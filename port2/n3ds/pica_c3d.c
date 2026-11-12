@@ -40,7 +40,8 @@ static unsigned char *arena; static unsigned arena_off;
 static unsigned long long st_syncs, st_writes, st_frames;
 /* where a frame's time goes (system ticks; the log line every 600 frames gives milliseconds per frame) */
 static unsigned long long tk_last, tk_frame, tk_upload, tk_write, tk_read, tk_panel, tk_present, tk_draw;
-static unsigned long long tk_begin; static unsigned st_switch;   /* the wait at a frame's start (the GPU still on the frame before), the changes of target */
+static unsigned long long tk_begin; static unsigned st_switch;
+static double gpu_ms_sum, gpu_ms_max; static unsigned gpu_ms_n;   /* the GPU's own time for each presented frame (C3D_GetDrawingTime) */   /* the wait at a frame's start (the GPU still on the frame before), the changes of target */
 #define TK_N 120   /* frames per log line */
 #define TK_MS(t) ((double)(t) * 1000.0 / SYSCLOCK_ARM11 / TK_N)
 static unsigned long long n_up, n_rd, n_wait;
@@ -460,6 +461,9 @@ static int c3d_present(int x, int y, int w, int h, int masked) {
         QUAD_END();
     }
     vb_flush();
+    {   /* (the frame before's: measured from its submission to the end of its queue) */
+        double g = C3D_GetDrawingTime(); gpu_ms_sum += g; gpu_ms_n++; if (g > gpu_ms_max) gpu_ms_max = g;
+    }
     C3D_FrameEnd(GX_CMDLIST_FLUSH);
     in_frame = 0;
     C3D_TexSetFilter(pres_tex, GPU_NEAREST, GPU_NEAREST);
@@ -509,7 +513,9 @@ static int c3d_present(int x, int y, int w, int h, int masked) {
                     "%.2f host writes, %.2f read-backs, %.2f panel, %.2f present (the rest: the game, the core, sound)\n",
                     st_frames, st_syncs, st_writes, TK_MS(tk_frame), TK_MS(tk_draw), TK_MS(tk_upload), TK_MS(tk_write), TK_MS(tk_read),
                     TK_MS(tk_panel), TK_MS(tk_present));
-        port_printf("[3ds] pica: per frame %.2f ms waiting for the GPU to end the frame before, %.2f changes of target\n", TK_MS(tk_begin), (double)st_switch / TK_N);
+        port_printf("[3ds] pica: per frame %.2f ms waiting for the GPU to end the frame before, %.2f changes of target; the GPU's own time a frame %.2f ms (the longest %.2f)\n",
+                    TK_MS(tk_begin), (double)st_switch / TK_N, gpu_ms_n ? gpu_ms_sum / gpu_ms_n : 0.0, gpu_ms_max);
+        gpu_ms_sum = gpu_ms_max = 0; gpu_ms_n = 0;
         tk_begin = 0; st_switch = 0;
         tk_frame = tk_draw = tk_upload = tk_write = tk_read = tk_panel = tk_present = 0;
     }
