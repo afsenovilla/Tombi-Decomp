@@ -141,6 +141,17 @@ static void tile(const Poly *ps, int np, const Poly *p, int *t0, int *t1)
 
 typedef struct { u8 flat[40]; } FQ;
 typedef struct { u8 g[52]; } GQ;
+typedef struct { u8 t[40]; } TR;          /* a triangle packet: flat 32 bytes, shaded 40 */
+#define MAXT 300
+
+/* A prop of the room stood again past its end: the polygons of the model inside a box (and on the given texture
+   pages: its leaves and wood, not the ground or the fence under it) are copied, moved by (dx, dy, dz).  The first
+   room: its big apple tree planted where the path ends on the left, so the way is visibly closed. */
+static const struct { u8 area, section, end; s16 x0, x1, y1, z0, z1; u16 tp[2]; s16 dx, dy, dz, narrow; } PROPS[] = {
+    /* (narrow: added to dx on a strip under 90 px, 16:9, so the trunk still stands inside the picture) */
+    {0, 0, 0, 150, 430, -50, 50, 200, {0x12, 0x0d}, -425, 8, 0, 30},
+};
+static int cur_area, cur_section;
 typedef struct { u8 *blk; int size, nq; } Block;
 
 static void put_v(u8 *d, int s, float x, const Vx *e, float u)
@@ -157,12 +168,13 @@ typedef struct { int poly, e, x0, x1, z0, z1, ground; } Cand;
 static void build(const u8 *tbl, int s, Block *out, int reach)
 {
     Cand *cs = malloc(sizeof(Cand) * MAXC); int nc = 0;
+    TR *ft = malloc(sizeof(TR) * MAXT), *gt = malloc(sizeof(TR) * MAXT); int nt3[2] = {0, 0}, nprop = 0;
     Poly *ps = malloc(sizeof(Poly) * MAXP);
     FQ *fq = malloc(sizeof(FQ) * MAXQ); GQ *gq = malloc(sizeof(GQ) * MAXQ);
     int nf = 0, ng = 0, np, nedge = 0;
     static struct { Vx a, b; } done[400]; int ndone = 0;
     out->nq = 0; out->size = 0;
-    if (!ps || !fq || !gq || !cs || (np = parse(tbl, ps, s)) <= 0) goto end;
+    if (!ps || !fq || !gq || !cs || !ft || !gt || (np = parse(tbl, ps, s)) <= 0) goto end;
     int M = 32767;
     for (int i = 0; i < np; i++) if (ps[i].x0 < M) M = ps[i].x0;
     for (int i = 0; i < np; i++) {
@@ -283,23 +295,43 @@ static void build(const u8 *tbl, int s, Block *out, int reach)
         }
     }
 pack:
-    if (nf + ng) {
-        int size = 4 + 4 + nf * 40 + 4 + 4 + ng * 52 + 16;
-        u8 *b = out->blk = realloc(out->blk, size), *d = b;
-        if (b) {
-            u32 z = 0, c;
-            memcpy(d, &z, 4); d += 4;
-            c = nf; memcpy(d, &c, 4); d += 4; memcpy(d, fq, nf * 40); d += nf * 40;
-            memcpy(d, &z, 4); d += 4;
-            c = ng; memcpy(d, &c, 4); d += 4; memcpy(d, gq, ng * 52); d += ng * 52;
-            memset(d, 0, 16);
-            out->size = size; out->nq = nf + ng;
+    for (unsigned pi = 0; pi < sizeof PROPS / sizeof PROPS[0]; pi++) {
+        if (PROPS[pi].area != cur_area || PROPS[pi].section != cur_section || PROPS[pi].end != (s < 0)) continue;
+        for (int i = 0; i < np; i++) {
+            const Poly *p = &ps[i];
+            int rx0 = s > 0 ? p->x0 : -p->x1, rx1 = s > 0 ? p->x1 : -p->x0;
+            if (p->tpage != PROPS[pi].tp[0] && p->tpage != PROPS[pi].tp[1]) continue;
+            if (rx0 < PROPS[pi].x0 || rx1 > PROPS[pi].x1 || p->y0 > PROPS[pi].y1 || p->z0 < PROPS[pi].z0 || p->z1 > PROPS[pi].z1) continue;
+            u8 *d;
+            if (p->nv == 4) { if (nf + ng >= MAXQ) break; d = p->gour ? gq[ng++].g : fq[nf++].flat; }
+            else { if (nt3[0] + nt3[1] >= MAXT) break; d = p->gour ? gt[nt3[1]++].t : ft[nt3[0]++].t; }
+            memcpy(d, &p->clut, 2); memcpy(d + 2, &p->tpage, 2); memcpy(d + 4, &p->col[0], 4); d += 8;
+            if (p->gour) for (int j = 1; j < p->nv; j++) { memcpy(d, &p->col[j], 4); d += 4; }
+            for (int j = 0; j < p->nv; j++) {
+                Vx v = p->v[j];
+                v.x = (s16)(s * v.x + PROPS[pi].dx + (port_ws_cull < 90 ? PROPS[pi].narrow : 0)); v.y = (s16)(v.y + PROPS[pi].dy); v.z = (s16)(v.z + PROPS[pi].dz);
+                memcpy(d, &v, 8); d += 8;
+            }
+            nprop++;
         }
     }
-    if (port_verbose) port_printf("[port] ws edge: %s end, %d polygons read, %d edges carried on as %d quads (%d flat, %d shaded)\n",
-                                  s > 0 ? "left" : "right", np, nedge, nf + ng, nf, ng);
+    if (nf + ng + nt3[0] + nt3[1]) {
+        int size = 4 + nt3[0] * 32 + 4 + nf * 40 + 4 + nt3[1] * 40 + 4 + ng * 52 + 16;
+        u8 *b = out->blk = realloc(out->blk, size), *d = b;
+        if (b) {
+            u32 c;
+            c = nt3[0]; memcpy(d, &c, 4); d += 4; for (int i = 0; i < nt3[0]; i++) { memcpy(d, ft[i].t, 32); d += 32; }
+            c = nf; memcpy(d, &c, 4); d += 4; memcpy(d, fq, nf * 40); d += nf * 40;
+            c = nt3[1]; memcpy(d, &c, 4); d += 4; memcpy(d, gt, nt3[1] * 40); d += nt3[1] * 40;
+            c = ng; memcpy(d, &c, 4); d += 4; memcpy(d, gq, ng * 52); d += ng * 52;
+            memset(d, 0, 16);
+            out->size = size; out->nq = nf + ng + nt3[0] + nt3[1];
+        }
+    }
+    if (port_verbose) port_printf("[port] ws edge: %s end, %d polygons read, %d edges carried on, %d polygons of a prop copied: %d quads, %d triangles\n",
+                                  s > 0 ? "left" : "right", np, nedge, nprop, nf + ng, nt3[0] + nt3[1]);
 end:
-    free(ps); free(fq); free(gq); free(cs);
+    free(ps); free(fq); free(gq); free(cs); free(ft); free(gt);
 }
 
 /* the rooms looked at (area, section, ends: 1 = left, 2 = right) */
@@ -327,8 +359,8 @@ void port_ws_edge_blocks(char *list, const u8 *tbl, int area, int section)
     u32 key = (u32)n * 2654435761u; int reach = 3 * port_ws_cull + 96;
     for (int i = 0; i < n; i++) key = (key ^ (u32)off[i]) * 16777619u;
     for (int i = 0; i < 64; i++) key = (key ^ tbl[off[0] + i]) * 16777619u;
-    if (key != cur_key || tbl != cur_tbl || reach != cur_reach) {
-        cur_key = key; cur_tbl = tbl; cur_reach = reach;
+    if (key != cur_key || tbl != cur_tbl || reach != cur_reach || area != cur_area || section != cur_section) {
+        cur_key = key; cur_tbl = tbl; cur_reach = reach; cur_area = area; cur_section = section;
         build(tbl, 1, &blocks[0], reach);
         build(tbl, -1, &blocks[1], reach);
     }
