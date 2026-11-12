@@ -26,7 +26,7 @@ CASES = {
     'defaults': {'cfg': {}, 'expect': ['--disc', '', '--window', '--scale', '2', '--log-fps', '2', '--renderer', 'gl', '--aspect', '4:3', '--skip-intro', '--hz', '60']},
     'defaults_es': {'cfg': {}, 'ui': 'es', 'expect': ['--disc', '', '--window', '--scale', '2', '--log-fps', '2', '--renderer', 'gl', '--aspect', '4:3', '--lang', '5', '--skip-intro', '--hz', '60']},
     'disc_only': {'cfg': {'disc': '{APP}/game.cue', 'savedir': '{APP}/saves'}, 'expect': ['--disc', '{APP}/game.cue', '--window', '--scale', '2', '--log-fps', '2', '--renderer', 'gl', '--aspect', '4:3', '--save-dir', '{APP}/saves', '--skip-intro', '--hz', '60']},
-    'everything': {'cfg': {'disc': '{APP}/tombi.bin', 'savedir': '{APP}/my saves', 'scale': 3, 'fullscreen': True, 'renderer': 'gl', 'internal_res': 4, 'aspect': '16:9', 'lang': 5, 'cut_content': True, 'wings_on': True, 'wings_glide': '{APP}/jpdemo.bin', 'wings_pre9': '{APP}/pre9.bin', 'texpack': '{APP}', 'experimental': True, 'show_fps': True, 'dualshock': True, 'rumble': 50, 'pad_map': {'cross': 'b', 'circle': 'a', 'start': 'guide', 'select': ''}, 'prompts_style': 'custom', 'prompt_colors': 'nintendo:ff0000/ffffff,00ff00/000000,0000ff/ffffff,ffff00/000000', 'keys_on': True, 'keys': {'cross': 'Space', 'circle': 'Return', 'up': 'W'}, 'areasel': True, 'area': 4, 'section': 7, 'ap_on': True, 'ap': 12345, 'lives_on': True, 'lives': 9, 'inflives': True, 'infhealth': True, 'events': True, 'debugmenu': True, 'titledebug': True, 'skipintro': False, 'hz60': True, 'autostart': True, 'civ_route': True, 'civ_collision': True, 'fps': '120'}, 'expect': ['--disc', '{APP}/tombi.bin', '--window', '--scale', '3', '--log-fps', '2', '--renderer', 'gl', '--aspect', '16:9', '--internal-res', '4', '--fps', '120', '--lang', '5', '--cut-content', '--wings-glide', '{APP}/.wings/jpdemo', '--wings-pre9', '{APP}/.wings/pre9', '--save-dir', '{APP}/my saves', '--texture-pack', '{APP}', '--fullscreen', '--show-fps', '--dualshock', '--rumble', '50', '--pad-map', 'cross=b,circle=a,start=guide,select=', '--prompts', 'custom', '--prompt-colors', 'nintendo:ff0000/ffffff,00ff00/000000,0000ff/ffffff,ffff00/000000', '--hz', '60', '--poke', '900:IS_DEBUG_MODE_ENABLED:1', '--poke', '1250:GAME:4:2', '--poke', '1250:GAME+2:7:2', '--pad-script', '1000:start,1300:circle:3', '--title-debug', '--poke', 'g1:GAME+C:3039:4', '--poke', 'g1:GAME+20:9:1', '--poke-every', '50:GAME+20:63:1', '--poke-every', '1:GAME+10:4:1', '--poke', 'g1:SCRIPT_FLAGS:FF:1x130', '--debug-menu', '--keys', 'up=W,cross=Space,circle=Return', '--civ-route', '--civ-maps', '{APP}/civ_cache/maps', '--civ-wfm', '{APP}/civ_cache/wfm', '--civ-collision']},
+    'everything': {'cfg': {'disc': '{APP}/tombi.bin', 'savedir': '{APP}/my saves', 'scale': 3, 'fullscreen': True, 'renderer': 'gl', 'internal_res': 4, 'aspect': '16:9', 'lang': 5, 'cut_content': True, 'wings_on': True, 'wings_glide': '{APP}/jpdemo.bin', 'wings_pre9': '{APP}/pre9.bin', 'texpack': '{APP}', 'experimental': True, 'show_fps': True, 'dualshock': True, 'rumble': 50, 'pad_map': {'cross': 'b', 'circle': 'a', 'start': 'guide', 'select': ''}, 'prompts_style': 'custom', 'prompt_colors': 'nintendo:ff0000/ffffff,00ff00/000000,0000ff/ffffff,ffff00/000000', 'keys_on': True, 'keys': {'cross': 'Space', 'circle': 'Return', 'up': 'W'}, 'areasel': True, 'area': 4, 'section': 7, 'ap_on': True, 'ap': 12345, 'lives_on': True, 'lives': 9, 'inflives': True, 'infhealth': True, 'nosaveheal': True, 'events': True, 'debugmenu': True, 'titledebug': True, 'skipintro': False, 'hz60': True, 'autostart': True, 'civ_route': True, 'civ_collision': True, 'fps': '120'}, 'expect': ['--disc', '{APP}/tombi.bin', '--window', '--scale', '3', '--log-fps', '2', '--renderer', 'gl', '--aspect', '16:9', '--internal-res', '4', '--fps', '120', '--lang', '5', '--cut-content', '--wings-glide', '{APP}/.wings/jpdemo', '--wings-pre9', '{APP}/.wings/pre9', '--save-dir', '{APP}/my saves', '--texture-pack', '{APP}', '--fullscreen', '--show-fps', '--dualshock', '--rumble', '50', '--pad-map', 'cross=b,circle=a,start=guide,select=', '--prompts', 'custom', '--prompt-colors', 'nintendo:ff0000/ffffff,00ff00/000000,0000ff/ffffff,ffff00/000000', '--hz', '60', '--poke', '900:IS_DEBUG_MODE_ENABLED:1', '--poke', '1250:GAME:4:2', '--poke', '1250:GAME+2:7:2', '--pad-script', '1000:start,1300:circle:3', '--title-debug', '--poke', 'g1:GAME+C:3039:4', '--poke', 'g1:GAME+20:9:1', '--poke-every', '50:GAME+20:63:1', '--poke-every', '1:GAME+10:4:1', '--no-save-heal', '--poke', 'g1:SCRIPT_FLAGS:FF:1x130', '--debug-menu', '--keys', 'up=W,cross=Space,circle=Return', '--civ-route', '--civ-maps', '{APP}/civ_cache/maps', '--civ-wfm', '{APP}/civ_cache/wfm', '--civ-collision']},
     'soft_odd': {'cfg': {'renderer': 'soft', 'internal_res': 3, 'aspect': 'weird', 'prompts_style': 'thor_abxy', 'rumble': 'abc', 'fps': 'unlimited', 'texpack': '{APP}', 'experimental': False, 'scale': '1'}, 'expect': ['--disc', '', '--window', '--scale', '1', '--log-fps', '2', '--renderer', 'soft', '--aspect', '4:3', '--fps', 'unlimited', '--skip-intro', '--hz', '60']},
     'fps60_legacy': {'cfg': {'fps60': True, 'experimental': True}, 'expect': ['--disc', '', '--window', '--scale', '2', '--log-fps', '2', '--renderer', 'gl', '--aspect', '4:3', '--fps', 'auto', '--skip-intro', '--hz', '60']},
     'fps_auto': {'cfg': {'fps': 'auto', 'renderer': 'soft'}, 'expect': ['--disc', '', '--window', '--scale', '2', '--log-fps', '2', '--renderer', 'soft', '--aspect', '4:3', '--fps', 'auto', '--skip-intro', '--hz', '60']},
@@ -277,17 +277,19 @@ class TestLauncher(unittest.TestCase):
         return dd
 
     def library(self, name, game, extra=None):
-        """A launcher whose library holds PAL (data/), USA (data-scus94236/) and JP (no data), game selected."""
+        """A launcher whose library holds PAL (data/), USA (data-scus94236/) and JP (data-slps01144/), game selected."""
         d = os.path.join(self.tmp, name)
         os.makedirs(d)
         self.fake_data(d, "data", L.MAIN0_SHA1)
         self.fake_data(d, "data-scus94236", L.GL.USA_SHA1, "SCUS_942.36", "SCUS-94236")
+        self.fake_data(d, "data-slps01144", L.GL.JP_SHA1, "SLPS_011.44", "SLPS-01144")
         games = [dict(serial="SCES-01331", sha1=L.MAIN0_SHA1, image="", data="data"),
                  dict(serial="SCUS-94236", sha1=L.GL.USA_SHA1, image="", data="data-scus94236"),
                  dict(serial="SLPS-01144", sha1=L.GL.JP_SHA1, image="", data="data-slps01144")]
         cfg = dict({"games": games, "game": game, "lang": 5, "patch_on": True, "cut_content": True, "hz60": False,
                     "areasel": True, "debugmenu": True, "prompts_style": "xbox", "titledebug": True, "skipintro": True,
-                    "autostart": True, "subscreen_labels": "item=Cosas", "hz60_default": True}, **(extra or {}))
+                    "autostart": True, "subscreen_labels": "item=Cosas", "hz60_default": True, "nosaveheal": True},
+                   **(extra or {}))
         with open(os.path.join(d, "tombi-port.json"), "w") as f:
             json.dump(cfg, f)
         L.app_dir = lambda: d
@@ -321,6 +323,7 @@ class TestLauncher(unittest.TestCase):
             self.assertNotIn(flag, a)
         self.assertIn("--skip-intro", a)
         self.assertIn("--debug-menu", a)
+        self.assertIn("--no-save-heal", a)                                # port/fixes.txt @version usa
         self.assertEqual(a[a.index("--poke") + 1], "900:IS_DEBUG_MODE_ENABLED:1")
         self.assertFalse([x for x in a if x[:1].isdigit() and ":800" in x])   # no raw PAL address
         self.assertEqual(a[a.index("--pad-script") + 1], "1000:start,1300:circle:3")      # the area select
@@ -346,8 +349,36 @@ class TestLauncher(unittest.TestCase):
         self.assertFalse(self.w.nav["cut"].isHidden())
         self.assertEqual(json.load(open(os.path.join(d, "tombi-port.json")))["game"], "SCES-01331")
 
+    def test_jp_game_gets_its_own_options(self):
+        """JP (SLPS-01144): its own data folder, binary (tombi-pc-jp) and card folder (saves_jp), the PAL-only options
+        off as for USA, the portable ones (area select, debug menu, cheats) on."""
+        d = self.library("jp", "SLPS-01144")
+        a = self.args()
+        self.assertEqual(a[:2], ["--data", os.path.join(d, "data-slps01144")])
+        for flag in ("--lang", "--hz", "--cut-content", "--title-debug", "--prompts", "--subscreen-labels", "--patch-tex"):
+            self.assertNotIn(flag, a)
+        self.assertIn("--skip-intro", a)
+        self.assertIn("--debug-menu", a)
+        self.assertIn("--no-save-heal", a)                                # a no-op in JP (no refill there)
+        self.assertEqual(a[a.index("--poke") + 1], "900:IS_DEBUG_MODE_ENABLED:1")
+        self.assertFalse([x for x in a if x[:1].isdigit() and ":800" in x])   # no raw PAL address
+        self.assertEqual(a[a.index("--save-dir") + 1], os.path.join(d, "saves_jp"))
+        self.assertEqual(self.w.card_file(), os.path.join(d, "saves_jp", "tombi_mc0.mcd"))
+        exe = self.w.command()[0].replace("\\", "/")
+        self.assertTrue(exe.endswith(("port2-slps01144/tombi2", "port2-slps01144-win/tombi2.exe", "tombi-pc-jp", "tombi-pc-jp.exe")), exe)
+        self.assertFalse(hasattr(self.w, "lang_cb"))
+        self.assertTrue(self.w.nav["cut"].isHidden())
+        self.assertEqual([t.d["selected"] for t in self.w.tiles], [False, False, True])
+        self.assertIn("60 Hz", self.w.summary.text())
+
     def test_unsupported_game(self):
-        """JP: recognised (a card with its name), but Play is off and says why."""
+        """A recognised version without a port (here JP with its support switched off): a card with its name, but
+        Play is off and says why."""
+        import unittest.mock
+        with unittest.mock.patch.dict(L.GL.VERSIONS, {L.GL.JP_SHA1: dict(L.GL.VERSIONS[L.GL.JP_SHA1], supported=False)}):
+            self._unsupported_game()
+
+    def _unsupported_game(self):
         self.library("jp", "SLPS-01144")
         self.assertFalse(self.w.play_btn.isEnabled())
         self.assertIn("オレっ！トンバ", self.w.status_msg)
@@ -549,7 +580,8 @@ class TestGameLibrary(unittest.TestCase):
         usa = GL.describe("SCUS_942.36", GL.USA_SHA1)
         self.assertEqual((usa["serial"], usa["version"]["binary"], usa["name"]), ("SCUS-94236", "tombi-pc-usa", "Tomba! (USA)"))
         jp = GL.describe("SLPS_011.44", GL.JP_SHA1)
-        self.assertFalse(jp["version"]["supported"])
+        self.assertTrue(jp["version"]["supported"])
+        self.assertEqual((jp["serial"], jp["version"]["binary"]), ("SLPS-01144", "tombi-pc-jp"))
         self.assertIsNone(GL.describe("SCUS_944.54", "3" * 40)["version"])
         self.assertTrue(GL.has(GL.PAL_SHA1, "lang") and not GL.has(GL.USA_SHA1, "lang"))
         self.assertEqual(GL.text_patches(GL.PAL_SHA1), ("es_mejorada.tombipatch.json",))

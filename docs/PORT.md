@@ -456,7 +456,12 @@ from the owner's disc (`GAME_FILES_URL`); the APK holds no game data files.
   changed rows, `r1=k103,l2=a17+`: `kN` an Android key code, `aN+` / `aN-` an axis) and handed to `TombiActivity`
   as the intent extra `io.github.tombi.port.PADMAP`.
 - **Launcher.** `LauncherActivity` (plain Canvas, "Selva" design, 1280x720 virtual space scaled to the panel) is the
-  app's entry: *¡A jugar!* starts `TombiActivity` (SDLActivity subclass, own `:game` process, exits with the game)
+  app's entry. Layout (2026-11-11 overhaul): a rail of icons down the left edge (*Jugar*, *Imagen*, *Mando*, *Extras*
+  (PAL only), *Disco*, *App*; L1 / R1 or the d-pad move between them) and one flat page each, never deeper than one
+  level: *Jugar* is the library (the cards on the left, the selected game with *¡A jugar!* and the essentials on the
+  right: language, improved translation, aspect, skip intro); the other pages are rows drawn as switches, segments
+  (aspect, renderer) or "◀ value ▶" (`LauncherView.row`). The Disc screen, the pad mapping, the custom buttons and the
+  log open from a page and B returns to it; B on *Jugar* quits. *¡A jugar!* starts `TombiActivity` (SDLActivity subclass, own `:game` process, exits with the game)
   with the chosen flags as `argv[1..]`, which `loader.c` puts after its defaults and before `files/args.txt` (still
   read, so it overrides). *Opciones* (SharedPreferences): `--lang` 0/5/6/7/8, `--aspect auto|4:3|16:9|21:9`,
   `--cut-content`, `--debug-menu`, `--renderer soft|gl`, `--skip-intro`, `--hz 60`, `--fps off|auto|60|90|120|144|unlimited` (*Gráficos*), `--show-fps`, infinite
@@ -483,21 +488,21 @@ from the owner's disc (`GAME_FILES_URL`); the APK holds no game data files.
   the left, the selected game large on the right), *Portada* (the selected game's logo as the title, a tab per game).
   A picked image is identified by its boot executable (`disccheck.c` `nativeIdentify`: SYSTEM.CNF `BOOT`, its SHA-1;
   on the PAL discs `EXE/MAIN0.EXE`, which the boot exe loads): PAL SCES-01331 / SCES-01330 `bec8dc5f…` →
-  `libtombi.so`, USA SCUS-94236 `81cbc79f…` → `libtombi_usa.so`; Japan SLPS-01144 `07d57769…` is listed as recognised
-  but *Aún no compatible* (nothing extracted); an unknown disc or the PAL Rev 0 is refused with the reason. Each game
+  `libtombi.so`, USA SCUS-94236 `81cbc79f…` → `libtombi_usa.so`, Japan SLPS-01144 `07d57769…` → `libtombi_jp.so`
+  (docs/JP.md "Native port"; an APK built without that disc lists the game as recognised but without its library);
+  an unknown disc or the PAL Rev 0 is refused with the reason. Each game
   is extracted into its own `files/games/<serial>/data` (the manifest also carries `serial` / `boot` / `boot_sha1`, as
   `tools/extract_data.py`, which `psyq.c` checks), its saves go to `files/saves` (PAL, as before) or
-  `files/saves_usa`; the loader takes `--game-lib` / `--save-sub` from the launcher (`loader.c`; the armeabi-v7a low
+  `files/saves_usa` / `files/saves_jp`; the loader takes `--game-lib` / `--save-sub` from the launcher (`loader.c`; the armeabi-v7a low
   reservation is sized for the largest `libtombi*.so` of the APK). The card's logo is cut at run time from the
   player's own disc as the PC launcher does (`tools/game_library.py` `logo_sprites`, `Library.cutLogo`): the title
   overlay's sprite list `TITLE_LOGO_SPRITE_RECS` (the records with the CLUT at 128,510, up to x = -1) drawn from the
   8 bpp logo page with its CLUT (`SYSTEM/A00202.000` + `A00203.000` + `O0PTSUB0.BIN` PAL, `A00012.000` + `A00013.000`
-  + `OPTSUB00.BIN` USA and Japan), saved as `files/games/<id>/logo.png`; without it the name in the title font. The
-  Japanese disc is not extracted, so its three files are read straight from the image when it is added
-  (`disccheck.c` `nativeReadFiles`: .bin / .iso / .chd, also the temp image of a .zip / .7z before it is deleted);
-  a Japanese card added by an older version shows the name until the disc is added again. Options per version: the
-  USA game gets no game language, translations, NTSC switch, second-screen panel, cut content or button icons (all
-  PAL-only in the port, docs/USA.md); `--aspect`, `--renderer`, `--fps`, `--skip-intro`, DualShock, vibration, the
+  + `OPTSUB00.BIN` USA and Japan), saved as `files/games/<id>/logo.png`; without it the name in the title font. (A
+  recognised disc the launcher does not extract reads its three files straight from the image when it is added:
+  `disccheck.c` `nativeReadFiles`, .bin / .iso / .chd, also the temp image of a .zip / .7z before it is deleted.)
+  Options per version: the USA and JP games get no game language, translations, NTSC switch, second-screen panel,
+  cut content or button icons (all PAL-only in the port, docs/USA.md, docs/JP.md); `--aspect`, `--renderer`, `--fps`, `--skip-intro`, DualShock, vibration, the
   debug menu, infinite lives / vitality (`--poke-every 50:GAME+20:63:1`, `1:GAME+10:4:1`: named fields, the same for
   both builds) and save import / export (on `files/saves_usa/tombi_mc0.mcd`) stay. An install from before the library (`files/data`, or an image copied
   by an older version) becomes the PAL entry on the first start (a rename). *Disco y datos* shows the selected game
@@ -1112,7 +1117,8 @@ messages as Android for loose files, `.rar` and the rest. `tools/extract_data.py
 archive on the command line too.
 
 Per version (`game_library.VERSIONS` `features`): PAL has everything; USA runs `tombi-pc-usa(.exe)` (checkout:
-`build/port2-scus94236[-win]/tombi2`) and has no game language (English only), no text patch / improved translation
+`build/port2-scus94236[-win]/tombi2`), JP `tombi-pc-jp(.exe)` (`build/port2-slps01144[-win]/tombi2`, the same
+option set as USA, card folder `saves_jp`), and USA has no game language (English only), no text patch / improved translation
 (the hook is `VERSIONS[...]["text_patches"]`, empty for USA/JP: a future retranslation goes there), no 50/60 Hz switch
 (60 Hz, no `--hz`), no *Cut content* page, no title DEBUG entry (its carousel hook is PAL-only), no button-icon styles
 (`--prompts` redraws the PAL fonts) and no texture dump (PAL layout); skip intro, autostart, keys, controller,
@@ -1197,9 +1203,48 @@ confirmed with Circle at 1300 (the values of the room sweep). Addresses: `GAME` 
 | Start with N lives | `--poke 1100:8009C980:N:1` | `GAME.playerLives` (drawHudLives) |
 | Infinite lives | `--poke-every 50:8009C980:63:1` | new option: `--poke-every INTERVAL:ADDR:VALUE[:SIZE]` writes every INTERVAL vblanks |
 | Infinite vitality | `--poke-every 1:8009C970:4:1` | `GAME.playerHealth`, 4 = full (initGameConfig) |
+| Saving does not refill vitality (default off) | `--no-save-heal` | a loaded save keeps its saved vitality; see below |
+| Proportional place names on the save list (default on) | `--memcard-mono` turns it off; `--memcard-prop GAP[,SPACE]` tunes it | see below; GAP 1, SPACE 4 by default |
 | Unlock all events | `--poke 1100:8009CDA4:FF:1x130` | new `SIZExCOUNT` suffix of `--poke`: COUNT consecutive values; event flag bytes 0x8009CDA4 + id (notes/names.md "Event links"), 0xFF = completed |
 | Custom keys | `--keys up=Up,cross=X,...` | *Controls* tab, Keyboard card: only the keys changed from the defaults |
 | Button prompts (PlayStation / Xbox / Keyboard) | `--patch-tex prompts-SET.tbtx` | see below |
+
+**Saving does not refill vitality (`--no-save-heal`).** Where the retail game refills Tombi's vitality around a save,
+checked headless on the PAL build (vitality poked to 1 of 4 in GAME+0x10 and the player object's +0x98/+0x9A, saved at
+the AREA06 s1 save sign with `--cut-content`, then loaded from the title's Continue): neither the save sign
+(`updateL4Type1AObject`), the "Save DATA?" message box (`func_8002CF40`, `openMenuScreen(4)`), the menu task
+(`inventoryScreenHandler`) nor the save writer (`func_800E999C`, which copies GAME with the current vitality into the
+file) touches it: after saving and back in the room the vitality is still 1, and the card holds 1. The refill is on
+**load**: `memCardFileListStep` (D0SPSUB2) sub 10 copies the file's 0x988-byte game block into GAME and then sets
+`GAME.playerHealth = GAME.playerMaxHealth` (PAL 0x800E8E30 `sb a0,-0x5AC(s4)`, s4 = GAME+0x5BC; USA DSPSUB2
+0x800E8A50 in `func_800E7ECC`, the same statement). So every save, once loaded (Continue from the title or a load from
+the save screen), starts at full vitality. The JP DSPSUB2 load copies the block and nothing else (no button-config or
+health store after the copy at 0x800EB4D0..0x800EB584), so the Japanese game already keeps the saved vitality. Other
+refills, unchanged by the mod: losing a life (`gameplayMainHandler` step 2), the golden bowl, healing spots, script op
+0xA9 (`scriptOpHealPlayer`), the max-vitality raises. The mod is a port/fixes.txt guard on that store (the PAL file and,
+in a `@version usa` section, the USA twin): with `--no-save-heal` the saved value stays unless it is 0 or above the
+maximum (an edited card). Launchers: PC Mods page ("Saving does not refill vitality" / "Guardar no recupera la vida",
+in `PORTABLE_MODS`), Android Extras page (`nosaveheal`, passed for every version by `cheatArgs`). Checked (PAL i386,
+headless): without the flag the loaded save has vitality 4, with it 1 (GAME and PLAYER+0x98), and a standard run
+without the flag gives frames byte-identical to the build without the change. USA and JP builds not run.
+
+**Proportional place names on the save list (default on; `--memcard-mono` = retail, `--memcard-prop GAP[,SPACE]`).** The retail
+`memCardDrawString` advances every glyph of `MEMCARD_FONT` by its 8-px cell, and the save-list place name
+(`memCardDrawFileLocation`, mode 0, from x 64; the row frame's inner edge is x 293, so 229 px of ink) is monospaced.
+In the 8x8 cells a wide letter fills columns 1-7 (ink + shadow), a narrow one sits in the middle ('i' 3-4, 'l' 2-4),
+the space is empty. With the option, each glyph of a place name is drawn from its first opaque column and advances
+by its opaque width + GAP; an empty glyph (space) advances SPACE. The spans are read from the font as it is in VRAM
+(`runtime/mcprop.c`, `port_gpu_vram`, cached per glyph), so the port holds no glyph data. Hooks: port/fixes.txt on
+`memCardDrawFileLocation` (turns it on around its call) and `memCardDrawString` (advance, x offset; a flag glyph keeps
+its place relative to the glyph before it). Only the place names change: the messages, the footer and the empty-slot
+label (`memCardDrawFileIcon`, the other mode-0 caller) keep the 8-px cells. GAP 1 leaves the wide letters at 8 px
+(as retail) and only narrows the narrow ones (i, l, r, 1, punctuation) and the space; GAP 0 makes the shadow touch the next letter.
+Measured (PAL, Spanish improved translation): "Cabaña del sabio centenario" 216 px mono, 189 gap 1, 212 gap 2;
+the previous long names "Cámara del Anciano de 1.000.000 años" / "Cámara del Anciano de los 10.000 años" /
+"Muros exteriores de la Isla de Cerdos" 288 / 296 / 296 mono, 247 / 251 / 251 gap 1 (do not fit), 217 / 221 / 221
+gap 0 (fit). On by default since the Spanish place names are written for it ("Cabaña del Anciano centenario" is 232 px
+monospaced, 206 proportional); `--memcard-mono` gives frames byte-identical to the retail spacing. No launcher switch; PAL only
+(the USA / JP twins of the function are not hooked).
 
 **Button prompts.** `tools/prompt_glyphs.py` draws our own glyph sets with Pillow (no third-party icon pack):
 `port/assets/prompts/{playstation,xbox,keyboard}/<button>.png`, 16x16, 4 palette indices (0 transparent, 1 outline,
@@ -2617,6 +2662,21 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   hook picks the blocks around the camera X each frame (nothing streams from CD).  For the hooks that only select
   (areas 0, 1, 2, 3, 7; the others also animate palettes or keep counters) it is run again with the camera X moved
   2*pad+40 each way and the extra blocks are merged into the list (cap 88), so the edges no longer pop in.  Drawing only.
+- **Top-down map** (`runtime/ws_topdown.c`, fixes.txt hooks at the end of `topdownDrawMapLayers` /
+  `overheadDrawMapLayers` and their USA / JP versions): the overhead background is the room's map picture (8 bpp TIM
+  in RAM, scratch 0x1F800394) of which the game uploads a 384x288 window (12x9 tiles of 32 px, USA / JP 384x256) into
+  fixed VRAM every frame and draws it as 5 SPRTs (2 in USA / JP): at most 32 px past 4:3 on each side, so the strips
+  filled in 32-px pieces as the camera moved.  VRAM has no room for a wider window, so the same rects are reused
+  within the frame: `port_ws_overhead_map` links into the map's ordering-table bucket, ahead of the game's packets,
+  for the window one width left and one right (each clipped to the wide frame and the picture) a marker packet
+  (len 2: GP0 no-ops 0x00575354, id) and copies of the game's DR_MODE + SPRT pairs moved by 384 px; `DrawOTag`
+  (`shims/gpu.c`, `port_ot_mark_fn`) calls back at a marker, which uploads that window's picture pixels with
+  `LoadImage` (both renderers, `--fps` and the texture tools see an ordinary upload); the last marker puts back what
+  the game had uploaded.  The geometry is read from the game's own packets and checked against VRAM (the window's
+  first row must equal the picture; else off, logged once).  The game's window is also cut at the picture's right /
+  bottom edge (past it, it showed the wrapped next row: invisible on 4:3).  Past the picture's edge stays black (the
+  map ends there; Dwarf Village is 448 px wide, AREA19 s2 barely wider than the screen).  The tunnels (I0NFO3) are 3D
+  blocks and were already covered by the block hook above.
 - **Event titles** (`spawnEventTitle`, `l8Type01MoveStep`, `#ifdef PORT2`): the title tiles start at screen x 340
   (just past 4:3, inside the wide frame, where they popped into view) and left at x 480 (inside 21:9 / 32:9).  They
   now start `pad + 160` further right (the tiles sit up to ~150 either side of the title's x) and leave once past `320 + pad`; the fly-in speed is derived from the distance over

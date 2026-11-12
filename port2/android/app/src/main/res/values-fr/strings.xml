@@ -42,6 +42,7 @@
     <string name="opt_showfps">Afficher les FPS</string>
     <string name="opt_inflives">Vies infinies</string>
     <string name="opt_infhealth">Force infinie</string>
+    <string name="opt_nosaveheal">Sauvegarder ne restaure pas la force</string>
     <string name="aspect_auto">Auto</string>
     <string name="chip_cut_on">Contenu coupé : oui</string>
     <string name="chip_cut_off">Contenu coupé : non</string>
@@ -178,4 +179,12 @@
     <string name="disc_zip_bad">Impossible de lire « %1$s » (archive endommagée, ou méthode de compression inconnue de l\'application : %2$s). Décompressez-le et choisissez l\'image du disque.</string>
     <string-array name="lib_styles"><item>Carrousel</item><item>Liste</item><item>Couverture</item></string-array>
     <string-array name="lib_regions"><item>Europe</item><item>États-Unis</item><item>Japon</item></string-array>
+    <!-- the launcher's rail (LauncherView.drawRail): one page each -->
+    <string name="rail_play">Jouer</string>
+    <string name="rail_image">Image</string>
+    <string name="rail_pad">Manette</string>
+    <string name="rail_extras">Extras</string>
+    <string name="rail_disc">Disque</string>
+    <string name="rail_app">Appli</string>
+    <string name="page_extras">Extras</string>
 </resources>

@@ -237,10 +237,20 @@ def filter_src(text, dropped=None, retail=()):
                       lambda m: tied_asm_moves(m.group(1), m.group(2)), line)
         # empty asm statements with operands or clobbers inside a line (register allocation hints for the old gcc)
         line = re.sub(r'\b(?:__asm__|asm)\s*(?:volatile\s*|__volatile__\s*)?\(\s*""\s*:(?:[^()]|\([^()]*\))*\)\s*;', ";", line)
+        # `lui %0,HI \n addiu %0,%0,LO` with one output: the address as a literal (resolved like every other literal)
+        def lui_addiu(m):
+            v = (int(m.group(1), 16) << 16) + int(m.group(2))
+            return "%s = (void *)0x%08X;" % (m.group(3), v & 0xFFFFFFFF)
+        line = re.sub(r'\b(?:__asm__|asm)\s*(?:volatile\s*|__volatile__\s*)?\(\s*"lui\s+%0\s*,\s*0x([0-9A-Fa-f]+)\\n\\t?addiu\s+%0\s*,\s*%0\s*,\s*(-?\d+)"\s*:\s*"=r"\s*\(\s*(\w+)\s*\)\s*\)\s*;',
+                      lui_addiu, line)
+        # `li %0,CONST` with one output (the old gcc made to reload a constant): the assignment
+        line = re.sub(r'\b(?:__asm__|asm)\s*(?:volatile\s*|__volatile__\s*)?\(\s*"li\s+%0\s*,\s*(-?(?:0x[0-9A-Fa-f]+|\d+))"\s*:\s*"=r"\s*\(\s*(\w+)\s*\)\s*\)\s*;',
+                      r'\2 = \1;', line)
         # asm statements with MIPS instructions or register clobbers (empty barriers asm("") are harmless)
         if re.match(r'\s*(__asm__|asm)\s*(volatile\s*)?\(\s*"[^"]', line) or \
            re.match(r'\s*(__asm__|asm)\s*(volatile\s*)?\(\s*""\s*:', line):
-            line = ";/* PORT: MIPS asm removed */"
+            # (inside a macro definition the line's continuation backslash must stay)
+            line = ";/* PORT: MIPS asm removed */" + (" \\" if line.rstrip().endswith("\\") else "")
         out.append(line)
     return "\n".join(out)
 
@@ -1127,7 +1137,18 @@ def sources_version(outdir, progs, ovls=(), areas=()):
                 if tgt != n: defs[n] = "%s /* @%08X */" % (tgt, a)    # (the annotation: PORT_ARG forwarding by address)
                 continue
             eff = effective(n)
-            if eff == a: continue
+            if eff == a:
+                # the address is right but the function there carries another native name (JP: the symbol file names
+                # PAL's gameMainTask func_80019608_slps01144, and the shared C calls it by the PAL name)
+                # Only when the native there is address-named (func_80019608_slps01144) or a shim: a native with a
+                # proper name of its own is aliased by gen2's link (USA: `#define freeEffectObject ObjFree` reached
+                # functions.h's `void freeEffectObject(s32*)` and clashed with the file's own ObjFree prototype)
+                if a in func_at and func_at[a] != n and n not in native_defs() \
+                        and (func_at[a] in native_defs() or not re.match(r"(?:func|FUN)_[0-9A-Fa-f]{8}", n)
+                             and re.match(r"(?:func|FUN)_[0-9A-Fa-f]{8}", func_at[a])) \
+                        and (kind == "base" or not (OVL_BASE <= a < OVL_END)):
+                    defs[n] = "%s /* @%08X */" % (func_at[a], a)
+                continue
             if eff is None:
                 canon[n] = a; canon_prog[n] = prog      # a name only this object knows: its address
                 continue

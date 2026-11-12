@@ -312,6 +312,17 @@ def rewrite_tree(d, res, relroot):
 
 BU_RE = re.compile(r"(?<![\w.>])(open|close|read|write|lseek|erase|format|firstfile|nextfile|undelete|rename)(\s*\()")
 ASMNAME_RE = re.compile(r"(?<=[\w)\]])\s+(?:__asm__|asm)\s*\(\s*\"(?!(?:[atvsk]\d|zero|at|gp|sp|fp|ra)\")([A-Za-z_]\w*)\"\s*\)")
+# a declaration aliased to a symbol expression (`extern volatile unsigned short D_800A1386 asm("D_800A1384+2");`, the
+# JP vblank handler and two more JP files): gas evaluates the expression, clang (wasm32, the NDK) takes it as a symbol
+# name and the link gets a stub called "D_800A1384+2".  Rewritten as a macro over the symbol's bytes.
+ASMEXPR_RE = re.compile(r"^([ \t]*)extern\s+([^;=]*?)\s*(\**)([A-Za-z_]\w*)(\[\])?\s+(?:__asm__|asm)\s*\(\s*\"([A-Za-z_]\w*)([+-]\d+)\"\s*\)\s*;", re.M)
+
+
+def asm_expr(m):
+    ind, typ, stars, name, arr, sym, off = m.groups()
+    decl = "%sextern unsigned char port_a_%s[] PORT2_ASM(%s);" % (ind, sym, sym)
+    if arr: return "%s\n%s#define %s ((%s %s*)(port_a_%s %s %s))" % (decl, ind, name, typ, stars, sym, off[0], off[1:])
+    return "%s\n%s#define %s (*(%s %s*)(port_a_%s %s %s))" % (decl, ind, name, typ, stars, sym, off[0], off[1:])
 
 
 # ---------------------------------------------------------------------------------------------------------------
@@ -420,6 +431,8 @@ def sources(outdir, progs):
     for name in ("inc", "inc24", "inc26"):          # materialised header copies of the previous run
         shutil.rmtree(os.path.join(outdir, name), ignore_errors=True)
     isarea = lambda p: re.match(r"X0\d\d$", p) and p != "X000"
+    # a SYSTEM overlay the version lacks (JP: no G0OVER) is not built
+    progs = [p for p in progs if p in sysovl.SYSOVL or isarea(p) or p in ("MAIN0", "X000") or PV.PAL]
     base = [p for p in progs if p not in sysovl.SYSOVL and not isarea(p)]
     GP.sources(outdir, base, [p for p in progs if p in sysovl.SYSOVL], [p for p in progs if isarea(p)])
     # the BIOS memory-card file system (open/read/write/... on "bu00:") must not shadow the host libc's calls
@@ -430,6 +443,7 @@ def sources(outdir, progs):
             new = BU_RE.sub(r"port_bu_\1\2", txt)
             # a declaration aliased by name (`extern u8 V asm("DAT_8009c971");`, a handful of game files) names the
             # C symbol: on Win32 it needs the "_" prefix too (PORT2_ASM of port2_syms.h adds the target's)
+            new = ASMEXPR_RE.sub(asm_expr, new)
             new = ASMNAME_RE.sub(r" PORT2_ASM(\1)", new)
             # clang (the Android NDK's compiler) rejects a K&R identifier list in a declaration (`extern void f(o);`,
             # 11 game files) where gcc only warns: an unprototyped `f()` there (Android builds only: the PC objects
@@ -703,7 +717,9 @@ def emit_data(outdir, amap, needed):
         # entry of AREA06 is a function start of X003, and the game read the thunk's code as sprites and drew over
         # the overlay region).  A run of consecutive region words with one that no overlay starts a function at is
         # such a table: every word of it is data.  (A handler table holds function starts only; an X000 function
-        # every area shares is a function start too.)
+        # every area shares is a function start too, also when it is no unit start of its own: the JP MAIN0 object
+        # table at 0x8007593C holds func_800EB7C8, native but inside another unit, and the whole table went data:
+        # its X000 handlers were called through the fault handler on the PC and trapped on wasm2c.)
         data_runs = set()
         # The load lists of MAIN0 (LDSYS_LOAD_LIST, LDAR_LOAD_LISTS[area]: records {id, idx, type, ptr, size, pad,
         # flags} ended by id -1, the format of SYS/LD0*.BIN) hold destinations like 0x801E0000, the top of RAM:
@@ -730,7 +746,7 @@ def emit_data(outdir, amap, needed):
             a = s + 4 * i
             if i < n and not amap.is_code(a) and GP.OVL_BASE <= w < GP.OVL_END and not (w & 3) and (w & 0xFFFF):
                 run.append((a, w)); continue
-            if run and any(w not in amap.ovl_starts for _, w in run): data_runs.update(a for a, _ in run)
+            if run and any(w not in amap.ovl_starts and not amap.func_name(w) for _, w in run): data_runs.update(a for a, _ in run)
             run = []
         for i in range(n):
             w = int.from_bytes(data[4 * i:4 * i + 4], "little")

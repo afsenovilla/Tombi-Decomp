@@ -16,7 +16,7 @@ import java.util.Locale;
 /**
  * The launcher's game library (docs/PORT_VERSIONS_PLAN.md stage U2): the discs the player added, one per serial, each
  * extracted into its own folder files/games/&lt;id&gt;/data (the port's --data mode) and run by the game library of its
- * version (loader.c --game-lib: libtombi.so for PAL, libtombi_usa.so for the USA release).  The version is the boot
+ * version (loader.c --game-lib: libtombi.so for PAL, libtombi_usa.so / libtombi_jp.so for the USA / JP releases).  The version is the boot
  * executable's SHA-1 (disccheck.c nativeIdentify: SYSTEM.CNF BOOT, or EXE/MAIN0.EXE on the PAL discs), the same table
  * as port2/shims/psyq.c and tools/extract_data.py.  A recognised release without a port yet (Japan) is listed but
  * cannot be played.  The card's logo is cut at run time from the player's own disc (the title screen's logo page, its
@@ -46,8 +46,8 @@ final class Library {
                     "SYSTEM/A00202.000", "SYSTEM/A00203.000", "SYSTEM/O0PTSUB0.BIN"),
         new Version("usa", "81cbc79f0230aeb4252e058039f47ac95a777f5a", "Tomba!", "TOMBA!", 1, "libtombi_usa.so", "saves_usa",
                     "SYSTEM/A00012.000", "SYSTEM/A00013.000", "SYSTEM/OPTSUB00.BIN"),
-        // SLPS-01144: no port yet, not extracted; its logo is read from the image when it is added (logoFromImage)
-        new Version("jp", "07d577698ad31ec1a69b9d7b80a7c3f90b650888", "オレっ！トンバ", "オレっ！トンバ", 2, null, null,
+        // SLPS-01144 (docs/JP.md "Native port"): libtombi_jp.so when the APK was built with the JP disc (game_libs.py)
+        new Version("jp", "07d577698ad31ec1a69b9d7b80a7c3f90b650888", "オレっ！トンバ", "オレっ！トンバ", 2, "libtombi_jp.so", "saves_jp",
                     "SYSTEM/A00012.000", "SYSTEM/A00013.000", "SYSTEM/OPTSUB00.BIN"),
     };
     static final String PAL_REV0_SHA1 = "118459cef9b3747f57b13a498c475ffb8ab512ec";   // July 1998 Rev 0: other overlays
@@ -59,6 +59,13 @@ final class Library {
         if ("SCES-01330".equals(serial)) return new int[]{0, 1, 2, 3, 4};
         if ("SCUS-94236".equals(serial)) return new int[]{9};
         if ("SLPS-01144".equals(serial)) return new int[]{10};
+        return new int[0];
+    }
+    /** the languages the port adds to a PAL disc from the other PAL disc's set (the two discs share every game file;
+     *  the port runs all nine from either: tools/game_library.py PORT_EXTRA_FLAGS), drawn after a "+" */
+    static int[] extraFlagsOf(String serial) {
+        if ("SCES-01331".equals(serial)) return new int[]{1, 2, 3, 4};
+        if ("SCES-01330".equals(serial)) return new int[]{5, 6, 7, 8};
         return new int[0];
     }
     static Version bySha1(String s) { for (Version v : VERSIONS) if (v.sha1.equalsIgnoreCase(s)) return v; return null; }

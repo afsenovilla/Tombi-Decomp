@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The game library of another version for the APK (docs/PORT_VERSIONS_PLAN.md stage U2): libtombi_<ver>.so for each
+"""The game library of another version for the APK (docs/PORT_VERSIONS_PLAN.md stages U2 / J1): libtombi_<ver>.so for each
 ABI, next to the PAL libtombi.so that Gradle's CMake build makes.  The launcher's library (Library.java) names it to the
 loader (loader.c --game-lib); one game library per version and ABI.
 
@@ -16,7 +16,7 @@ import argparse, os, shutil, subprocess, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__)); P2 = os.path.dirname(HERE); ROOT = os.path.dirname(P2)
 ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-ap.add_argument("--version", required=True, help="usa (port/tools/portver.py)")
+ap.add_argument("--version", required=True, help="usa or jp (port/tools/portver.py)")
 ap.add_argument("--sdl2", required=True, help="SDL2 2.30.x source tree (the same as Gradle's -Psdl2Source)")
 ap.add_argument("--ndk", default=os.environ.get("ANDROID_NDK_LATEST_HOME") or os.environ.get("ANDROID_NDK_HOME"))
 ap.add_argument("--abi", action="append", choices=("armeabi-v7a", "arm64-v8a"))

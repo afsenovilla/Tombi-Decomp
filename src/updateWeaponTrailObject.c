@@ -4,8 +4,9 @@
 #if defined(VERSION_SLPS_01144)
 #if defined(VERSION_SLPS_01144)
 #include "TOBJ.H"
-typedef struct { short k; short w1e; void **anims; int pad2; } T12;
-extern T12 WEAPON_TRAIL_DEFS[];
+typedef struct { unsigned short w1e; short p2; short k; short p6; void **anims; } T12;   /* JP layout, at 800768DC */
+extern T12 D_800768DC[];
+#define WEAPON_TRAIL_DEFS D_800768DC
 extern int SPR_DATA[];
 extern unsigned char PLAYER_ACTIVE;
 extern void AnimLoadDuration(TObj *);

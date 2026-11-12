@@ -69,7 +69,8 @@ extern int AnimAdvance(TObj *);
 extern void ObjApplyVelocity(TObj *);
 extern void weaponSetPlayerAnimA(TObj *);
 extern void weaponSetPlayerAnimB(TObj *);
-extern void weaponSetPlayerAnimC(TObj *);
+extern void func_800323A8(TObj *);   /* the JP weaponSetPlayerAnimC (between B 8003229C and A 800324B4, as PAL's 800313C8 sits between 800312E8 and 800314A8) */
+#define weaponSetPlayerAnimC func_800323A8
 extern short probeCollisionAtDepthB(TObj *, int, int);
 extern void spawnImpactEffect(int, int, int, int);
 extern void spawnWeaponHitDebris(int, int, int, int);
@@ -453,7 +454,7 @@ void func_800327F8(TObj *o)
     }
     if (PLAYER.bac >= 2) {
         char pad[16];
-        BITTEN_OBJECT = PLAYER.de4;
+        { extern unsigned char *D_800A7C4C; BITTEN_OBJECT = D_800A7C4C; }   /* JP: PLX.p611c, PLAYER + 0xD4 */
         PLAYER_EXT->b8 = 0;
         PLAYER.step = 14;
         PLAYER.ba5 = 0;

@@ -1,7 +1,10 @@
 // FUNC 8011f850 56 X014
 // MATCHING 8011f850 56
 #include "gamestate.h"
-#if defined(VERSION_SCUS_94236)  /* USA: sound ids one higher; the retail table at its USA address */
+#if defined(VERSION_SLPS_01144)  /* JP: other sound ids, the retail table at its JP address */
+extern int D_80123078[];
+#define D_80125E30 D_80123078
+#elif defined(VERSION_SCUS_94236)  /* USA: sound ids one higher; the retail table at its USA address */
 extern int D_80125194[];
 #define D_80125E30 D_80125194
 #else

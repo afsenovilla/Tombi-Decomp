@@ -556,6 +556,65 @@ What remains, by kind (for the paired functions with PAL C):
 
 Not linked yet: like the demo, the JP objects are compared by objdiff only; `tools/build_full.py` has no JP target.
 
+## Native port (stage J1, 2026-11-11)
+
+```
+sudo tools/setup_native.sh                                    # old-gcc, maspsx and include/tomba/psyq (required)
+python3 tools/build_full.py --version jp -j 8                # the symbol source (build/slps01144/full, 25 programs)
+python3 tools/extract_data.py game_jp/disc/tomba_jp.bin data_jp   # the JP disc's data/ (manifest: serial, boot, boot_sha1)
+cmake -S port2 -B build/port2-slps01144 -DPORT_VERSION=jp && make -C build/port2-slps01144 -j8
+build/port2-slps01144/tombi2 --data data_jp --headless --skip-movies --frames 4500 --pad-script 1000:start,1300:circle:3x20/60
+```
+
+The same pipeline as the USA port (docs/USA.md "Native port": `PORT_VERSION`, `port/tools/portver.py`,
+`gen_port.sources_version`, `gen/version/port_version.h`), with the JP table: boot `SLPS_011.44`, overlay base
+0x800E9AF8, shared prefix 0x2B680, the SYSTEM overlays `O0PTSUB0` = OPTSUB00.BIN, `D0SPSUB` = DSPSUB.BIN, `I0NFO` =
+INFO.BIN, ..., no GOVER (the PAL SYSOVL table entries the version lacks are dropped), the library part from `_bu_init`
+0x8005844C on (Psy-Q left to the shims). `gen/report.txt`: 51 stubs (psyq/bios 48, game-asm 2), 0 unresolved literals.
+
+What the JP game needed beyond the generator (all in the first JP port commit):
+
+- **CD reader**: the JP `cdLoadTask` (src/cdLoadTask.c JP branch) is the older libcd one: `CdControlF(CdlReadN)`
+  after `CdReadyCallback(cb)`, the callback copying each sector out with `CdGetSector` and ending the read with
+  `CdReadyCallback(0)` + `CdlPause`. `port2/shims/psyq.c` delivers the whole file inside the ReadN command
+  (`cd_readn`; the load-list / overlay relocation of `CdRead` moved to `cd_after_read`, shared by both readers).
+- **Pad**: no libpad in the JP executable. Its vblank handler (`src/vblankHandler_slps01144.c`) polls the older libetc
+  `PadRead(1)` = `func_80064B74` (PadInit = `func_80064B24`, BIOS InitPAD / StartPAD). `port/fixes.txt` (`@version
+  jp`) feeds it `port_pad_read_libetc()` of `shims/pad.c`: the host pad in PadRead's bit order (pad 1 in the low half,
+  the two BIOS bytes big-endian, pressed = 1: select 0x0100, start 0x0800, d-pad 0x1000..0x8000, L2 R2 L1 R1
+  0x01..0x08, triangle circle cross square 0x10..0x80). JP confirms with circle.
+- **Frame wait**: `SetRCnt` / `StartRCnt` of the JP `func_80015D1C` (main's wait) removed, `port_vblank()` instead.
+- **PAL names in JP branches**: a JP branch that calls a PAL function by its PAL address name (`func_800E8A14`,
+  `func_8001D6A4`) gets a data-image address and faults; the JP names are `func_800EA048` / `func_800EA060` (O0PTSUB0
+  bootLogoSetSpriteBase / bootLogoDraw) and `func_8001D5E0_slps01144` (the movie thread) in bootLogoState, and
+  `func_800323A8` for weaponSetPlayerAnimC in weapon0Swing. A JP file kept as asm by the link (`.rodata overlaps`)
+  is not checked against the retail bytes, so these only show at run time (stub / fault lines of the log).
+- **asm("SYM+N") externs** (`D_800A1386 asm("D_800A1384+2")`): gas evaluates the expression, clang (wasm2c, the NDK)
+  takes it as a symbol name; `port2/tools/gen2.py` rewrites such a declaration as a macro over the symbol's bytes.
+- `--second-screen` / `--dump-panel` are refused: `runtime/panel_addrs.h` has no JP column yet.
+
+Checked (headless, i386): logos, title (PUSH START, NEW START / LOAD START / OPTION), new game, AREA00: the opening
+dialogue (ちょっと まてよ ...), the event title 100年老人との出会い, HUD, attacking the pigs, walking. 12 stub calls
+in 4500 frames (PadInit, GetVideoMode, SpuInit). The PAL build regenerates the same stubs.c / funcmap.c and plays the
+same. Not checked: other areas, movies, saves, sound output, the Windows / Android builds of JP.
+
+(The MAIN0 object-handler table at 0x8007593C held `func_800EB7C8`, a native X000 function inside another unit, which
+made `gen2.emit_data` take the whole table for data: its X000 handlers were called through the fault handler on the PC,
+~30 calls per frame, and trapped on wasm2c (`Invalid call_indirect`). A native X000 function now counts as a function
+start of a run; the PAL data.c is unchanged by that.)
+
+Open: the 7 `.rodata overlaps` data units of the JP link (`src/data/slps01144/`:
+freeObjectByLayer, bootLogoState, playerEffect4EStepC, weapon0Swing, weapon8to9Swing, the two treasure chest files,
+updateHoodedOldMan, updateCharlesTalkScene, phoenixSpiritHintWalkC, func_80129CE4); `-v` reports (area / player
+position) read PAL addresses; the panel's JP address column (GAME 0x8009E508, GCD 0x8009E8A8, SCRIPT_FLAGS
+0x8009E94C: the PAL offsets apply if the structs match).
+
+Launchers and CI: `tools/game_library.py` marks SLPS-01144 supported (`tombi-pc-jp`, `build/port2-slps01144`,
+`saves_jp`, no PAL-only feature), Android `Library.java` gives it `libtombi_jp.so` / `saves_jp`
+(`port2/android/game_libs.py --version jp`); `port2-exe.yml` and `android-apk.yml` build the JP game from the
+`GAME_FILES_URL_JP` secret as they build the USA one from `GAME_FILES_URL_USA` (matching build cached as `fulljp-*`,
+the APK libraries as `jplibs-*`; `versions.txt` of the PC bundles lists `jp`).
+
 ## SYSTEM overlays (2026-11-08)
 
 | Step | Code | Functions |

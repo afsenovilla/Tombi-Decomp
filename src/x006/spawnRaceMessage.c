@@ -7,6 +7,12 @@ extern char D_8011F304[];
 extern char D_8011F314[];
 extern char D_8011F324[];
 extern char D_8011F334[];
+#if defined(VERSION_SLPS_01144)  /* JP: other contents (pointers), the retail tables at their JP addresses */
+extern char D_8011E384[], D_8011E3AC[]; extern E8 *D_8011E3DC[];
+#define D_8011F374 D_8011E384
+#define D_8011F39C D_8011E3AC
+#define D_8011F3CC D_8011E3DC
+#else
 static char D_8011F374[40] = {
     0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0x28, 0, 0, 0, 0, 0,
     2, 0, 0x50, 0, 0, 0, 0, 0, 3, 0, 0x78, 0, 0, 0, 0, 0,
@@ -21,6 +27,7 @@ static E8 *D_8011F3CC[7] = {
     (E8 *)D_8011F2F4, (E8 *)D_8011F304, (E8 *)D_8011F314, (E8 *)D_8011F324,
     (E8 *)D_8011F334, (E8 *)D_8011F374, (E8 *)D_8011F39C,
 };
+#endif
 extern TObj *ObjAlloc(void);
 
 void spawnRaceMessage(short sub, short x, short y)

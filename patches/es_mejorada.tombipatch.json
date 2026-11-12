@@ -141,6 +141,7 @@
     "33": "Cámara de la \ncivilización\n",
     "68": "Ciudad de \nlos trucos\n",
     "72": "Ciudad de \nlos trucos\n",
+    "73": "Cámara de los \n10.000 años\n",
     "90": "Cámara de la \ncivilización\n",
     "126": "Ciudad de la \ncivilización\n",
     "2": "Cabaña del Anciano \ncentenario\n",
@@ -148,7 +149,7 @@
     "6": "Bosque \nde las 100 Flores\n",
     "8": "Torre de \nvigilancia\n",
     "9": "Plaza de \nla caridad\n",
-    "14": "Cámara del Anciano \nde 1.000.000 años\n",
+    "14": "Cámara del millón \nde años\n",
     "15": "La pequeña y \nextraña cámara\n",
     "18": "Cuevas de lava\n",
     "19": "Nido del \nFénix\n",
@@ -181,7 +182,7 @@
     "96": "Cámara del \nladrón dos\n",
     "97": "Cámara del \nladrón tres\n",
     "98": "Cámara del llanto\n",
-    "99": "Muros exteriores \nde la Isla de Cerdos\n"
+    "99": "Muros de la \nIsla de Cerdos\n"
    },
    "font": {
     "0xA8": [
@@ -761,7 +762,7 @@
    "112": "{BOX 240 29}\n{VOICE 6 0}{MOVE 0 0}C... cuídate, chaval...{C058}{WAIT}{CLEAR}\nNo te metas en líos...{C058}{WAIT}{CLEAR}\nNo te pongas malo... esto...{C058}{WAIT}{CLEAR}\n¿Qué más iba a decir?{WAIT}{CLEAR}\n",
    "113": "{BOX 304 42}\n{VOICE 6 0}{MOVE 0 0}¿Y ahora a quién le falla la{NL}\nmemoria, eh, abuelo?{C058}{WAIT}{CLEAR}\nJa, ja, ja...{NL}\n¡No cambies nunca, chaval!{WAIT}{CLEAR}\n",
    "114": "{BOX 256 55}\n{MOVE 0 0}Cuando las Estatuas de la{NL}\ncaridad vuelvan a la vida,{NL}\naparecerá la Torre de flores.{WAIT}{CLEAR}\n",
-   "115": "{BOX 232 55}\n{MOVE 0 0}Planta semillas de flores{NL}\nen la Ciudad de Enanos{NL}\ny brotarán flores doradas.{WAIT}{CLEAR}\n",
+   "115": "{BOX 232 55}\n{MOVE 0 0}Planta semillas de flores{NL}\nen la ciudad de los Enanos{NL}\ny brotarán flores doradas.{WAIT}{CLEAR}\n",
    "116": "{BOX 232 42}\n{MOVE 0 0}En lo alto de la montaña{NL}\nhay una ciudad oculta...{WAIT}{CLEAR}\n",
    "117": "{BOX 216 42}\n{MOVE 0 0}La bruja volverá a casa{NL}\ncuando oiga cierto rumor.{WAIT}{CLEAR}\n"
   },
@@ -1213,7 +1214,7 @@
    "323": "{BOX 200 42}\n{VOICE 13 0}{MOVE 0 0}Mmm... El bosque es{NL}\nmuy peligroso.{WAIT}{CLEAR}\n",
    "324": "{BOX 272 55}\n{VOICE 13 0}{MOVE 0 0}El camino de la derecha{NL}\nlleva a casa del Mayor.{NL}\nPero todos andan muy liados...{WAIT}{CLEAR}\n",
    "326": "{BOX 256 55}\n{VOICE 13 0}{MOVE 0 0}¡Vaya, has aprendido un poco{NL}\nde nuestro idioma!{C056}{WAIT}{CLEAR}\nPero todavía no entiendo{NL}\ndel todo lo que{NL}\ndices.{C056}{WAIT}{CLEAR}\nCreo que si saltas sobre otro{NL}\nenano y le das un mordisco,{NL}\ndominarás el idioma.{WAIT}{CLEAR}\n",
-   "327": "{BOX 240 55}\n{VOICE 13 0}{MOVE 0 0}Esta es la Ciudad de Enanos.{NL}\nHan desaparecido algunos{NL}\nenanos de la ciudad...{WAIT}{CLEAR}\n",
+   "327": "{BOX 272 55}\n{VOICE 13 0}{MOVE 0 0}Esta es la ciudad de los Enanos.{NL}\nHan desaparecido algunos{NL}\nenanos de la ciudad...{WAIT}{CLEAR}\n",
    "328": "{BOX 280 55}\n{VOICE 13 0}{MOVE 0 0}¡Socorro! ¡Socorro!{NL}\n¡Han desaparecido unos enanos!{C056}{WAIT}{CLEAR}\n¡Hemos abierto la cabaña del{NL}\nbosque y el camino a la Torre{NL}\nde vigilancia para buscarlos!{WAIT}{CLEAR}\n",
    "329": "{BOX 248 55}\n{VOICE 13 0}{MOVE 0 0}Mi amigo ha desaparecido{NL}\ndelante de mis propias{NL}\nnarices...{WAIT}{CLEAR}\n",
    "330": "{BOX 272 55}\n{VOICE 13 0}{MOVE 0 0}Una espora de un árbol ha{NL}\natrapado a mi amigo y se ha{NL}\nquedado ahí colgado.{C056}{WAIT}{CLEAR}\n¡No llego hasta él!{NL}\n¡Ayúdale, por favor!{C056}{WAIT}{CLEAR}\nFíjate en las esporas que{NL}\nse estiran cuando te{NL}\ncuelgas de ellas.{WAIT}{CLEAR}\n",
@@ -1314,7 +1315,7 @@
    "458": "{BOX 272 29}\n{VOICE 6 0}{MOVE 0 0}Parece que algo se ha movido...{WAIT}{CLEAR}\n",
    "459": "{BOX 240 55}\n{MOVE 0 0}¡Ja, ja, ja!{NL}\n¡Nunca abrirás esa puerta!{NL}\n¡Ríndete! ¡Ja, ja, jaaa!{WAIT}{CLEAR}\n",
    "208": "{BOX 184 42}\n{MOVE 0 0}Laberinto subterráneo{C056}{WAIT}{CLEAR}\n{CHOICE}¿Guardar datos?  {NL}\nSí⮊✕ No⮊○{WAIT}{CLEAR}\n",
-   "209": "{BOX 152 42}\n{MOVE 0 0}Ciudad de Enanos{C056}{WAIT}{CLEAR}\n{CHOICE}¿Guardar datos?  {NL}\nSí⮊✕ No⮊○{WAIT}{CLEAR}\n",
+   "209": "{BOX 200 42}\n{MOVE 0 0}La ciudad de los Enanos{C056}{WAIT}{CLEAR}\n{CHOICE}¿Guardar datos?  {NL}\nSí⮊✕ No⮊○{WAIT}{CLEAR}\n",
    "210": "{BOX 160 42}\n{MOVE 0 0}Cabaña Enano Mayor{C056}{WAIT}{CLEAR}\n{CHOICE}¿Guardar datos?  {NL}\nSí⮊✕ No⮊○{WAIT}{CLEAR}\n",
    "67": "{BOX 72 29}\nVálvula{NL}\n",
    "81": "{BOX 96 29}\n300.000 AP{NL}\n"
@@ -3235,7 +3236,7 @@
    "112": "{BOX 240 29}\n{VOICE 6 0}{MOVE 0 0}C... cuídate, chaval...{C058}{WAIT}{CLEAR}\nNo te metas en líos...{C058}{WAIT}{CLEAR}\nNo te pongas malo... esto...{C058}{WAIT}{CLEAR}\n¿Qué más iba a decir?{WAIT}{CLEAR}\n",
    "113": "{BOX 304 42}\n{VOICE 6 0}{MOVE 0 0}¿Y ahora a quién le falla la{NL}\nmemoria, eh, abuelo?{C058}{WAIT}{CLEAR}\nJa, ja, ja...{NL}\n¡No cambies nunca, chaval!{WAIT}{CLEAR}\n",
    "114": "{BOX 256 55}\n{MOVE 0 0}Cuando las Estatuas de la{NL}\ncaridad vuelvan a la vida,{NL}\naparecerá la Torre de flores.{WAIT}{CLEAR}\n",
-   "115": "{BOX 232 55}\n{MOVE 0 0}Planta semillas de flores{NL}\nen la Ciudad de Enanos{NL}\ny brotarán flores doradas.{WAIT}{CLEAR}\n",
+   "115": "{BOX 232 55}\n{MOVE 0 0}Planta semillas de flores{NL}\nen la ciudad de los Enanos{NL}\ny brotarán flores doradas.{WAIT}{CLEAR}\n",
    "116": "{BOX 232 42}\n{MOVE 0 0}En lo alto de la montaña{NL}\nhay una ciudad oculta...{WAIT}{CLEAR}\n",
    "117": "{BOX 216 42}\n{MOVE 0 0}La bruja volverá a casa{NL}\ncuando oiga cierto rumor.{WAIT}{CLEAR}\n"
   },
@@ -4097,7 +4098,7 @@
    "323": "{BOX 200 42}\n{VOICE 13 0}{MOVE 0 0}Mmm... El bosque es{NL}\nmuy peligroso.{WAIT}{CLEAR}\n",
    "324": "{BOX 272 55}\n{VOICE 13 0}{MOVE 0 0}El camino de la derecha{NL}\nlleva a casa del Mayor.{NL}\nPero todos andan muy liados...{WAIT}{CLEAR}\n",
    "326": "{BOX 256 55}\n{VOICE 13 0}{MOVE 0 0}¡Vaya, has aprendido un poco{NL}\nde nuestro idioma!{C056}{WAIT}{CLEAR}\nPero todavía no entiendo{NL}\ndel todo lo que{NL}\ndices.{C056}{WAIT}{CLEAR}\nCreo que si saltas sobre otro{NL}\nenano y le das un mordisco,{NL}\ndominarás el idioma.{WAIT}{CLEAR}\n",
-   "327": "{BOX 240 55}\n{VOICE 13 0}{MOVE 0 0}Esta es la Ciudad de Enanos.{NL}\nHan desaparecido algunos{NL}\nenanos de la ciudad...{WAIT}{CLEAR}\n",
+   "327": "{BOX 272 55}\n{VOICE 13 0}{MOVE 0 0}Esta es la ciudad de los Enanos.{NL}\nHan desaparecido algunos{NL}\nenanos de la ciudad...{WAIT}{CLEAR}\n",
    "328": "{BOX 280 55}\n{VOICE 13 0}{MOVE 0 0}¡Socorro! ¡Socorro!{NL}\n¡Han desaparecido unos enanos!{C056}{WAIT}{CLEAR}\n¡Hemos abierto la cabaña del{NL}\nbosque y el camino a la Torre{NL}\nde vigilancia para buscarlos!{WAIT}{CLEAR}\n",
    "329": "{BOX 248 55}\n{VOICE 13 0}{MOVE 0 0}Mi amigo ha desaparecido{NL}\ndelante de mis propias{NL}\nnarices...{WAIT}{CLEAR}\n",
    "330": "{BOX 272 55}\n{VOICE 13 0}{MOVE 0 0}Una espora de un árbol ha{NL}\natrapado a mi amigo y se ha{NL}\nquedado ahí colgado.{C056}{WAIT}{CLEAR}\n¡No llego hasta él!{NL}\n¡Ayúdale, por favor!{C056}{WAIT}{CLEAR}\nFíjate en las esporas que{NL}\nse estiran cuando te{NL}\ncuelgas de ellas.{WAIT}{CLEAR}\n",
@@ -4198,7 +4199,7 @@
    "458": "{BOX 272 29}\n{VOICE 6 0}{MOVE 0 0}Parece que algo se ha movido...{WAIT}{CLEAR}\n",
    "459": "{BOX 240 55}\n{MOVE 0 0}¡Ja, ja, ja!{NL}\n¡Nunca abrirás esa puerta!{NL}\n¡Ríndete! ¡Ja, ja, jaaa!{WAIT}{CLEAR}\n",
    "208": "{BOX 184 42}\n{MOVE 0 0}Laberinto subterráneo{C056}{WAIT}{CLEAR}\n{CHOICE}¿Guardar datos?  {NL}\nSí⮊✕ No⮊○{WAIT}{CLEAR}\n",
-   "209": "{BOX 152 42}\n{MOVE 0 0}Ciudad de Enanos{C056}{WAIT}{CLEAR}\n{CHOICE}¿Guardar datos?  {NL}\nSí⮊✕ No⮊○{WAIT}{CLEAR}\n",
+   "209": "{BOX 200 42}\n{MOVE 0 0}La ciudad de los Enanos{C056}{WAIT}{CLEAR}\n{CHOICE}¿Guardar datos?  {NL}\nSí⮊✕ No⮊○{WAIT}{CLEAR}\n",
    "210": "{BOX 160 42}\n{MOVE 0 0}Cabaña Enano Mayor{C056}{WAIT}{CLEAR}\n{CHOICE}¿Guardar datos?  {NL}\nSí⮊✕ No⮊○{WAIT}{CLEAR}\n",
    "67": "{BOX 72 29}\nVálvula{NL}\n",
    "81": "{BOX 96 29}\n300.000 AP{NL}\n"
@@ -4327,7 +4328,7 @@
    "322": "{BOX 192 42}\n{VOICE 6 0}{MOVE 0 0}Mmm... El bosque es{NL}\nmuy peligroso.{WAIT}{CLEAR}\n",
    "323": "{BOX 272 55}\n{VOICE 6 0}{MOVE 0 0}El camino de la derecha{NL}\nlleva a casa del Mayor.{NL}\nPero todos andan muy liados...{WAIT}{CLEAR}\n",
    "325": "{BOX 256 55}\n{VOICE 6 0}{MOVE 0 0}¡Vaya, has aprendido un poco{NL}\nde nuestro idioma!{C053}{WAIT}{CLEAR}\nPero todavía no entiendo{NL}\ndel todo lo que{NL}\ndices.{C053}{WAIT}{CLEAR}\nCreo que si le das un mordisco{NL}\na otro enano, dominarás{NL}\nel idioma.{WAIT}{CLEAR}\n",
-   "326": "{BOX 240 55}\n{VOICE 6 0}{MOVE 0 0}Esta es la Ciudad de Enanos.{NL}\nHan desaparecido algunos{NL}\nenanos de la ciudad...{WAIT}{CLEAR}\n",
+   "326": "{BOX 272 55}\n{VOICE 6 0}{MOVE 0 0}Esta es la ciudad de los Enanos.{NL}\nHan desaparecido algunos{NL}\nenanos de la ciudad...{WAIT}{CLEAR}\n",
    "327": "{BOX 280 55}\n{VOICE 6 0}{MOVE 0 0}¡Socorro! ¡Socorro!{NL}\n¡Han desaparecido unos enanos!{C053}{WAIT}{CLEAR}\n¡Hemos abierto la cabaña del{NL}\nbosque y el camino a la Torre{NL}\nde vigilancia para buscarlos!{WAIT}{CLEAR}\n",
    "328": "{BOX 248 55}\n{VOICE 6 0}{MOVE 0 0}Mi amigo ha desaparecido{NL}\ndelante de mis propias{NL}\nnarices...{WAIT}{CLEAR}\n",
    "329": "{BOX 272 55}\n{VOICE 6 0}{MOVE 0 0}Una espora de un árbol ha{NL}\natrapado a mi amigo y se ha{NL}\nquedado ahí colgado.{C053}{WAIT}{CLEAR}\n¡No llego hasta él!{NL}\n¡Ayúdale, por favor!{C053}{WAIT}{CLEAR}\nFíjate en las esporas que{NL}\nse estiran cuando te{NL}\ncuelgas de ellas.{WAIT}{CLEAR}\n",
@@ -4411,7 +4412,7 @@
    "422": "{BOX 224 55}\n{VOICE 6 0}{MOVE 0 0}¡Por fin te despiertas!{NL}\nLo he pasado fatal.{C053}{WAIT}{CLEAR}\nPrimero salgo volando{NL}\npor los aires...{C053}{WAIT}{CLEAR}\nY cuando me doy cuenta,{NL}\nmi jaula de insectos está{NL}\nhecha añicos...{C053}{WAIT}{CLEAR}\nY antes de entender qué{NL}\nhabía pasado, me caigo{NL}\naquí...{WAIT}{CLEAR}\n",
    "423": "{BOX 288 55}\n{VOICE 6 0}{MOVE 0 0}¡Me rindo!{NL}\nMe dan igual esas tontas{NL}\nmariposas con alas de hoja.{C053}{WAIT}{CLEAR}\n¿Que dónde están?{C053}{WAIT}{CLEAR}\nLas Mariposas hoja están{NL}\npor ahí, alrededor de{NL}\nuna especie de huevo.{C053}{WAIT}{CLEAR}\nEn fin, yo me largo{NL}\nde aquí...{C053}{WAIT}{CLEAR}\nUn momento...{NL}\n¿Dónde estoy?{WAIT}{CLEAR}\n",
    "208": "{BOX 152 42}\n{MOVE 0 0}Ciudad oculta{C053}{WAIT}{CLEAR}\n{CHOICE}¿Guardar datos?  {NL}\nSí⮊✕ No⮊○{WAIT}{CLEAR}\n",
-   "209": "{BOX 152 42}\n{MOVE 0 0}Ciudad de Enanos{C053}{WAIT}{CLEAR}\n{CHOICE}¿Guardar datos?  {NL}\nSí⮊✕ No⮊○{WAIT}{CLEAR}\n",
+   "209": "{BOX 200 42}\n{MOVE 0 0}La ciudad de los Enanos{C053}{WAIT}{CLEAR}\n{CHOICE}¿Guardar datos?  {NL}\nSí⮊✕ No⮊○{WAIT}{CLEAR}\n",
    "210": "{BOX 160 42}\n{MOVE 0 0}Cabaña Enano Mayor{C053}{WAIT}{CLEAR}\n{CHOICE}¿Guardar datos?  {NL}\nSí⮊✕ No⮊○{WAIT}{CLEAR}\n",
    "67": "{BOX 72 29}\nVálvula{NL}\n",
    "81": "{BOX 96 29}\n300.000 AP{NL}\n"

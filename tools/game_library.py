@@ -21,8 +21,8 @@ USA_SHA1 = "81cbc79f0230aeb4252e058039f47ac95a777f5a"     # SCUS_942.36
 JP_SHA1 = "07d577698ad31ec1a69b9d7b80a7c3f90b650888"      # SLPS_011.44
 
 # What the launcher offers for a version (keys of FEATURES): the port options that read PAL addresses or the PAL
-# disc's files are PAL-only in the USA build (docs/USA.md "Native port": --lang, --text-patch, --picture ntsc,
-# --cut-content, --civ-test, the panel, the title DEBUG entry).
+# disc's files are PAL-only in the USA and JP builds (docs/USA.md / docs/JP.md "Native port": --lang, --text-patch,
+# --picture ntsc, --cut-content, --civ-test, the panel, the title DEBUG entry).
 #   lang       the nine languages of the boot menu (--lang)
 #   patch      text patches / translations applied to data/ (--text-patch, the improved Spanish translation)
 #   hz         the 50 / 60 Hz switch (a PAL game; NTSC versions always run at 60)
@@ -32,7 +32,7 @@ JP_SHA1 = "07d577698ad31ec1a69b9d7b80a7c3f90b650888"      # SLPS_011.44
 #   prompts    the button-icon styles (--prompts: redraws the PAL fonts' glyphs)
 #   texdump    "Dump all textures" (tools/dump_all_textures.py reads the PAL disc layout)
 PAL_FEATURES = frozenset(("lang", "patch", "hz", "cut", "pokes", "prompts", "texdump"))
-USA_FEATURES = frozenset()
+USA_FEATURES = frozenset()          # (the JP build: the same, none)
 
 # Every version the launcher knows. key: the boot executable's sha1.
 #   version    port version (port/tools/portver.py: PORT_VERSION; "" = PAL)
@@ -54,7 +54,7 @@ VERSIONS = {
                    text_patches=(),
                    art=("SYSTEM/A00012.000", "SYSTEM/A00013.000", "SYSTEM/A00010.GAM", "SYSTEM/A00011.000", "SYSTEM/OPTSUB00.BIN", 0)),
     JP_SHA1: dict(key="jp", version="jp", title="オレっ！トンバ", region="Japan", serials=("SLPS-01144",),
-                  supported=False, binary="tombi-pc-jp", build_dir="port2-slps01144", hz=60, features=frozenset(),
+                  supported=True, binary="tombi-pc-jp", build_dir="port2-slps01144", hz=60, features=frozenset(),
                   save_sub="saves_jp",
                   text_patches=(),
                   art=("SYSTEM/A00012.000", "SYSTEM/A00013.000", "SYSTEM/A00010.GAM", "SYSTEM/A00011.000", "SYSTEM/OPTSUB00.BIN", 0)),
@@ -68,6 +68,10 @@ DISC_LANGS = {"SCES-01331": "EN ES PT SV DA", "SCES-01330": "EN FR DE IT NL", "S
 # the same as flags (port_launcher.flag_pixmap / LauncherActivity flags: 0 UK, 1 FR, 2 DE, 3 IT, 4 NL, 5 ES, 6 PT, 7 SV,
 # 8 DA, 9 US, 10 JP), drawn beside the serial on the library's cards
 DISC_FLAGS = {"SCES-01331": [0, 5, 6, 7, 8], "SCES-01330": [0, 1, 2, 3, 4], "SCUS-94236": [9], "SLPS-01144": [10]}
+# the languages the port adds to a PAL disc from the other PAL disc's set (the game files of the two discs are the same
+# bytes, only the boot menu's five differ: port runs all nine from either disc, docs/PORT.md "--lang"); drawn after a
+# "+" on the library's cards
+PORT_EXTRA_FLAGS = {"SCES-01331": [1, 2, 3, 4], "SCES-01330": [5, 6, 7, 8]}
 # other Tomba releases a player might add by mistake
 OTHER_DISCS = {"SCUS-94454": "Tomba! 2 (USA)", "SCES-02005": "Tombi! 2 (PAL)", "SLPM-80165": "オレっ！トンバ (Japan, demo)"}
 

@@ -42,6 +42,7 @@
     <string name="opt_showfps">Visa FPS</string>
     <string name="opt_inflives">Oändligt med liv</string>
     <string name="opt_infhealth">Oändlig vitalitet</string>
+    <string name="opt_nosaveheal">Att spara fyller inte på vitaliteten</string>
     <string name="aspect_auto">Auto</string>
     <string name="chip_cut_on">Bortklippt innehåll: på</string>
     <string name="chip_cut_off">Bortklippt innehåll: av</string>
@@ -178,4 +179,12 @@
     <string name="disc_zip_bad">”%1$s” kan inte läsas (skadat arkiv eller en komprimeringsmetod som appen inte känner till: %2$s). Packa upp den och välj skivavbilden.</string>
     <string-array name="lib_styles"><item>Karusell</item><item>Lista</item><item>Omslag</item></string-array>
     <string-array name="lib_regions"><item>Europa</item><item>USA</item><item>Japan</item></string-array>
+    <!-- the launcher's rail (LauncherView.drawRail): one page each -->
+    <string name="rail_play">Spela</string>
+    <string name="rail_image">Bild</string>
+    <string name="rail_pad">Kontroller</string>
+    <string name="rail_extras">Extra</string>
+    <string name="rail_disc">Skiva</string>
+    <string name="rail_app">App</string>
+    <string name="page_extras">Extra</string>
 </resources>

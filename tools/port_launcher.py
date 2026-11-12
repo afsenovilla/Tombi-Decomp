@@ -1862,14 +1862,25 @@ class GameTile(QAbstractButton):
     _flag_cache = {}
 
     def _flags(self, p, x, y, h=11):
-        """the disc's languages as small drawn flags in a row from x, centred on y; returns the right end"""
+        """the disc's languages as small drawn flags in a row from x, centred on y, then "+" and the languages the port
+        adds from the other PAL disc (game_library.PORT_EXTRA_FLAGS, same size); returns the right end"""
         w = round(h * 1.5)
-        for n in self.d.get("flags") or ():
-            pm = GameTile._flag_cache.get((n, w, h))
-            if pm is None:
-                pm = GameTile._flag_cache[(n, w, h)] = flag_pixmap(n, w, h)
-            p.drawPixmap(QPointF(x, y - h / 2), pm)
-            x += w + 4
+        def row(ns):
+            nonlocal x
+            for n in ns:
+                pm = GameTile._flag_cache.get((n, w, h))
+                if pm is None:
+                    pm = GameTile._flag_cache[(n, w, h)] = flag_pixmap(n, w, h)
+                p.drawPixmap(QPointF(x, y - h / 2), pm)
+                x += w + 4
+        row(self.d.get("flags") or ())
+        extra = self.d.get("extra_flags") or ()
+        if extra:
+            p.setPen(QColor(self.a.t["muted"]))
+            p.setFont(self._font(9, QFont.Bold))
+            p.drawText(QPointF(x + 1, y + 4), "+")
+            x += 15
+            row(extra)
         return x
 
     def _status(self, p, x, y, t, color_text):
@@ -2506,10 +2517,11 @@ class App(QMainWindow):
             return lay
         lay = cell(0, 0, tr("c.game"))
         if not has("lang"):
-            # one language on the disc (USA: English): nothing to choose
+            # one language on the disc (USA: English, JP: Japanese): nothing to choose
+            key = (v or {}).get("key")
             lb = QLabel()
-            lb.setPixmap(flag_pixmap(9 if (v or {}).get("key") == "usa" else 0))
-            row, rl = hbox(lb, QLabel(tr("l.onlylang", "English")), None, spacing=8)
+            lb.setPixmap(flag_pixmap(10 if key == "jp" else 9 if key == "usa" else 0))
+            row, rl = hbox(lb, QLabel(tr("l.onlylang", "日本語" if key == "jp" else "English")), None, spacing=8)
             lay.addWidget(row)
         else:
             # game language (the boot menu's MAINn.EXE): a combobox with the flags
@@ -2605,6 +2617,10 @@ class App(QMainWindow):
         """the flag_pixmap indices of the disc's languages (game_library.DISC_FLAGS)"""
         return GL.DISC_FLAGS.get(e.get("serial"), [])
 
+    def game_extra_flags(self, e):
+        """the languages the port adds to this disc (game_library.PORT_EXTRA_FLAGS: the other PAL disc's four)"""
+        return GL.PORT_EXTRA_FLAGS.get(e.get("serial"), [])
+
     def game_status(self, e):
         """(text, level) of a library entry: ready / to extract / image missing / not supported yet."""
         v = GL.version_of(e.get("sha1"))
@@ -2655,7 +2671,7 @@ class App(QMainWindow):
     def _tile_data(self, e):
         text, level = self.game_status(e)
         return dict(serial=e.get("serial", ""), title=self.game_name(e), short=(GL.version_of(e.get("sha1")) or {}).get("title") or self.game_name(e),
-                    sub=self.game_sub(e), flags=self.game_flags(e), status=text, level=level, art=self.game_art(e),
+                    sub=self.game_sub(e), flags=self.game_flags(e), extra_flags=self.game_extra_flags(e), status=text, level=level, art=self.game_art(e),
                     selected=e is self.cur_entry())
 
     def _library_view(self):

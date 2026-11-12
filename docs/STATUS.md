@@ -30,6 +30,42 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
 
 ## In progress / open
 
+0. **Widescreen top-down maps drawn whole (2026-11-12)**: in the overhead rooms (I0NFO Dwarf Village AREA02/19 s0,
+   I0NFO2 AREA05/08 s0/s2, AREA19 s2) the side strips past 4:3 filled in 32-px pieces as the camera moved (the user on
+   the AYN Thor, `--widescreen auto`). Cause: the background is a 384x288 window of the map picture uploaded to fixed
+   VRAM every frame, at most 32 px wider than 4:3 per side. Fix `runtime/ws_topdown.c` (fixes.txt hooks on the six
+   map draw functions, PAL/USA/JP): the windows left / right are uploaded into the same VRAM at marker packets inside
+   the ordering table (`shims/gpu.c` DrawOTag -> `port_ot_mark_fn`) and drawn, then the game's window put back; the
+   game's window is cut at the picture's edge (it showed the wrapped next row). Checked headless, soft renderer: all
+   seven sections at 16:9 and 21:9 (4:3 middle byte-identical to before in every frame, strips filled up to the
+   picture's edge, which stays black: the world ends there), AREA05 on GL (xvfb); no widescreen: frames identical.
+   Tunnels (I0NFO3 AREA02 s3) were already full width (3D blocks). Not checked: the device, USA/JP discs, `--fps`
+   visually (runs).
+0. **Proportional place names on the save list (default on, 2026-11-12)**: `runtime/mcprop.c` + port/fixes.txt hooks
+   on `memCardDrawFileLocation` / `memCardDrawString` (PAL only): each glyph advances by its opaque width read from the
+   font in VRAM + 1 px, the space 4 px (retail: 8-px cells). `--memcard-mono` restores the retail spacing,
+   `--memcard-prop GAP[,SPACE]` tunes it. `check_text_patch.py` checks the place names against 229 px with the same
+   widths. Spanish location 2 is "Cabaña del Anciano centenario" again (206 px). Headless PAL renders only.
+0. **Mod "Saving does not refill vitality" (`--no-save-heal`, 2026-11-12)**: retail PAL/USA refill the vitality when a
+   save is **loaded** (D0SPSUB2 `memCardFileListStep` sub 10, `GAME.playerHealth = playerMaxHealth` after the copy;
+   PAL 0x800E8E30, USA 0x800E8A50), not when saving; JP never refills on load. port/fixes.txt guard + both launchers
+   (docs/PORT.md "Mods"). Checked headless on PAL i386 only (vitality 1 saved -> 4 loaded without the flag, 1 with it;
+   default frames identical); USA build and the device not run.
+0. **JP retail port (SLPS-01144) boots and plays (2026-11-11)**: stage J1 of docs/PORT_VERSIONS_PLAN.md. `python3
+   tools/build_full.py --version slps01144` (25 programs byte-identical), `cmake -S port2 -B build/port2-slps01144
+   -DPORT_VERSION=jp && make -C build/port2-slps01144`, data from `python3 tools/extract_data.py game_jp/disc/tomba_jp.bin
+   data_jp`. Headless the port goes logos → title → new game → AREA00 (the opening dialogue, the 100-year-old man event,
+   HUD, fighting, walking; JP confirms with circle). What the JP build needed beyond the generator: the older libcd
+   reader (`CdlReadN` + `CdReadyCallback` + `CdGetSector`, shims/psyq.c `cd_readn`), the older libetc pad
+   (`func_80064B74` = PadRead polled by the vblank handler, fed by shims/pad.c `port_pad_read_libetc` through a
+   `@version jp` fix), the JP overlay names in the JP branch of bootLogoState (`func_800EA048/60`, movie thread
+   `func_8001D5E0_slps01144`), `SetRCnt/StartRCnt` removed in the JP frame wait; gen2: `asm("SYM+N")` externs as macros
+   (clang / wasm2c), a native X000 function counts as a function start in a MAIN0 pointer table (the JP object table
+   went data and trapped on wasm2c). Launchers (PC: supported, `tombi-pc-jp`, `saves_jp`; Android `libtombi_jp.so`),
+   CI (`GAME_FILES_URL_JP` in port2-exe.yml / android-apk.yml, caches `fulljp-*` / `jplibs-*`), docs/JP.md "Native
+   port". Open: the second-screen panel has no JP address column (`--second-screen` is refused in the JP build); the 7
+   `.rodata overlaps` data units of the JP link; the Windows / Android JP builds are only built by CI (not run on a
+   device yet).
 0. **Wings glide in the port (2026-11-10)**: `--wings-glide JPDEMO_DIR --wings-pre9 PRE9_DIR` (its own switch, no `--cut-content` needed; PC launcher: Cut content page, own card with checkbox and the two demo disc images, the needed files are extracted into .wings/; the early-title field was removed from the launcher). `--cut-content` is now a pick list: `--cut-content=boatman,letter,board,berries,bubble,titles` (bits 1..32 in `port_cut_content`), the plain switch = all; the launcher shows one checkbox per item
    plays the JP demo's cut top-down Charity Wings animation (frames 77-79 + the feather item sprite spinning) in the
    wings exit and the landing of the three overhead engines (I0NFO2 Baccus Village / the pier, I0NFO Dwarf Village, I0NFO3 tunnels) (`port2/runtime/wings.c`, hooks in port/fixes.txt, docs/PORT.md). Checked headless in

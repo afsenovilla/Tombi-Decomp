@@ -51,6 +51,10 @@ jobs:
         with:
           urls: ${{ secrets.GAME_FILES_URL_USA }}
           scope: usa
+      - uses: ./.github/actions/disc-cache   # the JP disc, the same way
+        with:
+          urls: ${{ secrets.GAME_FILES_URL_JP }}
+          scope: jp
 
       - uses: actions/setup-python@v5
         with:
@@ -129,8 +133,10 @@ jobs:
           echo "full=v1-${{ hashFiles('src/**', 'include/**', 'asm/**', 'config/**', 'tools/build_full.py', 'tools/ncheck.py', 'tools/sysovl.py', 'tools/requirements.txt', 'tools/setup_native.sh') }}" >> "$GITHUB_OUTPUT"
           # the USA matching build: the same key as port2-exe.yml (one cache for both workflows)
           echo "fullusa=v1-${{ hashFiles('src/**', 'include/**', 'asm/**', 'config/**', 'tools/build_full.py', 'tools/ncheck.py', 'tools/sysovl.py', 'tools/units.py', 'tools/versions.py', 'tools/version_data.py', 'tools/requirements.txt', 'tools/setup_native.sh') }}" >> "$GITHUB_OUTPUT"
-          # the finished USA libraries (both ABIs): everything that feeds the generator, wasm2c and the NDK build
+          echo "fulljp=v1-${{ hashFiles('src/**', 'include/**', 'asm/**', 'config/**', 'tools/build_full.py', 'tools/ncheck.py', 'tools/sysovl.py', 'tools/units.py', 'tools/versions.py', 'tools/version_data.py', 'tools/requirements.txt', 'tools/setup_native.sh') }}" >> "$GITHUB_OUTPUT"
+          # the finished USA / JP libraries (both ABIs): everything that feeds the generator, wasm2c and the NDK build
           echo "usalibs=v1-${SDL2_VERSION}-${{ hashFiles('src/**', 'include/**', 'asm/**', 'config/**', 'port/**', 'port2/wasm/**', 'port2/runtime/**', 'port2/CMakeLists.txt', 'port2/cmake/**', 'port2/android/game_libs.py', 'tools/**', 'VERSION') }}" >> "$GITHUB_OUTPUT"
+          echo "jplibs=v1-${SDL2_VERSION}-${{ hashFiles('src/**', 'include/**', 'asm/**', 'config/**', 'port/**', 'port2/wasm/**', 'port2/runtime/**', 'port2/CMakeLists.txt', 'port2/cmake/**', 'port2/android/game_libs.py', 'tools/**', 'VERSION') }}" >> "$GITHUB_OUTPUT"
 
       - name: Restore matching build
         id: full
@@ -276,6 +282,72 @@ jobs:
             build/android-usa/*/libtombi_usa.debug.so
           key: usalibs-${{ steps.key.outputs.usalibs }}
 
+      # The finished JP libraries of the same sources (cache hit = the whole step below is skipped)
+      - name: Restore the JP game libraries
+        id: jplibs
+        if: steps.fetch.outputs.ok == 'true'
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            port2/android/app/src/main/jniLibs/*/libtombi_jp.so
+            build/android-jp/*/libtombi_jp.debug.so
+          key: jplibs-${{ steps.key.outputs.jplibs }}
+
+      - name: Restore JP matching build
+        id: fulljp
+        if: steps.fetch.outputs.ok == 'true' && steps.jplibs.outputs.cache-hit != 'true'
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            build/slps01144/full
+            !build/slps01144/full/tmp
+          key: fulljp-${{ steps.key.outputs.fulljp }}
+
+      - name: JP game library (libtombi_jp.so, both ABIs)
+        id: jp
+        if: steps.fetch.outputs.ok == 'true'
+        env:
+          GAME_FILES_URL_JP: ${{ secrets.GAME_FILES_URL_JP }}
+        run: |
+          if [ -z "$GAME_FILES_URL_JP" ]; then
+            echo "::notice::GAME_FILES_URL_JP secret not set; the APK has no JP game library."
+            echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          if [ "${{ steps.jplibs.outputs.cache-hit }}" = "true" ]; then
+            echo "JP libraries restored from the cache (jplibs-${{ steps.key.outputs.jplibs }})"
+            ls -l port2/android/app/src/main/jniLibs/*/
+            echo "ok=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          bash tools/disc_fetch.sh JP
+          mkdir -p game_jp/SYSTEM; cp game_jp/fs/SLPS_011.44 game_jp/; cp game_jp/fs/SYSTEM/*.BIN game_jp/SYSTEM/   # the flat tree of tools/versions.py
+          echo "07d577698ad31ec1a69b9d7b80a7c3f90b650888  game_jp/SLPS_011.44" | sha1sum -c -
+          if [ "${{ steps.fulljp.outputs.cache-hit }}" = "true" ]; then find build/slps01144/full -type f -exec touch {} +
+          else python3 tools/build_full.py --version jp -j "$(nproc)"; fi
+          ccache -z || true
+          python3 port2/android/game_libs.py --version jp --sdl2 "$SDL2_SOURCE" --ndk "$ANDROID_NDK_LATEST_HOME" -j "$(nproc)"
+          ccache -s || true
+          ls -l port2/android/app/src/main/jniLibs/*/
+          rm -f game_jp/disc.bin
+          echo "ok=true" >> "$GITHUB_OUTPUT"
+
+      - name: Save JP matching build
+        if: steps.jp.outputs.ok == 'true' && steps.jplibs.outputs.cache-hit != 'true' && steps.fulljp.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            build/slps01144/full
+            !build/slps01144/full/tmp
+          key: fulljp-${{ steps.key.outputs.fulljp }}
+
+      - name: Save the JP game libraries
+        if: steps.jp.outputs.ok == 'true' && steps.jplibs.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            port2/android/app/src/main/jniLibs/*/libtombi_jp.so
+            build/android-jp/*/libtombi_jp.debug.so
+          key: jplibs-${{ steps.key.outputs.jplibs }}
+
       - uses: actions/setup-java@v4
         if: steps.fetch.outputs.ok == 'true'
         with:
@@ -320,6 +392,7 @@ jobs:
           # both ABIs, all four libraries each (a 64-bit-only device loads only lib/arm64-v8a)
           LIBS="libtombi.so libmain.so libSDL2.so libtombidisc.so"
           [ "${{ steps.usa.outputs.ok }}" = "true" ] && LIBS="$LIBS libtombi_usa.so"   # the USA game library (game_libs.py)
+          [ "${{ steps.jp.outputs.ok }}" = "true" ] && LIBS="$LIBS libtombi_jp.so"     # the JP game library
           for abi in armeabi-v7a arm64-v8a; do for l in $LIBS; do
             unzip -l "$APK" | grep -q " lib/$abi/$l\$" || { echo "::error::the APK has no lib/$abi/$l"; exit 1; }
           done; done
@@ -342,6 +415,8 @@ jobs:
             if [ -n "$DBG" ]; then cp "$DBG" "dist/android/symbols/libtombi-$abi.debug.so"; fi
             DBG="build/android-usa/$abi/libtombi_usa.debug.so"
             if [ -f "$DBG" ]; then cp "$DBG" "dist/android/symbols/libtombi_usa-$abi.debug.so"; fi
+            DBG="build/android-jp/$abi/libtombi_jp.debug.so"
+            if [ -f "$DBG" ]; then cp "$DBG" "dist/android/symbols/libtombi_jp-$abi.debug.so"; fi
           done
           nm -n --defined-only "$SO" > dist/android/symbols/libtombi-armeabi-v7a.map 2>/dev/null || true
           unzip -o -q "$APK" lib/arm64-v8a/libtombi.so -d "$RUNNER_TEMP/apklib"

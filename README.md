@@ -186,8 +186,8 @@ Every known retail, demo and prototype disc (serials, dates, executable hashes):
 |---------|--------|--------|
 | Tombi! PAL, language set 2 (EN ES PT SV DA) | SCES-01331 Rev 1 | **100 % matched**; `MAIN0` (English) is the reference executable |
 | Tombi! PAL, language set 1 (EN FR DE IT NL) | SCES-01330 Rev 1 | same game files byte for byte, only the boot menu differs: covered by the same sources and reports |
-| Tomba! (USA) | SCUS-94236 | **100 % matched** (3681 / 3681 functions), see [docs/USA.md](docs/USA.md) |
-| Ore! Tomba (Japan) | SLPS-01144 | **100 % matched** (3528 / 3528 functions), see [docs/JP.md](docs/JP.md) |
+| Tomba! (USA) | SCUS-94236 | **100 % matched** (3681 / 3681 functions), native port (`tombi-pc-usa`), see [docs/USA.md](docs/USA.md) |
+| Ore! Tomba (Japan) | SLPS-01144 | **100 % matched** (3528 / 3528 functions), native port (`tombi-pc-jp`), see [docs/JP.md](docs/JP.md) |
 | Ore! Tomba demo (Japan, taikenban) | SLPM-80165 | split + shared C, 55.1 % of code (objdiff; figures in "Japanese demo progress"), `tools/demo_sweep.py` installs what PAL / JP C matches as is, see [docs/JPDEMO.md](docs/JPDEMO.md) |
 | Ore! Tomba beta 1998-02-03 (Japan) | SLPS-01144 (prototype) | split + shared C, 92.3 % of code, see [docs/BETA_980203.md](docs/BETA_980203.md) |
 | Tomba! PrePre 8 (Japan demo) | PCPX-96084 | split + symbol pairing, 32.3 % of code, see [docs/PREPRE8.md](docs/PREPRE8.md) |

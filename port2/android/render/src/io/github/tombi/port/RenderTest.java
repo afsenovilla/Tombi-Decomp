@@ -113,7 +113,7 @@ public class RenderTest {
         prefs.edit().putString("game", "sces01331").commit();
         a.view.setScreen(LauncherActivity.LauncherView.MAIN);
         draw(a);
-        android.graphics.RectF r = a.view.items.get(1).r;
+        android.graphics.RectF r = a.view.items.get(a.view.railCount() + 1).r;   // the USA card (after the rail's icons)
         float sc = a.view.s;
         for (int t = 0; t < 2; t++) {
             float x = a.view.ox + r.centerX() * sc, y = a.view.oy + r.centerY() * sc;
@@ -138,7 +138,7 @@ public class RenderTest {
     public void addFlow() throws Exception {
         Application app = RuntimeEnvironment.getApplication();
         SharedPreferences prefs = app.getSharedPreferences("launcher", 0);
-        prefs.edit().putInt("uilang", Integer.parseInt(System.getProperty("uilang", "2"))).putInt("libstyle", 1).commit();
+        prefs.edit().putInt("uilang", Integer.parseInt(System.getProperty("uilang", "2"))).commit();
         ActivityController<LauncherActivity> c = Robolectric.buildActivity(LauncherActivity.class).setup();
         LauncherActivity a = c.get();
         System.out.println("native disc check: " + LauncherActivity.nativeOk);
@@ -169,12 +169,9 @@ public class RenderTest {
             shot(a, "add_" + f.getName().replaceAll("[^A-Za-z0-9]+", "_"));
         }
         if (picks.length > 0) {
-            for (int st = 0; st < 3; st++) {
-                prefs.edit().putInt("libstyle", st).commit();
-                a.view.setScreen(LauncherActivity.LauncherView.MAIN);
-                a.view.focus = indexOfPlay(a);
-                shot(a, "add_lib" + st + "_after");
-            }
+            a.view.setScreen(LauncherActivity.LauncherView.MAIN);
+            a.view.focus = indexOfPlay(a);
+            shot(a, "add_lib_after");
         }
         c.pause().stop().destroy();
     }
@@ -190,7 +187,7 @@ public class RenderTest {
         // 1. the empty library (first start)
         ActivityController<LauncherActivity> c0 = Robolectric.buildActivity(LauncherActivity.class).setup();
         LauncherActivity a0 = c0.get();
-        for (int st = 0; st < 3; st++) { prefs.edit().putInt("libstyle", st).commit(); shot(a0, "lib" + st + "_empty"); }
+        shot(a0, "lib_empty");
         c0.pause().stop().destroy();
 
         // 2. a library of three discs: PAL (ready), USA (ready), Japan (recognised, not supported)
@@ -215,49 +212,41 @@ public class RenderTest {
         // each card's logo.png as the launcher cached it (to compare with tools/game_library.py --art)
         for (Library.Game g : a.lib.games())
             if (Library.logo(g) != null) copy(g.logoFile(), new File(System.getProperty("out"), "logo_" + g.id + ".png"));
-        for (int st = 0; st < 3; st++) {
-            prefs.edit().putInt("libstyle", st).putString("game", "sces01331").commit();
-            a.view.setScreen(LauncherActivity.LauncherView.MAIN);
-            a.view.focus = indexOfPlay(a);
-            shot(a, "lib" + st + "_pal");
-            prefs.edit().putString("game", "scus94236").commit();
-            a.view.focus = 1;                 // the USA card focused (and selected)
-            shot(a, "lib" + st + "_usa_focus");
-            prefs.edit().putString("game", "slps01144").commit();
-            a.view.focus = indexOfPlay(a);
-            shot(a, "lib" + st + "_jp");
-        }
+        prefs.edit().putString("game", "sces01331").commit();
+        a.view.page = LauncherActivity.LauncherView.PG_PLAY;
+        a.view.setScreen(LauncherActivity.LauncherView.MAIN);
+        a.view.focus = indexOfPlay(a);
+        shot(a, "lib_pal");
+        prefs.edit().putString("game", "scus94236").commit();
+        a.view.focus = a.view.railCount() + 1;   // the USA card focused (and selected)
+        shot(a, "lib_usa_focus");
+        prefs.edit().putString("game", "slps01144").commit();
+        a.view.focus = indexOfPlay(a);
+        shot(a, "lib_jp");
         // four discs (PAL SCES-01331 and SCES-01330, USA, Japan): their languages as flags beside the serial
         game(app, "sces01330", pal, "pal");
         prefs.edit().putString("games", "sces01331,sces01330,scus94236,slps01144").putString("g.sces01330.ver", "pal")
             .putString("g.sces01330.serial", "SCES-01330").putString("g.sces01330.name", "Tombi! (Europe) (En,Fr,De,It,Nl).bin").commit();
-        for (int st = 0; st < 2; st++) {
-            prefs.edit().putInt("libstyle", st).putString("game", "sces01331").commit();
-            a.view.setScreen(LauncherActivity.LauncherView.MAIN);
-            a.view.focus = indexOfPlay(a);
-            shot(a, "lib" + st + "_four");
-        }
-        prefs.edit().putString("games", "sces01331,scus94236,slps01144").commit();
-        // the options of the USA game (no languages / translations / panel) and of the PAL one
-        prefs.edit().putInt("libstyle", 0).putString("game", "scus94236").commit();
-        a.view.setScreen(LauncherActivity.LauncherView.OPTIONS); a.view.focus = 0;
-        shot(a, "opt_usa");
-        a.view.cat = LauncherActivity.LauncherView.CAT_GAME; a.view.setScreen(LauncherActivity.LauncherView.OPTCAT); a.view.focus = 0;
-        shot(a, "opt_usa_game");
-        a.view.cat = LauncherActivity.LauncherView.CAT_IMAGE; a.view.setScreen(LauncherActivity.LauncherView.OPTCAT); a.view.focus = 0;
-        shot(a, "opt_usa_gfx");
         prefs.edit().putString("game", "sces01331").commit();
-        a.view.setScreen(LauncherActivity.LauncherView.OPTIONS); a.view.focus = 0;
-        shot(a, "opt_pal");
-        a.view.cat = LauncherActivity.LauncherView.CAT_GAME; a.view.setScreen(LauncherActivity.LauncherView.OPTCAT); a.view.focus = 0;
-        shot(a, "opt_pal_game");
-        int[] cats = {LauncherActivity.LauncherView.CAT_CUT, LauncherActivity.LauncherView.CAT_IMAGE, LauncherActivity.LauncherView.CAT_PAD,
-                      LauncherActivity.LauncherView.CAT_DISC, LauncherActivity.LauncherView.CAT_LAUNCHDBG};
-        String[] catNames = {"cut", "image", "pad", "disc", "launchdbg"};
-        for (int ci = 0; ci < cats.length; ci++) {   // every category page of the PAL game
-            a.view.cat = cats[ci]; a.view.setScreen(LauncherActivity.LauncherView.OPTCAT); a.view.focus = 0;
-            shot(a, "opt_pal_" + catNames[ci]);
+        a.view.setScreen(LauncherActivity.LauncherView.MAIN);
+        a.view.focus = indexOfPlay(a);
+        shot(a, "lib_four");
+        prefs.edit().putString("games", "sces01331,scus94236,slps01144").commit();
+        // the pages of the USA game (no languages / translations / panel / extras) and of the PAL one
+        prefs.edit().putString("game", "scus94236").commit();
+        int[] pgs = {LauncherActivity.LauncherView.PG_IMAGE, LauncherActivity.LauncherView.PG_PAD, LauncherActivity.LauncherView.PG_EXTRAS,
+                     LauncherActivity.LauncherView.PG_DISC, LauncherActivity.LauncherView.PG_APP};
+        String[] pgNames = {"image", "pad", "extras", "disc", "app"};
+        a.view.setScreen(LauncherActivity.LauncherView.MAIN); a.view.openPage(LauncherActivity.LauncherView.PG_IMAGE);
+        shot(a, "page_usa_image");
+        a.view.openPage(LauncherActivity.LauncherView.PG_PAD);
+        shot(a, "page_usa_pad");
+        prefs.edit().putString("game", "sces01331").commit();
+        for (int pi = 0; pi < pgs.length; pi++) {   // every page of the PAL game
+            a.view.setScreen(LauncherActivity.LauncherView.MAIN); a.view.openPage(pgs[pi]);
+            shot(a, "page_pal_" + pgNames[pi]);
         }
+        a.view.openPage(LauncherActivity.LauncherView.PG_PLAY);
         // the game screen (Disc) of the PAL game: the long status of a real extraction (the device report: it overlapped
         // the help paragraph)
         prefs.edit().putString("game", "sces01331").putString("g.sces01331.info",
@@ -277,7 +266,7 @@ public class RenderTest {
         // the dialog when Play is pressed on the Japanese game
         a.view.setScreen(LauncherActivity.LauncherView.MAIN);
         a.play();
-        shot(a, "lib0_jp_play");
+        shot(a, "lib_jp_play");
         c.pause().stop().destroy();
     }
 }

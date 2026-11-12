@@ -42,6 +42,7 @@
     <string name="opt_showfps">Vis FPS</string>
     <string name="opt_inflives">Uendelige liv</string>
     <string name="opt_infhealth">Uendelig energi</string>
+    <string name="opt_nosaveheal">At gemme genopfylder ikke energien</string>
     <string name="aspect_auto">Auto</string>
     <string name="chip_cut_on">Fjernet indhold: til</string>
     <string name="chip_cut_off">Fjernet indhold: fra</string>
@@ -178,4 +179,12 @@
     <string name="disc_zip_bad">“%1$s” kan ikke læses (beskadiget arkiv eller en komprimeringsmetode, appen ikke kender: %2$s). Pak det ud og vælg diskaftrykket.</string>
     <string-array name="lib_styles"><item>Karrusel</item><item>Liste</item><item>Forside</item></string-array>
     <string-array name="lib_regions"><item>Europa</item><item>USA</item><item>Japan</item></string-array>
+    <!-- the launcher's rail (LauncherView.drawRail): one page each -->
+    <string name="rail_play">Spil</string>
+    <string name="rail_image">Billede</string>
+    <string name="rail_pad">Styring</string>
+    <string name="rail_extras">Ekstra</string>
+    <string name="rail_disc">Disk</string>
+    <string name="rail_app">App</string>
+    <string name="page_extras">Ekstra</string>
 </resources>

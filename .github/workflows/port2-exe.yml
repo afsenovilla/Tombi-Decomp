@@ -6,8 +6,9 @@ name: Native port (Windows exe)
 # data image from the player's own game files like report.yml (GAME_FILES_URL secret, the whole disc image), so NO
 # game data ends up in the artifact: only our code, SDL2.dll (zlib licence, THIRD_PARTY_NOTICES.md) and the launcher
 # (the image's MAIN0/X000 bytes are compiled into tombi-pc.exe: it is built from the player's own copy, and the exe
-# published here is the one the repository owner built from theirs).  With the GAME_FILES_URL_USA secret the same jobs
-# also build the USA game (tombi-pc-usa[.exe], PORT_VERSION=usa after tools/build_full.py --version usa) and the
+# published here is the one the repository owner built from theirs).  With the GAME_FILES_URL_USA / GAME_FILES_URL_JP
+# secrets the same jobs also build the USA / JP games (tombi-pc-usa[.exe] / tombi-pc-jp[.exe], PORT_VERSION=usa / jp
+# after tools/build_full.py --version usa / jp) and the
 # launcher bundles both (its game library runs the binary of the disc's version); without it they build PAL only.
 on:
   push:
@@ -78,18 +79,22 @@ jobs:
       game: ${{ steps.key.outputs.game }}
       full: ${{ steps.key.outputs.full }}
       fullusa: ${{ steps.key.outputs.fullusa }}
+      fulljp: ${{ steps.key.outputs.fulljp }}
     steps:
       - uses: actions/checkout@v4
       - name: Cache keys
         id: key
         env:
           HAVE_USA: ${{ secrets.GAME_FILES_URL_USA != '' }}   # (only whether it is set: the built-game cache holds the USA binary or not)
+          HAVE_JP: ${{ secrets.GAME_FILES_URL_JP != '' }}     # (the same for the JP binary)
         run: |
-          # full: inputs of tools/build_full.py; fullusa: the same for --version usa (build/scus94236/full); game: those
-          # plus the port generator/runtime and the toolchain setup, and whether the USA disc secret is there
+          # full: inputs of tools/build_full.py; fullusa / fulljp: the same for --version usa / jp (build/scus94236/full,
+          # build/slps01144/full); game: those plus the port generator/runtime and the toolchain setup, and whether the
+          # USA / JP disc secrets are there
           echo "full=v1-${{ hashFiles('src/**', 'include/**', 'asm/**', 'config/**', 'tools/build_full.py', 'tools/ncheck.py', 'tools/sysovl.py', 'tools/requirements.txt', 'tools/setup_native.sh') }}" >> "$GITHUB_OUTPUT"
           echo "fullusa=v1-${{ hashFiles('src/**', 'include/**', 'asm/**', 'config/**', 'tools/build_full.py', 'tools/ncheck.py', 'tools/sysovl.py', 'tools/units.py', 'tools/versions.py', 'tools/version_data.py', 'tools/requirements.txt', 'tools/setup_native.sh') }}" >> "$GITHUB_OUTPUT"
-          USA=pal; [ "$HAVE_USA" = true ] && USA=pal-usa
+          echo "fulljp=v1-${{ hashFiles('src/**', 'include/**', 'asm/**', 'config/**', 'tools/build_full.py', 'tools/ncheck.py', 'tools/sysovl.py', 'tools/units.py', 'tools/versions.py', 'tools/version_data.py', 'tools/requirements.txt', 'tools/setup_native.sh') }}" >> "$GITHUB_OUTPUT"
+          USA=pal; [ "$HAVE_USA" = true ] && USA=pal-usa; [ "$HAVE_JP" = true ] && USA=$USA-jp
           echo "game=v2-$USA-${{ env.SDL2_VERSION }}-${{ hashFiles('src/**', 'include/**', 'asm/**', 'config/**', 'tools/build_full.py', 'tools/ncheck.py', 'tools/sysovl.py', 'tools/areas.py', 'tools/units.py', 'tools/versions.py', 'tools/version_data.py', 'tools/requirements.txt', 'tools/setup_native.sh', 'port2/**', 'port/**', 'tools/extract_data.py', 'THIRD_PARTY_NOTICES.md') }}" >> "$GITHUB_OUTPUT"
 
   game-win:
@@ -330,6 +335,70 @@ jobs:
           ninja -C build/port2-scus94236-win -j "$(nproc)"
           head -12 build/port2-scus94236-win/gen/report.txt || true
           cp build/port2-scus94236-win/tombi2.exe build/win-bin/tombi-pc-usa.exe
+          ls -l build/win-bin
+
+      # JP (SLPS-01144, docs/JP.md "Native port"): a second game binary, tombi-pc-jp.exe, generated from the JP disc of
+      # the GAME_FILES_URL_JP secret (the same rule as PAL: built from the owner's own copy, no game data in the
+      # artifact beyond what the exe is compiled from). Without the secret the PAL game is built alone.
+      - uses: ./.github/actions/disc-cache     # the JP download stays in the Actions cache
+        if: steps.bin.outputs.cache-hit != 'true' && steps.fetch.outputs.ok == 'true'
+        with:
+          urls: ${{ secrets.GAME_FILES_URL_JP }}
+          scope: jp
+
+      - name: Fetch the JP disc
+        id: jp
+        if: steps.bin.outputs.cache-hit != 'true' && steps.fetch.outputs.ok == 'true'
+        env:
+          GAME_FILES_URL_JP: ${{ secrets.GAME_FILES_URL_JP }}
+        run: |
+          if [ -z "$GAME_FILES_URL_JP" ]; then
+            echo "::notice::GAME_FILES_URL_JP secret not set; the JP game is skipped."
+            echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          URL="$(printf '%s' "$GAME_FILES_URL_JP" | tr -d '\r\n"'"'"' ')"
+          bash tools/ci_download.sh "$URL" "$RUNNER_TEMP/jp.dl" 100000000
+          bash tools/disc_unpack.sh "$RUNNER_TEMP/jp.dl" game_jp/fs
+          rm -f "$RUNNER_TEMP/jp.dl" game_jp/fs.img
+          mkdir -p game_jp/SYSTEM; cp game_jp/fs/SLPS_011.44 game_jp/; cp game_jp/fs/SYSTEM/*.BIN game_jp/SYSTEM/   # the flat tree of tools/versions.py
+          echo "07d577698ad31ec1a69b9d7b80a7c3f90b650888  game_jp/SLPS_011.44" | sha1sum -c -
+          echo "ok=true" >> "$GITHUB_OUTPUT"
+
+      - name: Restore JP matching build
+        id: fulljp
+        if: steps.jp.outputs.ok == 'true'
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            build/slps01144/full
+            !build/slps01144/full/tmp
+          key: fulljp-${{ needs.plan.outputs.fulljp }}
+
+      - name: JP matching build (the generator's symbols, build/slps01144/full)
+        if: steps.jp.outputs.ok == 'true' && steps.fulljp.outputs.cache-hit != 'true'
+        run: python3 tools/build_full.py --version jp -j "$(nproc)"
+
+      - name: Touch restored JP matching build
+        if: steps.jp.outputs.ok == 'true' && steps.fulljp.outputs.cache-hit == 'true'
+        run: find build/slps01144/full -type f -exec touch {} +
+
+      - name: Save JP matching build
+        if: steps.jp.outputs.ok == 'true' && steps.fulljp.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            build/slps01144/full
+            !build/slps01144/full/tmp
+          key: fulljp-${{ needs.plan.outputs.fulljp }}
+
+      - name: Build tombi-pc-jp.exe (the JP game, PORT_VERSION=jp)
+        if: steps.jp.outputs.ok == 'true'
+        run: |
+          cmake -S port2 -B build/port2-slps01144-win -G Ninja -DPORT_VERSION=jp -DCMAKE_TOOLCHAIN_FILE="$PWD/port2/cmake/mingw-i686.cmake" \
+                -DPORT_SDL2_MINGW="$RUNNER_TEMP/sdl/SDL2-${SDL2_VERSION}/i686-w64-mingw32"
+          ninja -C build/port2-slps01144-win -j "$(nproc)"
+          head -12 build/port2-slps01144-win/gen/report.txt || true
+          cp build/port2-slps01144-win/tombi2.exe build/win-bin/tombi-pc-jp.exe
           ls -l build/win-bin
 
       - name: Save ccache
@@ -604,6 +673,70 @@ jobs:
           cp build/port2-scus94236/tombi2 build/linux-bin/tombi-pc-usa
           patchelf --set-rpath '$ORIGIN' build/linux-bin/tombi-pc-usa
           build/linux-bin/tombi-pc-usa --headless --test-null
+
+      # JP (SLPS-01144, docs/JP.md "Native port"): a second game binary, tombi-pc-jp, generated from the JP disc of
+      # the GAME_FILES_URL_JP secret (the same rule as PAL: built from the owner's own copy, no game data in the
+      # artifact beyond what the exe is compiled from). Without the secret the PAL game is built alone.
+      - uses: ./.github/actions/disc-cache     # the JP download stays in the Actions cache
+        if: steps.bin.outputs.cache-hit != 'true' && steps.fetch.outputs.ok == 'true'
+        with:
+          urls: ${{ secrets.GAME_FILES_URL_JP }}
+          scope: jp
+
+      - name: Fetch the JP disc
+        id: jp
+        if: steps.bin.outputs.cache-hit != 'true' && steps.fetch.outputs.ok == 'true'
+        env:
+          GAME_FILES_URL_JP: ${{ secrets.GAME_FILES_URL_JP }}
+        run: |
+          if [ -z "$GAME_FILES_URL_JP" ]; then
+            echo "::notice::GAME_FILES_URL_JP secret not set; the JP game is skipped."
+            echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          URL="$(printf '%s' "$GAME_FILES_URL_JP" | tr -d '\r\n"'"'"' ')"
+          bash tools/ci_download.sh "$URL" "$RUNNER_TEMP/jp.dl" 100000000
+          bash tools/disc_unpack.sh "$RUNNER_TEMP/jp.dl" game_jp/fs
+          rm -f "$RUNNER_TEMP/jp.dl" game_jp/fs.img
+          mkdir -p game_jp/SYSTEM; cp game_jp/fs/SLPS_011.44 game_jp/; cp game_jp/fs/SYSTEM/*.BIN game_jp/SYSTEM/   # the flat tree of tools/versions.py
+          echo "07d577698ad31ec1a69b9d7b80a7c3f90b650888  game_jp/SLPS_011.44" | sha1sum -c -
+          echo "ok=true" >> "$GITHUB_OUTPUT"
+
+      - name: Restore JP matching build
+        id: fulljp
+        if: steps.jp.outputs.ok == 'true'
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            build/slps01144/full
+            !build/slps01144/full/tmp
+          key: fulljp-${{ needs.plan.outputs.fulljp }}
+
+      - name: JP matching build (the generator's symbols, build/slps01144/full)
+        if: steps.jp.outputs.ok == 'true' && steps.fulljp.outputs.cache-hit != 'true'
+        run: python3 tools/build_full.py --version jp -j "$(nproc)"
+
+      - name: Touch restored JP matching build
+        if: steps.jp.outputs.ok == 'true' && steps.fulljp.outputs.cache-hit == 'true'
+        run: find build/slps01144/full -type f -exec touch {} +
+
+      - name: Save JP matching build
+        if: steps.jp.outputs.ok == 'true' && steps.fulljp.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            build/slps01144/full
+            !build/slps01144/full/tmp
+          key: fulljp-${{ needs.plan.outputs.fulljp }}
+
+      - name: Build tombi-pc-jp (the JP game, PORT_VERSION=jp)
+        if: steps.jp.outputs.ok == 'true'
+        run: |
+          cmake -S port2 -B build/port2-slps01144 -G Ninja -DPORT_VERSION=jp
+          ninja -C build/port2-slps01144 -j "$(nproc)"
+          head -12 build/port2-slps01144/gen/report.txt || true
+          cp build/port2-slps01144/tombi2 build/linux-bin/tombi-pc-jp
+          patchelf --set-rpath '$ORIGIN' build/linux-bin/tombi-pc-jp
+          build/linux-bin/tombi-pc-jp --headless --test-null
           ls -l build/linux-bin
 
       - name: Save ccache
@@ -656,6 +789,7 @@ jobs:
         run: |
           build/win-bin/tombi-pc.exe --headless --test-null
           if [ -f build/win-bin/tombi-pc-usa.exe ]; then build/win-bin/tombi-pc-usa.exe --headless --test-null; fi
+          if [ -f build/win-bin/tombi-pc-jp.exe ]; then build/win-bin/tombi-pc-jp.exe --headless --test-null; fi
           build/win-bin/tombi-pc.exe --headless --frames 200 --disc nonexistent.bin 2>&1 | head -5 || true
           # the data/ path: a manifest with MAIN0 and the PVD blob only (every other read is zeros, logged), and a
           # missing folder (must say so and exit, not crash)
@@ -690,10 +824,11 @@ jobs:
           QT_QPA_PLATFORM=offscreen python tools/test_port_launcher.py
           python tools/test_save_import.py
           echo "${GITHUB_SHA::7}" > build_id.txt
-          # the USA game (tombi-pc-usa[.exe]) next to the PAL one when the game job built it (GAME_FILES_URL_USA set)
+          # the USA / JP games (tombi-pc-usa[.exe], tombi-pc-jp[.exe]) next to the PAL one when the game job built them
+          # (GAME_FILES_URL_USA / GAME_FILES_URL_JP set)
           SEP=":"; if [ "$RUNNER_OS" = Windows ]; then SEP=";"; fi
-          USA=(); for f in build/win-bin/tombi-pc-usa.exe build/linux-bin/tombi-pc-usa; do
-            if [ -f "$f" ]; then USA=(--add-binary "$f$SEP."); fi; done
+          USA=(); for f in build/win-bin/tombi-pc-usa.exe build/linux-bin/tombi-pc-usa build/win-bin/tombi-pc-jp.exe build/linux-bin/tombi-pc-jp; do
+            if [ -f "$f" ]; then USA+=(--add-binary "$f$SEP."); fi; done
           pyinstaller --onefile --windowed --name tombi-port --distpath build/exe --workpath build/pyi --specpath . "${USA[@]}" \
             --hidden-import game_library --hidden-import disc_archive \
             --hidden-import i18n --hidden-import port_mods --hidden-import extract_data --hidden-import chd --hidden-import data_patch --hidden-import text_patch --hidden-import text_core --hidden-import text_strings --hidden-import wfm_py --hidden-import title_layout --hidden-import verb_order --hidden-import cdfiles --hidden-import prompt_glyphs --hidden-import gfx_es --hidden-import gfx_es.tryagain --hidden-import gfx_es.cargar_guardar --hidden-import gfx_es.cargando --hidden-import area000 --hidden-import dump_all_textures --hidden-import vram --hidden-import wpp --hidden-import PIL.ImageDraw --hidden-import PIL.ImageFilter --hidden-import PIL.ImageFont --hidden-import civ_rebuild --hidden-import civ_test_data --hidden-import topdown --hidden-import str --hidden-import audio --hidden-import load_lists --hidden-import menu_text --hidden-import memcard_text --hidden-import subscreen_text --hidden-import text_preview --hidden-import numpy --collect-all numpy --paths tools \
@@ -712,6 +847,7 @@ jobs:
           # which games the bundle runs (release.yml reads it for the notes)
           echo pal > dist/windows/versions.txt
           if [ -f build/win-bin/tombi-pc-usa.exe ]; then cp build/win-bin/tombi-pc-usa.exe build/out/; echo usa >> dist/windows/versions.txt; fi
+          if [ -f build/win-bin/tombi-pc-jp.exe ]; then cp build/win-bin/tombi-pc-jp.exe build/out/; echo jp >> dist/windows/versions.txt; fi
 
       - uses: actions/upload-artifact@v4
         with:
@@ -766,6 +902,7 @@ jobs:
           chmod +x build/linux-bin/tombi-pc
           build/linux-bin/tombi-pc --headless --test-null
           if [ -f build/linux-bin/tombi-pc-usa ]; then chmod +x build/linux-bin/tombi-pc-usa; build/linux-bin/tombi-pc-usa --headless --test-null; fi
+          if [ -f build/linux-bin/tombi-pc-jp ]; then chmod +x build/linux-bin/tombi-pc-jp; build/linux-bin/tombi-pc-jp --headless --test-null; fi
           # the launcher is Qt (PySide6-Essentials, as on Windows; its xcb platform plugin needs libxcb-cursor0 on the
           # player's system, README); the offscreen tests need EGL / xkbcommon
           sudo apt-get $APT_CACHE install -y libegl1 libxkbcommon0 libfontconfig1
@@ -778,10 +915,11 @@ jobs:
           QT_QPA_PLATFORM=offscreen python tools/test_port_launcher.py
           python tools/test_save_import.py
           echo "${GITHUB_SHA::7}" > build_id.txt
-          # the USA game (tombi-pc-usa[.exe]) next to the PAL one when the game job built it (GAME_FILES_URL_USA set)
+          # the USA / JP games (tombi-pc-usa[.exe], tombi-pc-jp[.exe]) next to the PAL one when the game job built them
+          # (GAME_FILES_URL_USA / GAME_FILES_URL_JP set)
           SEP=":"; if [ "$RUNNER_OS" = Windows ]; then SEP=";"; fi
-          USA=(); for f in build/win-bin/tombi-pc-usa.exe build/linux-bin/tombi-pc-usa; do
-            if [ -f "$f" ]; then USA=(--add-binary "$f$SEP."); fi; done
+          USA=(); for f in build/win-bin/tombi-pc-usa.exe build/linux-bin/tombi-pc-usa build/win-bin/tombi-pc-jp.exe build/linux-bin/tombi-pc-jp; do
+            if [ -f "$f" ]; then USA+=(--add-binary "$f$SEP."); fi; done
           pyinstaller --onefile --windowed --name tombi-port --distpath build/exe --workpath build/pyi --specpath . "${USA[@]}" \
             --hidden-import game_library --hidden-import disc_archive \
             --hidden-import i18n --hidden-import port_mods --hidden-import extract_data --hidden-import chd --hidden-import data_patch --hidden-import text_patch --hidden-import text_core --hidden-import text_strings --hidden-import wfm_py --hidden-import title_layout --hidden-import verb_order --hidden-import cdfiles --hidden-import prompt_glyphs --hidden-import gfx_es --hidden-import gfx_es.tryagain --hidden-import gfx_es.cargar_guardar --hidden-import gfx_es.cargando --hidden-import area000 --hidden-import dump_all_textures --hidden-import vram --hidden-import wpp --hidden-import PIL.ImageDraw --hidden-import PIL.ImageFilter --hidden-import PIL.ImageFont --hidden-import civ_rebuild --hidden-import civ_test_data --hidden-import topdown --hidden-import str --hidden-import audio --hidden-import load_lists --hidden-import menu_text --hidden-import memcard_text --hidden-import subscreen_text --hidden-import text_preview --hidden-import numpy --collect-all numpy --paths tools \
@@ -798,6 +936,7 @@ jobs:
           chmod +x dist/linux/tombi-port
           echo pal > dist/linux/versions.txt          # which games the bundle runs (release.yml reads it for the notes)
           if [ -f build/linux-bin/tombi-pc-usa ]; then echo usa >> dist/linux/versions.txt; fi
+          if [ -f build/linux-bin/tombi-pc-jp ]; then echo jp >> dist/linux/versions.txt; fi
 
       - uses: actions/upload-artifact@v4
         with:

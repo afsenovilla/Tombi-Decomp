@@ -14,9 +14,14 @@ typedef struct N {
     char pad20[0x1c];
     int w3c;
 } N;
+#if defined(VERSION_SLPS_01144)  /* JP: other contents; the retail table at its JP address */
+extern short D_80113F44[];
+#define DAT_80114c08 D_80113F44
+#else
 static short DAT_80114c08[12] = {
     -6, -0x10, -0xc, -8, 0, 0, -0x10, 8, 0x10, 8, 0x93,
 };
+#endif
 extern N *FUN_80018448(void);
 
 void spawnBreakPieces(N *o, short x, short y, short z)

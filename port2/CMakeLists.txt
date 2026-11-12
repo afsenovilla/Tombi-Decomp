@@ -96,8 +96,9 @@ endif()
 
 # the game version (docs/PORT_VERSIONS_PLAN.md U1, port/tools/portver.py): empty = PAL SCES-01331 (the default build),
 # usa = SCUS-94236 (needs python3 tools/build_full.py --version usa first, and the USA disc's files in game_usa/fs at
-# build time); one binary per version: cmake -S port2 -B build/port2-scus94236 -DPORT_VERSION=usa
-set(PORT_VERSION "" CACHE STRING "game version the port is generated for: empty (PAL SCES-01331) or usa (SCUS-94236)")
+# build time), jp = SLPS-01144 (build_full.py --version jp, files in game_jp); one binary per version:
+# cmake -S port2 -B build/port2-scus94236 -DPORT_VERSION=usa
+set(PORT_VERSION "" CACHE STRING "game version the port is generated for: empty (PAL SCES-01331), usa (SCUS-94236) or jp (SLPS-01144)")
 if(PORT_VERSION)
   if(PORT2_GEN_ENV)
     list(APPEND PORT2_GEN_ENV PORT_VERSION=${PORT_VERSION})
@@ -108,8 +109,11 @@ if(PORT_VERSION)
   if(_pv STREQUAL "usa" OR _pv STREQUAL "scus94236")
     set(PORT2_FULL_DIR ${ROOT}/build/scus94236/full)
     set(PORT2_FULL_EXE scus94236)
+  elseif(_pv STREQUAL "jp" OR _pv STREQUAL "slps01144")
+    set(PORT2_FULL_DIR ${ROOT}/build/slps01144/full)
+    set(PORT2_FULL_EXE slps01144)
   else()
-    message(FATAL_ERROR "PORT_VERSION=${PORT_VERSION}: not supported (empty for PAL, or usa)")
+    message(FATAL_ERROR "PORT_VERSION=${PORT_VERSION}: not supported (empty for PAL, usa or jp)")
   endif()
 else()
   set(PORT2_FULL_DIR ${ROOT}/build/full)

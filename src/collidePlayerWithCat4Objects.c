@@ -103,6 +103,7 @@ void func_80051F44(TObj *o)
         case 0xf: func_8012538C(o, e); break;
         case 0x17: playerContactCat4Type17(o, e); break;
         case 0x18: playerContactCat4Type18(o, e); break;
+        case 0x12:
         case 0x1a:
             e->b69 = 0;
             if (hit(o, e)) {

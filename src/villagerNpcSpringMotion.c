@@ -116,6 +116,10 @@ void villagerNpcSpringMotion(TObj *o)
 typedef struct { short spd[2]; short pos[2]; short cnt[2]; } B;
 typedef struct { int n; char *b8; int tab[4]; short val[2]; } E;
 extern int **VILLAGER_NPC_SPRING_PARAMS[];
+#if defined(VERSION_SLPS_01144)  /* JP: other contents; the retail table at its JP address */
+extern char D_80113F7C[];
+#define DAT_80114c7c D_80113F7C
+#else
 static char DAT_80114c7c[148] = {
     3, 1, -0x80, 0, 0, 0, 3, 1, -0x80, 1, 0, 0, 3, 1, -0x80, 2,
     0, 0, 3, 1, -0x80, 3, 0, 0, 3, 1, -0x80, 0, 0, 0, 3, 1,
@@ -128,6 +132,7 @@ static char DAT_80114c7c[148] = {
     -0x80, 1, 0, 0, 3, 1, -0x80, 2, 0, 0, 3, 1, -0x80, 3, 0, 0,
     1, -1, 0x41, 0x3c,
 };
+#endif
 extern char MODEL_PRIM_BUFFERS[];
 extern void copyModelPrimGroups(int, char *);
 extern void FUN_80024ea0(char *, int, int);

@@ -24,7 +24,11 @@ void weapon8to9ObjTick(TObj *o)
     case 2:
         WEAPON_STATE->b = 0;
         *PLAYER_EXT = 0;
+#if defined(VERSION_SLPS_01144)
+        { extern unsigned char D_800A7C4B; if ((signed char)--D_800A7C4B < 0) D_800A7C4B = 0; }   /* JP: PLX.b611b at PLX + 0x13 */
+#else
         if ((signed char)--PLX.b611b < 0) PLX.b611b = 0;
+#endif
         o->b04 = 3;
         break;
     case 3:
