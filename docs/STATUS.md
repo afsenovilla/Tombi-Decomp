@@ -46,7 +46,8 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    section's pier at x 352..384 uses both.  Front floors in front of the stand carry 0x2000, every back-lane floor
    0x1000.  Up+Cross there is turned into the lane jump (step 0x12) with depth +90 (port_funga_lane_flip, fixes.txt on
    src/playerStepIdle.c / src/playerStepLaneJump.c: velY -0x7A0 and 1 unit of extra lift a tick while rising, the
-   gravity limit capping the plain arc below the roof) so it lands straight on the stand's top.  Drum boxes take |dz| < 45: solid in the back lane only.  Fungas moved to drums 1353/1741/1788 (the middle
+   gravity limit capping the plain arc below the roof) so it lands straight on the stand's top, in step 0x11's
+   into-the-background pose (anim 0x15, his back) instead of 0x19.  Drum boxes take |dz| < 45: solid in the back lane only.  Fungas moved to drums 1353/1741/1788 (the middle
    drums and the stand are the back lane's path).  Verified headless: Up+Cross at x 1563 lands on the stand top, walk off onto drum 1643 / 1501 and bounce back up, Down+Cross back to the front; normal game unchanged.
    Next: the Funga Chief and Fungas.  Their sprites are SPR table 0x37 (SPR_DATA[7], frames 31, 47-58 chief, 59+ Fungas,
    docs/CONTENIDO_RECORTADO.md "Jungla"), loaded only by AREA10 lists 1 and 5 (sections 0/4: the 0x37 piece of the

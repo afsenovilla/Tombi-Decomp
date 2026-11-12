@@ -486,6 +486,8 @@ src/playerStepLaneJump.c | *(unsigned short *)0x1F8001C8 & 1 | (*(unsigned short
 src/playerStepLaneJump.c | void playerStepLaneJump(PO *o) | extern int port_funga_lane_flip; void playerStepLaneJump(PO *o)
 src/playerStepLaneJump.c | o->t.velY = -0x570; | o->t.velY = port_funga_lane_flip ? -0x7A0 : -0x570;
 src/playerStepLaneJump.c | ObjAddVelY7E(o); | ObjAddVelY7E(o); if (port_funga_lane_flip && o->t.state == 1) o->t.y.p.whole -= 1;
+# (that jump shows the into-the-background pose of step 0x11, anim 0x15: Tombi's back, not the front-facing 0x19)
+src/playerStepLaneJump.c | PlayerSetAnimIfChanged(o, 0x19); | PlayerSetAnimIfChanged(o, port_funga_lane_flip ? 0x15 : 0x19);
 src/playerStepLaneJump.c |             o->t.step = 0xe; |             o->t.step = 0xe; port_funga_lane_flip = 0;
 src/playerStepLaneJump.c |             o->t.step = 0; |             o->t.step = 0; port_funga_lane_flip = 0;
 src/a00Variant0EventScene.c | GAME_AREA00_EVENT_CONTROL |= 0x28; | { extern int port_cut_content, port_cc_boatman; if ((port_cut_content & 1) && port_cc_boatman < 3) { PLAYER_MESSAGE_BOX->b04 = 3; PLAYER_MESSAGE_BOX = showMessageBox(7, 3 + port_cc_boatman++, 0x120, 0x6c); break; } } GAME_AREA00_EVENT_CONTROL |= 0x28;
