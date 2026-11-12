@@ -172,15 +172,25 @@ static int choose_lang(int code) {
         }
         if (k & KEY_A) { ok = 1; break; }
         if (redraw) {
-            fprintf(stdout, "\x1b[2J\x1b[1;1HTombi! port - options\n\n");
-            fprintf(stdout, "%c Language  < %s >\n\n", row == 0 ? '>' : ' ', name[lang]);
-            fprintf(stdout, "%c Movies    < %s >\n\n", row == 1 ? '>' : ' ', opt_movies ? "play" : "skip");
-            fprintf(stdout, "%c Speed     < %s >\n\n", row == 2 ? '>' : ' ', opt_hz == 60 ? "60 Hz" : "50 Hz (the PAL disc's)");
-            fprintf(stdout, "%c Picture   < %s >\n", row == 3 ? '>' : ' ', opt_wide ? "wide, the whole screen (experimental)" : "4:3");
-            fprintf(stdout, "\n\nUp / Down: option    Left / Right: change\n");
-            fprintf(stdout, "\n(hold L while the game starts to come back here)\n");
-            if (codes[lang] == 9) fprintf(stdout, "\nLa traducci\xA2n mejorada se prepara la primera vez:\nunos minutos, con una barra de progreso.\n");
-            fprintf(stdout, "\x1b[28;1HA: start the game   START: exit");
+            /* (the top screen's console is 50 columns: a value is cut to what its row has left, 34 with the marks)
+               the title yellow, the row chosen bright with its value yellow, the others grey, the keys cyan */
+            const char *lab[ROWS] = { "Language", "Movies", "Speed", "Picture" };
+            const char *val[ROWS] = { name[lang], opt_movies ? "play" : "skip (straight to the title)", opt_hz == 60 ? "60 Hz" : "50 Hz (the PAL disc's)",
+                                      opt_wide ? "wide (experimental)" : "4:3" };
+            fprintf(stdout, "\x1b[2J\x1b[0m\x1b[2;3H\x1b[33;1mTombi! port\x1b[0m  options");
+            for (int i = 0; i < ROWS; i++) {
+                fprintf(stdout, "\x1b[%d;3H", 5 + 2 * i);
+                if (i == row) fprintf(stdout, "\x1b[37;1m> %-9s \x1b[36;1m< \x1b[33;1m%.34s\x1b[36;1m >\x1b[0m", lab[i], val[i]);
+                else fprintf(stdout, "\x1b[0m  %-9s   %.34s", lab[i], val[i]);
+            }
+            fprintf(stdout, "\x1b[15;3H\x1b[36mUp/Down\x1b[0m option    \x1b[36mLeft/Right\x1b[0m change");
+            fprintf(stdout, "\x1b[17;3HHold \x1b[36mL\x1b[0m while the game starts to see");
+            fprintf(stdout, "\x1b[18;3Hthis screen again.");
+            if (codes[lang] == 9) {
+                fprintf(stdout, "\x1b[21;3H\x1b[32mLa traducci\xA2n mejorada se prepara la");
+                fprintf(stdout, "\x1b[22;3Hprimera vez: unos minutos, con una barra.\x1b[0m");
+            }
+            fprintf(stdout, "\x1b[28;3H\x1b[36;1mA\x1b[0m start the game    \x1b[36;1mSTART\x1b[0m exit");
             fflush(stdout);
             redraw = 0;
         }
