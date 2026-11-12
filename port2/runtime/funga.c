@@ -117,6 +117,11 @@ static void spawn_npcs(void)
     s16 pos[3] = {1580, -160, 180};
     memcpy(rec + 6, pos, 6);
     spawnObjectFromRecord(rec, -1);
+    static const s16 FX[3] = {1360, 1500, 1660};
+    for (int i = 0; i < 3; i++) {                  /* the Fungas: marker 0x5B, their x in the record */
+        rec[3] = 0x5B; rec[4] = i; pos[0] = FX[i]; pos[1] = -150; memcpy(rec + 6, pos, 6);
+        spawnObjectFromRecord(rec, -1);
+    }
 }
 
 /* the chief: walks between x 1420 and 1720 (frames 47 48 49 48, 8 ticks each, 1 unit a tick), turns, and every second
@@ -132,8 +137,15 @@ static void show(u8 *o, int k, u16 frame)
         AnimLoadDuration(o);
     }
 }
+static const u16 FDANCE[] = {62, 64, 66, 64};
 void port_funga_npc_init(u8 *o)
 {
+    if ((port_cut_content & 64) && o[0x0C] == 0x5B && chief_state > 0) {   /* a Funga: page 0 as the parts say */
+        *(s16 *)(o + 0x1E) = 0; o[0x0D] = 0; o[0x0F] = 0;
+        *(u32 *)(o + 0x3C) = (u32)(unsigned long)chief_tbl;
+        *(s32 *)(o + 0x90) = o[3] * 13; *(s32 *)(o + 0x94) = (o[3] & 1) ? -1 : 1; *(s32 *)(o + 0x98) = *(s16 *)(o + 0x12);
+        return;
+    }
     if (!(port_cut_content & 64) || o[0x0C] != 0x5A || chief_state <= 0) return;
     *(s16 *)(o + 0x1E) = 1;                 /* page offset: the parts say page 2, the chief is on page 3 (VRAM 192,0) */
     o[0x0D] = 0;                            /* opaque */
@@ -146,8 +158,21 @@ void port_funga_npc_init(u8 *o)
     o[0x2E] |= 1;
     show(o, 0, WALK[0]);
 }
+static u8 fscript[4][8];
 int port_funga_npc_step(u8 *o)
 {
+    if ((port_cut_content & 64) && o[0x0C] == 0x5B && chief_state > 0) {   /* a Funga: dances on the spot, stepping 40 units to and fro */
+        s32 *t = (s32 *)(o + 0x90), *dir = (s32 *)(o + 0x94), home = *(s32 *)(o + 0x98);
+        s16 *x = (s16 *)(o + 0x12);
+        (*t)++;
+        if (*t % 2 == 0) *x += *dir;
+        if (*x > home + 40 || *x < home - 40) *dir = -*dir;
+        if (*dir > 0) o[0x2E] |= 1; else o[0x2E] &= ~1;
+        int k = *t / 10 % 4; u16 c = 0x8000 | 60;
+        memset(fscript[k], 0, 8); memcpy(fscript[k], &FDANCE[k], 2); memcpy(fscript[k] + 6, &c, 2);
+        if (*(u32 *)(o + 0x24) != (u32)(unsigned long)fscript[k]) { *(u32 *)(o + 0x24) = (u32)(unsigned long)fscript[k]; AnimLoadDuration(o); }
+        return 1;
+    }
     if (!(port_cut_content & 64) || o[0x0C] != 0x5A || chief_state <= 0) return 0;
     s32 *t = (s32 *)(o + 0x90), *dir = (s32 *)(o + 0x94), *talk = (s32 *)(o + 0x98), *laps = (s32 *)(o + 0x9C);
     s16 *x = (s16 *)(o + 0x12);
