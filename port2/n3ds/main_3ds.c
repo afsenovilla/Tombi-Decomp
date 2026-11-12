@@ -72,6 +72,18 @@ static void list_dir(const char *path) {
     closedir(d);
     qsort(ent, (size_t)nent, sizeof ent[0], ent_cmp);
 }
+/* a chooser's last act: its text off both screens (the game takes seconds to draw its first frame, and what the
+   screens' memory held stayed up meanwhile) */
+static void screens_black(void) {
+    fprintf(stdout, "\x1b[2J"); fflush(stdout);
+    for (int k = 0; k < 2; k++) {
+        u16 w, h; u8 *fb = gfxGetFramebuffer(GFX_TOP, GFX_LEFT, &w, &h);
+        if (fb) memset(fb, 0, (size_t)w * h * 3);   /* (gfxInitDefault: 3 bytes a pixel) */
+        fb = gfxGetFramebuffer(GFX_BOTTOM, GFX_LEFT, &w, &h);
+        if (fb) memset(fb, 0, (size_t)w * h * 3);
+        gfxFlushBuffers(); gfxSwapBuffers(); gspWaitForVBlank();
+    }
+}
 static int choose_image(char *out, size_t cap) {
     static char cur[400] = "sdmc:/";
     int sel = 0, top = 0, redraw = 1, ok = 0;
@@ -109,6 +121,7 @@ static int choose_image(char *out, size_t cap) {
         }
         gfxFlushBuffers(); gfxSwapBuffers(); gspWaitForVBlank();
     }
+    screens_black();
     gfxExit();
     return ok;
 }
@@ -138,6 +151,7 @@ static int choose_lang(int sel) {
         }
         gfxFlushBuffers(); gfxSwapBuffers(); gspWaitForVBlank();
     }
+    screens_black();
     gfxExit();
     return ok ? sel : -1;
 }

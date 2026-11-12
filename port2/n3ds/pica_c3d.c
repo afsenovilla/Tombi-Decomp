@@ -594,8 +594,18 @@ static int c3d_start(void) {
     port_printf("[3ds] pica: citro3d renderer, top screen format %d\n", scr_fmt);
     c3d_up = 1;
     port_n3ds_main_thread();
+    /* both screens black at once: until the game's first frame they showed what the memory held, the text of the
+       language chooser read as another pixel format, for the seconds the disc and the game take to start */
+    for (int k = 0; k < 2; k++) {
+        C3D_FrameBegin(0);
+        C3D_RenderTargetClear(top_rt, C3D_CLEAR_ALL, 0x000000FF, 0); C3D_FrameDrawOn(top_rt);
+        if (bot_rt) { C3D_RenderTargetClear(bot_rt, C3D_CLEAR_ALL, 0x000000FF, 0); C3D_FrameDrawOn(bot_rt); }
+        C3D_FrameEnd(0);
+    }
+    C3D_FrameBegin(0); C3D_FrameEnd(0);   /* (waits for them) */
     self_test();
-    gpu_test_picture();
+    /* (the test picture is 1.5 MB written to the SD card, seconds of every start: only when gputest.txt asks for it) */
+    { FILE *g = fopen("sdmc:/3ds/tombi/gputest.txt", "r"); if (g) { fclose(g); gpu_test_picture(); } }
     return 0;
 }
 /* the way out (runtime/sdl.c): citro3d closed */
