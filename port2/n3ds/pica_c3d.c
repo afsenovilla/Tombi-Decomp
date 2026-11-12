@@ -61,9 +61,16 @@ static C3D_Tex wide_tex; static C3D_RenderTarget *wide_rt;
 static C3D_Tex eye_tex; static C3D_RenderTarget *eye_rt, *top_r;
 static int cur_wide;                      /* the target a draw goes to now: 0 VRAM's, 1 the wide plane */
 static int lin_fresh;                     /* lin[] holds the target as it is (c3d_read): nothing drawn since */
-static int pres_dirty = 1;   /* something was drawn, written or filled since the last present (begin() was called) */
+/* The display area may have changed since the last present: something was drawn, written or filled into it (or into
+   the right eye's copy, the wide plane), or the panel's picture changed.  (A table the game skips still clears the
+   buffer it would have drawn, the one not shown: that is no change.) */
+static int pres_dirty = 1, lp_x = -1, lp_y, lp_w, lp_h;
+static void touch(int t, int x, int y, int w, int h) {   /* t: the target (0 VRAM's, 1 the wide plane, 2 the right eye's) */
+    if (t == 1 || lp_x < 0) { pres_dirty = 1; return; }
+    const int X = lp_x - (t == 2 ? 64 : 0);   /* (EYE_DX) */
+    if (x < X + lp_w && x + w > X && y < lp_y + lp_h && y + h > lp_y) pres_dirty = 1;
+}
 static void begin(void) {   /* (C3D_FrameBegin waits for the frame submitted before: its memory is free then) */
-    pres_dirty = 1;
     if (in_frame) return;
     u64 tb = svcGetSystemTick();
     int began = C3D_FrameBegin(0);
@@ -251,6 +258,7 @@ static void c3d_tris(const PState *s, const PV *v, int n) {
        sprites side by side), is the shader's; an untextured vertex's alpha is 0 (bit 15 clear on a read-back) */
     if (v != vb + vb_n) memmove(vb + vb_n, v, (size_t)n * sizeof *v);
     on_target(s->wide);
+    touch(s->wide, s->x1, s->y1, s->x2 - s->x1 + 1, s->y2 - s->y1 + 1);
     C3D_DrawArrays(GPU_TRIANGLES, vb_n, n);
     {   extern int pica_stereo_frame;
         if (pica_stereo_frame && eye_rt && !s->wide && s->x2 - s->x1 >= 255 && s->y2 - s->y1 >= 199) {
@@ -316,6 +324,7 @@ static int stage_tex(C3D_Tex *t, int w, int h) {
     return 0;
 }
 static void c3d_write(int x, int y, int w, int h, const unsigned *src, int stride) {
+    touch(0, x, y, w, h);
     u64 t0 = svcGetSystemTick();
     for (int j0 = 0; j0 < h; j0 += 256)   /* (in pieces of at most 256 x 256: the arena) */
         for (int i0 = 0; i0 < w; i0 += 256) {
@@ -361,6 +370,7 @@ static void c3d_write(int x, int y, int w, int h, const unsigned *src, int strid
 /* the same from the PS1's words (bit 15, blue, green, red: 5 bits each), staged as RGBA5551 texels: one pass, half the
    bytes.  The PICA widens 5 bits to 8 as the backend does (the high bits repeated below), bit 15 is the alpha. */
 static void write15_on(int wide, int x, int y, int w, int h, const unsigned short *src, int stride) {
+    touch(wide, x, y, w, h);
     u64 t0 = svcGetSystemTick();
     static unsigned char mo[64];
     if (!mo[1]) for (int k = 0; k < 64; k++) mo[k] = (unsigned char)morton(k & 7, k >> 3);
@@ -431,6 +441,7 @@ static int c3d_eye_start(void) {
     return 0;
 }
 static void c3d_wide_down(int wx, int wy, int x, int y, int w, int h) {
+    touch(0, x, y, w, h);
     begin(); cmd_room();
     if (vb_n + 6 > VB_MAX - 64) { end_and_wait(); begin(); }
     on_target(0);
@@ -457,6 +468,7 @@ static int c3d_wide_start(void) {
     return 0;
 }
 static void fill_on(int wide, int x, int y, int w, int h, unsigned c) {
+    touch(wide, x, y, w, h);
     begin();
     cmd_room();
     on_target(wide);
@@ -500,7 +512,8 @@ static void c3d_read(int x, int y, int w, int h, unsigned *dst, int stride) {
 
 /* ---- the top screen: the display area, 4:3 at the screen's height, centred */
 static C3D_Tex *pres_tex = &vram_tex; static int pres_w = 320;   /* what a present shows, and how wide on the screen */
-static unsigned st_pres_skipped;
+static unsigned st_pres_skipped, st_pres_busy;
+static int lp_m; static C3D_Tex *lp_t;
 static int c3d_present(int x, int y, int w, int h, int masked) {
     u64 t0 = svcGetSystemTick();
     {   /* nothing changed since the last present (a vblank whose ordering table was skipped, a still screen): the
@@ -510,6 +523,19 @@ static int c3d_present(int x, int y, int w, int h, int masked) {
         const float k = top_r ? osGet3DSliderState() : 0.0f;
         if (!pres_dirty && x == lx && y == ly && w == lw && h == lh && masked == lm && pres_tex == lt && k == lk) { st_pres_skipped++; return 1; }
         lx = x; ly = y; lw = w; lh = h; lm = masked; lt = pres_tex; lk = k;
+        lp_x = x; lp_y = y; lp_w = w; lp_h = h; lp_m = masked; lp_t = pres_tex;
+    }
+    if (!in_frame) {
+        /* (the GPU still on the frame drawn before: this present waits for the next vblank instead of the program
+           waiting here, 5 ms a frame with --stereo; port_n3ds_present_pending shows it if the game's next table is
+           skipped) */
+        static int waited;   /* (once only in a row: a GPU always busy must not leave the screens still) */
+        u64 tb = svcGetSystemTick();
+        int began = C3D_FrameBegin(waited ? 0 : C3D_FRAME_NONBLOCK);
+        tk_begin += svcGetSystemTick() - tb;
+        if (!began) { st_pres_busy++; waited = 1; return 1; }
+        waited = 0;
+        C3D_FrameDrawOn(vram_rt); cur_wide = 0; in_frame = 1; lin_fresh = 0;
     }
     begin();
     replay();
@@ -616,7 +642,7 @@ static int c3d_present(int x, int y, int w, int h, int masked) {
                     "%.2f host writes, %.2f read-backs, %.2f panel, %.2f present (the rest: the game, the core, sound)\n",
                     st_frames, st_syncs, st_writes, TK_MS(tk_frame), TK_MS(tk_draw), TK_MS(tk_upload), TK_MS(tk_write), TK_MS(tk_read),
                     TK_MS(tk_panel), TK_MS(tk_present));
-        port_printf("[3ds] pica: %u presents of the last %d had nothing new (not drawn)\n", st_pres_skipped, TK_N); st_pres_skipped = 0;
+        port_printf("[3ds] pica: %u presents had nothing new (not drawn), %u waited for the next vblank (the GPU busy)\n", st_pres_skipped, st_pres_busy); st_pres_skipped = st_pres_busy = 0;
         port_printf("[3ds] pica: per frame %.2f ms waiting for the GPU to end the frame before, %.2f changes of target; the GPU's own time a frame %.2f ms (the longest %.2f); %.2f ms recording the right eye\n",
                     TK_MS(tk_begin), (double)st_switch / TK_N, gpu_ms_n ? gpu_ms_sum / gpu_ms_n : 0.0, gpu_ms_max, TK_MS(tk_eye));
         tk_eye = 0;
@@ -637,6 +663,15 @@ static void c3d_submit(void) {
     C3D_FrameEnd(GX_CMDLIST_FLUSH);
     in_frame = 0;
     frame_no++; arena_off = 0; vb_n = 0; last_ok = 0;
+}
+/* a vblank whose display buffer's table was skipped (gpu.c present_window): a present the GPU made wait, or a new
+   panel picture, is shown now */
+void port_n3ds_present_pending(void) {
+    if (!c3d_up || !pres_dirty || lp_x < 0) return;
+    C3D_Tex *t = pres_tex; int pw = pres_w;
+    pres_tex = lp_t ? lp_t : &vram_tex; if (pres_tex == &wide_tex) pres_w = lp_w > 400 ? 400 : lp_w;
+    c3d_present(lp_x, lp_y, lp_w, lp_h, lp_m);
+    pres_tex = t; pres_w = pw;
 }
 static int c3d_wide_present(int x, int y, int w, int h) {
     pres_tex = &wide_tex; pres_w = w > 400 ? 400 : w;

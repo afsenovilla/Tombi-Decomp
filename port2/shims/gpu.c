@@ -1279,7 +1279,12 @@ static void present_window(void) {
         RECT *d = (RECT *)cur_dispenv;
         int w = d->w > 0 ? d->w : 320, h = d->h > 0 ? d->h : 240;
         if (w > 1024) w = 1024; if (h > 512) h = 512;
-        if (port_frameskip && fs_skipped(d->x & 1023, d->y & 511)) return;   /* (a buffer whose frame was not drawn) */
+        if (port_frameskip && fs_skipped(d->x & 1023, d->y & 511)) {   /* (a buffer whose frame was not drawn) */
+#ifdef __3DS__
+            if (be == &port_gpu_pica) { extern void port_n3ds_present_pending(void); port_n3ds_present_pending(); }
+#endif
+            return;
+        }
         /* the GL backend blits the display area itself; the software one goes through RGB24 and an SDL_Renderer;
            the 24-bit mode (MDEC movies) is read out as RGB24 on both and shown by the backend's present_rgb when it
            has one (GL: its own texture; an SDL_Renderer on the GL window would be a second device on it) */
