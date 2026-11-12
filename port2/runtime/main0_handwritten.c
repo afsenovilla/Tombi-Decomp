@@ -599,12 +599,9 @@ extern int port_ws_cull;
 void port_ws_area_model_link(void (*hook)(char *, int), char *list, int wmd, int game, u16 *origin_x)
 {
     hook(list, wmd);
-    {   /* --cut-content=funga: the AREA10 s2 gate, lifted out of the room model and swung open (runtime/funga.c) */
+    {   /* --cut-content=funga: the room's copy of the AREA10 s2 gate block (runtime/funga.c) */
         extern void port_funga_room(const u8 *, int, int);
-        extern void port_funga_blocks(char *, int, int);
-        u16 fsec = *(volatile u16 *)port_ram_ptr(PORT_A_GAME + 2);
-        port_funga_room((const u8 *)(unsigned long)(u32)wmd, game, fsec);
-        port_funga_blocks(list, game, fsec);
+        port_funga_room((const u8 *)(unsigned long)(u32)wmd, game, *(volatile u16 *)port_ram_ptr(PORT_A_GAME + 2));
     }
     if (!port_ws_cull || !(game == 0 || game == 1 || game == 2 || game == 3 || game == 7)) return;
     static u32 tmp[0x5b + 4];
