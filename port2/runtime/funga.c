@@ -103,6 +103,10 @@ static int load_chief(void)
     /* frames 29..58 end with two shadow parts (CLUT 0xF90A, 48 x 8) meant for a shadow page; drawn from the sprite page
        they come out as scraps beside the figure: keep the figure's own parts only */
     for (int f = 29; f <= 58; f++) { u16 c; memcpy(&c, chief_tbl + 4 * f, 2); if (c >= 3) { c -= 2; memcpy(chief_tbl + 4 * f, &c, 2); } }
+    /* frames whose rectangle cuts the drawing on the page (never used by the game, never corrected): 52 (walk) loses
+       the back of the cape and the trailing foot, 57 the cape: widen them to the whole drawing */
+    { static const struct { int f, w; } FIX[] = {{52, 54}, {57, 62}};
+      for (unsigned i = 0; i < sizeof FIX / sizeof FIX[0]; i++) { u16 o; memcpy(&o, chief_tbl + 4 * FIX[i].f + 2, 2); chief_tbl[o + 10] = (u8)FIX[i].w; } }
     chief_state = 1;
     return 1;
 }
@@ -117,6 +121,11 @@ static void spawn_npcs(void)
     s16 pos[3] = {1580, -160, 180};
     memcpy(rec + 6, pos, 6);
     spawnObjectFromRecord(rec, -1);
+    static const s16 FX[3] = {1380, 1530, 1700};
+    for (int i = 0; i < 3; i++) {                  /* the Fungas: marker 0x5B */
+        rec[3] = 0x5B; rec[4] = i; pos[0] = FX[i]; memcpy(rec + 6, pos, 6);
+        spawnObjectFromRecord(rec, -1);
+    }
 }
 
 /* the chief: walks between x 1420 and 1720 (frames 50 51 52 51, 8 ticks each, 1 unit a tick), turns, and every second
@@ -132,8 +141,32 @@ static void show(u8 *o, int k, u16 frame)
         AnimLoadDuration(o);
     }
 }
+/* the Fungas (frames 32..46: the tailed villager, page 3 like the chief; their parts name CLUT 0x7809, pale blue in
+   section 2, so they take the chief's 0x780A through the object's CLUT override): walk 32 33 (36..38 carry scraps of the next atlas cell), facing left
+   as drawn, each to and fro over 80 units around its spot */
+static const u16 FWALK[] = {32, 33};
+static u8 fscript[2][8];
+static int funga_step(u8 *o)
+{
+    s32 *t = (s32 *)(o + 0x90), *dir = (s32 *)(o + 0x94), home = *(s32 *)(o + 0x98);
+    s16 *x = (s16 *)(o + 0x12);
+    (*t)++;
+    if (*t % 2 == 0) *x += *dir;
+    if ((*dir > 0 && *x > home + 40) || (*dir < 0 && *x < home - 40)) *dir = -*dir;
+    if (*dir < 0) o[0x2E] |= 1; else o[0x2E] &= ~1;
+    int k = *t / 10 % 2; u16 c = 0x8000 | 60;
+    memset(fscript[k], 0, 8); memcpy(fscript[k], &FWALK[k], 2); memcpy(fscript[k] + 6, &c, 2);
+    if (*(u32 *)(o + 0x24) != (u32)(unsigned long)fscript[k]) { *(u32 *)(o + 0x24) = (u32)(unsigned long)fscript[k]; AnimLoadDuration(o); }
+    return 1;
+}
 void port_funga_npc_init(u8 *o)
 {
+    if ((port_cut_content & 64) && o[0x0C] == 0x5B && chief_state > 0) {
+        *(s16 *)(o + 0x1E) = 1; o[0x0D] = 1; *(u16 *)(o + 0x08) = 0x780A; o[0x0F] = 0;
+        *(u32 *)(o + 0x3C) = (u32)(unsigned long)chief_tbl;
+        *(s32 *)(o + 0x90) = o[3] * 11; *(s32 *)(o + 0x94) = (o[3] & 1) ? -1 : 1; *(s32 *)(o + 0x98) = *(s16 *)(o + 0x12);
+        return;
+    }
     if (!(port_cut_content & 64) || o[0x0C] != 0x5A || chief_state <= 0) return;
     *(s16 *)(o + 0x1E) = 1;                 /* page offset: the parts say page 2, the chief is on page 3 (VRAM 192,0) */
     o[0x0D] = 0;                            /* opaque */
@@ -148,6 +181,7 @@ void port_funga_npc_init(u8 *o)
 }
 int port_funga_npc_step(u8 *o)
 {
+    if ((port_cut_content & 64) && o[0x0C] == 0x5B && chief_state > 0) return funga_step(o);
     if (!(port_cut_content & 64) || o[0x0C] != 0x5A || chief_state <= 0) return 0;
     s32 *t = (s32 *)(o + 0x90), *dir = (s32 *)(o + 0x94), *talk = (s32 *)(o + 0x98), *laps = (s32 *)(o + 0x9C);
     s16 *x = (s16 *)(o + 0x12);
