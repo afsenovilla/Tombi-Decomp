@@ -438,6 +438,9 @@ src/x009/updateParallaxBackdropSprite.c | if ((short)t < 0x160) { | if (((short)
 # and the world-placed parallax sprites of AREA06 / AREA10 keep the ones over the side strips
 src/x006/updateParallaxBackdropSprite.c | if (x - 0x40 < 0x141 && x + 0x40 >= 0) { | if (x - 0x40 < 0x141 + port_ws_cull && x + 0x40 + port_ws_cull >= 0) {
 src/x010/updateParallaxBackdropSprite.c | if (o->a.p.whole - 0x40 < 0x141 && o->a.p.whole + 0x40 >= 0) { | if (o->a.p.whole - 0x40 < 0x141 + port_ws_cull && o->a.p.whole + 0x40 + port_ws_cull >= 0) {
+# and AREA00's far sky / sea strip (two 232-column sprites from world x 1400, scrolled at 1/8) starts at the room's left
+# end: its two first sprites repeat to the left (period 464) over the wide frame's left strip
+src/updateA00FarBackdropWest.c | *(unsigned char *)&o->visible = 1; | *(unsigned char *)&o->visible = 1; if (port_ws_cull && x < 3300) { extern int port_ws_backdrop_period(void *, int); port_ws_backdrop_period(o, -464); }
 #
 # --title-bg (widescreen, runtime/titlebg.c): mark the ordering-table node the title background / logo sprites go into
 src/o0ptsub0/titleLogoDraw.c |     addTilePrim(&r, 0, 0, 1); |     { extern unsigned long *CURRENT_OT; extern void port_title_bg_mark(void *); port_title_bg_mark(CURRENT_OT + 1); } addTilePrim(&r, 0, 0, 1);

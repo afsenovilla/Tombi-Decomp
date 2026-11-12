@@ -651,6 +651,9 @@ void port_ws_cat7(void *o, void (*draw)(void *))
     for (int k = 0; k < 32; k++) {
         if (ws_rep[k].o != o || port_frame - ws_rep[k].frame > 8) continue;
         s16 x = S16(o, 0x12);
+        if (ws_rep[k].period < 0) {                       /* carried on to the left only, as far as the strip shows */
+            for (int nx = x + ws_rep[k].period; nx + 256 >= -port_ws_cull; nx += ws_rep[k].period) { S16(o, 0x12) = nx; draw(o); }
+        } else
         for (int c = -1; c <= 1; c += 2) {
             int nx = x + c * ws_rep[k].period;
             if (nx + 128 < -port_ws_cull || nx - 128 >= 320 + port_ws_cull) continue;   /* (parts sit within +-128) */
