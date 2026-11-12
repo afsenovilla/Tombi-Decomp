@@ -78,6 +78,10 @@ static void on_target(int wide) {   /* (in a frame) */
     cur_wide = wide; st_switch++;
 }
 static void vb_flush(void);
+#define EYE_DX 64
+#define NREC 4096
+static struct { PState s; int first, n; } rec[NREC];   /* (--stereo: the frame's batches for the right eye, see replay) */
+static int nrec, replaying;
 static void replay(void);
 static void end_and_wait(void) {   /* run what was recorded and wait for it: memory may be reused afterwards */
     if (in_frame && !replaying) replay();
@@ -232,11 +236,6 @@ static void apply_state(const PState *s, int dx) {
 /* --stereo: the batches of a frame drawn for the left eye (into VRAM's target) are drawn again, at the end, into the
    right eye's target, where the shader moves each vertex by 2 sh and the whole picture EYE_DX to the left (so nothing
    crosses the target's right edge: a console draws nothing of such a triangle).  Only a screen's drawing area's. */
-#define EYE_DX 64
-#define NREC 4096
-static struct { PState s; int first, n; } rec[NREC];
-static int nrec, replaying;
-static void replay(void);
 static void c3d_tris(const PState *s, const PV *v, int n) {
     u64 t0 = svcGetSystemTick();
     begin();
