@@ -6,7 +6,8 @@ Format (docs/FORMATS.md "WSS"; MAIN0 execCoreOpcode / scriptOpBranch / scriptLoa
   The area loader (initAreaScripts) only ever starts entry 0; the other entries are reached by CALL (0x12 e).
   Branch targets are absolute code offsets (u16).
 
-Usage (prefix --ops N for a pre-release build's op count: 40 JP demo / Dengeki, 39 PrePre 9, 32 Hyper 12):
+Usage (prefix --ops N for a pre-release build's op count: 40 JP demo / Dengeki, 39 PrePre 9, 32 Hyper 12;
+semdiff takes --ops N,M for files of two builds; a wrong count makes the walk stop at the first Yield):
   wss.py dis FILE                 full listing with reachability marks ('!' = never reached from entry 0)
   wss.py summary FILE...          per file: entries, reached entries, orphan entries/blocks, events / items / messages
   wss.py diff A.WSS B.WSS         op-level diff of two files (normalised: jump targets replaced by labels)
@@ -265,10 +266,14 @@ def cmd_sem(path):
         print("%s %04X  %s" % (" " if live else "!", off, key))
 
 
-def cmd_semdiff(a, b):
+def cmd_semdiff(a, b, n_b=None):
+    """n_b: op count of B when it differs from A's (--ops N,M)."""
+    global GAME_N
     import collections
     ca = collections.Counter(k for k, live, _ in sem(a) if live)
+    keep, GAME_N = GAME_N, n_b or GAME_N
     cb = collections.Counter(k for k, live, _ in sem(b) if live)
+    GAME_N = keep
     for k in sorted(set(ca) | set(cb)):
         if ca[k] != cb[k]:
             print("%-40s %s=%d %s=%d" % (k, a.split("/")[-3] if a.count("/") >= 2 else "A", ca[k],
@@ -281,8 +286,11 @@ def cmd_diff(a, b):
 
 
 if __name__ == "__main__":
+    N_B = None
     if len(sys.argv) > 2 and sys.argv[1] == "--ops":
-        GAME_N = int(sys.argv[2], 0)
+        n = sys.argv[2].split(",")
+        GAME_N = int(n[0], 0)
+        N_B = int(n[1], 0) if len(n) > 1 else None
         del sys.argv[1:3]
     if len(sys.argv) < 3:
         sys.exit(__doc__)
@@ -296,6 +304,6 @@ if __name__ == "__main__":
     elif c == "sem":
         cmd_sem(sys.argv[2])
     elif c == "semdiff":
-        cmd_semdiff(sys.argv[2], sys.argv[3])
+        cmd_semdiff(sys.argv[2], sys.argv[3], N_B)
     else:
         sys.exit(__doc__)
