@@ -155,7 +155,18 @@ static int choose_lang(int code) {
     int redraw = 1, ok = 0, lang = 0, row = 0;
     for (int i = 0; i < NLANG; i++) if (codes[i] == code) lang = i;
     gfxInitDefault();
-    consoleInit(GFX_TOP, NULL);
+    {   /* (the console font's n with a tilde, code A4, sits against its cell's left edge, touching the letter before:
+           a copy of the font with that glyph a pixel to the right, when its right column is free) */
+        PrintConsole *con = consoleInit(GFX_TOP, NULL);
+        static u8 font[256 * 8];
+        if (con && con->font.gfx && con->font.asciiOffset == 0 && con->font.numChars >= 256) {
+            memcpy(font, con->font.gfx, sizeof font);
+            u8 *g = font + 0xA4 * 8, low = 0;
+            for (int i = 0; i < 8; i++) low |= g[i] & 1;
+            if (!low) for (int i = 0; i < 8; i++) g[i] >>= 1;
+            con->font.gfx = font;
+        }
+    }
     while (aptMainLoop()) {
         hidScanInput();
         u32 k = hidKeysDown() | (hidKeysDownRepeat() & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT));
