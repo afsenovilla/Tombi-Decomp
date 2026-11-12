@@ -748,7 +748,17 @@ static void panel_time_log(unsigned long long us) {
 int port_n3ds_worker_start(void (*job)(void));   /* 1: a thread runs job() after each port_n3ds_worker_go() */
 void port_n3ds_worker_go(void);
 static volatile int pw_state;            /* 0 idle, 1 rendering, 2 a canvas is ready */
-static void pw_job(void) { render(); pw_state = 2; }
+/* (the worker's own renders timed: a line every 20, with --log-fps) */
+static void pw_job(void) {
+    extern unsigned long long port_time_us(void); extern int port_show_fps;
+    static unsigned long long sum, mx; static int n;
+    unsigned long long t0 = port_time_us();
+    render();
+    unsigned long long us = port_time_us() - t0;
+    pw_state = 2;
+    sum += us; if (us > mx) mx = us;
+    if (++n >= 20) { if (port_show_fps) port_printf("[panel] worker: %d renders, %llu ms each, the longest %llu (page %d)\n", n, sum / n / 1000, mx / 1000, page); sum = mx = 0; n = 0; }
+}
 static int n3ds_worker_ok(void) {
     static int st;                        /* 0 not tried, 1 running, -1 none */
     if (!st) st = port_n3ds_worker_start(pw_job) ? 1 : -1;
@@ -777,7 +787,13 @@ void port_panel_vblank(void) {
             if (port_panel_window) port_panel_window_frame((const unsigned char *)pa_cv, pa_cw, pa_ch);
             pw_state = 0;
         }
-        if (pw_state == 0 && (!(frames++ & 3) || scr_busy())) { inq_run(); pw_state = 1; port_n3ds_worker_go(); }
+        /* a render when there is something to show: a touch or a button waiting (at the next vblank, not after the
+           render in hand and another), a list moving, else a refresh now and then: every fourth vblank, and on an
+           Old 3DS (--audio-half tells it) every 25th, half a second: its worker shares a third of a core with the
+           sound's mixer, and a panel drawn without pause kept every touch waiting for a render to end */
+        { extern int port_sound_half; static int idle;
+          int due = inq_n > 0 || scr_busy() || ++idle >= (port_sound_half ? 25 : 4);
+          if (pw_state == 0 && due) { idle = 0; inq_run(); pw_state = 1; port_n3ds_worker_go(); } }
         return;
     }
     { extern void port_sleep_us(unsigned long long); while (pw_state == 1) port_sleep_us(1000); }   /* (a dump, or no worker: here, as everywhere else) */

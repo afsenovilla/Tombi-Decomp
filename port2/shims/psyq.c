@@ -1098,6 +1098,22 @@ static int cd_read_sectors_base(int lba, int count, void *dst, int bytes) {
         return 0;
     }
     if (!cd_fp) { port_printf("[port] CD read of lba %d: no disc image open\n", lba); return -1; }
+    /* a run of sectors in one read of the image (in pieces of 32): a read a sector is a request to the SD card's
+       service each on a 3DS, and an overlay is 170 of them (the game's menu took a second to open and to close).
+       What the run does not give (the image's end, an error) falls to the loop below, which reports it. */
+    if (count > 1 && !port_trace_cd) {
+        static u8 run[32 * 2352];
+        const int ss = cd_raw ? 2352 : 2048, skip = cd_raw ? (bytes == 2048 ? 24 : 12) : 0;
+        int i = 0;
+        while (i < count && bytes <= ss - skip) {
+            int k = count - i < 32 ? count - i : 32;
+            if (port_pread(cd_fp, run, k * ss, (long long)(lba + i) * ss) != k * ss) break;
+            for (int j = 0; j < k; j++) memcpy(d + (size_t)(i + j) * bytes, run + j * ss + skip, bytes);
+            i += k;
+        }
+        if (i == count) return 0;
+        lba += i; count -= i; d += (size_t)i * bytes;
+    }
     for (int i = 0; i < count; i++) {
         long long off = cd_raw ? (long long)(lba + i) * 2352 + (bytes == 2048 ? 24 : 12) : (long long)(lba + i) * 2048;
         int got = port_pread(cd_fp, d, bytes, off);

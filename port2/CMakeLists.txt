@@ -196,6 +196,14 @@ if(NINTENDO_3DS)   # the 3DS entry point (main: SD card paths, then the port's m
   # its vertex shader (picasso), embedded as pica_vsh_shbin[] (pica_vsh_shbin.h)
   ctr_add_shader_library(pica_vsh ${CMAKE_CURRENT_SOURCE_DIR}/n3ds/pica.v.pica)
   dkp_add_embedded_binary_library(pica_vsh_bin pica_vsh)
+  # the improved Spanish translation's compiled patch, in the program (a 3DS has no launcher to hand it over):
+  # n3ds/main_3ds.c writes it next to the disc image and passes it as --text-patch when that language is chosen
+  add_custom_command(OUTPUT ${GEN}/es_tpatch.c
+                     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/bin2c.py ${ROOT}/patches/es_mejorada.tpatch ${GEN}/es_tpatch.c port_es_tpatch
+                     DEPENDS ${ROOT}/patches/es_mejorada.tpatch ${CMAKE_CURRENT_SOURCE_DIR}/tools/bin2c.py
+                     COMMENT "The improved Spanish translation's patch as a C array")
+  set_source_files_properties(${GEN}/es_tpatch.c PROPERTIES GENERATED TRUE)
+  list(APPEND PORT2_RT ${GEN}/es_tpatch.c)
 endif()
 # build id (git short sha, "+" when the tree is modified): the first log line says which checkout the binary is from
 add_custom_command(OUTPUT ${GEN}/build_id.stamp

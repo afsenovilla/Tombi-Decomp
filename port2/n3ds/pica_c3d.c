@@ -256,7 +256,20 @@ static void c3d_write(int x, int y, int w, int h, const unsigned *src, int strid
             if (stage_tex(tp, pw, ph)) continue;
             C3D_Tex t = *tp;
             unsigned *d = t.data;
-            for (int j = 0; j < ph; j++) for (int i = 0; i < pw; i++) d[tiled(i, j, t.width)] = pix(src[(j0 + j) * stride + i0 + i]);
+            {   /* (a tile of 8 x 8 at a time, its texels' places from a table: the place worked out per pixel was most
+                   of an upload's time: a movie's frame, a menu's pictures) */
+                static unsigned char mo[64];
+                if (!mo[1]) for (int k = 0; k < 64; k++) mo[k] = (unsigned char)morton(k & 7, k >> 3);
+                const int tpr = t.width >> 3;
+                for (int ty = 0; ty < ph; ty += 8) for (int tx = 0; tx < pw; tx += 8) {
+                    unsigned *tl = d + ((ty >> 3) * tpr + (tx >> 3)) * 64;
+                    const int nx = pw - tx < 8 ? pw - tx : 8, ny = ph - ty < 8 ? ph - ty : 8;
+                    for (int yy = 0; yy < ny; yy++) {
+                        const unsigned *sr = src + (j0 + ty + yy) * stride + i0 + tx; const unsigned char *m = mo + yy * 8;
+                        for (int xx = 0; xx < nx; xx++) tl[m[xx]] = pix(sr[xx]);
+                    }
+                }
+            }
             dcache_flush(d, (unsigned)t.width * t.height * 4);
             if (vb_n + 6 > VB_MAX - 64) end_and_wait();
             begin();

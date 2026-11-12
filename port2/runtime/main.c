@@ -29,7 +29,7 @@ unsigned long port_log_direct_tid;
 #if defined(__3DS__)
 /* (newlib's stdio reaches the SD card through its devoptab, not through the game's Psy-Q `write` stub) */
 static int log_is_direct(void) { return port_log_direct > 0; }
-static void port_log_write_raw(const char *s, int n) { fwrite(s, 1, n, stderr); }
+static void port_log_write_raw(const char *s, int n) { fwrite(s, 1, n, stderr); fflush(stderr); }   /* (a report that must not be lost) */
 #elif !defined(_WIN32)
 #include <unistd.h>
 #include <sys/syscall.h>
@@ -46,7 +46,17 @@ void port_printf(const char *fmt, ...) {
         char buf[2048]; int n = vsnprintf(buf, sizeof buf, fmt, ap);
         if (n > (int)sizeof buf - 1) n = sizeof buf - 1;
         if (n > 0) port_log_write_raw(buf, n);
-    } else { vfprintf(stderr, fmt, ap); fflush(stderr); }
+    } else {
+        vfprintf(stderr, fmt, ap);
+#ifdef __3DS__
+        /* (the log is a file on the SD card there, and a write to it a request to the card's service, milliseconds each:
+           buffered (main), and written out a second apart at most; port_flush_log and the fault reports write at once) */
+        { extern unsigned long long port_time_us(void); static unsigned long long last; unsigned long long now = port_time_us();
+          if (now - last > 1000000ull) { last = now; fflush(stderr); } }
+#else
+        fflush(stderr);
+#endif
+    }
     va_end(ap);
 }
 int port_audio_main;   /* --audio-main (3DS): the sound is mixed in the device's callback, on the game's core, not by a thread on the second (runtime/sdl.c) */
@@ -980,6 +990,7 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--panel-size") && v) { extern void port_panel_size(int, int); int w = 0, h = 0; sscanf(argv[++i], "%dx%d", &w, &h); port_panel_size(w, h); }
         else if (!strcmp(a, "--title-debug")) port_title_debug = 1;   /* title carousel DEBUG entry: the area select */
         else if (!strcmp(a, "--prompt-big")) { extern int port_prompt_big; port_prompt_big = i + 1 < argc && argv[i + 1][0] >= '1' && argv[i + 1][0] <= '6' && !argv[i + 1][1] ? atoi(argv[++i]) : 1; }   /* bold 8 x 10 letters on the button prompts (shims/prompts.c) */
+        else if (!strcmp(a, "--mdec-fast")) { extern int port_mdec_fast; port_mdec_fast = 1; }   /* the movies' inverse transform by a fast factorisation (shims/mdec.c) */
         else if (!strcmp(a, "--audio-main")) port_audio_main = 1;   /* 3DS: no mixer thread on the second core (runtime/sdl.c) */
         else if (!strcmp(a, "--panel-no-map")) { extern int port_panel_no_map; port_panel_no_map = 1; }   /* the second-screen panel without its map tab (runtime/panel.c) */
         else if (!strcmp(a, "--launcher-exit")) port_launcher_exit = 1;   /* QUIT entries (title, pause menu): back to the launcher */
@@ -1144,7 +1155,11 @@ int main(int argc, char **argv) {
     { extern int port_widescreen, port_renderer, port_ws_cull;
       port_ws_cull = port_widescreen;
       (void)port_renderer; }
+#ifdef __3DS__
+    { static char logbuf[16384]; setvbuf(stderr, logbuf, _IOFBF, sizeof logbuf); }   /* (port_printf: written out once a second) */
+#else
     setvbuf(stderr, NULL, _IONBF, 0);     /* the launcher reads a pipe: every line must leave the process at once */
+#endif
     { extern const char port_build_id[], port_build_date[]; port_printf("[port2] build %s %s\n", port_build_id, port_build_date); }
     port_printf("[port2] native pointers, %d-bit: data image %p..%p, scratch %p, layout %s\n", (int)(sizeof(void *) * 8),
                 (void *)port_main0_image, (void *)port_x000_bss, (void *)port_scratch,
