@@ -34,7 +34,16 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    camera's right bound (SECTION_CAMERA_BOUNDS 220..1038, read by initSectionCamera) goes to 1680, so Tombi walks past
    the gate to x 1904 (the WHM ground already runs to 1920; the drums are updateSolidScenery objects already placed);
    the gate (updateAreaMechanisms subtype 2) swings open (+0x88 to 0x400, hinge at its edge) once Tombi passes x 1080.
-   Next: collision for the straw stand, the black past the model's right end at wide ratios, the Funga Chief and Fungas.
+   Gate: the game's door block (16 x 97 x 50, x -8..7 z -25..25) swings a quarter turn on its back edge once Tombi
+   passes x 1180 (runtime/funga.c; its room copy flattened).  NOT the room's 21 polygons at x 1268..1296 z 155..205:
+   those are the lintel over the gap (swinging them broke the top, reverted).  Drums: updateSolidScenery subtypes
+   13..21 get no box (not solid) -> subtype 0, the springy drum; only the front one (x 1808) is on the path, the rest
+   and the straw stand stand in the back row (z 258..286), off the single walking line (WHM plane 2 only).
+   Next: the Funga Chief and Fungas.  Their sprites are SPR table 0x37 (SPR_DATA[7], frames 31, 47-58 chief, 59+ Fungas,
+   docs/CONTENIDO_RECORTADO.md "Jungla"), loaded only by AREA10 lists 1 and 5 (sections 0/4: the 0x37 piece of the
+   LD0SYS stream after D005.GAM); section 2 (list 3) has slot 7 empty, so the table has to be loaded there too; no
+   animation scripts and no palette in use (the community rip shows a blue chief): a new object with its own frame
+   cycle.  Also: the black past the model's right end at wide ratios.
    Original request:  Open the door object
    4:07 / 02 (82FF #026 "Door", WMD bank 1 model 7, position (1288, -187, 180), APD offset 0x01A0, SYS/LDAR10.BIN group 3)
    and make the unused area behind it walkable (collision for the ground strip; Tombi could climb the wooden stand in
