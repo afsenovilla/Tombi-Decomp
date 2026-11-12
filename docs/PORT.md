@@ -2697,9 +2697,25 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   `LoadImage` (both renderers, `--fps` and the texture tools see an ordinary upload); the last marker puts back what
   the game had uploaded.  The geometry is read from the game's own packets and checked against VRAM (the window's
   first row must equal the picture; else off, logged once).  The game's window is also cut at the picture's right /
-  bottom edge (past it, it showed the wrapped next row: invisible on 4:3).  Past the picture's edge stays black (the
-  map ends there; Dwarf Village is 448 px wide, AREA19 s2 barely wider than the screen).  The tunnels (I0NFO3) are 3D
-  blocks and were already covered by the block hook above.
+  bottom edge (past it, it showed the wrapped next row: invisible on 4:3).  The tunnels (I0NFO3) are 3D blocks and
+  were already covered by the block hook above.
+- **Top-down map edges** (`runtime/ws_topdown.c` `port_ws_topdown_begin` / `_end`, fixes.txt hooks in
+  `drawGameplayScene` after the lighting and before the pause menu / fades / HUD): the game clamps its camera so the
+  4:3 view stays inside the map picture, so at an edge the wide frame ran up to `pad` columns past it (black).  While
+  the scene draws, everything in it moves `dx` columns, chosen each frame so the wide frame's edge meets the picture's
+  edge (pictures at least as wide as the wide frame: Dwarf Village 448 px at 16:9, AREA05 864, AREA08 544), or so a
+  picture narrower than the wide frame (but not than 4:3) is centred (Dwarf Village at 21:9, AREA19 s2 384 px);
+  |dx| <= pad.  The objects move through the GTE (`gte.c` `port_gte_dx`, added to every RTPS / RTPT screen X between
+  the two hooks, so their own screen culls see the moved position), the map through its SPRT packets in
+  `port_ws_overhead_map` (the side windows are computed from the moved ones); the culls (`port_ws_cull`) keep
+  pad + |dx| columns so what enters from the far edge is drawn.  Picture column c lies at screen x K - SCREEN_ORIGIN_X
+  + c (K = -129 in PAL, learnt from the map packets), and dx needs the map to have drawn in the previous scene draw,
+  else it is 0 (a room whose map is hidden, like the hut interiors shown on black, keeps the retail placement).  A
+  message balloon that follows its speaker (`openMessageBox` anim != 0, the NPC dialogues) moves with the scene so its
+  tail stays on the speaker (fixes.txt `drawMessageBox`, `port_ws_balloon_dx`); boxes at a screen position, the pause
+  menu and the HUD stay put (anything else a room draws in 2D during the scene would stay put too; none showed in
+  the checked rooms).  Game logic, camera and the 4:3 picture are untouched: every frame is the old frame moved by dx
+  (checked pixel for pixel), identity without --widescreen and outside these rooms.
 - **Event titles** (`spawnEventTitle`, `l8Type01MoveStep`, `#ifdef PORT2`): the title tiles start at screen x 340
   (just past 4:3, inside the wide frame, where they popped into view) and left at x 480 (inside 21:9 / 32:9).  They
   now start `pad + 160` further right (the tiles sit up to ~150 either side of the title's x) and leave once past `320 + pad`; the fly-in speed is derived from the distance over

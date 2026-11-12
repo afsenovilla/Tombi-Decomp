@@ -416,6 +416,18 @@ src/i0nfo/func_800EA3A4_scus94236.c | } while (i < 2); | } while (i < 2); { exte
 src/i0nfo2/func_800EBA58_scus94236.c | } while (i < 2); | } while (i < 2); { extern void port_ws_overhead_map(void *, int, int); port_ws_overhead_map(o, 2, 0); }
 src/i0nfo/func_800EC658_slps01144.c | } while (i < 2); | } while (i < 2); { extern void port_ws_overhead_map(void *, int, int); port_ws_overhead_map(o, 2, 0); }
 src/i0nfo2/func_800EDDE0_slps01144.c | } while (i < 2); | } while (i < 2); { extern void port_ws_overhead_map(void *, int, int); port_ws_overhead_map(o, 2, 0); }
+# ... and at a map edge the scene drawn by drawGameplayScene (objects through the GTE, the map through the hook above)
+# moves so the wide frame stays inside the picture; the pause menu, fades and HUD after it stay put (identity when off)
+src/drawGameplayScene.c | FUN_80063e0c(LIGHTING); | FUN_80063e0c(LIGHTING); { extern void port_ws_topdown_begin(void); port_ws_topdown_begin(); }
+# (a message balloon that follows a speaker, openMessageBox's anim != 0 at +0x2E, moves with the scene so its tail stays
+#  on the speaker; boxes at a screen position stay put)
+src/drawMessageBox.c |                 FUN_8005e580(CURRENT_OT + 8, q); |                 { extern int port_ws_balloon_dx(const void *); q->x0 += port_ws_balloon_dx(o); } FUN_8005e580(CURRENT_OT + 8, q);
+src/drawMessageBox.c |     drawBalloonFrame(&l, 0, o->v1e); |     { extern int port_ws_balloon_dx(const void *); l.a += port_ws_balloon_dx(o); } drawBalloonFrame(&l, 0, o->v1e);
+@version pal usa jp beta prepre8
+src/drawGameplayScene.c |     drawCategory7Objects(); |     drawCategory7Objects(); { extern void port_ws_topdown_end(void); port_ws_topdown_end(); }
+@version jpdemo
+src/drawGameplayScene.c |     FUN_80057edc(); |     FUN_80057edc(); { extern void port_ws_topdown_end(void); port_ws_topdown_end(); }
+@version all
 #
 # --widescreen: the wrapping parallax backdrop columns of AREA01 / AREA09 repeat one period (512 columns) left and right
 # (port2/runtime/main0_handwritten.c port_ws_backdrop_period / port_ws_cat7; identity when off)
