@@ -132,28 +132,52 @@ static int choose_image(char *out, size_t cap) {
    start; the choice is kept in lang.txt.  Returns 0..8 (--lang) or 9, Spanish with the improved translation (the
    patch the program carries: port_es_tpatch), -1: START (leave). */
 #define NLANG 10
+/* the options beside the language, kept in opts.txt ("movies hz"): the movies played or skipped, the game at 60 Hz (the
+   3DS's screens, the US game's speed) or 50 (the PAL disc's own) */
+static int opt_movies = 1, opt_hz = 60;
+static void opts_load(void) {
+    FILE *f = fopen(DIR_ "/opts.txt", "r"); int m, h;
+    if (!f) return;
+    if (fscanf(f, "%d %d", &m, &h) == 2) { opt_movies = m != 0; opt_hz = h == 50 ? 50 : 60; }
+    fclose(f);
+}
+static void opts_save(void) {
+    FILE *f = fopen(DIR_ "/opts.txt", "w");
+    if (f) { fprintf(f, "%d %d\n", opt_movies, opt_hz); fclose(f); }
+}
 static int choose_lang(int code) {
     /* (the console's font is the PC's code page 437: its codes for the accented letters) */
     static const char *name[NLANG] = { "English", "Fran\x87" "ais", "Deutsch", "Italiano", "Nederlands", "Espa\xA4ol (traducci\xA2n mejorada)",
                                        "Espa\xA4ol (original)", "Portugues", "Svenska", "Dansk" };
     static const int codes[NLANG] = { 0, 1, 2, 3, 4, 9, 5, 6, 7, 8 };
-    int redraw = 1, ok = 0, sel = 0;
-    for (int i = 0; i < NLANG; i++) if (codes[i] == code) sel = i;
+    enum { ROWS = 3 };
+    int redraw = 1, ok = 0, lang = 0, row = 0;
+    for (int i = 0; i < NLANG; i++) if (codes[i] == code) lang = i;
     gfxInitDefault();
     consoleInit(GFX_TOP, NULL);
     while (aptMainLoop()) {
         hidScanInput();
-        u32 k = hidKeysDown() | (hidKeysDownRepeat() & (KEY_UP | KEY_DOWN));
+        u32 k = hidKeysDown() | (hidKeysDownRepeat() & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT));
         if (k & KEY_START) break;
-        if ((k & KEY_DOWN) && sel < NLANG - 1) { sel++; redraw = 1; }
-        if ((k & KEY_UP) && sel > 0) { sel--; redraw = 1; }
+        if ((k & KEY_DOWN) && row < ROWS - 1) { row++; redraw = 1; }
+        if ((k & KEY_UP) && row > 0) { row--; redraw = 1; }
+        if (k & (KEY_LEFT | KEY_RIGHT)) {
+            const int d = (k & KEY_RIGHT) ? 1 : -1;
+            if (row == 0) lang = (lang + d + NLANG) % NLANG;
+            else if (row == 1) opt_movies = !opt_movies;
+            else opt_hz = opt_hz == 60 ? 50 : 60;
+            redraw = 1;
+        }
         if (k & KEY_A) { ok = 1; break; }
         if (redraw) {
-            fprintf(stdout, "\x1b[2J\x1b[1;1HTombi! port - language\n\n");
-            for (int i = 0; i < NLANG; i++) fprintf(stdout, "%c %s\n", i == sel ? '>' : ' ', name[i]);
-            fprintf(stdout, "\n(hold L while the game starts to choose again)\n");
-            fprintf(stdout, "\nLa traducci\xA2n mejorada se prepara la primera vez:\nunos minutos, con una barra de progreso.\n");
-            fprintf(stdout, "\x1b[28;1HA: choose   START: exit");
+            fprintf(stdout, "\x1b[2J\x1b[1;1HTombi! port - options\n\n");
+            fprintf(stdout, "%c Language  < %s >\n\n", row == 0 ? '>' : ' ', name[lang]);
+            fprintf(stdout, "%c Movies    < %s >\n\n", row == 1 ? '>' : ' ', opt_movies ? "play" : "skip");
+            fprintf(stdout, "%c Speed     < %s >\n", row == 2 ? '>' : ' ', opt_hz == 60 ? "60 Hz" : "50 Hz (the PAL disc's)");
+            fprintf(stdout, "\n\nUp / Down: option    Left / Right: change\n");
+            fprintf(stdout, "\n(hold L while the game starts to come back here)\n");
+            if (codes[lang] == 9) fprintf(stdout, "\nLa traducci\xA2n mejorada se prepara la primera vez:\nunos minutos, con una barra de progreso.\n");
+            fprintf(stdout, "\x1b[28;1HA: start the game   START: exit");
             fflush(stdout);
             redraw = 0;
         }
@@ -161,7 +185,8 @@ static int choose_lang(int code) {
     }
     screens_black();
     gfxExit();
-    return ok ? codes[sel] : -1;
+    if (ok) opts_save();
+    return ok ? codes[lang] : -1;
 }
 
 /* Sound in an emulator: libctru's ndsp (SDL's audio) loads the DSP firmware from sdmc:/3ds/dspfirm.cdc, a file a console
@@ -219,6 +244,7 @@ int main(int argc, char **argv) {
         svcSleepThread(50000000); hidScanInput(); ask = (hidKeysHeld() & KEY_L) != 0;
         FILE *lf = fopen(DIR_ "/args.txt", "r");   /* (a language given there: nothing to ask) */
         if (lf) { static char t[2048]; size_t len = fread(t, 1, sizeof t - 1, lf); t[len] = 0; fclose(lf); given = strstr(t, "--lang") != 0; }
+        opts_load();
         lf = given ? 0 : fopen(DIR_ "/lang.txt", "r");
         if (lf) { if (fscanf(lf, "%d", &lang) != 1 || lang < 0 || lang > 9) lang = -1; fclose(lf); }
         if (!given && (lang < 0 || ask)) {
@@ -251,7 +277,8 @@ int main(int argc, char **argv) {
        speed (the PAL build kept the US logic, docs/PORT.md "60 Hz mode"); args.txt "--hz 50" for the PAL speed */
     /* (60 on both now: with the sound mixed on the second core and the frames it cannot draw skipped, an Old 3DS kept
        50 with time to spare; args.txt "--hz 50" for the PAL disc's own speed) */
-    args[n++] = "--hz"; args[n++] = "60";
+    args[n++] = "--hz"; args[n++] = opt_hz == 50 ? "50" : "60";   /* (the options screen: choose_lang) */
+    if (!opt_movies) args[n++] = "--skip-movies";
     /* the bottom screen: the panel (runtime/panel.c) at the screen's own size, drawn by n3ds/pica_c3d.c; the game's
        NOW LOADING until gameplay, then status / events / map / items, by touch */
     args[n++] = "--second-screen"; args[n++] = "--panel-size"; args[n++] = "320x240";
