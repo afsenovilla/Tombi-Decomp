@@ -147,6 +147,27 @@ static void opts_save(void) {
     if (f) { fprintf(f, "%d %d %d\n", opt_movies, opt_hz, opt_wide); fclose(f); }
 }
 static int es_ready;   /* the improved translation's files are on the SD card already, made from this patch */
+static const char *launch_disc = "";   /* the disc image's name, for the options screen */
+/* The options screen, teletext-like: TOMBI! in block letters, the options under it with a blue bar on the chosen one and
+   a band of keys at the foot; the bottom screen says what the chosen option does, the disc and the console.  The
+   console's text (libctru): 50 x 30 cells on top, 40 x 30 below, code page 437. */
+static void put_at(int r, int c, const char *s) { fprintf(stdout, "\x1b[%d;%dH%s", r, c, s); }
+static void bar_at(int r, int w, const char *bg) { fprintf(stdout, "\x1b[0m\x1b[%d;1H%s%*s", r, bg, w, ""); }
+static void banner(void) {
+    static const char *big[6][5] = {
+        { "#####", "  #  ", "  #  ", "  #  ", "  #  " }, { " ### ", "#   #", "#   #", "#   #", " ### " },
+        { "#   #", "## ##", "# # #", "#   #", "#   #" }, { "#### ", "#   #", "#### ", "#   #", "#### " },
+        { "###", " # ", " # ", " # ", "###" },           { "#", "#", "#", " ", "#" } };
+    int x = 11;
+    for (int k = 0; k < 6; k++) {
+        const int w = (int)strlen(big[k][0]);
+        fprintf(stdout, k == 5 ? "\x1b[0m\x1b[33;1m" : "\x1b[0m\x1b[35;1m");
+        for (int r = 0; r < 5; r++)
+            for (int c = 0; c < w; c++) if (big[k][r][c] == '#') fprintf(stdout, "\x1b[%d;%dH\xDB", 2 + r, x + c);
+        x += w + 1;
+    }
+    fprintf(stdout, "\x1b[0m");
+}
 static int choose_lang(int code) {
     /* (the console's font is the PC's code page 437: its codes for the accented letters) */
     static const char *name[NLANG] = { "English", "Fran\x87" "ais", "Deutsch", "Italiano", "Nederlands", "Espa\xA4ol (traducci\xA2n mejorada)",
@@ -155,16 +176,17 @@ static int choose_lang(int code) {
     enum { ROWS = 4 };
     int redraw = 1, ok = 0, lang = 0, row = 0;
     for (int i = 0; i < NLANG; i++) if (codes[i] == code) lang = i;
+    bool n3 = false; APT_CheckNew3DS(&n3);
     gfxInitDefault();
-    {   /* (the console font's n with a tilde, code A4, sits against its cell's left edge, touching the letter before:
-           a copy of the font with that glyph a pixel to the right, when its right column is free) */
-        PrintConsole *con = consoleInit(GFX_TOP, NULL);
+    static PrintConsole top, bot;
+    consoleInit(GFX_TOP, &top);
+    consoleInit(GFX_BOTTOM, &bot);
+    {   /* (the console font's accented letters sit against their cells' left edge, touching the letter before: a copy
+           of the font with each moved right while its cell's last column is free, 5 pixels at most) */
         static u8 font[256 * 8];
-        if (con && con->font.gfx && con->font.asciiOffset == 0 && con->font.numChars >= 256) {
-            memcpy(font, con->font.gfx, sizeof font);
-            /* (moved right while its cell's last column is free, 5 pixels at most: as far as it goes uncut.  The
-               same for every accented letter the screen shows: a acute, e acute, i acute, o acute, u acute, c cedilla) */
-            static const u8 acc[] = { 0xA4, 0xA0, 0x82, 0xA1, 0xA2, 0xA3, 0x87 };
+        if (top.font.gfx && top.font.asciiOffset == 0 && top.font.numChars >= 256) {
+            memcpy(font, top.font.gfx, sizeof font);
+            static const u8 acc[] = { 0xA4, 0xA0, 0x82, 0xA1, 0xA2, 0xA3, 0x87 };   /* n tilde, a e i o u acute, c cedilla */
             for (unsigned a = 0; a < sizeof acc; a++) {
                 u8 *g = font + acc[a] * 8;
                 for (int k = 0; k < 5; k++) {
@@ -174,7 +196,7 @@ static int choose_lang(int code) {
                     for (int i = 0; i < 8; i++) g[i] >>= 1;
                 }
             }
-            con->font.gfx = font;
+            top.font.gfx = font; bot.font.gfx = font;
         }
     }
     while (aptMainLoop()) {
@@ -193,26 +215,57 @@ static int choose_lang(int code) {
         }
         if (k & KEY_A) { ok = 1; break; }
         if (redraw) {
-            /* (the top screen's console is 50 columns: a value is cut to what its row has left, 34 with the marks)
-               the title yellow, the row chosen bright with its value yellow, the others grey, the keys cyan */
+            /* the top screen: every row inside its 50 columns (a value cut to the 33 its row has left) */
             const char *lab[ROWS] = { "Language", "Movies", "Speed", "Picture" };
-            const char *val[ROWS] = { name[lang], opt_movies ? "play" : "skip (straight to the title)", opt_hz == 60 ? "60 Hz" : "50 Hz (the PAL disc's)",
-                                      opt_wide ? "wide (experimental)" : "4:3" };
-            fprintf(stdout, "\x1b[2J\x1b[0m\x1b[2;3H\x1b[33;1mTombi! port\x1b[0m  options");
+            const char *val[ROWS] = { name[lang], opt_movies ? "play" : "skip", opt_hz == 60 ? "60 Hz" : "50 Hz", opt_wide ? "wide (experimental)" : "4:3" };
+            consoleSelect(&top);
+            fprintf(stdout, "\x1b[0m\x1b[2J");
+            banner();
+            put_at(8, 18, "port for the 3DS");
             for (int i = 0; i < ROWS; i++) {
-                fprintf(stdout, "\x1b[%d;3H", 5 + 2 * i);
-                if (i == row) fprintf(stdout, "\x1b[37;1m> %-9s \x1b[36;1m< \x1b[33;1m%.34s\x1b[36;1m >\x1b[0m", lab[i], val[i]);
-                else fprintf(stdout, "\x1b[0m  %-9s   %.34s", lab[i], val[i]);
+                const int r = 12 + 3 * i;
+                if (i == row) {
+                    bar_at(r, 50, "\x1b[44m");
+                    fprintf(stdout, "\x1b[%d;5H\x1b[37;1m%-10s \x1b[36;1m< \x1b[33;1m%.31s\x1b[36;1m >\x1b[0m", r, lab[i], val[i]);
+                } else fprintf(stdout, "\x1b[0m\x1b[%d;5H%-10s   %.33s", r, lab[i], val[i]);
             }
-            fprintf(stdout, "\x1b[15;3H\x1b[36mUp/Down\x1b[0m option    \x1b[36mLeft/Right\x1b[0m change");
-            fprintf(stdout, "\x1b[17;3HHold \x1b[36mL\x1b[0m while the game starts to see");
-            fprintf(stdout, "\x1b[18;3Hthis screen again.");
-            if (codes[lang] == 9 && es_ready) fprintf(stdout, "\x1b[21;3H\x1b[32mLa traducci\xA2n mejorada ya est\xA0 preparada.\x1b[0m");
-            else if (codes[lang] == 9) {
-                fprintf(stdout, "\x1b[21;3H\x1b[32mLa traducci\xA2n mejorada se prepara la");
-                fprintf(stdout, "\x1b[22;3Hprimera vez: unos minutos, con una barra.\x1b[0m");
+            /* (the band of keys on the last row, written up to its last cell and no further: the console scrolls only
+               when a character goes past the end) */
+            bar_at(30, 50, "\x1b[100m");
+            fprintf(stdout, "\x1b[30;2H\x1b[100m\x1b[36;1mUp/Down \x1b[37;1moption  \x1b[36;1mLeft/Right \x1b[37;1mchange  \x1b[36;1mA \x1b[37;1mstart\x1b[0m");
+            /* the bottom screen: what the chosen option does */
+            consoleSelect(&bot);
+            fprintf(stdout, "\x1b[0m\x1b[2J");
+            bar_at(2, 40, "\x1b[44m");
+            fprintf(stdout, "\x1b[2;3H\x1b[44m\x1b[37;1m%s\x1b[0m", lab[row]);
+            if (row == 0) {
+                put_at(4, 3, "The language of the game's texts.");
+                if (codes[lang] == 9) {
+                    fprintf(stdout, "\x1b[32;1m");
+                    if (es_ready) { put_at(6, 3, "La traducci\xA2n mejorada ya est\xA0"); put_at(7, 3, "preparada."); }
+                    else { put_at(6, 3, "La traducci\xA2n mejorada se prepara"); put_at(7, 3, "la primera vez: unos minutos, con una"); put_at(8, 3, "barra de progreso."); }
+                    fprintf(stdout, "\x1b[0m");
+                }
+            } else if (row == 1) {
+                put_at(4, 3, "play: the logos, the intro and the");
+                put_at(5, 3, "game's movies.");
+                put_at(7, 3, "skip: straight to the title screen,");
+                put_at(8, 3, "and no movie in the game either.");
+            } else if (row == 2) {
+                put_at(4, 3, "60 Hz: the 3DS's screens and the US");
+                put_at(5, 3, "game's speed.");
+                put_at(7, 3, "50 Hz: the PAL disc's own speed.");
+            } else {
+                put_at(4, 3, "4:3: the picture as on the PS1.");
+                put_at(6, 3, "wide: the whole top screen, 400");
+                put_at(7, 3, "columns. Experimental: slower in the");
+                put_at(8, 3, "busiest rooms.");
             }
-            fprintf(stdout, "\x1b[28;3H\x1b[36;1mA\x1b[0m start the game    \x1b[36;1mSTART\x1b[0m exit");
+            fprintf(stdout, "\x1b[21;3HDisc   \x1b[37;1m%.30s\x1b[0m", launch_disc);
+            fprintf(stdout, "\x1b[22;3HModel  \x1b[37;1m%s\x1b[0m", n3 ? "New 3DS" : "Old 3DS");
+            fprintf(stdout, "\x1b[25;3H\x1b[36;1mA\x1b[0m start the game");
+            fprintf(stdout, "\x1b[26;3H\x1b[36;1mSTART\x1b[0m exit");
+            fprintf(stdout, "\x1b[27;3H\x1b[36;1mL\x1b[0m held at boot: this screen");
             fflush(stdout);
             redraw = 0;
         }
@@ -254,7 +307,7 @@ int main(int argc, char **argv) {
     int n = 0;
     args[n++] = "tombi";
     struct stat st;
-    if (stat(DIR_ "/data/manifest.txt", &st) == 0) { args[n++] = "--data"; args[n++] = DIR_ "/data"; }
+    if (stat(DIR_ "/data/manifest.txt", &st) == 0) { args[n++] = "--data"; args[n++] = DIR_ "/data"; launch_disc = "data folder"; }
     else {
         /* the image chosen before (disc.txt), else one in the port's folder, else the chooser; SELECT held: the chooser */
         int have = 0, ask = 0;
@@ -271,6 +324,7 @@ int main(int argc, char **argv) {
             if (df) { fprintf(df, "%s\n", image); fclose(df); }
         }
         args[n++] = "--disc"; args[n++] = image;
+        { const char *b = strrchr(image, '/'); launch_disc = b ? b + 1 : image; }
     }
     {   /* the language: lang.txt, asked the first time and with L held (an args.txt "--lang N" comes later and wins) */
         static char langarg[4];
