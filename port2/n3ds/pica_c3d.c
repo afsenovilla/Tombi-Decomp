@@ -40,6 +40,7 @@ static unsigned char *arena; static unsigned arena_off;
 static unsigned long long st_syncs, st_writes, st_frames;
 /* where a frame's time goes (system ticks; the log line every 600 frames gives milliseconds per frame) */
 static unsigned long long tk_last, tk_frame, tk_upload, tk_write, tk_read, tk_panel, tk_present, tk_draw;
+static unsigned long long tk_begin; static unsigned st_switch;   /* the wait at a frame's start (the GPU still on the frame before), the changes of target */
 #define TK_N 120   /* frames per log line */
 #define TK_MS(t) ((double)(t) * 1000.0 / SYSCLOCK_ARM11 / TK_N)
 static unsigned long long n_up, n_rd, n_wait;
@@ -59,7 +60,10 @@ static int cur_wide;                      /* the target a draw goes to now: 0 VR
 static int lin_fresh;                     /* lin[] holds the target as it is (c3d_read): nothing drawn since */
 static void begin(void) {   /* (C3D_FrameBegin waits for the frame submitted before: its memory is free then) */
     if (in_frame) return;
-    if (!C3D_FrameBegin(0)) { static int said; if (!said++) port_printf("[3ds] pica: C3D_FrameBegin refused a frame\n"); }
+    u64 tb = svcGetSystemTick();
+    int began = C3D_FrameBegin(0);
+    tk_begin += svcGetSystemTick() - tb;
+    if (!began) { static int said; if (!said++) port_printf("[3ds] pica: C3D_FrameBegin refused a frame\n"); }
     C3D_FrameDrawOn(vram_rt);
     cur_wide = 0;
     in_frame = 1;
@@ -68,7 +72,7 @@ static void begin(void) {   /* (C3D_FrameBegin waits for the frame submitted bef
 static void on_target(int wide) {   /* (in a frame) */
     if (cur_wide == wide) return;
     C3D_FrameDrawOn(wide ? wide_rt : vram_rt);
-    cur_wide = wide;
+    cur_wide = wide; st_switch++;
 }
 static void vb_flush(void);
 static void end_and_wait(void) {   /* run what was recorded and wait for it: memory may be reused afterwards */
@@ -505,6 +509,8 @@ static int c3d_present(int x, int y, int w, int h, int masked) {
                     "%.2f host writes, %.2f read-backs, %.2f panel, %.2f present (the rest: the game, the core, sound)\n",
                     st_frames, st_syncs, st_writes, TK_MS(tk_frame), TK_MS(tk_draw), TK_MS(tk_upload), TK_MS(tk_write), TK_MS(tk_read),
                     TK_MS(tk_panel), TK_MS(tk_present));
+        port_printf("[3ds] pica: per frame %.2f ms waiting for the GPU to end the frame before, %.2f changes of target\n", TK_MS(tk_begin), (double)st_switch / TK_N);
+        tk_begin = 0; st_switch = 0;
         tk_frame = tk_draw = tk_upload = tk_write = tk_read = tk_panel = tk_present = 0;
     }
     return 1;
