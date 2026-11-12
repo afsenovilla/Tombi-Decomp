@@ -1130,7 +1130,7 @@ public class LauncherActivity extends Activity {
          *  CUSTOM: "Customise buttons" (custom style): preset, symbols, 8 colour rows, live preview; COLOR: one colour
          *  (pcEdit = 2 * position + 0 disc / 1 letter): R G B, H S V, a palette of swatches */
         static final int PG_PLAY = 0, PG_IMAGE = 1, PG_PAD = 2, PG_EXTRAS = 3, PG_DISC = 4, PG_APP = 5;
-        static final float RAIL_W = 104;
+        static final float RAIL_W = 124;
         int pcEdit;
         final RectF[] pcSw = new RectF[PC_PALETTE.length];
         int screen = MAIN, focus = 0, page = PG_PLAY;
@@ -1901,28 +1901,39 @@ public class LauncherActivity extends Activity {
             p.setStyle(Paint.Style.FILL); p.setColor(CHIP);
             canvas.drawRect(0, 0, RAIL_W, 720, p);
             int rc = railCount();
-            float h = 94, gap = 10, top = 360 - (rc * h + (rc - 1) * gap) / 2;
+            float h = 100, gap = 6, top = 352 - (rc * h + (rc - 1) * gap) / 2;
             for (int i = 0; i < rc; i++) {
                 Item it = items.get(i);
                 boolean f = i == focus, open = it.rail == page;
-                it.r.set(10, top, RAIL_W - 10, top + h);
-                if (open || f) {
-                    pill(it.r, open ? ACCENT : 0x30ffffff, open ? ACCENT_SH : 0x00000000, open ? 4 : 0, f);
+                it.r.set(8, top, RAIL_W - 8, top + h);
+                // the icon on a rounded square: accent when its page is open, faint when focused; the label under it
+                float bx = it.r.centerX() - 30, by = it.r.top + 8;
+                tmp.set(bx, by, bx + 60, by + 60);
+                if (f) {
+                    p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(4); p.setColor(Color.WHITE);
+                    RectF ring = new RectF(tmp.left - 6, tmp.top - 6, tmp.right + 6, tmp.bottom + 6);
+                    canvas.drawRoundRect(ring, 24, 24, p);
+                    p.setStyle(Paint.Style.FILL);
                 }
-                int col = open ? ACCENT_TEXT : CREAM;
-                railIcon(it.rail, it.r.centerX(), it.r.top + 36, col);
-                text(nunito, 13, col);
-                drawFitAt(it.label, it.r.centerX(), it.r.bottom - 12, h - 8);
+                if (open) {
+                    p.setColor(ACCENT_SH); canvas.drawRoundRect(new RectF(tmp.left, tmp.top + 4, tmp.right, tmp.bottom + 4), 18, 18, p);
+                    p.setColor(ACCENT); canvas.drawRoundRect(tmp, 18, 18, p);
+                } else if (f) {
+                    p.setColor(0x30ffffff); canvas.drawRoundRect(tmp, 18, 18, p);
+                }
+                railIcon(it.rail, tmp.centerX(), tmp.centerY(), open ? ACCENT_TEXT : CREAM);
+                text(nunito, 17, open ? Color.WHITE : CREAM);
+                drawFitAt(it.label, it.r.centerX(), it.r.bottom - 8, it.r.width() - 4);
                 top += h + gap;
             }
-            text(nunito, 12, SUB);
-            canvas.drawText("L1 / R1", RAIL_W / 2, 708, p);
+            text(nunito, 13, SUB);
+            canvas.drawText("L1 / R1", RAIL_W / 2, 710, p);
         }
         /** a simple drawn icon for a page (no image files), centred at (cx, cy), about 36 wide */
         void railIcon(int pg, float cx, float cy, int col) {
             p.setColor(col); p.setStyle(Paint.Style.FILL);
             if (pg == PG_PLAY) {
-                tri.reset(); tri.moveTo(cx - 12, cy - 16); tri.lineTo(cx + 16, cy); tri.lineTo(cx - 12, cy + 16); tri.close();
+                tri.reset(); tri.moveTo(cx - 13, cy - 18); tri.lineTo(cx + 19, cy); tri.lineTo(cx - 13, cy + 18); tri.close();
                 canvas.drawPath(tri, p);
             } else if (pg == PG_IMAGE) {
                 p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(4);
@@ -2015,9 +2026,9 @@ public class LauncherActivity extends Activity {
             for (Item it : rest) {
                 boolean f = items.indexOf(it) == focus;
                 if (it.primary) {
-                    it.r.set(pane.left + inset + 40, py, pane.right - inset - 40, py + 62);
+                    it.r.set(pane.left + inset, py, pane.right - inset, py + 64);
                     button(it, f, 28);
-                    py += 62 + 24;
+                    py += 64 + 22;
                 } else {
                     it.r.set(pane.left + inset, py, pane.right - inset, py + 50);
                     row(it, f, 19);
