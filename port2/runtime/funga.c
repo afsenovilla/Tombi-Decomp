@@ -44,6 +44,7 @@ void port_funga_room(const u8 *tbl, int area, int section)
     }
 }
 
+static void spawn_npcs(void);
 /* the gate object, every update (after ObjCullRegister): opens once Tombi is past x 1088 (200 units before it) */
 void port_funga_gate(u8 *o, int player_x)
 {
@@ -52,6 +53,7 @@ void port_funga_gate(u8 *o, int player_x)
     s16 *x = (s16 *)(o + 0x12), *z = (s16 *)(o + 0x1A);
     s32 *rot = (s32 *)(o + 0x88);
     if (bx == 0x7fff || (*rot == 0 && (*x != bx || *z != bz))) { bx = *x; bz = *z; }   /* (a new spawn: its own place) */
+    if (!o[0x91]) { o[0x91] = 1; spawn_npcs(); }   /* once per gate object = once per section load (objects start zeroed) */
     if (o[0x0A] == 0x10) o[0x0A] = 0x11;           /* the model drawer that applies the rotation (+0x84/+0x88/+0x8C) */
     if (*rot < 0x400 && (*rot || player_x > 1088)) *rot += 0x20;
     if (*rot > 0x400) *rot = 0x400;
@@ -59,4 +61,109 @@ void port_funga_gate(u8 *o, int player_x)
     int a = *rot;
     *x = (s16)(bx - 25 * rsin(a) / 4096);
     *z = (s16)(bz + 25 - 25 * rcos(a) / 4096);
+}
+
+/* ---- the Funga Chief (and later the Fungas): sprites of SPR table 0x37 (docs/CUT_CONTENT.md "Jungle (AREA10)").
+   Only AREA10 load lists 1 and 5 bring that table; section 2 does not, so it is read here from the user's own extraction
+   (AREA10/D005.GAM unpacked: list 1's LD0SYS pieces follow the room model, table 0x37 at +0x26954, 0x17FC bytes).  The
+   pixels (SYSTEM/A05700.000 at VRAM 64,0) and section 2's palette (CLUT03: the chief comes out blue with a red cape)
+   are in place already.  The objects are layer 3 updateAnimDecorSprite objects (the torches' handler: anim + cull)
+   spawned with marker b3 = 0x5A and given this table, page offset 0 and their own frames (port_funga_npc_*). */
+#include <stdio.h>
+#include <stdlib.h>
+extern const char *port_data_dir;
+extern int port_printf(const char *, ...);
+extern void lzDecompress(unsigned char *, unsigned char *);
+extern void AnimLoadDuration(void *);
+extern void spawnObjectFromRecord(void *, int);
+#define TBL_OFF 0x26954u
+#define TBL_LEN 0x17FCu
+static u8 chief_tbl[TBL_LEN + 16];
+static int chief_state;          /* 0 not tried, 1 loaded, -1 failed */
+static int load_chief(void)
+{
+    if (chief_state) return chief_state > 0;
+    chief_state = -1;
+    char p[1024]; FILE *f; long len; u8 *gam, *pg;
+    snprintf(p, sizeof p, "%s/AREA10/D005.GAM", port_data_dir ? port_data_dir : "data");
+    if (!(f = fopen(p, "rb"))) { port_printf("funga: cannot open %s\n", p); return 0; }
+    fseek(f, 0, SEEK_END); len = ftell(f); fseek(f, 0, SEEK_SET);
+    gam = malloc(len + 16);
+    if (!gam || fread(gam, 1, len, f) != (size_t)len) { fclose(f); free(gam); return 0; }
+    fclose(f);
+    u32 size = gam[4] | gam[5] << 8 | gam[6] << 16 | (u32)gam[7] << 24;
+    if (len < 8 || memcmp(gam, "GAM", 3) || size < TBL_OFF + TBL_LEN || size > (16u << 20)) { free(gam); port_printf("funga: %s is not the expected GAM\n", p); return 0; }
+    pg = calloc(1, size + 1024);
+    lzDecompress(gam, pg);
+    free(gam);
+    memcpy(chief_tbl, pg + TBL_OFF, TBL_LEN);
+    free(pg);
+    u16 first; memcpy(&first, chief_tbl + 2, 2);
+    if (first != 0x27C) { port_printf("funga: table 0x37 not where expected (first offset %x)\n", first); return 0; }
+    /* frames 29..58 end with two shadow parts (CLUT 0xF90A, 48 x 8) meant for a shadow page; drawn from the sprite page
+       they come out as scraps beside the figure: keep the figure's own parts only */
+    for (int f = 29; f <= 58; f++) { u16 c; memcpy(&c, chief_tbl + 4 * f, 2); if (c >= 3) { c -= 2; memcpy(chief_tbl + 4 * f, &c, 2); } }
+    chief_state = 1;
+    return 1;
+}
+
+/* the spawns, once per section load (from the gate's first update) */
+static void spawn_npcs(void)
+{
+    static u8 rec[16];
+    if (!load_chief()) return;
+    memset(rec, 0, sizeof rec);
+    rec[0] = 2; rec[1] = 3; rec[2] = 0x3F; rec[3] = 0x5A; rec[4] = 0;
+    s16 pos[3] = {1580, -160, 180};
+    memcpy(rec + 6, pos, 6);
+    spawnObjectFromRecord(rec, -1);
+}
+
+/* the chief: walks between x 1420 and 1720 (frames 47 48 49 48, 8 ticks each, 1 unit a tick), turns, and every second
+   lap stops for about two seconds talking and pointing (56 57).  Facing: bit 0 of +2E set = as drawn (to the right). */
+static const u16 WALK[] = {47, 48, 49, 48}, TALK[] = {56, 57};
+static u8 script[6][8];
+static void show(u8 *o, int k, u16 frame)
+{
+    u16 c = 0x8000 | 60;
+    memset(script[k], 0, 8); memcpy(script[k], &frame, 2); memcpy(script[k] + 6, &c, 2);
+    if (*(u32 *)(o + 0x24) != (u32)(unsigned long)script[k] || *(u16 *)script[k] != frame) {
+        *(u32 *)(o + 0x24) = (u32)(unsigned long)script[k];
+        AnimLoadDuration(o);
+    }
+}
+void port_funga_npc_init(u8 *o)
+{
+    if (!(port_cut_content & 64) || o[0x0C] != 0x5A || chief_state <= 0) return;
+    *(s16 *)(o + 0x1E) = 1;                 /* page offset: the parts say page 2, the chief is on page 3 (VRAM 192,0) */
+    o[0x0D] = 0;                            /* opaque */
+    *(u32 *)(o + 0x3C) = (u32)(unsigned long)chief_tbl;
+    o[0x0F] = 0;
+    *(s32 *)(o + 0x90) = 0;                 /* tick */
+    *(s32 *)(o + 0x94) = 1;                 /* direction */
+    *(s32 *)(o + 0x98) = 0;                 /* talk ticks left */
+    *(s32 *)(o + 0x9C) = 0;                 /* laps */
+    o[0x2E] |= 1;
+    show(o, 0, WALK[0]);
+}
+int port_funga_npc_step(u8 *o)
+{
+    if (!(port_cut_content & 64) || o[0x0C] != 0x5A || chief_state <= 0) return 0;
+    s32 *t = (s32 *)(o + 0x90), *dir = (s32 *)(o + 0x94), *talk = (s32 *)(o + 0x98), *laps = (s32 *)(o + 0x9C);
+    s16 *x = (s16 *)(o + 0x12);
+    (*t)++;
+    if (*talk > 0) {
+        (*talk)--;
+        show(o, 4 + (*t / 16 & 1), TALK[*t / 16 & 1]);
+        return 1;
+    }
+    *x += *dir;
+    if ((*dir > 0 && *x >= 1720) || (*dir < 0 && *x <= 1420)) {
+        *dir = -*dir;
+        if (++*laps % 2 == 0) *talk = 120;
+    }
+    if (*dir > 0) o[0x2E] |= 1; else o[0x2E] &= ~1;
+    int k = *t / 8 % 4;
+    show(o, k, WALK[k]);
+    return 1;
 }
