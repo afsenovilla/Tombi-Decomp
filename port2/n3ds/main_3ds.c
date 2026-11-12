@@ -135,7 +135,7 @@ static int choose_image(char *out, size_t cap) {
 static int choose_lang(int code) {
     /* (the console's font is the PC's code page 437: its codes for the accented letters) */
     static const char *name[NLANG] = { "English", "Fran\x87" "ais", "Deutsch", "Italiano", "Nederlands", "Espa\xA4ol (traducci\xA2n mejorada)",
-                                       "Espa\xA4ol (el del disco)", "Portugues", "Svenska", "Dansk" };
+                                       "Espa\xA4ol (original)", "Portugues", "Svenska", "Dansk" };
     static const int codes[NLANG] = { 0, 1, 2, 3, 4, 9, 5, 6, 7, 8 };
     int redraw = 1, ok = 0, sel = 0;
     for (int i = 0; i < NLANG; i++) if (codes[i] == code) sel = i;
