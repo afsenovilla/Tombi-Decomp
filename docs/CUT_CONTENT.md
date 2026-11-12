@@ -989,6 +989,11 @@ depended on which of the two village scripts was loaded; PAL/USA (and only they)
 if 177 or 113 is finished while event 20 is in progress [I].
 
 ### PrePre Vol. 9 (PCPX-96093, `TOMBA/AREA01/*.WSS`, 39 ops)
+Read this table as "switched off in the demo", not as cut content: events 14 "A Lost Child", 20 "Stop the Fight!",
+177 "Something's Cookin'?", and the lines 187 (the leaf butterfly), 185 (the Elder's bag), 175 (the friends vanished)
+and 171 (the right entrance to the Elder's house) are all in the retail game. The demo jumps over them because it
+ends early. The one real difference is the **reward of 177: the Charity Wings** (item 7) in the demo's dead branch
+(the live demo branch gives the Broken Vase; retail gives max health +1, JP / beta 0201 two Torches).
 | file / place | what | text (PrePre 9 bank `AREA02/A003` block 0) |
 |---|---|---|
 | 0200 e0 0x06FF..0x0828 (dead: after the unconditional `JMP` at 0x06FC, talker 14 always says dialogue 69) | the gassy dwarf's 177 quest as a talk branch: flag 177 == 4 -> dialogue 71, flag := 255, **AwardEvent(177, complete)**, wait 300 frames, **GiveItem(7) = Charity Wings**; other states dialogue 69 / 70 | 71 "おやっ！これ、くれるのかい？... かわりに これをもらっとくれ" ("oh, you're giving me this? ... take this in exchange"); 69 "4 dwarves suddenly vanished... the Koma Pigs hid them" |
