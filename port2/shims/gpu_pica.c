@@ -1038,6 +1038,10 @@ static void pica_copy(int sx, int sy, int dx, int dy, int w, int h) {
     put_rect(dx, dy, w, h);
 }
 static void pica_list_end(void) { flush(); }
+/* the end of a drawn ordering table (gpu.c DrawOTag): the frame's drawing is handed to the GPU now, so it runs while
+   the program waits for the vblank and runs the game, not from the present on (a 3DS waited 2.5 to 7 ms a frame for
+   the GPU at the next table's start) */
+void pica_submit(void) { flush(); if (dev->submit && !pica_dry) dev->submit(); }
 /* ---- --widescreen (gpu.c "widescreen"): the wide plane is the device's second target; a displayed buffer's wide copy
    is in its left or right half (gpu.c ws_base) at the buffer's own rows */
 static void pica_ws_fill(int x, int y, int w, int h, u16 c) { flush(); dev->wide_fill(x, y, w, h, c15to32(c)); }

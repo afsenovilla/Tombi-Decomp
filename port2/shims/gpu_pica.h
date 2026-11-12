@@ -62,5 +62,7 @@ typedef struct {
     void (*wide_down)(int wx, int wy, int x, int y, int w, int h);
     int (*wide_present)(int x, int y, int w, int h);
     void (*wide_read)(int x, int y, int w, int h, unsigned *dst, int stride);
+    /* optional: what was recorded goes to the GPU now (the end of a drawn ordering table), not at the present */
+    void (*submit)(void);
 } PicaDev;
 #endif

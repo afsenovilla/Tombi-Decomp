@@ -1052,6 +1052,9 @@ void DrawOTag(u32 *ot) {
     ws_sync_down();
     port_ot_signature = h * 31u + (unsigned)n;
     be->list_end();
+#ifdef __3DS__
+    if (!skip && be == &port_gpu_pica) { extern void pica_submit(void); pica_submit(); }
+#endif
     port_prof_draw_us += port_time_us() - t0;
     if (port_verbose > 1) port_printf("[port] DrawOTag %p: %d packets\n", ot, n);
 }

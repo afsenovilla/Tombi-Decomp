@@ -40,8 +40,8 @@ static unsigned char *arena; static unsigned arena_off;
 static unsigned long long st_syncs, st_writes, st_frames;
 /* where a frame's time goes (system ticks; the log line every 600 frames gives milliseconds per frame) */
 static unsigned long long tk_last, tk_frame, tk_upload, tk_write, tk_read, tk_panel, tk_present, tk_draw;
-static unsigned long long tk_begin; static unsigned st_switch;
-static double gpu_ms_sum, gpu_ms_max; static unsigned gpu_ms_n;   /* the GPU's own time for each presented frame (C3D_GetDrawingTime) */   /* the wait at a frame's start (the GPU still on the frame before), the changes of target */
+static unsigned long long tk_begin; static unsigned st_switch;   /* the wait at a frame's start (the GPU still on the frame before), the changes of target */
+static double gpu_ms_sum, gpu_ms_max; static unsigned gpu_ms_n;   /* the GPU's own time for each submitted frame (C3D_GetDrawingTime) */
 #define TK_N 120   /* frames per log line */
 #define TK_MS(t) ((double)(t) * 1000.0 / SYSCLOCK_ARM11 / TK_N)
 static unsigned long long n_up, n_rd, n_wait;
@@ -238,6 +238,7 @@ static void c3d_tris(const PState *s, const PV *v, int n) {
 }
 /* where the backend builds its next batch: the free end of the vertex buffer (at least 2048 vertices of it) */
 static PV *c3d_vbuf(int *room) {
+    begin();   /* (the vertices are written before the batch is drawn: the frames submitted before must be done with them) */
     if (vb_n > VB_MAX - 2048 - 256) { end_and_wait(); begin(); }
     *room = VB_MAX - 256 - vb_n;
     return vb + vb_n;
@@ -522,6 +523,16 @@ static int c3d_present(int x, int y, int w, int h, int masked) {
     return 1;
 }
 
+/* the open frame to the GPU (pica_submit): its memory, the vertex buffer and the arena, is free again once the next
+   begin() has waited for it, and every writer of them begins first */
+static void c3d_submit(void) {
+    if (!in_frame) return;
+    vb_flush();
+    { double g = C3D_GetDrawingTime(); gpu_ms_sum += g; gpu_ms_n++; if (g > gpu_ms_max) gpu_ms_max = g; }
+    C3D_FrameEnd(GX_CMDLIST_FLUSH);
+    in_frame = 0;
+    frame_no++; arena_off = 0; vb_n = 0; last_ok = 0;
+}
 static int c3d_wide_present(int x, int y, int w, int h) {
     pres_tex = &wide_tex; pres_w = w > 400 ? 400 : w;
     int r = c3d_present(x, y, w, h, 0);
@@ -847,7 +858,7 @@ void port_n3ds_gpu_fini(void) {
     C3D_Fini();
 }
 const PicaDev pd_c3d = { c3d_start, c3d_tex_upload, c3d_tris, c3d_fill, c3d_read, c3d_write, c3d_present, c3d_vbuf, c3d_write15,
-                         c3d_wide_start, c3d_wide_fill, c3d_wide_write, c3d_wide_down, c3d_wide_present, 0 };
+                         c3d_wide_start, c3d_wide_fill, c3d_wide_write, c3d_wide_down, c3d_wide_present, 0, c3d_submit };
 #endif
 
 /* ---- a worker thread for the panel's renders (runtime/panel.c): on another core where there is one (New 3DS: core 2;
