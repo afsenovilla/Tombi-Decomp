@@ -292,6 +292,50 @@ static void c3d_write(int x, int y, int w, int h, const unsigned *src, int strid
         }
     tk_write += svcGetSystemTick() - t0;
 }
+/* the same from the PS1's words (bit 15, blue, green, red: 5 bits each), staged as RGBA5551 texels: one pass, half the
+   bytes.  The PICA widens 5 bits to 8 as the backend does (the high bits repeated below), bit 15 is the alpha. */
+static void c3d_write15(int x, int y, int w, int h, const unsigned short *src, int stride) {
+    u64 t0 = svcGetSystemTick();
+    static unsigned char mo[64];
+    if (!mo[1]) for (int k = 0; k < 64; k++) mo[k] = (unsigned char)morton(k & 7, k >> 3);
+    for (int j0 = 0; j0 < h; j0 += 256)
+        for (int i0 = 0; i0 < w; i0 += 256) {
+            int pw = w - i0 < 256 ? w - i0 : 256, ph = h - j0 < 256 ? h - j0 : 256;
+            C3D_Tex *tp = &stg;
+            begin(); cmd_room();
+            if (stage_tex(tp, pw, ph)) continue;   /* (4 bytes a texel of the arena taken, 2 used) */
+            tp->fmt = GPU_RGBA5551; tp->size = (u32)tp->width * tp->height * 2;
+            C3D_Tex t = *tp;
+            u16 *d = t.data;
+            const int tpr = t.width >> 3;
+            for (int ty = 0; ty < ph; ty += 8) for (int tx = 0; tx < pw; tx += 8) {
+                u16 *tl = d + ((ty >> 3) * tpr + (tx >> 3)) * 64;
+                const int nx = pw - tx < 8 ? pw - tx : 8, ny = ph - ty < 8 ? ph - ty : 8;
+                for (int yy = 0; yy < ny; yy++) {
+                    const unsigned short *sr = src + (j0 + ty + yy) * stride + i0 + tx; const unsigned char *m = mo + yy * 8;
+                    for (int xx = 0; xx < nx; xx++) {
+                        const unsigned c = sr[xx];
+                        tl[m[xx]] = (u16)((c & 31) << 11 | (c & 0x3E0) << 1 | (c >> 9 & 0x3E) | c >> 15);
+                    }
+                }
+            }
+            dcache_flush(d, (unsigned)t.width * t.height * 2);
+            if (vb_n + 6 > VB_MAX - 64) end_and_wait();
+            begin();
+            C3D_SetScissor(GPU_SCISSOR_DISABLE, 0, 0, 0, 0);
+            set_env(1, 0); set_atest(AT_OFF); set_blend(-1);
+            C3D_TexBind(0, tp);
+            float X0 = x + i0, Y0 = y + j0, X1 = X0 + pw, Y1 = Y0 + ph, S1 = (float)pw / t.width, T0 = 1.0f, T1 = 1.0f - (float)ph / t.height;
+            if (X1 > EDGE_X) { S1 *= (EDGE_X - X0) / (X1 - X0); X1 = EDGE_X; }
+            if (Y1 > EDGE_Y) { T1 = T0 + (T1 - T0) * (EDGE_Y - Y0) / (Y1 - Y0); Y1 = EDGE_Y; }
+            QUAD_BEGIN();
+            vtx(X0, Y0, 0, T0, 1, 1, 1, 1); vtx(X1, Y0, S1, T0, 1, 1, 1, 1); vtx(X0, Y1, 0, T1, 1, 1, 1, 1);
+            vtx(X1, Y0, S1, T0, 1, 1, 1, 1); vtx(X1, Y1, S1, T1, 1, 1, 1, 1); vtx(X0, Y1, 0, T1, 1, 1, 1, 1);
+            QUAD_END();
+            st_writes++;
+        }
+    tk_write += svcGetSystemTick() - t0;
+}
 static void c3d_fill(int x, int y, int w, int h, unsigned c) {
     begin();
     cmd_room();
@@ -739,7 +783,7 @@ void port_n3ds_gpu_fini(void) {
     in_frame = 0;
     C3D_Fini();
 }
-const PicaDev pd_c3d = { c3d_start, c3d_tex_upload, c3d_tris, c3d_fill, c3d_read, c3d_write, c3d_present, c3d_vbuf };
+const PicaDev pd_c3d = { c3d_start, c3d_tex_upload, c3d_tris, c3d_fill, c3d_read, c3d_write, c3d_present, c3d_vbuf, c3d_write15 };
 #endif
 
 /* ---- a worker thread for the panel's renders (runtime/panel.c): on another core where there is one (New 3DS: core 2;

@@ -264,6 +264,9 @@ static void pend_go(int i) {   /* (no batch is open here) */
     const u16 *vram = port_vram();
     const int x = pend[i].x, y = pend[i].y, w = pend[i].w, h = pend[i].h;
     memmove(&pend[i], &pend[i + 1], (size_t)(npend - i - 1) * sizeof pend[0]); npend--;
+    /* (a movie's frame is one of these, 15 times a second: the pass to RGBA8 here and the device's own to its texel
+       order were as long as decoding the picture) */
+    if (dev->write15) { dev->write15(x, y, w, h, vram + y * 1024 + x, 1024); return; }
     for (int j = 0; j < h; j++) for (int k = 0; k < w; k++) stage[j * w + k] = c15to32(vram[(y + j) * 1024 + x + k]);
     dev->write(x, y, w, h, stage, w);
 }

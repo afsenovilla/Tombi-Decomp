@@ -51,5 +51,7 @@ typedef struct {
     /* optional: memory of the device's for the next batch (*room vertices of it): tris() then gets that pointer and
        has nothing to copy.  Asked before each batch; valid until that batch's tris() */
     PV *(*vbuf)(int *room);
+    /* optional: write() from the PS1's own words (VRAM's rows, stride words apart): no pass to RGBA8 before it */
+    void (*write15)(int x, int y, int w, int h, const unsigned short *src, int stride);
 } PicaDev;
 #endif

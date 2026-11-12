@@ -311,8 +311,14 @@ static void xa_next(int *l, int *r) {
         return;
     }
     const s16 *c = xa_fifo[xa_r % XA_FIFO], *n = avail > 1 ? xa_fifo[(xa_r + 1) % XA_FIFO] : c;
+#ifdef __3DS__   /* (no divide instruction: two 64-bit divisions a sample were a routine call each; the phase to 15 bits) */
+    { const int f = (int)(((unsigned)xa_phase << 15) / RATE);
+      *l = c[0] + (((n[0] - c[0]) * f) >> 15);
+      *r = c[1] + (((n[1] - c[1]) * f) >> 15); }
+#else
     *l = c[0] + (int)(((long long)(n[0] - c[0]) * xa_phase) / RATE);
     *r = c[1] + (int)(((long long)(n[1] - c[1]) * xa_phase) / RATE);
+#endif
     xa_phase += xa_rate;
     while (xa_phase >= RATE) { xa_phase -= RATE; if (xa_w - xa_r) xa_r++; }
 }
