@@ -44,7 +44,7 @@ void port_funga_room(const u8 *tbl, int area, int section)
     }
 }
 
-/* the gate object, every update (after ObjCullRegister): opens once Tombi is past x 1180 (about 100 units before it) */
+/* the gate object, every update (after ObjCullRegister): opens once Tombi is past x 1088 (200 units before it) */
 void port_funga_gate(u8 *o, int player_x)
 {
     static int bx = 0x7fff, bz;
@@ -53,7 +53,7 @@ void port_funga_gate(u8 *o, int player_x)
     s32 *rot = (s32 *)(o + 0x88);
     if (bx == 0x7fff || (*rot == 0 && (*x != bx || *z != bz))) { bx = *x; bz = *z; }   /* (a new spawn: its own place) */
     if (o[0x0A] == 0x10) o[0x0A] = 0x11;           /* the model drawer that applies the rotation (+0x84/+0x88/+0x8C) */
-    if (*rot < 0x400 && (*rot || player_x > 1180)) *rot += 0x20;
+    if (*rot < 0x400 && (*rot || player_x > 1088)) *rot += 0x20;
     if (*rot > 0x400) *rot = 0x400;
     /* hinge on the back edge (local z +25): origin = hinge - R(0, 0, 25) */
     int a = *rot;
