@@ -15,9 +15,9 @@ image (the disc field is optional while data/ is valid for the same MAIN0.EXE).
 import hashlib, re, json, os, shutil, struct, subprocess, sys, threading
 
 try:
-    from PySide6.QtCore import Qt, QTimer, QObject, Signal, QEvent, QSize, QRectF, QPointF
+    from PySide6.QtCore import Qt, QTimer, QObject, Signal, QEvent, QSize, QRectF, QPointF, QUrl
     from PySide6.QtGui import QIcon, QPixmap, QPainter, QColor, QPen, QFont, QFontMetricsF, QFontDatabase, QPainterPath, \
-        QPalette, QGuiApplication, QImage, QLinearGradient
+        QPalette, QGuiApplication, QImage, QLinearGradient, QDesktopServices
     from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QFrame, QLabel, QPushButton, QToolButton, QAbstractButton, \
         QHBoxLayout, QVBoxLayout, QGridLayout, QLineEdit, QComboBox, QCheckBox, QRadioButton, QButtonGroup, QSpinBox, \
         QAbstractSpinBox, QProgressBar, QPlainTextEdit, QScrollArea, QStackedWidget, QFileDialog, QMessageBox, \
@@ -216,6 +216,12 @@ i18n.add({   # a disc inside a .zip / .7z (tools/disc_archive.py), or a file tha
            "s.a.cue": "“{0}” indeholder .cue-filen, men ikke det datanummer, den nævner ({1}).",
            "s.a.bad": "“{0}” kan ikke læses: {1}. Pak det ud og vælg diskaftrykket.",
            "s.a.space": "Ikke nok ledig plads til at pakke “{0}” ud: {1} MB kræves, {2} MB ledigt."},
+})
+i18n.add({   # the update check at start (newer_release); the other languages: port_launcher_lang.py
+    "es": {"l.update": "Nueva versión {0}: descargar", "l.updatetip": "Abre la página de la versión en GitHub.",
+           "l.checkupdates": "Buscar actualizaciones al abrir"},
+    "en": {"l.update": "New version {0}: download", "l.updatetip": "Opens the release page on GitHub.",
+           "l.checkupdates": "Check for updates at start"},
 })
 i18n.add({   # the game library (tools/game_library.py); the other languages: port_launcher_lang.py
     "es": {"c.library": "Juegos", "b.addgame": "Añadir juego…",
@@ -714,6 +720,34 @@ def app_version():
 
 
 APP_VERSION = app_version()
+RELEASES_API = "https://api.github.com/repos/afsenovilla/Tombi-Decomp/releases/latest"
+
+
+def _ver_tuple(v):
+    m = re.match(r"v?(\d+)\.(\d+)\.(\d+)$", (v or "").strip())
+    return tuple(int(x) for x in m.groups()) if m else None
+
+
+def newer_release(current=None, timeout=6):
+    """(version, page URL) of the latest published release when it is newer than this one, else None (also offline, on
+    any error, or for a checkout without a VERSION). One request to the GitHub API, no data sent but the request."""
+    cur = _ver_tuple(current if current is not None else APP_VERSION)
+    if not cur:
+        return None
+    try:
+        import urllib.request
+        req = urllib.request.Request(RELEASES_API, headers={"Accept": "application/vnd.github+json", "User-Agent": "tombi-port-launcher"})
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            j = json.loads(r.read().decode("utf-8", "replace"))
+        tag = j.get("tag_name") or ""
+        new = _ver_tuple(tag)
+        if new and new > cur and not j.get("draft") and not j.get("prerelease"):
+            return ".".join(map(str, new)), j.get("html_url") or "https://github.com/afsenovilla/Tombi-Decomp/releases/latest"
+    except Exception:
+        pass
+    return None
+
+
 VERSION_TAG = ("v" + APP_VERSION + " · " if APP_VERSION else "") + "build " + BUILD_ID
 
 
@@ -1127,6 +1161,7 @@ QToolTip { background: %(card)s; color: %(text)s; border: 1px solid %(line)s; pa
 #appSub { color: %(muted)s; font-size: 9pt; }
 #sideCaption { color: %(muted)s; font-size: 9pt; }
 #build { color: %(faint)s; font-size: 8.5pt; }
+QPushButton#update { font-weight: bold; }
 QPushButton#nav { text-align: left; padding: 8px 12px; border: 1px solid transparent; border-radius: 8px;
     background: transparent; font-size: 10.5pt; }
 QPushButton#nav:hover { background: %(nav_hover)s; }
@@ -2086,7 +2121,18 @@ class App(QMainWindow):
             QGuiApplication.styleHints().colorSchemeChanged.connect(lambda *_: (self._apply_theme(), self.rebuild()))
         except AttributeError:
             pass
+        self.update_info = None      # (version, url) of a newer release, from the check at start (check_updates setting)
         self._build()
+        if self.s.get("check_updates", True):
+            threading.Thread(target=lambda: self._got_update(newer_release()), daemon=True).start()
+
+    def _got_update(self, info):
+        if info:
+            self.later(self._show_update, info)
+
+    def _show_update(self, info):
+        self.update_info = info
+        self.rebuild()
 
     # ---- helpers
     def after(self, ms, fn, *args):
@@ -2357,9 +2403,22 @@ class App(QMainWindow):
         cb.activated.connect(chosen)
         sl.addWidget(cb)
         sl.addSpacing(10)
+        if self.update_info:
+            ub = QPushButton(tr("l.update", self.update_info[0]))
+            ub.setObjectName("update")
+            ub.setToolTip(tr("l.updatetip"))
+            ub.setFocusPolicy(Qt.NoFocus)
+            ub.clicked.connect(lambda: QDesktopServices.openUrl(QUrl(self.update_info[1])))
+            sl.addWidget(ub)
+            sl.addSpacing(4)
         bl = QLabel(VERSION_TAG)
         bl.setObjectName("build")
         sl.addWidget(bl)
+        uc = QCheckBox(tr("l.checkupdates"))
+        uc.setChecked(bool(self.s.get("check_updates", True)))
+        uc.setFocusPolicy(Qt.NoFocus)
+        uc.toggled.connect(lambda on: self.s.__setitem__("check_updates", on))
+        sl.addWidget(uc)
         grid.addWidget(side, 0, 0, 2, 1)
 
         self.stack = QStackedWidget()

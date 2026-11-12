@@ -187,4 +187,6 @@
     <string name="rail_disc">Disc</string>
     <string name="rail_app">App</string>
     <string name="page_extras">Extras</string>
+    <string name="upd_new">Neue Version %1$s: herunterladen</string>
+    <string name="opt_checkupd">Beim Start nach Updates suchen</string>
 </resources>

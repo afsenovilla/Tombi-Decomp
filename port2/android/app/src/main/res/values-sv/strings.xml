@@ -187,4 +187,6 @@
     <string name="rail_disc">Skiva</string>
     <string name="rail_app">App</string>
     <string name="page_extras">Extra</string>
+    <string name="upd_new">Ny version %1$s: ladda ner</string>
+    <string name="opt_checkupd">Sök efter uppdateringar vid start</string>
 </resources>

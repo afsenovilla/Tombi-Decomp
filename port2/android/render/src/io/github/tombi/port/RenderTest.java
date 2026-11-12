@@ -217,6 +217,10 @@ public class RenderTest {
         a.view.setScreen(LauncherActivity.LauncherView.MAIN);
         a.view.focus = indexOfPlay(a);
         shot(a, "lib_pal");
+        a.updateVer = "9.9.9"; a.updateUrl = "https://github.com/";   // the update check found a newer release
+        a.view.build(); a.view.focus = indexOfPlay(a) + 1;
+        shot(a, "lib_pal_update");
+        a.updateVer = null; a.view.build(); a.view.focus = indexOfPlay(a);
         prefs.edit().putString("game", "scus94236").commit();
         a.view.focus = a.view.railCount() + 1;   // the USA card focused (and selected)
         shot(a, "lib_usa_focus");

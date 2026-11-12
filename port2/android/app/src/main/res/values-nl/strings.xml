@@ -187,4 +187,6 @@
     <string name="rail_disc">Schijf</string>
     <string name="rail_app">App</string>
     <string name="page_extras">Extra\'s</string>
+    <string name="upd_new">Nieuwe versie %1$s: downloaden</string>
+    <string name="opt_checkupd">Bij het starten op updates controleren</string>
 </resources>

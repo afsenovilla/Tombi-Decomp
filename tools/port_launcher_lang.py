@@ -1267,3 +1267,13 @@ i18n.add({   # the game library (port_launcher.py, tools/game_library.py)
            "s.noimage": "Diskaftrykket blev ikke fundet: {0}", "l.speedntsc": "60 Hz: spillets egen hastighed (NTSC).",
            "l.nomods": "DEBUG-punktet i titelmenuen findes indtil videre kun i PAL-versionen."},
 })
+
+i18n.add({   # the update check at start (port_launcher.py newer_release)
+    "fr": {"l.update": "Nouvelle version {0} : télécharger", "l.updatetip": "Ouvre la page de la version sur GitHub.", "l.checkupdates": "Chercher des mises à jour au démarrage"},
+    "de": {"l.update": "Neue Version {0}: herunterladen", "l.updatetip": "Öffnet die Seite der Version auf GitHub.", "l.checkupdates": "Beim Start nach Updates suchen"},
+    "it": {"l.update": "Nuova versione {0}: scarica", "l.updatetip": "Apre la pagina della versione su GitHub.", "l.checkupdates": "Cerca aggiornamenti all'avvio"},
+    "nl": {"l.update": "Nieuwe versie {0}: downloaden", "l.updatetip": "Opent de pagina van de versie op GitHub.", "l.checkupdates": "Bij het starten op updates controleren"},
+    "pt": {"l.update": "Nova versão {0}: transferir", "l.updatetip": "Abre a página da versão no GitHub.", "l.checkupdates": "Procurar atualizações ao abrir"},
+    "sv": {"l.update": "Ny version {0}: ladda ner", "l.updatetip": "Öppnar versionens sida på GitHub.", "l.checkupdates": "Sök efter uppdateringar vid start"},
+    "da": {"l.update": "Ny version {0}: hent", "l.updatetip": "Åbner versionens side på GitHub.", "l.checkupdates": "Søg efter opdateringer ved start"},
+})

@@ -187,4 +187,6 @@
     <string name="rail_disc">Disk</string>
     <string name="rail_app">App</string>
     <string name="page_extras">Ekstra</string>
+    <string name="upd_new">Ny version %1$s: hent</string>
+    <string name="opt_checkupd">Søg efter opdateringer ved start</string>
 </resources>
