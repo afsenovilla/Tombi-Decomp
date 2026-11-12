@@ -147,14 +147,30 @@ typedef struct { u8 t[40]; } TR;          /* a triangle packet: flat 32 bytes, s
 /* A prop of the room stood again past its end: the polygons of the model inside a box (and on the given texture
    pages: its leaves and wood, not the ground or the fence under it) are copied, moved by (dx, dy, dz).  The first
    room: its big apple tree planted where the path ends on the left, so the way is visibly closed. */
-static const struct { u8 area, section, end; s16 x0, x1, y1, z0, z1; u16 tp[2], clut; s16 dx, dy, dz, pad0, pad1; } PROPS[] = {
+static const struct { u8 area, section, end; s16 x0, x1, y1, z0, z1; u16 tp[2], clut; s16 dx, dy, dz, pad0, pad1; s16 tx, tz, slope; } PROPS[] = {
     /* (clut: 0 = any; pad0..pad1: the strip widths, in px, it is used for)
        32:9: the whole tree, far enough out that its round crown stops at the pig house;
        16:9 / 21:9: the strip is narrower than the crown, so only the trunk and its fork, under the tree line carried
        on (21:9: a second one further out and back) */
-    {0, 0, 0, 150, 520, -50, -10, 200, {0x12, 0x0d}, 0,      -490,  8,   0, 200, 999},
-    {0, 0, 0, 300, 380, -50,  50,  60, {0x12, 0x12}, 0x7eca, -400, 22,  60,   1, 199},
-    {0, 0, 0, 300, 380, -50,  50,  60, {0x12, 0x12}, 0x7eca, -545, 18, 110,  90, 199},
+    /* a stand of trunks in the foreground (in front of the path, on the front slope), at their own size: the apple
+       tree's forked trunk (7eca) and the trunk of the tree by the thatched hut (7f0a) */
+    {0, 0, 0, 300, 380, -50,  50,  60, {0x12, 0x12}, 0x7eca,  -388,   5, -105,   1, 999},
+    {0, 0, 0, 815, 870, -30,  80,  86, {0x12, 0x12}, 0x7f0a,  -926, -16, -108,   1, 999},
+    {0, 0, 0, 300, 380, -50,  50,  60, {0x12, 0x12}, 0x7eca,  -463,  34, -125,   1, 999},
+    {0, 0, 0, 815, 870, -30,  80,  86, {0x12, 0x12}, 0x7f0a, -1011, -16, -123,  90, 999},
+    {0, 0, 0, 300, 380, -50,  50,  60, {0x12, 0x12}, 0x7eca,  -570,   2,  -75,  90, 999},
+    /* 21:9 and wider: a trunk further out and back, under the tree line carried on; 32:9: the whole tree too */
+    {0, 0, 0, 300, 380, -50,  50,  60, {0x12, 0x12}, 0x7eca,  -620,  18,  110,  90, 999},
+    {0, 0, 0, 150, 520, -50, -10, 200, {0x12, 0x0d}, 0,       -760,   8,   40, 200, 999},
+    /* the fence (page 0xe, its level stretch x 96..192 at z 45): carried on to the left behind the pig house, and
+       turned (tx, tz: x and z change per 256 units along the source x, from dx, dz at x0; slope: y change per 256
+       units, to follow the ground) across the path where the room's wall stops the player (x about 10), from the
+       house's corner diagonally down the front slope */
+    {0, 0, 0,  96, 192, -20,  45,  45, {0x0e, 0x0e}, 0x7d0d,  -196, -19,    0,   1, 999, 0, 0, 0},
+    {0, 0, 0,  96, 192, -20,  45,  45, {0x0e, 0x0e}, 0x7d0d,  -292, -19,    0,  60, 999, 0, 0, 0},
+    {0, 0, 0,  96, 192, -20,  45,  45, {0x0e, 0x0e}, 0x7d0d,  -388, -19,    0, 200, 999, 0, 0, 0},
+    {0, 0, 0,  96, 192, -20,  45,  45, {0x0e, 0x0e}, 0x7d0d,  -484, -19,    0, 200, 999, 0, 0, 0},
+    {0, 0, 0,  96, 192, -20,  45,  45, {0x0e, 0x0e}, 0x7d0d,    -2, -19,   48,   1, 999,   18, -256, -30},
 };
 static int cur_area, cur_section;
 typedef struct { u8 *blk; int size, nq; } Block;
@@ -312,11 +328,21 @@ pack:
             u8 *d;
             if (p->nv == 4) { if (nf + ng >= MAXQ) break; d = p->gour ? gq[ng++].g : fq[nf++].flat; }
             else { if (nt3[0] + nt3[1] >= MAXT) break; d = p->gour ? gt[nt3[1]++].t : ft[nt3[0]++].t; }
-            memcpy(d, &p->clut, 2); memcpy(d + 2, &p->tpage, 2); memcpy(d + 4, &p->col[0], 4); d += 8;
-            if (p->gour) for (int j = 1; j < p->nv; j++) { memcpy(d, &p->col[j], 4); d += 4; }
+            /* a turned copy faces the other way: swap the vertex pairs so that it is not culled (the command byte
+               stays with the first colour word) */
+            static const u8 fwd[4] = {0, 1, 2, 3}, rev4[4] = {1, 0, 3, 2}, rev3[4] = {1, 0, 2, 3};
+            const u8 *ord = !PROPS[pi].tz ? fwd : p->nv == 4 ? rev4 : rev3;
+            memcpy(d, &p->clut, 2); memcpy(d + 2, &p->tpage, 2); memcpy(d + 4, &p->col[ord[0]], 3); memcpy(d + 7, (const u8 *)&p->col[0] + 3, 1); d += 8;
+            if (p->gour) for (int j = 1; j < p->nv; j++) { memcpy(d, &p->col[ord[j]], 4); d += 4; }
             for (int j = 0; j < p->nv; j++) {
-                Vx v = p->v[j];
-                v.x = (s16)(s * v.x + PROPS[pi].dx); v.y = (s16)(v.y + PROPS[pi].dy); v.z = (s16)(v.z + PROPS[pi].dz);
+                Vx v = p->v[ord[j]];
+                if (PROPS[pi].tz) {
+                    int along = s * v.x - PROPS[pi].x0;
+                    v.x = (s16)(PROPS[pi].dx + along * PROPS[pi].tx / 256); v.z = (s16)(PROPS[pi].dz + along * PROPS[pi].tz / 256);
+                    v.y = (s16)(v.y + PROPS[pi].dy + along * PROPS[pi].slope / 256);
+                } else {
+                    v.x = (s16)(s * v.x + PROPS[pi].dx); v.y = (s16)(v.y + PROPS[pi].dy); v.z = (s16)(v.z + PROPS[pi].dz);
+                }
                 memcpy(d, &v, 8); d += 8;
             }
             nprop++;
