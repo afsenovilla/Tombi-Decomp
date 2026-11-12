@@ -43,6 +43,10 @@ static void set_ir(int lm) {
     IR3 = clampf(MAC3, lo, 0x7FFF, 1u << 22);
 }
 
+/* --widescreen top-down rooms (runtime/ws_topdown.c): screen X added to RTPS / RTPT while the scene's objects are
+   drawn, so the frame keeps inside the map picture at its edges; 0 otherwise (identity) */
+int port_gte_dx;
+
 static void rtp(int n, int last) {
     s16 r[3][3]; mat(0, r);
     s64 x = VX(n), y = VY(n), z = VZ(n);
@@ -58,7 +62,7 @@ static void rtp(int n, int last) {
     u32 q;
     if (sz * 2 <= h) { q = 0x1FFFF; FLAG |= 1u << 17; }
     else { q = (u32)((((s64)h << 17) / sz + 1) >> 1); if (q > 0x1FFFF) { q = 0x1FFFF; FLAG |= 1u << 17; } }
-    s64 sx = ((s64)C[24] + (s64)IR1 * q) >> 16;
+    s64 sx = (((s64)C[24] + (s64)IR1 * q) >> 16) + port_gte_dx;
     s64 sy = ((s64)C[25] + (s64)IR2 * q) >> 16;
     D[12] = D[13]; D[13] = D[14];
     s32 SX = clampf(sx, -0x400, 0x3FF, 1u << 14), SY = clampf(sy, -0x400, 0x3FF, 1u << 13);
