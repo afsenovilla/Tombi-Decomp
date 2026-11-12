@@ -1104,6 +1104,7 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--subscreen-labels") && v) { extern int port_subscreen_labels(const char *); if (!port_subscreen_labels(argv[++i])) return usage(argv[0]); }
         else if (!strcmp(a, "--skip-movies")) port_skip_movies = 1;
         else if (!strcmp(a, "--skip-intro")) port_skip_movies = 2;
+        else if (!strcmp(a, "--no-movies")) { extern int port_skip_all; port_skip_movies = 2; port_skip_all = 1; }   /* both: straight to the title screen, and no movie in the game either (the 3DS's "Movies: skip") */
         else if (!strcmp(a, "--logo-only")) port_skip_movies = 3;       /* (the 3DS's default: n3ds/main_3ds.c) */
         else if (!strcmp(a, "--audio-half")) { extern int port_sound_half; port_sound_half = 1; }   /* (shims/sound.c: an Old 3DS) */
         else if (!strcmp(a, "--audio-dry")) { extern int port_sound_dry; port_sound_dry = 1; }

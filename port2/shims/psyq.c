@@ -1273,6 +1273,7 @@ int port_cd_stats(int *sectors) { *sectors = cd_sectors; return cd_reads; }
  * part of the stream (the file after the movie) end it; the game ends a movie on its own frame count three
  * frames before that.  --skip-movies: StGetNext at once reports a frame past the end of every movie, so
  * moviePlayerTask takes its "movie finished" path (CdMix, StUnSetRing, exitTask) without playing. */
+int port_skip_all;        /* --no-movies: --skip-intro, and the game's own movies skipped too */
 int port_skip_movies;     /* 1 = every movie (--skip-movies), 2 = only those before gameplay starts (--skip-intro: logos, title movie) */
 int port_in_game;         /* set by the overlay loader on the first area overlay (runtime/ovl.c) */
 typedef struct { u16 id, type, secCount, nSectors; u32 frameCount, frameSize; u16 width, height; u16 nCodes, magic, q, version; u32 zero; } StHEADER;
@@ -1382,7 +1383,7 @@ void port_st_vblank(void) {
    the first stream of the session, the developer's logo (LOGO.STR, 6.7 s) */
 static int st_count;
 static int st_skipped(void) {
-    return port_skip_movies == 1 || (port_skip_movies == 2 && !port_in_game) || (port_skip_movies == 3 && st_count > 1);
+    return port_skip_all || port_skip_movies == 1 || (port_skip_movies == 2 && !port_in_game) || (port_skip_movies == 3 && st_count > 1);
 }
 int CdRead2(int mode) {
     u8 param = (u8)mode;

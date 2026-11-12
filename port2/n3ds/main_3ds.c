@@ -281,7 +281,7 @@ int main(int argc, char **argv) {
     /* (60 on both now: with the sound mixed on the second core and the frames it cannot draw skipped, an Old 3DS kept
        50 with time to spare; args.txt "--hz 50" for the PAL disc's own speed) */
     args[n++] = "--hz"; args[n++] = opt_hz == 50 ? "50" : "60";   /* (the options screen: choose_lang) */
-    if (!opt_movies) args[n++] = "--skip-movies";
+    if (!opt_movies) args[n++] = "--no-movies";   /* (the logos at the start too: straight to the title screen) */
     if (opt_wide) { args[n++] = "--widescreen"; args[n++] = "5:3"; }
     /* the bottom screen: the panel (runtime/panel.c) at the screen's own size, drawn by n3ds/pica_c3d.c; the game's
        NOW LOADING until gameplay, then status / events / map / items, by touch */
