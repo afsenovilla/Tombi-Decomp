@@ -167,7 +167,7 @@ int port_tpatch_load(const char *arg) {
             snprintf(name, sizeof name, "%.*s", (int)pl, (char *)b + q + 2); \
             tp_busy = 1; src[s__] = port_cd_read_named(name, &got); tp_busy = 0; \
             if (!src[s__] || got != ssz[s__]) { port_printf("[tpatch] source %s: %s\n", name, src[s__] ? "size differs (not the PAL disc SCES-01331?)" : "not on the disc (or no memory for it)"); ok = 0; ssz[s__] = 0; } \
-            else { sha1(src[s__], got, dd); if (memcmp(dd, b + q + 2 + pl + 4, 20)) { port_printf("[tpatch] source %s: sha1 differs (not the PAL disc SCES-01331, or already patched)\n", name); ok = 0; } loaded += got; } } } while (0)
+            else { (void)dd; loaded += got; } } } while (0)   /* (no sha1 of a source here: each rebuilt file's own is checked, and hashing 60 MB of sources was most of the minutes a store took to make) */
         f->data = malloc(f->size + 4);
         if (!f->data) { port_printf("[tpatch] no memory for %s (%u bytes)\n", f->path, f->size); ok = 0; }
         for (k = 0; k < nops && ok; k++) {

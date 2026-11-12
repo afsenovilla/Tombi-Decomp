@@ -56,7 +56,12 @@ static void audio_cb(void *ud, Uint8 *stream, int len) {
    the lock for a whole callback, tens of milliseconds there: port_audio_yield, between the callback's pieces,
    lets the game thread in) */
 static volatile int lock_wanted;
-void port_audio_lock(void) { if (dev) { lock_wanted++; SDL_LockAudioDevice(dev); lock_wanted--; } }
+/* (counted with atomic steps: the game's thread and, on an Old 3DS, the mixer's on the other core both come here, and
+   a count lost between them stayed above zero for good: every yield then waited its 20 ms, the mixer made a seventh
+   of the samples, and the sound broke up and held the game) */
+void port_audio_lock(void) {
+    if (dev) { __atomic_add_fetch(&lock_wanted, 1, __ATOMIC_SEQ_CST); SDL_LockAudioDevice(dev); __atomic_sub_fetch(&lock_wanted, 1, __ATOMIC_SEQ_CST); }
+}
 void port_audio_unlock(void) { if (dev) SDL_UnlockAudioDevice(dev); }
 void port_audio_yield(void) {
 #ifdef __3DS__

@@ -243,15 +243,22 @@ static const u8 font[64][7] = {   /* ASCII 32..95, 5x7, bit 4 = left column */
     {0,0,0,0,0,0,31}};
 /* (the same letters for the 3DS's progress screen, n3ds/pica_c3d.c: the 7 rows of a character, lower case as capitals) */
 const unsigned char *port_font5x7(int c) {
-    /* (Latin-1 codes of the accented capitals Spanish needs: the mark in the two upper rows, the letter in five) */
-    static const u8 acc[6][7] = { {2,4,14,17,31,17,17}, {2,4,31,16,30,16,31}, {2,4,14,4,4,4,14}, {2,4,14,17,17,17,14}, {2,4,17,17,17,17,14},
-                                  {14,0,17,25,21,19,17} };   /* A E I O U with an acute, N with a tilde */
-    static const u8 code[6] = { 0xC1, 0xC9, 0xCD, 0xD3, 0xDA, 0xD1 };
+    /* (Latin-1 codes of the accented letters Spanish needs: the capital itself here, its mark from port_font5x7_mark,
+       which the caller draws in the two rows above the letter) */
+    static const char base[] = "AEIOUN"; static const u8 code[6] = { 0xC1, 0xC9, 0xCD, 0xD3, 0xDA, 0xD1 };
     c &= 255;
     if (c >= 0xE0) c -= 32;                    /* (lower case accented -> its capital) */
-    for (int i = 0; i < 6; i++) if (c == code[i]) return acc[i];
+    for (int i = 0; i < 6; i++) if (c == code[i]) c = base[i];
     if (c >= 'a' && c <= 'z') c -= 32;
     return font[c >= 32 && c <= 95 ? c - 32 : 0];
+}
+/* the two rows of the mark over an accented letter (0: none): the upper one in bits 5..9, the lower in bits 0..4 */
+int port_font5x7_mark(int c) {
+    c &= 255;
+    if (c >= 0xE0) c -= 32;
+    if (c == 0xD1) return 13 << 5 | 22;                                                    /* a tilde */
+    if (c == 0xC1 || c == 0xC9 || c == 0xCD || c == 0xD3 || c == 0xDA) return 2 << 5 | 4;   /* an acute */
+    return 0;
 }
 extern int port_gpu_overlay_fill(int x, int y, int w, int h, u16 c);   /* shims/gpu.c: display-relative; 0 = no frame */
 extern void port_gpu_overlay_end(void);

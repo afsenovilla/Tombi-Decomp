@@ -97,6 +97,7 @@ static const struct { const char *code; u8 size; } dc_chroma[] = {
 #define AC_ESC 0xFD
 /* lookup on the next 16 bits: length (0 = no code), run (AC_EOB / AC_ESC for the two specials), level */
 static u8 ac_len[65536], ac_run[65536], ac_lvl[65536];
+static u16 ac_small[256];
 static u8 dcl_len[256], dcl_size[256], dcc_len[256], dcc_size[256];   /* on the next 8 bits */
 
 static void lut_fill16(u8 *len, u8 *a, u8 *b, const char *code, u8 va, u8 vb) {
@@ -123,6 +124,13 @@ static void tables_init(void) {
     }
     lut_fill16(ac_len, ac_run, ac_lvl, "10", AC_EOB, 0);
     lut_fill16(ac_len, ac_run, ac_lvl, "000001", AC_ESC, 0);
+    /* the codes of 8 bits or fewer (nearly every coefficient) from a table of 512 bytes: the three of 64 KB above
+       are a cache miss each on a 3DS, three a coefficient.  An entry: length << 12 | run << 6 | level; 0: a longer
+       code, read from the big tables */
+    for (int p8 = 0; p8 < 256; p8++) {
+        int i16 = p8 << 8, l = ac_len[i16];
+        ac_small[p8] = l && l <= 8 ? (u16)(l << 12 | (ac_run[i16] == AC_EOB ? 62 : ac_run[i16] == AC_ESC ? 63 : ac_run[i16]) << 6 | ac_lvl[i16]) : 0;
+    }
     for (unsigned i = 0; i < sizeof dc_luma / sizeof dc_luma[0]; i++) lut_fill8(dcl_len, dcl_size, dc_luma[i].code, dc_luma[i].size);
     for (unsigned i = 0; i < sizeof dc_chroma / sizeof dc_chroma[0]; i++) lut_fill8(dcc_len, dcc_size, dc_chroma[i].code, dc_chroma[i].size);
     for (int k = 0; k < 64; k++) iq_y[k] = iq_c[k] = k == 0 ? 2 : quant_raster[zigzag[k]];
@@ -180,16 +188,18 @@ static int vlc_block(BR *b, int ver, int chroma, int *dc_pred, int q, u16 **out,
     *o++ = (u16)((q << 10) | (dc & 0x3FF));
     for (int k = 0; k < 64;) {
         u32 pk = br_peek(b, 16);
-        int len = ac_len[pk];
+        const u16 sm = ac_small[pk >> 8];
+        int len = sm ? sm >> 12 : ac_len[pk];
         if (!len) return 0;
         br_skip(b, len);
         int run, level;
-        if (ac_run[pk] == AC_EOB) { if (o >= out_end) return 0; *o++ = 0xFE00; *out = o; return 1; }
-        if (ac_run[pk] == AC_ESC) {
+        const int rr = sm ? ((sm >> 6 & 63) == 62 ? AC_EOB : (sm >> 6 & 63) == 63 ? AC_ESC : (sm >> 6 & 63)) : ac_run[pk];
+        if (rr == AC_EOB) { if (o >= out_end) return 0; *o++ = 0xFE00; *out = o; return 1; }
+        if (rr == AC_ESC) {
             run = (int)br_get(b, 6);
             level = (int)(br_get(b, 10) << 22) >> 22;
         } else {
-            run = ac_run[pk]; level = ac_lvl[pk];
+            run = rr; level = sm ? sm & 63 : ac_lvl[pk];
             if (br_get(b, 1)) level = -level;
         }
         k += run + 1;

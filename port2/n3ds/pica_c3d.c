@@ -677,10 +677,13 @@ static void c3d_progress(int done, int total) {
             const int sc = line[l].sc, len = (int)strlen(line[l].t); const float c = line[l].c;
             int x = 200 - len * 6 * sc / 2;
             for (const char *t = line[l].t; *t; t++, x += 6 * sc) {
-                const unsigned char *g = port_font5x7(*t);
-                for (int r = 0; r < 7; r++) for (int b = 0; b < 5; b++) {
-                    if (!(g[r] >> (4 - b) & 1)) continue;
-                    int e = b; while (e + 1 < 5 && (g[r] >> (4 - (e + 1)) & 1)) e++;
+                extern int port_font5x7_mark(int c);
+                const unsigned char *g = port_font5x7((unsigned char)*t);
+                const int mark = port_font5x7_mark((unsigned char)*t);
+                for (int r = mark ? -2 : 0; r < 7; r++) for (int b = 0; b < 5; b++) {
+                    const int row = r == -2 ? mark >> 5 : r == -1 ? mark & 31 : g[r];   /* (the mark: the two rows above) */
+                    if (!(row >> (4 - b) & 1)) continue;
+                    int e = b; while (e + 1 < 5 && (row >> (4 - (e + 1)) & 1)) e++;
                     float X0 = x + b * sc, X1 = x + (e + 1) * sc, Y0 = line[l].y + r * sc, Y1 = Y0 + sc;
                     vtx(X0, Y0, 0, 0, c, c, c, 1); vtx(X1, Y0, 0, 0, c, c, c, 1); vtx(X0, Y1, 0, 0, c, c, c, 1);
                     vtx(X1, Y0, 0, 0, c, c, c, 1); vtx(X1, Y1, 0, 0, c, c, c, 1); vtx(X0, Y1, 0, 0, c, c, c, 1);
