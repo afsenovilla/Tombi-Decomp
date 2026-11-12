@@ -792,6 +792,25 @@ void port_panel_vblank(void) {
            Old 3DS (--audio-half tells it) every 25th, half a second: its worker shares a third of a core with the
            sound's mixer, and a panel drawn without pause kept every touch waiting for a render to end */
         { extern int port_sound_half; static int idle;
+          /* An Old 3DS: a touch or a button is answered here and now, by the main thread: the worker's render waits
+             for the processor (15 to 50 ms measured, 90 in a busy room, for a few ms of work) and its picture for the
+             vblank after, and a tap took a tenth of a second or two to show.  (One frame of the game late per tap.) */
+          int now = 0;   /* (a finger moving is a move every vblank: those stay the worker's) */
+          for (int i = 0; i < inq_n; i++) if (!(inq[i].kind == 1 && inq[i].a == 2)) now = 1;
+          if (port_sound_half && now) {
+              extern void port_sleep_us(unsigned long long); extern unsigned long long port_time_us(void); extern int port_show_fps;
+              static unsigned long long sum, mx, wsum; static int n;
+              unsigned long long t0 = port_time_us();
+              while (pw_state == 1) port_sleep_us(500);   /* (the canvas is the worker's until its render ends) */
+              unsigned long long t1 = port_time_us();
+              pw_state = 0; idle = 0;
+              inq_run(); render();
+              if (port_panel_window) port_panel_window_frame((const unsigned char *)pa_cv, pa_cw, pa_ch);
+              unsigned long long us = port_time_us() - t1;
+              sum += us; wsum += t1 - t0; if (us > mx) mx = us;
+              if (++n >= 10) { if (port_show_fps) port_printf("[panel] touches: %d answered at once, %llu.%llu ms each (the longest %llu), %llu.%llu ms waiting for the worker\n", n, sum / n / 1000, sum / n / 100 % 10, mx / 1000, wsum / n / 1000, wsum / n / 100 % 10); sum = mx = wsum = 0; n = 0; }
+              return;
+          }
           int due = inq_n > 0 || scr_busy() || ++idle >= (port_sound_half ? 25 : 4);
           if (pw_state == 0 && due) { idle = 0; inq_run(); pw_state = 1; port_n3ds_worker_go(); } }
         return;
