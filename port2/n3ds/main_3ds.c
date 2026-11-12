@@ -161,9 +161,14 @@ static int choose_lang(int code) {
         static u8 font[256 * 8];
         if (con && con->font.gfx && con->font.asciiOffset == 0 && con->font.numChars >= 256) {
             memcpy(font, con->font.gfx, sizeof font);
-            u8 *g = font + 0xA4 * 8, low = 0;
-            for (int i = 0; i < 8; i++) low |= g[i] & 1;
-            if (!low) for (int i = 0; i < 8; i++) g[i] >>= 1;
+            /* (moved right while its cell's last column is free, 5 pixels at most: as far as it goes uncut) */
+            u8 *g = font + 0xA4 * 8;
+            for (int k = 0; k < 5; k++) {
+                u8 low = 0;
+                for (int i = 0; i < 8; i++) low |= g[i] & 1;
+                if (low) break;
+                for (int i = 0; i < 8; i++) g[i] >>= 1;
+            }
             con->font.gfx = font;
         }
     }
