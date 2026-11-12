@@ -100,6 +100,42 @@ static void link_prim(u32 *ot, char *p)          /* addPrim: keeps the packet's 
     *ot = (*ot & 0xFF000000u) | ((u32)(uintptr_t)p & 0xFFFFFF);
 }
 
+/* The frame inside the picture.  The game clamps its camera so the 4:3 view stays inside the map picture, so at a
+   map edge the wide frame ran up to `pad` columns past the picture (black).  While the scene draws
+   (drawGameplayScene: port_ws_topdown_begin after the lighting, port_ws_topdown_end before the pause menu, fades and
+   HUD), everything the scene draws moves dx columns: the objects through the GTE (gte.c port_gte_dx, added to every
+   RTPS / RTPT screen X, so their own culls see the moved position), the map through its packets below.  dx puts the
+   wide frame's edge on the picture's edge; a picture narrower than the wide frame (but at least 4:3 wide) is centred.
+   The game's camera, logic and 4:3 picture are untouched; message boxes (2D packets) stay put, except a balloon that
+   follows its speaker (below); the pause menu, fades and HUD come after port_ws_topdown_end.  The culls (port_ws_cull, PORT_WSX) keep pad + |dx| columns, so what enters
+   from the far edge is there.  dx follows the camera of the frame being drawn: picture column c lies at screen x
+   K - SCREEN_ORIGIN_X + c, with K and the picture width taken from the previous map draw (the room's map must have
+   drawn in the previous scene draw, else dx = 0). */
+extern int port_gte_dx;                           /* runtime/gte.c */
+static int td_seq, td_hook_seq = -100, td_K, td_pw, td_dx, td_cull = -1;
+void port_ws_topdown_begin(void)
+{
+    int pad = port_widescreen, dx = 0;
+    if (td_cull < 0) td_cull = port_ws_cull;
+    td_seq++;
+    if (pad > 0 && td_cull > 0 && td_hook_seq == td_seq - 1) {
+        int L0 = td_K - *(const s16 *)port_ram_ptr(0x1F800176u), pw = td_pw;   /* picture column 0, 4:3 frame px */
+        if (pw >= 320 + 2 * pad) {
+            if (L0 > -pad) dx = -pad - L0;
+            else if (L0 + pw < 320 + pad) dx = 320 + pad - (L0 + pw);
+        } else if (pw >= 320) dx = (320 - pw) / 2 - L0;
+        if (dx > pad) dx = pad;
+        if (dx < -pad) dx = -pad;
+    }
+    td_dx = dx;
+    port_gte_dx = dx;
+    if (td_cull > 0) port_ws_cull = td_cull + (dx < 0 ? -dx : dx);
+}
+void port_ws_topdown_end(void) { port_gte_dx = 0; }
+/* fixes.txt drawMessageBox: a balloon that follows its speaker (openMessageBox's anim, +0x2E, nonzero: the game
+   places it from the speaker's world position each frame) moves with the scene, so the tail stays on the speaker */
+int port_ws_balloon_dx(const void *o) { return *(const s16 *)((const char *)o + 0x2E) ? port_gte_dx : 0; }
+
 /* fixes.txt, at the end of the map draw (inside its `o->b6b != 0`): n = the game's SPRT count, row_off = picture row
    of tile row 0 (PAL -24: topdownBuildMapStrip's `(v / w) * 32 - 24`; USA / JP 0).  The game's packets are the last
    0xC + n * 0x20 bytes before NEXT_PRIM: DR_MODE (0xC), then n times SPRT (0x14) + DR_MODE (0xC). */
@@ -108,6 +144,11 @@ void port_ws_overhead_map(void *o, int n, int row_off)
     static int said;
     int pad = port_widescreen;
     if (pad <= 0 || !port_ws_cull || n < 1 || n > MAXR) return;
+    char *first = NEXT_PRIM - (0xC + n * 0x20);
+    int dx = td_dx;
+    for (int i = 0; i < n; i++) if ((rd32((u8 *)first + 0x10 + i * 0x20) >> 24) != 0x65) return;
+    for (int i = 0; i < n; i++)                     /* the frame inside the picture: the map moves with the objects */
+        *(s16 *)(first + 0x14 + i * 0x20) = (s16)(*(s16 *)(first + 0x14 + i * 0x20) + dx);
     port_ot_mark_fn = mark;
     const u8 *tim = *(const u8 **)port_ram_ptr(0x1F800394u), *map = *(const u8 **)port_ram_ptr(0x1F800390u);
     if (!tim || !map) return;
@@ -117,7 +158,6 @@ void port_ws_overhead_map(void *o, int n, int row_off)
     if (pw < 64 || ph < 64 || stride < pw || stride > pw + 64 || (port_is_ram_ptr(tim) && !port_is_ram_ptr(tim + 0x220 + (size_t)stride * ph - 1))) return;
     const u8 *pic = tim + 0x220;
 
-    char *first = NEXT_PRIM - (0xC + n * 0x20);
     const u8 *ob = (const u8 *)o;
     int d30 = *(const int *)(ob + 0x30), d34 = *(const int *)(ob + 0x34), b0f = (signed char)ob[0x0F];
     int xt = (s16)(d30 >> 5), yt = (s16)((unsigned)d34 >> 5);        /* topdownBuildVisibleTileList */
@@ -151,6 +191,7 @@ void port_ws_overhead_map(void *o, int n, int row_off)
             ok = !memcmp(v + r->y * 1024 + r->x, pic + (size_t)row * stride + s->px0, (size_t)r->w * 2);
         if (!ok) { if (!said++) port_printf("[ws] top-down map: VRAM window is not picture (%d, %d); side strips off\n", s->px0, s->py0); return; }
     }
+    td_K = X - dx - s->px0 + *(const s16 *)port_ram_ptr(0x1F800176u); td_pw = pw; td_hook_seq = td_seq;
 
     /* the game's own window past the picture's right / bottom edge holds the wrapped next row (or what follows the
        picture): never seen on 4:3, where the camera stops at the edge, but inside the wide strips.  Cut it there. */

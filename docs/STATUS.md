@@ -30,6 +30,23 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
 
 ## In progress / open
 
+0. **Widescreen room ends (2026-11-12)**: `runtime/ws_edge.c` carries a room's model on past its end (the free
+   outward edges of the ground strips, risers and tree cards extruded along X with the room's own tiling; docs/PORT.md
+   "Widescreen", "Room ends").  On: AREA00 section 0, left end (the sky strip left of the first hill at 16:9 / 21:9 /
+   32:9).  Next: look at the other rooms with `--ws-edge all` (both ends; the right end of the first room is the way on
+   to section 4 and was not reached headless without a room change) and add them to `ROOMS`; not built on wasm2c /
+   the device yet.
+0. **Widescreen top-down rooms: the wide frame stays inside the map picture (2026-11-12)**: at a map edge the game's
+   camera clamp keeps only the 4:3 view inside the picture, so up to `pad` columns of black showed on that side (e.g.
+   Dwarf Village's left edge, 53 px at 16:9). Fix `runtime/ws_topdown.c` `port_ws_topdown_begin` / `_end` (fixes.txt
+   hooks in `drawGameplayScene`): while the scene draws, it moves dx columns (objects through `gte.c` `port_gte_dx`
+   on RTPS / RTPT, the map through its packets, speaker balloons through `drawMessageBox`), dx putting the wide edge on
+   the picture edge, or centring a picture narrower than the wide frame; culls keep pad + |dx|. Checked headless, i386
+   and the 64-bit wasm2c PC build: AREA02/19 s0, AREA05/08 s0/s2, AREA19 s2 at 16:9 and 21:9 walking to the edges,
+   every frame equal to the old frame moved by dx (pixel compare, objects/NPCs/Tombi with the map), the NPC dialogue
+   balloon's tail on the speaker, a screen-positioned message box and the pause menu where they were, the hut
+   interior (map hidden) unchanged; 4:3 and a side-view room at 16:9 byte-identical to before. Not checked: the
+   device, USA/JP discs, `--fps` interpolation visually (runs); GL (xvfb) one room.
 0. **Widescreen top-down maps drawn whole (2026-11-12)**: in the overhead rooms (I0NFO Dwarf Village AREA02/19 s0,
    I0NFO2 AREA05/08 s0/s2, AREA19 s2) the side strips past 4:3 filled in 32-px pieces as the camera moved (the user on
    the AYN Thor, `--widescreen auto`). Cause: the background is a 384x288 window of the map picture uploaded to fixed
@@ -38,7 +55,7 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    the ordering table (`shims/gpu.c` DrawOTag -> `port_ot_mark_fn`) and drawn, then the game's window put back; the
    game's window is cut at the picture's edge (it showed the wrapped next row). Checked headless, soft renderer: all
    seven sections at 16:9 and 21:9 (4:3 middle byte-identical to before in every frame, strips filled up to the
-   picture's edge, which stays black: the world ends there), AREA05 on GL (xvfb); no widescreen: frames identical.
+   picture's edge; the black past it is now gone, entry above), AREA05 on GL (xvfb); no widescreen: frames identical.
    Tunnels (I0NFO3 AREA02 s3) were already full width (3D blocks). Not checked: the device, USA/JP discs, `--fps`
    visually (runs).
 0. **Proportional place names on the save list (default on, 2026-11-12)**: `runtime/mcprop.c` + port/fixes.txt hooks

@@ -2662,6 +2662,31 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   hook picks the blocks around the camera X each frame (nothing streams from CD).  For the hooks that only select
   (areas 0, 1, 2, 3, 7; the others also animate palettes or keep counters) it is run again with the camera X moved
   2*pad+40 each way and the extra blocks are merged into the list (cap 88), so the edges no longer pop in.  Drawing only.
+- **Room ends** (`runtime/ws_edge.c`, called from `port_ws_area_model_link`; `--ws-edge off|on|all`): a room's
+  model stops where the 4:3 camera stops, so past its first / last sector a wide frame showed the clear colour (the
+  ground and the tree line of the first room ended in mid-air on the left).  Once per room model and end, one extra
+  sector is built in the model's own format (FT4 / GT4 packets) and added to the draw list while one of the end's four
+  outermost sectors is listed (those four are then all listed: the game's own selection leaves the outermost out), so
+  the game's drawer, GTE and culls draw it.  It carries the model on: every free edge of the end's silhouette that
+  faces outwards is extruded along X in pieces of at most 80 units, keeping the edge's height, depth, colours and
+  texture rows; along X the texture goes on at the polygon's texel density and wraps inside the tile that material
+  uses in the room (the union of the U ranges of the polygons of the same page, palette and rows that share a texel
+  column: 58 texels per 64 units of grass, 64 per leaf card).  Nothing is mirrored or stretched.  Extruded: an edge
+  with nothing of the model further out at its depth and height, of a polygon that does not face sideways and is a
+  surface that goes on (ground-like, |n.y| >= 0.5, starting a chain of three or more polygons joined edge to edge; or
+  a polygon whose texture rectangle another polygon uses too: a tile).  The outermost ground edges give the end's
+  line per depth; cards and risers count only at or past it (16 units of margin), so a house, a roof or a tree that
+  stands inside the 4:3 picture keeps its outline.  Reach: 3 * pad + 96 units.  Enabled per (area, section, end)
+  after a look at the result (`ROOMS`): AREA00 section 0, left end (17 edges, 143 quads at 21:9; the 4:3 centre of
+  the frame stays pixel-identical, 4:3 runs untouched; software and OpenGL).  `--ws-edge all` turns it on for every
+  room of the block-list areas (0, 1, 2, 3, 7), for checking the next rooms; `-v -v` lists the edges.
+  **Props** (`PROPS`): a prop of the room stood again past its end: the model's polygons inside a box, on the given
+  texture pages (and palette, when given), are copied into the end's sector moved by (dx, dy, dz), per range of strip
+  widths.  The first room's big apple tree is round and 344 units wide, more than a 16:9 or 21:9 strip without
+  hanging over the pig house, so there only its trunk and fork (4 polygons) stand under the tree line carried on, one
+  beside the house and at 21:9 a second one further out and back; at 32:9 the whole tree (59 polygons) stands far
+  enough out that its crown stops at the house.  (A box that cut the tree in depth left a flat dark crown: the front
+  leaf clusters start at z -3.)
 - **Top-down map** (`runtime/ws_topdown.c`, fixes.txt hooks at the end of `topdownDrawMapLayers` /
   `overheadDrawMapLayers` and their USA / JP versions): the overhead background is the room's map picture (8 bpp TIM
   in RAM, scratch 0x1F800394) of which the game uploads a 384x288 window (12x9 tiles of 32 px, USA / JP 384x256) into
@@ -2674,9 +2699,25 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   `LoadImage` (both renderers, `--fps` and the texture tools see an ordinary upload); the last marker puts back what
   the game had uploaded.  The geometry is read from the game's own packets and checked against VRAM (the window's
   first row must equal the picture; else off, logged once).  The game's window is also cut at the picture's right /
-  bottom edge (past it, it showed the wrapped next row: invisible on 4:3).  Past the picture's edge stays black (the
-  map ends there; Dwarf Village is 448 px wide, AREA19 s2 barely wider than the screen).  The tunnels (I0NFO3) are 3D
-  blocks and were already covered by the block hook above.
+  bottom edge (past it, it showed the wrapped next row: invisible on 4:3).  The tunnels (I0NFO3) are 3D blocks and
+  were already covered by the block hook above.
+- **Top-down map edges** (`runtime/ws_topdown.c` `port_ws_topdown_begin` / `_end`, fixes.txt hooks in
+  `drawGameplayScene` after the lighting and before the pause menu / fades / HUD): the game clamps its camera so the
+  4:3 view stays inside the map picture, so at an edge the wide frame ran up to `pad` columns past it (black).  While
+  the scene draws, everything in it moves `dx` columns, chosen each frame so the wide frame's edge meets the picture's
+  edge (pictures at least as wide as the wide frame: Dwarf Village 448 px at 16:9, AREA05 864, AREA08 544), or so a
+  picture narrower than the wide frame (but not than 4:3) is centred (Dwarf Village at 21:9, AREA19 s2 384 px);
+  |dx| <= pad.  The objects move through the GTE (`gte.c` `port_gte_dx`, added to every RTPS / RTPT screen X between
+  the two hooks, so their own screen culls see the moved position), the map through its SPRT packets in
+  `port_ws_overhead_map` (the side windows are computed from the moved ones); the culls (`port_ws_cull`) keep
+  pad + |dx| columns so what enters from the far edge is drawn.  Picture column c lies at screen x K - SCREEN_ORIGIN_X
+  + c (K = -129 in PAL, learnt from the map packets), and dx needs the map to have drawn in the previous scene draw,
+  else it is 0 (a room whose map is hidden, like the hut interiors shown on black, keeps the retail placement).  A
+  message balloon that follows its speaker (`openMessageBox` anim != 0, the NPC dialogues) moves with the scene so its
+  tail stays on the speaker (fixes.txt `drawMessageBox`, `port_ws_balloon_dx`); boxes at a screen position, the pause
+  menu and the HUD stay put (anything else a room draws in 2D during the scene would stay put too; none showed in
+  the checked rooms).  Game logic, camera and the 4:3 picture are untouched: every frame is the old frame moved by dx
+  (checked pixel for pixel), identity without --widescreen and outside these rooms.
 - **Event titles** (`spawnEventTitle`, `l8Type01MoveStep`, `#ifdef PORT2`): the title tiles start at screen x 340
   (just past 4:3, inside the wide frame, where they popped into view) and left at x 480 (inside 21:9 / 32:9).  They
   now start `pad + 160` further right (the tiles sit up to ~150 either side of the title's x) and leave once past `320 + pad`; the fly-in speed is derived from the distance over

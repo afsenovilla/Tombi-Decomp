@@ -47,6 +47,10 @@ static void set_ir(int lm) {
     IR3 = clampf(MAC3, lo, 0x7FFF, 1u << 22);
 }
 
+/* --widescreen top-down rooms (runtime/ws_topdown.c): screen X added to RTPS / RTPT while the scene's objects are
+   drawn, so the frame keeps inside the map picture at its edges; 0 otherwise (identity) */
+int port_gte_dx;
+
 static inline s32 clamp32(s32 v, s32 lo, s32 hi, u32 flag) {
     if (v < lo) { FLAG |= flag; return lo; }
     if (v > hi) { FLAG |= flag; return hi; }
@@ -80,7 +84,7 @@ static inline __attribute__((always_inline)) void rtp(int n, int last) {   /* (i
         q = (d + 1) >> 1;
         if (q > 0x1FFFF) { q = 0x1FFFF; FLAG |= 1u << 17; }
     }
-    s64 sx = ((s64)C[24] + (s64)IR1 * q) >> 16;
+    s64 sx = (((s64)C[24] + (s64)IR1 * q) >> 16) + port_gte_dx;
     s64 sy = ((s64)C[25] + (s64)IR2 * q) >> 16;
     D[12] = D[13]; D[13] = D[14];
     s32 SX = clampf(sx, -0x400, 0x3FF, 1u << 14), SY = clampf(sy, -0x400, 0x3FF, 1u << 13);
