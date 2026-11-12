@@ -768,6 +768,7 @@ i18n.add({
            "l.cut.board": "El tablón de anuncios de Ciudad Baco (AREA05), legible desde el suelo, y el punto de guardado «La roca de la sirena» (AREA06)",
            "l.cut.berries": "Bayas plateadas y doradas en lo que sueltan enemigos y cofres (2 de vida)", "l.cut.bubble": "El bocadillo grande «?» al repetir una conversación (escenas desde arriba)",
            "l.cut.titles": "Títulos de evento que la versión PAL dejó vacíos (de la versión japonesa)",
+           "l.cut.funga": "El escenario Funga sin usar de la Colina del árbol viejo (Jungla profunda): la puerta de la empalizada se abre",
            "i.cutcontent": "Textos que se quitaron del juego y que se han encontrado en la versión japonesa (Ore! Tomba). "
                            "Se activan cuatro:\n\n"
                            "• El barquero de la Ciudad de todo principio (AREA00): en el estanque al que llegas sobre la tortuga, "
@@ -799,6 +800,7 @@ i18n.add({
            "l.cut.board": "The Baccus Village notice board (AREA05), readable from the ground, and the \"Mermaid's rock\" save point (AREA06)",
            "l.cut.berries": "Silver and golden berries in enemy and chest drops (2 HP)", "l.cut.bubble": "The big \"?\" bubble when a talk repeats (top-down scenes)",
            "l.cut.titles": "Event titles the PAL release left empty (from the Japanese release)",
+           "l.cut.funga": "The unused Funga stage on Old Tree Hill (Deep Jungle): the palisade gate opens",
            "i.cutcontent": "Text that was removed from the game and found in the Japanese release (Ore! Tomba). "
                            "Four pieces are enabled:\n\n"
                            "• The boatman in the Village of All Beginnings (AREA00): at the pond you reach on the turtle, after his "
@@ -1345,7 +1347,7 @@ def window_icon():
     return QIcon()
 
 
-CUT_ITEMS = ["boatman", "letter", "board", "berries", "bubble", "titles"]     # --cut-content=LIST items (port/fixes.txt, runtime/main.c)
+CUT_ITEMS = ["boatman", "letter", "board", "berries", "bubble", "titles", "funga"]     # --cut-content=LIST items (port/fixes.txt, runtime/main.c)
 
 
 def cut_items(s):

@@ -30,7 +30,12 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
 
 ## In progress / open
 
--1. **Later (owner's request, no hurry): AREA10 section 2 (Old Tree Hill) unused Funga area.**  Open the door object
+-1. **In progress: AREA10 section 2 (Old Tree Hill) unused Funga area (`--cut-content=funga`, bit 64).**  Done: the
+   camera's right bound (SECTION_CAMERA_BOUNDS 220..1038, read by initSectionCamera) goes to 1680, so Tombi walks past
+   the gate to x 1904 (the WHM ground already runs to 1920; the drums are updateSolidScenery objects already placed);
+   the gate (updateAreaMechanisms subtype 2) swings open (+0x88 to 0x400, hinge at its edge) once Tombi passes x 1080.
+   Next: collision for the straw stand, the black past the model's right end at wide ratios, the Funga Chief and Fungas.
+   Original request:  Open the door object
    4:07 / 02 (82FF #026 "Door", WMD bank 1 model 7, position (1288, -187, 180), APD offset 0x01A0, SYS/LDAR10.BIN group 3)
    and make the unused area behind it walkable (collision for the ground strip; Tombi could climb the wooden stand in
    the middle and jump on the drums); add a Funga Chief walking around (he has walk and talk animations) and some

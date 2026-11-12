@@ -464,6 +464,11 @@ src/showMessageBoxDirectTimed.c |     openMessageBox(a, b, c, 1, d); |     retur
 # opt-in; console build unchanged): text cut from the game that the Japanese release
 # still has (tools/jp_text.py). 1) AREA00 boatman scene: after his third line (7,2) a00Variant0EventScene
 # ends the scene; with the flag it first shows the three unused lines (7,3), (7,4), (7,5) (MFNT000 #162-164).
+# 64 funga: AREA10 section 2 (Old Tree Hill) has a Funga stage past the palisade gate at x 1288 (drums, torches, a straw
+# stand; its WHM ground runs on to x 1920) that the camera bounds (220..1038) keep out of reach: the right bound goes to 1760
+src/initSectionCamera.c |     D_800A457E = *p++; |     D_800A457E = *p++; { extern int port_cut_content; if ((port_cut_content & 64) && GAME[0] == 10 && GAME_SELECTED_SECTION == 2) D_800A457E = 1680; }
+# and the gate (updateAreaMechanisms subtype 2, a model the game never moves) swings open as Tombi comes near, like subtype 1
+src/x010/updateAreaMechanisms.c |         ObjCullRegister(o); |         ObjCullRegister(o); { extern int port_cut_content; extern TObj PLAYER; if ((port_cut_content & 64) && o->subtype == 2 && o->d88 < 0x400 && (o->d88 || PLAYER.h->p.whole > 1080)) o->d88 += 0x20; }
 src/a00Variant0EventScene.c | GAME_AREA00_EVENT_CONTROL |= 0x28; | { extern int port_cut_content, port_cc_boatman; if ((port_cut_content & 1) && port_cc_boatman < 3) { PLAYER_MESSAGE_BOX->b04 = 3; PLAYER_MESSAGE_BOX = showMessageBox(7, 3 + port_cc_boatman++, 0x120, 0x6c); break; } } GAME_AREA00_EVENT_CONTROL |= 0x28;
 src/a00Variant0EventScene.c | o->w08 = 100; | o->w08 = 100; { extern int port_cc_boatman; port_cc_boatman = 0; }
 # 2) AREA03 letter (MFNT030 #208 = sign text (1,1), no sign shows it): next to the save-point sign of Phoenix Mountain

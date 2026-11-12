@@ -348,8 +348,8 @@ public class LauncherActivity extends Activity {
     boolean flag(String k, boolean def) { return prefs.getBoolean(k, "hz60".equals(k) || def); }
 
     // ---- cut content: one switch per item (port/fixes.txt, --cut-content=LIST; the PC launcher's CUT_ITEMS) ----
-    static final String[] CUT_ITEMS = {"boatman", "letter", "board", "berries", "bubble", "titles"};
-    static final int[] CUT_LABELS = {R.string.cut_boatman, R.string.cut_letter, R.string.cut_board, R.string.cut_berries, R.string.cut_bubble, R.string.cut_titles};
+    static final String[] CUT_ITEMS = {"boatman", "letter", "board", "berries", "bubble", "titles", "funga"};
+    static final int[] CUT_LABELS = {R.string.cut_boatman, R.string.cut_letter, R.string.cut_board, R.string.cut_berries, R.string.cut_bubble, R.string.cut_titles, R.string.cut_funga};
     /** the items switched on; settings saved with the old single switch ("cut") meant every item */
     List<String> cutItems() {
         if (prefs.contains("cut") && !prefs.contains("cut_boatman")) {

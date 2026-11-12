@@ -19,6 +19,7 @@
     <string name="cut_berries">Silver and golden berries in drops (2 HP)</string>
     <string name="cut_bubble">Big \"?\" bubble when a talk repeats (top-down)</string>
     <string name="cut_titles">Event titles PAL left empty (from the Japanese release)</string>
+    <string name="cut_funga">Unused Funga stage on Old Tree Hill (Deep Jungle): the gate opens</string>
     <string name="opt_wings">Lost animation: Charity Wings glide (Japanese demo)</string>
     <string name="opt_wings_short">glide</string>
     <string name="wings_jp">Japanese demo image (SLPM-80165)</string>
