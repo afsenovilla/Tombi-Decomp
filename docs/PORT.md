@@ -1204,7 +1204,7 @@ confirmed with Circle at 1300 (the values of the room sweep). Addresses: `GAME` 
 | Infinite lives | `--poke-every 50:8009C980:63:1` | new option: `--poke-every INTERVAL:ADDR:VALUE[:SIZE]` writes every INTERVAL vblanks |
 | Infinite vitality | `--poke-every 1:8009C970:4:1` | `GAME.playerHealth`, 4 = full (initGameConfig) |
 | Saving does not refill vitality (default off) | `--no-save-heal` | a loaded save keeps its saved vitality; see below |
-| Proportional place names on the save list (experiment, default off) | `--memcard-prop [GAP[,SPACE]]` | see below; GAP 1, SPACE 4 by default |
+| Proportional place names on the save list (default on) | `--memcard-mono` turns it off; `--memcard-prop GAP[,SPACE]` tunes it | see below; GAP 1, SPACE 4 by default |
 | Unlock all events | `--poke 1100:8009CDA4:FF:1x130` | new `SIZExCOUNT` suffix of `--poke`: COUNT consecutive values; event flag bytes 0x8009CDA4 + id (notes/names.md "Event links"), 0xFF = completed |
 | Custom keys | `--keys up=Up,cross=X,...` | *Controls* tab, Keyboard card: only the keys changed from the defaults |
 | Button prompts (PlayStation / Xbox / Keyboard) | `--patch-tex prompts-SET.tbtx` | see below |
@@ -1228,7 +1228,7 @@ in `PORTABLE_MODS`), Android Extras page (`nosaveheal`, passed for every version
 headless): without the flag the loaded save has vitality 4, with it 1 (GAME and PLAYER+0x98), and a standard run
 without the flag gives frames byte-identical to the build without the change. USA and JP builds not run.
 
-**Proportional place names on the save list (`--memcard-prop [GAP[,SPACE]]`, experiment).** The retail
+**Proportional place names on the save list (default on; `--memcard-mono` = retail, `--memcard-prop GAP[,SPACE]`).** The retail
 `memCardDrawString` advances every glyph of `MEMCARD_FONT` by its 8-px cell, and the save-list place name
 (`memCardDrawFileLocation`, mode 0, from x 64; the row frame's inner edge is x 293, so 229 px of ink) is monospaced.
 In the 8x8 cells a wide letter fills columns 1-7 (ink + shadow), a narrow one sits in the middle ('i' 3-4, 'l' 2-4),
@@ -1242,7 +1242,8 @@ label (`memCardDrawFileIcon`, the other mode-0 caller) keep the 8-px cells. GAP 
 Measured (PAL, Spanish improved translation): "Cabaña del sabio centenario" 216 px mono, 189 gap 1, 212 gap 2;
 the previous long names "Cámara del Anciano de 1.000.000 años" / "Cámara del Anciano de los 10.000 años" /
 "Muros exteriores de la Isla de Cerdos" 288 / 296 / 296 mono, 247 / 251 / 251 gap 1 (do not fit), 217 / 221 / 221
-gap 0 (fit). Default off: frames byte-identical to the build without the change. No launcher switch yet; PAL only
+gap 0 (fit). On by default since the Spanish place names are written for it ("Cabaña del Anciano centenario" is 232 px
+monospaced, 206 proportional); `--memcard-mono` gives frames byte-identical to the retail spacing. No launcher switch; PAL only
 (the USA / JP twins of the function are not hooked).
 
 **Button prompts.** `tools/prompt_glyphs.py` draws our own glyph sets with Pillow (no third-party icon pack):

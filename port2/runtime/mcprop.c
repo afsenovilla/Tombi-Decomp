@@ -1,10 +1,10 @@
-/* Proportional spacing for the place names of the memory card save list (opt-in, --memcard-prop; port/fixes.txt
+/* Proportional spacing for the place names of the memory card save list (on by default, --memcard-mono turns it off, --memcard-prop GAP,SPACE tunes it; port/fixes.txt
  * hooks in memCardDrawFileLocation and memCardDrawString).
  *
  * The retail memCardDrawString advances every glyph of MEMCARD_FONT by its cell width (8 px), so a place name is
  * monospaced and the longest Spanish ones do not fit the row (230 px from x 64 to the frame's inner edge at x 293).
  * In the 8 x 8 cells a wide letter fills columns 1-7 (ink, then its shadow), a narrow one sits in the middle ('i' in
- * columns 3-4, 'l' in 2-4).  With the option on, a glyph of a place name is drawn from its first opaque column and
+ * columns 3-4, 'l' in 2-4).  With the option on (the default), a glyph of a place name is drawn from its first opaque column and
  * advances by its opaque width (first to last opaque texel column of the glyph as it is in VRAM: ink plus shadow, read
  * from the user's own font upload at run time, so no glyph data in the port) plus port_mc_prop_gap; a glyph with no
  * opaque texel (the space) advances port_mc_prop_space.  Only memCardDrawFileLocation turns it on, so the messages,
@@ -12,7 +12,7 @@
 
 extern const unsigned short *port_gpu_vram(int x, int y, int w, int h);
 
-int port_mc_prop;               /* --memcard-prop: on */
+int port_mc_prop = 1;           /* on by default; --memcard-mono: off (retail 8-px cells) */
 int port_mc_prop_gap = 1;       /* px after a glyph's shadow */
 int port_mc_prop_space = 4;     /* advance of an empty glyph (the space) */
 int port_mc_prop_on;            /* set around memCardDrawFileLocation's memCardDrawString call */

@@ -238,19 +238,37 @@ def pause_boxes(proj, exe="EXE/MAIN5.EXE"):
     return out
 
 
-MEMCARD_LOCATION_MAX = 28   # the save/load list row: 8-px monospaced cells from x 64 to the frame's inner edge (x 293)
+MEMCARD_LOCATION_PX = 229   # the save/load list row: ink from x 64 up to the frame's inner edge (x 293)
+# Opaque width (ink + shadow) of the MEMCARD_FONT glyphs, as the port measures them from VRAM (runtime/mcprop.c,
+# proportional spacing, on by default): a glyph advances its width + 1, the space 4. Other letters count as 8.
+MEMCARD_GLYPH_W = {" ": 0, "I": 2, "i": 2, "'": 3, ",": 3, ".": 3, "1": 3, "l": 3, "r": 6, "ó": 6}
+MEMCARD_GLYPH_W.update({c: 7 for c in "0abcdeghmnopqstuxyáñ"})
+
+
+def memcard_width(s):
+    """ink extent in px of a place name under the port's proportional spacing (GAP 1, SPACE 4)"""
+    x = last = 0
+    for ch in s:
+        w = MEMCARD_GLYPH_W.get(ch, 8)
+        if w == 0:
+            x += 4
+            continue
+        last = x + w
+        x += w + 1
+    return last
 
 
 def memcard_locations(patch):
-    """The save/load list draws a place name on one line (memCardDrawString mode 0 skips the "\\n"), 8 px a letter from
-    rowX+0x20: at most 28 letters fit inside the row frame (29 draw over its border, longer ones run off the screen)."""
+    """The save/load list draws a place name on one line (memCardDrawString mode 0 skips the "\\n") from rowX+0x20; the
+    port spaces it proportionally (runtime/mcprop.c), and the ink must stay within 229 px of the row frame."""
     out = []
     for path, m in sorted((patch.get("menus") or {}).items()):
         for k, s in sorted(((m or {}).get("locations") or {}).items(), key=lambda kv: int(kv[0])):
-            n = len(s.replace("\n", ""))
-            if n > MEMCARD_LOCATION_MAX:
-                out.append("%s location %s: %d letters on one line, the save list row holds %d (%r)" % (
-                    path, k, n, MEMCARD_LOCATION_MAX, s.replace("\n", "")))
+            t = s.replace("\n", "")
+            w = memcard_width(t)
+            if w > MEMCARD_LOCATION_PX:
+                out.append("%s location %s: %d px on one line, the save list row holds %d (%r)" % (
+                    path, k, w, MEMCARD_LOCATION_PX, t))
     return out
 
 

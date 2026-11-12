@@ -114,6 +114,7 @@ Corregidos: *Cuevas de lava* (antes "Cueva de lava" por falta de sitio), *Nido d
 *Cámara del millón de años* (antes "Cámara Anciano 1 millón años"), *Cámara del Anciano milenario*, *Cámara del ladrón uno / dos / tres* (antes "Una cámara del ladrón", "Dos / Tres
 cámaras de ladrones": error de traducción de *Thief's Room One/Two/Three*), *Cámara de la cerradura*, *Cámara del
 escondite*, *Cámara de la risa*, *Cámara de los trucos*, *Cámara de la sombra*, *Cámara del llanto*, *Muros de la Isla
-de Cerdos* (antes "Muros externos de Isla Cerdos"), *Cabaña del sabio centenario*, *Cámara de los 10.000 años*.
-La fila de la lista de guardado dibuja el nombre en una sola línea, 8 px por letra: caben 28 letras como máximo
-(`tools/check_text_patch.py` lo comprueba).
+de Cerdos* (antes "Muros externos de Isla Cerdos"), *Cabaña del Anciano centenario*, *Cámara de los 10.000 años*.
+La fila de la lista de guardado dibuja el nombre en una sola línea. El port usa espaciado proporcional (letras
+estrechas y espacios más cortos; `--memcard-mono` vuelve a las celdas de 8 px): caben 229 px de tinta
+(`tools/check_text_patch.py` lo comprueba con los anchos de la fuente).

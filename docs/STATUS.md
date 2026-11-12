@@ -30,6 +30,11 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
 
 ## In progress / open
 
+0. **Proportional place names on the save list (default on, 2026-11-12)**: `runtime/mcprop.c` + port/fixes.txt hooks
+   on `memCardDrawFileLocation` / `memCardDrawString` (PAL only): each glyph advances by its opaque width read from the
+   font in VRAM + 1 px, the space 4 px (retail: 8-px cells). `--memcard-mono` restores the retail spacing,
+   `--memcard-prop GAP[,SPACE]` tunes it. `check_text_patch.py` checks the place names against 229 px with the same
+   widths. Spanish location 2 is "Cabaña del Anciano centenario" again (206 px). Headless PAL renders only.
 0. **Mod "Saving does not refill vitality" (`--no-save-heal`, 2026-11-12)**: retail PAL/USA refill the vitality when a
    save is **loaded** (D0SPSUB2 `memCardFileListStep` sub 10, `GAME.playerHealth = playerMaxHealth` after the copy;
    PAL 0x800E8E30, USA 0x800E8A50), not when saving; JP never refills on load. port/fixes.txt guard + both launchers

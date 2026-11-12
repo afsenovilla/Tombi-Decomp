@@ -980,7 +980,7 @@ src/d0spsub2/memCardFileListStep.c | D_8009C960g.f10 = D_8009C960g.f11; | { exte
 src/d0spsub2/func_800E7ECC_scus94236.c | D_8009C960g.f10 = D_8009C960g.f11; | { extern int port_no_save_heal; if (!port_no_save_heal || D_8009C960g.f10 == 0 || D_8009C960g.f10 > D_8009C960g.f11) D_8009C960g.f10 = D_8009C960g.f11; }
 @version all
 #
-# --memcard-prop (experiment, runtime/mcprop.c): the place names of the save list in proportional spacing. Each glyph
+# Proportional place names (runtime/mcprop.c; on by default, --memcard-mono = retail): the place names of the save list in proportional spacing. Each glyph
 # is drawn from its first opaque column and advances by its opaque width in VRAM (ink + shadow) + a gap, the space by
 # a fixed width; only the memCardDrawFileLocation call turns it on (messages, footer and the empty-slot label keep the
 # 8-px cells).  A flag glyph (drawn at x - 11 without advancing) keeps its place relative to the glyph before it.
