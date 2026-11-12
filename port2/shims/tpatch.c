@@ -44,7 +44,16 @@ static void sha1(const unsigned char *p, unsigned n, unsigned char out[20]) {
 static void hex(const unsigned char *d, char *o) { static const char *x = "0123456789abcdef"; for (int i = 0; i < 20; i++) { o[2*i] = x[d[i] >> 4]; o[2*i+1] = x[d[i] & 15]; } o[40] = 0; }
 
 /* ---- the installed overlay */
-typedef struct { char path[64]; unsigned char *data; unsigned size; int nr; unsigned lba[4], sec[4]; int from; } TpFile;
+typedef struct { char path[64]; unsigned char *data; unsigned size; int nr; unsigned lba[4], sec[4]; int from; long off; } TpFile;
+/* port_tpatch_store (a path; the 3DS's entry point sets it, TOMBI_TPATCH_STORE tries it elsewhere): the rebuilt files are
+   kept in that file, not in memory.  A 3DS has no room for the 335 disc files a translation is built from at once, nor
+   for the 12 MB it rebuilds: there the sources are read as each file needs them and let go, each rebuilt file is
+   appended to the store (data == 0, off its place there), and the next start finds the store made (its head: "TPC1",
+   the patch's sha1) and reads from it.  port_tpatch_progress, if set, is told how far a build is. */
+const char *port_tpatch_store;
+void (*port_tpatch_progress)(int done, int total);
+static FILE *tp_store;
+#define STORE_HEAD 24
 /* the file each installed patch came from (log of the overlap rule below) */
 static char tp_names[16][160]; static int tp_npatches;
 static TpFile tp_files[512];
@@ -87,12 +96,32 @@ int port_tpatch_load(const char *arg) {
     port_printf("[tpatch] %s: \"%.*s\", %u files from %u disc files\n", path, (int)tl, (char *)b + p, ne, ns);
     p += tl;
     unsigned char **src = calloc(ns ? ns : 1, sizeof *src); unsigned *ssz = calloc(ns ? ns : 1, sizeof *ssz);
+    unsigned *spos = calloc(ns ? ns : 1, sizeof *spos);   /* (store mode: where each source's entry is, read when a file needs it) */
     int ok = 1, base = tp_nfiles;
+    const char *store = port_tpatch_store ? port_tpatch_store : getenv("TOMBI_TPATCH_STORE");
+    int made = 0;                       /* the store is there already: nothing is rebuilt */
+    unsigned char key[20]; long soff = 0; unsigned loaded = 0;
+    if (store && tp_store) store = 0;   /* (one patch's store at a time: a second patch is kept in memory) */
+    if (store) {
+        unsigned char head[STORE_HEAD];
+        sha1(b, (unsigned)n, key);
+        tp_store = fopen(store, "rb");
+        if (tp_store && fread(head, 1, STORE_HEAD, tp_store) == STORE_HEAD && !memcmp(head, "TPC1", 4) && !memcmp(head + 4, key, 20)) made = 1;
+        else {
+            if (tp_store) fclose(tp_store);
+            tp_store = fopen(store, "wb");
+            if (!tp_store) { port_printf("[tpatch] cannot write %s: the patch is kept in memory\n", store); store = 0; }
+            else { memset(head, 0, sizeof head); memcpy(head, "TPC0", 4); fwrite(head, 1, STORE_HEAD, tp_store); }
+        }
+        port_printf("[tpatch] store %s: %s\n", port_tpatch_store ? port_tpatch_store : "(TOMBI_TPATCH_STORE)", made ? "found" : store ? "being made (the first start with this patch)" : "not used");
+    }
     tp_busy = 1;
     for (i = 0; i < ns && ok; i++) {
         unsigned pl = u16(b + p); char name[256]; unsigned char d[20];
+        spos[i] = p;
         snprintf(name, sizeof name, "%.*s", (int)pl, (char *)b + p + 2); p += 2 + pl;
         unsigned want = u32(b + p); p += 4;
+        if (store) { ssz[i] = want; p += 20; continue; }
         src[i] = port_cd_read_named(name, &ssz[i]);
         if (!src[i] || ssz[i] != want) { port_printf("[tpatch] source %s: %s\n", name, src[i] ? "size differs (not the PAL disc SCES-01331?)" : "not on the disc"); ok = 0; }
         else { sha1(src[i], ssz[i], d); if (memcmp(d, b + p, 20)) { port_printf("[tpatch] source %s: sha1 differs (not the PAL disc SCES-01331, or already patched)\n", name); ok = 0; } }
@@ -120,10 +149,31 @@ int port_tpatch_load(const char *arg) {
         for (k = 0; k < (unsigned)f->nr; k++) { if (k < 4) { f->lba[k] = u32(b + p); f->sec[k] = u32(b + p + 4); } p += 8; }
         if (f->nr > 4) f->nr = 4;
         unsigned nops = u32(b + p), o = 0; p += 4;
+        f->off = soff; soff += f->size;
+        if (made) {   /* in the store: the operations are only stepped over */
+            for (k = 0; k < nops; k++) {
+                if (b[p] == 0) p += 11;
+                else if (b[p] == 2) p += 5 + 8u * u16(b + p + 3);
+                else p += 5 + u32(b + p + 1);
+            }
+            f->data = 0;
+            tp_nfiles++;
+            continue;
+        }
+        /* (store mode: the sources this file reads, loaded now and checked as the others are above) */
+        #define NEED(s_) do { unsigned s__ = (s_); if (store && s__ < ns && !src[s__]) { \
+            unsigned q = spos[s__], pl = u16(b + q); char name[256]; unsigned char dd[20]; unsigned got = 0; \
+            snprintf(name, sizeof name, "%.*s", (int)pl, (char *)b + q + 2); \
+            tp_busy = 1; src[s__] = port_cd_read_named(name, &got); tp_busy = 0; \
+            if (!src[s__] || got != ssz[s__]) { port_printf("[tpatch] source %s: %s\n", name, src[s__] ? "size differs (not the PAL disc SCES-01331?)" : "not on the disc (or no memory for it)"); ok = 0; ssz[s__] = 0; } \
+            else { sha1(src[s__], got, dd); if (memcmp(dd, b + q + 2 + pl + 4, 20)) { port_printf("[tpatch] source %s: sha1 differs (not the PAL disc SCES-01331, or already patched)\n", name); ok = 0; } loaded += got; } } } while (0)
         f->data = malloc(f->size + 4);
+        if (!f->data) { port_printf("[tpatch] no memory for %s (%u bytes)\n", f->path, f->size); ok = 0; }
         for (k = 0; k < nops && ok; k++) {
             if (b[p] == 0) {
                 unsigned s = u16(b + p + 1), off = u32(b + p + 3), len = u32(b + p + 7); p += 11;
+                NEED(s);
+                if (!ok) break;
                 if (s >= ns || off + len > ssz[s] || o + len > f->size) ok = 0; else { memcpy(f->data + o, src[s] + off, len); o += len; }
             } else if (b[p] == 2) {     /* GLYPH: w x h 4bpp bitmap, each row a (shifted) row of a disc glyph */
                 unsigned w = u16(b + p + 1), h = u16(b + p + 3), len = (w * h + 1) / 2, r, c; p += 5;
@@ -132,6 +182,8 @@ int port_tpatch_load(const char *arg) {
                 for (r = 0; r < h && ok; r++, p += 8) {
                     unsigned s = u16(b + p), off = u32(b + p + 2), sr = b[p + 6]; int dx = (signed char)b[p + 7];
                     if (sr == 0xFF) continue;
+                    NEED(s);
+                    if (!ok) break;
                     if (s >= ns || sr >= h || off + (w * h + 1) / 2 > ssz[s]) { ok = 0; break; }
                     for (c = 0; c < w; c++) {
                         int sc = (int)c - dx;
@@ -148,12 +200,31 @@ int port_tpatch_load(const char *arg) {
         }
         if (ok && o == f->size) { sha1(f->data, f->size, d); if (memcmp(d, want, 20)) ok = 0; }
         else ok = 0;
-        if (!ok) { port_printf("[tpatch] %s: rebuilt file does not match its sha1 (corrupt .tpatch?)\n", f->path); free(f->data); break; }
+        if (!ok) { port_printf("[tpatch] %s: rebuilt file does not match its sha1 (corrupt .tpatch?)\n", f->path); free(f->data); f->data = 0; break; }
+        if (store) {   /* to the store, and out of memory; the sources too once they add up */
+            if (fwrite(f->data, 1, f->size, tp_store) != f->size) { port_printf("[tpatch] cannot write %s (the SD card is full?)\n", store); ok = 0; }
+            free(f->data); f->data = 0;
+            if (loaded > (3u << 20)) { for (unsigned j = 0; j < ns; j++) { free(src[j]); src[j] = 0; } loaded = 0; }
+            if (port_tpatch_progress) port_tpatch_progress((int)i + 1, (int)ne);
+            if (!ok) break;
+        }
         tp_nfiles++;
     }
+    #undef NEED
+    if (store && !made) {   /* the store is whole: its head says so, and it is read from now on */
+        if (ok) {
+            unsigned char head[STORE_HEAD]; memcpy(head, "TPC1", 4); memcpy(head + 4, key, 20);
+            if (fseek(tp_store, 0, SEEK_SET) || fwrite(head, 1, STORE_HEAD, tp_store) != STORE_HEAD) ok = 0;
+        }
+        fclose(tp_store);
+        tp_store = ok ? fopen(store, "rb") : 0;
+        if (!tp_store) ok = 0;
+    }
+    if (tp_store) { static char sbuf[32768]; setvbuf(tp_store, sbuf, _IOFBF, sizeof sbuf); }
     for (i = 0; i < ns; i++) free(src[i]);
-    free(src); free(ssz); free(b);
+    free(src); free(ssz); free(spos); free(b);
     if (!ok) {
+        if ((store || made) && tp_store) { fclose(tp_store); tp_store = 0; }
         while (tp_nfiles > base) free(tp_files[--tp_nfiles].data);
         if (!skip) port_printf("[tpatch] %s NOT applied: the game runs with the disc's own text\n", path);
         return -1;
@@ -169,7 +240,7 @@ int port_tpatch_load(const char *arg) {
             size_t l = strlen(o);
             snprintf(o + l, sizeof o - l, "%s", tp_files[j].path);
             for (char *c = o + l; *c; c++) if (*c == '/') *c = '_';
-            if ((w = fopen(o, "wb"))) { fwrite(tp_files[j].data, 1, tp_files[j].size, w); fclose(w); }
+            if (tp_files[j].data && (w = fopen(o, "wb"))) { fwrite(tp_files[j].data, 1, tp_files[j].size, w); fclose(w); }
         }
     }
     if (port_verbose) for (int j = base; j < tp_nfiles; j++) port_printf("[tpatch]   %s %u bytes, lba %u\n", tp_files[j].path, tp_files[j].size, tp_files[j].lba[0]);
@@ -187,6 +258,9 @@ int port_tpatch_sector(int lba, unsigned char *d, int bytes) {
             unsigned char *u = bytes == 2048 ? d : d + 12;
             if (bytes != 2048) memset(d, 0, bytes);
             unsigned avail = off >= f->size ? 0 : f->size - off > 2048 ? 2048 : f->size - off;
+            if (!f->data) {   /* in the store */
+                if (!tp_store || fseek(tp_store, STORE_HEAD + f->off + (long)off, SEEK_SET) || fread(u, 1, avail, tp_store) != avail) avail = 0;
+            } else
             memcpy(u, f->data + off, avail);
             memset(u + avail, 0, 2048 - avail);
             return 1;
@@ -200,6 +274,9 @@ unsigned char *port_tpatch_named(const char *path, unsigned *size) {
     for (int i = tp_nfiles - 1; i >= 0; i--) if (!strcmp(tp_files[i].path, path)) {
         unsigned char *d = malloc(tp_files[i].size + 4);
         if (!d) return 0;
+        if (!tp_files[i].data) {   /* in the store */
+            if (!tp_store || fseek(tp_store, STORE_HEAD + tp_files[i].off, SEEK_SET) || fread(d, 1, tp_files[i].size, tp_store) != tp_files[i].size) { free(d); return 0; }
+        } else
         memcpy(d, tp_files[i].data, tp_files[i].size); *size = tp_files[i].size; return d;
     }
     return 0;

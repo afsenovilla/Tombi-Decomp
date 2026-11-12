@@ -142,6 +142,25 @@ void pa_spr(int x, int y, int tx, int ty, int u, int v, int w, int h, int cx, in
     if (!pa_ok || w <= 0 || h <= 0 || w > 256 || h > 256) return;
     u16 pal[16]; static u8 idx[258 * 258], vis[258 * 258];
     for (int i = 0; i < 16; i++) pal[i] = vram[(cy & 511) * 1024 + ((cx + i) & 1023)];
+    if (!(flags & ~PA_OPAQUE)) {
+        /* the plain sprite (and every tile of a background): straight to the canvas, a row at a time inside the
+           clip, the colours converted once (the same pixels as the general way below, which is a fifth as fast:
+           an Old 3DS took 200 ms a panel) */
+        u32 p32[16]; u8 on[16];
+        for (int i = 0; i < 16; i++) { p32[i] = c15(pal[i]); on[i] = pal[i] || (flags & PA_OPAQUE); }
+        int x0 = x, x1 = x + w, y0 = y, y1 = y + h;
+        if (x0 < pa_clip_x0) x0 = pa_clip_x0; if (x0 < 0) x0 = 0; if (x1 > pa_clip_x1) x1 = pa_clip_x1; if (x1 > pa_cw) x1 = pa_cw;
+        if (y0 < pa_clip_y0) y0 = pa_clip_y0; if (y0 < 0) y0 = 0; if (y1 > pa_clip_y1) y1 = pa_clip_y1; if (y1 > pa_ch) y1 = pa_ch;
+        for (int j = y0; j < y1; j++) {
+            const u16 *row = &vram[((ty + v + (j - y)) & 511) * 1024];
+            u32 *d = pa_cv + j * pa_cw;
+            for (int i = x0; i < x1; i++) {
+                const int uu = u + (i - x), t = (row[(tx + (uu >> 2)) & 1023] >> ((uu & 3) * 4)) & 15;
+                if (on[t]) d[i] = p32[t];
+            }
+        }
+        return;
+    }
     /* PS1 GPU, textured sprite: a texel whose CLUT colour is 0x0000 is not drawn; any other (STP bit 0x8000 or not)
        is drawn (the panel draws opaque, like a primitive without semi-transparency) */
     for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) {

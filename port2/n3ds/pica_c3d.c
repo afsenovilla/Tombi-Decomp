@@ -625,6 +625,7 @@ static int c3d_start(void) {
     proj_vram();
     port_printf("[3ds] pica: citro3d renderer, top screen format %d\n", scr_fmt);
     c3d_up = 1;
+    { extern void (*port_tpatch_progress)(int, int); port_tpatch_progress = c3d_progress; }
     port_n3ds_main_thread();
     /* both screens black at once: until the game's first frame they showed what the memory held, the text of the
        language chooser read as another pixel format, for the seconds the disc and the game take to start */
@@ -639,6 +640,35 @@ static int c3d_start(void) {
     /* (the test picture is 1.5 MB written to the SD card, seconds of every start: only when gputest.txt asks for it) */
     { FILE *g = fopen("sdmc:/3ds/tombi/gputest.txt", "r"); if (g) { fclose(g); gpu_test_picture(); } }
     return 0;
+}
+/* a progress bar on the top screen (shims/tpatch.c port_tpatch_progress: the improved translation's files being made,
+   minutes at the first start with it, the screens black otherwise) */
+static void c3d_progress(int done, int total) {
+    static int last = -1;
+    if (!c3d_up || total <= 0) return;
+    int w = 240 * done / total;
+    if (w == last) return;
+    last = w;
+    end_and_wait();
+    C3D_FrameBegin(0);
+    C3D_RenderTargetClear(top_rt, C3D_CLEAR_ALL, 0x000000FF, 0);
+    C3D_FrameDrawOn(top_rt);
+    C3D_Mtx m; Mtx_OrthoTilt(&m, 0.0f, 400.0f, 240.0f, 0.0f, 1.0f, -1.0f, true);
+    C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, u_proj, &m);
+    C3D_SetScissor(GPU_SCISSOR_DISABLE, 0, 0, 0, 0);
+    set_env(0, 0); set_atest(AT_OFF); set_blend(-1);
+    for (int k = 0; k < 2; k++) {   /* the whole bar dim, what is done bright */
+        float X0 = 80, X1 = k ? 80 + w : 320, Y0 = 112, Y1 = 128, c = k ? 1.0f : 0.25f;
+        if (X1 <= X0) continue;
+        QUAD_BEGIN();
+        vtx(X0, Y0, 0, 0, c, c, c, 1); vtx(X1, Y0, 0, 0, c, c, c, 1); vtx(X0, Y1, 0, 0, c, c, c, 1);
+        vtx(X1, Y0, 0, 0, c, c, c, 1); vtx(X1, Y1, 0, 0, c, c, c, 1); vtx(X0, Y1, 0, 0, c, c, c, 1);
+        QUAD_END();
+    }
+    vb_flush();
+    C3D_FrameEnd(0);
+    proj_vram();
+    vb_n = 0; last_ok = 0;
 }
 /* the way out (runtime/sdl.c): citro3d closed */
 void port_n3ds_gpu_fini(void) {

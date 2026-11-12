@@ -151,6 +151,7 @@ static int choose_lang(int code) {
             fprintf(stdout, "\x1b[2J\x1b[1;1HTombi! port - language\n\n");
             for (int i = 0; i < NLANG; i++) fprintf(stdout, "%c %s\n", i == sel ? '>' : ' ', name[i]);
             fprintf(stdout, "\n(hold L while the game starts to choose again)\n");
+            fprintf(stdout, "\nLa traduccion mejorada se prepara la primera vez:\nun par de minutos, con una barra de progreso.\n");
             fprintf(stdout, "\x1b[28;1HA: choose   START: exit");
             fflush(stdout);
             redraw = 0;
@@ -231,6 +232,8 @@ int main(int argc, char **argv) {
                 FILE *pf = fopen(DIR_ "/es_mejorada.tpatch", "wb");
                 if (pf) { fwrite(port_es_tpatch, 1, port_es_tpatch_size, pf); fclose(pf); }
             }
+            /* (the files it rebuilds are kept on the SD card, made at the first start: shims/tpatch.c port_tpatch_store) */
+            { extern const char *port_tpatch_store; port_tpatch_store = DIR_ "/es_mejorada.cache"; }
             args[n++] = "--lang"; args[n++] = "5";
             if (stat(DIR_ "/es_mejorada.tpatch", &ps) == 0) { args[n++] = "--text-patch"; args[n++] = DIR_ "/es_mejorada.tpatch"; }
         } else if (lang > 0) { snprintf(langarg, sizeof langarg, "%d", lang); args[n++] = "--lang"; args[n++] = langarg; }
