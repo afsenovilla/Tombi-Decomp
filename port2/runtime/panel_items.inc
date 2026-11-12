@@ -467,7 +467,8 @@ static void page_items(int play) {
         if (it_warp < 0) { if (it_in_use(item)) it_badge_use(cx + fr / 2 - 15, top + 8); if (s3(S3_NCLUT)[item] & 0x80) it_badge_n(cx + fr / 2 - 1, top + fr + 4, G_QTY(item)); }
         int y = top + fr + 10;
         y += (lh + 2) * text_wrap(lx + 8, y, fh, lw - 16, lh + 2, 2, 1, it_name(item, b, sizeof b), C_DARK, C_EDGE);
-        if (it_warp < 0) { ctext(cx, y, fh, cat_name(it_icat[it_sel]), sm ? C_MUTED8 : C_MUTED, C_EDGE); y += lh + 3; }
+        /* (the category wrapped too: "Objetos importantes" is wider than the 3DS's showcase in the 8 px font) */
+        if (it_warp < 0) y += (lh + 1) * text_wrap(lx + 8, y, fh, lw - 16, lh + 1, 2, 1, cat_name(it_icat[it_sel]), sm ? C_MUTED8 : C_MUTED, C_EDGE) + 2;
         pa_fill(lx + 12, y + 1, lw - 24, 1, RGB(230, 200, 180)); y += 4;
         int lim = oy - 4 - (st ? 2 : 0) * lh;
         if (it_desc(item, b, sizeof b)) { int ml = (lim - y) / lh; if (ml > 0) text_wrap(lx + 10, y, fh, lw - 20, lh, ml, 0, b, C_MUTED8, C_EDGE); }
