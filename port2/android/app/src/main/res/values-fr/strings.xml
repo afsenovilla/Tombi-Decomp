@@ -42,6 +42,7 @@
     <string name="opt_showfps">Afficher les FPS</string>
     <string name="opt_inflives">Vies infinies</string>
     <string name="opt_infhealth">Force infinie</string>
+    <string name="opt_nosaveheal">Sauvegarder ne restaure pas la force</string>
     <string name="aspect_auto">Auto</string>
     <string name="chip_cut_on">Contenu coupé : oui</string>
     <string name="chip_cut_off">Contenu coupé : non</string>

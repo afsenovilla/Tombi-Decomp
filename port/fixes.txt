@@ -969,3 +969,13 @@ src/playerEventStepRiseFadeOut.c |         FUN_800eeb5c(o, 4); |         { exter
 src/playerEventStepRiseFadeOut.c |         playerAirSpinToFall(o); |         { extern int port_wings_side_active(void *); if (!port_wings_side_active(o)) playerAirSpinToFall(o); }
 src/playerEventStepDropIn.c |         o->anim = PLAYER_FALL_ANIM; |         o->anim = PLAYER_FALL_ANIM; { extern void port_wings_side_land(void *); port_wings_side_land(o); }
 src/drawPlayerSpriteDefault.c |     } while (--n); |     } while (--n); { extern void port_wings_draw(void *, int, int, int); port_wings_draw(o, x, y, SPAD.i74); }
+# --no-save-heal (mod, tools/port_mods.py "nosaveheal"): loading a save keeps the vitality it was saved with.  Retail
+# PAL / USA refill it on every load: memCardFileListStep sub 10 copies the file's game block into GAME and then sets
+# GAME.playerHealth = GAME.playerMaxHealth (PAL D0SPSUB2 0x800E8E30 `sb a0,-0x5AC(s4)`, USA DSPSUB2 0x800E8A50); the
+# save itself stores the current health (func_800E999C copies GAME) and does not refill.  JP has no such store (its
+# load copies the block and nothing else), so JP already behaves like this mod.  A saved health of 0 or above the
+# maximum (an edited card) is still refilled.
+src/d0spsub2/memCardFileListStep.c | D_8009C960g.f10 = D_8009C960g.f11; | { extern int port_no_save_heal; if (!port_no_save_heal || D_8009C960g.f10 == 0 || D_8009C960g.f10 > D_8009C960g.f11) D_8009C960g.f10 = D_8009C960g.f11; }
+@version usa
+src/d0spsub2/func_800E7ECC_scus94236.c | D_8009C960g.f10 = D_8009C960g.f11; | { extern int port_no_save_heal; if (!port_no_save_heal || D_8009C960g.f10 == 0 || D_8009C960g.f10 > D_8009C960g.f11) D_8009C960g.f10 = D_8009C960g.f11; }
+@version all

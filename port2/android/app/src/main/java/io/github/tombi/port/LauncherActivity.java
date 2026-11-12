@@ -559,6 +559,8 @@ public class LauncherActivity extends Activity {
     void cheatArgs(List<String> a) {
         if (flag("inflives", false)) { a.add("--poke-every"); a.add("50:GAME+20:63:1"); }
         if (flag("infhealth", false)) { a.add("--poke-every"); a.add("1:GAME+10:4:1"); }
+        // loading a save keeps the saved vitality (port/fixes.txt memCardFileListStep; PAL and USA refill it, JP never does)
+        if (flag("nosaveheal", false)) a.add("--no-save-heal");
     }
     /** another version (USA): English only and its own 60 Hz; the language, text, panel, NTSC picture, cut content and
      *  button icons are PAL-only in the port (docs/USA.md "Native port"); the debug menu and the cheats run in both */
@@ -1479,6 +1481,7 @@ public class LauncherActivity extends Activity {
                 }
                 items.add(toggle(R.string.opt_inflives, "inflives"));   // (named fields: every version, cheatArgs)
                 items.add(toggle(R.string.opt_infhealth, "infhealth"));
+                items.add(toggle(R.string.opt_nosaveheal, "nosaveheal"));
                 items.add(new Item(getString(R.string.tr_import), new Runnable() { public void run() { pickTranslation(); } }));
                 if (translationFile().isFile())
                     items.add(new Item(getString(R.string.tr_remove), new Runnable() { public void run() {

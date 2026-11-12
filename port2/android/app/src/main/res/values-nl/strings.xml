@@ -42,6 +42,7 @@
     <string name="opt_showfps">FPS tonen</string>
     <string name="opt_inflives">Oneindig levens</string>
     <string name="opt_infhealth">Oneindige vitaliteit</string>
+    <string name="opt_nosaveheal">Opslaan herstelt de vitaliteit niet</string>
     <string name="aspect_auto">Auto</string>
     <string name="chip_cut_on">Geschrapte inhoud: aan</string>
     <string name="chip_cut_off">Geschrapte inhoud: uit</string>
