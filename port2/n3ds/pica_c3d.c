@@ -118,6 +118,7 @@ static void set_atest(int at) {
    builds its batches in this buffer (c3d_vbuf), so a batch is drawn where it lies. */
 #define VB_MAX 32768
 #define POS_OFF (0.5f - 1.0f / 64.0f)   /* (what the shader adds to a position) */
+#define TEX_EPS (1.0f / 32.0f)           /* (and to a texture coordinate, in texels: pica.v.pica) */
 static PV *vb;
 static int quad0;
 static float tsc_x, tsc_y;
@@ -130,7 +131,7 @@ static void set_tscale(float x, float y) {   /* texels -> texture coordinates (p
    (call set_tscale(1, 1) for them) */
 static void vtx(float x, float y, float s, float t, float r, float g, float b, float a) {
     PV *d = vb + vb_n++;
-    d->x = x - POS_OFF; d->y = y - POS_OFF; d->u = s; d->v = 1.0f - t;
+    d->x = x - POS_OFF; d->y = y - POS_OFF; d->u = s - TEX_EPS; d->v = (1.0f - t) - TEX_EPS;   /* (the shader adds TEX_EPS to both) */
     d->r = (u8)(r * 255.0f + 0.5f); d->g = (u8)(g * 255.0f + 0.5f); d->b = (u8)(b * 255.0f + 0.5f); d->a = (u8)(a * 255.0f + 0.5f);
 }
 #define EDGE_X 1023.9f   /* (past the last pixel's centre, short of the target's edge) */

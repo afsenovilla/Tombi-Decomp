@@ -3,11 +3,17 @@
 ; A vertex is the backend's own (shims/gpu_pica.h PV: x, y, u, v as floats, the colour as four bytes), read by the
 ; GPU as it is: the conversion the CPU made of every vertex is done here.
 ;   position: + (0.5 - 1/64) (the PICA samples pixel centres; the hair less: see pica_c3d.c), z 0.5
-;   texture coordinate: (u, v) * tscale.xy + (0, 1)   (tscale.y is negative: the rows run the other way)
+;   texture coordinate: (u + 1/32, v + 1/32) * tscale.xy + (0, 1)   (tscale.y is negative: the rows run the other way)
+;     The 1/32 of a texel: the PS1 reads the texel at a pixel's integer position, where a sprite's coordinate is a
+;     whole number.  Here the sample point is 1/64 of a pixel past it (the position's offset), which is the same texel
+;     when the coordinate grows along the row and the one before when it falls: a mirrored sprite (the left corners
+;     of a message box) showed a column of its neighbour's texels on a console.  With 1/32 added both directions
+;     land 1/64 inside the right texel, at up to a texel a pixel.
 ;   colour: bytes * tscale.z (rgb), * tscale.w (alpha)
 .fvec projection[4]
 .fvec tscale
 .constf consts(0.484375, 0.5, 1.0, 0.0)
+.constf texeps(0.03125, 0.03125, 0.0, 0.0)
 
 .out outpos position
 .out outtc0 texcoord0
@@ -25,7 +31,9 @@
 	dp4 outpos.z, projection[2], r0
 	dp4 outpos.w, projection[3], r0
 	mov r1, consts.wzww
-	mul r2.xy, tscale.xy, intex.xy
+	mov r3, texeps
+	add r3.xy, r3.xy, intex.xy
+	mul r2.xy, tscale.xy, r3.xy
 	add r1.xy, r1.xy, r2.xy
 	mov outtc0, r1
 	mul outclr, tscale.zzzw, inclr
