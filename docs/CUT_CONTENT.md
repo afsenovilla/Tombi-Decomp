@@ -118,6 +118,12 @@ Full table: notes/secrets.md, "Where the 0xFF events are started / completed". S
 - **76 (Black Water)** and **99 (Where's the Material!?)** are started only in the cut Iron Town (AREA17 s0) and completed nowhere. **61** is only read by the cut Stonetown dialogue.
 - **The other 19** (6, 18, 45, 52, 59, 60, 67, 74, 83, 89, 94, 95, 96, 100, 138, 139, 140, 184, 186) have no code, room data or script that starts, completes or reads them.
   **89 (Green Fortune Teller)** is one of these. Its only context is the cut Wood village line "a fortune-teller lives in this hut, but he has a condition" (AREA11 s0).
+- **Pre-release builds** (2026-11-12, notes/secrets.md "Pre-release builds"): USA, beta 980203, JP demo, PrePre 9, Dengeki D5, Hyper 12 and
+  PrePre 8 add **no trigger** for any of these ids; USA and the beta have exactly the retail sites. The demos only add titles and hints:
+  event 6 is titled in Hyper 12 (大きな水たまり？) and PrePre 8 (slot 7, PrePre 8 numbering = retail + 1) and hinted in the JP demo; event 18 is
+  ドワーフの助け ("Help from the Dwarves") in PrePre 8 (slot 19) and PrePre 9; in the Dengeki hint bank event 83 is a dinner-party feast, not
+  the iron car. Side finding: event 169 (Biting Plant Flower) is completed by using item 8 from the sub-screen in JP retail and the beta;
+  USA/PAL moved it to giving the flower to witch Mizuno (X018).
 
 ## Jungle (AREA10): what is left of the Masakari / Funga content
 

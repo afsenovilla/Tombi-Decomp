@@ -103,6 +103,57 @@ Conclusion: of the 24, only **97 (complete) and 98 (start)** have code outside t
 them depends on the Clock Tower sections being loadable (docs/CIVILIZATION.md: AREA16 s4..s6 from AREA18 s1) and, for 97, on having the Iron Wheel. Everything else is either cut-town
 code (61, 76, 99 and the other halves of 97/98) or a dead id (20 events).
 
+### Pre-release builds (2026-11-12)  [V = binary scan, I = inferred]
+Same method, throw-away scanner (not committed): every `jal` to the four event routines with a0 resolved backwards (also through
+`move`, and through a branch whose delay slot loads a0, which the PAL/JP pass had missed for X000 0x8012D7A8 = event 167), plus
+`lui`+load/store at `SCRIPT_FLAGS`+E, plus op `9a` in every WSS, plus the data-driven sites decoded (sequence steps `{op, arg}` of the
+wise-man scene, the area/room/entry records). PAL rescanned first as a control: it reproduces the table above exactly.
+| build | event routines (award / started / complete / get) | `SCRIPT_FLAGS` | files scanned |
+|---|---|---|---|
+| USA SCUS-94236 | 0x8001E118 / E220 / E31C / E3D8 | 0x8009C10C | exe + SYSTEM/*.BIN + AREA*/*.BIN (base 0x800E7388) |
+| beta 980203 | 0x8001D87C / D984 / DA80 / DB3C | 0x800A2884 | exe + SYSTEM + AREA* BINs (base 0x800EDAA8, checked by jal/prologue histogram) |
+| JP demo SLPM-80165 | 0x8001C3F8 (title/AP notify) / C4F4 / C614 / C6CC | 0x8009AC54 | exe, X00/DSPSUB/DSPSUB3/OPTSUB00 (0x800E7698), the unreferenced CA01..CA14 (0x8010F560) |
+| PrePre 9 PCPX-96093 | 0x8001ED24 (notify) / EE20 / EF40 / EFF8 | 0x800A258C | TOMBA.EXE, X01/X02/INFO/DSPSUB/DSPSUB3 (0x800ED548) |
+| Dengeki D5 SLPM-80186 | 0x8001C160 (notify) / C25C / C37C / C434 | 0x800A78BC | TOMBA.EXE, SYSTEM X00/DSPSUB/DSPSUB3/OPTSUB00 (0x800F4A48) |
+| Hyper Re-mix 12 SLPM-80167 | 0x8001D374 (?) / D414 / D510 / D5A4 | 0x800A47BC | TOMBA.EXE, SYSTEM A00/DSPSUB/DSPSUB2/DSPSUB3 (0x800EF518) |
+| PrePre 8 PCPX-96084 | 0x800216F4 start / 0x800217A8 set-4 / 0x800217F0 complete / 0x80021914 get | 0x800DE21C | TOMBA.EXE (single binary) |
+
+**Lost ids: nothing new.** None of the 24 ids of the table above (6, 18, 45, 52, 59-61, 67, 74, 76, 83, 89, 94-100, 138-140, 184, 186)
+is started, completed or read by any pre-release build, apart from the retail sites themselves:
+- **USA = PAL** for every event site (same files, same kinds, same counts); WSS byte-identical in effect (same `9a` list).
+- **beta 980203 = PAL** for the lost ids: INFO2 (Stonetown/Iron Town scenes) starts 97 at 0x80100D9C, 76 at 0x80101AA8, 99 at 0x80101C38,
+  completes 98 at 0x80102B18 (USA 0x800FAAC8 / 0x800FB7D4 / 0x800FB964 / 0x800FC844); X16 starts 98 at 0x8011AF10 and completes 97 at
+  0x8011B040 (USA 0x80116930 / 0x80116A60); 61 is only read (INFO2 0x800F81A0 / 0x800F82BC). Same verdict as retail.
+- **JP demo, PrePre 9, Dengeki D5, Hyper 12**: zero hits for any lost id. Ids touched at all: JP demo 0, 1, 2, 3, 5, 8, 9, 10, 13, 14, 17,
+  20, 21, 22, 37, 127 (read), 166, 167, 169, 177, 178, 179, 181, 182; PrePre 9 1, 2, 13, 14, 17, 37, 127 (read), 169, 177, 178, 179, 182;
+  Dengeki 0-5, 8, 9, 10, 13, 14, 17, 20, 21, 22, 37, 127 (read), 166, 169, 177, 179, 182; Hyper 0, 1, 2, 3, 5, 8, 9, 10, 12, 13, 14, 17,
+  23, 177. Data-driven sites hold no lost id either: the wise-man sequences (Dengeki X00 table 0x801321A4, JP demo X00 0x8012C480,
+  Hyper A00 0x8013069C; ops 8/9 = start/complete) award only 1, 9, 10 (Hyper also 12, like PAL); the area/room/entry records of PrePre 9
+  X01/X02 (0x80114A8C, read at 0x800F4908) and Hyper A00 (0x801202C4, read at 0x800F727C) are all -1 (PrePre 8 had event 2 there).
+- **PrePre 8 uses its own numbering = retail id + 1** for its 25 list slots [V by title: 1 ジィちゃんの形見 = retail 0 ... 13 ドワーフの長老 =
+  retail 12, 23 のぞいてごらん?! = 22, 24 バロンは友だち = 23; only slot 21 消えた長老 differs from retail 20 "Stop the Fight!"]. So the lost
+  **6 = PrePre 8 slot 7 大きな水たまり?** and **18 = slot 19 ドワーフの助け** ("Help from the Dwarves"). Neither is started, set or read
+  (constants in the exe: 1, 2, 3, 4, 6, 9, 10, 11, 13 = retail 0, 1, 2, 3, 5, 8, 9, 10, 12): both were list titles with no trigger already
+  in June 1997. Hyper 12's title block (AREA00/DATA000.GAM, 16 entries, entry 0 = CLEAR!) has 大きな水たまり？ at index 7 = event 6 + 1,
+  and PrePre 9's (AREA01/A008.GAM block 1, 30 titles) has ドワーフの助け between ドワーフを救え (17) and 魔女の忘れもの (19), i.e. in
+  event 18's place: titled in every demo that reaches it, triggered in none [V for the titles, I for the slot].
+- Hint banks: JP demo `SYSTEM/A00014.000` already has the retail hint for 6 ("heard about a big puddle"); slot 18 is an **empty string**,
+  while every other unfilled slot is an `イベント０xx` placeholder. Dengeki `A00014.000` has the retail JP hints for all lost ids **except 83**:
+  お食事会には ごちそう いっぱい ("a dinner party has a lot of feast") instead of retail's "how do you move the iron car?" [V]: id 83 was a
+  different event in November 1997 and became 動かない鉄の車 / "The Rusty Steel Car" later (still never triggered).
+
+**Moved or extra triggers of other events** (not lost, but different from retail) [V]:
+| event | retail (PAL / USA) | pre-release |
+|---|---|---|
+| 169 Biting Plant Flower | completed only when item 8 (Biting Plant Flower) is given to witch Mizuno, X018 `witchMizunoCandyRecipeTalk` (PAL 0x80119A14) | **beta 980203 and JP retail**: completed by *using* item 8 from the sub-screen, `setEventComplete(0xA9, 1)` in the item-use switch (beta DSPSUB 0x800EF290 / DSPSUB3 0x800EF1E8; JP DSPSUB 0x800EB290 / DSPSUB3 0x800EB1D8, src/d0spsub/func_800EA2BC_slps01144.c `case 8`); neither has the X18 call. Moved to the witch for USA (1998-03) |
+| 47 Some Cheese Please | I0NFO2 `setEventStarted(47)` 0x800F84D8 | beta INFO2 0x800FD83C: `awardEventProgress(47, 0)` then `SCRIPT_FLAGS[47] = 1` written directly (0x800FD84C); same place |
+| 168 The Evil Pig Bag | only completed, by 0210.WSS | Hyper 12 `AREA15/0200.WSS` +0x51A also starts it (`9a` 168, 0); PrePre 9's 0200.WSS does not. Hyper ships only area 0, so this script cannot run on that disc [I] |
+| 4 Motocross Course | AREA03 | Dengeki X00 scroll controller (already in docs/STATUS.md) |
+| reads | PAL reads 166 in every X overlay's shared part and D0SPSUB, 180 in MAIN0, 20 in I0NFO | beta reads 166 only in X00, no MAIN0 read of 180, no INFO read of 20 (status checks added for USA) |
+WSS (`9a` op): USA = beta = PAL. PrePre 9 (AREA01/*.WSS, 7 files) and Hyper (AREA15, 8 files, no 0201) carry the early-area subset
+(1, 12, 13, 14, 17, 20, 23, 168, 177, 179, 180, 181); their 0140.WSS awards nothing (retail: 27, 151, 187-189). JP demo and Dengeki: one
+0000.WSS (award 1 only).
+
 ## Not done
 - Exhaustive proof that no overlay has a button sequence (checked: MAIN0 pad readers; overlay pad code not audited one by one).
 - Unreferenced dialogue / room / item text.
