@@ -61,7 +61,9 @@ static C3D_Tex wide_tex; static C3D_RenderTarget *wide_rt;
 static C3D_Tex eye_tex; static C3D_RenderTarget *eye_rt, *top_r;
 static int cur_wide;                      /* the target a draw goes to now: 0 VRAM's, 1 the wide plane */
 static int lin_fresh;                     /* lin[] holds the target as it is (c3d_read): nothing drawn since */
+static int pres_dirty = 1;   /* something was drawn, written or filled since the last present (begin() was called) */
 static void begin(void) {   /* (C3D_FrameBegin waits for the frame submitted before: its memory is free then) */
+    pres_dirty = 1;
     if (in_frame) return;
     u64 tb = svcGetSystemTick();
     int began = C3D_FrameBegin(0);
@@ -497,8 +499,17 @@ static void c3d_read(int x, int y, int w, int h, unsigned *dst, int stride) {
 
 /* ---- the top screen: the display area, 4:3 at the screen's height, centred */
 static C3D_Tex *pres_tex = &vram_tex; static int pres_w = 320;   /* what a present shows, and how wide on the screen */
+static unsigned st_pres_skipped;
 static int c3d_present(int x, int y, int w, int h, int masked) {
     u64 t0 = svcGetSystemTick();
+    {   /* nothing changed since the last present (a vblank whose ordering table was skipped, a still screen): the
+           screens keep what they show, and no frame is begun, which waited for the GPU to end the one before (5 ms
+           and more a vblank with --stereo, whose frames are twice the GPU's work) */
+        static int lx = -1, ly, lw, lh, lm; static C3D_Tex *lt; static float lk = -1;
+        const float k = top_r ? osGet3DSliderState() : 0.0f;
+        if (!pres_dirty && x == lx && y == ly && w == lw && h == lh && masked == lm && pres_tex == lt && k == lk) { st_pres_skipped++; return 1; }
+        lx = x; ly = y; lw = w; lh = h; lm = masked; lt = pres_tex; lk = k;
+    }
     begin();
     replay();
     C3D_RenderTargetClear(top_rt, C3D_CLEAR_ALL, 0x000000FF, 0);
@@ -556,7 +567,7 @@ static int c3d_present(int x, int y, int w, int h, int masked) {
         double g = C3D_GetDrawingTime(); gpu_ms_sum += g; gpu_ms_n++; if (g > gpu_ms_max) gpu_ms_max = g;
     }
     C3D_FrameEnd(GX_CMDLIST_FLUSH);
-    in_frame = 0;
+    in_frame = 0; pres_dirty = 0;
     C3D_TexSetFilter(pres_tex, GPU_NEAREST, GPU_NEAREST);
     proj_vram();
     frame_no++; st_frames++;
@@ -604,6 +615,7 @@ static int c3d_present(int x, int y, int w, int h, int masked) {
                     "%.2f host writes, %.2f read-backs, %.2f panel, %.2f present (the rest: the game, the core, sound)\n",
                     st_frames, st_syncs, st_writes, TK_MS(tk_frame), TK_MS(tk_draw), TK_MS(tk_upload), TK_MS(tk_write), TK_MS(tk_read),
                     TK_MS(tk_panel), TK_MS(tk_present));
+        port_printf("[3ds] pica: %u presents of the last %d had nothing new (not drawn)\n", st_pres_skipped, TK_N); st_pres_skipped = 0;
         port_printf("[3ds] pica: per frame %.2f ms waiting for the GPU to end the frame before, %.2f changes of target; the GPU's own time a frame %.2f ms (the longest %.2f); %.2f ms recording the right eye\n",
                     TK_MS(tk_begin), (double)st_switch / TK_N, gpu_ms_n ? gpu_ms_sum / gpu_ms_n : 0.0, gpu_ms_max, TK_MS(tk_eye));
         tk_eye = 0;
@@ -664,7 +676,7 @@ void port_n3ds_panel(const unsigned char *rgba, int w, int h) {
         if (row) { if (r0 < 0) r0 = ty >> 3; r1 = ty >> 3; }
     }
     lw = w; lh = h;
-    if (r0 >= 0) dcache_flush(d + r0 * 64 * 64, (unsigned)(r1 - r0 + 1) * 64 * 64 * 4);
+    if (r0 >= 0) { dcache_flush(d + r0 * 64 * 64, (unsigned)(r1 - r0 + 1) * 64 * 64 * 4); pres_dirty = 1; }
     panel_w = w; panel_h = h;
     tk_panel += svcGetSystemTick() - t0;
 }
