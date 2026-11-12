@@ -132,6 +132,7 @@ static int load_chief(void)
 
 /* the spawns, once per section load (from the gate's first update) */
 static u8 *fungas[3];
+
 static void spawn_npcs(void)
 {
     static u8 rec[16];
@@ -156,8 +157,8 @@ static void spawn_npcs(void)
         { extern u8 *SPAWN_RECORD_OBJECT; fungas[i] = SPAWN_RECORD_OBJECT; }
     }
 }
-/* each frame (from the gate's update): every Funga stays on its drum, x fixed and never below the drum's top, so its
-   jumps go up from the drum and come back down onto it */
+/* each frame (from the gate's update): every Funga stays on its drum (x fixed) and hops on it: a 40-unit jump every
+   70 frames, the three out of step (their own jump only comes when they attack) */
 static void hold_fungas(void)
 {
     static const s16 FX[3] = {1401, 1501, 1690};
@@ -165,7 +166,18 @@ static void hold_fungas(void)
         u8 *o = fungas[i];
         if (!o || o[0] == 0 || o[2] != 0x3A) { fungas[i] = 0; continue; }
         *(s16 *)(o + 0x12) = FX[i];
-        if (*(s16 *)(o + 0x16) > -186) { *(s16 *)(o + 0x16) = -186; *(u16 *)(o + 0x14) = 0; }
+        /* a hop every 70 frames, 40 high, phases apart: y = top - parabola */
+        extern int port_frame;
+        int t = (port_frame + i * 23) % 70, h = t < 36 ? (40 * 4 * t * (36 - t)) / (36 * 36) : 0;
+        *(s16 *)(o + 0x16) = (s16)(-186 - h); *(u16 *)(o + 0x14) = 0;
+        /* their own pose is the walk (the AI keeps walking in place): standing on the drum (frame 62), crouched
+           leap in the air (73), facing the path */
+        static u8 sc[3][8];
+        u16 fr = h > 4 ? 73 : 62, c = 0x8000 | 60;
+        if (*(u16 *)sc[i] != fr || *(u32 *)(o + 0x24) != (u32)(unsigned long)sc[i]) {
+            memset(sc[i], 0, 8); memcpy(sc[i], &fr, 2); memcpy(sc[i] + 6, &c, 2);
+            *(u32 *)(o + 0x24) = (u32)(unsigned long)sc[i]; AnimLoadDuration(o);
+        }
     }
 }
 
