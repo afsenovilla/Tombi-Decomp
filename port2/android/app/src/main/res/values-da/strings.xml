@@ -42,6 +42,7 @@
     <string name="opt_showfps">Vis FPS</string>
     <string name="opt_inflives">Uendelige liv</string>
     <string name="opt_infhealth">Uendelig energi</string>
+    <string name="opt_nosaveheal">At gemme genopfylder ikke energien</string>
     <string name="aspect_auto">Auto</string>
     <string name="chip_cut_on">Fjernet indhold: til</string>
     <string name="chip_cut_off">Fjernet indhold: fra</string>

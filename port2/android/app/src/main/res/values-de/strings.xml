@@ -42,6 +42,7 @@
     <string name="opt_showfps">FPS anzeigen</string>
     <string name="opt_inflives">Unendlich Leben</string>
     <string name="opt_infhealth">Unendlich Energie</string>
+    <string name="opt_nosaveheal">Speichern füllt die Energie nicht auf</string>
     <string name="aspect_auto">Auto</string>
     <string name="chip_cut_on">Entfernte Inhalte: an</string>
     <string name="chip_cut_off">Entfernte Inhalte: aus</string>

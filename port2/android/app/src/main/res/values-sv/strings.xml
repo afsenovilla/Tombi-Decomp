@@ -42,6 +42,7 @@
     <string name="opt_showfps">Visa FPS</string>
     <string name="opt_inflives">Oändligt med liv</string>
     <string name="opt_infhealth">Oändlig vitalitet</string>
+    <string name="opt_nosaveheal">Att spara fyller inte på vitaliteten</string>
     <string name="aspect_auto">Auto</string>
     <string name="chip_cut_on">Bortklippt innehåll: på</string>
     <string name="chip_cut_off">Bortklippt innehåll: av</string>

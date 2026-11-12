@@ -30,6 +30,11 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
 
 ## In progress / open
 
+0. **Mod "Saving does not refill vitality" (`--no-save-heal`, 2026-11-12)**: retail PAL/USA refill the vitality when a
+   save is **loaded** (D0SPSUB2 `memCardFileListStep` sub 10, `GAME.playerHealth = playerMaxHealth` after the copy;
+   PAL 0x800E8E30, USA 0x800E8A50), not when saving; JP never refills on load. port/fixes.txt guard + both launchers
+   (docs/PORT.md "Mods"). Checked headless on PAL i386 only (vitality 1 saved -> 4 loaded without the flag, 1 with it;
+   default frames identical); USA build and the device not run.
 0. **JP retail port (SLPS-01144) boots and plays (2026-11-11)**: stage J1 of docs/PORT_VERSIONS_PLAN.md. `python3
    tools/build_full.py --version slps01144` (25 programs byte-identical), `cmake -S port2 -B build/port2-slps01144
    -DPORT_VERSION=jp && make -C build/port2-slps01144`, data from `python3 tools/extract_data.py game_jp/disc/tomba_jp.bin

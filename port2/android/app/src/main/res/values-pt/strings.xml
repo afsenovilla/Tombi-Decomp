@@ -42,6 +42,7 @@
     <string name="opt_showfps">Mostrar FPS</string>
     <string name="opt_inflives">Vidas infinitas</string>
     <string name="opt_infhealth">Vitalidade infinita</string>
+    <string name="opt_nosaveheal">Guardar não recupera a vitalidade</string>
     <string name="aspect_auto">Auto</string>
     <string name="chip_cut_on">Conteúdo cortado: sim</string>
     <string name="chip_cut_off">Conteúdo cortado: não</string>
