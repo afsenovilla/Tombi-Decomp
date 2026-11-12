@@ -1203,9 +1203,29 @@ confirmed with Circle at 1300 (the values of the room sweep). Addresses: `GAME` 
 | Start with N lives | `--poke 1100:8009C980:N:1` | `GAME.playerLives` (drawHudLives) |
 | Infinite lives | `--poke-every 50:8009C980:63:1` | new option: `--poke-every INTERVAL:ADDR:VALUE[:SIZE]` writes every INTERVAL vblanks |
 | Infinite vitality | `--poke-every 1:8009C970:4:1` | `GAME.playerHealth`, 4 = full (initGameConfig) |
+| Saving does not refill vitality (default off) | `--no-save-heal` | a loaded save keeps its saved vitality; see below |
 | Unlock all events | `--poke 1100:8009CDA4:FF:1x130` | new `SIZExCOUNT` suffix of `--poke`: COUNT consecutive values; event flag bytes 0x8009CDA4 + id (notes/names.md "Event links"), 0xFF = completed |
 | Custom keys | `--keys up=Up,cross=X,...` | *Controls* tab, Keyboard card: only the keys changed from the defaults |
 | Button prompts (PlayStation / Xbox / Keyboard) | `--patch-tex prompts-SET.tbtx` | see below |
+
+**Saving does not refill vitality (`--no-save-heal`).** Where the retail game refills Tombi's vitality around a save,
+checked headless on the PAL build (vitality poked to 1 of 4 in GAME+0x10 and the player object's +0x98/+0x9A, saved at
+the AREA06 s1 save sign with `--cut-content`, then loaded from the title's Continue): neither the save sign
+(`updateL4Type1AObject`), the "Save DATA?" message box (`func_8002CF40`, `openMenuScreen(4)`), the menu task
+(`inventoryScreenHandler`) nor the save writer (`func_800E999C`, which copies GAME with the current vitality into the
+file) touches it: after saving and back in the room the vitality is still 1, and the card holds 1. The refill is on
+**load**: `memCardFileListStep` (D0SPSUB2) sub 10 copies the file's 0x988-byte game block into GAME and then sets
+`GAME.playerHealth = GAME.playerMaxHealth` (PAL 0x800E8E30 `sb a0,-0x5AC(s4)`, s4 = GAME+0x5BC; USA DSPSUB2
+0x800E8A50 in `func_800E7ECC`, the same statement). So every save, once loaded (Continue from the title or a load from
+the save screen), starts at full vitality. The JP DSPSUB2 load copies the block and nothing else (no button-config or
+health store after the copy at 0x800EB4D0..0x800EB584), so the Japanese game already keeps the saved vitality. Other
+refills, unchanged by the mod: losing a life (`gameplayMainHandler` step 2), the golden bowl, healing spots, script op
+0xA9 (`scriptOpHealPlayer`), the max-vitality raises. The mod is a port/fixes.txt guard on that store (the PAL file and,
+in a `@version usa` section, the USA twin): with `--no-save-heal` the saved value stays unless it is 0 or above the
+maximum (an edited card). Launchers: PC Mods page ("Saving does not refill vitality" / "Guardar no recupera la vida",
+in `PORTABLE_MODS`), Android Extras page (`nosaveheal`, passed for every version by `cheatArgs`). Checked (PAL i386,
+headless): without the flag the loaded save has vitality 4, with it 1 (GAME and PLAYER+0x98), and a standard run
+without the flag gives frames byte-identical to the build without the change. USA and JP builds not run.
 
 **Button prompts.** `tools/prompt_glyphs.py` draws our own glyph sets with Pillow (no third-party icon pack):
 `port/assets/prompts/{playstation,xbox,keyboard}/<button>.png`, 16x16, 4 palette indices (0 transparent, 1 outline,
