@@ -153,6 +153,9 @@ is started, completed or read by any pre-release build, apart from the retail si
 WSS (`9a` op): USA = beta = PAL. PrePre 9 (AREA01/*.WSS, 7 files) and Hyper (AREA15, 8 files, no 0201) carry the early-area subset
 (1, 12, 13, 14, 17, 20, 23, 168, 177, 179, 180, 181); their 0140.WSS awards nothing (retail: 27, 151, 187-189). JP demo and Dengeki: one
 0000.WSS (award 1 only).
+**Correction (2026-11-12, reachability walk of `tools/wss.py`):** in PrePre 9 the awards of 14 (0210), 20 (0210) and 177 (0200)
+are in dead code jumped over by the demo (the 177 branch also gives item 7 = Charity Wings); the live PrePre 9 scripts award 1, 12,
+13, 17, 23, 168, 180, 181 only (179 is only read there; it is awarded by Hyper's 0220). Hyper's 0200 awards 14 and 177 live. Details: docs/CUT_CONTENT.md "WSS event scripts across builds".
 
 ## Not done
 - Exhaustive proof that no overlay has a button sequence (checked: MAIN0 pad readers; overlay pad code not audited one by one).
