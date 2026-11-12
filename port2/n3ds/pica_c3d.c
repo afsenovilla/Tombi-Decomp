@@ -425,15 +425,36 @@ static int c3d_present(int x, int y, int w, int h, int masked) {
 void port_n3ds_panel(const unsigned char *rgba, int w, int h) {
     if (!bot_rt || w <= 0 || h <= 0) return;
     if (w > 320) w = 320; if (h > 240) h = 240;
-    /* only when the canvas changed (the panel redraws at ~25 fps, mostly the same picture) */
+    /* only the 8 x 8 tiles of the canvas that changed (the panel redraws mostly the same picture, and a touch changes
+       a corner of it), their texels' places from a table, and only those tiles' rows flushed.  Without a wait for the
+       frames submitted before: the bottom screen is drawn from this texture at every present, so one caught half
+       written is put right a frame later, and the wait was the GPU's whole queue when the game's screen is a dear one
+       (a touch took 70 ms to show: 60 of them here) */
     static unsigned last[320 * 240]; static int lw, lh;
-    if (w == lw && h == lh && !memcmp(last, rgba, (size_t)w * h * 4)) return;
+    static unsigned char mo[64];
+    if (!mo[1]) for (int k = 0; k < 64; k++) mo[k] = (unsigned char)morton(k & 7, k >> 3);
     u64 t0 = svcGetSystemTick();
-    memcpy(last, rgba, (size_t)w * h * 4); lw = w; lh = h;
-    begin();   /* (waits for the frames submitted before: the last present sampled this texture) */
+    const int all = w != lw || h != lh;
     const unsigned *src = (const unsigned *)rgba; unsigned *d = panel_tex.data;
-    for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) d[tiled(i, j, 512)] = pix(src[j * w + i]) | 0xFF;
-    dcache_flush(d, 512 * 256 * 4);
+    int r0 = -1, r1 = -1;   /* the tile rows written */
+    for (int ty = 0; ty < h; ty += 8) {
+        const int ny = h - ty < 8 ? h - ty : 8; int row = 0;
+        for (int tx = 0; tx < w; tx += 8) {
+            const int nx = w - tx < 8 ? w - tx : 8; int diff = all;
+            for (int yy = 0; yy < ny && !diff; yy++) diff = memcmp(src + (ty + yy) * w + tx, last + (ty + yy) * w + tx, (size_t)nx * 4) != 0;
+            if (!diff) continue;
+            unsigned *tl = d + ((ty >> 3) * 64 + (tx >> 3)) * 64;
+            for (int yy = 0; yy < ny; yy++) {
+                const unsigned *sr = src + (ty + yy) * w + tx; const unsigned char *m = mo + yy * 8;
+                memcpy(last + (ty + yy) * w + tx, sr, (size_t)nx * 4);
+                for (int xx = 0; xx < nx; xx++) tl[m[xx]] = pix(sr[xx]) | 0xFF;
+            }
+            row = 1;
+        }
+        if (row) { if (r0 < 0) r0 = ty >> 3; r1 = ty >> 3; }
+    }
+    lw = w; lh = h;
+    if (r0 >= 0) dcache_flush(d + r0 * 64 * 64, (unsigned)(r1 - r0 + 1) * 64 * 64 * 4);
     panel_w = w; panel_h = h;
     tk_panel += svcGetSystemTick() - t0;
 }
