@@ -355,6 +355,16 @@ jobs:
           echo "== log.txt of the widescreen run"; grep -a "wide\|port_main" "$SD/3ds/tombi/log.txt" 2>/dev/null | head -8
           grep "\[port\] fps" "$SD/3ds/tombi/log.txt" 2>/dev/null | tail -3
           for f in wide_050 wide_075; do convert shots/$f.png -trim +repage -quality 80 small_$f.jpg && { echo "=====BEGIN shot_$f====="; base64 -w 100 small_$f.jpg; echo "=====END shot_$f====="; }; done
+          # --stereo (experimental 3D: each frame drawn for both eyes): the same gameplay, the log's lines and a screenshot
+          rm -f "$SD/3ds/tombi/log.txt"
+          echo "--log-fps --skip-movies --stereo --poke 900:1F8001B4:1 --poke 1250:8009C960:1:2 --poke 1250:8009C962:0:2 --pad-script 1000:start,1300:circle:3,2000:right:3000" > "$SD/3ds/tombi/args.txt"
+          ./squashfs-root/AppRun "$PWD/app/tombi.cci" > azahar_stereo.log 2>&1 &
+          EMU=$!
+          sleep 60; import -window root shots/stereo_060.png || true
+          kill "$EMU" 2>/dev/null || true; sleep 2
+          echo "== log.txt of the stereo run"; grep -a "stereo\|port_main\|right eye" "$SD/3ds/tombi/log.txt" 2>/dev/null | head -8
+          grep "\[port\] fps" "$SD/3ds/tombi/log.txt" 2>/dev/null | tail -3
+          convert shots/stereo_060.png -trim +repage -quality 80 small_stereo.jpg && { echo "=====BEGIN shot_stereo====="; base64 -w 100 small_stereo.jpg; echo "=====END shot_stereo====="; }
 
       # (small JPEGs of three screenshots in the job log, base64 between markers: readable without the artifact API)
       - name: Screenshots in the log

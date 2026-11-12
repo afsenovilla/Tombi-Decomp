@@ -395,18 +395,34 @@ static void ws_fill(int x, int y, int w, int h, u16 c) {
         if (be->ws_fill) be->ws_fill(ws_base(ax), y, 320 + 2 * port_widescreen, h, c); else
         for (int j = 0; j < h; j++) for (int i = 0; i < 320 + 2 * port_widescreen; i++) wvram[(y + j) & 511][ws_base(ax) + i] = c; }
 }
-/* --stereo prototype (PC only for now: PORT_STEREO=eye,strength,focus,zfocus, eye -1 left / 1 right): each eye's
-   picture drawn with things shifted by their depth.  A polygon's vertices by the GTE's SZ (below); a sprite or a
-   rectangle, which the GTE did not project, by its place in the drawing order (far first) */
+/* --stereo (experimental; the pica backend, so the 3DS): each ordering table is drawn twice, the left eye's into VRAM
+   as always and the right eye's into a target of its own (gpu_pica.c, PState.wide 2), things shifted apart by their
+   depth.  A polygon's vertices by the GTE's SZ (below); a sprite or a rectangle, which the GTE did not project, by its
+   place in the drawing order (far first).  port_stereo_k scales it (the 3DS's 3D slider; 0: one pass, as without) */
 static int st_dx;   /* this packet's shift by its place in the drawing order (DrawOTag) */
+/* a run of sprites, rectangles and fills keeps the shift of its first: a tile map, a menu's pieces, a top-down room's
+   picture are runs of them side by side, which shifts by their places apart opened one-pixel gaps between */
+static int st_run;
+static int st_new_depth(unsigned c) {
+    int flat = c == 0x02 || (c >= 0x60 && c < 0x80);
+    if (c >= 0xE0 || c < 0x02 || (c > 0x02 && c < 0x20)) return 0;   /* (the environment: the run goes on) */
+    int r = !(flat && st_run);
+    st_run = flat;
+    return r;
+}
 /* the depth of a projected vertex: the GTE notes each one's screen point and SZ (runtime/gte.c), the decoder looks a
    polygon's vertices up: a mesh's shared vertices then get the same shift, so its polygons stay joined.  Two tables,
    by the parity of the frame that built them (a table is drawn the frame after) */
-int port_stereo_on; static int st_eye; static float st_s, st_zf;
+int port_stereo_on; float port_stereo_k = 1.0f;
+static int st_eye;                                  /* the pass being drawn: 0 none, -1 the left eye, 1 the right */
+static float st_s = 16.0f, st_zf = 550.0f;          /* the widest shift between the eyes (pixels, k = 1); the SZ at the screen's plane */
 #define STH 8192
 static struct { short x, y; unsigned short z, ok; } sth[2][STH];
 static unsigned sth_hash(int x, int y) { return ((unsigned)(x & 0x7FF) * 73856093u ^ (unsigned)(y & 0x7FF) * 19349663u) & (STH - 1); }
+static unsigned st_notes;   /* vertices the GTE projected (a screen without any is flat: a menu, a 2D screen) */
+int port_stereo_flat;       /* the last table drawn had no depth: its right eye is its left one (n3ds/pica_c3d.c) */
 void port_stereo_note(int x, int y, unsigned z) {
+    st_notes++;
     unsigned h = sth_hash(x, y); int p = port_frame & 1;
     for (int k = 0; k < 4; k++, h = (h + 1) & (STH - 1))
         if (sth[p][h].ok != (unsigned short)(port_frame | 1) || (sth[p][h].x == x && sth[p][h].y == y)) {
@@ -420,8 +436,8 @@ static int st_lookup(int x, int y) {   /* the shift of a vertex at this screen p
             int age = (unsigned short)(port_frame | 1) - sth[p][h].ok;
             if (sth[p][h].ok && age >= -2 && age <= 4 && sth[p][h].x == x && sth[p][h].y == y) {
                 float z = sth[p][h].z ? sth[p][h].z : 1;
-                float disp = st_s * (1.0f - st_zf / z);
-                if (disp < -st_s * 0.5f) disp = -st_s * 0.5f;
+                float S = st_s * port_stereo_k, disp = S * (1.0f - st_zf / z);
+                if (disp < -S * 0.5f) disp = -S * 0.5f;
                 float v = st_eye * disp * 0.5f;
                 return (int)(v + (v >= 0 ? 0.5f : -0.5f));
             }
@@ -1055,15 +1071,22 @@ void DrawOTag(u32 *ot) {
     if (port_frameskip) { fs_mark(gs.x1, gs.y1, skip); port_frames_skipped += (unsigned)skip; }
     /* (the game compacts its ordering tables: the slots' nodes are gone, so a packet's depth is its place in the
        drawing order, far first: its count over the table's count the time before) */
-    static int st_init; static float st_focus; static int st_prev, st_cnt;
-    if (!st_init) { const char *e = getenv("PORT_STEREO"); st_init = 1; if (e) { st_s = 10; st_focus = 0.5f; st_zf = 1000; sscanf(e, "%d,%f,%f,%f", &st_eye, &st_s, &st_focus, &st_zf); port_stereo_on = st_eye != 0; } }
-    st_cnt = 0; st_dx = 0;
+    static int st_init; static float st_focus = 0.3f; static int st_prev, st_cnt;
+    if (!st_init) { const char *e = getenv("PORT_STEREO_PARAMS"); st_init = 1; if (e) sscanf(e, "%f,%f,%f", &st_s, &st_focus, &st_zf); }   /* (strength, focus, SZ at the screen) */
+    extern int pica_eye_ok;
+    static unsigned st_notes_seen;
+    const int st_flat = st_notes - st_notes_seen < 64; st_notes_seen = st_notes;
+    if (!skip) port_stereo_flat = st_flat;
+    const int stereo = port_stereo_on && pica_eye_ok && port_stereo_k > 0.01f && !skip && !st_flat && be == &port_gpu_pica;
+    const GpuState st_gs0 = gs; const int st_tx0 = tpg.tx, st_ty0 = tpg.ty, st_tp0 = tpg.tp;   /* (the right eye's pass starts from here) */
+    st_eye = stereo ? -1 : 0;
+    st_cnt = 0; st_dx = 0; st_run = 0;
     while (n < 200000) {
         u32 tag = *p, next = tag & 0xFFFFFF, len = tag >> 24;
         n++;
-        if (st_eye && len && st_prev > 0) {
+        if (st_eye && len && st_prev > 0 && st_new_depth(p[1] >> 24)) {
             float d = 1.0f - (float)st_cnt / (float)st_prev; if (d < 0) d = 0;   /* 1 farthest .. 0 nearest */
-            float disp = d > st_focus ? st_s * (d - st_focus) / (1.0f - st_focus) : 0.0f;
+            float disp = d > st_focus ? st_s * port_stereo_k * (d - st_focus) / (1.0f - st_focus) : 0.0f;
             st_dx = (int)(st_eye * disp * 0.5f + (st_eye > 0 ? 0.5f : -0.5f));
         }
         if (len) st_cnt++;
@@ -1097,7 +1120,33 @@ void DrawOTag(u32 *ot) {
         if (pica_prof_on) { pica_prof[0] += dt; pica_prof_n++; pica_prof_on = 0; }
     }
 #endif
-    st_dx = 0; if (st_cnt > 50) st_prev = st_cnt;
+    if (stereo) {   /* the right eye: the same table again into its own target, its drawing alone (no loads, copies) */
+        const GpuState st_gs1 = gs; const int st_tx1 = tpg.tx, st_ty1 = tpg.ty, st_tp1 = tpg.tp;
+        gs = st_gs0; tpg.tx = st_tx0; tpg.ty = st_ty0; tpg.tp = st_tp0;
+        st_eye = 1; st_cnt = 0; st_dx = 0; st_run = 0;
+        const u32 *q = ot; int m = 0;
+        while (m++ < 200000) {
+            u32 tag = *q, next = tag & 0xFFFFFF, len = tag >> 24;
+            if (len && st_prev > 0 && st_new_depth(q[1] >> 24)) {
+                float d = 1.0f - (float)st_cnt / (float)st_prev; if (d < 0) d = 0;
+                float disp = d > st_focus ? st_s * port_stereo_k * (d - st_focus) / (1.0f - st_focus) : 0.0f;
+                st_dx = (int)(disp * 0.5f + 0.5f);
+            }
+            if (len) {
+                st_cnt++;
+                u32 c = q[1] >> 24;
+                /* (the frame's drawing only: a fill, a primitive or the environment, into a screen-sized area) */
+                if ((c == 0x02 || (c >= 0x20 && c < 0x80) || c >= 0xE0) && (c >= 0xE0 || (gs.x2 - gs.x1 >= 255 && gs.y2 - gs.y1 >= 199))) {
+                    gs.wide = 2; packet(q + 1, len); gs.wide = 0;
+                }
+            }
+            if (next == 0xFFFFFF) break;
+            q = (const u32 *)next;
+        }
+        be->list_end();
+        gs = st_gs1; tpg.tx = st_tx1; tpg.ty = st_ty1; tpg.tp = st_tp1;
+    }
+    st_eye = 0; st_dx = 0; if (st_cnt > 50) st_prev = st_cnt;
     poly_lean = 0;
     gpu_prims += n;
     if (skip) ws_drew = 0;   /* (a table not drawn changed nothing of the wide plane: no copy of it to VRAM) */
@@ -1304,6 +1353,16 @@ void port_gpu_vblank(void) {
     port_gpu_frame(frame_rgb, &w, &h);
     path_for(path, "frame_");
     if (write_png(path, frame_rgb, w, h)) port_printf("[gpu] cannot write %s\n", path);
+#ifndef __3DS__
+    if (port_stereo_on && be == &port_gpu_pica) {   /* --stereo on a PC: the right eye's picture beside it (right_*.png) */
+        extern int pica_eye_frame(u8 *rgb, int x, int y, int w, int h);
+        RECT *d = (RECT *)cur_dispenv;
+        if (!cur_dispenv[0x11] && pica_eye_frame(frame_rgb, d->x & 1023, d->y & 511, w, h)) {
+            path_for(path, "right_");
+            if (write_png(path, frame_rgb, w, h)) port_printf("[gpu] cannot write %s\n", path);
+        }
+    }
+#endif
     {   /* --internal-res N > 1 on OpenGL: the display area at N x as well (hd_*.png) */
         extern int port_internal_res;
         extern int port_gl_frame_hd(u8 *rgb, int x, int y, int w, int h, int wide, int *ow, int *oh);

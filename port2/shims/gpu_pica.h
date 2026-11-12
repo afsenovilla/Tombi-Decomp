@@ -38,7 +38,7 @@ enum { AT_OFF, AT_NOTZERO, AT_OPAQUE, AT_SEMI };   /* alpha test: off, alpha != 
 typedef struct { float x, y, u, v; unsigned char r, g, b, a; } PV;   /* u, v: texels of the atlas */
 /* tex: the atlas (0, 1, 2) or -1; mod: texture x colour x 2 (else the texture, raw); blend: -1 or the PS1 mode 0..3;
    x1..y2: the drawing area (inclusive) */
-typedef struct { int tex, mod, atest, blend, x1, y1, x2, y2, wide; } PState;   /* wide: the wide plane is the target (--widescreen) */
+typedef struct { int tex, mod, atest, blend, x1, y1, x2, y2, wide; } PState;   /* wide: the target, 0 VRAM's, 1 the wide plane (--widescreen), 2 the right eye's (--stereo) */
 typedef struct {
     int (*start)(void);                                                    /* 0 = ready */
     /* a slot's texels (pica_slot_size(slot) squared); busy: triangles since the last present sample this slot */
@@ -64,5 +64,9 @@ typedef struct {
     void (*wide_read)(int x, int y, int w, int h, unsigned *dst, int stride);
     /* optional: what was recorded goes to the GPU now (the end of a drawn ordering table), not at the present */
     void (*submit)(void);
+    /* optional, --stereo: the right eye's target, of the first one's size (PState.wide 2), 0 = ready, and a fill of it;
+       the present shows its display area to the right eye */
+    int (*eye_start)(void);
+    void (*eye_fill)(int x, int y, int w, int h, unsigned rgba);
 } PicaDev;
 #endif

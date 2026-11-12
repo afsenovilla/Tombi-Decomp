@@ -135,11 +135,11 @@ static int choose_image(char *out, size_t cap) {
 /* the options beside the language, kept in opts.txt ("movies hz wide"): the movies played or skipped, the game at 60 Hz
    (the 3DS's screens, the US game's speed) or 50 (the PAL disc's own), the picture 400 columns wide, the whole top
    screen (experimental: --widescreen 5:3, shims/gpu_pica.c) */
-static int opt_movies = 1, opt_hz = 60, opt_wide = 0;
+static int opt_movies = 1, opt_hz = 60, opt_wide = 0;   /* opt_wide: 0 4:3, 1 wide, 2 3D (--stereo) */
 static void opts_load(void) {
     FILE *f = fopen(DIR_ "/opts.txt", "r"); int m, h, w = 0;
     if (!f) return;
-    if (fscanf(f, "%d %d %d", &m, &h, &w) >= 2) { opt_movies = m != 0; opt_hz = h == 50 ? 50 : 60; opt_wide = w != 0; }
+    if (fscanf(f, "%d %d %d", &m, &h, &w) >= 2) { opt_movies = m != 0; opt_hz = h == 50 ? 50 : 60; opt_wide = w == 1 || w == 2 ? w : 0; }
     fclose(f);
 }
 static void opts_save(void) {
@@ -210,14 +210,14 @@ static int choose_lang(int code) {
             if (row == 0) lang = (lang + d + NLANG) % NLANG;
             else if (row == 1) opt_movies = !opt_movies;
             else if (row == 2) opt_hz = opt_hz == 60 ? 50 : 60;
-            else opt_wide = !opt_wide;
+            else opt_wide = (opt_wide + d + 3) % 3;
             redraw = 1;
         }
         if (k & KEY_A) { ok = 1; break; }
         if (redraw) {
             /* the top screen: every row inside its 50 columns (a value cut to the 33 its row has left) */
             const char *lab[ROWS] = { "Language", "Movies", "Speed", "Picture" };
-            const char *val[ROWS] = { name[lang], opt_movies ? "play" : "skip", opt_hz == 60 ? "60 Hz" : "50 Hz", opt_wide ? "wide (experimental)" : "4:3" };
+            const char *val[ROWS] = { name[lang], opt_movies ? "play" : "skip", opt_hz == 60 ? "60 Hz" : "50 Hz", opt_wide == 1 ? "wide (experimental)" : opt_wide == 2 ? "3D (experimental)" : "4:3" };
             consoleSelect(&top);
             fprintf(stdout, "\x1b[0m\x1b[2J");
             banner();
@@ -260,6 +260,9 @@ static int choose_lang(int code) {
                 put_at(6, 3, "wide: the whole top screen, 400");
                 put_at(7, 3, "columns. Experimental: slower in the");
                 put_at(8, 3, "busiest rooms.");
+                put_at(10, 3, "3D: depth with the 3D slider, the");
+                put_at(11, 3, "frame drawn once for each eye.");
+                put_at(12, 3, "Experimental: slower while it is up.");
             }
             fprintf(stdout, "\x1b[21;3HDisc   \x1b[37;1m%.30s\x1b[0m", launch_disc);
             fprintf(stdout, "\x1b[22;3HModel  \x1b[37;1m%s\x1b[0m", n3 ? "New 3DS" : "Old 3DS");
@@ -372,7 +375,8 @@ int main(int argc, char **argv) {
        50 with time to spare; args.txt "--hz 50" for the PAL disc's own speed) */
     args[n++] = "--hz"; args[n++] = opt_hz == 50 ? "50" : "60";   /* (the options screen: choose_lang) */
     if (!opt_movies) args[n++] = "--no-movies";   /* (the logos at the start too: straight to the title screen) */
-    if (opt_wide) { args[n++] = "--widescreen"; args[n++] = "5:3"; }
+    if (opt_wide == 1) { args[n++] = "--widescreen"; args[n++] = "5:3"; }
+    else if (opt_wide == 2) args[n++] = "--stereo";
     /* the bottom screen: the panel (runtime/panel.c) at the screen's own size, drawn by n3ds/pica_c3d.c; the game's
        NOW LOADING until gameplay, then status / events / map / items, by touch */
     args[n++] = "--second-screen"; args[n++] = "--panel-size"; args[n++] = "320x240";

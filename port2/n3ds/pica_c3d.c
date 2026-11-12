@@ -57,6 +57,8 @@ static void dcache_flush(const void *p, u32 size) { GSPGPU_FlushDataCache(p, siz
 /* ---- the frame */
 /* --widescreen: the wide plane, a second target of the first one's size (shims/gpu_pica.h PicaDev.wide_start) */
 static C3D_Tex wide_tex; static C3D_RenderTarget *wide_rt;
+/* --stereo: the right eye's target (the same size: the frame at VRAM's coordinates) and the top screen's right image */
+static C3D_Tex eye_tex; static C3D_RenderTarget *eye_rt, *top_r;
 static int cur_wide;                      /* the target a draw goes to now: 0 VRAM's, 1 the wide plane */
 static int lin_fresh;                     /* lin[] holds the target as it is (c3d_read): nothing drawn since */
 static void begin(void) {   /* (C3D_FrameBegin waits for the frame submitted before: its memory is free then) */
@@ -72,7 +74,7 @@ static void begin(void) {   /* (C3D_FrameBegin waits for the frame submitted bef
 }
 static void on_target(int wide) {   /* (in a frame) */
     if (cur_wide == wide) return;
-    C3D_FrameDrawOn(wide ? wide_rt : vram_rt);
+    C3D_FrameDrawOn(wide == 2 ? eye_rt : wide ? wide_rt : vram_rt);
     cur_wide = wide; st_switch++;
 }
 static void vb_flush(void);
@@ -359,6 +361,23 @@ static void c3d_fill(int x, int y, int w, int h, unsigned c) { fill_on(0, x, y, 
 static void c3d_wide_fill(int x, int y, int w, int h, unsigned c) { fill_on(1, x, y, w, h, c); }
 /* the wide plane's rectangle into VRAM's target, texel for pixel (the frame's 4:3 middle, after every ordering table:
    what the game reads back, copies or uses as a texture is there) */
+static void c3d_eye_fill(int x, int y, int w, int h, unsigned c) { fill_on(2, x, y, w, h, c); }
+static int c3d_eye_start(void) {
+    if (eye_rt) return 0;
+    if (!C3D_TexInitVRAM(&eye_tex, 1024, 512, GPU_RGBA8)) { port_printf("[3ds] pica: no VRAM for the right eye (%u KB free)\n", (unsigned)(vramSpaceFree() >> 10)); return -1; }
+    C3D_TexSetFilter(&eye_tex, GPU_NEAREST, GPU_NEAREST);
+    eye_rt = C3D_RenderTargetCreateFromTex(&eye_tex, GPU_TEXFACE_2D, 0, -1);
+    top_r = C3D_RenderTargetCreate(240, 400, GPU_RB_RGBA8, -1);
+    if (!eye_rt || !top_r) { port_printf("[3ds] pica: no render targets for the right eye\n"); eye_rt = 0; top_r = 0; return -1; }
+    C3D_RenderTargetClear(eye_rt, C3D_CLEAR_ALL, 0x000000FF, 0);
+    C3D_RenderTargetSetOutput(top_r, GFX_TOP, GFX_RIGHT,
+                              GX_TRANSFER_FLIP_VERT(0) | GX_TRANSFER_OUT_TILED(0) | GX_TRANSFER_RAW_COPY(0) |
+                              GX_TRANSFER_IN_FORMAT(GX_TRANSFER_FMT_RGBA8) | GX_TRANSFER_OUT_FORMAT(scr_fmt) |
+                              GX_TRANSFER_SCALING(GX_TRANSFER_SCALE_NO));
+    gfxSet3D(true);
+    port_printf("[3ds] pica: stereo: the right eye's target is ready (%u KB of VRAM left)\n", (unsigned)(vramSpaceFree() >> 10));
+    return 0;
+}
 static void c3d_wide_down(int wx, int wy, int x, int y, int w, int h) {
     begin(); cmd_room();
     if (vb_n + 6 > VB_MAX - 64) { end_and_wait(); begin(); }
@@ -447,6 +466,25 @@ static int c3d_present(int x, int y, int w, int h, int masked) {
         vtx(X0, Y0, S0, T0, 1, 1, 1, 1); vtx(X1, Y0, S1, T0, 1, 1, 1, 1); vtx(X0, Y1, S0, T1, 1, 1, 1, 1);
         vtx(X1, Y0, S1, T0, 1, 1, 1, 1); vtx(X1, Y1, S1, T1, 1, 1, 1, 1); vtx(X0, Y1, S0, T1, 1, 1, 1, 1);
         QUAD_END();
+    }
+    if (top_r) {   /* --stereo: the right eye's picture, its target's display area (or the left one's while the slider is down) */
+        extern float port_stereo_k;
+        port_stereo_k = osGet3DSliderState();
+        extern int port_stereo_flat;
+        C3D_Tex *rt = port_stereo_k > 0.01f && !port_stereo_flat ? &eye_tex : pres_tex;
+        C3D_RenderTargetClear(top_r, C3D_CLEAR_ALL, 0x000000FF, 0);
+        C3D_FrameDrawOn(top_r);
+        if (!masked && w > 0 && h > 0) {
+            C3D_TexSetFilter(rt, GPU_LINEAR, GPU_LINEAR);
+            C3D_TexBind(0, rt);
+            float X0 = 200 - pres_w / 2, X1 = 200 + pres_w / 2, Y0 = 0, Y1 = 240;
+            float S0 = x / 1024.0f, S1 = (x + w) / 1024.0f, T0 = 1.0f - y / 512.0f, T1 = 1.0f - (y + h) / 512.0f;
+            QUAD_BEGIN();
+            vtx(X0, Y0, S0, T0, 1, 1, 1, 1); vtx(X1, Y0, S1, T0, 1, 1, 1, 1); vtx(X0, Y1, S0, T1, 1, 1, 1, 1);
+            vtx(X1, Y0, S1, T0, 1, 1, 1, 1); vtx(X1, Y1, S1, T1, 1, 1, 1, 1); vtx(X0, Y1, S0, T1, 1, 1, 1, 1);
+            QUAD_END();
+            C3D_TexSetFilter(rt, GPU_NEAREST, GPU_NEAREST);
+        }
     }
     if (bot_rt && panel_w) {   /* the bottom screen: the panel's canvas, 1:1 (320 x 240) */
         C3D_RenderTargetClear(bot_rt, C3D_CLEAR_ALL, 0x000000FF, 0);
@@ -858,7 +896,8 @@ void port_n3ds_gpu_fini(void) {
     C3D_Fini();
 }
 const PicaDev pd_c3d = { c3d_start, c3d_tex_upload, c3d_tris, c3d_fill, c3d_read, c3d_write, c3d_present, c3d_vbuf, c3d_write15,
-                         c3d_wide_start, c3d_wide_fill, c3d_wide_write, c3d_wide_down, c3d_wide_present, 0, c3d_submit };
+                         c3d_wide_start, c3d_wide_fill, c3d_wide_write, c3d_wide_down, c3d_wide_present, 0, c3d_submit,
+                         c3d_eye_start, c3d_eye_fill };
 #endif
 
 /* ---- a worker thread for the panel's renders (runtime/panel.c): on another core where there is one (New 3DS: core 2;

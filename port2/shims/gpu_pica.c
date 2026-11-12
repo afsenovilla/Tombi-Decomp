@@ -38,6 +38,7 @@ extern unsigned long long pica_cnt[8];
 extern int pica_gpu_clips;
 static u32 (*rt)[1024];                  /* the render target, 512 rows (allocated by pica_start: the image stays small) */
 static u32 (*wrt)[1024];                 /* the wide plane (--widescreen) */
+static u32 (*ert)[1024];                 /* the right eye's target (--stereo) */
 /* (the changes of target a 3DS would make, by what made them: 0 triangles, 1 a fill, 2 a write, 3 a wide fill, 4 a
    wide write, 5 the copy down; logged at the end) */
 static int ref_cur; static unsigned long long ref_sw[6];
@@ -60,7 +61,7 @@ static inline void ref_frag(const PState *s, int x, int y, int r, int g, int b, 
         if (s->mod) { tr = sat(tr * r / 128); tg = sat(tg * g / 128); tb = sat(tb * b / 128); }
         c = (u32)tr | ((u32)tg << 8) | ((u32)tb << 16) | ((u32)a << 24);
     } else c &= 0x00FFFFFFu;
-    u32 *d = s->wide ? &wrt[y][x] : &rt[y][x];
+    u32 *d = s->wide == 2 ? &ert[y][x] : s->wide ? &wrt[y][x] : &rt[y][x];
     if (s->blend >= 0) {
         int dr = *d & 255, dg = (*d >> 8) & 255, db = (*d >> 16) & 255, fr = c & 255, fg = (c >> 8) & 255, fb = (c >> 16) & 255;
         switch (s->blend) {
@@ -140,8 +141,10 @@ static void ref_wide_write(int x, int y, int w, int h, const u16 *s, int stride)
 }
 static void ref_wide_down(int wx, int wy, int x, int y, int w, int h) { REF_T(0, 5); for (int j = 0; j < h; j++) memcpy(&rt[y + j][x], &wrt[wy + j][wx], (size_t)w * 4); }
 static void ref_wide_read(int x, int y, int w, int h, u32 *d, int stride) { for (int j = 0; j < h; j++) memcpy(d + (size_t)j * stride, &wrt[y + j][x], (size_t)w * 4); }
+static int ref_eye_start(void) { if (!ert) ert = calloc(512, sizeof *ert); return ert ? 0 : -1; }
+static void ref_eye_fill(int x, int y, int w, int h, u32 c) { for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) ert[(y + j) & 511][(x + i) & 1023] = c; }
 static const PicaDev pd_ref = { ref_start, ref_tex_upload, ref_tris, ref_fill, ref_read, ref_write, 0, 0, 0,
-                                ref_wide_start, ref_wide_fill, ref_wide_write, ref_wide_down, 0, ref_wide_read };
+                                ref_wide_start, ref_wide_fill, ref_wide_write, ref_wide_down, 0, ref_wide_read, 0, ref_eye_start, ref_eye_fill };
 #ifdef __3DS__
 extern const PicaDev pd_c3d;              /* port2/n3ds/pica_c3d.c */
 static const PicaDev *dev = &pd_c3d;
@@ -981,9 +984,23 @@ static void put_rect(int x, int y, int w, int h) {   /* vram[] -> the target, in
         j += hh;
     }
 }
+/* --stereo on a PC (gpu.c's frame dumps): the right eye's display area as RGB8; 0 = none */
+int pica_eye_frame(unsigned char *rgb, int x, int y, int w, int h) {
+    extern int port_stereo_flat;
+    if (!ert || w <= 0 || h <= 0 || w > 1024 || h > 512 || port_stereo_flat) return 0;
+    flush();
+    for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) {
+        u32 c = ert[(y + j) & 511][(x + i) & 1023]; unsigned char *o = rgb + (j * w + i) * 3;
+        o[0] = c & 255; o[1] = (c >> 8) & 255; o[2] = (c >> 16) & 255;
+    }
+    return 1;
+}
+int pica_eye_ok;   /* --stereo: the right eye's target is there (gpu.c draws a second pass into it) */
 static void pica_fill(int x, int y, int w, int h, u16 c) {
     u16 *vram = port_vram();
     flush();
+    if (gs->wide == 2) { dev->eye_fill(x, y, w, h, c15to32(c)); return; }   /* (the right eye's pass: its own target alone) */
+    if (pica_eye_ok && w >= 320 && h >= 200) dev->eye_fill(x, y, w, h, c15to32(c));   /* (a frame's clear: the right eye's too) */
     if (npend) {   /* (a host write the fill covers whole never needs to go; one it cuts goes first) */
         for (int i = 0; i < npend; i++)
             if (pend[i].x >= x && pend[i].y >= y && pend[i].x + pend[i].w <= x + w && pend[i].y + pend[i].h <= y + h) { memmove(&pend[i], &pend[i + 1], (size_t)(npend - i - 1) * sizeof pend[0]); npend--; i--; }
@@ -1077,6 +1094,13 @@ static int pica_start(void) {
     if (!stage) stage = malloc(1024 * 512 * 4);
     if (!dec) dec = malloc(256 * 256 * 4);
     if (!stage || !dec || dev->start()) return -1;
+    {   extern int port_stereo_on, port_widescreen, port_ws_cull;
+        if (port_stereo_on) {
+            if (port_widescreen) { port_printf("[gpu] pica: --stereo: --widescreen off (one or the other)\n"); port_widescreen = port_ws_cull = 0; }
+            if (dev->eye_start && dev->eye_start() == 0) pica_eye_ok = 1;
+            else { port_printf("[gpu] pica: no right eye's target on this device: --stereo off\n"); port_stereo_on = 0; }
+        }
+    }
     {   extern int port_widescreen, port_ws_cull;
         if (port_widescreen > 96) port_widescreen = port_ws_cull = 96;
         if (port_widescreen && (!dev->wide_start || dev->wide_start())) {
@@ -1099,6 +1123,7 @@ static void pica_stop(void) {
 }
 static int pica_present(int dx, int dy, int dw, int dh, int masked) {
     flush();
+
     if (npend) pend_flush(dx, dy, dw, dh);
     if (nwd) wd_resolve(dx, dy, dw, dh);
     frame_clock = use_clock; present_no++;
