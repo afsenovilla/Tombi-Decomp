@@ -37,7 +37,7 @@ logo.
 |---|---|---|
 | "DIRT MOTOCROSS RACE  Let's challenge it!!" sign | MFNT000 #165 = (8,0); no call with k=8 in X000/MAIN0 (PAL or JP). PrePre8's event-title strip has モトクロスコース. | A sign that maps to (8,0) (a port-side subtype; `D_80079EBC` has none) and a place for it: **no evidence where it stood**, so placement would be ours. Cheap (same pattern as the letter). |
 | AREA00 hint signs per button config | MFNT000 k1 dx 8,10,14,15,21,22 and 24..29: variants of hints PAL already shows; `D_80079E8C..EB0[BUTTON_CONFIG_INDEX]` never selects them. | Nothing new to show: the same advice exists. Not worth it. |
-| Dwarf woodcutter lines (AREA02/19) | MFNT020 (2,54..56) "Dwarves... good at cutting trees", "you want a tree cut down?" (JP text; PAL has `!!!!!!!!!!` placeholders). 0200.WSS stages (2,54) in register r11 for villager 16, whose talk case is missing (section "WSS event scripts across builds"); nothing reaches dx 55-56. Unused event 18 "The Dwarves' Help" ("Ask the lumberjack dwarf for some wood"). | A WSS script change (AREA15/02xx.WSS op 0x85) and a dwarf actor that offers it; medium. |
+| Dwarf woodcutter lines (AREA02/19) | MFNT020 (2,54..56) "Dwarves... good at cutting trees", "you want a tree cut down?" (JP text; PAL has `!!!!!!!!!!` placeholders). 0200.WSS stages (2,54) in register r11 for villager 16, whose talk case is missing (section "WSS event scripts across builds"); nothing reaches dx 55-56. Villager 16 is the chopping dwarf at the top left (0200 obj 16 / 0201 obj 13, world (8, 154), anim 56, while event 168 is complete and 80 is not): he stands in solid cells, 40-56 px beyond the nearest walkable cell, in every build's cell map, so he can never be touched (section "The village woodcutter"). Not spawned in PrePre 9 or Hyper 12. Unused event 18 "The Dwarves' Help" ("Ask the lumberjack dwarf for some wood"). | A WSS script change (AREA15/02xx.WSS op 0x85) and a dwarf actor that offers it; medium. |
 | AREA02 group 3/4/6 lines ("We're being pushed back!", "Big brother... hurry!") | MFNT020 (3,5..6), (4,0..2), (6,16); X002 calls only k 2, 3 (dx 0-4), 7, 9. | No scene to hang them on: medium-hard. |
 | Unused items (47; 21 with a JP description) | `scratchpad`-built list `unused_items_jp.txt`: e.g. Rain Essence (52), Torn Map halves (57/58), Rubber Gloves (59), Iron (61), Letter (90), Wood (91), Shovel (97), Electric Eel (108), Black Water (109), five Candies (110-114), Funga Leather/Tree/Sap (119/122/123), Small Drum (137), Chief's Spear (140), Coal (147). Name = D0SPSUB `ITEM_NAME_STRINGS[id]` (MFNT id+3 only for ids < 10), description = D0SPSUB block 0 id+4 (PAL English "···???"). | Giving them is one `addItemToInventory`, but nothing uses them; most belong to the cut Civilization / Masakari chains. Only a viewer would be honest. The JP descriptions could go into a text patch. |
 | Unused events (68; 26 with JP info) | `unused_events_jp.txt`: e.g. 6 "A Big Puddle?" (PrePre8's strip has あれま大きな水たまり: the same idea, now confirmed in two builds), 18 Dwarves' Help, 45 AP Slot Machine, 52 "Now I Can't Cross...", 59-61 Masakari chain, 74 Catch the Electric Eel, 76 Black Water, 77 Civilization Machine, 83 Iron Car. No `setEventStarted/Complete` with those ids anywhere. | Each needs its own trigger and goal; none has code. Medium-hard each; only the titles/descriptions are cheap (text patch). |
@@ -971,12 +971,112 @@ the retail discs is movement/fade boilerplate: **no cut dialogue, event or item 
 post-rescue dialogue-stage entries (e8-e12, PAL 0x1E6B..0x2039): every villager `n` talks with register `r(n+1)`
 (`ObjCmd n, 4, 2, r(n+1)`), and `r11` belongs to villager **16**, but the talk switch has no case for object 16
 (15 -> r10, then 17 -> r12) and nothing else reads `r11`. Object 16 is spawned (class 9, at 8,154, anim 56, only
-while event 80 is started and 168 is not). So MFNT020 (2,54) "ドワーフ、木を切るのとくい... わしらの なかまにたのむといい"
+while event 168 is complete and event 80 is not: correction 2026-11-12, see "The village woodcutter" below). So MFNT020 (2,54) "ドワーフ、木を切るのとくい... わしらの なかまにたのむといい"
 ("Dwarves are good at cutting trees... ask one of us if you are in trouble"; PAL has `!!!!!!!!!!` placeholders at
 2,54-56 in every language) was wired to a villager whose talk case was removed. PrePre 9 has the same `r11 = 54`
 (dialogue 59+54 = 113, same JP text) and no talk case either; Hyper 12's 0200 has neither. The follow-ups (2,55)
 "you want a tree cut?" / (2,56) "this tree is fine, step back" stay unreferenced in every build (the 0x55/0x56 lines
 belong to the cut event 18, table "Possible" above) [V for the registers, I for the purpose].
+
+### The village woodcutter (AREA02 s0 / AREA19 s0, 2026-11-12)
+
+The user remembers a dwarf at the top left of the Dwarf Village who chops all the time and cannot be talked to,
+and a loose axe sprite in memory. Checked in the binaries and in i386 port renders [V] unless marked.
+
+**He is the WSS object 16, not an I0NFO record.** AREA02 s0 (and AREA19 s0) run `I0NFO.BIN` (`overhead*`). That
+overlay has no actor or patrol table. Everybody in the village is spawned by `AREA15/0200.WSS` (or `0201.WSS`).
+The only placement records are APD[0] types 0x25 / 0x26 at (120, 172) / (-77, 292). `SpawnObject(16, 9, 0, 8, 154,
+0)` (PAL 0x2A55) makes class 9 = layer 2 type 0x19 = `overheadActorHandler`, subtype 0 (`OVERHEAD_ACTOR_DEFS[0]`:
+box {8, 16, 8, 16}, `w1e` 0x10, `SPR_DATA[11]`, anims 0x800F0E40). Op 0x81 (wss.py "SetObjAnim") sets `w74` = anim
+56 (`overheadActorSetScriptAnim`), and op 0x89 sets facing 2.
+- **When.** 0200 entry 1 spawns him only if event 168 "The Evil Pig Bag" is complete (255) and event 80 "The 100
+  Flower Forest" is not. The other villagers are gated by their register `r(n+1) != 255`; he is not gated by r11.
+  `0201.WSS` (loaded while event 20 is in progress) spawns the same dwarf as **object 13** at (8, 154), anim 56,
+  whenever event 80 is not complete (0x10B2). Once the forest is purified, `resolveAreaVariant` loads AREA02 s0/s1
+  with `AREA_VARIANT` 17, i.e. the AREA19 data (green village, same script), and 0200 no longer spawns him.
+  So he chops from the bag event until the 100 Flower Forest. That is a long stretch of the game, but not "always".
+- **Where.** I0NFO maps world (x, y) to cell ((x + 0x80) >> 3, (y - 0x30) >> 3) (`overheadCollideMapTile`), so
+  picture pixel = (x + 128, y - 48). His feet are at picture (136, 106) of the 448 x 576 map: behind the fence,
+  under the balloon tree at the top left, left of the upper hut. The port render shows him there, axe swinging, half
+  hidden by the canopy prop.
+- **Anim 56** = frames 19, 20, 21, 22, 23, 21 (32 / 2 / 2 / 2 / 16 / 3 ticks, then loop): the chop. Each frame is
+  the body part (CLUT 0x7809) plus 1-2 **separate axe parts** (CLUT 0x7909, page `w1e` 0x10, u 128..239,
+  v 80..119). This is the "loose axe": the axe is cut as its own parts with its own palette on the page. Every one
+  of them is referenced, and only by frames 19-23. No frame holds the axe alone.
+- **Unused copies.** `SPR_DATA[11]` repeats the 70-frame dwarf set in four palettes (frames 0-69 brown,
+  70-139 purple, 140-209 green, 210-279 grey). No anim of I0NFO (216 actor scripts + 24 prop scripts) uses
+  the chop copies 89-93, 159-163, 229-233, the anim-57 copies 85-88, 155-158, 225-228, frames 69/139/209/279
+  (page +1) or 354. In the copies the axe parts take the body CLUT (a pink / green axe). So they are generated
+  palette variants, not new art.
+- **Same chop script in every INFO.** `AREA02/I0NFO` = `AREA19/I0NFO` = `SYSTEM/I0NFO`; USA, JP, beta 980203,
+  PrePre 9 (`TOMBA/INFO.BIN` = `TOMBA/AREA02/INFO.BIN`) and even the JP demo's leftover `AREA08/INFO.BIN` hold the
+  same 6-step script at anim slot 56.
+- **The axe in the stump** at picture (~280, 410) is painted into both map pictures (AREA02 autumn, AREA19 green),
+  not a sprite.
+
+**Why he cannot be talked to.** Talk in I0NFO is contact: `overheadPlayerNpcCollision` runs
+`overheadResolveNpcContact` on every type 0x19 / 0x25 / 0x26 object. The boxes push Tombi out and, if he faces the
+dwarf and pressed the button (`wac == 1`), set the dwarf's `b68 = 1`. The 0200 loop (0x05DF, objects 0..27) then
+dispatches on `GetObj68`. Class 9 is talkable (all villagers are class 9, `active = 1`). With Tombi's box {8, 16, 2,
+8} and the dwarf's {8, 16, 8, 16}, contact needs dx in [-16, 16] and dy in [-10, 14] (b9c 0), i.e. Tombi's feet in
+world x -8..24, y 144..168. **Every cell of that window is solid (shape 9)**: the whole top-left block is 9 down
+to y 208. The nearest walkable cell is 40 px right of and 56 px below the window (plaza edge at (64, 224)); the
+house trigger cells under the upper hut start at x 88, y 176. So he stands outside the walkable area by design of
+the cell map, which is the same in PAL, USA, JP, beta 980203 (byte-identical maps, found in `AREA02/D004.000` /
+`D005.000` and the AREA19 copy) and PrePre 9 (`TOMBA/AREA02/D007.000`: 48 cells differ, all at y >= 248). Even
+if he were reached, 0200 has no case 16 and 0201's talk loop only covers objects 0..9 (he is 13 there). Then `b68`
+would stay 1 and nothing would open.
+
+**Across builds** (0200 / 0201, `tools/wss.py`, ops 44 / 39 / 32):
+| build | woodcutter | r11 / (2,54..56) | talk case |
+|---|---|---|---|
+| PAL = USA (byte-identical 02xx.WSS) | 0200 obj 16 and 0201 obj 13 at (8, 154), anim 56 | r11 = 54 in e8-e12 | none |
+| JP retail, beta 980203 | identical (same spawns, conditions, anim) | identical | none |
+| PrePre 9 (`TOMBA/AREA01/0200`) | **not spawned** (no object 16; entry 1 ends at 15) | r11 = 54 in e8 (live), e9-e11 dead, e12 = 255 | none |
+| Hyper 12 | not spawned (object 16 is a prop, the canopy at (-16, 142)) | no r11 | none (switch 0..15) |
+| JP demo SLPM-80165, Dengeki D5, PrePre 8 | no village script (only `0000.WSS` / no AREA15) | - | - |
+No build references (2,55) / (2,56), or their pre-release index (PrePre 9 59 + 55/56), as an immediate or a register
+value.
+
+**The other villagers (the user asked about patrols).** I0NFO has no patrol boxes (those are the I0NFO2 SpawnA
+records of AREA05/08/19 s2). Village movement is WSS `ObjCmd n, 2, ticks, speed` legs that flip the facing each
+call. That covers object 2 (horizontal, 120 x 100 or 40 x 400) and object 9 (vertical, 220 x 100 or 80 x 360,
+e16/e17 or e19/e20 by global 0), plus 14, 18, 28, 29 in their scenes. Leg length ~ ticks x speed / 256 px [I, not
+traced]. The 0200 entry-1 spawn table (objects 0-29) is the same in PAL, USA, JP and beta. The diffs are elsewhere.
+- PAL/USA's 0200 entry 13 adds two event-80 alternative props that JP and beta lack (35 at (198, 533), 41 at
+  (18, 589)) and moves prop 38 from (98, 567) to (95, 570). 0201 e2 likewise adds props 28, 34 and 40-42.
+- PAL shows the rescued friends' balloons (2,160..166) for 180 frames, JP for 120.
+- PrePre 9 lacks objects 5, 6, 16-29, puts 12 at (-64, 345) and 14 at (48, 286), and walks 14 for 180 ticks
+  (PAL 75).
+- Hyper 12 puts 0/1 at x 223 (PAL 234) and 4 at (120, 180) (PAL (80, 188)).
+Nobody else is placed outside the walkable area.
+
+**Port mod feasibility (no implementation).**
+1. **Reach.** He must be reachable, because a talk case alone does nothing while he stands in solid cells. Three
+   ways:
+   - Move his spawn to a walkable spot near the plaza edge, e.g. around (40, 228). This changes the scene, but keeps
+     all data.
+   - Open cells of the 0x8E map. Tombi would then walk through the painted fence and tree.
+   - A port-side contact exception for this object, e.g. a larger box in `overheadResolveNpcContact` when `b0c` is
+     16 in AREA02 s0. `OVERHEAD_ACTOR_DEFS[0]` is shared by every villager, so it cannot be widened, and `b9c = 1`
+     only adds 8 / 16 px to y.
+2. **Talk case.** Add one to 0200 e0 (and 0201, object 13, outside its 0..9 loop): `CMPI r1E, 16; JNE next;
+   ObjCmd 16, 4, 2, r11, 70; wait GetObj6A == 0; SetObjAnim 16, 56, 0; SetObjFrame 16, 2`. This copies the case of
+   object 19, a brown dwarf whose talk anims are 70-73. r11 is already 54 in exactly the stages in which he exists
+   (e9-e11 = 168 complete, 80 not).
+3. **Text.** PAL (2,54..56) are `!!!!!!!!!!` in every language. The lines come from JP via the text patch
+   (`--text-patch`), as for the other restored lines.
+4. **Event 18** "The Dwarves' Help" (JP title only, set by nothing) could hang off the same case:
+   - the first talk shows (2,54) and runs `AwardEvent(18, 0)`;
+   - (2,55) "you want a tree cut?" needs a tree or target to ask about, which the scripts and maps do not provide
+     [I];
+   - completion and a reward would have to be invented.
+
+So the talk and the start of 18 are cheap (one WSS case plus a reach fix), but a faithful completion of 18 is not
+recoverable from the data.
+
+Evidence renders (local, not committed): overlay of the cell map, the woodcutter, the contact window and the
+villagers. Port frames, 168 poked to 255: debug select AREA02 s0 and AREA19 s0, both with him in place.
 
 ### JP retail and beta 980203 vs PAL (meaningful script changes)
 | file | JP / beta | PAL / USA |
