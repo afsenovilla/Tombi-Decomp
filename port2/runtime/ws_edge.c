@@ -147,9 +147,14 @@ typedef struct { u8 t[40]; } TR;          /* a triangle packet: flat 32 bytes, s
 /* A prop of the room stood again past its end: the polygons of the model inside a box (and on the given texture
    pages: its leaves and wood, not the ground or the fence under it) are copied, moved by (dx, dy, dz).  The first
    room: its big apple tree planted where the path ends on the left, so the way is visibly closed. */
-static const struct { u8 area, section, end; s16 x0, x1, y1, z0, z1; u16 tp[2]; s16 dx, dy, dz, narrow; } PROPS[] = {
-    /* (narrow: added to dx on a strip under 90 px, 16:9, so the trunk still stands inside the picture) */
-    {0, 0, 0, 150, 430, -50, 50, 200, {0x12, 0x0d}, -425, 8, 0, 30},
+static const struct { u8 area, section, end; s16 x0, x1, y1, z0, z1; u16 tp[2], clut; s16 dx, dy, dz, pad0, pad1; } PROPS[] = {
+    /* (clut: 0 = any; pad0..pad1: the strip widths, in px, it is used for)
+       32:9: the whole tree, far enough out that its round crown stops at the pig house;
+       16:9 / 21:9: the strip is narrower than the crown, so only the trunk and its fork, under the tree line carried
+       on (21:9: a second one further out and back) */
+    {0, 0, 0, 150, 520, -50, -10, 200, {0x12, 0x0d}, 0,      -490,  8,   0, 200, 999},
+    {0, 0, 0, 300, 380, -50,  50,  60, {0x12, 0x12}, 0x7eca, -400, 22,  60,   1, 199},
+    {0, 0, 0, 300, 380, -50,  50,  60, {0x12, 0x12}, 0x7eca, -545, 18, 110,  90, 199},
 };
 static int cur_area, cur_section;
 typedef struct { u8 *blk; int size, nq; } Block;
@@ -297,10 +302,12 @@ static void build(const u8 *tbl, int s, Block *out, int reach)
 pack:
     for (unsigned pi = 0; pi < sizeof PROPS / sizeof PROPS[0]; pi++) {
         if (PROPS[pi].area != cur_area || PROPS[pi].section != cur_section || PROPS[pi].end != (s < 0)) continue;
+        if (port_ws_cull < PROPS[pi].pad0 || port_ws_cull > PROPS[pi].pad1) continue;
         for (int i = 0; i < np; i++) {
             const Poly *p = &ps[i];
             int rx0 = s > 0 ? p->x0 : -p->x1, rx1 = s > 0 ? p->x1 : -p->x0;
             if (p->tpage != PROPS[pi].tp[0] && p->tpage != PROPS[pi].tp[1]) continue;
+            if (PROPS[pi].clut && p->clut != PROPS[pi].clut) continue;
             if (rx0 < PROPS[pi].x0 || rx1 > PROPS[pi].x1 || p->y0 > PROPS[pi].y1 || p->z0 < PROPS[pi].z0 || p->z1 > PROPS[pi].z1) continue;
             u8 *d;
             if (p->nv == 4) { if (nf + ng >= MAXQ) break; d = p->gour ? gq[ng++].g : fq[nf++].flat; }
@@ -309,7 +316,7 @@ pack:
             if (p->gour) for (int j = 1; j < p->nv; j++) { memcpy(d, &p->col[j], 4); d += 4; }
             for (int j = 0; j < p->nv; j++) {
                 Vx v = p->v[j];
-                v.x = (s16)(s * v.x + PROPS[pi].dx + (port_ws_cull < 90 ? PROPS[pi].narrow : 0)); v.y = (s16)(v.y + PROPS[pi].dy); v.z = (s16)(v.z + PROPS[pi].dz);
+                v.x = (s16)(s * v.x + PROPS[pi].dx); v.y = (s16)(v.y + PROPS[pi].dy); v.z = (s16)(v.z + PROPS[pi].dz);
                 memcpy(d, &v, 8); d += 8;
             }
             nprop++;

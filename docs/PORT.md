@@ -2681,10 +2681,12 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   the frame stays pixel-identical, 4:3 runs untouched; software and OpenGL).  `--ws-edge all` turns it on for every
   room of the block-list areas (0, 1, 2, 3, 7), for checking the next rooms; `-v -v` lists the edges.
   **Props** (`PROPS`): a prop of the room stood again past its end: the model's polygons inside a box, on the given
-  texture pages (leaves and wood, not the ground or fence under it), are copied into the end's sector moved by
-  (dx, dy, dz).  The first room gets its big apple tree (25 polygons, trunk and canopy) where the path ends on the
-  left, so the way is visibly closed; on a strip under 90 px (16:9) it stands 30 units further in so the trunk is in
-  the picture.  Its canopy reaches a little into the 4:3 part of the wide frame (top left, behind the pig house).
+  texture pages (and palette, when given), are copied into the end's sector moved by (dx, dy, dz), per range of strip
+  widths.  The first room's big apple tree is round and 344 units wide, more than a 16:9 or 21:9 strip without
+  hanging over the pig house, so there only its trunk and fork (4 polygons) stand under the tree line carried on, one
+  beside the house and at 21:9 a second one further out and back; at 32:9 the whole tree (59 polygons) stands far
+  enough out that its crown stops at the house.  (A box that cut the tree in depth left a flat dark crown: the front
+  leaf clusters start at z -3.)
 - **Top-down map** (`runtime/ws_topdown.c`, fixes.txt hooks at the end of `topdownDrawMapLayers` /
   `overheadDrawMapLayers` and their USA / JP versions): the overhead background is the room's map picture (8 bpp TIM
   in RAM, scratch 0x1F800394) of which the game uploads a 384x288 window (12x9 tiles of 32 px, USA / JP 384x256) into
