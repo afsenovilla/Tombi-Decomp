@@ -277,10 +277,24 @@ static u32 *stage;                       /* (defined below: 1024 x 512) */
 #define NPEND 24
 static struct { int x, y, w, h; } pend[NPEND];
 static int npend;
+/* --widescreen: the wide plane's 4:3 middle is owed to VRAM's target after every ordering table (pica_ws_copy_down),
+   and waits like a host write: it goes when the target's rectangle is read, drawn into, written or shown.  A frame is
+   then drawn and shown on the wide plane alone; the copy each time was a change of target and back in every frame,
+   which a 3DS's GPU pays for (5 to 11 ms a frame waited for it, measured). */
+static struct { int wx, wy, x, y, w, h; } wd[4];
+static int nwd;
+static void wd_resolve(int x, int y, int w, int h) {   /* those this rectangle touches (no batch is open here) */
+    for (int i = 0; i < nwd; i++)
+        if (x < wd[i].x + wd[i].w && x + w > wd[i].x && y < wd[i].y + wd[i].h && y + h > wd[i].y) {
+            dev->wide_down(wd[i].wx, wd[i].wy, wd[i].x, wd[i].y, wd[i].w, wd[i].h);
+            wd[i] = wd[--nwd]; i--;
+        }
+}
 static void pend_go(int i) {   /* (no batch is open here) */
     const u16 *vram = port_vram();
     const int x = pend[i].x, y = pend[i].y, w = pend[i].w, h = pend[i].h;
     memmove(&pend[i], &pend[i + 1], (size_t)(npend - i - 1) * sizeof pend[0]); npend--;
+    if (nwd) wd_resolve(x, y, w, h);
     /* (a movie's frame is one of these, 15 times a second: the pass to RGBA8 here and the device's own to its texel
        order were as long as decoding the picture) */
     if (dev->write15) { dev->write15(x, y, w, h, vram + y * 1024 + x, 1024); return; }
@@ -313,6 +327,7 @@ static PV *batch(const PState *s, int n) {
     if (nbv && (nbv + n > bv_room || s->tex != bst.tex || s->mod != bst.mod || s->atest != bst.atest || s->blend != bst.blend
                 || s->x1 != bst.x1 || s->y1 != bst.y1 || s->x2 != bst.x2 || s->y2 != bst.y2 || s->wide != bst.wide)) flush();
     if (!nbv && npend && !pica_dry && !s->wide) pend_flush(s->x1, s->y1, s->x2 - s->x1 + 1, s->y2 - s->y1 + 1);
+    if (!nbv && nwd && !pica_dry && !s->wide) wd_resolve(s->x1, s->y1, s->x2 - s->x1 + 1, s->y2 - s->y1 + 1);
     if (!nbv && dev->vbuf) bv = dev->vbuf(&bv_room);
     bst = *s;
     PV *p = bv + nbv; nbv += n;
@@ -324,6 +339,7 @@ static u32 *stage;                       /* 1024 x 512 */
 static void read_back(int x, int y, int w, int h) {   /* the target's rectangle into vram[] */
     u16 *vram = port_vram();
     if (npend) pend_flush(x, y, w, h);
+    if (nwd) wd_resolve(x, y, w, h);
     dev->read(x, y, w, h, stage, w);
     int changed = 0;
     for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) {
@@ -943,6 +959,11 @@ static void pica_fill(int x, int y, int w, int h, u16 c) {
             if (pend[i].x >= x && pend[i].y >= y && pend[i].x + pend[i].w <= x + w && pend[i].y + pend[i].h <= y + h) { memmove(&pend[i], &pend[i + 1], (size_t)(npend - i - 1) * sizeof pend[0]); npend--; i--; }
         pend_flush(x, y, w, h);
     }
+    if (nwd) {   /* (the same of the wide plane's copies) */
+        for (int i = 0; i < nwd; i++)
+            if (wd[i].x >= x && wd[i].y >= y && wd[i].x + wd[i].w <= x + w && wd[i].y + wd[i].h <= y + h) { wd[i] = wd[--nwd]; i--; }
+        wd_resolve(x, y, w, h);
+    }
     /* a fill inside a noted drawing area (the frame's clear): vram[] is stale there anyway and stays marked so, the
        device alone fills (82000 words a frame otherwise, for nothing) */
     for (int i = 0; i < nbulk; i++)
@@ -983,7 +1004,12 @@ static void pica_ws_upload(int wx, int wy, int w, int h, const u16 *src, int str
 static void pica_ws_copy_down(int wx, int wy, int vx, int vy, int w, int h) {
     flush();
     if (npend) pend_flush(vx, vy, w, h);   /* (a host write waiting for this rectangle goes first, as before a primitive) */
-    dev->wide_down(wx, wy, vx, vy, w, h);
+    {   /* it waits (wd_resolve): the newest copy of a rectangle is the one that counts */
+        int i;
+        for (i = 0; i < nwd; i++) if (wd[i].x == vx && wd[i].y == vy && wd[i].w == w && wd[i].h == h) break;
+        if (i == nwd) { if (nwd == 4) wd_resolve(wd[0].x, wd[0].y, wd[0].w, wd[0].h); i = nwd++; }
+        wd[i].wx = wx; wd[i].wy = wy; wd[i].x = vx; wd[i].y = vy; wd[i].w = w; wd[i].h = h;
+    }
     /* the buffer in VRAM was drawn: vram[] is stale there, as after its primitives */
     if (!bulk_note(vx, vy, vx + w - 1, vy + h - 1)) pages_drawn(vx, vy, vx + w - 1, vy + h - 1);
     bulk_memo.ok = 0;
@@ -1024,6 +1050,7 @@ static void pica_stop(void) {
 static int pica_present(int dx, int dy, int dw, int dh, int masked) {
     flush();
     if (npend) pend_flush(dx, dy, dw, dh);
+    if (nwd) wd_resolve(dx, dy, dw, dh);
     frame_clock = use_clock; present_no++;
     clock_hist[present_no & 63] = use_clock;
     return dev->present ? dev->present(dx, dy, dw, dh, masked) : 0;

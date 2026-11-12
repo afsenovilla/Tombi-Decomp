@@ -1036,6 +1036,7 @@ void DrawOTag(u32 *ot) {
 #endif
     poly_lean = 0;
     gpu_prims += n;
+    if (skip) ws_drew = 0;   /* (a table not drawn changed nothing of the wide plane: no copy of it to VRAM) */
     ws_sync_down();
     port_ot_signature = h * 31u + (unsigned)n;
     be->list_end();
