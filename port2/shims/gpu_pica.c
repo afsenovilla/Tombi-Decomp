@@ -250,9 +250,49 @@ static void flush(void) {
     st_batches++; st_tris += nbv / 3;
     nbv = 0; batch_clock = use_clock;
 }
+/* Host writes wait: what the game loads into VRAM is in vram[] at once (the texture cache and the host's reads use
+   that), and goes to the device's target only when the target needs it: before a primitive whose drawing area the
+   rectangle touches, a fill over part of it, a read-back or a present of it.  Most of what a game loads is textures
+   and palettes, which the target never needs: a top-down area that draws its floor into a page every frame wrote it
+   to the GPU for nothing each time (6 ms a frame on an Old 3DS), and a movie's frame arrives as twenty strips, which
+   merge here into one write.  A rectangle written again is the same wait (its words are read when it goes). */
+static u32 *stage;                       /* (defined below: 1024 x 512) */
+#define NPEND 24
+static struct { int x, y, w, h; } pend[NPEND];
+static int npend;
+static void pend_go(int i) {   /* (no batch is open here) */
+    const u16 *vram = port_vram();
+    const int x = pend[i].x, y = pend[i].y, w = pend[i].w, h = pend[i].h;
+    memmove(&pend[i], &pend[i + 1], (size_t)(npend - i - 1) * sizeof pend[0]); npend--;
+    for (int j = 0; j < h; j++) for (int k = 0; k < w; k++) stage[j * w + k] = c15to32(vram[(y + j) * 1024 + x + k]);
+    dev->write(x, y, w, h, stage, w);
+}
+static void pend_flush(int x, int y, int w, int h) {   /* those this rectangle touches */
+    for (int i = 0; i < npend; i++)
+        if (x < pend[i].x + pend[i].w && x + w > pend[i].x && y < pend[i].y + pend[i].h && y + h > pend[i].y) { pend_go(i); i--; }
+}
+static void pend_add(int x, int y, int w, int h) {
+    for (int i = 0; i < npend; i++) {
+        if (x >= pend[i].x && y >= pend[i].y && x + w <= pend[i].x + pend[i].w && y + h <= pend[i].y + pend[i].h) return;   /* inside one that waits */
+        /* beside one of the same height or width (a movie's strips, a picture loaded in pieces): one rectangle */
+        if (y == pend[i].y && h == pend[i].h && x <= pend[i].x + pend[i].w && x + w >= pend[i].x) {
+            int x2 = x + w > pend[i].x + pend[i].w ? x + w : pend[i].x + pend[i].w;
+            if (x < pend[i].x) pend[i].x = x;
+            pend[i].w = x2 - pend[i].x; return;
+        }
+        if (x == pend[i].x && w == pend[i].w && y <= pend[i].y + pend[i].h && y + h >= pend[i].y) {
+            int y2 = y + h > pend[i].y + pend[i].h ? y + h : pend[i].y + pend[i].h;
+            if (y < pend[i].y) pend[i].y = y;
+            pend[i].h = y2 - pend[i].y; return;
+        }
+    }
+    if (npend == NPEND) pend_go(0);
+    pend[npend].x = x; pend[npend].y = y; pend[npend].w = w; pend[npend].h = h; npend++;
+}
 static PV *batch(const PState *s, int n) {
     if (nbv && (nbv + n > bv_room || s->tex != bst.tex || s->mod != bst.mod || s->atest != bst.atest || s->blend != bst.blend
                 || s->x1 != bst.x1 || s->y1 != bst.y1 || s->x2 != bst.x2 || s->y2 != bst.y2)) flush();
+    if (!nbv && npend && !pica_dry) pend_flush(s->x1, s->y1, s->x2 - s->x1 + 1, s->y2 - s->y1 + 1);
     if (!nbv && dev->vbuf) bv = dev->vbuf(&bv_room);
     bst = *s;
     PV *p = bv + nbv; nbv += n;
@@ -263,6 +303,7 @@ static PV *batch(const PState *s, int n) {
 static u32 *stage;                       /* 1024 x 512 */
 static void read_back(int x, int y, int w, int h) {   /* the target's rectangle into vram[] */
     u16 *vram = port_vram();
+    if (npend) pend_flush(x, y, w, h);
     dev->read(x, y, w, h, stage, w);
     int changed = 0;
     for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) {
@@ -306,13 +347,16 @@ static void clip_rect(int *x, int *y, int *w, int *h) {
     if (*x + *w > 1024) *w = 1024 - *x;
     if (*y + *h > 512) *h = 512 - *y;
 }
+static int pend_now;   /* 1: a host write goes to the device at once */
 static void pica_vram_written(int x, int y, int w, int h) {
     clip_rect(&x, &y, &w, &h);
     if (w <= 0 || h <= 0) return;
     flush();
-    const u16 *vram = port_vram();
-    for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) stage[j * w + i] = c15to32(vram[(y + j) * 1024 + x + i]);
-    dev->write(x, y, w, h, stage, w);
+    if (pend_now) {   /* (the whole of VRAM at the start) */
+        const u16 *vram = port_vram();
+        for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) stage[j * w + i] = c15to32(vram[(y + j) * 1024 + x + i]);
+        dev->write(x, y, w, h, stage, w);
+    } else pend_add(x, y, w, h);
     pages_bump(x, y, w, h);
     cells_clean(x, y, w, h);
 }
@@ -368,26 +412,37 @@ static unsigned clut_hash(const GpuTex *t) {
     return h;
 }
 static inline u32 texel(u16 c) { return !c ? 0 : (c15to32(c) & 0x00FFFFFFu) | ((u32)(c & 0x8000 ? A_SEMI : A_OPAQUE) << 24); }
+static int dec_kinds;   /* (set by decode: see there) */
 static void decode(const GpuTex *t, int tw, int bx, int by, int z) {   /* the block into dec[], z x z */
     const u16 *vram = port_vram();
     if (!tw && t->cy != PORT_CLUT_Y && (t->depth == 2 || t->cx + (t->depth ? 256 : 16) <= 1024)) {
         /* the usual case (no texture window, a CLUT in vram[] that does not wrap): the CLUT converted once, whole
            words of indices at a time; the same texels as the general loop below */
         static u32 clut[256];
-        if (t->depth < 2) for (int i = 0; i < (t->depth ? 256 : 16); i++) clut[i] = texel(vram[t->cy * 1024 + t->cx + i]);
+        /* dec_kinds: the classes of texel the CLUT can give (1 opaque, 2 semi-transparent); one class alone, and every
+           part of the block has that one or nothing: the look at each texel for its parts' classes is not needed
+           (a top-down area decodes three 256 x 256 blocks a frame) */
+        dec_kinds = 0;
+        if (t->depth < 2) for (int i = 0; i < (t->depth ? 256 : 16); i++) { clut[i] = texel(vram[t->cy * 1024 + t->cx + i]); u32 a = clut[i] >> 24; if (a) dec_kinds |= a == A_SEMI ? 2 : 1; }
+        else dec_kinds = 3;
+        const int depth = t->depth, tx = t->tx, ty = t->ty;   /* (locals: the stores to dec[] could be to *t for all the compiler knows) */
+        u32 *const out = dec;
         for (int v = 0; v < z; v++) {
-            const u16 *row = &vram[((t->ty + by + v) & 511) * 1024];
-            u32 *d = &dec[v * z];
-            if (t->depth == 0) for (int k = 0; k < z / 4; k++) {
-                u16 w = row[(t->tx + bx / 4 + k) & 1023];
-                d[0] = clut[w & 15]; d[1] = clut[(w >> 4) & 15]; d[2] = clut[(w >> 8) & 15]; d[3] = clut[w >> 12]; d += 4;
-            } else if (t->depth == 1) for (int k = 0; k < z / 2; k++) {
-                u16 w = row[(t->tx + bx / 2 + k) & 1023];
-                d[0] = clut[w & 255]; d[1] = clut[w >> 8]; d += 2;
-            } else for (int k = 0; k < z; k++) d[k] = texel(row[(t->tx + bx + k) & 1023]);
+            const u16 *row = &vram[((ty + by + v) & 511) * 1024];
+            u32 *d = &out[v * z];
+            if (depth == 0) {
+                const int x0 = tx + bx / 4;
+                if (x0 + z / 4 <= 1024) { const u16 *r = row + x0; for (int k = 0; k < z / 4; k++) { const u16 w = r[k]; d[0] = clut[w & 15]; d[1] = clut[(w >> 4) & 15]; d[2] = clut[(w >> 8) & 15]; d[3] = clut[w >> 12]; d += 4; } }
+                else for (int k = 0; k < z / 4; k++) { const u16 w = row[(x0 + k) & 1023]; d[0] = clut[w & 15]; d[1] = clut[(w >> 4) & 15]; d[2] = clut[(w >> 8) & 15]; d[3] = clut[w >> 12]; d += 4; }
+            } else if (depth == 1) {
+                const int x0 = tx + bx / 2;
+                if (x0 + z / 2 <= 1024) { const u16 *r = row + x0; for (int k = 0; k < z / 2; k++) { const u16 w = r[k]; d[0] = clut[w & 255]; d[1] = clut[w >> 8]; d += 2; } }
+                else for (int k = 0; k < z / 2; k++) { const u16 w = row[(x0 + k) & 1023]; d[0] = clut[w & 255]; d[1] = clut[w >> 8]; d += 2; }
+            } else for (int k = 0; k < z; k++) d[k] = texel(row[(tx + bx + k) & 1023]);
         }
         return;
     }
+    dec_kinds = 3;
     int twmx = tw & 31, twmy = (tw >> 5) & 31, twox = (tw >> 10) & 31, twoy = (tw >> 15) & 31;
     for (int j = 0; j < z; j++) for (int i = 0; i < z; i++) {
         int u0 = bx + i, v0 = by + j;
@@ -540,8 +595,8 @@ static int tex_slot(const GpuTex *t, int u0, int v0, int u1, int v1, int *obx, i
     decode(t, tw, bx, by, z);
     {   /* the texel classes (1: opaque, 2: semi-transparent) of the block's 8 x 8 parts: see prim_kinds */
         unsigned char *kc = slot_kinds[i]; const int sh = z == 64 ? 3 : z == 128 ? 4 : 5;
-        memset(kc, 0, 64);
-        for (int yy = 0; yy < z; yy++) {
+        memset(kc, dec_kinds == 3 ? 0 : dec_kinds, 64);
+        if (dec_kinds == 3) for (int yy = 0; yy < z; yy++) {
             const u32 *q = dec + yy * z; unsigned char *row = kc + (yy >> sh) * 8;
             for (int xx = 0; xx < z; xx++) { u32 a = q[xx] >> 24; if (a) row[xx >> sh] |= a == A_SEMI ? 2 : 1; }
         }
@@ -856,6 +911,11 @@ static void put_rect(int x, int y, int w, int h) {   /* vram[] -> the target, in
 static void pica_fill(int x, int y, int w, int h, u16 c) {
     u16 *vram = port_vram();
     flush();
+    if (npend) {   /* (a host write the fill covers whole never needs to go; one it cuts goes first) */
+        for (int i = 0; i < npend; i++)
+            if (pend[i].x >= x && pend[i].y >= y && pend[i].x + pend[i].w <= x + w && pend[i].y + pend[i].h <= y + h) { memmove(&pend[i], &pend[i + 1], (size_t)(npend - i - 1) * sizeof pend[0]); npend--; i--; }
+        pend_flush(x, y, w, h);
+    }
     /* a fill inside a noted drawing area (the frame's clear): vram[] is stale there anyway and stays marked so, the
        device alone fills (82000 words a frame otherwise, for nothing) */
     for (int i = 0; i < nbulk; i++)
@@ -894,7 +954,7 @@ static int pica_start(void) {
     if (!dec) dec = malloc(256 * 256 * 4);
     if (!stage || !dec || dev->start()) return -1;
     clip_sides();
-    pica_vram_written(0, 0, 1024, 512);
+    pend_now = 1; pica_vram_written(0, 0, 1024, 512); pend_now = getenv("PICA_WRITE_NOW") != 0;   /* (PICA_WRITE_NOW: no waiting, to compare) */
     return 0;
 }
 static void pica_stop(void) {
@@ -905,6 +965,7 @@ static void pica_stop(void) {
 }
 static int pica_present(int dx, int dy, int dw, int dh, int masked) {
     flush();
+    if (npend) pend_flush(dx, dy, dw, dh);
     frame_clock = use_clock; present_no++;
     clock_hist[present_no & 63] = use_clock;
     return dev->present ? dev->present(dx, dy, dw, dh, masked) : 0;
