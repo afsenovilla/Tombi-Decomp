@@ -276,6 +276,10 @@ Stop after about 90 minutes on one function: write what was tried under "tried" 
 - [ ] x04 func_80115FD0 (6472 B), x00 func_800F4CDC (5464 B), x10 func_8011DCC8 (3872 B): no PAL twin, from scratch.
 
 ## Recently done (context)
+- Graffiti rock in PrePre 9 (2026-11-12, docs/CUT_CONTENT.md "PrePre Vol. 9: the "2" rock can be examined"): layer 4
+  type 0x13 at AREA01 (4110,-399) is examinable in PCPX-96093 (X01 0x800F1980): the plaque flies to the camera at
+  twice the size until Circle, and the big "?" bubble (unused in retail) pops over Tombi; no text, event or flag.
+  Same code in SLPM-80165 X00 (no rock placed); retail kept only the draw. Static reading, not run in an emulator.
 - WSS scripts across all builds (2026-11-12, `tools/wss.py`, docs/CUT_CONTENT.md "WSS event scripts across builds"):
   retail orphan entries are movement/fade helpers only; 0200.WSS stages the woodcutter line (2,54) for villager 16,
   whose talk case is missing (every build); JP/beta 0201 give 2 Torches for event 177 and no Baron after 113 (PAL

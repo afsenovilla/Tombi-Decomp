@@ -25,7 +25,7 @@ What the game data says and what is our choice are kept apart in every entry ("O
 | Baccus notice board (AREA05 s1) | `spawnNpcSet09` (X005, table `D_80117AC8[GCD.bceed]`) does spawn the board sign: subtype 19 = MFNT050 (1,5) MISSING MOUSE (reading it starts event 46 "Where's the Baby Mouse?"), 20 = (1,7) ADVENTURER WANTED once the mouse is back (`bceed` 2; starts event 49 "A Drink for Grownups"), 35 after event 50. But it stands at (28,-144) depth 90 beside the townsfolk who mentions it, and nothing Tombi can stand on is within its hit depth (ledge above the wall at depth 144, \|dz\| 54 > 45; the ground 88 px too low): never readable, so events 46/49 never started from it. (1,6) CONGRATULATIONS has no sign-table row at all. `tools/dialogue_refs.py` missed the code-spawned sign (it reads only room lists). | fixes.txt `updateL4Type1AObject` + runtime/main.c `port_cc_sign`: the sign is moved to the ground under the painted board (28,-60, depth 0); read with Up + Square. `port_cc_sign_text` / `port_cc_sign_next`: when the mouse is back and event 49 has not started, (1,6) is shown first and (1,7) follows in the same read (then event 49 starts as in the code). | ground position; (1,6) before the first (1,7) |
 | Mermaid's Singing Rock save (AREA06 s1) | MFNT060 (1,0) "The Mermaid's Singing Rock / Save DATA?" in no table row nor room; the race man (1,1): "the finish line ... is near the Mermaid's Singing Rock". AREA06 s1 (finish beach) has the record board (subtype 36) only. | `port_cc_sign` spawns a port sign (subtype 0x40+i, text from `port_cc_saves`) 48 px left of the record board; it saves like any save sign (block named "La roca de la sirena"). | placement |
 | Silver / golden berries | `initItemObject` CLUT rows 503/504; `rewardHeart` pays 2 HP when `b0c & 0x7f != 0`; no drop table uses b0c 2/3. | fixes.txt `spawnItemFromEntry` + `initItemObject` (dafdbcf) | rates 1/8 silver, 1/32 gold |
-| Big "?" bubble | `D_80079D34[1]` (SPR 0x34 f48); `spawnItemPickupObject` is only called with 0. | fixes.txt `topdownActorOpenDialogue` (dafdbcf) | when it shows |
+| Big "?" bubble | `D_80079D34[1]` (SPR 0x34 f48); `spawnItemPickupObject` is only called with 0. Original user: the graffiti rock of PrePre Vol. 9 (examine -> "?" over Tombi, section "PrePre Vol. 9: the "2" rock can be examined"). | fixes.txt `topdownActorOpenDialogue` (dafdbcf) | when it shows |
 | **Early title screen** (PrePre Vol. 8) | PCPX-96084 `SYSTEM/SYS005.GAM` (8 bpp, 768x256 page; x 0..319, y 0..239 = landscape with a rock spire and a river) + `SYS006.000` (its palette). Retail draws its landscape `SYSTEM/A00200` (8 bpp, 320x240) from VRAM (0,0) with the palette at (128,511), so the old picture fits the same slot. | `--early-title DIR` (needs `--cut-content`), `port2/runtime/titlebg.c`: while the title is up (`titleLogoDraw`, via `port_title_bg_mark`) the page and palette are written over A00200's. Launcher: folder field under the checkbox. | We keep the retail TOMBI! logo, menu and text: the old "オレっ！トンバ" logo pieces are on the same page (x 512..767, palette SYS007) but how they were assembled is unknown. Files are read from the user's extraction (`tools/prepre8.py extract DISC OUT`). |
 
 Screenshot check (headless port, frame 400 of `--skip-intro`): retail landscape vs PrePre8 landscape under the retail
@@ -183,7 +183,7 @@ These are the rest, checked only where it was cheap. **Unverified** means we did
 | Navy Evil Pig Bag from the chief | unverified | |
 | GoGoCar cacti and an extra track piece | **partly** | The cacti are confirmed (see "GoGoCart cacti / sign" above). The track piece was not checked. |
 | Haunted Mansion metal sign model | unverified | |
-| Doodle Rock textures/sprites in the Underground Forest | **confirmed (corrected)** | The graffiti rocks exist: five distinct dot-and-bar plaques (2, 5, 18, 139, 59) on room texture pages, two of them placed in retail as 3D decor models (Dwarf Forest AREA01 s1/s3 = 2, Haunted Mansion AREA04 s0/s1 = 5). See "Graffiti rocks (らくがき岩): the plaques exist". |
+| Doodle Rock textures/sprites in the Underground Forest | **confirmed (corrected)** | The graffiti rocks exist: five distinct dot-and-bar plaques (2, 5, 18, 139, 59) on room texture pages, two of them placed in retail as 3D decor models (Dwarf Forest AREA01 s1/s3 = 2, Haunted Mansion AREA04 s0/s1 = 5). See "Graffiti rocks (らくがき岩): the plaques exist". In PrePre 9 the "2" rock can be examined (close-up + big "?" bubble; no text or event). |
 | Growing flower sprites, cursed and uncursed | **partly** | AREA02 SPR 0x3B frames 27-32 exist, but the VRAM they point at is empty on PAL (see Lost). |
 | Iron door in the Iron Castle | **partly** | Event 100 "Iron Keyhole" has an icon (frame 209), is not in the menu order, and nothing starts it. No door sprite checked. |
 | Weird plant in the Masakari Jungle VRAM | **not found** | AREA10 4 bpp pages of all 10 load lists rendered (tools/vram.py + find_unused_gfx.py): the unsampled regions are palms, reeds, flowers and wall textures used by backdrops/models, plus the known withdrawn B002 page. No isolated plant sprite. No palette, so a small plant could be missed. |
@@ -649,10 +649,72 @@ GAM files unpacked, PAL, US and JP): five distinct plaques, every hit listed.
 - **Checked in the port:** with the fly mode of the port debug menu (`--debug-menu`, L1+R1+Select), AREA04 s0 at player (978, -716) shows the "5" rock right of
   Tombi on the mansion terrace (`--dump-draws`: CLUT (240,491), page (960,0), uv 129..197 x 186..248, frames 1809+);
   AREA01 s1 at (4252, -521) shows the small "2" plaque on the stone wall before the exit (CLUT (144,481), page (768,0)).
-- **No code uses them:** `updateStaticDecorModel` (X001 = X004, 0x800EE18C) only sets the draw flags and draws; no
-  talk, flag, event or check. Event 67 has no start/complete/read (above). The Stonetown villager says he saw one
+- **No code uses them in retail:** `updateStaticDecorModel` (X001 = X004, 0x800EE18C) only sets the draw flags and
+  draws; no talk, flag, event or check. Event 67 has no start/complete/read (above). The Stonetown villager says he saw one
   "at the wood people's workshop" (木人の加工場, AREA16 #188): that fits the "59" texture on the AREA11 page. No other
-  JP line names a rock, a number, an order or a symbol.
+  JP line names a rock, a number, an order or a symbol. **In the 1997 demos the same object type could be examined:**
+  see the next section.
+
+### PrePre Vol. 9: the "2" rock can be examined (close-up and "?" bubble), 12 November 2026
+
+A player of PrePre Vol. 9 remembered that Tombi reacts with a "?" at a rock near the Dwarf Village. Checked statically
+on `game_prepre9/fs/TOMBA` (PCPX-96093, `tools/disc_fetch.sh PREPRE9`); no emulator ran the demo, so the sequence below
+is read from the code, not seen.
+
+- **The record is the retail one.** `AREA01/D004.GAM` = `D104.GAM` (unpacked, offset 0x2D7FC, again at 0x2E13C):
+  `01 04 13 00 00 00 | x 4110 y -399 z 48 | bc 0x10 bd 0 be 24 bf 0`: layer 4, type 0x13, subtype 0, same position as
+  retail AREA01 s1/s3 (retail be 22 / 10). Model 24 of Pre9's second object-model table (0x272B0, 25 models) is the
+  retail plaque model 22 polygon for polygon: 19 polygons, the same vertices (x -12..12, y -16..16, z -1..1) and the same
+  UVs (u 88..157, v 41..133); only the texture address moved (Pre9 CLUT word 0x7C49 = (144,497), tpage 15; retail
+  0x7849 = (144,481), tpage 12). The Pre9 texel pattern of the plaque was not found in the Pre9 A/B pages by the
+  index-pattern scan (Pre9 reorganised its pages and CLUT rows), so the picture itself was not compared. No other Pre9
+  record anywhere (AREA01, AREA02) uses layer 4 type 0x13; in retail too only the two graffiti rocks (and their AREA07 /
+  AREA12 copies) use it: the type is the graffiti-rock class.
+- **The handler.** Pre9's `updateMainObjects` (TOMBA.EXE 0x8001EBD8, xmatch) dispatches kind 2/3/4/5 through the tables
+  0x8007041C / 0x800725D8 / 0x80072D2C / 0x80073850; layer 4 entry 0x13 = **X01 0x800F1980** (X01.BIN + 0x4438, base
+  0x800ED548; X02.BIN has the same function at the same address). It is not a decor stub:
+  - init: box (8, 16, 16, 32), `b0f` = -10;
+  - idle: `ObjCullRegister`; when `o->b69 == 1` (player contact) **and** `PLAYER+0xC0 & 1` (0x800AB728) it sets
+    0x800A222F = 1, `o->h20` = 10, spawns a **layer-8 type 0 object** (0x800F1B58: `allocObjectLayer8`, b0a 0x10,
+    b0c 5, `da0` = the rock's own model pointer, same position): a copy of the plaque left on the wall; and, when
+    0x800A2244 is 0, an **ObjAlloc object type 0x0D with b0c = 1**;
+  - next state, every frame, the close-up (0x800F1BF0, four steps): (0) scale 1.0, z speed 0x18 units/frame toward the
+    camera, x speed 6 units/frame (sign from the player's x against the x of the object at `*0x800A9BCC`, not
+    identified), a y step that is a tenth of a camera-relative offset (`SPAD+0x17A`) in area 1 (a fixed 1 unit/frame
+    elsewhere), draw flags `b0a` 0x13; (1) 10 frames of that motion with x/y scale +0x190 per frame in area 1
+    (+0x64 elsewhere; "area 1" = 0x800A2248 == 1, read as the current area because Pre9's icon code tests it where
+    retail tests `GAME[0]`): about 240 units toward the camera and twice the size; (2) waits for pad bit 0x20 in `SPAD.s1fc`;
+    (3) 10 frames back (scale -0x190 per frame in every area), `b0a` back to 0x10;
+  - end: clears 0x800A222F, 0x800A2232, `PLAYER+0xC0`, `SPAD.s1c6`; player state 1 / 0 / 0 (normal); the layer-8 copy
+    is freed; the rock goes back to idle (it can be examined again).
+- **The "?"**: Pre9's pool type 0x0D (TOMBA.EXE 0x8002F78C) is retail `updateItemGetIcon`: it pops `ANIMS[b0c]` (table
+  0x800726A4, retail `ITEM_GET_ICON_ANIMS` 0x80079D34) above Tombi's head (player position - 0x1E) with SFX 0x1A and
+  sets 0x800A2244 (retail `D_8009C954`) while it lives. Entry 1 is the same anim in both builds (frames 0x30, 0x31,
+  0x4B); rendered from retail with `tools/objdraw.py 1 1 P/0D:0:1` it is the **big "?" speech bubble** (entry 0 = the "!"
+  bubble of event starts). In Pre9 the only spawns of this icon are the two event paths in TOMBA.EXE (b0c 0) and the rock
+  (b0c 1). Retail never spawns b0c 1 (`spawnItemPickupObject` is only called with 0; the bubble is listed in the table at
+  the top of this page): **the rock was the original user of the big "?" bubble.**
+- **The button.** The Pre9 idle step (X01 0x800F4F74) does what retail `playerStepIdle` does for contact result 4 (the
+  retail "check" press that signs answer to): on pad bit 0x20 it puts Tombi in event mode (b04 5, step 0x61) and sets
+  0x800A222F, 0x800A2232 and `PLAYER+0xC0` = 1. Retail tests `BUTTON_MASK_A` (default Square) there; Pre9 tests the
+  fixed bit 0x20. Reading 0x20 as **Circle** is an inference: X01 tests 0x40 (jump, X) 34 times, and 0x10/0x20/0x40/0x80
+  and 0x1000..0x8000 fit the byte-swapped pad word (face buttons low, d-pad high). Retail signs (`updateL4Type1AObject`)
+  use the same gate as the Pre9 rock (`o->b69 == 1 && D_800A60F8 & 1`, D_800A60F8 = retail `PLAYER+0xC0`).
+- **No text, event or flag.** The handler and its helpers call only `ObjCullRegister`, `allocObjectLayer8`, `ObjAlloc`,
+  the close-up step and the free routine: no message box, no `setEventStarted/Complete` (event 67 or any other), no
+  script flag, no counter, no WSS entry. Examining the rock shows the numerals up close and nothing else; the puzzle
+  that would read them (above) is not in the demo.
+- **Other builds.** The close-up code (signature: `0x1800` stored to `+0x7E` next to the 0x13 draw flags) is also in the
+  SLPM-80165 demo (1997-10-10): `SYSTEM/X00.BIN`, layer 4 entry 0x13 = 0x800EB774 with the same `ObjAlloc` type 0x0D /
+  b0c 1 spawn at 0x800EB89C, but that disc has only AREA00 data, so no rock is placed. Not in Hyper 12 (`A00.BIN`),
+  PrePre 8 (no AREA01 data either), JP retail SLPS-01144 (1997-12-02), the beta 980203, USA or PAL: by the December 1997
+  JP release the type was reduced to the draw-only `updateStaticDecorModel`. PrePre 9 has no AREA04, so the "5" rock is
+  not in it. The demo the user remembers is therefore PrePre 9 (inference from the data: it is the only local disc that
+  has both the code and a placed rock).
+- **Side correction** to "What was checked for the object they act on" (PrePre Vol. 9 section below): the Pre9 kind 2
+  type 0x0D record at (4187, -378, 618) runs layer-2 entry 0x0D = X01 0x8012E708 (an animated actor with a
+  `r[1]=%01d r[2]=%01d` debug print; not analysed further); X01 + 0x2E8F8 (0x8011BE40), the four-state stub quoted there,
+  is layer-4 entry 0x12.
 
 ### Reading the numbers (Maya base 20)
 Dot = 1, bar = 5, levels read bottom (x1) to top (x20); within a level the dots sit above the bars.
@@ -793,6 +855,9 @@ The 84 frames these scripts use are exactly the new frames no table reaches; the
   units (two scenery sprites, three items, one chest) plus one L2 type 13 at (4187,-378,618) whose handler
   (X01.BIN +0x2E8F8, overlay base 0x800ED548) is a four-state stub that only calls two exe functions. AREA02 is
   identical record for record.
+  (Correction 2026-11-12: that stub is layer-4 entry 0x12; the kind-2 type-0x0D record runs X01 0x8012E708, see
+  "PrePre Vol. 9: the "2" rock can be examined". The graffiti rock at (4110,-399,48), layer 4 type 0x13, is the Pre9
+  object with demo-only behaviour: it can be examined, with a close-up and the big "?" bubble.)
 - **Texture pages**: `AREA01/A002.GAM` (objects: chests, barrels, pots, arrow sign, a rolling log in 4 views at page
   x 768-880, y 220-240) differs from retail's `AREA01/A002.GAM` in 21 regions, all retouches; the log is in retail
   AREA01 and AREA07 too. `AREA01/B000.GAM` 3 retouches (the slanted two-pronged trident at (208,192) / (208,216) is the

@@ -119,6 +119,11 @@ rendered with the PAL renderer), `tools/audio.py wvd` (now accepts the demo's he
   (`0x1F80016A/16E/172`) with the same thresholds as `src/x001/updateAreaScroll.c` (0xB6E, 0x109B, 0x779, 0x7FC, 0xFAB).
   PAL AREA07 runs X001, which kept this table, so it is not cut logic.
 - **Sound.** `AREA08/SND002_.WVD`: 52 samples, 39 found in PAL banks (`SND_INI`, `SND0020`, ...), 13 demo-only.
+- **Graffiti-rock handler (2026-11-12).** Layer 4 type 0x13 (the retail graffiti rocks, draw-only `updateStaticDecorModel`
+  there) is the examinable rock in this demo: `SYSTEM/X00.BIN` entry 0x13 of the layer-4 table (`D_8006D504`) =
+  0x800EB774, with the close-up and the big "?" bubble spawn (`ObjAlloc` type 0x0D, b0c 1, at 0x800EB89C) of PrePre 9.
+  The disc has no AREA01 room data, so no rock is placed and the code cannot run here. Details:
+  docs/CUT_CONTENT.md "PrePre Vol. 9: the "2" rock can be examined".
 
 Insertion into the PAL port: the text lines are easy (WFM3 encoder exists; a translated appraisal/extra line could be
 attached to an NPC through the script/WSS side). The early village model is renderable but would need the old packet
