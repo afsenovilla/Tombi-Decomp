@@ -243,6 +243,13 @@ static const u8 font[64][7] = {   /* ASCII 32..95, 5x7, bit 4 = left column */
     {0,0,0,0,0,0,31}};
 /* (the same letters for the 3DS's progress screen, n3ds/pica_c3d.c: the 7 rows of a character, lower case as capitals) */
 const unsigned char *port_font5x7(int c) {
+    /* (Latin-1 codes of the accented capitals Spanish needs: the mark in the two upper rows, the letter in five) */
+    static const u8 acc[6][7] = { {2,4,14,17,31,17,17}, {2,4,31,16,30,16,31}, {2,4,14,4,4,4,14}, {2,4,14,17,17,17,14}, {2,4,17,17,17,17,14},
+                                  {14,0,17,25,21,19,17} };   /* A E I O U with an acute, N with a tilde */
+    static const u8 code[6] = { 0xC1, 0xC9, 0xCD, 0xD3, 0xDA, 0xD1 };
+    c &= 255;
+    if (c >= 0xE0) c -= 32;                    /* (lower case accented -> its capital) */
+    for (int i = 0; i < 6; i++) if (c == code[i]) return acc[i];
     if (c >= 'a' && c <= 'z') c -= 32;
     return font[c >= 32 && c <= 95 ? c - 32 : 0];
 }

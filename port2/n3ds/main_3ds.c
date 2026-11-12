@@ -133,8 +133,9 @@ static int choose_image(char *out, size_t cap) {
    patch the program carries: port_es_tpatch), -1: START (leave). */
 #define NLANG 10
 static int choose_lang(int code) {
-    static const char *name[NLANG] = { "English", "Francais", "Deutsch", "Italiano", "Nederlands", "Espanol (traduccion mejorada)",
-                                       "Espanol (el del disco)", "Portugues", "Svenska", "Dansk" };
+    /* (the console's font is the PC's code page 437: its codes for the accented letters) */
+    static const char *name[NLANG] = { "English", "Fran\x87" "ais", "Deutsch", "Italiano", "Nederlands", "Espa\xA4ol (traducci\xA2n mejorada)",
+                                       "Espa\xA4ol (el del disco)", "Portugu\x88s", "Svenska", "Dansk" };
     static const int codes[NLANG] = { 0, 1, 2, 3, 4, 9, 5, 6, 7, 8 };
     int redraw = 1, ok = 0, sel = 0;
     for (int i = 0; i < NLANG; i++) if (codes[i] == code) sel = i;
@@ -151,7 +152,7 @@ static int choose_lang(int code) {
             fprintf(stdout, "\x1b[2J\x1b[1;1HTombi! port - language\n\n");
             for (int i = 0; i < NLANG; i++) fprintf(stdout, "%c %s\n", i == sel ? '>' : ' ', name[i]);
             fprintf(stdout, "\n(hold L while the game starts to choose again)\n");
-            fprintf(stdout, "\nLa traduccion mejorada se prepara la primera vez:\nun par de minutos, con una barra de progreso.\n");
+            fprintf(stdout, "\nLa traducci\xA2n mejorada se prepara la primera vez:\nunos minutos, con una barra de progreso.\n");
             fprintf(stdout, "\x1b[28;1HA: choose   START: exit");
             fflush(stdout);
             redraw = 0;

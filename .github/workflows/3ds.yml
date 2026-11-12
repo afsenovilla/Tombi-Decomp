@@ -312,6 +312,24 @@ jobs:
           kill "$EMU" 2>/dev/null || true; sleep 2
           convert shots/nodisc_030.png -trim +repage -quality 75 small_nodisc.jpg && { echo "=====BEGIN shot_nodisc====="; base64 -w 100 small_nodisc.jpg; echo "=====END shot_nodisc====="; }
           mv "$SD/tombi_away.bin" "$SD/3ds/tombi/tombi.bin"
+          # the language chooser (no lang.txt), then the improved Spanish translation being made (lang.txt 9): its
+          # progress screen and the [tpatch] lines of the log
+          rm -f "$SD/3ds/tombi/lang.txt"
+          ./squashfs-root/AppRun "$PWD/app/tombi.cci" > azahar_lang.log 2>&1 &
+          EMU=$!
+          sleep 15; import -window root shots/lang_015.png || true
+          kill "$EMU" 2>/dev/null || true; sleep 2
+          convert shots/lang_015.png -trim +repage -quality 80 small_lang.jpg && { echo "=====BEGIN shot_lang====="; base64 -w 100 small_lang.jpg; echo "=====END shot_lang====="; }
+          echo 9 > "$SD/3ds/tombi/lang.txt"; rm -f "$SD/3ds/tombi/es_mejorada.cache" "$SD/3ds/tombi/log.txt"
+          ./squashfs-root/AppRun "$PWD/app/tombi.cci" > azahar_es.log 2>&1 &
+          EMU=$!
+          sleep 12; import -window root shots/es_012.png || true
+          sleep 50; import -window root shots/es_062.png || true
+          kill "$EMU" 2>/dev/null || true; sleep 2
+          echo "== log.txt of the improved Spanish run"; grep -a "tpatch\|port_main\|lang" "$SD/3ds/tombi/log.txt" 2>/dev/null | head -12
+          ls -l "$SD/3ds/tombi/" | head -20
+          for f in es_012 es_062; do convert shots/$f.png -trim +repage -quality 80 small_$f.jpg && { echo "=====BEGIN shot_$f====="; base64 -w 100 small_$f.jpg; echo "=====END shot_$f====="; }; done
+          echo 0 > "$SD/3ds/tombi/lang.txt"; rm -f "$SD/3ds/tombi/log.txt"
           ./squashfs-root/AppRun "$PWD/app/tombi.cci" > azahar_cci.log 2>&1 &
           EMU=$!
           sleep 35; import -window root shots/cci_060.png || true
