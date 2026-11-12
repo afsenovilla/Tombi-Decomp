@@ -23,7 +23,7 @@ game/disc/Tombi.bin patches/es_mejorada.tombipatch.json`.
 | Charity Statues / Flower Tower | Estatuas de la caridad / Torre de flores | |
 | Ol' Pond | Viejo estanque | |
 | Yan of the Hidden Village | Yan, el de la Ciudad oculta | |
-| Village | Ciudad (nombres propios: Ciudad Baco, Ciudad de Enanos...) | oficial |
+| Village | Ciudad (nombres propios: Ciudad Baco, La ciudad de los Enanos...) | oficial |
 | Mr. Turtle | el Sr. Tortuga | antes "la Sra. Tortuga" |
 | Psychic Fish | Pez psíquico | antes "Pez potencia" |
 | Blackjack | Mangual | antes "Bola"; bola de pinchos con cadena (como el francés *Fléau d'armes*) |
