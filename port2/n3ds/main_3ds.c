@@ -146,6 +146,7 @@ static void opts_save(void) {
     FILE *f = fopen(DIR_ "/opts.txt", "w");
     if (f) { fprintf(f, "%d %d %d\n", opt_movies, opt_hz, opt_wide); fclose(f); }
 }
+static int es_ready;   /* the improved translation's files are on the SD card already, made from this patch */
 static int choose_lang(int code) {
     /* (the console's font is the PC's code page 437: its codes for the accented letters) */
     static const char *name[NLANG] = { "English", "Fran\x87" "ais", "Deutsch", "Italiano", "Nederlands", "Espa\xA4ol (traducci\xA2n mejorada)",
@@ -202,7 +203,8 @@ static int choose_lang(int code) {
             fprintf(stdout, "\x1b[15;3H\x1b[36mUp/Down\x1b[0m option    \x1b[36mLeft/Right\x1b[0m change");
             fprintf(stdout, "\x1b[17;3HHold \x1b[36mL\x1b[0m while the game starts to see");
             fprintf(stdout, "\x1b[18;3Hthis screen again.");
-            if (codes[lang] == 9) {
+            if (codes[lang] == 9 && es_ready) fprintf(stdout, "\x1b[21;3H\x1b[32mLa traducci\xA2n mejorada ya est\xA0 preparada.\x1b[0m");
+            else if (codes[lang] == 9) {
                 fprintf(stdout, "\x1b[21;3H\x1b[32mLa traducci\xA2n mejorada se prepara la");
                 fprintf(stdout, "\x1b[22;3Hprimera vez: unos minutos, con una barra.\x1b[0m");
             }
@@ -277,6 +279,10 @@ int main(int argc, char **argv) {
         lf = given ? 0 : fopen(DIR_ "/lang.txt", "r");
         if (lf) { if (fscanf(lf, "%d", &lang) != 1 || lang < 0 || lang > 9) lang = -1; fclose(lf); }
         if (!given && (lang < 0 || ask)) {
+            {   /* (the files are kept whatever language is chosen meanwhile: made again only for another translation) */
+                extern int port_tpatch_store_ok(const char *, const void *, unsigned);
+                es_ready = port_tpatch_store_ok(DIR_ "/es_mejorada.cache", port_es_tpatch, port_es_tpatch_size);
+            }
             lang = choose_lang(lang < 0 ? 0 : lang);
             if (lang < 0) return 0;
             lf = fopen(DIR_ "/lang.txt", "w");

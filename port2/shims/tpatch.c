@@ -51,6 +51,17 @@ typedef struct { char path[64]; unsigned char *data; unsigned size; int nr; unsi
    appended to the store (data == 0, off its place there), and the next start finds the store made (its head: "TPC1",
    the patch's sha1) and reads from it.  port_tpatch_progress, if set, is told how far a build is. */
 const char *port_tpatch_store;
+/* 1: the store at path was made from this patch (the 3DS's options screen says the translation is ready, not that it
+   will be prepared) */
+int port_tpatch_store_ok(const char *path, const void *patch, unsigned n) {
+    unsigned char key[20], head[24]; int ok = 0;
+    FILE *f = fopen(path, "rb");
+    if (!f) return 0;
+    sha1(patch, n, key);
+    if (fread(head, 1, sizeof head, f) == sizeof head && !memcmp(head, "TPC1", 4) && !memcmp(head + 4, key, 20)) ok = 1;
+    fclose(f);
+    return ok;
+}
 void (*port_tpatch_progress)(int done, int total);
 static FILE *tp_store;
 #define STORE_HEAD 24
