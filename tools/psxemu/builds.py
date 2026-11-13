@@ -55,7 +55,9 @@ PROFILES = {
     "prepre9": Profile(name="prepre9", title="PlayStation Club PrePre Vol. 9 (PCPX-96093) TOMBA/TOMBA.EXE",
                        exe="game_prepre9/fs/TOMBA/TOMBA.EXE", disc="game_prepre9/disc.bin", syms="prepre9", cd_irq=True, movie_state=0x1F8001CC),
     "prepre8": Profile(name="prepre8", title="PlayStation Club PrePre Vol. 8 (PCPX-96084) TOMBA/TOMBA.EXE",
-                       exe="game_prepre8/fs/TOMBA/TOMBA.EXE", disc="game_prepre8/disc.bin", syms="prepre8", cd_irq=True, movie_state=0x1F8001CC),
+                       exe="game_prepre8/fs/TOMBA/TOMBA.EXE", disc="game_prepre8/disc.bin", syms="prepre8", cd_irq=True,
+                       movie_task=0x800228B8, movie_state=0x800CCCDC),   # older code: StartTask(1, 0x800228B8) after sh 1 -> 0x800CCCDC
+                                                                          # (0x8001FEE8), not the scratchpad byte the libsig scan looks for
     "dengeki": Profile(name="dengeki", title="Dengeki PlayStation D5 (SLPM-80186) Tomba demo", exe="game_dengeki_d5/fs/TOMBA/TOMBA.EXE",
                        disc="game_dengeki_d5/disc.bin", syms="dengeki", cd_irq=True, movie_state=0x1F8001CC),
     "hyper": Profile(name="hyper", title="Hyper PlayStation Re-mix No.12 (SLPM-80167) Tomba demo", exe="game_hyper12/fs/TOMBA/TOMBA.EXE",

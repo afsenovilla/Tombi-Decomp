@@ -284,7 +284,7 @@ Stop after about 90 minutes on one function: write what was tried under "tried" 
   run-time trace finds no script flag, event, text or counter tied to it (only the "?" SFX 0x1A, and the demo countdown is held while it runs).
 - tools/psxemu multi-build (2026-11-13, tools/psxemu/README.md): `Machine(build=pal|usa|jp|beta|jpdemo|prepre9|
   prepre8|dengeki|hyper)`; non-PAL entry points from byte-signature tables (`libsig.py` -> `syms/<build>.csv`, FMV task
-  included). USA, JP, beta 980203, JP demo, PrePre 9, Dengeki D5 and Hyper 12 boot to gameplay; PAL bit-identical.
+  included). All nine boot to gameplay (title, START, AREA00 or PrePre 9's Dwarf Village); PAL bit-identical.
 - WSS scripts across all builds (2026-11-12, `tools/wss.py`, docs/CUT_CONTENT.md "WSS event scripts across builds"):
   retail orphan entries are movement/fade helpers only; 0200.WSS stages the woodcutter line (2,54) for villager 16,
   whose talk case is missing (every build); JP/beta 0201 give 2 Torches for event 177 and no Baron after 113 (PAL
