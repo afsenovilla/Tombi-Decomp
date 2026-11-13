@@ -658,8 +658,9 @@ GAM files unpacked, PAL, US and JP): five distinct plaques, every hit listed.
 ### PrePre Vol. 9: the "2" rock can be examined (close-up and "?" bubble), 12 November 2026
 
 A player of PrePre Vol. 9 remembered that Tombi reacts with a "?" at a rock near the Dwarf Village. Checked statically
-on `game_prepre9/fs/TOMBA` (PCPX-96093, `tools/disc_fetch.sh PREPRE9`); no emulator ran the demo, so the sequence below
-is read from the code, not seen.
+on `game_prepre9/fs/TOMBA` (PCPX-96093, `tools/disc_fetch.sh PREPRE9`); the list below is read from the code. It was
+then run in `tools/psxemu` (2026-11-13, "Seen at run time" at the end of this section), which confirms it and adds
+the Up gate and the run-time trace.
 
 - **The record is the retail one.** `AREA01/D004.GAM` = `D104.GAM` (unpacked, offset 0x2D7FC, again at 0x2E13C):
   `01 04 13 00 00 00 | x 4110 y -399 z 48 | bc 0x10 bd 0 be 24 bf 0`: layer 4, type 0x13, subtype 0, same position as
@@ -715,6 +716,35 @@ is read from the code, not seen.
   type 0x0D record at (4187, -378, 618) runs layer-2 entry 0x0D = X01 0x8012E708 (an animated actor with a
   `r[1]=%01d r[2]=%01d` debug print; not analysed further); X01 + 0x2E8F8 (0x8011BE40), the four-state stub quoted there,
   is layer-4 entry 0x12.
+
+**Seen at run time (2026-11-13).** The demo now runs in `tools/psxemu` (build profile `prepre9`), and
+`python3 tools/psxemu/pre9_rock.py video|trace` replays the scene from the boot: the opening dialogue in the Dwarf
+Village, then AREA01 section 1 spawn 1 (Tombi lands at x 4168, next to the rock) through the game's own area loader
+(Pre9 `GAME` = 0x800A2248: +0x334 / +0x336 / +0x340 next area / section / spawn, game task mode 5; the only RAM write),
+then pad input. Video (MP4, 2x, 60 fps, no sound: audio is not emulated) kept outside the repo.
+- **How to trigger it.** Standing (no Left/Right) in front of the plaque (x about 4093..4112, the cells with attribute
+  4), **hold Up and press Circle**. Up is part of the gate, which the static reading missed: contact result 4 of
+  0x800F49FC needs `PLAYER+0x2E` bit 2 (no Left/Right in the pad word 0x800A2FF8) and bit 8 (Up held, 0x1000 there)
+  and cell attribute 4; Circle is bit 0x20 of `SPAD+0x1FC` (confirmed). Circle alone is Tombi's normal action.
+- **What it shows.** As read: the "?" bubble pops over Tombi, the plaque (Maya "2", two dots) leaves a copy on the
+  cliff and comes forward from z 48 to z -192 at twice the size (scale 0x1000 -> 0x2000 in 10 frames, drifting left),
+  then holds until Circle and goes back in 10 frames. While it is up, the HUD (vitality, AP, timer) is hidden and the
+  pad words (0x800A2FF8/2FFC, `SPAD+0x1FC/1FE`) are cleared every frame by 0x8010FAAC (input locked).
+- **Call tree** of X01 0x800F1980 at run time (every `jal`/`jalr` under it, VBlank interrupt excluded): 0x80023C68 ->
+  0x80019984 every frame (visible flag + per-frame draw list), and once at the trigger 0x80019160 (pool alloc: the "?"
+  object, type 0x0D b0c 1) and 0x800F1B58 -> 0x80019278 (allocObjectLayer8: the copy); the close-up step 0x800F1BF0
+  calls nothing. No library call (no text, no sound) inside the tree.
+- **Writes outside the rock and the player** in that tree: 0x800A222F = 1 (and 0 at the end), 0x800A2232 = 0 at the
+  end, `SPAD+0x1C6` = 0 at the end, the pool / free-list bookkeeping (`SPAD+0x208/0x20C/0x238/0x23A`), the draw list
+  (`SPAD+0x224/0x24C`), and the two new objects. The player's idle step adds 0x800A222F = 1, 0x800A2232 = 1,
+  0x800A2A98 = 2, `PLAYER+0xC0` = 1 and `*(0x80090E08)+0x1E/0x1F` = 0. The "?" object (TOMBA.EXE 0x8002F78C) sets
+  0x800A2244 = 1 while it lives (159 frames, then 0 again: the bubble shows on every examine) and queues **SFX 0x1A**
+  (sound queue 0x80021C40 -> `SsUtKeyOnV`, stubbed here).
+- **Differential** (the same input without the Circle presses, all RAM 0x80010000..0x800B8000 and the scratchpad,
+  ordering tables left out): besides the above, only the demo countdown differs: 0x80090E14..16 (min / s / ticks,
+  0x800A7E38 its text) does not move while Tombi is in event mode, i.e. for the whole examine (more time left at the end). No
+  write to the script flags (0x800A258C..), no event start/complete, no text or dialogue state, no item, AP or counter.
+  Examining the plaque is a self-contained look at the numerals; nothing else is tied to it in this demo.
 
 ### Reading the numbers (Maya base 20)
 Dot = 1, bar = 5, levels read bottom (x1) to top (x20); within a level the dots sit above the bars.

@@ -279,7 +279,12 @@ Stop after about 90 minutes on one function: write what was tried under "tried" 
 - Graffiti rock in PrePre 9 (2026-11-12, docs/CUT_CONTENT.md "PrePre Vol. 9: the "2" rock can be examined"): layer 4
   type 0x13 at AREA01 (4110,-399) is examinable in PCPX-96093 (X01 0x800F1980): the plaque flies to the camera at
   twice the size until Circle, and the big "?" bubble (unused in retail) pops over Tombi; no text, event or flag.
-  Same code in SLPM-80165 X00 (no rock placed); retail kept only the draw. Static reading, not run in an emulator.
+  Same code in SLPM-80165 X00 (no rock placed); retail kept only the draw. Run in tools/psxemu on 2026-11-13
+  (`tools/psxemu/pre9_rock.py video|trace`): confirmed; the trigger is Up held + Circle in front of the plaque; the
+  run-time trace finds no script flag, event, text or counter tied to it (only the "?" SFX 0x1A, and the demo countdown is held while it runs).
+- tools/psxemu multi-build (2026-11-13, tools/psxemu/README.md): `Machine(build=pal|usa|jp|beta|jpdemo|prepre9|
+  prepre8|dengeki|hyper)`; non-PAL entry points from byte-signature tables (`libsig.py` -> `syms/<build>.csv`, FMV task
+  included). USA, JP, beta 980203, JP demo, PrePre 9, Dengeki D5 and Hyper 12 boot to gameplay; PAL bit-identical.
 - WSS scripts across all builds (2026-11-12, `tools/wss.py`, docs/CUT_CONTENT.md "WSS event scripts across builds"):
   retail orphan entries are movement/fade helpers only; 0200.WSS stages the woodcutter line (2,54) for villager 16,
   whose talk case is missing (every build); JP/beta 0201 give 2 Torches for event 177 and no Baron after 113 (PAL
