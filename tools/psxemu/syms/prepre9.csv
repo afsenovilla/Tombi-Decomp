@@ -2,6 +2,7 @@
 address,name
 80018174,exitTask
 8001ebd8,updateMainObjects
+8002060c,moviePlayerTask
 80021ed4,SoundShutdown
 80057218,printf
 80058328,_card_clear

@@ -127,10 +127,39 @@ def wanted(name):
             or name in _builds.GAME_NAMES)
 
 
+def movie_tasks(b):
+    """The FMV player task of a Tombi executable, found by its start: `sb v0, 0x1CC(at)` (MOVIE_PLAY_STATE = 1) next to
+    `lui a1 / addiu a1` (the task function passed to StartTask).  PAL MAIN0 gives 0x8001D6A4 (moviePlayerTask) at its three calls.
+    Returns {address: number of calls}."""
+    base = struct.unpack_from("<I", b, 0x18)[0] - 0x800
+    w = lambda o: struct.unpack_from("<I", b, o)[0]
+    hits = collections.Counter()
+    for o in range(0x800 + 32, len(b) - 40, 4):
+        x = w(o)
+        if x >> 26 != 0x28 or x & 0xFFFF != 0x1CC or (x >> 21) & 31 != 1:
+            continue
+        hi = lo = None
+        for k in range(-8, 9):
+            v = w(o + 4 * k)
+            if v >> 16 == 0x3C05:
+                hi = v & 0xFFFF
+            elif v >> 16 == 0x24A5:
+                lo = v & 0xFFFF
+        if hi is not None and lo is not None:
+            a = ((hi << 16) + ((lo ^ 0x8000) - 0x8000)) & 0xFFFFFFFF
+            if base + 0x800 <= a < base + len(b):
+                hits[a] += 1
+    return hits
+
+
 def build_table(build, exe=None, keep_all=False, log=print):
     prof = _builds.get(build)
     exe = exe or prof.path("exe")
-    found = scan(open(exe, "rb").read(), pal_functions())
+    b = open(exe, "rb").read()
+    found = scan(b, pal_functions())
+    mt = movie_tasks(b)
+    if mt and "moviePlayerTask" not in found:
+        found["moviePlayerTask"] = [mt.most_common(1)[0][0]]
     rows = sorted((a, n) for n, al in found.items() for a in al if keep_all or wanted(n))
     out = os.path.join(_builds.SYMS_DIR, "%s.csv" % build)
     os.makedirs(_builds.SYMS_DIR, exist_ok=True)
