@@ -20,6 +20,7 @@
  * Identity when off: nothing is linked and no marker exists without --widescreen; the gpu.c test is one compare. */
 #include <stdint.h>
 #include <string.h>
+#include <stdlib.h>
 
 typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32; typedef short s16;
 typedef struct { s16 x, y, w, h; } RECT;
@@ -149,6 +150,17 @@ void port_ws_overhead_map(void *o, int n, int row_off)
     for (int i = 0; i < n; i++) if ((rd32((u8 *)first + 0x10 + i * 0x20) >> 24) != 0x65) return;
     for (int i = 0; i < n; i++)                     /* the frame inside the picture: the map moves with the objects */
         *(s16 *)(first + 0x14 + i * 0x20) = (s16)(*(s16 *)(first + 0x14 + i * 0x20) + dx);
+    {   /* The 3DS (and PORT_WS_NO_WINDOWS=1 on a PC to see it): not the windows beside the game's.  Its wide frame
+           is 40 columns a side, of which the game's window has 32 already; the two more windows were three map
+           uploads into the same VRAM a frame, each a texture decode there (Baccus at 30 vblank/s, 22 ms a frame
+           decoding, on an Old 3DS) */
+#ifdef __3DS__
+        return;
+#else
+        static int off = -1; if (off < 0) { const char *e = getenv("PORT_WS_NO_WINDOWS"); off = e && *e == '1'; }
+        if (off) return;
+#endif
+    }
     port_ot_mark_fn = mark;
     const u8 *tim = *(const u8 **)port_ram_ptr(0x1F800394u), *map = *(const u8 **)port_ram_ptr(0x1F800390u);
     if (!tim || !map) return;
