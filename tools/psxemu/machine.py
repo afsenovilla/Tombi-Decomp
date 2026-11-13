@@ -200,6 +200,8 @@ class Machine:
             if names is None:
                 self.remap_names(exe)
             self.load_exe(exe)
+            if self.build != "pal" and self.pad_buf is None:
+                self.pad_buf = self.joypad_buffer()
         self.install_hle()
         if boot is not None:
             c.w16(0x1F8003D8, 1)        # what SCES_013.31 leaves in the scratchpad before LoadExec (disc 01331, digital pad)
@@ -216,6 +218,23 @@ class Machine:
         self.cpu.R[29] = (spb + spo) & 0xFFFFFFFF if spb else 0x801FFFF0
         self.cpu.pc = pc
         return pc
+
+    def joypad_buffer(self):
+        """The PadInitDirect buffer joypadInit passes (lui a0 / addiu a0 in its first instructions; joypadInit itself is an HLE stub,
+        so its PadInitDirect call never runs).  None when the build has no joypadInit (old libetc PadRead: BIOS PAD_init)."""
+        j = (self.names.get("joypadInit") or [None])[0]
+        if not j:
+            return None
+        hi = None
+        for k in range(16):
+            w = self.cpu.r32(j + 4 * k)
+            if w >> 16 == 0x3C04:
+                hi = w & 0xFFFF
+            elif w >> 16 == 0x2484 and hi is not None:
+                return ((hi << 16) + ((w & 0xFFFF ^ 0x8000) - 0x8000)) & 0xFFFFFFFF
+            elif w >> 26 == 3:
+                break
+        return None
 
     def remap_names(self, exe):
         """The names/HLE addresses are those of MAIN0. The other MAINn (MAIN5 = Spanish: code from 0x8004DB4C linked 6 words
@@ -356,6 +375,17 @@ class Machine:
             if n in STUB_NAMES or (n.startswith(STUB_PREFIXES) and not n.startswith("Store")):
                 for a in al:
                     h[a] = ret(0)
+        if self.build != "pal":
+            # libpad functions the signature table missed (other libpad versions, e.g. PadGetState of the beta 980203) call through the
+            # port-table pointer libpad's init sets; that init is HLE'd, the pointer stays 0: stub every `lui v0; lw v0,(v0); ... jalr v0`
+            # function between the first and the last libpad name
+            pads = [a for n, al in self.names.items() if n.startswith("Pad") for a in al]
+            if pads:
+                for a in range(min(pads), max(pads) + 0x200, 4):
+                    w0, w1 = self.cpu.r32(a), self.cpu.r32(a + 4)
+                    if w0 >> 16 == 0x3C02 and w1 >> 16 == 0x8C42 and a not in h and \
+                            any(self.cpu.r32(a + 4 * k) == 0x0040F809 for k in range(2, 8)):
+                        h[a] = ret(0)
         table = {
             "ResetGraph": ret(0), "SetDispMask": ret(0), "DrawSync": ret(0),
             "LoadImage": self.h_load_image, "StoreImage": self.h_store_image, "MoveImage": self.h_move_image,
