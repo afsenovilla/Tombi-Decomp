@@ -216,6 +216,47 @@ static void c3d_tex_upload(int slot, const unsigned *rgba, int busy) {
     tk_upload += svcGetSystemTick() - t0;
 }
 
+/* a 256 slot's 32 x 32 cell from another's: four rows of four tiles, each row 1 KB in a row in the atlas's memory
+   (the tiles of an atlas row follow one another).  The cache is flushed by c3d_cell_upload, called after */
+static void c3d_cell_copy(int ds, int dc, int ss, int sc, int busy) {
+    u64 t0 = svcGetSystemTick();
+    begin();
+    if (busy) { end_and_wait(); begin(); n_wait++; }
+    int dx, dy, sx, sy; pica_slot_pos(ds, &dx, &dy); pica_slot_pos(ss, &sx, &sy);
+    dx += (dc & 7) * 32; dy += (dc >> 3) * 32; sx += (sc & 7) * 32; sy += (sc >> 3) * 32;
+    unsigned *db = atlas_tex[pica_slot_atlas(ds)].data; const unsigned *sb = atlas_tex[pica_slot_atlas(ss)].data;
+    for (int r = 0; r < 4; r++)
+        memcpy(db + (((dy >> 3) + r) * (PICA_ATLAS >> 3) + (dx >> 3)) * 64, sb + (((sy >> 3) + r) * (PICA_ATLAS >> 3) + (sx >> 3)) * 64, 4 * 64 * 4);
+    tk_upload += svcGetSystemTick() - t0;
+}
+/* the cells of mask from rgba (256 x 256), then the slot's memory flushed for the GPU (as c3d_tex_upload) */
+static void c3d_cell_upload(int slot, const unsigned *rgba, unsigned long long mask, int busy) {
+    u64 t0 = svcGetSystemTick();
+    begin();
+    if (busy) { end_and_wait(); begin(); n_wait++; }
+    static unsigned char my[8]; if (!my[1]) for (int i = 0; i < 8; i++) my[i] = (unsigned char)morton(0, i);
+    int ax, ay; pica_slot_pos(slot, &ax, &ay);
+    unsigned *base = atlas_tex[pica_slot_atlas(slot)].data;
+    if (mask) n_up++;
+    for (int c = 0; c < 64; c++) if (mask >> c & 1) {
+        const int cx = (c & 7) * 32, cy = (c >> 3) * 32;
+        for (int v = 0; v < 32; v++) {
+            unsigned *drow = base + (((ay + cy + v) >> 3) * (PICA_ATLAS >> 3) + ((ax + cx) >> 3)) * 64 + my[v & 7];
+            const unsigned *s = rgba + (cy + v) * 256 + cx;
+            for (int tx = 0; tx < 4; tx++, s += 8) {
+                unsigned *t = drow + tx * 64;
+                t[0] = pix(s[0]); t[1] = pix(s[1]); t[4] = pix(s[2]); t[5] = pix(s[3]);
+                t[16] = pix(s[4]); t[17] = pix(s[5]); t[20] = pix(s[6]); t[21] = pix(s[7]);
+            }
+        }
+    }
+    {   unsigned *first = base + (((ay >> 3) * (PICA_ATLAS >> 3)) + (ax >> 3)) * 64;
+        unsigned *last = base + ((((ay >> 3) + 32 - 1) * (PICA_ATLAS >> 3)) + (ax >> 3) + 32) * 64;
+        dcache_flush(first, (u32)((char *)last - (char *)first));
+    }
+    tk_upload += svcGetSystemTick() - t0;
+}
+
 /* ---- primitives */
 /* (state is only set when it changes) */
 /* the GPU reads the vertices from memory, not through the CPU's cache: written out before the frame is submitted (a
@@ -1002,7 +1043,7 @@ void port_n3ds_gpu_fini(void) {
 }
 const PicaDev pd_c3d = { c3d_start, c3d_tex_upload, c3d_tris, c3d_fill, c3d_read, c3d_write, c3d_present, c3d_vbuf, c3d_write15,
                          c3d_wide_start, c3d_wide_fill, c3d_wide_write, c3d_wide_down, c3d_wide_present, 0, c3d_submit,
-                         c3d_eye_start, c3d_eye_fill };
+                         c3d_eye_start, c3d_eye_fill, c3d_cell_copy, c3d_cell_upload };
 #endif
 
 /* ---- a worker thread for the panel's renders (runtime/panel.c): on another core where there is one (New 3DS: core 2;

@@ -68,5 +68,10 @@ typedef struct {
        the present shows its display area to the right eye */
     int (*eye_start)(void);
     void (*eye_fill)(int x, int y, int w, int h, unsigned rgba);
+    /* optional: a 256 slot's 32 x 32 cell (0..63, row by row) copied from another slot's; the cells set in mask
+       uploaded from rgba (256 x 256), and the slot's memory made the GPU's (called after the copies, mask 0 or not).
+       busy: as tex_upload's */
+    void (*cell_copy)(int dslot, int dcell, int sslot, int scell, int busy);
+    void (*cell_upload)(int slot, const unsigned *rgba, unsigned long long mask, int busy);
 } PicaDev;
 #endif

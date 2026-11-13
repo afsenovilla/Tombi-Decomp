@@ -149,8 +149,20 @@ static void ref_wide_down(int wx, int wy, int x, int y, int w, int h) { REF_T(0,
 static void ref_wide_read(int x, int y, int w, int h, u32 *d, int stride) { for (int j = 0; j < h; j++) memcpy(d + (size_t)j * stride, &wrt[y + j][x], (size_t)w * 4); }
 static int ref_eye_start(void) { if (!ert) ert = calloc(512, sizeof *ert); return ert ? 0 : -1; }
 static void ref_eye_fill(int x, int y, int w, int h, u32 c) { for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) ert[(y + j) & 511][(x + i) & 1023] = c; }
+static void ref_cell_copy(int ds, int dc, int ss, int sc, int busy) {
+    int dx, dy, sx, sy; (void)busy;
+    pica_slot_pos(ds, &dx, &dy); pica_slot_pos(ss, &sx, &sy);
+    dx += (dc & 7) * 32; dy += (dc >> 3) * 32; sx += (sc & 7) * 32; sy += (sc >> 3) * 32;
+    for (int j = 0; j < 32; j++) memcpy(&atlas[pica_slot_atlas(ds)][dy + j][dx], &atlas[pica_slot_atlas(ss)][sy + j][sx], 32 * 4);
+}
+static void ref_cell_upload(int slot, const u32 *rgba, unsigned long long mask, int busy) {
+    int ax, ay; (void)busy; pica_slot_pos(slot, &ax, &ay);
+    for (int c = 0; c < 64; c++) if (mask >> c & 1)
+        for (int j = 0; j < 32; j++) memcpy(&atlas[pica_slot_atlas(slot)][ay + (c >> 3) * 32 + j][ax + (c & 7) * 32], rgba + ((c >> 3) * 32 + j) * 256 + (c & 7) * 32, 32 * 4);
+}
 static const PicaDev pd_ref = { ref_start, ref_tex_upload, ref_tris, ref_fill, ref_read, ref_write, 0, 0, 0,
-                                ref_wide_start, ref_wide_fill, ref_wide_write, ref_wide_down, 0, ref_wide_read, 0, ref_eye_start, ref_eye_fill };
+                                ref_wide_start, ref_wide_fill, ref_wide_write, ref_wide_down, 0, ref_wide_read, 0, ref_eye_start, ref_eye_fill,
+                                ref_cell_copy, ref_cell_upload };
 #ifdef __3DS__
 extern const PicaDev pd_c3d;              /* port2/n3ds/pica_c3d.c */
 static const PicaDev *dev = &pd_c3d;
@@ -527,6 +539,32 @@ static void decode(const GpuTex *t, int tw, int bx, int by, int z) {   /* the bl
         dec[j * z + i] = texel(c);
     }
 }
+/* 256 blocks of 8 bpp textures by 32 x 32 cells (a top-down room's map is 32 x 32 tiles that the game uploads again,
+   moved by a tile, as the camera crosses one: the cells are mostly the ones some slot decoded already).  cellh: each
+   cell's hash of its VRAM words, cellok: the slot has them (a 256 block of an 8 bpp texture, no window) */
+static u32 cellh[SLOTS][64]; static unsigned char cellok[SLOTS];
+static unsigned long long st_cells_copied, st_cells_decoded;
+static void cell_hashes(const GpuTex *t, int bx, int by, u32 *h) {
+    const u16 *vram = port_vram();
+    for (int c = 0; c < 64; c++) {
+        u32 hsh = 2166136261u; const int x0 = t->tx + bx / 2 + (c & 7) * 16, y0 = t->ty + by + (c >> 3) * 32;
+        for (int v = 0; v < 32; v++) { const u16 *row = &vram[((y0 + v) & 511) * 1024]; for (int k = 0; k < 16; k++) hsh = (hsh ^ row[(x0 + k) & 1023]) * 16777619u; }
+        h[c] = hsh;
+    }
+}
+static void decode_cells(const GpuTex *t, int bx, int by, unsigned long long need, unsigned char *kc) {   /* into dec[] (256 x 256) */
+    const u16 *vram = port_vram(); u32 clut[256];
+    for (int i = 0; i < 256; i++) clut[i] = texel(vram[t->cy * 1024 + ((t->cx + i) & 1023)]);
+    for (int c = 0; c < 64; c++) if (need >> c & 1) {
+        const int x0 = t->tx + bx / 2 + (c & 7) * 16, y0 = t->ty + by + (c >> 3) * 32; unsigned char k = 0;
+        for (int v = 0; v < 32; v++) {
+            const u16 *row = &vram[((y0 + v) & 511) * 1024]; u32 *d = dec + ((c >> 3) * 32 + v) * 256 + (c & 7) * 32;
+            for (int i = 0; i < 16; i++) { const u16 w = row[(x0 + i) & 1023]; d[2 * i] = clut[w & 255]; d[2 * i + 1] = clut[w >> 8]; }
+            for (int i = 0; i < 32; i++) { u32 a = d[i] >> 24; if (a) k |= a == A_SEMI ? 2 : 1; }
+        }
+        kc[c] = k;
+    }
+}
 extern unsigned long long port_time_us(void);
 unsigned long long pica_decode_us;   /* (time in decode(): n3ds/pica_c3d.c logs it) */
 /* the slot of the block that holds texels u0..u1 x v0..v1 (inclusive) of the texture: the smallest of the 64 / 128 /
@@ -688,6 +726,30 @@ static int tex_slot(const GpuTex *t, int u0, int v0, int u1, int v1, int *obx, i
     if (nbv && was > batch_clock) flush();   /* the pending batch samples the slot about to change */
     if (port_verbose > 1) port_printf("[gpu] DEC %s z%d tex %d,%d d%d clut %d,%d b %d,%d tw %x (frame %d)\n", slots[i].ver ? "stale" : "new", z, t->tx, t->ty, t->depth, t->cx, t->cy, bx, by, tw, port_frame);
     unsigned long long t0 = port_time_us();
+    const int celled = z == 256 && t->depth == 1 && !tw && t->cy != PORT_CLUT_Y && t->cx + 256 <= 1024 && dev->cell_copy && dev->cell_upload;
+    if (celled) {   /* by cells: each one some slot has (this one in place, another copied) or decoded */
+        u32 nh[64]; cell_hashes(t, bx, by, nh);
+        const unsigned hc = clut_hash(t);
+        const int keep = cellok[i] && slots[i].chash == hc;   /* (its own cells, before this decode) */
+        unsigned long long need = 0; int busy = was > frame_clock;
+        for (int c = 0; c < 64; c++) {
+            if (keep && cellh[i][c] == nh[c]) continue;
+            int done = 0;
+            for (int j = 0; j < PICA_N256 && !done; j++) {
+                if (j == i || !cellok[j] || !slots[j].live || slots[j].chash != hc) continue;
+                for (int k = 0; k < 64; k++) if (cellh[j][k] == nh[c]) {
+                    dev->cell_copy(i, c, j, k, busy); busy = 0; slot_kinds[i][c] = slot_kinds[j][k]; done = 1; st_cells_copied++; break;
+                }
+            }
+            if (!done) need |= 1ull << c;
+        }
+        if (need) decode_cells(t, bx, by, need, slot_kinds[i]);
+        for (int c = 0; c < 64; c++) st_cells_decoded += need >> c & 1;
+        pica_decode_us += port_time_us() - t0;
+        dev->cell_upload(i, dec, need, busy);
+        memcpy(cellh[i], nh, sizeof nh); cellok[i] = 1;
+    } else {
+    cellok[i] = 0;
     decode(t, tw, bx, by, z);
     {   /* the texel classes (1: opaque, 2: semi-transparent) of the block's 8 x 8 parts: see prim_kinds */
         unsigned char *kc = slot_kinds[i]; const int sh = z == 64 ? 3 : z == 128 ? 4 : 5;
@@ -699,6 +761,7 @@ static int tex_slot(const GpuTex *t, int u0, int v0, int u1, int v1, int *obx, i
     }
     pica_decode_us += port_time_us() - t0;
     dev->tex_upload(i, dec, was > frame_clock);
+    }
     st_decodes++;
     slots[i].ver = v; slots[i].checked = ver_clock + 1; slots[i].used = ++use_clock;
     slots[i].tver = blocks_ver(x, y, w, h); slots[i].chash = clut_hash(t); slots[i].updated = present_no; slots[i].srch = src_hash(x, y, w, h);
@@ -1140,7 +1203,7 @@ static void pica_stop(void) {
                 pica_dec_why[0], pica_dec_why[1], pica_dec_why[2], pica_dec_why[3], pica_dec_why[4], pica_dec_why[5], pica_dec_why[6], pica_dec_why[7], pica_dec_why[8]);
     if (ref_sw[0] | ref_sw[3]) port_printf("[gpu] pica: changes of target: %llu by triangles, %llu fills, %llu writes, %llu wide fills, %llu wide writes, %llu copies down\n",
                                            ref_sw[0], ref_sw[1], ref_sw[2], ref_sw[3], ref_sw[4], ref_sw[5]);
-    port_printf("[gpu] pica: %llu blocks written again the same, not decoded\n", st_same);
+    port_printf("[gpu] pica: %llu blocks written again the same, not decoded; 8 bpp 256 blocks by cells: %llu copied, %llu decoded\n", st_same, st_cells_copied, st_cells_decoded);
     port_printf("[gpu] pica: %llu batches, %llu triangles, %llu texture decodes, %llu read-backs (%llu for textures, %llu for the host: %llu pixels)\n",
                 st_batches, st_tris, st_decodes, st_readbacks, st_rb_tex, st_rb_host, st_rb_px);
 }
