@@ -283,8 +283,13 @@ Stop after about 90 minutes on one function: write what was tried under "tried" 
   (`tools/psxemu/pre9_rock.py video|trace`): confirmed; the trigger is Up held + Circle in front of the plaque; the
   run-time trace finds no script flag, event, text or counter tied to it (only the "?" SFX 0x1A, and the demo countdown is held while it runs).
 - tools/psxemu multi-build (2026-11-13, tools/psxemu/README.md): `Machine(build=pal|usa|jp|beta|jpdemo|prepre9|
-  prepre8|dengeki|hyper)`; non-PAL entry points from byte-signature tables (`libsig.py` -> `syms/<build>.csv`, FMV task
-  included). All nine boot to gameplay (title, START, AREA00 or PrePre 9's Dwarf Village); PAL bit-identical.
+  prepre8|dengeki|hyper|yoiko2)`; non-PAL entry points from byte-signature tables (`libsig.py` -> `syms/<build>.csv`, FMV task
+  included). All ten boot to gameplay (title, START, AREA00 or PrePre 9's Dwarf Village); PAL bit-identical.
+- PAPX-90023 (*Yoi Ko to Yoi Otona no. PlayStation Taikenban Vol.2*, 2026-11-13, docs/JPDEMO.md "PAPX-90023, the
+  same-day sampler build"): SLPM-80165 rebuilt two hours later for a sampler disc; data identical but for the text.
+  New: no debug area select (the only 1997 build without it), no disclaimer / OP_UTA / 100JP, CdSearchFile loading,
+  START+SELECT back to MAIN.EXE, the wise man's "this version ends here" moved into dialogue 56 with a new line, and
+  event hint 4 "you have to be able to swim". No new area, object, graphic or sound.
 - WSS scripts across all builds (2026-11-12, `tools/wss.py`, docs/CUT_CONTENT.md "WSS event scripts across builds"):
   retail orphan entries are movement/fade helpers only; 0200.WSS stages the woodcutter line (2,54) for villager 16,
   whose talk case is missing (every build); JP/beta 0201 give 2 Torches for event 177 and no Baron after 113 (PAL

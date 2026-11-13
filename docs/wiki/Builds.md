@@ -11,7 +11,7 @@ Copied here as published there; the column names below are ours, where the sourc
 | 1 | 1997-06-24 16:35 | PrePre Vol.8 | NTSC | 🇯🇵 | PCPX-96084 | 1997-09 | 36812 | | `TOMBA/TOMBA.EXE` | `4e52a29447edcedc5f5f77bf76789792` | 1997-06-24 14:35 | [PrePre 8](../PREPRE8.md) |
 | 2 | 1997-09-22 16:10 | Hyper PlayStation Re-mix No.12 | NTSC | 🇯🇵 | SLPM-80167 | 1997-12 | 51118 | | `TOMBA/TOMBA.EXE` | `8a560b8df72fe98d47396d13b7b2b98a` | 1997-09-24 07:00 | |
 | 3 | 1997-10-10 10:58 | Ore! Tomba (standalone demo) | NTSC | 🇯🇵 | SLPM-80165 | 1997 | 57448 | | `SLPM_801.65` | `f70ca58eebfa23322ecd2f98513bb194` | 1997-10-10 10:00 | [JP demo](../JPDEMO.md) |
-| 4 | 1997-10-10 12:49 | Yoi Ko to Yoi Otona no. PlayStation Taikenban Vol.2 | NTSC | 🇯🇵 | PAPX-90023 | 1997-12-04 | 6785 | | `TOMBA/TOMBA.EXE` | `2232f64fc078c62760da8d125f814c86` | 1997-10-10 12:16 | |
+| 4 | 1997-10-10 12:49 | Yoi Ko to Yoi Otona no. PlayStation Taikenban Vol.2 | NTSC | 🇯🇵 | PAPX-90023 | 1997-12-04 | 6785 | | `TOMBA/TOMBA.EXE` | `2232f64fc078c62760da8d125f814c86` | 1997-10-10 12:16 | [survey](../JPDEMO.md#papx-90023-the-same-day-sampler-build), emulator profile `yoiko2` |
 | 5 | 1997-10-20 20:10 | PrePre Vol.9 | NTSC | 🇯🇵 | PCPX-96093 | 1997-12 | 36350 | | `TOMBA/TOMBA.EXE` | `65803d5d0b3b94fc94f3b06af9beebb2` | 1997-10-20 19:16 | |
 | 6 | 1997-11-06 02:53 | Dengeki PlayStation D5 | NTSC | 🇯🇵 | SLPM-80186 | 1998-01-16 | 32213 | | `TOMBA/TOMBA.EXE` | `72fe96e4ae8bc5ac1822ade41f64bd9e` | 1997-10-13 16:51 | |
 | 7 | 1997-12-02 10:25 | Ore! Tomba | NTSC | 🇯🇵 | SLPS-01144 | 1997-12-25 | 22906 | | `SLPS_011.44` | `10578dc57b9a3f3a836414a690179e48` | 1997-12-02 09:26 | [JP](../JP.md) |

@@ -153,6 +153,75 @@ cut top-down towns.**
 - **Text** (`tools/jpdemo_text.py`): no town or Civilization lines; the only related words are the item names
   ストーンブーメラン / アイアンブーメラン.
 
+## PAPX-90023, the same-day sampler build
+
+*Yoi Ko to Yoi Otona no. PlayStation Taikenban Vol.2* (PAPX-90023, `GAME_FILES_URL_YOIKO2`, `bash tools/disc_fetch.sh
+YOIKO2` -> `game_yoiko2/`) carries a Tombi demo in `TOMBA/` (the other root folders are other games; `MAIN.EXE` is
+the disc menu). `TOMBA/TOMBA.EXE` is dated 1997-10-10 12:16 (build-time string `12:49`; SLPM-80165 says `10:58`).
+Survey of 2026-11-13 against SLPM-80165, Hyper 12, Dengeki D5, PrePre 9 and JP retail. Short answer: the same game
+as SLPM-80165, rebuilt for a sampler disc, with a few cuts and one new text variant. No new area, room, object,
+item, graphic or sound.
+
+**Files.** Every data file except five is byte-identical to a SLPM-80165 file; only the layout differs:
+`TOMBA/AREA00` (= SLPM `AREA00` minus the CLUTs), `TOMBA/CLUT01..06.GAM` (SLPM `AREA00/CLUT0n`),
+`TOMBA/SYSTEM/0000.WSS` (= SLPM `AREA15/0000.WSS`, so = Dengeki's; op table 40, Yield 0xA7, unchanged),
+`TOMBA/SYSTEM/MIST.STR` and `TOMBA.STR` (= SLPM `MOVIE/`). The `SYSTEM` pages are renumbered: Yoiko `A00006`..`A00007`
+= SLPM `A00005`..`A00006`, `A00008`..`A00021` = SLPM `A00009`..`A00022`, no `A00005`. Not on the disc: SLPM `A00007` +
+`A00008` (the start-up disclaimer picture and its CLUT, CUT_CONTENT.md), `MOVIE/100JP.STR`, `OP_UTA.STR`, `BOY.STR`.
+Different: `TOMBA.EXE`, `X00.BIN` (`SYSTEM/` and `AREA00/` copies identical), `DSPSUB.BIN`, `DSPSUB3.BIN`,
+`OPTSUB00.BIN`, `AREA00/A006.GAM` (text block 0 only) and `SYSTEM/A00013.000` (= SLPM `A00014`, event hints). Every
+Tombi file on the disc is in the exe's file list (65 names), so there is nothing unused.
+
+**Code** (function-level compare against the SLPM-80165 splat functions, masked like `tools/xmatch.py`). Exe: 1172 of
+1193 functions found (190 byte-identical, the rest relocated), 21 changed. X00: 455 of 459, 4 changed. What changed:
+- **File access**: the SLPM name+LBA table (`" /SYSTEM/A00000."` + LBA + size) is gone; the stub that SLPM calls at
+  0x8001F688 (`return 0`) is now a loop that resolves the 65 `\TOMBA\...;1` names with `CdSearchFile` (libcd
+  `CdSearchFile`/`CD_newmedia`/`CD_cachefile`, 0xAA4 bytes, linked in at 0x8005C1A0). Hyper 12, Dengeki and PrePre 9
+  load the same way; SLPM-80165, a standalone disc, has the fixed table. The file loader also gives up after 9 read
+  retries (new check in the 0x8001EBC8 loader, sets 0x1F8001CE and ends the task).
+- **Quit to the disc menu**: START+SELECT held (`0x100|0x800` in the demo's byte-swapped pad word) on the title or in
+  play sets a new flag 0x800A1D40; the main loop (`main` 0x80014FFC) then ends, closes the tasks, events, pad and
+  sound, and calls `LoadExec("cdrom:\MAIN.EXE;1")` (0x80050EA0, with the usual BIOS-version workaround). Seen in
+  `tools/psxemu` (flag set on the first frame of the press; the emulator has no `LoadExec`). Hyper 12
+  (`MAINMENU.`), Dengeki (`BRIDGE.EXE`) and PrePre 9 (`MAIN.EXE`) have the same kind of exit. The Psy-Q start-up
+  code is linked first (entry 0x80014DEC; SLPM 0x8005E98C).
+- **Debug area select removed**: `displayDebugScreen` (SLPM 0x80019DCC, `AREA SELECT = %02d` / `SECTION SELECT =
+  %02d`) is replaced by a short function and both strings are gone. SLPM-80165, Hyper 12, PrePre 9, Dengeki, JP
+  retail and the beta all keep it, so this is the only 1997 build without it. The `CDROM LOAD TEST` / sound test
+  menu code and its strings are still there (unchanged).
+- **No disclaimer, no OP_UTA**: the front-end mode SLPM 0x80019384 (show the "under development" disclaimer through
+  `OPTSUB00` for 300 frames while pre-seeking `OP_UTA.STR`) is gone: 6 title modes instead of 7, and `OPTSUB00.BIN`
+  lost the 14-word routine and the strip table that drew the picture. The movie selector (SLPM 0x8001D114, 5 movies)
+  keeps 2: MIST and TOMBA. In X00 the event-script step that played `100JP.STR` (SLPM 0x801141D8) is removed (27 ->
+  26 cases); the one that plays `TOMBA.STR` stays. PrePre 9 (`D006.000`) and Dengeki (`A00007`) keep the
+  disclaimer; Hyper 12 has none.
+- Small: one byte test in X00 0x800FB9A8 drops its second value (0x1F); a distance in the exe's object step
+  0x800331E8 loses its -16 bias (`sra`+`addiu -0x10` -> `srl`); X00 0x80120D74 and 0x8012B8C8 reorder a few clears;
+  the sub-screen overlays load 0x2C30 higher, and in `DSPSUB`/`DSPSUB3` one pad mask goes from 0x860 to 0x820
+  (Cross no longer accepted there) and four values of an 8-byte-record table at file offset 0x7818 / 0x5404
+  change (0xDCC/0xE20/-0x385/-0x383 -> 0xAFD/0xBC2/-0x2BE/-0x29E; meaning not traced). Play-time limit: 5:00, as in
+  SLPM.
+
+**Text** (`tools/jpdemo_text.py`, read from the extracted tree; diff against SLPM-80165, Dengeki, Hyper 12 and JP
+retail). Item descriptions (`A00012`) and the place-name block are identical to SLPM-80165. Two changes:
+- **The wise man's end-of-demo speech moved.** SLPM-80165 puts it in dialogue 58 (`わしが　今回、話してやれる事は
+  ここまでじゃ...`). Here dialogue 58 is back to the retail wording (`わしが話してやれる事はここまでじゃ... わしの仲間を
+  さがしてみるといい`) and the speech is appended to dialogue 56, right after the retail `じつはのォ・・・`: **`・・・と
+  言いたいところじゃが／今回のバージョンは　ここまでじゃ`** ("...is what I'd like to say, but this version ends here"),
+  then the SLPM lines (`ざんねんじゃのぅ`, `せいひんばんで　楽しんでくだされ`, `このあとのムービーを　見ていくがよい`,
+  `ぼうけんは　始まったばかりじゃ`). The two lines in bold are in no other build: Hyper 12 has no end speech, Dengeki
+  (three days later) moves it to new dialogues 62/63 (`今回のバージョンでは、ここまでなんじゃ`, after the 100-year
+  bell / key lines), retail has none. Four glyphs were added to the block for it.
+- **Event hint 4** (the Motocross Course slot): SLPM-80165 `わくわくする　コースだ` ("an exciting course"), this build
+  **`およげないと　ダメらしい`** ("it seems you have to be able to swim"), Dengeki and retail `サクのむこうに　のびる／
+  デコボコ道`. The Yoiko line is in no other build (closest: retail AREA10 `およげないのか？`). Hint 6 only re-wraps
+  (`おおきな　みずたまり／の話を　きいた`).
+The appraisal lines (dialogues 59/64), `始まりの村` / `始まりの森` / `ふるいけ` and the other "demo only" lines are the
+SLPM-80165 ones (above).
+
+**Run.** `tools/psxemu` profile `yoiko2` (`syms/yoiko2.csv` from `libsig.py`): boots through the Whoopee Camp logo
+to the title (NEW START / MOVIE START) and, with START, to AREA00 gameplay (opening dialogue), like SLPM-80165.
+
 ## Making the demo a second matching target
 
 **Status:** `config/slpm80165/slpm80165.yaml` and `config/slpm80165/x00.yaml` split the exe (text 0x80014C38..0x80069FC4)
