@@ -707,7 +707,9 @@ the Up gate and the run-time trace.
   that would read them (above) is not in the demo.
 - **Other builds.** The close-up code (signature: `0x1800` stored to `+0x7E` next to the 0x13 draw flags) is also in the
   SLPM-80165 demo (1997-10-10): `SYSTEM/X00.BIN`, layer 4 entry 0x13 = 0x800EB774 with the same `ObjAlloc` type 0x0D /
-  b0c 1 spawn at 0x800EB89C, but that disc has only AREA00 data, so no rock is placed. Not in Hyper 12 (`A00.BIN`),
+  b0c 1 spawn at 0x800EB89C, but that disc has only AREA00 data, so no rock is placed. Same in *Yoi Ko to Yoi Otona
+  no. PlayStation Taikenban Vol.2* (PAPX-90023, exe 1997-10-10, `GAME_FILES_URL_YOIKO2`): its `TOMBA/AREA00/X00.BIN`
+  holds the same handler bytes (at file offset 0x40DC), and the disc has only `TOMBA/AREA00` + `SYSTEM`. Not in Hyper 12 (`A00.BIN`),
   PrePre 8 (no AREA01 data either), JP retail SLPS-01144 (1997-12-02), the beta 980203, USA or PAL: by the December 1997
   JP release the type was reduced to the draw-only `updateStaticDecorModel`. PrePre 9 has no AREA04, so the "5" rock is
   not in it. The demo the user remembers is therefore PrePre 9 (inference from the data: it is the only local disc that
