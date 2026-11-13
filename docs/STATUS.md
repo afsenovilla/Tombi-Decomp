@@ -30,6 +30,18 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
 
 ## In progress / open
 
+0. **Nintendo 3DS port (branch `claude/wizardly-heisenberg-5fllxj`, tested by the user on an Old 3DS, 2026-11-13)**:
+   `--renderer pica` (n3ds/pica_c3d.c + shims/gpu_pica.c), 60 Hz with frameskip, the panel on the bottom screen
+   (no map tab on an Old 3DS, the game's HUD there: `--hud-bottom`), improved Spanish translation stored on the SD.
+   Start screen (n3ds/main_3ds.c, teletext-like, L held at boot): language, movies (skip = straight to the title),
+   50/60 Hz, picture 4:3 / wide (`--widescreen 5:3`, experimental, off by default) / 3D (`--stereo`, experimental).
+   Measured on the console: gameplay 58-60 vblank/s in most rooms (the mansion AREA04 ~52: game logic 14 ms), Baccus
+   wide 59 (tiles of the top-down map copied by 32 x 32 cells, not decoded again; on the 3DS ws_topdown.c draws no
+   map windows beside the game's: 8 px of black at a map edge).  3D: the left eye is the game's picture, the right
+   one the same batches drawn again by the GPU with a per-vertex shift (GTE SZ, else drawing order), in front of the
+   screen too; ~52 in the first village with the slider up before the last present change (presents no longer wait
+   for the GPU: not measured yet).  Open: the 3D's speed on the console; the PC syntax check for 3DS code uses
+   devkitPro headers in a scratch folder (not in the repo).
 0. **Widescreen room ends (2026-11-12)**: `runtime/ws_edge.c` carries a room's model on past its end (the free
    outward edges of the ground strips, risers and tree cards extruded along X with the room's own tiling; docs/PORT.md
    "Widescreen", "Room ends").  On: AREA00 section 0, left end (the sky strip left of the first hill at 16:9 / 21:9 /
