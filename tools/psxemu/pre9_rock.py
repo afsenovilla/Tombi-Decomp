@@ -2,6 +2,8 @@
 
   python3 tools/psxemu/pre9_rock.py frames OUT_DIR      PNG per game frame (320x224) of the scene, + scene.txt (frame ranges)
   python3 tools/psxemu/pre9_rock.py trace OUT.txt       run-time trace of the rock handler (call tree, stores, differential)
+  python3 tools/psxemu/pre9_rock.py video OUT_DIR       OUT_DIR/pre9_graffiti_rock.mp4 (H.264, 2x, 60 fps, English title card and
+                                                        captions) + .gif (1x, 30 fps, the examine only); needs ffmpeg and Pillow
 
 Needs the demo extracted by `bash tools/disc_fetch.sh PREPRE9` (game_prepre9/).  What the script does, all deterministic:
   1. boot TOMBA.EXE (build profile "prepre9"), title, START, the opening dialogue in the Dwarf Village (AREA02 s1) clicked through;
@@ -110,7 +112,7 @@ class Run:
             self.frames(1, LEFT)
         self.frames(8)
 
-    def examine(self, hold=120):
+    def examine(self, hold=210, tail=120):
         self.mark("hold UP")
         self.frames(6, UP)
         self.mark("UP + CIRCLE: examine")
@@ -121,7 +123,7 @@ class Run:
         self.frames(hold)
         self.mark("CIRCLE: close-up ends")
         self.frames(2, CIRCLE)
-        self.frames(70)
+        self.frames(tail)
         self.mark("end")
 
 
@@ -137,6 +139,94 @@ def cmd_frames(out):
         for fr, what in r.marks:
             f.write("%d %s\n" % (fr, what))
     print("frames in", out, r.marks)
+
+
+# ------------------------------------------------------------------------------------------------------------------- video
+TITLE = "PrePre Vol. 9 (1997 demo): examining the graffiti rock"
+CARD = ["PlayStation Club PrePre Vol. 9 (PCPX-96093), Tombi demo",
+        "AREA01 section 1, east end, next to the Dwarf Village: the \"2\" rock",
+        "",
+        "Rendered from the demo's own code by tools/psxemu (Python HLE).",
+        "Tombi is sent to the rock through the game's own area loader",
+        "(one RAM write); everything after that is pad input: Up + Circle.",
+        "",
+        "No sound: audio is not emulated."]
+
+
+def _font(size):
+    from PIL import ImageFont
+    for p in ("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", "DejaVuSans.ttf"):
+        try:
+            return ImageFont.truetype(p, size)
+        except OSError:
+            pass
+    return ImageFont.load_default()
+
+
+def cmd_video(out):
+    import shutil
+    import subprocess
+    import tempfile
+    from PIL import Image, ImageDraw, ImageStat
+    os.makedirs(out, exist_ok=True)
+    tmp = tempfile.mkdtemp(prefix="pre9rock")
+    raw, comp = os.path.join(tmp, "raw"), os.path.join(tmp, "comp")
+    os.makedirs(comp)
+    r = Run()
+    r.to_village()
+    r.out = raw
+    os.makedirs(raw)
+    r.mark("start")
+    r.to_rock()
+    r.examine()
+    marks = dict((w, f) for f, w in r.marks)
+    files = sorted(os.listdir(raw))
+    num = [int(f[1:6]) for f in files]
+    first = next(n for n, f in zip(num, files) if n > marks["start"] + 60 and ImageStat.Stat(Image.open(os.path.join(raw, f))).mean[0] > 0
+                 and sum(ImageStat.Stat(Image.open(os.path.join(raw, f))).mean) > 5)      # the fade-in of AREA01 s1 after NOW LOADING
+    caps = [(marks["start"], "AREA01 section 1, east end: the \"2\" plaque on the rock"),
+            (marks["hold UP"], "Hold Up in front of the plaque..."),
+            (marks["UP + CIRCLE: examine"], "...press Circle: the big \"?\" pops over Tombi"),
+            (marks["UP + CIRCLE: examine"] + 14, "The plaque flies toward the camera, twice the size, and waits for a button"),
+            (marks["CIRCLE: close-up ends"], "Circle: the plaque flies back (no text, no event, no flag)")]
+    f_cap, f_title, f_card = _font(15), _font(20), _font(16)
+    k = 0
+    card = Image.new("RGB", (640, 480), (12, 12, 20))
+    d = ImageDraw.Draw(card)
+    tw = d.textlength(TITLE, font=f_title)
+    while tw > 610:                              # keep the title on one line
+        f_title = _font(f_title.size - 1)
+        tw = d.textlength(TITLE, font=f_title)
+    d.text((320, 130), TITLE, font=f_title, fill=(255, 235, 140), anchor="mm")
+    for i, line in enumerate(CARD):
+        d.text((320, 195 + 24 * i), line, font=f_card, fill=(225, 225, 225), anchor="mm")
+    for _ in range(240):                         # 4 s
+        card.save(os.path.join(comp, "c%05d.png" % k))
+        k += 1
+    sel = [(n, f) for n, f in zip(num, files) if n >= first]
+    for n, f in sel:
+        im = Image.open(os.path.join(raw, f)).convert("RGB").resize((640, 448), Image.NEAREST)
+        fr = Image.new("RGB", (640, 480), (0, 0, 0))
+        fr.paste(im, (0, 0))
+        cap = [c for fn, c in caps if fn <= n][-1]
+        ImageDraw.Draw(fr).text((320, 464), cap, font=f_cap, fill=(255, 255, 255), anchor="mm")
+        fr.save(os.path.join(comp, "c%05d.png" % k))
+        k += 1
+    mp4 = os.path.join(out, "pre9_graffiti_rock.mp4")
+    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-framerate", "60", "-i", os.path.join(comp, "c%05d.png"), "-c:v", "libx264",
+                    "-pix_fmt", "yuv420p", "-crf", "16", "-preset", "slow", "-movflags", "+faststart", mp4], check=True)
+    # GIF: 1x, 30 fps, from "hold UP" to the end, with the captions (the 640x480 composition halved)
+    g0 = 240 + sum(1 for n, _ in sel if n < marks["hold UP"] - 20)
+    gif = os.path.join(out, "pre9_graffiti_rock.gif")
+    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-framerate", "60", "-start_number", str(g0), "-i", os.path.join(comp, "c%05d.png"),
+                    "-vf", "fps=30,scale=320:240:flags=area,split[a][b];[a]palettegen=max_colors=128[p];[b][p]paletteuse=dither=none",
+                    gif], check=True)
+    with open(os.path.join(out, "scene.txt"), "w") as f:
+        f.write("game frames %d..%d (60 fps), marks:\n" % (first, num[-1]))
+        for fr_, w in r.marks:
+            f.write("  %d %s\n" % (fr_, w))
+    shutil.rmtree(tmp)
+    print("wrote", mp4, gif)
 
 
 # ------------------------------------------------------------------------------------------------------------------- trace
@@ -275,6 +365,8 @@ def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
     if len(argv) == 2 and argv[0] == "frames":
         return cmd_frames(argv[1])
+    if len(argv) == 2 and argv[0] == "video":
+        return cmd_video(argv[1])
     if len(argv) == 2 and argv[0] == "trace":
         return cmd_trace(argv[1])
     print(__doc__)
