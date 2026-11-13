@@ -25,11 +25,12 @@ The discs come from `bash tools/disc_fetch.sh NAME`; `Machine(build=..., exe=PAT
 Only `pal` uses the hand-named symbol tables (`notes/functions_main0.csv`, `notes/names_main0.csv`). For every other
 build, `libsig.py` finds the library entry points (and the few game functions the HLE needs: `exitTask`,
 `StartTask`, `updateMainObjects`, the FMV player task...) by masked byte signature of the matched PAL functions and
-writes them as an address table, `syms/<build>.csv` (names and addresses only, nothing of the game). The FMV player
-task is found by its `StartTask` call next to `MOVIE_PLAY_STATE` (0x1F8001CC) = 1; PrePre 8, older, keeps that state at
-0x800CCCDC, so its profile names the task (0x800228B8) by hand:
+writes them as an address table, `syms/<build>.csv` (names and addresses only, nothing of the game):
 
     python3 tools/psxemu/libsig.py prepre9 [--exe PATH] [--all]
+
+The FMV player task is found by its `StartTask` call next to `MOVIE_PLAY_STATE` (0x1F8001CC) = 1; PrePre 8, older,
+keeps that state at 0x800CCCDC, so its profile names the task (0x800228B8) by hand.
 
 The demos load files with `CdReadyCallback` + `CdlReadN` instead of `CdRead`; profiles with `cd_irq` deliver the
 sectors from the VBlank (8 per VBlank) through the game's own callback. Old libetc `PadRead` (PrePre 9) reads the BIOS
