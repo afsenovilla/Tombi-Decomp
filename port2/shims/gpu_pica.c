@@ -602,25 +602,32 @@ static int tex_slot(const GpuTex *t, int u0, int v0, int u1, int v1, int *obx, i
     if (!hinit) { memset(hhead, -1, sizeof hhead); hinit = 1; }
     unsigned hk = ((unsigned)(t->tx >> 6) * 7 + (unsigned)(t->ty >> 8) * 3 + (unsigned)cx * 13 + (unsigned)cy * 31 + (unsigned)(bx >> 5) * 5
                    + (unsigned)(by >> 5) * 17 + (unsigned)z + (unsigned)tw * 11 + (unsigned)t->depth) & 255;
-    int i;
-    for (i = hhead[hk]; i >= 0; i = slots[i].next) {
-        Slot *s = &slots[i];
+    /* (a block can have more than one slot: a top-down room's wide frame uploads three windows of its map into the
+       same VRAM in a frame, one after the other, so each block alternates between three pictures in a frame; each
+       picture keeps its slot, found again by its words' hash, instead of one slot decoded three times a frame) */
+    int cand[4], nc = 0;
+    for (int k = hhead[hk]; k >= 0 && nc < 4; k = slots[k].next) {
+        Slot *s = &slots[k];
         if (s->tx == t->tx && s->ty == t->ty && s->depth == t->depth && s->tw == tw && s->cx == cx && s->cy == cy
-            && s->bx == bx && s->by == by && pica_slot_size(i) == z) break;
+            && s->bx == bx && s->by == by && pica_slot_size(k) == z) cand[nc++] = k;
     }
+    int i = nc ? cand[0] : -1;
     /* found valid, and nothing was written to vram[] or newly drawn since: nothing to read back or to compare
        (primitives that alternate between two textures miss the memo every time) */
     int x, y, w, h; tex_rect(t, tw, bx, by, z, &x, &y, &w, &h);
     const int has_clut = t->depth < 2 && t->cy != PORT_CLUT_Y;
     unsigned gsum = gens_of(x, y, w, h) + (has_clut ? gens_of(t->cx, t->cy, t->depth ? 256 : 16, 1) : 0);
-    if (i >= 0 && slots[i].checked == ver_clock + 1 && slots[i].synced == gsum + 1) { slots[i].used = ++use_clock; goto found; }
+    for (int c = 0; c < nc; c++)
+        if (slots[cand[c]].checked == ver_clock + 1 && slots[cand[c]].synced == gsum + 1) { i = cand[c]; slots[i].used = ++use_clock; goto found; }
     pica_cnt[6]++;
     sync_pages(x, y, w, h);
     if (has_clut) sync_pages(t->cx, t->cy, t->depth ? 256 : 16, 1);
     gsum = gens_of(x, y, w, h) + (has_clut ? gens_of(t->cx, t->cy, t->depth ? 256 : 16, 1) : 0);   /* (a noted area made cells moves them) */
-    unsigned v;
+    unsigned v = 0;
     unsigned long long was = 0;   /* the slot's last use, by this block or the one it replaces */
-    if (i >= 0) {
+    int fresh = 0;                /* 1: decoded into a slot of its own, the others kept */
+    if (nc) {
+        for (int c = 1; c < nc; c++) if (slots[cand[c]].used > slots[i].used) i = cand[c];   /* (the latest used) */
         Slot *s = &slots[i];
         if (s->checked == ver_clock + 1) { s->used = ++use_clock; goto found; }   /* (nothing in vram[] changed since) */
         v = tex_ver(t, tw, bx, by, z);
@@ -641,17 +648,24 @@ static int tex_slot(const GpuTex *t, int u0, int v0, int u1, int v1, int *obx, i
                   done++;
               }
           } }
-        {   /* its words written again but the same (a top-down room uploads its map window every frame, moved or not:
-               four 256 x 256 blocks decoded and uploaded each time, 25 ms a drawn frame on an Old 3DS): kept */
+        {   /* its words written again but the same as a slot of it has (a top-down room uploads its map window every
+               frame, moved or not: four 256 x 256 blocks decoded and uploaded each time, 25 ms a drawn frame on an
+               Old 3DS): that slot is kept */
             int x3, y3, w3, h3; tex_rect(t, tw, bx, by, z, &x3, &y3, &w3, &h3);
-            if (s->srch == src_hash(x3, y3, w3, h3) && clut_hash(t) == s->chash) {
-                s->ver = v; s->tver = blocks_ver(x3, y3, w3, h3); s->checked = ver_clock + 1; s->used = ++use_clock; st_same++;
-                goto found;
+            const unsigned hs = src_hash(x3, y3, w3, h3), hc = clut_hash(t);
+            for (int c = 0; c < nc; c++) {
+                Slot *o = &slots[cand[c]];
+                if (o->srch == hs && o->chash == hc) {
+                    i = cand[c]; o->ver = v; o->tver = blocks_ver(x3, y3, w3, h3); o->checked = ver_clock + 1; o->used = ++use_clock; st_same++;
+                    goto found;
+                }
             }
             pica_dec_why[blocks_ver(x3, y3, w3, h3) <= s->tver ? 1 : 0]++;
         }
-        was = s->used;   /* (stale: decoded again in its slot) */
-    } else {
+        if (s->used > frame_clock && nc < 3) fresh = 1;   /* (used in this very frame with another picture: alternating) */
+        else was = s->used;   /* (stale: decoded again in its slot) */
+    }
+    if (!nc || fresh) {
         if (z == 256) i = slot_pick(0, PICA_N256, 0, 0);
         else if (z == 128) i = slot_pick(PICA_N256, PICA_N128, PICA_X128, pica_n128x);
         else i = slot_pick(PICA_N256 + PICA_N128, 128, PICA_N256 + PICA_N128 + 128, PICA_N64 - 128);
