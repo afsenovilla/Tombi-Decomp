@@ -20,6 +20,7 @@ once).
 | `prepre8` | `game_prepre8/fs/TOMBA/TOMBA.EXE` | gameplay (early title, AREA00, 5:00 timer) |
 | `dengeki` | `game_dengeki_d5/fs/TOMBA/TOMBA.EXE` | gameplay (AREA00) |
 | `hyper` | `game_hyper12/fs/TOMBA/TOMBA.EXE` | gameplay (AREA00, 5:00 timer) |
+| `yoiko2` | `game_yoiko2/fs/TOMBA/TOMBA.EXE` (PAPX-90023) | gameplay (title, START, AREA00 opening dialogue) |
 
 The discs come from `bash tools/disc_fetch.sh NAME`; `Machine(build=..., exe=PATH, disc=PATH)` overrides the paths.
 Only `pal` uses the hand-named symbol tables (`notes/functions_main0.csv`, `notes/names_main0.csv`). For every other

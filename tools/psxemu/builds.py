@@ -60,6 +60,9 @@ PROFILES = {
                                                                           # (0x8001FEE8), not the scratchpad byte the libsig scan looks for
     "dengeki": Profile(name="dengeki", title="Dengeki PlayStation D5 (SLPM-80186) Tomba demo", exe="game_dengeki_d5/fs/TOMBA/TOMBA.EXE",
                        disc="game_dengeki_d5/disc.bin", syms="dengeki", cd_irq=True, movie_state=0x1F8001CC),
+    "yoiko2": Profile(name="yoiko2", title="Yoi Ko to Yoi Otona no. PlayStation Taikenban Vol.2 (PAPX-90023) Tomba demo",
+                      exe="game_yoiko2/fs/TOMBA/TOMBA.EXE", disc="game_yoiko2/disc.bin", syms="yoiko2", cd_irq=True,
+                      movie_state=0x1F8001CC),
     "hyper": Profile(name="hyper", title="Hyper PlayStation Re-mix No.12 (SLPM-80167) Tomba demo", exe="game_hyper12/fs/TOMBA/TOMBA.EXE",
                      disc="game_hyper12/disc.bin", syms="hyper", cd_irq=True, movie_state=0x1F8001CC),
 }
