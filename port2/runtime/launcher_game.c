@@ -186,29 +186,37 @@ static float seg_d2(float px, float py, float ax, float ay, float bx, float by) 
     const float dx = wx - t * vx, dy = wy - t * vy;
     return dx * dx + dy * dy;
 }
-/* the console's START key: a black pill (the Thor's black keys' look, as abutton), the word in white in it, w x 16
-   from (x0, y0) */
+/* the console's START key: a square-cornered black key with a thin grey rim, START in thin light grey strokes drawn
+   here (not the game font: the A key's look), w x 16 from (x0, y0); each pixel from 8 x 8 samples */
 static int exit_style;
+static float seg_d2(float px, float py, float ax, float ay, float bx, float by);
 static void startkey(Cv *c, int x0, int y0, int w) {
-    const float r = 8.0f;
+    /* the letters on a 4 x 7 grid (y down), as polylines; NaN-free: a pair (-1, -1) breaks a line */
+    static const float S_[] = { 4, 1, 3, 0, 1, 0, 0, 1, 0, 2.4f, 1, 3.4f, 3, 3.6f, 4, 4.6f, 4, 6, 3, 7, 1, 7, 0, 6 };
+    static const float T_[] = { 0, 0, 4, 0, -1, -1, 2, 0, 2, 7 };
+    static const float A_[] = { 0, 7, 2, 0, 4, 7, -1, -1, 0.8f, 4.6f, 3.2f, 4.6f };
+    static const float R_[] = { 0, 7, 0, 0, 3, 0, 4, 1, 4, 2.6f, 3, 3.6f, 0, 3.6f, -1, -1, 2, 3.6f, 4, 7 };
+    static const struct { const float *p; int n; } L[5] = { {S_, 12}, {T_, 5}, {A_, 6}, {R_, 10}, {T_, 5} };
+    const float sc = 1.15f, adv = 6.6f, hw = 0.62f, tw = 4 * adv + 4 * sc, tx = x0 + (w - tw) / 2, ty = y0 + (16 - 7 * sc) / 2;
     for (int y = 0; y < 16; y++) for (int x = 0; x < w; x++) {
-        int in = 0; float shade = 0;
-        for (int sy = 0; sy < 4; sy++) for (int sx = 0; sx < 4; sx++) {
-            const float px = x + (sx + 0.5f) / 4, py = y + (sy + 0.5f) / 4;
-            const float cx = px < r ? r : px > w - r ? w - r : px, dx = px - cx, dy = py - r;
-            if (dx * dx + dy * dy <= r * r) { in++; shade += (py - r) / r; }
+        int ink = 0;
+        for (int sy = 0; sy < 8; sy++) for (int sx = 0; sx < 8; sx++) {
+            const float px = x0 + x + (sx + 0.5f) / 8, py = y0 + y + (sy + 0.5f) / 8;
+            int hit = 0;
+            for (int l = 0; l < 5 && !hit; l++) {
+                const float ox = tx + l * adv;
+                for (int k = 0; k + 1 < L[l].n && !hit; k++) {
+                    const float *a = L[l].p + 2 * k, *b = a + 2;
+                    if (a[0] < 0 || b[0] < 0) continue;
+                    hit = seg_d2(px, py, ox + a[0] * sc, ty + a[1] * sc, ox + b[0] * sc, ty + b[1] * sc) <= hw * hw;
+                }
+            }
+            ink += hit;
         }
-        if (in) blend(c, x0 + x, y0 + y, (u32)(int)(0x2A - 8 * shade / in) * 0x010101, in * 255 / 16);
-    }
-    /* the word: the game font's capitals, white, squeezed to 6 columns each (every other one of its 8 dropped where
-       the letter has no ink there) */
-    const char *wd = "START"; const int tw = 5 * 7, tx = x0 + (w - tw) / 2;
-    for (int i = 0; wd[i]; i++) {
-        int u, v; glyph_cell((u8)wd[i], &u, &v);
-        for (int j = 3; j < 14; j++) for (int k = 0; k < 7; k++) {
-            const int px = u + (k < 6 ? k : 7), q = (font[(v + j) * 128 + px / 2] >> ((px & 1) * 4)) & 15;
-            if (q == 1) put(c, tx + i * 7 + k, y0 + j - 1, 0xE8E8E8); else if (q) blend(c, tx + i * 7 + k, y0 + j - 1, 0xE8E8E8, 90);
-        }
+        const int rim = x == 0 || y == 0 || x == w - 1 || y == 15;
+        const int body = (int)(0x2C - 0x12 * y / 15);   /* (a touch lighter at the top, as the A key) */
+        const int v = rim ? 0x6E : (body * (64 - ink) + 0xDA * ink) / 64;
+        put(c, x0 + x, y0 + y, (u32)v * 0x010101);
     }
 }
 static void abutton(Cv *c, int cx, int cy, int n) {
@@ -292,12 +300,12 @@ void port_launcher_game_draw(unsigned char *top, unsigned char *bot, const LuiSt
         wrap(&b, 16, y + 20, 288, disc, 3);
     }
     bar(&b, START_X0, START_Y0, START_X1, START_Y1, s->start_down);
-    text(&b, 160 - text_w("PLAY") / 2, START_Y0 + 7, "PLAY");
+    text(&b, 160 - text_w("START GAME") / 2, START_Y0 + 7, "START GAME");
     if (exit_style == 0) {   /* the console's START key, then what it does */
-        const int w = 52 + 8 + text_w("EXIT"), x = 160 - w / 2;
+        const int w = 42 + 8 + text_w("EXIT"), x = 160 - w / 2;
         box(&b, x - 14, 208, x + w + 13, 235);
-        startkey(&b, x, 214, 52);
-        text(&b, x + 60, 214, "EXIT");
+        startkey(&b, x, 214, 42);
+        text(&b, x + 50, 214, "EXIT");
     } else {
         box(&b, 160 - text_w("START BUTTON: EXIT") / 2 - 14, 208, 160 + text_w("START BUTTON: EXIT") / 2 + 13, 235);
         text(&b, 160 - text_w("START BUTTON: EXIT") / 2, 214, "START BUTTON: EXIT");
