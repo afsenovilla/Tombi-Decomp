@@ -375,6 +375,12 @@ src/x003/translucentSpriteDrift.c | > SCREEN_ORIGIN_X[0] + 0x168) o->step = 1; |
 # AREA01 KomaPigs dropping in from the spawner (needs the story flag GCD 0xb5): placed 16 columns past either 4:3 edge
 src/x001/komaPigDropIn.c | o->h->p.whole = (*(unsigned short*)((char*)&SPAD.i174 + 2)) - 0x10; | o->h->p.whole = (*(unsigned short*)((char*)&SPAD.i174 + 2)) - 0x10 - PORT_WSO;
 src/x001/komaPigDropIn.c | o->h->p.whole = (*(unsigned short*)((char*)&SPAD.i174 + 2)) + 0x150; | o->h->p.whole = (*(unsigned short*)((char*)&SPAD.i174 + 2)) + 0x150 + PORT_WSO;
+# AREA02 s5 (Small Strange Room): Baron waits at x 340 (4 columns past 4:3, in the 16:9 strip) for his walk-in in
+# pigGateDiscoveryScene state 22/23; parked pad further right, the walk spread over the retail frame count
+# (runtime/ws_entrance.c; identity when off)
+src/x002/spawnPigGateSceneNpcs.c | SCRIPT_OBJECTS[i] = p; | SCRIPT_OBJECTS[i] = p; if (i == 1) { extern int port_ws_park_dx(int); p->a.p.whole += port_ws_park_dx(p->a.p.whole); }
+src/x002/pigGateDiscoveryScene.c | o->w08 = b->h->p.whole - PLAYER.h->p.whole; | { extern int port_ws_walkin_frames(int); o->w08 = port_ws_walkin_frames(b->h->p.whole - PLAYER.h->p.whole); }
+src/x002/pigGateDiscoveryScene.c | b->h->p.whole--; | { extern int port_ws_walkin_step(void); int m_ = port_ws_walkin_step(); b->h->p.whole -= m_; if (m_ > 1) AnimAdvance(b); }
 src/x004/cullObjectPerspective.c | + 0x40 + h) > h * 2 + 0x1c0 | + 0x40 + h + (port_ws_cull * k >> 7)) > h * 2 + 0x1c0 + 2 * (port_ws_cull * k >> 7)
 src/x004/cullObjectPerspectiveWide.c | + 0x40 + h) > h * 2 + 0x1c0 | + 0x40 + h + (port_ws_cull * k >> 7)) > h * 2 + 0x1c0 + 2 * (port_ws_cull * k >> 7)
 # --widescreen: the gameplay HUD anchored to the wide frame's edges (lives, vitality, weapon left; AP right)
