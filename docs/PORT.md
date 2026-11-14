@@ -2821,7 +2821,8 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   never two random draws in one argument list (gcc i386 evaluates arguments right to left, clang / wasm2c left to
   right: that made the first wasm2c strips differ).  Checked at 16:9 / 21:9 / 32:9: i386 = wasm2c = the standalone
   build (`cc -DWS_BACKDROP_MAIN`, see the file header), software = OpenGL (xvfb), the 4:3 centre unchanged, 4:3 runs
-  identical.  `--ws-backdrop mirror` keeps the first preview (the picture mirrored at its edge over 56 columns with
+  identical (after the corner / light / roots pass: i386 = wasm2c whole frames at 16:9 and 21:9, 4:3 on = off, the
+  4:3 centre unchanged; 32:9 only in the standalone build, OpenGL not re-run).  `--ws-backdrop mirror` keeps the first preview (the picture mirrored at its edge over 56 columns with
   the edge ivy laid over again), rejected by the user ("mirroring, not redrawing"); the first redraw continued the
   back wall flat into the strips, replaced by the side walls after "the room doesn't extend sideways, it closes like
   a box, judging by the angle of the corner".
