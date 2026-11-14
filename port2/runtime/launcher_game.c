@@ -367,6 +367,54 @@ void port_launcher_game_preview(const char *dir) {
         snprintf(p, sizeof p, "%s/launcher_%d_top.png", dir, r); port_gpu_write_png(p, top, 400, 240);
         snprintf(p, sizeof p, "%s/launcher_%d_bottom.png", dir, r); port_gpu_write_png(p, bot, 320, 240);
     }
+    {   /* PORT_LAUNCHER_VIDEO=DIR: a scripted walk through the screen (the 3DS's keys, as n3ds/main_3ds.c handles
+           them), each state's screens as DIR/v_<n>_{top,bottom}.png, DIR/v.txt their start times, DIR/v.wav the music
+           with the cursor sound at every change (the PC's video: tools assemble it) */
+        const char *vd = getenv("PORT_LAUNCHER_VIDEO");
+        extern int port_sound_pull(short *dst, int frames);
+        if (vd && port_launcher_music_start()) {
+            static const char *name[10] = { "English", "Fran\xE7" "ais", "Deutsch", "Italiano", "Nederlands", "Espa\xF1ol (traducci\xF3n mejorada)",
+                                            "Espa\xF1ol (original)", "Portugu\xEAs", "Svenska", "Dansk" };
+            /* (seconds, key: d down, u up, r right, l left, s Start touched, . the end) */
+            static const struct { float t; char k; } ev[] = {
+                {2.0f, 'r'}, {2.8f, 'r'}, {3.6f, 'l'}, {4.4f, 'l'}, {5.4f, 'd'}, {6.4f, 'r'}, {7.2f, 'r'}, {8.2f, 'd'}, {9.0f, 'r'},
+                {9.8f, 'r'}, {10.8f, 'd'}, {11.6f, 'r'}, {12.4f, 'r'}, {13.2f, 'r'}, {14.2f, 'u'}, {14.8f, 'u'}, {15.4f, 'u'},
+                {16.6f, 's'}, {17.4f, '.'} };
+            int row = 0, lang = 5, movies = 1, hz = 60, wide = 0, n = 0; float t = 0; unsigned total = 0;
+            char p2[512]; snprintf(p2, sizeof p2, "%s/v.wav", vd);
+            FILE *wf = fopen(p2, "wb"); snprintf(p2, sizeof p2, "%s/v.txt", vd); FILE *tf = fopen(p2, "w");
+            u8 h[44] = { 0 }; if (wf) fwrite(h, 1, 44, wf);
+            static short buf[2 * 4410];
+            for (unsigned e = 0; e <= sizeof ev / sizeof ev[0] && wf && tf; e++) {
+                LuiState st = { row, name[lang], lang == 5, 1, movies, hz, wide, "Tombi! (Europe).chd", 0, e > 0 && ev[e - 1].k == 's', 0 };
+                st.pressed = st.start_down;
+                port_launcher_game_draw(top, bot, &st);
+                snprintf(p, sizeof p, "%s/v_%03d_top.png", vd, n); port_gpu_write_png(p, top, 400, 240);
+                snprintf(p, sizeof p, "%s/v_%03d_bottom.png", vd, n); port_gpu_write_png(p, bot, 320, 240);
+                fprintf(tf, "%d %.3f\n", n, t); n++;
+                if (e == sizeof ev / sizeof ev[0]) break;
+                const float until = ev[e].t;
+                while (t + 0.0001f < until) { port_sound_pull(buf, 441); fwrite(buf, 4, 441, wf); total += 441 * 4; t += 0.01f; }
+                const char k = ev[e].k; const int was = row * 4096 + lang * 64 + movies * 16 + (hz == 50) * 8 + wide;
+                if (k == 'd' && row < 3) row++;
+                if (k == 'u' && row > 0) row--;
+                if (k == 'r' || k == 'l') {
+                    const int d = k == 'r' ? 1 : -1;
+                    if (row == 0) lang = (lang + d + 10) % 10; else if (row == 1) movies = !movies; else if (row == 2) hz = hz == 60 ? 50 : 60; else wide = (wide + d + 3) % 3;
+                }
+                if (k == '.') break;
+                if (row * 4096 + lang * 64 + movies * 16 + (hz == 50) * 8 + wide != was) port_launcher_sfx_move();
+            }
+            for (int i = 0; i < 100 && wf; i++) { port_sound_pull(buf, 441); fwrite(buf, 4, 441, wf); total += 441 * 4; }
+            if (wf) {
+                const unsigned v[] = { 36 + total, 16, 1 | 2u << 16, 44100, 44100 * 4, 4 | 16u << 16 };
+                fseek(wf, 0, SEEK_SET); fwrite("RIFF", 1, 4, wf); fwrite(&v[0], 4, 1, wf); fwrite("WAVEfmt ", 1, 8, wf);
+                fwrite(&v[1], 4, 5, wf); fwrite("data", 1, 4, wf); fwrite(&total, 4, 1, wf); fclose(wf);
+            }
+            if (tf) fclose(tf);
+            port_launcher_music_stop();
+        }
+    }
     port_launcher_game_end();
     {   /* PORT_LAUNCHER_MUSIC_WAV=FILE: 20 s of the music, as the device would pull it */
         const char *w = getenv("PORT_LAUNCHER_MUSIC_WAV");
