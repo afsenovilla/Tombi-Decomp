@@ -132,13 +132,11 @@ static int wrap(Cv *c, int x, int y, int w, const char *s, int maxl) {
     return n;
 }
 
-/* the touch buttons of the bottom screen: Start, then up, down, left, right in a row under it */
-static const int START_X0 = 40, START_Y0 = 172, START_X1 = 279, START_Y1 = 201, ARROW_Y0 = 207, ARROW_Y1 = 235;
+/* the touch button of the bottom screen: Start (the only one; i > 0: none) */
+static const int START_X0 = 40, START_Y0 = 172, START_X1 = 279, START_Y1 = 201;
 int port_launcher_game_button(int i, int *x0, int *y0, int *x1, int *y1) {
-    if (i < 0 || i > 4) return 0;
-    if (!i) { *x0 = START_X0; *y0 = START_Y0; *x1 = START_X1; *y1 = START_Y1; return 1; }
-    /* (in two groups as the hints were: up / down + OPTION, left / right + CHANGE) */
-    *x0 = (i <= 2 ? 10 : 168) + ((i - 1) & 1) * 34; *x1 = *x0 + 31; *y0 = ARROW_Y0 + 3; *y1 = ARROW_Y1 - 3;
+    if (i) return 0;
+    *x0 = START_X0; *y0 = START_Y0; *x1 = START_X1; *y1 = START_Y1;
     return 1;
 }
 /* a dark arrow (0 up, 1 down, 2 left, 3 right) centred on (cx, cy), its edge pixels blended by coverage */
@@ -166,10 +164,19 @@ void port_launcher_game_draw(unsigned char *top, unsigned char *bot, const LuiSt
     box(&t, 200 - text_w("TOMBI!") / 2 - 14, 10, 200 + text_w("TOMBI!") / 2 + 13, 37);
     text(&t, 200 - text_w("TOMBI!") / 2, 16, "TOMBI!");
     for (int i = 0; i < 4; i++) {
-        const int y = 64 + i * 40;
+        const int y = 58 + i * 38;
         if (i == s->row) bar(&t, 16, y - 4, 383, y + 17, 0);
         text(&t, 28, y, lab[i]);
         text(&t, 132, y, val[i]);
+    }
+    {   /* what the keys do: the arrows drawn, the words in the game's letters */
+        static const char *w[3] = { "OPTION", "CHANGE", "START" };
+        const int gap = 24, wa = 2 * 14 + 4, wt = wa + text_w(w[0]) + gap + wa + text_w(w[1]) + gap + 12 + text_w(w[2]);
+        int x = 200 - wt / 2;
+        box(&t, x - 14, 204, x + wt + 13, 231);
+        arrow(&t, x + 6, 217, 0); arrow(&t, x + 20, 217, 1); x += wa; text(&t, x, 210, w[0]); x += text_w(w[0]) + gap;
+        arrow(&t, x + 6, 217, 2); arrow(&t, x + 20, 217, 3); x += wa; text(&t, x, 210, w[1]); x += text_w(w[1]) + gap;
+        text(&t, x, 210, "A"); x += 12; text(&t, x, 210, w[2]);
     }
     /* ---- the bottom screen, on the yellow squares: what the option does, the disc and the console, Start */
     squares(&b, -6, 1);
@@ -200,16 +207,8 @@ void port_launcher_game_draw(unsigned char *top, unsigned char *bot, const LuiSt
     }
     bar(&b, START_X0, START_Y0, START_X1, START_Y1, s->start_down);
     text(&b, 160 - text_w("START") / 2, START_Y0 + 7, "START");
-    for (int g = 0; g < 2; g++) {   /* a message box holding two arrow keys and what they do */
-        const int gx = g ? 164 : 6;
-        box(&b, gx, ARROW_Y0, gx + 149, ARROW_Y1);
-        text(&b, gx + 72 + (77 - text_w(g ? "CHANGE" : "OPTION")) / 2, ARROW_Y0 + 6, g ? "CHANGE" : "OPTION");
-    }
-    for (int i = 1; i <= 4; i++) {   /* the keys: a message box, the game's green bar while touched */
-        int x0, y0, x1, y1; port_launcher_game_button(i, &x0, &y0, &x1, &y1);
-        if (s->pressed == i + 1) bar(&b, x0, y0, x1, y1, 1); else box(&b, x0, y0, x1, y1);
-        arrow(&b, (x0 + x1 + 1) / 2, (y0 + y1 + 1) / 2, i - 1);
-    }
+    box(&b, 160 - text_w("START: EXIT") / 2 - 14, 208, 160 + text_w("START: EXIT") / 2 + 13, 235);
+    text(&b, 160 - text_w("START: EXIT") / 2, 214, "START: EXIT");
 }
 
 #ifndef __3DS__
@@ -219,7 +218,7 @@ void port_launcher_game_preview(const char *dir) {
     static unsigned char top[400 * 240 * 3], bot[320 * 240 * 3]; char p[512];
     if (!port_launcher_game_begin()) { port_printf("[launcher] the options screen's pieces are not readable\n"); return; }
     for (int r = 0; r < 5; r++) {
-        LuiState st = { r & 3, "Espa\xF1ol (traducci\xF3n mejorada)", 1, r != 4, 1, 60, r == 3 ? 2 : 0, r == 1 ? "Tombi! (Europe) (En,Fr,De,Es,It,Nl,Sv,Da).chd" : "Tombi.chd", 0, r == 4, r == 4 ? 1 : r == 2 ? 4 : 0 };
+        LuiState st = { r & 3, "Espa\xF1ol (traducci\xF3n mejorada)", 1, r != 4, 1, 60, r == 3 ? 2 : 0, r == 1 ? "Tombi! (Europe) (En,Fr,De,Es,It,Nl,Sv,Da).chd" : "Tombi.chd", 0, r == 4, r == 4 ? 1 : 0 };
         port_launcher_game_draw(top, bot, &st);
         snprintf(p, sizeof p, "%s/launcher_%d_top.png", dir, r); port_gpu_write_png(p, top, 400, 240);
         snprintf(p, sizeof p, "%s/launcher_%d_bottom.png", dir, r); port_gpu_write_png(p, bot, 320, 240);
