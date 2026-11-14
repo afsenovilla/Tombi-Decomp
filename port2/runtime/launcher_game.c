@@ -6,6 +6,8 @@
      SYSTEM/A00802.000  their 256-colour CLUT
      SYSTEM/A00804.000  4 bpp, 256 x 256: the 8 x 16 font (rows of 32 characters from ' ', then A-grave.., a-grave..)
      SYSTEM/A00803.000  the font's CLUT (row 0)
+     SYSTEM/A00202.000  8 bpp, 256 x 256: the title screen's TOMBI! logo in two pieces (the main one at the top, the
+                        right end of the "!" and the TM at x 0-63, y 112-223, 240 to the right and 112 up), CLUT A00203
    The top screen has the green squares, the bottom one the yellow ones; the texts that stay put sit in the cream boxes
    of the game's messages (the LOAD screen's "No saved games": a blue rim, a dark line inside it, rounded corners).
    With no disc readable the plain screen (n3ds/launcher_ui.c) is drawn instead.  Pictures: RGB, rows from the top. */
@@ -18,9 +20,9 @@
 
 typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32;
 
-static u8 *sq, *font;                 /* the squares' page (8 bpp), the font page (4 bpp) */
-static u32 sq_pal[256], font_pal[16]; /* 0xRRGGBB */
-static unsigned sq_n, font_n;
+static u8 *sq, *font, *logo;          /* the squares' page (8 bpp), the font page (4 bpp), the logo's (8 bpp) */
+static u32 sq_pal[256], font_pal[16], logo_pal[256]; /* 0xRRGGBB */
+static unsigned sq_n, font_n, logo_n;
 
 static u32 c15(unsigned v) { return (v & 31) << 19 | (v >> 5 & 31) << 11 | (v >> 10 & 31) << 3; }
 static int read_pal(const char *name, u32 *pal, int n) {
@@ -29,12 +31,14 @@ static int read_pal(const char *name, u32 *pal, int n) {
     for (int i = 0; i < n; i++) pal[i] = c15(d[2 * i] | d[2 * i + 1] << 8);
     free(d); return 1;
 }
-void port_launcher_game_end(void) { free(sq); free(font); sq = font = NULL; }
+void port_launcher_game_end(void) { free(sq); free(font); free(logo); sq = font = logo = NULL; }
 /* 1: the pieces were read */
 int port_launcher_game_begin(void) {
     port_launcher_game_end();
     sq = pa_read("SYSTEM/A00801.GAM", &sq_n);
     font = pa_read("SYSTEM/A00804.000", &font_n);
+    logo = pa_read("SYSTEM/A00202.000", &logo_n);
+    if (!logo || logo_n < 256 * 256 || !read_pal("SYSTEM/A00203.000", logo_pal, 256)) { free(logo); logo = NULL; }   /* (then the title in letters) */
     if (!sq || sq_n < 384 * 256 || !font || font_n < 128 * 256 ||
         !read_pal("SYSTEM/A00802.000", sq_pal, 256) || !read_pal("SYSTEM/A00803.000", font_pal, 16)) {
         port_launcher_game_end(); return 0;
@@ -88,6 +92,27 @@ static int glyph_cell(unsigned ch, int *u, int *v) {
     if (ch >= 0x20 && ch < 0x80) { *u = (ch & 31) * 8; *v = (ch - 0x20) / 32 * 16; return 1; }
     if (ch >= 0xC0) { *u = (ch & 31) * 8; *v = ch < 0xE0 ? 48 : 64; return 1; }
     return 0;
+}
+/* the logo's texel at (x, y) of the whole logo (295 x 111): its index, 0 transparent */
+static int logo_at(int x, int y) {
+    if (x < 0 || y < 0 || y > 110) return 0;
+    int k = x < 256 ? logo[y * 256 + x] : 0;
+    if (!k && x >= 240 && x < 304) k = logo[(y + 112) * 256 + x - 240];
+    return k;
+}
+/* the logo at half its size (each pixel the mean of four, its edge blended by how many of them are opaque), its top
+   left at (x0, y0); 148 x 56 */
+static void blend(Cv *c, int x, int y, u32 col, int a);
+static void logo_half(Cv *c, int x0, int y0) {
+    for (int y = 0; y < 56; y++) for (int x = 0; x < 148; x++) {
+        int r = 0, g = 0, b = 0, n = 0;
+        for (int j = 0; j < 2; j++) for (int i = 0; i < 2; i++) {
+            const int k = logo_at(2 * x + i, 2 * y + j);
+            if (!k) continue;
+            const u32 v = logo_pal[k]; r += v >> 16 & 255; g += v >> 8 & 255; b += v & 255; n++;
+        }
+        if (n) blend(c, x0 + x, y0 + y, (u32)(r / n) << 16 | (u32)(g / n) << 8 | (u32)(b / n), n * 255 / 4);
+    }
 }
 static void text(Cv *c, int x, int y, const char *s) {
     for (; *s; s++, x += 8) {
@@ -152,6 +177,23 @@ static void arrow(Cv *c, int cx, int cy, int dir) {
         blend(c, x, y, 0x080008, in * 255 / 16);
     }
 }
+/* the console's A button: a dark round key, its letter white (the game font's A), centred on (cx, cy) */
+static void abutton(Cv *c, int cx, int cy) {
+    for (int y = cy - 9; y <= cy + 9; y++) for (int x = cx - 9; x <= cx + 9; x++) {
+        int in = 0, rim = 0;
+        for (int sy = 0; sy < 4; sy++) for (int sx = 0; sx < 4; sx++) {
+            const float dx = x + (sx + 0.5f) / 4 - (cx + 0.5f), dy = y + (sy + 0.5f) / 4 - (cy + 0.5f), d2 = dx * dx + dy * dy;
+            in += d2 <= 8.5f * 8.5f; rim += d2 <= 7.5f * 7.5f;
+        }
+        blend(c, x, y, 0x080008, in * 255 / 16);
+        blend(c, x, y, 0x4A4A52, rim * 255 / 16);
+    }
+    int u, v; glyph_cell('A', &u, &v);
+    for (int j = 0; j < 16; j++) for (int i = 0; i < 8; i++) {
+        const int px = u + i, k = (font[(v + j) * 128 + px / 2] >> ((px & 1) * 4)) & 15;
+        if (k == 1) put(c, cx - 3 + i, cy - 7 + j, 0xFFFFFF); else if (k) blend(c, cx - 3 + i, cy - 7 + j, 0xFFFFFF, 110);
+    }
+}
 
 void port_launcher_game_draw(unsigned char *top, unsigned char *bot, const LuiState *s) {
     static const char *lab[4] = { "LANGUAGE:", "MOVIES:", "SPEED:", "PICTURE:" }, *name[4] = { "LANGUAGE", "MOVIES", "SPEED", "PICTURE" };
@@ -161,22 +203,22 @@ void port_launcher_game_draw(unsigned char *top, unsigned char *bot, const LuiSt
     Cv t = { top, 400, 240 }, b = { bot, 320, 240 };
     /* ---- the top screen: the options, as the game's OPTIONS, on the green squares */
     squares(&t, -6, 0);
-    box(&t, 200 - text_w("TOMBI!") / 2 - 14, 10, 200 + text_w("TOMBI!") / 2 + 13, 37);
-    text(&t, 200 - text_w("TOMBI!") / 2, 16, "TOMBI!");
+    if (logo) logo_half(&t, 200 - 74, 4);
+    else { box(&t, 200 - text_w("TOMBI!") / 2 - 14, 10, 200 + text_w("TOMBI!") / 2 + 13, 37); text(&t, 200 - text_w("TOMBI!") / 2, 16, "TOMBI!"); }
     for (int i = 0; i < 4; i++) {
-        const int y = 58 + i * 38;
+        const int y = 72 + i * 34;
         if (i == s->row) bar(&t, 16, y - 4, 383, y + 17, 0);
         text(&t, 28, y, lab[i]);
         text(&t, 132, y, val[i]);
     }
     {   /* what the keys do: the arrows drawn, the words in the game's letters */
         static const char *w[3] = { "OPTION", "CHANGE", "START" };
-        const int gap = 24, wa = 2 * 14 + 4, wt = wa + text_w(w[0]) + gap + wa + text_w(w[1]) + gap + 12 + text_w(w[2]);
+        const int gap = 24, wa = 2 * 14 + 4, wt = wa + text_w(w[0]) + gap + wa + text_w(w[1]) + gap + 20 + text_w(w[2]);
         int x = 200 - wt / 2;
         box(&t, x - 14, 204, x + wt + 13, 231);
         arrow(&t, x + 6, 217, 0); arrow(&t, x + 20, 217, 1); x += wa; text(&t, x, 210, w[0]); x += text_w(w[0]) + gap;
         arrow(&t, x + 6, 217, 2); arrow(&t, x + 20, 217, 3); x += wa; text(&t, x, 210, w[1]); x += text_w(w[1]) + gap;
-        text(&t, x, 210, "A"); x += 12; text(&t, x, 210, w[2]);
+        abutton(&t, x + 8, 217); x += 20; text(&t, x, 210, w[2]);
     }
     /* ---- the bottom screen, on the yellow squares: what the option does, the disc and the console, Start */
     squares(&b, -6, 1);
