@@ -150,18 +150,38 @@ static Rgb ramp(const Ramp *rp, int t)
 #define MORTAR 2
 #define BRICK 27            /* brick length incl. the joint */
 #define FLOOR 176           /* first floor row at the wall foot */
+#define VPX16 (172 * 16)    /* the vanishing point (x 16) and the camera's focal length, see "the side walls" below */
+#define VPY16 (85 * 16)
+#define FOC16 (320 * 16)
 static const int JOINT_EVEN[2] = { 5, 4 }, JOINT_ODD[2] = { 19, 18 };   /* X of the first joint, even / odd courses */
 static int pcol(int side, int X) { return side ? PW - 1 + X : -X; }      /* X <= 0: inside the picture */
 static u16 picx(int side, int X, int y) { int x = clampi(pcol(side, X), 0, PW - 1); return pic[clampi(y, 0, PH - 1)][x]; }
 
 static Ramp R_wall, R_floor, R_ivy, R_root;
-static Rgb C_mortar, C_stem, C_gap;
+static Rgb C_mortar, C_stem, C_gap, C_rust, C_rootgap;
+/* the outline of the picture's root fan (left, x 10-66, rows 124-184): where its colours are sampled */
+static const int ROOT_FAN[9][2] = { { 10, 124 }, { 24, 124 }, { 36, 136 }, { 48, 158 }, { 66, 180 }, { 56, 184 }, { 40, 176 },
+                                    { 24, 172 }, { 12, 164 } };
+static int in_root_fan(int x, int y)       /* even-odd rule, pixel centres */
+{
+    int in = 0;
+    for (int i = 0, j = 8; i < 9; j = i++) {
+        int xi = ROOT_FAN[i][0] * 2, yi = ROOT_FAN[i][1] * 2, xj = ROOT_FAN[j][0] * 2, yj = ROOT_FAN[j][1] * 2, px = x * 2 + 1, py = y * 2 + 1;
+        if ((yi > py) != (yj > py)) {
+            int l = (px - xi) * (yj - yi), r = (py - yi) * (xj - xi);
+            if (yj > yi ? l < r : l > r) in = !in;                  /* px left of the edge's crossing */
+        }
+    }
+    return in;
+}
 static int course_tone[2][14];          /* mean tone (ramp index 0..255) of the bricks next to each edge, per course */
 static int floor_tone[2][PH];           /* the floor's row tone next to each edge */
 static int edge_ivy[2][PH];             /* 0..256: share of ivy texels in the 6 columns at the edge (+-2 rows) */
 static int edge_depth[2][PH];           /* how far (columns) the picture's ivy reaches in from the edge on that row */
 static int edge_tone[2][PH];            /* the tone (on R_ivy) of the picture's ivy at the edge on that row */
 static int side_k[2];                   /* light of each side wall against the back wall (x 256) */
+static int floor_fit[2][2];             /* the floor's light: L(|f|) = a - b (|f| - 1), fitted per side on |f| 0.6..1.15 */
+static u8 lum_tone[256];                /* luminance -> tone on R_floor */
 
 static int green(u16 c) { Rgb k = rgb15(c); return k.g >= k.r + 16 && k.g >= k.b + 16; }
 static int greenish(u16 c) { Rgb k = rgb15(c); return k.g >= k.r + 8 && k.g >= k.b + 8; }
@@ -195,10 +215,23 @@ static void analyse(void)
     /* ivy leaves: the green texels at both edges */
     for (int y = 0; y < 200; y++) for (int x = 0; x < 40; x++) { if (green(pic[y][x])) samp_add(pic[y][x]); if (green(pic[y][PW - 1 - x])) samp_add(pic[y][PW - 1 - x]); }
     ramp_make(&R_ivy);
-    /* roots (left): the brown texels of the root fan */
-    for (int y = 126; y < 182; y++) for (int x = 8; x < 64; x++) if (brownish(pic[y][x])) samp_add(pic[y][x]);
-    ramp_make(&R_root);
-    if (!R_root.ok) R_root = R_wall;
+    /* roots (left): the texels inside the outline of the picture's root fan (no ivy, no black gaps); the black of its
+       gaps and the rust of its bark apart */
+    {
+        int rs = 0, rn = 0, rr = 0, rg = 0, rb = 0, kr = 0, kg = 0, kb = 0, kn = 0;
+        for (int y = 120; y < 188; y++) for (int x = 0; x < 72; x++) {
+            u16 c = pic[y][x]; Rgb k = rgb15(c);
+            if (!in_root_fan(x, y) || greenish(c)) continue;
+            if (lum(k) >= 18) samp_add(c); else { kr += k.r; kg += k.g; kb += k.b; kn++; }
+            if (k.r >= k.g + 24 && k.r >= 72) { rr += k.r; rg += k.g; rb += k.b; rn++; }
+            rs++;
+        }
+        ramp_make(&R_root);
+        if (!R_root.ok) R_root = R_wall;
+        C_rust = rn ? (Rgb){ rr / rn, rg / rn, rb / rn } : (Rgb){ 96, 64, 48 };
+        C_rootgap = kn ? (Rgb){ kr / kn, kg / kn, kb / kn } : (Rgb){ 12, 8, 4 };
+        (void)rs;
+    }
     /* stems: dark non-green texels among the left ivy; gaps between leaves: the darkest greens */
     for (int y = 0; y < 120; y++) for (int x = 0; x < 30; x++) { u16 c = pic[y][x]; Rgb k = rgb15(c); if (!greenish(c) && lum(k) < 60 && k.r >= k.b) samp_add(c); }
     { Ramp m; ramp_make(&m); C_stem = m.ok ? m.bin[NRAMP / 2] : (Rgb){ 56, 40, 32 }; }
@@ -254,8 +287,27 @@ static void analyse(void)
             for (int x = 284; x < 292; x++) { ba += lum(rgb15(pic[y][x])); bn++; }
         }
         side_k[1] = clampi(sa * 256 / sn * bn / (ba ? ba : 1), 160, 256);
-        side_k[0] = side_k[1] * 7 / 8;
+        side_k[0] = side_k[1] * 15 / 16;
     }
+    /* the floor's light across the room: a line through its luminance against |f| (0.6..1.15, rows 186-223, no ivy),
+       per side; past the edge the strip follows that line (the pool of light fading towards the side walls) */
+    for (int side = 0; side < 2; side++) {
+        long long n = 0, sf = 0, sl = 0, sff = 0, sfl = 0;
+        for (int y = 186; y < PH; y++)
+            for (int x = 0; x < PW; x++) {
+                int f = ((x * 16 + 8 - VPX16) * 256) / (y * 16 + 8 - VPY16), l;
+                if ((side ? f : -f) < 154 || (side ? f : -f) > 294 || greenish(pic[y][x])) continue;
+                f = f < 0 ? -f : f; l = lum(rgb15(pic[y][x]));
+                n++; sf += f; sl += l; sff += (long long)f * f; sfl += (long long)f * l;
+            }
+        if (n > 100 && n * sff - sf * sf != 0) {
+            long long den = n * sff - sf * sf, num = n * sfl - sf * sl;             /* slope x 256 = num * 256 / den */
+            int b = (int)(-num * 256 / den);                                          /* L(256) = mean + slope (256 - mean f) */
+            int a = (int)((sl * 256 + (long long)b * sf) / (n * 256)) - b;
+            floor_fit[side][0] = clampi(a, 50, 140); floor_fit[side][1] = clampi(b, 0, 120);
+        } else { floor_fit[side][0] = 85; floor_fit[side][1] = 40; }
+    }
+    for (int l = 0; l < 256; l++) { Rgb c = { l, l, l }; lum_tone[l] = (u8)(R_floor.ok ? tone_of(&R_floor, c) : l); }
 }
 
 /* --- the canvas of one strip: X = 1..pad, y = 0..PH-1 */
@@ -275,42 +327,71 @@ static void put(int X, int y, Rgb c) { Rgb *p = px_at(X, y); if (p) *p = c; }
    the scale s = (D + X - 1/2) / D (D: the corner's distance from the VP), its back-wall height yb = 85 + (y - 85) /
    (s * kc), and its place along the wall U = F (1 - 1 / s) / kc (focal length F 320 px): bricks get wider, courses
    taller and their mortar lines diverge from the VP as the wall comes towards the viewer; verticals stay vertical. */
-#define VPX16 (172 * 16)
-#define VPY16 (85 * 16)
-#define FOC16 (320 * 16)
-static const int KC[2] = { 256, 277 };                     /* the wall's scale at the corner (x 256) */
-static int D16(int side) { return side ? (PW - 1) * 16 + 8 - VPX16 : VPX16 + 8; }
+/* the side wall's plane: the room corner's column (x 16; scale 1 there, on the back wall's foot row) and the strip
+   column's distance from the VP.  Right: the corner at x 296.5 (the dark vertical line where the back wall meets the
+   narrow slanted face; the slanted face's foot runs from (296.5, 176) through the VP, and the dark ivy-covered wall
+   beside the pillar, x 315-319, ends on the floor on the same line: rows 190 / 193 at x 315 / 319), so the pillar's
+   lit front face (x 303-314) stands out of that wall.  Left: the corner hidden behind the trunk (bricks of the back
+   wall show from x 22), at x 19.5, where the room's mirror of the right corner about the door's axis (x 23.5) would
+   be too; its foot passes x 0 at row 187.6, under the ivy that drapes onto the floor down to row ~194 there. */
+static const int CORNER16[2] = { 19 * 16 + 8, 296 * 16 + 8 };
+static int DC16(int side) { return side ? CORNER16[1] - VPX16 : VPX16 - CORNER16[0]; }
+static int DE16(int side, int X) { return side ? (PW - 1) * 16 + 8 + X * 16 - VPX16 : VPX16 - 8 + X * 16; }   /* column centre */
 static int *S256, *WU16;                                   /* per strip column 0..cw+1: scale (x 256), U (back-wall px x 16) */
 static int s_at(int X) { return S256[clampi(X, 0, cw + 1)]; }
 static void persp_cols(int side)
 {
     for (int X = 0; X <= cw + 1; X++) {
-        int d = D16(side), s = (d + X * 16 - 8) * 256 / d;
+        int s = DE16(side, X) * 256 / DC16(side);
         S256[X] = s;
-        WU16[X] = (s - 256) * FOC16 / s * 256 / KC[side];
+        WU16[X] = (int)((long long)(s - 256) * FOC16 / s);
     }
 }
 /* screen row (x 16) of back-wall height yb16 at column X, and back-wall height (x 16) of screen row y16 */
-static int wall_y16(int side, int X, int yb16) { return VPY16 + (int)((long long)(yb16 - VPY16) * KC[side] * s_at(X) / 65536); }
-static int wall_yb16(int side, int X, int y16) { return VPY16 + (int)((long long)(y16 - VPY16) * 65536 / ((long long)KC[side] * s_at(X))); }
-static int foot_y(int side, int X) { return wall_y16(side, X, FLOOR * 16) / 16; }        /* the wall's foot, screen row */
+static int wall_y16(int side, int X, int yb16) { (void)side; return VPY16 + (int)((long long)(yb16 - VPY16) * s_at(X) / 256); }
+static int wall_yb16(int side, int X, int y16) { (void)side; return VPY16 + (int)((long long)(y16 - VPY16) * 256 / s_at(X)); }
+#define FOOT16 (FLOOR * 16 - 8)                            /* the back wall's foot: between rows 175 and 176 */
+static int foot_y16(int side, int X) { return wall_y16(side, X, FOOT16); }
+static int foot_y(int side, int X) { return (foot_y16(side, X) + 8) / 16; }   /* first floor row of the column */
 /* strip column of a place U16 along the wall (the inverse of WU16) */
 static int X_of_U(int side, int U16)
 {
-    int u = U16 * KC[side] / 256; if (u > FOC16 * 15 / 16) u = FOC16 * 15 / 16;
-    { int s = (int)((long long)256 * FOC16 / (FOC16 - u)), d = D16(side); return ((long long)s * d / 256 - d + 8) / 16; }
+    int u = U16; if (u > FOC16 * 15 / 16) u = FOC16 * 15 / 16;
+    { int s = (int)((long long)256 * FOC16 / (FOC16 - u)); return (int)(((long long)s * DC16(side) / 256 - DE16(side, 0)) / 16); }
+}
+
+/* --- the room's light (measured on the picture).  One soft pool from above the camera, centred on the door: the floor
+   is brightest on the door's axis (luminance 130 at floor lateral f = 0, f = (x - 172) / (y - 85)) and falls to ~82 at
+   |f| 1.2 near both edges, lateral only (rows of equal f keep their tone from row 186 to 223); the back wall the same
+   (130 by the arch, 50-65 by the edges, 30-40 under the edge ivy); faces turned to the camera are lit most (the
+   pillar's front face, 80, brighter than the back wall beside it, 57), faces turned sideways less (the slanted face of
+   the right wall, ~0.7 of the back wall next to it).  The wall beside the pillar (x 315-319) lies in the pillar's
+   shadow (~30); the left edge is dark under the tree.  Corners and the wall's foot are darker (the back wall's mortar
+   row over the floor, rows 174-175, is its darkest).
+   wall_light: the side wall's light (x 256) at strip column X, row y (foot16: its foot, 1/16 px) */
+static int wall_light(int side, int X, int y, int foot16)
+{
+    int s = s_at(X), k = side_k[side];
+    k = k * (256 - clampi((s - 256) * 96 / 256, 0, 110)) / 256;              /* further from the pool, towards the viewer */
+    if (side) { int t = clampi(X * 256 / 14, 0, 256); t = t * t * (768 - 2 * t) / 65536; k = k * (150 + 70 * t / 256) / 256; }   /* the pillar's shadow */
+    else { int t = clampi(X * 256 / 14, 0, 256); k = k * (176 + 56 * t / 256) / 256; }                   /* the trunk's shade */
+    {   int up = foot16 - (y * 16 + 8), sc = s / 16;                        /* height over the foot (1/16 px), scale */
+        if (up < 2 * sc) k = k * 140 / 256; else if (up < 4 * sc) k = k * 190 / 256; else if (up < 9 * sc) k = k * 228 / 256;
+    }
+    {   int top = y * 256 / (24 * s / 256 + 1);                               /* the top, under the ivy */
+        if (top < 256) k = k * (200 + 56 * top / 256) / 256;
+    }
+    return k;
 }
 
 static void draw_wall(int side)
 {
     for (int X = 1; X <= cw; X++) {
-        int s = s_at(X), U = WU16[X], dU = WU16[X + 1] - WU16[X];
+        int U = WU16[X], dU = WU16[X + 1] - WU16[X], foot16 = foot_y16(side, X);
         int jw = dU > 16 ? dU : 16;                                         /* a joint is at least a column wide */
-        int lit = side_k[side] * (256 - clampi((s - 256) * 40 / 256, 0, 120) - (X < 8 ? (8 - X) * 4 : 0)) / 256;
-                                                                            /* side light, darker towards the viewer and in the corner */
         for (int y = 0; y < PH; y++) {
             int yb = wall_yb16(side, X, y * 16 + 8);
-            if (yb >= FLOOR * 16) break;
+            if (yb >= FOOT16) break;
             int k = fdiv(yb - COURSE0 * 16, COURSE * 16), t = yb - COURSE0 * 16 - k * COURSE * 16;  /* course k, t in it */
             int odd = k & 1, j0 = odd ? JOINT_ODD[side] : JOINT_EVEN[side];
             int base = course_tone[side][clampi(k + 1, 0, 13)];
@@ -338,64 +419,158 @@ static void draw_wall(int side)
                 }
                 c = ramp(&R_wall, tone);
             }
-            put(X, y, scale(c, lit));
+            put(X, y, scale(c, wall_light(side, X, y, foot16)));
         }
     }
 }
 
-/* the floor between the side wall's foot and the frame, in perspective: streaks across (rows of constant depth stay
-   horizontal), slabs and pebbles scaled with the distance (texture coordinates at the scale of picture row 200) */
+/* the floor between the side wall's foot and the frame, in perspective: its light from the picture's floor (the
+   lateral profile, carried on past the edge with its own slope), streaks across (rows of constant depth stay
+   horizontal), slabs and pebbles scaled with the distance (texture coordinates at the scale of picture row 200), and
+   the wall's foot darker (the contact shadow, a few rows, wider towards the viewer) */
+static int floor_lum(int side, int f256)                   /* |f| x 256 -> luminance */
+{
+    int a = floor_fit[side][0], b = floor_fit[side][1];    /* L = a - b (|f| - 1) */
+    return clampi(a - b * (f256 - 256) / 256, 40, 140);
+}
 static void draw_floor(int side)
 {
     for (int X = 1; X <= cw; X++) {
-        int fy = foot_y(side, X), x16 = pcol(side, X) * 16 + 8;
+        int foot16 = foot_y16(side, X), fy = foot_y(side, X), x16 = pcol(side, X) * 16 + 8, sc = s_at(X);
         for (int y = fy < 0 ? 0 : fy; y < PH; y++) {
             int dy = y * 16 + 8 - VPY16; if (dy < 16) dy = 16;
             int fu = (int)((long long)(x16 - VPX16) * 115 * 16 / dy) + 8192, fv = 115 * 115 * 256 / dy;
-            int tone = floor_tone[side][y];
+            int f256 = (int)((long long)(x16 - VPX16) * 256 / dy); if (f256 < 0) f256 = -f256;
+            int tone = lum_tone[floor_lum(side, f256)];
             tone += noise(fu, fv, 13 * 16, 2 * 16, 31 + side) / 2 - 64;              /* streaks */
             tone += noise(fu, fv, 5 * 16, 2 * 16, 37) / 4 - 32;                      /* slabs */
             tone += noise(X, y, 1, 1, 41) / 10 - 12;                                  /* grain */
             tone += noise(fu, fv, 3 * 16, 16, 43) / 5 - 25;                           /* pebbles: short light dashes */
-            if (y <= fy) tone -= 70; else if (y == fy + 1) tone -= 34; else if (y <= fy + 3) tone -= 14;   /* the wall's foot */
-            put(X, y, ramp(&R_floor, tone));
+            {   int dn = (y * 16 + 8 - foot16) * 256 / sc;                       /* rows below the foot, at the corner's scale */
+                Rgb c = ramp(&R_floor, tone);
+                if (dn < 16) c = scale(c, 110); else if (dn < 32) c = scale(c, 160); else if (dn < 56) c = scale(c, 200);
+                else if (dn < 96) c = scale(c, 232);
+                put(X, y, c);
+            }
         }
     }
 }
 
-/* a tapered curve (root / trunk): quadratic bezier p0 -> p2 via p1 (pixels), radius r0 -> r1 (1/16 px) */
-static void draw_root(int x0, int y0, int x1, int y1, int x2, int y2, int r0, int r1, int seed)
+/* --- the tree (left): trunk and roots drawn the way the picture's own root fan is painted (x 10-66, rows 124-184):
+   each root a tapered tube 3-6 px thick that leaves the trunk outwards and a little up, arches over and comes down
+   steeply, then flattens onto the floor into a long point; across it (lit from the top left) a thin dark rim, a pale
+   highlight two px wide (luminance ~110), a dark line under it, the brown body (55-75) in two or three strands with
+   dark seams between them, the shadowed underside (~30) and a near-black outline; along it, bark streaks and the odd
+   rust fleck; the roots behind darker, black gaps and shadow between and under them.  Colours: the ramp of the
+   picture's root texels (R_root), its rust and its gap black. */
+static u8 root_lt[256];                                    /* luminance -> tone on R_root */
+static int isqrt_i(int v)
 {
-    for (int i = 0; i <= 96; i++) {
-        int a = (96 - i) * (96 - i), b = 2 * (96 - i) * i, c = i * i;      /* /9216 */
-        int cx = (x0 * a + x1 * b + x2 * c) * 16 / 9216, cy = (y0 * a + y1 * b + y2 * c) * 16 / 9216;
-        int r = r0 + (r1 - r0) * i / 96;
-        for (int py = (cy - r) / 16 - 1; py <= (cy + r) / 16 + 1; py++)
-            for (int X = (cx - r) / 16 - 1; X <= (cx + r) / 16 + 1; X++) {
-                int dx = X * 16 + 8 - cx, dy = py * 16 + 8 - cy;
-                if (dx * dx + dy * dy > r * r) continue;
-                int v = dy * 128 / (r + 1);                                  /* -128 top .. 128 bottom */
-                int tone = 125 - v - (dx * dx + dy * dy) * 70 / (r * r + 1) - i * 2 / 3;   /* darker towards the tip */
-                tone += noise(i * 2 + seed * 50, dy / 4 + 64, 3, 1, 43) / 4 - 32;  /* bark streaks along the root */
-                put(X, py, ramp(&R_root, tone));
-            }
+    int r = 0, b = 1 << 30;
+    if (v <= 0) return 0;
+    while (b > v) b >>= 2;
+    while (b) { if (v >= r + b) { v -= r + b; r = (r >> 1) + b; } else r >>= 1; b >>= 2; }
+    return r;
+}
+typedef struct { short x, y; } Pt;                         /* 1/16 px, strip coordinates (X, row) */
+#define RS 128                                             /* samples along a root */
+/* luminance across the root (v -256 lit top .. 256 underside) */
+static int root_profile(int v)
+{
+    static const int P[9] = { 26, 76, 112, 66, 54, 46, 34, 22, 12 };   /* v = -256, -192, ... 256 */
+    int i = clampi((v + 256) / 64, 0, 7), f = (v + 256) - i * 64;
+    return P[i] + (P[i + 1] - P[i]) * clampi(f, 0, 64) / 64;
+}
+/* one root: cubic bezier p0..p3, radius r0 -> r1 (1/16 px); shade x 256; mode 0: its shadow (cast down and towards
+   the picture, the light being at the top left), 1: the root */
+static void draw_root(const Pt *p, int r0, int r1, int shade, int seed, int mode)
+{
+    static int cx[RS + 1], cy[RS + 1], nx[RS + 1], ny[RS + 1], rr[RS + 1];
+    int x0 = 1 << 30, x1 = -(1 << 30), y0 = 1 << 30, y1 = -(1 << 30);
+    for (int i = 0; i <= RS; i++) {
+        long long t = i, u = RS - i, a = u * u * u, b = 3 * u * u * t, c = 3 * u * t * t, d = t * t * t, D = (long long)RS * RS * RS;
+        int q = RS - i;
+        cx[i] = (int)((a * p[0].x + b * p[1].x + c * p[2].x + d * p[3].x) / D);
+        cy[i] = (int)((a * p[0].y + b * p[1].y + c * p[2].y + d * p[3].y) / D);
+        rr[i] = r1 + (int)((long long)(r0 - r1) * (RS * RS - (long long)(RS - q) * (RS - q)) / (RS * RS));   /* thick, pointed at the end */
     }
+    for (int i = 0; i <= RS; i++) {
+        int ia = i > 0 ? i - 1 : 0, ib = i < RS ? i + 1 : RS, tx = cx[ib] - cx[ia], ty = cy[ib] - cy[ia], n = isqrt_i(tx * tx + ty * ty);
+        if (!n) n = 1;
+        nx[i] = -ty * 256 / n; ny[i] = tx * 256 / n;                         /* unit normal (x 256) ... */
+        if (nx[i] - ny[i] < 0) { nx[i] = -nx[i]; ny[i] = -ny[i]; }            /* ... towards the light: +X (screen left here) and up */
+        if (cx[i] - rr[i] < x0) x0 = cx[i] - rr[i];
+        if (cx[i] + rr[i] > x1) x1 = cx[i] + rr[i];
+        if (cy[i] - rr[i] < y0) y0 = cy[i] - rr[i];
+        if (cy[i] + rr[i] > y1) y1 = cy[i] + rr[i];
+    }
+    for (int py = y0 / 16 - 1; py <= y1 / 16 + 3; py++)
+        for (int X = x0 / 16 - 2; X <= x1 / 16 + 1; X++) {
+            int qx = X * 16 + 8, qy = py * 16 + 8, best = -1, bd = 1 << 30;
+            Rgb *o = px_at(X, py);
+            if (!o) continue;
+            if (mode == 0) { qx += 16; qy -= 32; }                            /* the shadow: the root moved down, away from the light */
+            for (int i = 0; i <= RS; i++) {
+                int dx = qx - cx[i], dy = qy - cy[i], r = rr[i] + (mode == 0 ? 12 : 0);
+                if (dx > r || dx < -r || dy > r || dy < -r) continue;
+                {   int m = dx * dx + dy * dy - r * r;
+                    if (m <= 0 && m < bd) { bd = m; best = i; } }
+            }
+            if (best < 0) continue;
+            if (mode == 0) { *o = mix(*o, C_rootgap, 150); continue; }
+            {
+                int i = best, r = rr[i] < 8 ? 8 : rr[i];
+                int d = ((qx - cx[i]) * nx[i] + (qy - cy[i]) * ny[i]) / 256;     /* towards the light (1/16 px) */
+                int v = clampi(-d * 256 / r, -256, 256);
+                int l = root_profile(v);
+                int rpx = rr[i] / 16, ns = rpx >= 3 ? 2 : 1;                       /* strands across the root */
+                int sv = (v + 256) * ns, st = sv / 512, sf = sv % 512;
+                Rgb c;
+                if (ns > 1 && st > 0 && sf < 512 / (rpx + 1) && v > -160) l -= 22;   /* the seam between two strands */
+                l += (int)(hash3(seed, st, 5) % 21) - 10;                          /* each strand its own tone */
+                l += noise(i, st * 40 + v / 24, 20, 3, 91 + seed) / 10 - 12;        /* bark streaks along the root */
+                l -= i * 10 / RS;                                                  /* a little darker towards the tip */
+                l = clampi(l * shade / 256, 0, 255);
+                c = ramp(&R_root, root_lt[l]);
+                if (v < -40 && v > -200 && (hash3(i / 5, st, seed * 7 + 3) & 15) == 0) c = mix(c, C_rust, 140);   /* rust fleck */
+                if (v > 200) c = mix(c, C_rootgap, 170);                                                         /* outline */
+                *o = c;
+            }
+        }
 }
 
+/* the trunk's foot and the roots on the left strip (strip X, rows): the trunk stands at the picture's edge (x 8-22,
+   its left flank behind the edge ivy); its bark ridges widen into the flare, the roots leave it outwards over the floor
+   in front of the side wall, their tips on the floor (below the wall's foot, rows 199 / 205 / 211 at X 20 / 30 / 40) */
+#define P16(x, y) { (short)((x) * 16), (short)((y) * 16) }
+typedef struct { Pt p[4]; short r0, r1, shade; } RootDef;
+static const RootDef ROOTS[] = {
+    /* the trunk's bark ridges, behind (mostly under the edge ivy), flaring at the foot */
+    { { P16(1, -6), P16(1, 70), P16(1, 150), P16(3, 192) }, 64, 48, 150 },
+    { { P16(6, -6), P16(5, 80), P16(6, 150), P16(11, 196) }, 56, 30, 135 },
+    { { P16(10, 40), P16(9, 100), P16(10, 160), P16(17, 200) }, 44, 16, 120 },
+    /* the dark hollow under the arch of the roots: dim roots going straight down (as under the picture's fan) */
+    { { P16(6, 150), P16(9, 170), P16(10, 190), P16(13, 206) }, 64, 24, 70 },
+    { { P16(12, 152), P16(15, 172), P16(18, 194), P16(22, 210) }, 56, 16, 62 },
+    { { P16(18, 160), P16(21, 180), P16(25, 198), P16(30, 212) }, 48, 12, 56 },
+    /* roots behind: darker, longer */
+    { { P16(4, 150), P16(18, 140), P16(38, 214), P16(56, 227) }, 52, 4, 160 },
+    { { P16(6, 170), P16(16, 166), P16(30, 220), P16(46, 228) }, 48, 4, 150 },
+    /* the sweep in front, the lowest (shortest) first, the top one longest and in front of all */
+    { { P16(2, 186), P16(10, 182), P16(16, 210), P16(25, 216) }, 50, 4, 206 },
+    { { P16(2, 175), P16(13, 168), P16(24, 210), P16(36, 217) }, 56, 4, 216 },
+    { { P16(1, 159), P16(12, 156), P16(20, 200), P16(30, 214) }, 40, 4, 228 },
+    { { P16(1, 164), P16(15, 154), P16(30, 208), P16(46, 219) }, 60, 4, 226 },
+    { { P16(0, 152), P16(16, 140), P16(36, 207), P16(56, 224) }, 70, 4, 244 },
+    /* one towards the viewer, off the frame's bottom */
+    { { P16(1, 190), P16(5, 196), P16(7, 216), P16(10, 236) }, 72, 40, 225 },
+};
 static void draw_roots(void)
 {
-    /* the trunk behind the edge ivy: a dark column next to the picture's own */
-    for (int y = 0; y < 150; y++) for (int X = 1; X <= 9 + noise(0, y, 1, 9, 47) / 40; X++) {
-        int tone = 50 + noise(X, y, 2, 7, 53) / 3 - X * 3;
-        put(X, y, ramp(&R_root, tone));
-    }
-    /* the fan: roots leaving the trunk outwards, down to the floor */
-    for (int i = 0; i < 3; i++) {
-        Rng r = rng_at(901, i, 3);
-        int y0 = 132 + i * 10 + rndi(&r, 5), x2 = 20 + i * 7 + rndi(&r, 6), y2 = foot_y(0, x2) + 3 + rndi(&r, 4);
-        int x0 = 1 + rndi(&r, 3), x1 = x2 * 3 / 4 + rndi(&r, 4), y1 = y0 + 2 + rndi(&r, 4) + (y2 - 181) / 2, r0 = 132 - i * 16 + rndi(&r, 16);
-        draw_root(x0, y0, x1, y1, x2, y2, r0, 24, i);
-    }
+    int n = (int)(sizeof ROOTS / sizeof ROOTS[0]);
+    for (int l = 0; l < 256; l++) { Rgb c = { l, l, l }; root_lt[l] = (u8)tone_of(&R_root, c); }
+    for (int i = 6; i < n; i++) draw_root(ROOTS[i].p, ROOTS[i].r0, ROOTS[i].r1, 256, i, 0);      /* the shadows first */
+    for (int i = 0; i < n; i++) draw_root(ROOTS[i].p, ROOTS[i].r0, ROOTS[i].r1, ROOTS[i].shade, i, 1);
 }
 
 /* --- ivy */
@@ -417,6 +592,7 @@ static const int COS16[16] = { 256, 237, 181, 98, 0, -98, -181, -237, -256, -237
 static const int SIN16[16] = { 0, 98, 181, 237, 256, 237, 181, 98, 0, -98, -181, -237, -256, -237, -181, -98 };
 /* one leaf: a tapered ellipse (rx along its axis, ry across, 1/16 px; the tip at +u is narrower), lit from the top
    left, the far rim darker; mode 0 = shadow mask only (occ), 1 = draw */
+static int cur_side;                                       /* the strip being drawn */
 static void leaf_draw(const Leaf *l, int mode)
 {
     int c = COS16[l->ang], s = SIN16[l->ang], rx = l->rx, ry = l->ry, R = (rx > ry ? rx : ry) / 16 + 2;
@@ -434,7 +610,9 @@ static void leaf_draw(const Leaf *l, int mode)
             if (q > 150 && dx + dy > 0) tone -= 50;                          /* the far rim */
             if (q < 40 && dx + dy < 0) tone += 18;                           /* the sheen */
             tone += (int)(hash3(X, py, l->x16) & 31) - 16;                  /* the painted grain */
-            put(X, py, ramp(&R_ivy, tone));
+            {   int k = wall_light(cur_side, clampi(X, 1, cw), py, (PH + 64) * 16) * 256 / (side_k[cur_side] ? side_k[cur_side] : 256);
+                put(X, py, scale(ramp(&R_ivy, tone), clampi(k * 9 / 8, 120, 256)));   /* the room's light on the leaves too */
+            }
         }
 }
 static void stem_line(int x0, int y0, int x1, int y1, Rgb c)      /* 1/16 px endpoints */
@@ -453,6 +631,7 @@ static int edge_dens(int side, int X, int y)
 {
     int yy = clampi(y, 0, PH - 1), d = edge_depth[side][yy], e = edge_ivy[side][yy];
     int reach = 3 + d * 3 / 4 + noise(0, y, 1, 11, 61 + side) * (4 + d / 3) / 256;  /* ragged boundary */
+    if (side == 0 && y > 136 && reach > 6 + d / 4) reach = 6 + d / 4;                 /* leave the roots in sight */
     if (X > reach) return 0;
     return e * (reach - X + 2) / (reach + 2);
 }
@@ -474,7 +653,7 @@ static void grow(int side, Rng *r, int x16, int y16, int dir, int len, int drift
             if (rndi(r, 256) < (want > 256 ? 256 : want)) {
                 int ox = rndr(r, -spread, spread), oy = rndr(r, -spread / 2 - 8, spread / 2 + 8);
                 int front = rndi(r, 2);
-                int lx = rndr(r, 18, 34), ly = rndr(r, 13, 22), la = rndi(r, 16), lt = front ? rndr(r, 90, 230) : rndr(r, 0, 80);
+                int lx = rndr(r, 18, 34), ly = rndr(r, 13, 22), la = rndi(r, 16), lt = front ? rndr(r, 70, 205) : rndr(r, 0, 70);
                 int ks = s_at((px + ox) / 16);                              /* nearer the viewer, bigger */
                 leaf_add(px + ox * ks / 256, py + oy * ks / 256, lx * ks / 256, ly * ks / 256, la, lt, front ? 2 : 1);
             }
@@ -511,7 +690,7 @@ static void grow_ivy(int side)
        the whole wall top, long ones near the corner and here and there further out */
     for (int slot = -1; ; slot++) {
         Rng r = rng_at(side * 7 + 2, slot, 0);
-        int X = X_of_U(side, (slot * 22 + rndi(&r, 10)) * 16), ks, near;
+        int X = X_of_U(side, WU16[1] + (slot * 22 + rndi(&r, 10)) * 16), ks, near;
         if (slot < 0) X = -8 + rndi(&r, 6);
         if (X > cw + 22) break;
         ks = s_at(X); near = X < 48 ? 256 - X * 4 : 70;
@@ -519,6 +698,7 @@ static void grow_ivy(int side)
         if (rndi(&r, 256) < near) L += 40 + rndi(&r, 100);
         if (X < 30) L += 50;
         L = L * ks / 256;
+        if (side == 0 && X < 60 && L > 118) L = 118 + (int)(hash3(slot, 3, 9) % 16);   /* above the roots */
         for (int j = 0; j < n; j++) {
             int off = 2 * j - (n - 1), m = n > 1 ? (off < 0 ? -off : off) * 256 / n : 0;   /* 0 middle .. 256 sides */
             int len = L * (256 - m * 5 / 8) / 256 * rndr(&r, 180, 256) / 256;
@@ -530,7 +710,7 @@ static void grow_ivy(int side)
     for (int k = 0; k < 3 + cw / 60; k++) {
         Rng r = rng_at(side * 7 + 3, k, 0);
         int X = side == 0 ? (k < 3 ? 6 + k * 9 + rndi(&r, 6) : 30 + rndi(&r, cw)) : (k < 2 ? 3 + k * 10 + rndi(&r, 6) : 30 + rndi(&r, cw));
-        int y = side == 0 && k < 3 ? 150 + rndi(&r, 20) : foot_y(side, X) - 2;
+        int y = side == 0 && k < 3 ? 140 + rndi(&r, 8) : foot_y(side, X) - 2;
         if (k >= 3 && rndi(&r, 2)) continue;
         int cl = 30 + rndi(&r, 70), dr = rndr(&r, -4, 4);
         grow(side, &r, X * 16, y * 16, -1, cl, dr, 24, 40, 260, 1, sc2);
@@ -583,9 +763,12 @@ static void build_redraw(int pad)
         free(cv); free(occ); free(S256); free(WU16); cv = 0; occ = 0; S256 = WU16 = 0; return;
     }
     for (int side = 0; side < 2; side++) {
-        persp_cols(side);
+        persp_cols(side); cur_side = side;
         draw_wall(side); draw_floor(side);
         if (side == 0) draw_roots();
+#ifdef WS_BACKDROP_MAIN
+        if (!getenv("WSB_NOIVY"))
+#endif
         grow_ivy(side);
         for (int y = 0; y < PH; y++)
             for (int X = 1; X <= pad; X++) {
@@ -656,6 +839,7 @@ int main(int argc, char **argv)
     fclose(f);
     pad = atoi(argv[2]); enabled = argc > 4 ? 2 : 1;
     build(pad);
+    if (getenv("WSB_INFO")) fprintf(stderr, "side_k %d %d floor_fit L %d-%d R %d-%d\n", side_k[0], side_k[1], floor_fit[0][0], floor_fit[0][1], floor_fit[1][0], floor_fit[1][1]);
     if (!strip || !(f = fopen(argv[3], "wb"))) return 1;
     fprintf(f, "P6 %d %d 255\n", PW + 2 * pad, PH);
     for (int y = 0; y < PH; y++)
