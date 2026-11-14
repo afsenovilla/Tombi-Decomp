@@ -42,8 +42,8 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    fixed texts in the LOAD screen's cream message boxes, the keys hint with drawn arrows and an A key drawn like the black Thor buttons, the title logo A00202 at half size, Start touchable; the disc is opened before the game and closed again,
    port_cd_close), the plain DejaVu screen (n3ds/launcher_ui.c) when the disc cannot be read; PC preview
    `PORT_LAUNCHER_PREVIEW=DIR` (with `--second-screen`).
-   The OPTIONS screen's music plays under it (SOUND/SND_SYS.WVD + S_SYS00.SEQ through shims/sound.c, an SDL audio
-   device of its own closed before the game's; PC check: PORT_LAUNCHER_MUSIC_WAV=FILE with the preview, its envelope
+   The OPTIONS screen's music plays under it (SOUND/SND_SYS.WVD + S_SYS00.SEQ through shims/sound.c, fed to the
+   DSP (ndsp) by the start screen's loop, its buffers given back before the game; the screens in VRAM, not linear memory; PC check: PORT_LAUNCHER_MUSIC_WAV=FILE with the preview, its envelope
    matched the game's own options music, r 0.83, same level); moving an option or its value plays the disc's language
    menu cursor sound (its boot program's second VAB, sound 0: SsUtKeyOnV(23, vab, 0, 0, 8, 0, 100, 100)).  Not yet seen
    on the console.
