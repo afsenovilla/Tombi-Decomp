@@ -6,9 +6,8 @@
      SYSTEM/A00802.000  their 256-colour CLUT
      SYSTEM/A00804.000  4 bpp, 256 x 256: the 8 x 16 font (rows of 32 characters from ' ', then A-grave.., a-grave..)
      SYSTEM/A00803.000  the font's CLUT (row 0)
-   and the bottom screen in the LOAD screen's pink wall of TOMBI! logos:
-     SYSTEM/A00500.000  8 bpp, 384 x 256: the wall, 160 x 256 at x 128, repeating both ways
-     SYSTEM/A00502.000  its 256-colour CLUT
+   The top screen has the green squares, the bottom one the yellow ones; the texts that stay put sit in the cream boxes
+   of the game's messages (the LOAD screen's "No saved games": a blue rim, a dark line inside it, rounded corners).
    With no disc readable the plain screen (n3ds/launcher_ui.c) is drawn instead.  Pictures: RGB, rows from the top. */
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,9 +18,9 @@
 
 typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32;
 
-static u8 *sq, *font, *wall;          /* the squares' page (8 bpp), the font page (4 bpp), the logo wall's (8 bpp) */
-static u32 sq_pal[256], font_pal[16], wall_pal[256]; /* 0xRRGGBB */
-static unsigned sq_n, font_n, wall_n;
+static u8 *sq, *font;                 /* the squares' page (8 bpp), the font page (4 bpp) */
+static u32 sq_pal[256], font_pal[16]; /* 0xRRGGBB */
+static unsigned sq_n, font_n;
 
 static u32 c15(unsigned v) { return (v & 31) << 19 | (v >> 5 & 31) << 11 | (v >> 10 & 31) << 3; }
 static int read_pal(const char *name, u32 *pal, int n) {
@@ -30,16 +29,14 @@ static int read_pal(const char *name, u32 *pal, int n) {
     for (int i = 0; i < n; i++) pal[i] = c15(d[2 * i] | d[2 * i + 1] << 8);
     free(d); return 1;
 }
-void port_launcher_game_end(void) { free(sq); free(font); free(wall); sq = font = wall = NULL; }
+void port_launcher_game_end(void) { free(sq); free(font); sq = font = NULL; }
 /* 1: the pieces were read */
 int port_launcher_game_begin(void) {
     port_launcher_game_end();
     sq = pa_read("SYSTEM/A00801.GAM", &sq_n);
     font = pa_read("SYSTEM/A00804.000", &font_n);
-    wall = pa_read("SYSTEM/A00500.000", &wall_n);
-    if (!sq || sq_n < 384 * 256 || !font || font_n < 128 * 256 || !wall || wall_n < 384 * 256 ||
-        !read_pal("SYSTEM/A00802.000", sq_pal, 256) || !read_pal("SYSTEM/A00803.000", font_pal, 16) ||
-        !read_pal("SYSTEM/A00502.000", wall_pal, 256)) {
+    if (!sq || sq_n < 384 * 256 || !font || font_n < 128 * 256 ||
+        !read_pal("SYSTEM/A00802.000", sq_pal, 256) || !read_pal("SYSTEM/A00803.000", font_pal, 16)) {
         port_launcher_game_end(); return 0;
     }
     return 1;
@@ -55,17 +52,37 @@ static void mix(Cv *c, int x, int y, u32 col) {   /* half the colour, half what 
     u8 *d = c->p + (y * c->w + x) * 3;
     d[0] = (u8)((d[0] + (col >> 16 & 255)) / 2); d[1] = (u8)((d[1] + (col >> 8 & 255)) / 2); d[2] = (u8)((d[2] + (col & 255)) / 2);
 }
-/* the squares: green ones where (column + row) is even, yellow ones elsewhere, as on the game's screen */
-static void squares(Cv *c, int y0) {
-    static const u8 green[4][2] = { {0, 0}, {2, 0}, {0, 1}, {1, 2} }, yellow[4][2] = { {1, 0}, {1, 1}, {2, 1}, {0, 2} };
+/* the squares of one colour (0 green, 1 yellow), the four of it in turn so that no two alike touch */
+static void squares(Cv *c, int y0, int yellow) {
+    static const u8 tile[2][4][2] = { { {0, 0}, {2, 0}, {0, 1}, {1, 2} }, { {1, 0}, {1, 1}, {2, 1}, {0, 2} } };
     for (int j = 0; y0 + j * 84 < c->h; j++) for (int i = 0; i * 80 < c->w; i++) {
-        const u8 *t = (i + j) & 1 ? yellow[(i + 3 * j) & 3] : green[(i + 3 * j) & 3];
+        const u8 *t = tile[yellow][(i + 2 * j) & 3];
         for (int y = 0; y < 84; y++) for (int x = 0; x < 80; x++)
             put(c, i * 80 + x, y0 + j * 84 + y, sq_pal[sq[(t[1] * 86 + y) * 384 + t[0] * 80 + x]]);
     }
 }
-static void logo_wall(Cv *c) {
-    for (int y = 0; y < c->h; y++) for (int x = 0; x < c->w; x++) put(c, x, y, wall_pal[wall[((y + 128) & 255) * 384 + 128 + x % 160]]);   /* (framed as on the LOAD screen) */
+/* a message box (inclusive bounds): cream, a dark line inside a blue rim, the corners rounded (radius 5, their edge
+   pixels blended by coverage) */
+static void blend(Cv *c, int x, int y, u32 col, int a) {
+    if (x < 0 || y < 0 || x >= c->w || y >= c->h || a <= 0) return;
+    u8 *d = c->p + (y * c->w + x) * 3;
+    d[0] = (u8)(((col >> 16 & 255) * a + d[0] * (255 - a)) / 255); d[1] = (u8)(((col >> 8 & 255) * a + d[1] * (255 - a)) / 255);
+    d[2] = (u8)(((col & 255) * a + d[2] * (255 - a)) / 255);
+}
+static void box(Cv *c, int x0, int y0, int x1, int y1) {
+    static const u32 ring[3] = { 0x0000FF, 0x393939, 0xFFEFDE };   /* rim, line, inside */
+    const float r = 5.5f;
+    for (int y = y0; y <= y1; y++) for (int x = x0; x <= x1; x++) {
+        int a[3] = { 0, 0, 0 };   /* coverage (of 16) of the rounded rect shrunk by 0, 1, 2 px */
+        for (int k = 0; k < 3; k++) for (int sy = 0; sy < 4; sy++) for (int sx = 0; sx < 4; sx++) {
+            float px = x + (sx + 0.5f) / 4, py = y + (sy + 0.5f) / 4, l = x0 + k, t = y0 + k, rr = x1 + 1 - k, bb = y1 + 1 - k, q = r - k;
+            float cx = px < l + q ? l + q : px > rr - q ? rr - q : px, cy = py < t + q ? t + q : py > bb - q ? bb - q : py;
+            if (px >= l && px <= rr && py >= t && py <= bb && (px - cx) * (px - cx) + (py - cy) * (py - cy) <= q * q) a[k]++;
+        }
+        blend(c, x, y, ring[0], a[0] * 255 / 16);
+        blend(c, x, y, ring[1], a[1] * 255 / 16);
+        blend(c, x, y, ring[2], a[2] * 255 / 16);
+    }
 }
 static int glyph_cell(unsigned ch, int *u, int *v) {
     if (ch >= 0x20 && ch < 0x80) { *u = (ch & 31) * 8; *v = (ch - 0x20) / 32 * 16; return 1; }
@@ -100,6 +117,7 @@ static void bar(Cv *c, int x0, int y0, int x1, int y1, int down) {
     }
 }
 /* lines of at most w pixels, broken at spaces (a word longer than a line is broken where it has to be) */
+static int wrap_dry;
 static int wrap(Cv *c, int x, int y, int w, const char *s, int maxl) {
     int n = 0, per = w / 8;
     while (*s && n < maxl) {
@@ -108,13 +126,13 @@ static int wrap(Cv *c, int x, int y, int w, const char *s, int maxl) {
         if (len > per) { take = per; while (take > 0 && s[take] != ' ') take--; if (!take) take = per; }
         char ln[64]; if (take > 63) take = 63;
         memcpy(ln, s, take); ln[take] = 0;
-        text(c, x, y + 16 * n, ln);
+        if (!wrap_dry) text(c, x, y + 16 * n, ln);
         s += take; n++;
     }
     return n;
 }
 
-static const int START_X0 = 40, START_Y0 = 172, START_X1 = 279, START_Y1 = 203;
+static const int START_X0 = 40, START_Y0 = 176, START_X1 = 279, START_Y1 = 203;
 void port_launcher_game_start_rect(int *x0, int *y0, int *x1, int *y1) { *x0 = START_X0; *y0 = START_Y0; *x1 = START_X1; *y1 = START_Y1; }
 
 void port_launcher_game_draw(unsigned char *top, unsigned char *bot, const LuiState *s) {
@@ -123,20 +141,24 @@ void port_launcher_game_draw(unsigned char *top, unsigned char *bot, const LuiSt
     const char *val[4] = { lang, s->movies ? "PLAY" : "SKIP", s->hz == 50 ? "50 HZ" : "60 HZ",
                            s->picture == 1 ? "WIDE (EXPERIMENTAL)" : s->picture == 2 ? "3D (EXPERIMENTAL)" : "4:3" };
     Cv t = { top, 400, 240 }, b = { bot, 320, 240 };
-    /* ---- the top screen: the options, as the game's OPTIONS */
-    squares(&t, -6);
-    text(&t, 200 - text_w("TOMBI!") / 2, 22, "TOMBI!");
+    static const char *hint = "UP/DOWN: OPTION   LEFT/RIGHT: CHANGE";
+    /* ---- the top screen: the options, as the game's OPTIONS, on the green squares */
+    squares(&t, -6, 0);
+    box(&t, 200 - text_w("TOMBI!") / 2 - 14, 10, 200 + text_w("TOMBI!") / 2 + 13, 37);
+    text(&t, 200 - text_w("TOMBI!") / 2, 16, "TOMBI!");
     for (int i = 0; i < 4; i++) {
-        const int y = 60 + i * 32;
+        const int y = 58 + i * 32;
         if (i == s->row) bar(&t, 16, y - 4, 383, y + 17, 0);
         text(&t, 28, y, lab[i]);
         text(&t, 132, y, val[i]);
     }
-    text(&t, 200 - text_w("UP/DOWN: OPTION   LEFT/RIGHT: CHANGE") / 2, 204, "UP/DOWN: OPTION   LEFT/RIGHT: CHANGE");
-    /* ---- the bottom screen: what the option does, the disc and the console, Start */
-    logo_wall(&b);
-    text(&b, 160 - text_w(name[s->row]) / 2, 8, name[s->row]);
-    {   const char *d0 = 0, *d1 = 0; int y = 32;
+    box(&t, 200 - text_w(hint) / 2 - 14, 196, 200 + text_w(hint) / 2 + 13, 223);
+    text(&t, 200 - text_w(hint) / 2, 202, hint);
+    /* ---- the bottom screen, on the yellow squares: what the option does, the disc and the console, Start */
+    squares(&b, -6, 1);
+    box(&b, 160 - text_w(name[s->row]) / 2 - 14, 4, 160 + text_w(name[s->row]) / 2 + 13, 29);
+    text(&b, 160 - text_w(name[s->row]) / 2, 9, name[s->row]);
+    {   const char *d0 = 0, *d1 = 0;
         if (s->row == 0) {
             d0 = "The language of the texts.";
             if (s->lang_es_improved) d1 = s->es_ready ? "La traducci\xF3n mejorada ya est\xE1 preparada."
@@ -144,16 +166,25 @@ void port_launcher_game_draw(unsigned char *top, unsigned char *bot, const LuiSt
         } else if (s->row == 1) { d0 = "Play: the logos, the intro, the movies."; d1 = "Skip: straight to the title screen."; }
         else if (s->row == 2) { d0 = "60 Hz: the speed of the US game."; d1 = "50 Hz: the speed of the PAL disc."; }
         else { d0 = "4:3 as on the PS1, Wide: all of the top screen, 3D: depth with the slider."; d1 = "Wide and 3D are slower."; }
-        y += 16 * wrap(&b, 16, y, 288, d0, 3);
-        if (d1) wrap(&b, 16, y, 288, d1, 3);
-    }
-    {   char disc[48]; snprintf(disc, sizeof disc, "%s", s->disc && *s->disc ? s->disc : "-");
-        text(&b, 16, 132, s->new3ds ? "New 3DS" : "Old 3DS");
-        wrap(&b, 16, 148, 288, disc, 1);
+        char disc[96]; snprintf(disc, sizeof disc, "%s", s->disc && *s->disc ? s->disc : "-");
+        wrap_dry = 1;
+        int n0 = wrap(&b, 0, 0, 288, d0, 3), n1 = d1 ? wrap(&b, 0, 0, 288, d1, 3) : 0, nd = wrap(&b, 0, 0, 288, disc, 3);
+        wrap_dry = 0;
+        /* (the text box from y 34 down; the console and disc box under it, both above Start) */
+        int y = 32, h = 16 * (n0 + n1) + 8;
+        box(&b, 8, y, 311, y + h - 1);
+        wrap(&b, 16, y + 4, 288, d0, 3);
+        if (d1) wrap(&b, 16, y + 4 + 16 * n0, 288, d1, 3);
+        /* (the console, then the disc image's name on lines of its own) */
+        y = START_Y0 - 6 - (16 * (1 + nd) + 8);
+        box(&b, 8, y, 311, y + 16 * (1 + nd) + 7);
+        text(&b, 16, y + 4, s->new3ds ? "New 3DS" : "Old 3DS");
+        wrap(&b, 16, y + 20, 288, disc, 3);
     }
     bar(&b, START_X0, START_Y0, START_X1, START_Y1, s->start_down);
-    text(&b, 160 - text_w("START") / 2, 180, "START");
-    text(&b, 160 - text_w("A: START   START: EXIT") / 2, 216, "A: START   START: EXIT");
+    text(&b, 160 - text_w("START") / 2, 182, "START");
+    box(&b, 160 - text_w("A: START   START: EXIT") / 2 - 14, 210, 160 + text_w("A: START   START: EXIT") / 2 + 13, 236);
+    text(&b, 160 - text_w("A: START   START: EXIT") / 2, 215, "A: START   START: EXIT");
 }
 
 #ifndef __3DS__
@@ -163,7 +194,7 @@ void port_launcher_game_preview(const char *dir) {
     static unsigned char top[400 * 240 * 3], bot[320 * 240 * 3]; char p[512];
     if (!port_launcher_game_begin()) { port_printf("[launcher] the options screen's pieces are not readable\n"); return; }
     for (int r = 0; r < 5; r++) {
-        LuiState st = { r & 3, "Espa\xF1ol (traducci\xF3n mejorada)", 1, r != 4, 1, 60, r == 3 ? 2 : 0, "Tombi.chd", 0, r == 4 };
+        LuiState st = { r & 3, "Espa\xF1ol (traducci\xF3n mejorada)", 1, r != 4, 1, 60, r == 3 ? 2 : 0, r == 1 ? "Tombi! (Europe) (En,Fr,De,Es,It,Nl,Sv,Da).chd" : "Tombi.chd", 0, r == 4 };
         port_launcher_game_draw(top, bot, &st);
         snprintf(p, sizeof p, "%s/launcher_%d_top.png", dir, r); port_gpu_write_png(p, top, 400, 240);
         snprintf(p, sizeof p, "%s/launcher_%d_bottom.png", dir, r); port_gpu_write_png(p, bot, 320, 240);
