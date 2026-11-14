@@ -186,6 +186,31 @@ static float seg_d2(float px, float py, float ax, float ay, float bx, float by) 
     const float dx = wx - t * vx, dy = wy - t * vy;
     return dx * dx + dy * dy;
 }
+/* the console's START key: a black pill (the Thor's black keys' look, as abutton), the word in white in it, w x 16
+   from (x0, y0) */
+static int exit_style;
+static void startkey(Cv *c, int x0, int y0, int w) {
+    const float r = 8.0f;
+    for (int y = 0; y < 16; y++) for (int x = 0; x < w; x++) {
+        int in = 0; float shade = 0;
+        for (int sy = 0; sy < 4; sy++) for (int sx = 0; sx < 4; sx++) {
+            const float px = x + (sx + 0.5f) / 4, py = y + (sy + 0.5f) / 4;
+            const float cx = px < r ? r : px > w - r ? w - r : px, dx = px - cx, dy = py - r;
+            if (dx * dx + dy * dy <= r * r) { in++; shade += (py - r) / r; }
+        }
+        if (in) blend(c, x0 + x, y0 + y, (u32)(int)(0x2A - 8 * shade / in) * 0x010101, in * 255 / 16);
+    }
+    /* the word: the game font's capitals, white, squeezed to 6 columns each (every other one of its 8 dropped where
+       the letter has no ink there) */
+    const char *wd = "START"; const int tw = 5 * 7, tx = x0 + (w - tw) / 2;
+    for (int i = 0; wd[i]; i++) {
+        int u, v; glyph_cell((u8)wd[i], &u, &v);
+        for (int j = 3; j < 14; j++) for (int k = 0; k < 7; k++) {
+            const int px = u + (k < 6 ? k : 7), q = (font[(v + j) * 128 + px / 2] >> ((px & 1) * 4)) & 15;
+            if (q == 1) put(c, tx + i * 7 + k, y0 + j - 1, 0xE8E8E8); else if (q) blend(c, tx + i * 7 + k, y0 + j - 1, 0xE8E8E8, 90);
+        }
+    }
+}
 static void abutton(Cv *c, int cx, int cy, int n) {
     const float R = n / 2.0f, s = n / 16.0f, hw = 0.72f * s;   /* radius, scale, half the stroke */
     for (int y = 0; y < n; y++) for (int x = 0; x < n; x++) {
@@ -267,9 +292,16 @@ void port_launcher_game_draw(unsigned char *top, unsigned char *bot, const LuiSt
         wrap(&b, 16, y + 20, 288, disc, 3);
     }
     bar(&b, START_X0, START_Y0, START_X1, START_Y1, s->start_down);
-    text(&b, 160 - text_w("START") / 2, START_Y0 + 7, "START");
-    box(&b, 160 - text_w("START: EXIT") / 2 - 14, 208, 160 + text_w("START: EXIT") / 2 + 13, 235);
-    text(&b, 160 - text_w("START: EXIT") / 2, 214, "START: EXIT");
+    text(&b, 160 - text_w("PLAY") / 2, START_Y0 + 7, "PLAY");
+    if (exit_style == 0) {   /* the console's START key, then what it does */
+        const int w = 52 + 8 + text_w("EXIT"), x = 160 - w / 2;
+        box(&b, x - 14, 208, x + w + 13, 235);
+        startkey(&b, x, 214, 52);
+        text(&b, x + 60, 214, "EXIT");
+    } else {
+        box(&b, 160 - text_w("START BUTTON: EXIT") / 2 - 14, 208, 160 + text_w("START BUTTON: EXIT") / 2 + 13, 235);
+        text(&b, 160 - text_w("START BUTTON: EXIT") / 2, 214, "START BUTTON: EXIT");
+    }
 }
 
 /* ---- the OPTIONS screen's music while the start screen is up: the game's own (loadSoundSet 8 + startBgmTrack 0:
@@ -361,6 +393,7 @@ extern int port_gpu_write_png(const char *path, const unsigned char *rgb, int w,
 void port_launcher_game_preview(const char *dir) {
     static unsigned char top[400 * 240 * 3], bot[320 * 240 * 3]; char p[512];
     if (!port_launcher_game_begin()) { port_printf("[launcher] the options screen's pieces are not readable\n"); return; }
+    { const char *v = getenv("PORT_LAUNCHER_EXIT"); if (v) exit_style = atoi(v); }
     for (int r = 0; r < 5; r++) {
         LuiState st = { r & 3, "Espa\xF1ol (traducci\xF3n mejorada)", 1, r != 4, 1, 60, r == 3 ? 2 : 0, r == 1 ? "Tombi! (Europe) (En,Fr,De,Es,It,Nl,Sv,Da).chd" : "Tombi.chd", 0, r == 4, r == 4 ? 1 : 0 };
         port_launcher_game_draw(top, bot, &st);
