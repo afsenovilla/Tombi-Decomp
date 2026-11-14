@@ -362,6 +362,18 @@ src/isObjectInView.c | (unsigned short)(p->pos->y - *(unsigned short *)SCR_X + 0
 # the off-screen despawns keep their margin past the wide frame's edges (objects in the strips are not removed)
 src/despawnObjectOffscreen.c | (unsigned short)(o->h[1] - SCREEN_ORIGIN_X + 0xa0) > 0x27f | (unsigned short)(o->h[1] - SCREEN_ORIGIN_X + 0xa0 + PORT_WSO) > 0x27f + 2 * PORT_WSO
 src/despawnObjectOffscreenMargin.c | (unsigned short)(o->h->p.whole - (*(unsigned short*)((char*)&SPAD.i174 + 2)) + a) < (short)a * 2 + 0x140 | (unsigned short)(o->h->p.whole - (*(unsigned short*)((char*)&SPAD.i174 + 2)) + a + PORT_WSO) < (short)a * 2 + 0x140 + 2 * PORT_WSO
+# per-object windows and spawn points at the 4:3 edges (identity when off): a thing that would appear / start / reset
+# just past 4:3 does so just past the wide frame instead
+src/isOnScreen.c | if ((u16)(x - SCREEN_ORIGIN_X + 0x40) < 0x1C1) { | if ((u16)(x - SCREEN_ORIGIN_X + 0x40 + PORT_WSO) < 0x1C1 + 2 * PORT_WSO) {
+src/x003/wingedForkPigWaitAppear.c | + 0x64) >= 0x209) return 0; | + 0x64 + PORT_WSO) >= 0x209 + 2 * PORT_WSO) return 0;
+src/x006/cullObjectWideWindow.c | + 0xc8) >= 0x385) return 0; | + 0xc8 + PORT_WSO) >= 0x385 + 2 * PORT_WSO) return 0;
+src/x010/updateSpearPig.c | + 0xe0) >= 0x301) return 0; | + 0xe0 + PORT_WSO) >= 0x301 + 2 * PORT_WSO) return 0;
+src/x003/spikyLizardIdle.c | + 0x70) >= 0x220 || | + 0x70 + PORT_WSO) >= 0x220 + 2 * PORT_WSO ||
+src/x003/spikyLizardWalk.c | + 0x70) >= 0x220 || | + 0x70 + PORT_WSO) >= 0x220 + 2 * PORT_WSO ||
+src/x003/updateSpikyLizardSpawner.c | (*(unsigned short*)((char*)&SPAD.i174 + 2)) - 0x40, | (*(unsigned short*)((char*)&SPAD.i174 + 2)) - 0x40 - PORT_WSO,
+src/x003/windStreakRespawn.c | o->a.raw = ((*(short*)((char*)&SPAD.i174 + 2)) - 0x10) << 16; | o->a.raw = ((*(short*)((char*)&SPAD.i174 + 2)) - 0x10 - PORT_WSO) << 16;
+src/x003/translucentSpriteDrift.c | o->a.raw = (SCREEN_ORIGIN_X[0] - 0xa0) << 16; | o->a.raw = (SCREEN_ORIGIN_X[0] - 0xa0 - PORT_WSO) << 16;
+src/x003/translucentSpriteDrift.c | > SCREEN_ORIGIN_X[0] + 0x168) o->step = 1; | > SCREEN_ORIGIN_X[0] + 0x168 + PORT_WSO) o->step = 1;
 src/x004/cullObjectPerspective.c | + 0x40 + h) > h * 2 + 0x1c0 | + 0x40 + h + (port_ws_cull * k >> 7)) > h * 2 + 0x1c0 + 2 * (port_ws_cull * k >> 7)
 src/x004/cullObjectPerspectiveWide.c | + 0x40 + h) > h * 2 + 0x1c0 | + 0x40 + h + (port_ws_cull * k >> 7)) > h * 2 + 0x1c0 + 2 * (port_ws_cull * k >> 7)
 # --widescreen: the gameplay HUD anchored to the wide frame's edges (lives, vitality, weapon left; AP right)
