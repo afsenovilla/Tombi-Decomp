@@ -15,6 +15,7 @@ extern int pa_ok, pa_font_ok;
 extern unsigned *pa_cv; extern int pa_cw, pa_ch;          /* the canvas, in game pixels (0xAABBGGRR) */
 extern int pa_clip_x0, pa_clip_y0, pa_clip_x1, pa_clip_y1;
 void pa_init(void);
+void pa_release(void);
 unsigned char *pa_read(const char *name, unsigned *n);   /* a disc file, GAM unpacked */
 void pa_put(int x, int y, unsigned c);
 void pa_blend(int x, int y, unsigned c, int a);

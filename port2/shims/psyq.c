@@ -1053,6 +1053,17 @@ int port_cd_open(const char *path) {
     else if (port_verbose || port_trace_cd) port_printf("[port] disc self-check: PVD ok, volume \"%.32s\"\n", sec + 40);
     return 0;
 }
+/* the disc closed again (the 3DS start screen reads the game's pictures from it before the game opens it itself) */
+void port_cd_close(void) {
+    if (cd_fp) { fclose(cd_fp); cd_fp = 0; }
+    if (cd_chd) { port_chd_close(); cd_chd = 0; }
+    if (cd_data) {
+        for (int i = 0; i < cd_nranges; i++) { if (cd_ranges[i].fp) fclose(cd_ranges[i].fp); free(cd_ranges[i].path); }
+        free(cd_ranges); cd_ranges = 0; cd_nranges = 0; cd_data = 0;
+        memset(cd_open_ranges, 0, sizeof cd_open_ranges); cd_open_next = 0;
+    }
+    cd_sector_count = 0;
+}
 int port_tpatch_sector(int lba, unsigned char *d, int bytes);              /* shims/tpatch.c (--text-patch) */
 unsigned char *port_tpatch_named(const char *path, unsigned *size);
 extern int port_tpatch_count;

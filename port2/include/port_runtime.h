@@ -125,6 +125,7 @@ extern int port_realtime, port_hz;
 
 /* CD image */
 int port_cd_open(const char *path);
+void port_cd_close(void);
 int port_cd_open_data(const char *dir);          /* data/ folder of tools/extract_data.py (manifest.txt) */
 int port_cd_read_sectors(int lba, int count, void *dst, int sector_bytes);
 unsigned char *port_cd_read_named(const char *path, unsigned *size);   /* a whole file by ISO path (disc directory / data folder), malloc'd */

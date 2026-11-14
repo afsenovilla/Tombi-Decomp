@@ -33,8 +33,12 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
 0. **Nintendo 3DS port (branch `claude/wizardly-heisenberg-5fllxj`, tested by the user on an Old 3DS, 2026-11-13)**:
    `--renderer pica` (n3ds/pica_c3d.c + shims/gpu_pica.c), 60 Hz with frameskip, the panel on the bottom screen
    (no map tab on an Old 3DS, the game's HUD there: `--hud-bottom`), improved Spanish translation stored on the SD.
-   Start screen (n3ds/main_3ds.c, teletext-like, L held at boot): language, movies (skip = straight to the title),
+   Start screen (n3ds/main_3ds.c, L held at boot): language, movies (skip = straight to the title),
    50/60 Hz, picture 4:3 / wide (`--widescreen 5:3`, experimental, off by default) / 3D (`--stereo`, experimental).
+   Drawn with the game's own pieces (wood planks, stone, cream window, its fonts: runtime/panel.c
+   port_launcher_game_draw; the disc is opened before the game and closed again, pa_release frees the panel's copy) and
+   the plain DejaVu screen (n3ds/launcher_ui.c) when the disc cannot be read; PC preview `PORT_LAUNCHER_PREVIEW=DIR`.
+   Not yet seen on the console.
    Measured on the console: gameplay 58-60 vblank/s in most rooms (the mansion AREA04 ~52: game logic 14 ms), Baccus
    wide 59 (tiles of the top-down map copied by 32 x 32 cells, not decoded again; on the 3DS ws_topdown.c draws no
    map windows beside the game's: 8 px of black at a map edge).  3D: the left eye is the game's picture, the right

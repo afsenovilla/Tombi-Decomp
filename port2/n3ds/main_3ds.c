@@ -163,6 +163,15 @@ static void blit(gfxScreen_t scr, const unsigned char *rgb, int w) {   /* RGB, w
         }
     }
 }
+/* the start screen in the game's own pieces (runtime/panel.c), when the disc can be read before the game starts */
+int port_launcher_game_begin(int lang);
+void port_launcher_game_end(void);
+void port_launcher_game_start_rect(int *x0, int *y0, int *x1, int *y1);
+void port_launcher_game_draw(unsigned char *top, unsigned char *bot, const LuiState *s);
+extern int port_cd_open_data(const char *dir);
+extern int port_cd_open(const char *path);
+extern void port_cd_close(void);
+static const char *launch_image;   /* the disc image (NULL: the data folder) */
 static int choose_lang(int code) {
     /* (Latin-1: the start screen's font has its accented letters) */
     static const char *name[NLANG] = { "English", "Fran\xE7" "ais", "Deutsch", "Italiano", "Nederlands", "Espa\xF1ol (traducci\xF3n mejorada)",
@@ -175,7 +184,11 @@ static int choose_lang(int code) {
     gfxInitDefault();
     gfxSetDoubleBuffering(GFX_TOP, false); gfxSetDoubleBuffering(GFX_BOTTOM, false);
     static unsigned char top[400 * 240 * 3], bot[320 * 240 * 3];
-    int sx0, sy0, sx1, sy1; lui_start_rect(&sx0, &sy0, &sx1, &sy1);
+    /* (the disc opened for its pictures and letters, the Spanish font with the English one's missing letters, then closed
+       again: the game opens it itself) */
+    int game = (launch_image ? port_cd_open(launch_image) : port_cd_open_data(DIR_ "/data")) == 0 && port_launcher_game_begin(5);
+    int sx0, sy0, sx1, sy1;
+    if (game) port_launcher_game_start_rect(&sx0, &sy0, &sx1, &sy1); else lui_start_rect(&sx0, &sy0, &sx1, &sy1);
     while (aptMainLoop()) {
         hidScanInput();
         u32 k = hidKeysDown() | (hidKeysDownRepeat() & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT));
@@ -204,13 +217,15 @@ static int choose_lang(int code) {
         }
         if (redraw) {
             LuiState st = { row, name[lang], codes[lang] == 9, es_ready, opt_movies, opt_hz, opt_wide, launch_disc, n3, touching };
-            lui_draw(top, bot, &st);
+            if (game) port_launcher_game_draw(top, bot, &st); else lui_draw(top, bot, &st);
             blit(GFX_TOP, top, 400); blit(GFX_BOTTOM, bot, 320);
             gfxFlushBuffers();
             redraw = 0;
         }
         gfxSwapBuffers(); gspWaitForVBlank();
     }
+    port_launcher_game_end();
+    port_cd_close();
     screens_black();
     gfxExit();
     if (ok) opts_save();
@@ -264,7 +279,7 @@ int main(int argc, char **argv) {
             if (df) { fprintf(df, "%s\n", image); fclose(df); }
         }
         args[n++] = "--disc"; args[n++] = image;
-        { const char *b = strrchr(image, '/'); launch_disc = b ? b + 1 : image; }
+        { const char *b = strrchr(image, '/'); launch_disc = b ? b + 1 : image; launch_image = image; }
     }
     {   /* the language: lang.txt, asked the first time and with L held (an args.txt "--lang N" comes later and wins) */
         static char langarg[4];
