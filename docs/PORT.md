@@ -2907,15 +2907,49 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     more regular than the painted ones (cleaner, stripier chevrons; pure green rather than the picture's olive /
     yellow mix); at 8x the strip's slabs are a touch greyer and busier than the picture's (whose mortar reads lighter
     and whose stones more often have a white top), and its vertical joints are straighter.
-  - AREA19 s1 / AREA02 s1 (the Dwarf Village: one layout, two pictures): canopy 0-~100 (AREA19: blossom as value
-    noise masses with small flower clusters on a jittered 8 x 7 grid, a ragged shaded lower edge; AREA02: soft
-    spheres of radius 13-25 in the picture's own four balloon colours, far ones first, lit upper left), the haze /
-    rock band behind, the fence 112-138 (posts 5-7 columns, two rails), the ledge 138-150 (grass / golden leaves),
-    its lip, the palisade 155-182 (4-column stakes in the ledge's shade), the ground, the front 195-223 (blossom
-    mounds / big spheres half under the frame).  Huts, dwarves, jukebox, bench and barrel are not continued.  Weak
-    points: the fence is sparser than the picture's, the blossom's flower clusters are rounder than the painted
-    ones, the front band is lower and flatter than the picture's front quads, no trunks between the balloons (by
-    design: no trunks).
+  - AREA02 s1 (the Dwarf Village with the balloon trees), redrawn 2026-11-15 (`gen_vb`) after the user rejected the
+    first version as garbage (flat saturated spheres lit from the wrong side, a regular stake fence and palisade, seams).
+    Measured on the picture at 5-12x next to both edges (the comment over `gen_vb` has every number):
+    - the canopy (rows 0-~90): soft woolly spheres of radius ~12-30 (most 15-22) in three colour classes, cream,
+      pink-lilac and blue (hues ~40, ~300, ~250 degrees: what looked like a fourth, violet, class is the pink one in
+      shade), packed with no gap down to row ~60, ragged lower ends to ~90, the lower ones in front; lit mostly from
+      the front and a little from the upper right (each brightest just right of and above its centre: the first
+      version lit them from the upper left), low contrast, darker where a front one overlaps them, a cottony grain.
+      The spheres cut by each edge are completed from measured centres / radii / classes (`VB_EDGE`), then far
+      balloons (no gaps) and three layers of new ones (radius 15-27) laid outwards; a new sphere that would be cut by
+      the join is left out, one close to it goes behind the edge's.  The shading is a rank in its class's ramp (the
+      picture's quantiles), and every lightness change on a sphere (the match to the picture next to the edge, the
+      tone per row at the join) moves along that ramp (`vb_relum`): the picture's lighter pinks are paler, and
+      scaling the colour had made them hot pink;
+    - behind them (rows ~56-138) the balloon trees' trunks and the haze, as ranks in per-row ramps of the edge
+      columns (rows y-2..y+2, so no banding): broad brown trunks lit on their right flank, mottled with pale streaks,
+      pale haze and far trunks between them, the far trunk by the left edge and the fluted one by the right edge
+      continued;
+    - the fence (rows 110-138): posts with a dark left column and a lit middle, tops 111-118; sparse and in the shade
+      by the left edge (3-5 columns every 6-12), dense by the jukebox (3-6 columns, 1-4 apart); three rails per side,
+      the rows measured per side (left 119-122, 125-129, 134-137; right, from the stretch x 186-234 beside the
+      jukebox, 116-119, 127-130, 132-135), boards here and there thinner or missing; matched in brightness / contrast
+      to the picture's fence wood next to the edge;
+    - the ledge of golden leaves (138-150), its dark lip (150-155), the bank (155-182: straw blades every 3-6 columns,
+      its top in the ledge's shade, golden leaves caught in its lower part), the ground (182-): per-row ramps of the
+      golden texels next to the edge (the right edge's rows 112-192 are the jukebox's: the right takes them from x
+      160-234 beside it; the stones, their track and the front spheres' dark rims left out);
+    - the front (~186-223): the big soft spheres cut by the frame's bottom completed (left pink, right blue), new ones
+      outwards, the ground between them.
+    Then the per-row tone at the join (`vb_seam`) and each band blurred to the picture's own fine detail there.  Not
+    continued: the huts, the dwarves, the jukebox, the ladder, the stones, the barrel; no roots.  Weak points (8x
+    sheets): the new spheres are a little smoother and more evenly sized than the painted ones, the pinks a touch
+    more saturated and the shadows between spheres a deeper blue; the fence is cleaner and more regular than the
+    picture's blurred jumble (its rails read more, its posts are straighter); the bank's blades are more regular; the
+    trunk outlines step by whole columns; under the canopy (rows ~70-80) the odd dark line where a far balloon meets
+    the haze.  Checked (headless, 2026-11-15): 16:9 and 21:9 (the 21:9 strip starts with the 16:9 one's columns);
+    i386 = wasm2c frames; with the default flags AREA02 s1 and AREA02 s5 / AREA05 s1 / s3 identical to the build
+    before; 4:3 with `--ws-backdrop on` identical to 4:3; not checked on the device.
+  - AREA19 s1 (the blossom village; it shares the layout, the pieces and the first generator, `gen_village`, with the
+    old AREA02 s1): the first version, rejected by the user, still to be redone the way AREA02 s1 was: canopy 0-~100
+    (blossom as value noise masses with small flower clusters on a jittered 8 x 7 grid, a ragged shaded lower edge),
+    the grey rock band behind, the fence 112-138 (posts 5-7 columns, two rails), the grass ledge 138-150, its lip,
+    the palisade 155-182 (4-column stakes), the ground, the front 195-223 (blossom mounds).
   - AREA17 s3 / s4 (the Iron Castle hall) is not redrawn yet: its side walls are not simply planes towards the
     camera.  Measured edges (left / right edge columns): the top rail of the side balustrade rises outwards (row 136
     at x 34, 131 at x 1), its lower rail stays at row 146-147 across, the walls' foot falls outwards (180 at x 25,

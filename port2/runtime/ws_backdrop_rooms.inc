@@ -974,6 +974,9 @@ static void gen_a5(int pad)
 }
 
 /* ================================================================== AREA19 s1 / AREA02 s1: the Dwarf Village
+ * The first version, rejected by the user ("garbage"); AREA19 s1 (the blossom picture) still runs it, AREA02 s1 has its
+ * own generator since (gen_vb below), so the balloon branches here are no longer used.  To be redone for AREA19 the
+ * way gen_vb is (the fence / ledge / bank / ground bands are the same layout).
  * Two pictures with one layout (the same pieces), a frontal scene: bands by row, measured on the pictures:
  *   0-~100  the canopy: cherry blossom (AREA19: dark pink with light flower clusters) or the balloon trees (AREA02:
  *           big soft spheres, cream / pink / violet / blue, lit from the upper left);
@@ -1209,7 +1212,36 @@ static void gen_village(int pad)
 }
 
 /* ================================================================== AREA02 s1: the Dwarf Village with the balloon trees
- * (see gen_vb) */
+ * Redrawn 2026-11-15 after the user rejected the first version (gen_village's: flat saturated spheres lit from the wrong
+ * side, a regular stake fence and palisade, seams).  Measured on the picture at 5-12x next to both edges:
+ *   0-~90   the canopy: soft woolly spheres, radius ~12-30 (most 15-22), cream / pink-lilac / blue (hues ~40, ~300 (blue -
+ *           red -8..15), ~250 (blue - red ~50)), packed without gaps down to row ~60, their lower ends ragged to ~90;
+ *           the lower ones in front of the upper ones; lit mostly from the front and a little from the upper right
+ *           (each brightest just right of and above its centre), low contrast (a blue one spans luminance ~60-160,
+ *           cream ~90-230), darker where a front one overlaps them (contact shade), a fine cottony grain.  The ones cut
+ *           by each edge (VB_EDGE: left cream (8, 2) r 17, pink (2, 62) r 20, a dark lilac one behind them (-8, 33) r 18;
+ *           right cream (325, 52) r 28 and (318, 8) r 20 behind the pink / blue ones) are completed;
+ *   ~56-138 behind them the balloon trees' trunks and the haze: broad brown trunks (x 9-32, 256-296) lit on their right
+ *           flank, mottled, pale vertical streaks; pale grey haze and slender far trunks between them (left edge x
+ *           0-8: a far trunk; right edge x 302-319: a fluted far trunk, light and dark streaks 2-4 columns wide);
+ *   110-138 the fence, in front of the haze: posts with a dark left column and a lit middle, tops 111-118, sparse and
+ *           in the shade by the left edge (3-5 columns every 6-12), dense next to the jukebox (3-6 columns, 1-4
+ *           apart); three rails per side, measured on the edge columns (left rows 119-122, 125-129, 134-137; right,
+ *           on the stretch x 186-234 by the jukebox, 116-119, 127-130, 132-135), a lit top row, the board, a dark
+ *           row and a shadow under it, here and there thinner or missing;
+ *   138-150 the ledge of golden leaves (bright 138/143-147, darker 148-149, a ragged lower edge), 150-155 its dark lip
+ *           (luminance ~42, almost flat), 155-182 the bank: straw blades (a thin light one every 3-6 columns, dark
+ *           between), its upper part in the ledge's shade, golden leaves caught in its lower part; 182-~200 the ground
+ *           of golden leaves; ~186-223 the front: big soft spheres cut by the frame (left pink (34, 250) r 52, right
+ *           blue (296, 245) r 58, completed), the ground between them.
+ * Every colour is the picture's: the classes' ramps (canopy, front), per-row ramps of rows y-2..y+2 next to the edge for
+ * the haze / trunks, ledge, lip, bank and ground (the right edge's rows 112-192 are the jukebox's, so the right takes
+ * them from the stretch x 160-234 beside it), the fence wood per side.  The spheres' shading is a rank in their class's
+ * ramp (the ramp is the picture's quantiles: a sphere spanning the ranks has the picture's tones), and every lightness
+ * change on a sphere (the match to the picture next to the edge, the tone per row at the join) moves along its class's
+ * ramp (vb_relum: lighter pinks are paler, not more saturated, as in the picture).  Then the bands blurred to the
+ * picture's own fine detail next to the edge (a5_soften).  Not continued: the huts, the dwarves, the jukebox, the
+ * ladder, the stones and their track, the barrel; no roots. */
 enum { VB_C0 = 1, VB_F0 = 5, VB_BACK = 9, VB_FENCE, VB_LEDGE, VB_BANK, VB_GROUND };
 typedef struct { short x, y, r, cls, dep; } VSph;       /* centre (picture coordinates), radius, class, depth (front: more) */
 typedef struct { short x0, x1, kind; } VTrunk;            /* columns [x0, x1), kind 0 far (pale), 1 near (dark), 2 fluted */
@@ -1444,9 +1476,9 @@ static void vb_fence(int side)
 {
     int lo = vb_lo(side), hi = vb_hi(side), p = side ? PW - 1 : 0, dir = side ? 1 : -1;
     for (int k = 0; k < 80; k++) {
-        u32 h = hash3(side, k, 891); int gap = side ? 4 + (int)(h % 6) : 6 + (int)(h % 7), w = 2 + (int)(h >> 4) % 3;
+        u32 h = hash3(side, k, 891); int w = side ? 3 + (int)(h >> 4) % 4 : 3 + (int)(h >> 4) % 3, gap = side ? w + 1 + (int)(h % 4) : 6 + (int)(h % 7);
         int top = 111 + (int)(h >> 8) % 8, x0;
-        p += dir * gap; x0 = side ? p : p - w + 1;
+        p += dir * (side ? gap - w + 1 : gap); x0 = side ? p : p - w + 1;
         if ((side && x0 > hi) || (!side && x0 + w < lo)) break;
         for (int u = 0; u < w; u++)
             for (int y = top; y < VB_LEDGE0 + 1; y++) {
@@ -1461,9 +1493,10 @@ static void vb_fence(int side)
         int r0 = VB_RAIL[side][r].r0, r1 = VB_RAIL[side][r].r1;
         for (int wx = lo; wx < hi; wx++) {
             int sag = (noise(wx, r, 40, 1, 901 + r) - 128) / 100;           /* (a rough board: +-1 row) */
+            int th = noise(wx, r, 13, 1, 909 + r) < 110;                       /* (thinner here and there) */
             if (noise(wx, r, 9, 1, 903 + r) > 214) continue;                  /* (here and there a board missing) */
-            for (int y = r0 + sag; y <= r1 + 1 + sag; y++) {
-                int t = y == r0 + sag ? 170 : y == r1 + sag ? 60 : y > r1 + sag ? -1 : 120;
+            for (int y = r0 + sag + th; y <= r1 + 1 + sag; y++) {
+                int t = y == r0 + sag + th ? 150 : y == r1 + sag ? 50 : y > r1 + sag ? -1 : 105;
                 if (t < 0) { Rgb *q = vb_px(side, wx, y); if (q && vb_reg(side, wx, y) != VB_FENCE) *q = scale(*q, 190); continue; }
                 t += (noise(wx, y, 9, 1, 905 + r) - 128) / 3 + (int)(hash3(wx, y, 907) & 31) - 16;
                 vb_put(side, wx, y, ramp(&VB_rpost[side], t), VB_FENCE);
@@ -1564,6 +1597,7 @@ static void vb_seam(int side, int y0, int y1, int n)
     }
 }
 
+static int vb_fencewood(Rgb k) { return (k.r + k.g) / 2 - k.b > 35 && lum(k) > 50; }
 static int vb_c0(Rgb k) { return vb_class(k) == 0; }
 static int vb_c1(Rgb k) { return vb_class(k) == 1; }
 static int vb_c2(Rgb k) { return vb_class(k) == 2; }
@@ -1579,6 +1613,7 @@ static void gen_vb(int pad)
         for (int c = 0; c < 3; c++) {
             if (side) vb_match(VB_C0 + c, 240, PW, 0, 90, cp[c]); else vb_match(VB_C0 + c, 0, 80, 0, 90, cp[c]);
         }
+        if (side) a5_match(VB_FENCE, 186, 235, 112, VB_LEDGE0, vb_fencewood); else a5_match(VB_FENCE, 0, 57, 112, VB_LEDGE0, vb_fencewood);
         vb_seam(side, 0, VB_LEDGE0, 14);
         vb_seam(side, VB_LEDGE0, PH, 8);
         a5_soften(side, 0, 110);
