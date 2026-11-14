@@ -365,7 +365,7 @@ static void a5_clump(const A5Tree *t, int side, int x16, int y16, int rx, int ry
         if (X < 1 || X > cw || y < 0 || y >= A5_WALL0) continue;
         q = (long long)u * u * 256 / (rx * rx) + (long long)v * v * 256 / (ry * ry);
         if (q > 256 + (int)(hash3(wx, y, seed) & 127) - 80) continue;                      /* a ragged rim */
-        {   int c = base - v * 36 / ry + dx * 10 / rx + (int)(hash3(wx, y, seed + 1) & 15) - 8 + (noise(wx, y, 2, 2, seed + 3) - 128) / 4;
+        {   int c = base - v * (t->kind == 2 ? 36 : 16) / ry + dx * 10 / rx + (int)(hash3(wx, y, seed + 1) & 15) - 8 + (noise(wx, y, 2, 2, seed + 3) - 128) / 4;
             if (q > 150 && v > 0) c -= 34;                                                 /* the underside */
             if ((hash3(wx, y, seed + 5) & 7) == 0) c -= 24;                                /* gaps between the needles */
             putr(X, y, a5_tcol(t, c), t->kind == 2 ? A5_TREEN : A5_TREE);
@@ -394,17 +394,18 @@ static void a5_tree(const A5Tree *t, int side)
         } else
             for (int y = t->ty + 1 + (int)(hash3(t->seed, 0, 803) % 3); y < A5_WALL0 && nr < 40; y += t->sp + (int)(hash3(t->seed, y, 805) % 4) - 1) rows[nr++] = y;
         for (int k = nr - 1; k >= 0; k--) {
-            int yk = rows[k], rel = yk - t->ty, W = a5_tw(t, rel + t->sp), base = 128 + 14 - rel / 6;
+            int yk = rows[k], rel = yk - t->ty, W0 = a5_tw(t, rel + t->sp) * (200 + (int)(hash3(t->seed, k, 813) % 90)) / 256, base = 128 + 14 - rel / 6;
             if (rel < 0) continue;
             for (int s = -1; s <= 1; s += 2) {
                 Rng r = rng_at(t->seed * 64 + k, s + 1, 807);
+                int W = W0 * (s > 0 ? 224 + (int)(hash3(t->seed, k, 815) % 64) : 224 + (int)(hash3(t->seed, k, 817) % 64)) / 256;   /* uneven sides */
                 int step = 20 + rndi(&r, 12);
                 for (int i = rndi(&r, 16); i <= W + 6; i += step) {
                     int x16 = xs + s * i, y16 = yk * 16 + i * A5_DROOP / 16 + rndi(&r, 48) - 24;
                     int rx = 28 + rndi(&r, 26), ry = 16 + rndi(&r, 10), v = base + rndi(&r, 70) - 35;
                     int wx = x16 / 16;
-                    v += (noise(wx, yk, 9, 11, 809 + t->seed) - 128) * 4 / 5;          /* patches of sun and shade */
-                    v += s > 0 ? 14 + i * 30 / (W + 16) : -14 - i * 10 / (W + 16);   /* the right flank in the light */
+                    v += (noise(wx, yk, 9, 11, 809 + t->seed) - 128) * 3 / 5;          /* patches of sun and shade */
+                    v += s > 0 ? 18 + i * 40 / (W + 16) : -18 - i * 22 / (W + 16);   /* the right flank in the light */
                     if (s > 0 && i > W / 2 && rndi(&r, 2)) v += 34;                  /* its bright tips */
                     if (i > W - 8 && rndi(&r, 2)) ry += 8;                           /* drooping tips */
                     if (rndi(&r, 8)) a5_clump(t, side, x16, y16, rx, ry, v, t->seed * 16 + k, s);
@@ -420,12 +421,12 @@ static void a5_wood(int side)
     for (int X = 1; X <= cw; X++)                                            /* the sky */
         for (int y = 0; y < A5_FEN[side].pl[0][0]; y++) {
             int wx = wx_of(side, X);
-            putr(X, y, ramp(&A5_rsky[side], a5_rank(wx, y, 14, 7, 621, 40)), A5_SKY);
+            putr(X, y, ramp(&A5_rsky[side], 112 + a5_rank(wx, y, 20, 9, 621, 30) * 9 / 16), A5_SKY);
         }
     /* the hazy back row: far trees every ~13 columns */
     for (int k = fdiv(x0, 13) - 3; k * 13 < x1 + 30 && n < 96; k++) {
         u32 h = hash3(k, 0, 631); A5Tree *t = &tr[n];
-        t->cx = k * 13 + (int)(h % 7) - 3; t->ty = 4 + (int)(h >> 8) % 14; t->h = 50 + (int)(h >> 16) % 20; t->wmax = 13 + (int)(h >> 20) % 6;
+        t->cx = k * 13 + (int)(h % 7) - 3; t->ty = 2 + (int)(h >> 8) % 14; t->h = 30 + (int)(h >> 16) % 16; t->wmax = 16 + (int)(h >> 20) % 9;
         t->sp = 6; t->kind = 0; t->seed = k * 7 + 3; t->nb = 0; t->B = 0; t->adx0 = 0;
         if ((side && t->cx > PW - 4) || (!side && t->cx < 4)) n++;
     }
@@ -434,15 +435,19 @@ static void a5_wood(int side)
         t->cx = c; t->ty = A5_ETREE[side].ty; t->h = 70; t->wmax = A5_ETREE[side].wk * 70 / 16; t->sp = 7;
         t->kind = A5_ETREE[side].kind; t->seed = 900 + side; t->nb = A5_ntb[side]; t->B = A5_tb[side];
         t->adx0 = (side ? PW - 1 : 0) - c; if (t->adx0 < 0) t->adx0 = -t->adx0; t->adx0 *= 16;
-        /* new conifers outwards: 20-34 columns apart, near and hazy mixed, tops -4..14, crowns 22-36 wide */
-        while (n < 96) {
-            u32 h = hash3(side, i, 641); A5Tree *q = &tr[n];
-            c += dir * (20 + (int)(h % 15));
-            if ((side && c > x1) || (!side && c < x0)) break;
-            q->cx = c; q->kind = (h >> 8) % 5 < 3 ? 2 : 1; q->ty = (int)(h >> 12) % 17 - 4;
-            q->h = 55 + (int)(h >> 17) % 30; q->wmax = 22 + (int)(h >> 22) % 14; q->sp = 6 + (int)(h >> 26) % 3;
-            q->seed = 700 + i * 5 + side; q->nb = 0; q->B = 0; q->adx0 = 0;
-            n++; i++;
+        /* new conifers outwards, each its own: near (bright) or hazy, top -5..15, crown 26-60 wide, spaced by their
+           widths (overlapping by a third or so), a gap now and then where the back row and the sky show */
+        {   int pw = t->wmax;
+            while (n < 96) {
+                u32 h = hash3(side, i, 641), h2 = hash3(side, i, 643); A5Tree *q = &tr[n];
+                q->kind = h % 9 < 5 ? 2 : 1; q->wmax = 20 + (int)(h >> 4) % 18;
+                c += dir * ((pw + q->wmax) * 2 / 3 + (int)(h2 % 9) - 4 + ((h2 >> 4) % 4 == 0 ? 10 : 0));
+                if ((side && c > x1) || (!side && c < x0)) break;
+                q->cx = c; q->ty = (int)(h >> 10) % 21 - 5 + (q->kind == 1 ? 3 : 0);
+                q->h = 36 + (int)(h >> 16) % 26; q->sp = 6 + (int)(h >> 22) % 3;
+                q->seed = 700 + i * 5 + side; q->nb = 0; q->B = 0; q->adx0 = 0;
+                pw = q->wmax; n++; i++;
+            }
         }
         /* draw: the back row, the hazy trees, the near ones; the edge tree last within its kind */
         for (int pass = 0; pass < 3; pass++) {
@@ -472,7 +477,7 @@ static void a5_fence(int side)
         for (int y = F->pl[0][0] - 1; y < A5_WALL0; y++) {
             Rgb c; int plank = a5_plank_row(side, y);
             if (plank) {
-                int p = y < F->pl[1][0] ? 0 : y < F->pl[2][0] ? 1 : 2, t = a5_rank(wx, y * 5, 11, 4, 661 + p, 70);
+                int p = y < F->pl[1][0] ? 0 : y < F->pl[2][0] ? 1 : 2, t = a5_rank(wx, y * 5, 6, 4, 661 + p, 100);
                 int wth = (noise(wx, y, 17, 5, 667 + p) - 128) / 5;                       /* weathered patches */
                 int jn = 0;
                 {   int lit2, pp = A5_FEN[side].post_edge, dir = side ? 1 : -1;           /* board ends at some posts */
@@ -627,17 +632,17 @@ static void a5_ground(int side)
 {
     for (int X = 1; X <= cw; X++) {
         int wx = wx_of(side, X);
-        for (int y = A5_WALL1; y < PH; y++) putr(X, y, ramp(&A5_rrow[side][y], a5_rank(wx, y * 3, 9, 4, 731, 30)), A5_PATH);
+        for (int y = A5_WALL1; y < PH; y++) putr(X, y, ramp(&A5_rrow[side][y], a5_rank(wx, y * 3, 4, 4, 731, 60)), A5_PATH);
     }
 }
 static int a5_bush_top(int side, int wx, int X)
 {
     int best = PH + 20, dir = side ? 1 : -1, p = side ? PW - 30 : 30;
-    for (int k = 0; k < 64; k++) {                       /* mounds: 26-44 columns apart, half-width 15-25, top 199-207 */
-        u32 h = hash3(side, k, 741); int hw = 15 + (int)(h % 11), top = 199 + (int)(h >> 8) % 9, d = wx - p, t;
+    for (int k = 0; k < 64; k++) {                       /* mounds: 22-50 columns apart, half-width 12-27, top 198-211 */
+        u32 h = hash3(side, k, 741); int hw = 12 + (int)(h % 16), top = 198 + (int)(h >> 8) % 14, d = wx - p, t;
         t = top + d * d * 13 / (hw * hw);
         if (t < best) best = t;
-        p += dir * (26 + (int)(h >> 12) % 19);
+        p += dir * (22 + (int)(h >> 12) % 29);
         if ((side && p - 40 > wx) || (!side && p + 40 < wx)) break;
     }
     best += (noise(wx, 0, 4, 1, 743) - 128) / 36;                                  /* leaf clusters on the outline */
@@ -683,7 +688,7 @@ static void a5_match(int reg, int x0, int x1, int y0, int y1, int (*pred)(Rgb))
     static Hist hp, hs; int mp, dp, ms, ds, k;
     memset(&hp, 0, sizeof hp); memset(&hs, 0, sizeof hs);
     for (int y = y0; y < y1; y++) for (int x = x0; x < x1; x++) { Rgb c = rgb15(pic[y][x]); if (pred(c)) hist_add(&hp, lum(c)); }
-    for (int y = 0; y < PH; y++) for (int X = 1; X <= cw; X++) if (reg_at(X, y) == reg) hist_add(&hs, lum(cv[(size_t)y * cw + X - 1]));
+    for (int y = 0; y < PH; y++) for (int X = 1; X <= cw && X <= 53; X++) if (reg_at(X, y) == reg) hist_add(&hs, lum(cv[(size_t)y * cw + X - 1]));   /* (the 16:9 strip's columns: a wider one starts the same) */
     if (hp.n < 40 || hs.n < 40) return;
     hist_stat(&hp, &mp, &dp); hist_stat(&hs, &ms, &ds);
     k = ds ? clampi(dp * 256 / ds, 160, 512) : 256;
@@ -752,7 +757,7 @@ static void a5_soften_reg(int side, int y0, int y1, int reg, int px0, int px1, i
     a5_box(&cv[(size_t)y0 * cw], b1, cw, h); a5_box(b1, b2, cw, h);
     for (int w = 0; w <= 512; w += 32) {
         long long sum = 0; int n = 0;
-        for (int y = 1; y < h - 1; y++) for (int X = 2; X < cw; X++) {
+        for (int y = 1; y < h - 1; y++) for (int X = 2; X < cw && X <= 53; X++) {
             int t = 0, ok = 1, c = 0;
             for (int dy = -1; dy <= 1 && ok; dy++) for (int dx = -1; dx <= 1; dx++) {
                 size_t i = (size_t)(y + dy) * cw + X - 1 + dx; Rgb q;
@@ -767,7 +772,7 @@ static void a5_soften_reg(int side, int y0, int y1, int reg, int px0, int px1, i
     }
     for (int y = 0; y < h; y++) for (int X = 1; X <= cw; X++) {
         size_t i = (size_t)y * cw + X - 1;
-        if (rg[(size_t)y0 * cw + i] == reg) cv[(size_t)y0 * cw + i] = best <= 256 ? mix(cv[(size_t)y0 * cw + i], b1[i], best) : mix(b1[i], b2[i], best - 256);
+        if (rg[(size_t)y0 * cw + i] == reg || (reg == A5_TREE && rg[(size_t)y0 * cw + i] == A5_SKY)) cv[(size_t)y0 * cw + i] = best <= 256 ? mix(cv[(size_t)y0 * cw + i], b1[i], best) : mix(b1[i], b2[i], best - 256);
     }
 #ifdef WS_BACKDROP_MAIN
     if (getenv("WSB_INFO")) fprintf(stderr, "side %d region %d: picture fine %d, blur %d (left %d)\n", side, reg, ep, best, bd);
@@ -808,7 +813,7 @@ static void gen_a5(int pad)
         a5_seam(side, 0, A5_FEN[side].pl[0][0], 12);
         a5_seam(side, 196, PH, 10);
         a5_soften_reg(side, 0, A5_WALL0, A5_TREEN, 252, 288, 8, 64, 128);
-        a5_soften_reg(side, 0, A5_WALL0, A5_TREE, 298, 320, 8, 64, 64);
+        a5_soften_reg(side, 0, A5_WALL0, A5_TREE, 298, 320, 8, 64, 128);   /* (the sky with it: soft tree tops) */
         a5_soften(side, A5_FEN[side].pl[0][0], A5_WALL0);
         a5_soften(side, A5_WALL0 + 1, A5_WALL1 - 1);
         a5_soften(side, A5_WALL1, 200);
