@@ -568,7 +568,7 @@ void func_8004AE7C(u8 *o) {
 /* --widescreen (port/fixes.txt, callAreaModelLinkHook): the per-area hook picks which 80-unit-wide blocks of the
  * area's background model (all already in RAM) are drawn this frame from the camera X (scratchpad 0x176,
  * SCREEN_ORIGIN_X).  With wider screens the blocks just past the 4:3 window popped in at the edges, so for the areas
- * whose hook selects blocks (GAME 0, 1, 2, 3, 7; AREA03's other work is kept out, below) it is run again with the camera
+ * whose hook selects blocks (GAME 0, 1, 2, 3, 7, 9, 10; their palette uploads are kept out: port_ws_dry, and AREA03 s2/s3 below) it is run again with the camera
  * moved left and right and the extra blocks are added to the list (capacity 88, the size the game's own clear keeps).
  * Drawing only: nothing else reads the list.  Off (port_ws_cull 0) the hook runs once exactly as before.
  * What of AREA03's hook (animateArea3Palettes) the extra runs must not pick up or repeat:

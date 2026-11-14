@@ -76,6 +76,20 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    extents relative to its origin) to see whether it swings on a hinge like the other doors or slides / lifts.
    A port mod (runtime data patch / spawned objects), never shipped game data.
 
+0. **Widescreen pop-in in the side-view rooms (2026-11-14)**: user report (AYN Thor, 16:9 auto): "quite a lot of
+   popping" in the Forest of 100 Flowers and the other side-view stages.  Measured with the new research options
+   `--log-pop` / `--sweep-x` and `tools/ws_popcheck.py` over the 52 scrolling side-view rooms (docs/PORT.md
+   "Widescreen", "Pop-in check"): 1543 -> 261 pops in the strips at 16:9 (i386 and wasm2c the same).  Fixed: block hooks
+   of AREA09 / AREA10 widened (palette uploads of the extra runs suppressed, `port_ws_dry`), AREA04's frustum
+   widened, object windows 2 * pad world units (objects behind the screen plane), isObjectInView / isOnScreen widened
+   (activation too), despawns keep their margin past the wide edges, edge spawns (AREA03 lizards, wind streaks,
+   drifting sprites, AREA01 KomaPig drop-ins) moved out by 2 * pad.  Windows already wide enough are left alone (the
+   AREA10 spear pigs' widened made one walk off before Tomba arrived).  Gameplay side effect: those objects start / are
+   placed a little further out (they walk in a little later); listed in PORT.md.  No widescreen: frames identical.
+   Headless only, not seen on the device.  Left: things that really appear (collected items, whole-layer toggles), a
+   thin polygon that flickers every other frame (AREA01 s0/s2, same at 4:3), AREA10 s3/s7 and AREA01 s2 rows chosen by
+   camera Y at the top edge.
+
 0. **Widescreen room ends (2026-11-12)**: `runtime/ws_edge.c` carries a room's model on past its end (the free
    outward edges of the ground strips, risers and tree cards extruded along X with the room's own tiling; docs/PORT.md
    "Widescreen", "Room ends").  On: AREA00 section 0, left end (the sky strip left of the first hill at 16:9 / 21:9 /

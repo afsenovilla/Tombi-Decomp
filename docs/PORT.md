@@ -2648,8 +2648,25 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   the `x < 0x140` / `< 0x141` screen tests of the model drawers (modelDraw*, drawModel*, area 9 models) and sprite
   drawers (drawObjectSprite*, drawScreenSpriteObject, isQuadOnScreen, the i0nfo ones) become
   `(u16)(x + pad) < 0x140 + 2*pad`; the object on-screen tests (cullObjectToDrawList[Margin], ObjCullRegister,
-  cullObjectPerspective[Wide]) get the same margin.  Ground, trees and objects then fill the side strips.  Note that
+  cullObjectPerspective[Wide]) get a margin too.  Ground, trees and objects then fill the side strips.  Note that
   `o->visible` feeds some object logic, so objects in the strips may be "active" earlier than on 4:3.
+- **Object windows and edge spawns (2026-11-14)**: the object windows are in world units, and an object behind the
+  screen plane moves less than one column per unit (measured: 0.81 in AREA00, 0.51 in AREA04 s0), so a margin of `pad`
+  units let objects appear up to ~20 columns inside the strip.  The object windows (cullObjectToDrawList[Margin],
+  ObjCullRegister, isObjectInView, isOnScreen) now take `PORT_WSO` = 2 * pad units (`port_prelude.h`), the AREA04
+  perspective culls pad * k / 128 (k = the game's own depth ratio; its 4:3 margin assumes a projection that the
+  measured one does not match).  isObjectInView also gates activation (KomaPigs, crawlers, spear pigs, eggs, flying
+  bugs, AREA01 rope chains' drawing), so these start when the wide frame shows them.  The off-screen despawns
+  (despawnObjectOffscreen[Margin]) keep their margin past the wide edges (+PORT_WSO), so nothing started in a strip is
+  removed while it shows.  Per-object windows and spawn points at the 4:3 edges moved out by PORT_WSO: winged fork
+  pigs (AREA03), the spiky lizards' reset window and their spawner (AREA03),
+  AREA03's wind streaks and drifting translucent sprites, and AREA01's KomaPig drop-ins (they land 2 * pad units
+  further out and walk in a little later; near the left room limit 0x3CA a left drop-in is skipped a little more
+  often).  Gameplay timing changes only by that walk; nothing is spawned that the game would not spawn.
+  Not changed: windows already wider than 16:9 needs (the spear pigs' [-224, 545), AREA06's [-200, 701)): widening
+  the spear pigs' made one in AREA10 s0 start early and walk off before Tomba arrived (found by comparing runs), so
+  activation windows are only widened where 4:3 + pad is not covered.  Gameplay positions, not screen tests: the
+  jellyfish targets (AREA09), komaPigDropIn's "walked in" test, the rolling barrel's camera range.
 - **HUD** (`drawHud`, fixes.txt): lives, vitality and weapon move left by pad, the AP counter right by pad (anchored to
   the wide frame's edges).  Other HUDs (race, item gauges, menus) stay at their 4:3 place, centred.
 
@@ -2659,9 +2676,15 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   rows, its centred 56.24 % the game's 320 columns (measured on a 2000x848 picture); wider than the picture is black.
 - **Background blocks** (`callAreaModelLinkHook`, fixes.txt -> `port_ws_area_model_link` in
   `runtime/main0_handwritten.c`): the area background is one model in RAM split into 80-unit-wide blocks; a per-area
-  hook picks the blocks around the camera X each frame (nothing streams from CD).  For the hooks that only select
-  (areas 0, 1, 2, 3, 7; the others also animate palettes or keep counters) it is run again with the camera X moved
-  2*pad+40 each way and the extra blocks are merged into the list (cap 88), so the edges no longer pop in.  Drawing only.
+  hook picks the blocks around the camera X each frame (nothing streams from CD).  The hook is run again with the camera
+  X moved 2*pad+40 each way (in steps of at most 160 units, so 32:9 leaves no gap) and the extra blocks are merged into the list (cap 88), so the edges no longer pop in.  Drawing only.
+  Areas 0, 1, 2, 3, 7, 9, 10 (2026-11-14: 9 and 10 added).  Some hooks also animate palettes / copy VRAM from
+  counters kept in the list (AREA03 s2/s3, AREA09 s0, AREA10 s1/s5, AREA14 s3/s6): the extra runs fill a zeroed
+  copy of the list and `port_ws_dry` (`shims/gpu.c`) turns LoadImage / MoveImage into no-ops while they run, so the
+  uploads happen once, from the game's own run (AREA03 s2/s3 still run only their selection, area3_blocks).  AREA04
+  s0-s3 select by a view-frustum test, not by camera X: its corners (x = +-z * 220 / 544) widen to
+  220 + pad (fixes.txt, area4ScriptOpSetQuad).  AREA06 s0 (selects by GVARS+0x48, not the camera X; no pop seen), 13, 14, 18 (one
+  block, the whole room) need nothing.
 - **Room ends** (`runtime/ws_edge.c`, called from `port_ws_area_model_link`; `--ws-edge off|on|all`): a room's
   model stops where the 4:3 camera stops, so past its first / last sector a wide frame showed the clear colour (the
   ground and the tree line of the first room ended in mid-air on the left).  Once per room model and end, one extra
@@ -2768,6 +2791,36 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   Our letters also cover the digits, punctuation and the keyboard's symbols, the grave / diaeresis / cedilla marks
   (à è ì ò ù, ä ë ï ö ü, ç and capitals), and replace the disc's leaf U / u (turned 8 degrees left: `REPLACE`);
   marks above the leaf's u / U sit a few texels right (`MARK_SHIFT`). 130 characters per font.
+
+**Pop-in check** (`--log-pop FILE`, `--sweep-x FRAME:STEP:X,X,...`, `tools/ws_popcheck.py`; research options,
+`runtime/ws_poplog.c`): `--log-pop` writes, per frame, the screen-X / Y range of the primitives each object
+(drawObject, layer 7) and each background block (drawAreaModelList) emitted; `--sweep-x` sets the player's X every
+vblank, walking it through a list of positions (`=X` jumps), so a room scrolls end to end with the game running
+(spawners, gravity, camera).  `ws_popcheck.py` lists what appeared or vanished inside the frame with at least 16
+columns showing on its first / last frame (something scrolling in shows a sliver), tagged "strip" (reaches into the
+side strips) or "4:3".  Run over the 52 scrolling side-view rooms the debug select enters (rooms of AREA00-04, 06, 09,
+10, 14, 17 whose camera range is wider than a screen; top-down rooms and the tunnels are elsewhere), sweeping each
+from its start to past both camera limits, 16:9, PC i386 and the wasm2c build (same counts): strip events
+
+| area | sections swept | before | after | 4:3 events, widescreen off |
+|---|---|---|---|---|
+| AREA00 | 0-5 | 58 | 29 | 94 |
+| AREA01 | 0-4 | 290 | 62 | 116 |
+| AREA03 | 0-5 | 36 | 34 | 139 |
+| AREA04 | 0-3, 5-7, 9, 13, 16 | 326 | 71 | 241 |
+| AREA09 | 0-2 | 108 | 10 | 42 |
+| AREA10 | 0-7 | 719 | 53 | 185 |
+| AREA14 | 0-7 | 6 | 2 | 15 |
+| AREA02 s4, AREA06 s0/s1, AREA17 s2 | | 0 | 0 | 0 |
+
+Before, by source: AREA10 / AREA09 / AREA04 background blocks (hooks not widened: ~1000), AREA01 s2 rope chains
+(isObjectInView: 228), AREA04 collectibles and other objects behind the screen plane (object windows one pad wide).
+What is left: things that really appear / vanish in view (collected items, a layer-8 overlay of AREA04 that toggles as
+a whole, AREA01 s2 / AREA10 s3 s7 blocks that the game selects by camera Y too, flickering in a row at the top edge,
+the same at 4:3), blocks flickering every other frame at a thin polygon (AREA01 s0, AREA01 s2: a polygon seen edge
+on, not a selection), and objects of room start / respawn frames.  The last column is the retail count of the same
+metric inside the 4:3 picture (widescreen off): the PS1 game itself pops blocks and objects in near its edges, which
+the wide frame now mostly hides.  Headless only; the device (AYN Thor) not checked.
 
 Launcher: Play tab, "Imagen" 16:9 / 21:9 / 32:9.  Remaining: some far backdrop layers still end near the 4:3 edges (sky
 colour in the top corners in AREA00), and any screen-space cull not matching the patterns above is untouched.
