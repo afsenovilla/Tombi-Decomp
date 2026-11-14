@@ -20,8 +20,8 @@
 
 typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32;
 
-static u8 *sq, *font, *logo, *frm;          /* the squares' page (8 bpp), the font page (4 bpp), the logo's (8 bpp) */
-static u32 sq_pal[256], font_pal[16], logo_pal[256], frm_pal[256]; /* 0xRRGGBB */
+static u8 *sq, *font, *logo;          /* the squares' page (8 bpp), the font page (4 bpp), the logo's (8 bpp) */
+static u32 sq_pal[256], font_pal[16], logo_pal[256]; /* 0xRRGGBB */
 static unsigned sq_n, font_n, logo_n;
 
 static u32 c15(unsigned v) { return (v & 31) << 19 | (v >> 5 & 31) << 11 | (v >> 10 & 31) << 3; }
@@ -31,15 +31,13 @@ static int read_pal(const char *name, u32 *pal, int n) {
     for (int i = 0; i < n; i++) pal[i] = c15(d[2 * i] | d[2 * i + 1] << 8);
     free(d); return 1;
 }
-void port_launcher_game_end(void) { free(sq); free(font); free(logo); free(frm); sq = font = logo = frm = NULL; }
+void port_launcher_game_end(void) { free(sq); free(font); free(logo); sq = font = logo = NULL; }
 /* 1: the pieces were read */
 int port_launcher_game_begin(void) {
     port_launcher_game_end();
     sq = pa_read("SYSTEM/A00801.GAM", &sq_n);
     font = pa_read("SYSTEM/A00804.000", &font_n);
     logo = pa_read("SYSTEM/A00202.000", &logo_n);
-    {   unsigned fn = 0; frm = pa_read("SYSTEM/A00500.000", &fn);   /* (the LOAD screen's page: its save slot frame) */
-        if (!frm || fn < 384 * 256 || !read_pal("SYSTEM/A00502.000", frm_pal, 256)) { free(frm); frm = NULL; } }
     if (!logo || logo_n < 256 * 256 || !read_pal("SYSTEM/A00203.000", logo_pal, 256)) { free(logo); logo = NULL; }   /* (then the title in letters) */
     if (!sq || sq_n < 384 * 256 || !font || font_n < 128 * 256 ||
         !read_pal("SYSTEM/A00802.000", sq_pal, 256) || !read_pal("SYSTEM/A00803.000", font_pal, 16)) {
@@ -116,27 +114,13 @@ static void logo_half(Cv *c, int x0, int y0) {
         if (n) blend(c, x0 + x, y0 + y, (u32)(r / n) << 16 | (u32)(g / n) << 8 | (u32)(b / n), n * 255 / 4);
     }
 }
-static int ink;   /* how text() draws the letters: 0 the font's own (black), 1 white with a dark edge, 2 black with a white halo */
-static int glyph_px(int u, int v, int i, int j) {
-    if (i < 0 || j < 0 || i > 7 || j > 15) return 0;
-    const int px = u + i; return (font[(v + j) * 128 + px / 2] >> ((px & 1) * 4)) & 15;
-}
 static void text(Cv *c, int x, int y, const char *s) {
     for (; *s; s++, x += 8) {
         int u, v;
         if (!glyph_cell((u8)*s, &u, &v)) continue;
-        if (ink == 2) for (int j = -1; j <= 16; j++) for (int i = -1; i <= 8; i++) {   /* (the halo: next to a body pixel) */
-            if (glyph_px(u, v, i, j) == 1) continue;
-            int near = 0;
-            for (int dj = -1; dj <= 1; dj++) for (int di = -1; di <= 1; di++) near |= glyph_px(u, v, i + di, j + dj) == 1;
-            if (near) put(c, x + i, y + j, 0xFFF8F0);
-        }
         for (int j = 0; j < 16; j++) for (int i = 0; i < 8; i++) {
-            const int k = glyph_px(u, v, i, j);
-            if (!k) continue;
-            if (ink == 1) put(c, x + i, y + j, k == 1 ? 0xF8F8F0 : 0x181818);
-            else if (ink == 2) { if (k == 1) put(c, x + i, y + j, font_pal[1]); }
-            else put(c, x + i, y + j, font_pal[k]);
+            const int px = u + i, k = (font[(v + j) * 128 + px / 2] >> ((px & 1) * 4)) & 15;
+            if (k) put(c, x + i, y + j, font_pal[k]);
         }
     }
 }
@@ -192,37 +176,6 @@ static void arrow(Cv *c, int cx, int cy, int dir) {
         }
         blend(c, x, y, 0x080008, in * 255 / 16);
     }
-}
-/* the bottom screen's boxes, in the style chosen (lg_style): 0 the cream message box; 1 the pause menu's: the
-   squares darkened through it, a light rim, white letters; 2 the LOAD screen's save slot frame (A00500 at 3,114,
-   77 x 37, corners 9 x 9 with their ornaments, its edges tiled from their middle) on the darkened squares, white
-   letters; 3 no box: black letters with a white halo */
-static int lg_style;
-static void frame9(Cv *c, int x0, int y0, int x1, int y1) {
-    const int W = x1 - x0 + 1, H = y1 - y0 + 1;
-    for (int y = 0; y < H; y++) for (int x = 0; x < W; x++) {
-        const int sx = x < 9 ? 3 + x : x >= W - 9 ? 80 - (W - x) : 40, sy = y < 9 ? 114 + y : y >= H - 9 ? 151 - (H - y) : 132;
-        const int k = frm[sy * 384 + sx];
-        if (k) put(c, x0 + x, y0 + y, frm_pal[k]);
-    }
-}
-static void dim(Cv *c, int x0, int y0, int x1, int y1, int keep) {   /* keep: of 256 */
-    for (int y = y0; y <= y1; y++) for (int x = x0; x <= x1; x++) {
-        if (x < 0 || y < 0 || x >= c->w || y >= c->h) continue;
-        u8 *d = c->p + (y * c->w + x) * 3;
-        d[0] = (u8)(d[0] * keep >> 8); d[1] = (u8)(d[1] * keep >> 8); d[2] = (u8)((d[2] * keep >> 8) + 8 > 255 ? 255 : (d[2] * keep >> 8) + 8);
-    }
-}
-static void box(Cv *c, int x0, int y0, int x1, int y1);
-static void panel(Cv *c, int x0, int y0, int x1, int y1) {
-    if (lg_style == 1) {
-        dim(c, x0 + 2, y0 + 2, x1 - 2, y1 - 2, 90);
-        for (int x = x0; x <= x1; x++) for (int t = 0; t < 2; t++) { put(c, x, y0 + t, 0xD8C890); put(c, x, y1 - t, 0xD8C890); }
-        for (int y = y0; y <= y1; y++) for (int t = 0; t < 2; t++) { put(c, x0 + t, y, 0xD8C890); put(c, x1 - t, y, 0xD8C890); }
-        ink = 1;
-    } else if (lg_style == 2 && frm) { dim(c, x0 + 2, y0 + 2, x1 - 2, y1 - 2, 90); frame9(c, x0, y0, x1, y1); ink = 1; }
-    else if (lg_style == 3) ink = 2;
-    else { box(c, x0, y0, x1, y1); ink = 0; }
 }
 /* the console's A button as on the AYN Thor with black buttons: a matt black round key, a touch lighter at its upper
    left and darker at its rim, and a thin light grey A (two legs and a bar); drawn n x n (16: the capitals' height)
@@ -288,7 +241,7 @@ void port_launcher_game_draw(unsigned char *top, unsigned char *bot, const LuiSt
     }
     /* ---- the bottom screen, on the yellow squares: what the option does, the disc and the console, Start */
     squares(&b, -6, 1);
-    panel(&b, 160 - text_w(name[s->row]) / 2 - 14, 4, 160 + text_w(name[s->row]) / 2 + 13, 29);
+    box(&b, 160 - text_w(name[s->row]) / 2 - 14, 4, 160 + text_w(name[s->row]) / 2 + 13, 29);
     text(&b, 160 - text_w(name[s->row]) / 2, 9, name[s->row]);
     {   const char *d0 = 0, *d1 = 0;
         if (s->row == 0) {
@@ -304,20 +257,19 @@ void port_launcher_game_draw(unsigned char *top, unsigned char *bot, const LuiSt
         wrap_dry = 0;
         /* (the text box from y 34 down; the console and disc box under it, both above Start) */
         int y = 32, h = 16 * (n0 + n1) + 8;
-        panel(&b, 8, y, 311, y + h - 1);
+        box(&b, 8, y, 311, y + h - 1);
         wrap(&b, 16, y + 4, 288, d0, 3);
         if (d1) wrap(&b, 16, y + 4 + 16 * n0, 288, d1, 3);
         /* (the console, then the disc image's name on lines of its own) */
         y = START_Y0 - 6 - (16 * (1 + nd) + 8);
-        panel(&b, 8, y, 311, y + 16 * (1 + nd) + 7);
+        box(&b, 8, y, 311, y + 16 * (1 + nd) + 7);
         text(&b, 16, y + 4, s->new3ds ? "New 3DS" : "Old 3DS");
         wrap(&b, 16, y + 20, 288, disc, 3);
     }
     bar(&b, START_X0, START_Y0, START_X1, START_Y1, s->start_down);
-    { const int k = ink; ink = 0; text(&b, 160 - text_w("START") / 2, START_Y0 + 7, "START"); ink = k; }
-    panel(&b, 160 - text_w("START: EXIT") / 2 - 14, 208, 160 + text_w("START: EXIT") / 2 + 13, 235);
+    text(&b, 160 - text_w("START") / 2, START_Y0 + 7, "START");
+    box(&b, 160 - text_w("START: EXIT") / 2 - 14, 208, 160 + text_w("START: EXIT") / 2 + 13, 235);
     text(&b, 160 - text_w("START: EXIT") / 2, 214, "START: EXIT");
-    ink = 0;
 }
 
 /* ---- the OPTIONS screen's music while the start screen is up: the game's own (loadSoundSet 8 + startBgmTrack 0:
@@ -409,7 +361,6 @@ extern int port_gpu_write_png(const char *path, const unsigned char *rgb, int w,
 void port_launcher_game_preview(const char *dir) {
     static unsigned char top[400 * 240 * 3], bot[320 * 240 * 3]; char p[512];
     if (!port_launcher_game_begin()) { port_printf("[launcher] the options screen's pieces are not readable\n"); return; }
-    { const char *v = getenv("PORT_LAUNCHER_STYLE"); if (v) lg_style = atoi(v); }
     for (int r = 0; r < 5; r++) {
         LuiState st = { r & 3, "Espa\xF1ol (traducci\xF3n mejorada)", 1, r != 4, 1, 60, r == 3 ? 2 : 0, r == 1 ? "Tombi! (Europe) (En,Fr,De,Es,It,Nl,Sv,Da).chd" : "Tombi.chd", 0, r == 4, r == 4 ? 1 : 0 };
         port_launcher_game_draw(top, bot, &st);
