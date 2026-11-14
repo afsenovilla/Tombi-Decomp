@@ -1212,55 +1212,100 @@ static void gen_village(int pad)
 }
 
 /* ================================================================== AREA02 s1: the Dwarf Village with the balloon trees
- * Redrawn 2026-11-15 after the user rejected the first version (gen_village's: flat saturated spheres lit from the wrong
- * side, a regular stake fence and palisade, seams).  Measured on the picture at 5-12x next to both edges:
- *   0-~90   the canopy: soft woolly spheres, radius ~12-30 (most 15-22), cream / pink-lilac / blue (hues ~40, ~300 (blue -
- *           red -8..15), ~250 (blue - red ~50)), packed without gaps down to row ~60, their lower ends ragged to ~90;
- *           the lower ones in front of the upper ones; lit mostly from the front and a little from the upper right
- *           (each brightest just right of and above its centre), low contrast (a blue one spans luminance ~60-160,
- *           cream ~90-230), darker where a front one overlaps them (contact shade), a fine cottony grain.  The ones cut
- *           by each edge (VB_EDGE: left cream (8, 2) r 17, pink (2, 62) r 20, a dark lilac one behind them (-8, 33) r 18;
- *           right cream (325, 52) r 28 and (318, 8) r 20 behind the pink / blue ones) are completed;
- *   ~56-138 behind them the balloon trees' trunks and the haze: broad brown trunks (x 9-32, 256-296) lit on their right
- *           flank, mottled, pale vertical streaks; pale grey haze and slender far trunks between them (left edge x
- *           0-8: a far trunk; right edge x 302-319: a fluted far trunk, light and dark streaks 2-4 columns wide);
- *   110-138 the fence, in front of the haze: posts with a dark left column and a lit middle, tops 111-118, sparse and
- *           in the shade by the left edge (3-5 columns every 6-12), dense next to the jukebox (3-6 columns, 1-4
- *           apart); three rails per side, measured on the edge columns (left rows 119-122, 125-129, 134-137; right,
- *           on the stretch x 186-234 by the jukebox, 116-119, 127-130, 132-135), a lit top row, the board, a dark
- *           row and a shadow under it, here and there thinner or missing;
- *   138-150 the ledge of golden leaves (bright 138/143-147, darker 148-149, a ragged lower edge), 150-155 its dark lip
- *           (luminance ~42, almost flat), 155-182 the bank: straw blades (a thin light one every 3-6 columns, dark
- *           between), its upper part in the ledge's shade, golden leaves caught in its lower part; 182-~200 the ground
- *           of golden leaves; ~186-223 the front: big soft spheres cut by the frame (left pink (34, 250) r 52, right
- *           blue (296, 245) r 58, completed), the ground between them.
- * Every colour is the picture's: the classes' ramps (canopy, front), per-row ramps of rows y-2..y+2 next to the edge for
- * the haze / trunks, ledge, lip, bank and ground (the right edge's rows 112-192 are the jukebox's, so the right takes
- * them from the stretch x 160-234 beside it), the fence wood per side.  The spheres' shading is a rank in their class's
- * ramp (the ramp is the picture's quantiles: a sphere spanning the ranks has the picture's tones), and every lightness
- * change on a sphere (the match to the picture next to the edge, the tone per row at the join) moves along its class's
- * ramp (vb_relum: lighter pinks are paler, not more saturated, as in the picture).  Then the bands blurred to the
- * picture's own fine detail next to the edge (a5_soften).  Not continued: the huts, the dwarves, the jukebox, the
- * ladder, the stones and their track, the barrel; no roots. */
-enum { VB_C0 = 1, VB_F0 = 5, VB_BACK = 9, VB_FENCE, VB_LEDGE, VB_BANK, VB_GROUND };
-typedef struct { short x, y, r, cls, dep; } VSph;       /* centre (picture coordinates), radius, class, depth (front: more) */
-typedef struct { short x0, x1, kind; } VTrunk;            /* columns [x0, x1), kind 0 far (pale), 1 near (dark), 2 fluted */
-static const VSph VB_EDGE[2][6] = {
-    { { -8, 33, 18, 1, 0 }, { 6, 82, 12, 1, 4 }, { 8, 2, 17, 0, 20 }, { 2, 62, 20, 1, 30 }, { 0, 0, 0, 0, 0 } },
-    { { 296, -12, 22, 0, 0 }, { 318, 8, 20, 0, 5 }, { 325, 52, 28, 0, 25 }, { 0, 0, 0, 0, 0 } } };
-static const VSph VB_FEDGE[2] = { { 34, 250, 52, 1, 0 }, { 296, 245, 58, 2, 0 } };
-static const VTrunk VB_TEDGE[2] = { { -16, 9, 0 }, { 302, 326, 2 } };
-typedef struct { short r0, r1; } VRail;
-static const VRail VB_RAIL[2][3] = { { { 119, 122 }, { 125, 129 }, { 134, 137 } }, { { 116, 119 }, { 127, 130 }, { 132, 135 } } };
-#define VB_LEDGE0 138
-#define VB_LIP0 150
-#define VB_BANK0 155
-#define VB_GROUND0 182
-static Ramp VB_rc[3], VB_rf[3], VB_rpost[2], VB_rrow[2][PH];
+ * Third version (2026-11-16), after the user's review of the second: the strips are now made from the user's own
+ * picture at run time instead of being drawn by hand-made procedures ("you invented the fence instead of looking at
+ * the fences literally next to it"; the palisade "practically a repeating texture"; the spheres cut by the edges not
+ * closed and not round; the right trunks "blobs").  Nothing of the picture is stored: the tables below are coordinates
+ * (measured circles, row bands, column ranges, boxes to leave out), every texel is read from VRAM when the room is
+ * entered.  Two techniques:
+ *
+ * 1. Image quilting (Efros & Freeman) for everything that is a texture: the trunks and the haze behind the canopy, the
+ *    fence, the ledge of golden leaves and its lip, the straw bank, the ground.  Each band (VB_BANDS: its rows, the
+ *    picture columns it may copy from, the boxes of objects to leave out) is filled outwards from the join in blocks
+ *    of B columns.  A block is a window of the picture's own texels on the SAME rows (so the fence rails, the
+ *    ledge's lip and the ground's perspective rows stay aligned; the back and the ground may shift a few rows), chosen
+ *    so that its OV columns of overlap match what is already there: for the first block the picture's columns at the
+ *    edge (the texture goes on with its phase), then the previous block; and its top rows match the band above.  Among
+ *    the windows within 1/8 of the best match one is taken by a position hash (deterministic variety); windows
+ *    near the ones just used are penalised (no visible repetition), and where a band has a clear horizontal period
+ *    (the fence posts, the straw blades: autocorrelation of the band's rows next to the edge, vb_period) an off-phase
+ *    window is penalised too.  The block is pasted along a minimum-error boundary cut (dynamic programming through
+ *    the overlap, vertical against the previous block, horizontal against the band above), so no straight seam
+ *    shows.  The picture's own columns are never changed: the first block meets the picture only through its match.
+ *    Rows of the back band hidden by the canopy in the picture (above row ~88) are taken from the band's clean rows
+ *    reflected upwards (the trunks are vertical): only their lowest part shows between the spheres.
+ *
+ * 2. Geometric completion for the spheres.  The circles of the spheres cut by each edge (canopy and front) were fitted
+ *    on the picture (outline points at 8x, then refined to the strongest colour step along the visible arc:
+ *    VB_PS).  At run time each sphere's shading is fitted on its visible texels (inside 0.9 r, not under a sphere in
+ *    front, of its colour class): luminance = a + b * (normal . light), the light direction itself fitted over all
+ *    the spheres (30 candidates, least error).  A completed sphere is drawn whole, in depth order with its neighbours:
+ *    every hidden texel takes the residual texture (picture - model) of a visible texel of the same sphere (its
+ *    reflection across the picture's edge first, so the cottony grain runs on through the join, then across the
+ *    sphere's vertical axis, then rotated) on the model's tone at its own place, as a shift along the colour class's
+ *    ramp (lighter pinks paler, as in the picture).  New spheres are drawn the same way from a donor sphere of the
+ *    picture of the chosen class (scaled to the new radius, its texture rotated / mirrored by hash, its tone moved by
+ *    depth), with a contact shade on what lies behind them.  A new sphere may reach the join only where the edge's
+ *    completed spheres are in front of it there, so the join shows exactly the picture's spheres.
+ *
+ * Bands and objects (rows measured on the picture at 6-12x): back (trunks / haze) to ~105, fence ~104-137 (left in
+ * the shade x 0-43; right beside the jukebox x 186-227), the ledge 137/138-155 (its top rows on the left are a log,
+ * x 6-52, left out), the bank 156-181 (left x 0-215 without the barrel; right x 150-215, before the ladder), the
+ * ground 182-~200 (left x 0-99; right x 214-255 under the ladder; the stones' track left out), the front spheres from
+ * ~190.  Not continued: the huts, the dwarves, the jukebox, the ladder, the log, the barrel, the stones. */
+enum { VB_SPH = 1, VB_FRONTR = 5, VB_BACK = 9, VB_FENCE, VB_LEDGE, VB_BANK, VB_GROUND };
+typedef struct { short x2, y2, r2, cls, dep, side, fl; } VbS;   /* centre / radius in half texels, colour class (cream 0,
+                                                                   pink 1, blue 2), depth (more: in front), the edge that
+                                                                   cuts it (-1: none) */
+#define VBS_DONOR 1
+#define VBS_FRONT 2
+static const VbS VB_PS[] = {
+    /* the canopy at the left edge */
+    {  22,  19, 28, 0, 10, 0, VBS_DONOR },               /* cream (11, 9.5) r 14 */
+    { -24,  72, 34, 1,  0, 0, 0 },                       /* the dark lilac one behind the pink, seen in columns 0-3 */
+    {  28,  76, 32, 1, 30, 0, VBS_DONOR },               /* pink (14, 38) r 16 */
+    {   5, 139, 38, 1, 20, 0, 0 },                       /* pink (2.5, 69.5) r 19, its lower right in a cast shade */
+    /* the canopy at the right edge */
+    { 592, -14, 24, 0,  5, 1, 0 },                       /* cream (296, -7) r 12 */
+    { 644,  44, 40, 0,  2, 1, 0 },                       /* cream (322, 22) r 20, behind the pink and the cream below */
+    { 570,  66, 37, 1, 15, -1, VBS_DONOR },              /* pink (285, 33) r 18.5 */
+    { 546, 125, 46, 2, 30, -1, VBS_DONOR },              /* blue (273, 62.5) r 23 */
+    { 631, 121, 45, 0, 25, 1, VBS_DONOR },               /* cream (315.5, 60.5) r 22.5 */
+    /* the front, cut by the frame's bottom */
+    {  56, 496, 100, 1, 10, 0, VBS_FRONT | VBS_DONOR },  /* pink (28, 248) r 50 */
+    { 590, 472, 94, 2, 10, 1, VBS_FRONT | VBS_DONOR },   /* blue (295, 236) r 47 */
+    { 366, 492, 96, 0, 10, -1, VBS_FRONT | VBS_DONOR },  /* cream (183, 246) r 48 */
+};
+#define VB_NPS ((int)(sizeof VB_PS / sizeof VB_PS[0]))
+typedef struct { short x0, y0, x1, y1; } VbBox;          /* [x0, x1) x [y0, y1) */
+/* objects never copied: the huts, the log, the bucket, the barrel, the stones and their track, the plank stack, the
+   ladder, the jukebox and its lever */
+static const VbBox VB_EXCL[] = {
+    { 44, 40, 190, 143 }, { 6, 138, 53, 144 }, { 138, 126, 162, 150 }, { 34, 164, 60, 192 }, { 100, 181, 216, 196 },
+    { 226, 118, 254, 142 }, { 216, 133, 262, 188 }, { 252, 120, 268, 190 }, { 262, 108, 316, 196 }, { 0, 0, 0, 0 } };
+typedef struct { short y0, y1, ry0, ry1, sx0, sx1, B, OV, OT, OB, dy, reg, per, up; } VbBand;
+/* rows [y0, y1) of the strip from the picture's rows [ry0, ry1) (others reflected into them), columns [sx0, sx1);
+   blocks of B columns, OV of overlap, OT / OB rows of overlap with the band above / below, windows shifted up to dy rows, per: look
+   for a horizontal period, up: rows above ry0 reflected into the first up rows only (the trunks: straight on up) */
+static const VbBand VB_BANDS[2][5] = {          /* (in the order they are made: the fence, then the back above it) */
+    { { 108, 138, 108, 138, 0, 44, 9, 4, 0, 0, 0, VB_FENCE, 1, 0 },
+      { 0, 108, 90, 110, 0, 44, 16, 6, 0, 6, 3, VB_BACK, 0, 6 },
+      { 138, 156, 144, 156, 0, 216, 16, 5, 4, 0, 0, VB_LEDGE, 0, 0 },
+      { 156, 181, 156, 181, 0, 216, 16, 5, 4, 0, 0, VB_BANK, 1, 0 },
+      { 181, PH, 181, 199, 0, 100, 16, 5, 4, 0, 1, VB_GROUND, 0, 0 } },
+    { { 108, 137, 108, 137, 186, 256, 12, 5, 0, 0, 0, VB_FENCE, 1, 0 },
+      { 0, 108, 92, 110, 186, 320, 24, 8, 0, 6, 3, VB_BACK, 0, 6 },
+      { 137, 156, 143, 156, 150, 216, 16, 5, 4, 0, 0, VB_LEDGE, 0, 0 },
+      { 156, 181, 156, 181, 150, 216, 16, 5, 4, 0, 0, VB_BANK, 1, 0 },
+      { 181, PH, 188, 204, 214, 262, 14, 5, 4, 0, 1, VB_GROUND, 0, 0 } } };
+static Ramp VB_rc[3], VB_rf[3];
 static int VB_share[4];                                  /* the classes' shares of the canopy (cumulative, /256) */
+static int VB_L[3];                                      /* the light (x 256) */
+static int VB_a[VB_NPS], VB_b[VB_NPS], VB_n[VB_NPS];    /* each sphere's shading: L = a + b (n . light) / 256 */
+static int vb_ow;                                        /* the working canvas' width (the strip + a margin, so a block
+                                                            or sphere at the strip's end is the same at any width) */
 
-static int vb_class(Rgb k)                               /* cream 0, pink / lilac 1, blue 2, else -1 (hues measured:
-                                                            ~40, ~300 (blue - red -8..15), ~250 (blue - red 48-63)) */
+static int vb_class(Rgb k)                               /* cream 0, pink / lilac 1, blue 2, else -1 */
 {
     int mx = k.r > k.g ? (k.r > k.b ? k.r : k.b) : (k.g > k.b ? k.g : k.b), mn = k.r < k.g ? (k.r < k.b ? k.r : k.b) : (k.g < k.b ? k.g : k.b);
     if (k.b > k.r + 16 && k.b > k.g + 24) return 2;
@@ -1268,34 +1313,454 @@ static int vb_class(Rgb k)                               /* cream 0, pink / lila
     if (mx - mn < 40 && lum(k) > 70 && k.r >= k.b) return 0;
     return -1;
 }
-static int vb_wx(int side, int i) { return side ? PW - 1 - i : i; }
-static int pr_vb_back(int side, int i, int y)            /* haze and trunks: greyish (not the spheres, not the fence's wood) */
+static int vb_excl(int x, int y)
 {
-    Rgb k = a5p(side, i, y); int mx = k.r > k.g ? (k.r > k.b ? k.r : k.b) : (k.g > k.b ? k.g : k.b), mn = k.r < k.g ? (k.r < k.b ? k.r : k.b) : (k.g < k.b ? k.g : k.b);
-    return mx - mn < 56 && lum(k) < 160 && !((k.r + k.g) / 2 - k.b > 35 && y >= 110);
+    if (x < 0 || x >= PW || y < 0 || y >= PH) return 1;
+    for (int i = 0; VB_EXCL[i].x1; i++)
+        if (x >= VB_EXCL[i].x0 && x < VB_EXCL[i].x1 && y >= VB_EXCL[i].y0 && y < VB_EXCL[i].y1) return 1;
+    return 0;
 }
-/* the ramp of rows y-2..y+2 (smooth from row to row) */
-static void vb_row_ramp(Ramp *rp, int side, int y, int i0, int i1, A5Pred pred)
+
+/* --- the canvas in picture columns: wx < 0 (left strip) or >= PW (right strip); X = 1.. outwards, up to vb_ow */
+static int vb_X(int side, int wx) { return side ? wx - (PW - 1) : -wx; }
+static int vb_in(int side, int wx, int y) { int X = vb_X(side, wx); return X >= 1 && X <= vb_ow && y >= 0 && y < PH; }
+static Rgb *vb_px(int side, int wx, int y) { return vb_in(side, wx, y) ? &cv[(size_t)y * vb_ow + vb_X(side, wx) - 1] : 0; }
+static int vb_reg(int side, int wx, int y) { return vb_in(side, wx, y) ? rg[(size_t)y * vb_ow + vb_X(side, wx) - 1] : 0; }
+static void vb_put(int side, int wx, int y, Rgb c, int r)
 {
-    nsamp = 0;
-    for (int yy = y - 2; yy <= y + 2; yy++)
-        if (yy >= 0 && yy < PH) for (int i = i0; i < i1; i++) if (pred(side, i, yy)) samp_add(pic[yy][a5x(side, i)]);
-    if (nsamp >= 10) ramp_any(rp); else { nsamp = 0; memset(rp, 0, sizeof *rp); }
+    if (vb_in(side, wx, y)) { size_t i = (size_t)y * vb_ow + vb_X(side, wx) - 1; cv[i] = c; rg[i] = (u8)r; }
 }
-static int pr_vb_band(int side, int i, int y)
+static int vb_lo(int side) { return side ? PW : -vb_ow; }            /* the canvas' columns [lo, hi) */
+static int vb_hi(int side) { return side ? PW + vb_ow : 0; }
+/* what is at picture column wx: the picture (when not an object), or the canvas where already filled */
+static int vb_get(int side, int wx, int y, Rgb *c)
 {
-    Rgb k = a5p(side, i, y); int mx = k.r > k.g ? (k.r > k.b ? k.r : k.b) : (k.g > k.b ? k.g : k.b), mn = k.r < k.g ? (k.r < k.b ? k.r : k.b) : (k.g < k.b ? k.g : k.b);
-    return mx - mn >= 40 && k.b < 48 && k.r > k.b + 40 && k.r >= k.g   /* the golden leaves and straw (not the stones, the ladder,
-                                                                          the barrel, the spheres) */
-           && (y < VB_GROUND0 || (lum(k) >= 70 && k.g > k.b + 30));    /* (the ground: not the stones' track, not the front
-                                                                          spheres' dark rims) */
+    if (wx >= 0 && wx < PW) { if (y < 0 || y >= PH || vb_excl(wx, y)) return 0; *c = rgb15(pic[y][wx]); return 1; }
+    if (!vb_reg(side, wx, y)) return 0;
+    *c = *vb_px(side, wx, y); return 1;
 }
-static int pr_vb_fence(int side, int i, int y) { Rgb k = a5p(side, i, y); return (k.r + k.g) / 2 - k.b > 35 && lum(k) > 50; }
+static int vb_d2(Rgb a, Rgb b) { int r = a.r - b.r, g = a.g - b.g, bb = a.b - b.b; return 3 * r * r + 4 * g * g + 2 * bb * bb; }
+
+/* ================================================================== quilting */
+static int vb_srow(const VbBand *b, int y)               /* a row of the band's clean rows: reflected into [ry0, ry1) */
+{
+    int n = b->ry1 - b->ry0, k;
+    if (y >= b->ry0 && y < b->ry1) return y;
+    if (b->up && y >= b->ry1) { k = fmodi(b->ry1 - 1 - y, 2 * b->up); return b->ry1 - 1 - (k < b->up ? k : 2 * b->up - 1 - k); }
+    if (b->up) n = b->up;
+    k = fmodi(y - b->ry0, 2 * n);
+    return b->ry0 + (k < n ? k : 2 * n - 1 - k);
+}
+/* the band's horizontal period next to the edge (autocorrelation of each row's luminance minus its mean over the
+   window's columns), 0 if none is clear */
+static int vb_period(int side, const VbBand *b)
+{
+    int x0 = b->sx0, w = b->sx1 - b->sx0 < 40 ? b->sx1 - b->sx0 : 40, best = 0, bc = 0, ok[PH]; long long den = 0;
+    static int L[PH][40];
+    for (int y = b->ry0; y < b->ry1; y++) {
+        int s = 0; ok[y] = 1;
+        for (int i = 0; i < w; i++) { if (vb_excl(x0 + i, y)) ok[y] = 0; L[y][i] = lum(rgb15(pic[y][x0 + i])); s += L[y][i]; }
+        for (int i = 0; i < w; i++) { L[y][i] -= s / w; if (ok[y]) den += (long long)L[y][i] * L[y][i]; }
+    }
+    if (den <= 0) return 0;
+    for (int lag = 4; lag <= 16; lag++) {
+        long long s = 0; int c;
+        for (int y = b->ry0; y < b->ry1; y++) if (ok[y]) for (int i = 0; i + lag < w; i++) s += (long long)L[y][i] * L[y][i + lag];
+        c = (int)(s * 256 * w / (w - lag) / den);
+        if (c > bc) { bc = c; best = lag; }
+    }
+#ifdef WS_BACKDROP_MAIN
+    if (getenv("WSB_INFO")) fprintf(stderr, "side %d band %d-%d: period %d (corr %d/256)\n", side, b->y0, b->y1, best, bc);
+#endif
+    (void)side;
+    return bc >= 64 ? best : 0;
+}
+/* the minimum-error path through rows [ya, yb) x columns [0, w) of the error map e (indexed e[y - ya][j]): vertical
+   (one column per row, path[y - ya]) when vert, else horizontal (one row per column, path[j]) */
+#define VB_MAXH 128
+#define VB_MAXW 40
+static int vb_E[VB_MAXH][VB_MAXW];
+static void vb_cutpath(int e[VB_MAXH][VB_MAXW], int rows, int w, int vert, int *path)
+{
+    int (*E)[VB_MAXW] = vb_E, n = vert ? rows : w, m = vert ? w : rows;   /* n steps, m positions each */
+    for (int i = 0; i < n; i++)
+        for (int p = 0; p < m; p++) {
+            int c = vert ? e[i][p] : e[p][i], best = 1 << 30;
+            if (i == 0) best = 0;
+            else for (int d = -1; d <= 1; d++) if (p + d >= 0 && p + d < m && E[i - 1][p + d] < best) best = E[i - 1][p + d];
+            E[i][p] = c + best;
+        }
+    {   int p = 0;
+        for (int q = 1; q < m; q++) if (E[n - 1][q] < E[n - 1][p]) p = q;
+        for (int i = n - 1; i >= 0; i--) {
+            path[i] = p;
+            if (i > 0) { int bp = p; for (int d = -1; d <= 1; d++) if (p + d >= 0 && p + d < m && E[i - 1][p + d] < E[i - 1][bp]) bp = p + d; p = bp; }
+        }
+    }
+}
+static void vb_quilt(int side, const VbBand *b, int seed)
+{
+    int W = b->B + b->OV, ytop = b->y0 - b->OT, ybot = b->y1 + b->OB, H = ybot - ytop, per = b->per ? vb_period(side, b) : 0;
+    int pos = side ? PW : -1, nb = 0, used[3] = { -999, -999, -999 }, nd = 2 * b->dy + 1, ncand = (b->sx1 - b->sx0 - W + 1) * nd;
+    static int err[320 * 9], em[VB_MAXH][VB_MAXW], vcut[VB_MAXH], tcut[VB_MAXW], bcut[VB_MAXW];
+    static Rgb win[VB_MAXH][VB_MAXW];
+    if (H > VB_MAXH || W > VB_MAXW || ncand <= 0 || ncand > 320 * 9) return;
+    while (side ? pos < vb_hi(side) : pos >= vb_lo(side)) {
+        int t0 = side ? pos - b->OV : pos - b->B + 1;             /* the window's first picture column (target) */
+        int first = nb == 0, mn = 1 << 30, pick = -1, nc = 0, k;
+        for (int c = 0; c < ncand; c++) {
+            int sx = b->sx0 + c / nd, dy = c % nd - b->dy, ok = 1, n = 0; long long e = 0;
+            for (int y = ytop; y < ybot && ok; y++) for (int j = 0; j < W; j++) if (vb_excl(sx + j, vb_srow(b, y + dy))) { ok = 0; break; }
+            if (!ok) { err[c] = -1; continue; }
+            for (int y = ytop; y < ybot; y++)
+                for (int j = 0; j < W; j++) {
+                    int ov = side ? j < b->OV : j >= b->B; Rgb o;
+                    if (!ov && y >= b->y0 && y < b->y1) continue;
+                    if (first && ov && (y < b->ry0 || y >= b->ry1)) continue;   /* (the picture's canopy above the back) */
+                    if (!vb_get(side, t0 + j, y, &o)) continue;
+                    e += vb_d2(o, rgb15(pic[vb_srow(b, y + dy)][sx + j])); n++;
+                }
+            e = n ? e * 64 / n : 0;
+            for (int u = 0; u < 3; u++) { int d = sx - used[u]; if (d < 0) d = -d; if (d < b->B) e += e / 2 + 2000; }
+            if (per) { int ph = fmodi(t0 - sx, per); if (ph > per / 2) ph = per - ph; e += e * ph / per; }
+            err[c] = (int)(e > (1 << 29) ? (1 << 29) : e);
+            if (err[c] < mn) mn = err[c];
+        }
+        if (mn == 1 << 30) return;
+        for (int c = 0; c < ncand; c++) if (err[c] >= 0 && err[c] <= mn + mn / 8) nc++;
+        k = (int)(hash3(side * 64 + b->reg, nb, seed) % (u32)nc);
+        for (int c = 0; c < ncand && pick < 0; c++) if (err[c] >= 0 && err[c] <= mn + mn / 8 && k-- == 0) pick = c;
+        {   int sx = b->sx0 + pick / nd, dy = pick % nd - b->dy, j0 = side ? 0 : b->B;
+            for (int y = 0; y < H; y++) for (int j = 0; j < W; j++) win[y][j] = rgb15(pic[vb_srow(b, ytop + y + dy)][sx + j]);
+            used[nb % 3] = sx;
+            for (int y = 0; y < H; y++) for (int j = 0; j < W; j++) { Rgb o; em[y][j] = vb_get(side, t0 + j, ytop + y, &o) ? vb_d2(o, win[y][j]) : 0; }
+            /* the vertical cut through the overlap columns (rows y0..y1): the new block on the outer side */
+            for (int y = 0; y < H; y++) vcut[y] = side ? -1 : W;
+            if (!first) {
+                static int ev[VB_MAXH][VB_MAXW]; int path[VB_MAXH];
+                for (int y = b->y0; y < b->y1; y++) for (int j = 0; j < b->OV; j++) ev[y - b->y0][j] = em[y - ytop][j0 + j];
+                vb_cutpath(ev, b->y1 - b->y0, b->OV, 1, path);
+                for (int y = b->y0; y < b->y1; y++) vcut[y - ytop] = j0 + path[y - b->y0];
+            }
+            /* the horizontal cuts through the overlap rows with the band above (the new block below the cut) and below
+               (the new block above it) */
+            for (int j = 0; j < W; j++) { tcut[j] = ytop; bcut[j] = ybot; }
+            if (b->OT > 0) {
+                vb_cutpath(em, b->OT, W, 0, tcut);
+                for (int j = 0; j < W; j++) tcut[j] += ytop;
+            }
+            if (b->OB > 0) {
+                vb_cutpath(em + (b->y1 - ytop), b->OB, W, 0, bcut);
+                for (int j = 0; j < W; j++) bcut[j] += b->y1 + 1;
+            }
+            for (int y = ytop; y < ybot; y++)
+                for (int j = 0; j < W; j++) {
+                    int tx = t0 + j, vc = vcut[y - ytop];
+                    if (tx >= 0 && tx < PW) continue;                     /* never the picture */
+                    if (y >= b->y0 && y < b->y1 && (side ? j <= vc : j >= vc)) continue;   /* the old block's side of the cut */
+                    if (y < tcut[j] || y >= bcut[j]) continue;
+                    vb_put(side, tx, y, win[y - ytop][j], b->reg);
+                }
+        }
+        nb++; pos += side ? b->B : -b->B;
+    }
+}
+
+/* ================================================================== the spheres */
+static const short VB_COS[8] = { 256, 181, 0, -181, -256, -181, 0, 181 }, VB_SIN[8] = { 0, 181, 256, 181, 0, -181, -256, -181 };
+/* n . light (-256..256) at texel (x, y) of the circle centre (x2, y2) radius r2 (half texels), or -9999 outside */
+static int vb_dot(int x2, int y2, int r2, int x, int y, const int *L)
+{
+    int dx = (x * 2 + 1 - x2) * 8, dy = (y * 2 + 1 - y2) * 8, R = r2 * 8, q = R * R - dx * dx - dy * dy;
+    if (q <= 0) return -9999;
+    return (dx * L[0] + dy * L[1] + isqrt_i(q) * L[2]) / R;
+}
+/* is the picture's texel (x, y) a visible texel of sphere i: inside 0.9 r, under no sphere in front, of its class */
+static int vb_vis(int i, int x, int y)
+{
+    const VbS *s = &VB_PS[i]; int dx = x * 2 + 1 - s->x2, dy = y * 2 + 1 - s->y2;
+    if (x < 0 || x >= PW || y < 0 || y >= PH || (dx * dx + dy * dy) * 100 >= s->r2 * s->r2 * 81) return 0;
+    for (int j = 0; j < VB_NPS; j++) {
+        const VbS *t = &VB_PS[j]; int ex = x * 2 + 1 - t->x2, ey = y * 2 + 1 - t->y2;
+        if (j == i || (t->fl & VBS_FRONT) != (s->fl & VBS_FRONT) || t->dep <= s->dep) continue;
+        if (ex * ex + ey * ey < (t->r2 + 2) * (t->r2 + 2)) return 0;
+    }
+    if (vb_excl(x, y)) return 0;                                  /* (the huts, the jukebox) */
+    return vb_class(rgb15(pic[y][x])) == s->cls;
+}
+/* the same by geometry only (any colour): inside 0.95 r, under no sphere in front, not an object */
+static int vb_vis_geo(int i, int x, int y)
+{
+    const VbS *s = &VB_PS[i]; int dx = x * 2 + 1 - s->x2, dy = y * 2 + 1 - s->y2;
+    if (vb_excl(x, y) || (dx * dx + dy * dy) * 400 >= s->r2 * s->r2 * 361) return 0;
+    for (int j = 0; j < VB_NPS; j++) {
+        const VbS *t = &VB_PS[j]; int ex = x * 2 + 1 - t->x2, ey = y * 2 + 1 - t->y2;
+        if (j == i || (t->fl & VBS_FRONT) != (s->fl & VBS_FRONT) || t->dep <= s->dep) continue;
+        if (ex * ex + ey * ey < (t->r2 + 2) * (t->r2 + 2)) return 0;
+    }
+    return 1;
+}
+/* each sphere's a, b by least squares on its visible texels for light L; returns the summed squared error */
+static long long vb_fit(const int *L, int apply)
+{
+    long long tot = 0;
+    for (int i = 0; i < VB_NPS; i++) {
+        const VbS *s = &VB_PS[i]; long long n = 0, sd = 0, sdd = 0, sl = 0, sdl = 0, sll = 0, den; int a, b;
+        for (int y = (s->y2 - s->r2) / 2 - 1; y <= (s->y2 + s->r2) / 2 + 1; y++)
+            for (int x = (s->x2 - s->r2) / 2 - 1; x <= (s->x2 + s->r2) / 2 + 1; x++) {
+                int d, l;
+                if (!vb_vis(i, x, y)) continue;
+                d = vb_dot(s->x2, s->y2, s->r2, x, y, L); l = lum(rgb15(pic[y][x]));
+                n++; sd += d; sdd += (long long)d * d; sl += l; sdl += (long long)d * l; sll += (long long)l * l;
+            }
+        den = n * sdd - sd * sd;
+        if (n < 12) { a = n ? (int)(sl / n) : 120; b = 0; }
+        else {
+            b = den > 0 ? (int)((n * sdl - sd * sl) * 256 / den) : 0;   /* (x 256) */
+            b = clampi(b, 40, 150);
+            a = (int)((sl * 256 - (long long)b * sd) / (n * 256));
+        }
+        /* the error: sum (l - a - b d / 256)^2 */
+        tot += sll - 2 * a * sl - 2 * (long long)b * sdl / 256 + n * a * a + 2 * (long long)a * b * sd / 256 + (long long)b * b / 256 * sdd / 256;
+        if (apply) { VB_a[i] = a; VB_b[i] = b; VB_n[i] = (int)n; }
+    }
+    return tot;
+}
+static void vb_light(void)
+{
+    static const short LX[6] = { -32, 0, 32, 64, 96, 128 }, LY[5] = { -128, -96, -64, -32, 0 };
+    long long be = -1; int L[3], bl[3] = { 64, -80, 230 };
+    for (int i = 0; i < 6; i++) for (int j = 0; j < 5; j++) {
+        long long e;
+        L[0] = LX[i]; L[1] = LY[j]; L[2] = isqrt_i(65536 - LX[i] * LX[i] - LY[j] * LY[j]);
+        e = vb_fit(L, 0);
+        if (be < 0 || e < be) { be = e; bl[0] = L[0]; bl[1] = L[1]; bl[2] = L[2]; }
+    }
+    VB_L[0] = bl[0]; VB_L[1] = bl[1]; VB_L[2] = bl[2];
+    vb_fit(VB_L, 1);
+#ifdef WS_BACKDROP_MAIN
+    if (getenv("WSB_INFO")) {
+        fprintf(stderr, "light %d %d %d\n", VB_L[0], VB_L[1], VB_L[2]);
+        for (int i = 0; i < VB_NPS; i++) fprintf(stderr, "sphere %d: a %d b %d (n %d)\n", i, VB_a[i], VB_b[i], VB_n[i]);
+    }
+#endif
+}
+/* a colour moved along its class's ramp from its luminance by dl (lighter pinks paler, as the picture's) */
+static Rgb vb_at_lum(const Ramp *rp, int l)
+{
+    int i = 0;
+    while (i < NRAMP - 1 && lum(rp->bin[i + 1]) <= l) i++;
+    if (i >= NRAMP - 1 || l <= lum(rp->bin[0])) return rp->bin[l <= lum(rp->bin[0]) ? 0 : NRAMP - 1];
+    {   int a = lum(rp->bin[i]), b = lum(rp->bin[i + 1]); return b > a ? mix(rp->bin[i], rp->bin[i + 1], (l - a) * 256 / (b - a)) : rp->bin[i]; }
+}
+static Rgb vb_shift(const Ramp *rp, Rgb c, int dl)
+{
+    int l = lum(c); Rgb a = vb_at_lum(rp, l), b = vb_at_lum(rp, clampi(l + dl, 4, 250));
+    Rgb o = { clampi(c.r + b.r - a.r, 0, 255), clampi(c.g + b.g - a.g, 0, 255), clampi(c.b + b.b - a.b, 0, 255) };
+    return o;
+}
+typedef struct { int x2, y2, r2, cls, dep, don, rot, mir, da, self, reg; } VbN;
+static u16 *vb_id; static int vb_cur;                    /* which sphere is on top at each strip texel (1 + index) */   /* a sphere to draw in the strip */
+/* sphere n into the strip: each texel the donor's texel at the same place on the sphere (scaled, rotated, mirrored),
+   or, where the donor's is hidden, another visible texel of the donor (across the edge, across its axis, rotated);
+   its residual on n's model tone at that place */
+static void vb_sphere(int side, const VbN *n)
+{
+    const VbS *D = &VB_PS[n->don]; const Ramp *rp = D->fl & VBS_FRONT ? &VB_rf[D->cls] : &VB_rc[D->cls];
+    int R16 = n->r2 * 8, lo = vb_lo(side), hi = vb_hi(side), xa = (n->x2 - n->r2) / 2 - 7, xb = (n->x2 + n->r2) / 2 + 7;
+    int ya = (n->y2 - n->r2) / 2 - 7, yb = (n->y2 + n->r2) / 2 + 7;
+    /* the contact shade on the spheres behind it: a soft ring outside its outline, deeper at the lower left */
+    for (int y = ya; y <= yb; y++)
+        for (int wx = xa; wx <= xb; wx++) {
+            int dx = (wx * 2 + 1 - n->x2) * 8, dy = (y * 2 + 1 - n->y2) * 8, o = isqrt_i(dx * dx + dy * dy) - R16, rr; Rgb *p;
+            if (wx < lo || wx >= hi || y < 0 || y >= PH || o < 0 || o >= 72 || !(p = vb_px(side, wx, y))) continue;
+            rr = vb_reg(side, wx, y);
+            if (rr < VB_SPH || rr >= VB_BACK || occ[(size_t)y * vb_ow + vb_X(side, wx) - 1]) continue;   /* (once: not deeper
+                                                                       where several spheres in front meet) */
+            *p = scale(*p, clampi(200 + o * 56 / 72 + (dx - dy) * 12 / (R16 + 1), 200, 256));
+            occ[(size_t)y * vb_ow + vb_X(side, wx) - 1] = 1;
+        }
+    for (int y = ya; y <= yb; y++)
+        for (int wx = xa; wx <= xb; wx++) {
+            int dx = (wx * 2 + 1 - n->x2) * 8, dy = (y * 2 + 1 - n->y2) * 8, d = isqrt_i(dx * dx + dy * dy), dt, src = 0, qx = 0, qy = 0, sdx, sdy;
+            Rgb c;
+            if (wx < lo || wx >= hi || y < 0 || y >= PH || d >= R16 || (wx >= 0 && wx < PW)) continue;
+            dt = vb_dot(n->x2, n->y2, n->r2, wx, y, VB_L);
+            {   int rin = R16 * 86 / 100; if (d > rin) { sdx = dx * rin / d; sdy = dy * rin / d; } else { sdx = dx; sdy = dy; } }   /* (the rim: texture
+                                                                       from just inside it, the tone of its own place) */
+            /* the source texel: the donor's at the same place; for a completed sphere its reflection across the edge
+               (any texel of it there, whatever its colour: the geometry says it is this sphere); then the same
+               direction nearer the centre (continuous, so no patchwork); then mirrored, then rotated */
+            for (int t = 0; t < 13 && !src; t++) {
+                int rot = n->rot, mir = n->mir, ux, uy, q16x, q16y, k = 256;
+                if (t == 1 && !n->self) continue;
+                if (t >= 2 && t <= 4) k = 256 - 51 * (t - 1);
+                if (t == 5) mir ^= 1;
+                if (t >= 6) rot = (rot + t - 5) & 7;
+                ux = (mir ? -sdx : sdx) * k / 256; uy = sdy * k / 256;
+                {   int rx = (ux * VB_COS[rot] - uy * VB_SIN[rot]) / 256, ry = (ux * VB_SIN[rot] + uy * VB_COS[rot]) / 256;
+                    q16x = D->x2 * 8 + rx * D->r2 / n->r2; q16y = D->y2 * 8 + ry * D->r2 / n->r2; }
+                qx = fdiv(q16x, 16); qy = fdiv(q16y, 16);
+                if (t == 1) { qx = side ? 2 * PW - 1 - qx : -1 - qx; src = vb_vis_geo(n->don, qx, qy); }
+                else src = vb_vis(n->don, qx, qy);
+            }
+            {   int lt = VB_a[n->don] + n->da + VB_b[n->don] * dt / 256;
+                if (src) {
+                    int ls = VB_a[n->don] + VB_b[n->don] * vb_dot(D->x2, D->y2, D->r2, qx, qy, VB_L) / 256;
+                    c = vb_shift(rp, rgb15(pic[qy][qx]), lt - ls);
+                } else c = vb_at_lum(rp, clampi(lt + (int)(hash3(wx, y, 977) & 15) - 8, 4, 250));
+            }
+            if (d >= R16 - 24) { Rgb *p = vb_px(side, wx, y); if (p && vb_reg(side, wx, y)) c = mix(*p, c, 256 - (d - (R16 - 24)) * 150 / 24); }   /* (a soft outline) */
+            vb_put(side, wx, y, c, n->reg);
+            if (vb_in(side, wx, y)) { occ[(size_t)y * vb_ow + vb_X(side, wx) - 1] = 0; if (vb_id) vb_id[(size_t)y * vb_ow + vb_X(side, wx) - 1] = (u16)vb_cur; }
+        }
+}
+static int vb_cls(u32 h) { int a = (int)(h & 255), c = 0; while (c < 2 && VB_share[c + 1] <= a) c++; return c; }
+static int vb_ncmp(const void *a, const void *b)
+{
+    const VbN *p = a, *q = b;
+    return p->dep != q->dep ? p->dep - q->dep : p->x2 != q->x2 ? p->x2 - q->x2 : p->y2 - q->y2;
+}
+static int vb_donor(int cls, int front, u32 h)            /* a donor of the class (by hash among them) */
+{
+    int c[VB_NPS], n = 0;
+    for (int i = 0; i < VB_NPS; i++)
+        if ((VB_PS[i].fl & VBS_DONOR) && VB_PS[i].cls == cls && !(VB_PS[i].fl & VBS_FRONT) == !front && VB_n[i] >= 60) c[n++] = i;
+    return n ? c[h % (u32)n] : -1;
+}
+/* the deepest edge sphere in front at the strip texel (wx, y) next to the join, or -1000 */
+static int vb_edge_dep(int side, int front, int wx, int y)
+{
+    int m = -1000;
+    for (int i = 0; i < VB_NPS; i++) {
+        const VbS *s = &VB_PS[i]; int dx = wx * 2 + 1 - s->x2, dy = y * 2 + 1 - s->y2;
+        if (s->side != side || !(s->fl & VBS_FRONT) != !front) continue;
+        if (dx * dx + dy * dy < s->r2 * s->r2 && s->dep > m) m = s->dep;
+    }
+    return m;
+}
+/* may new sphere n stand where it is: in the strip's first 3 columns only under an edge sphere in front of it */
+static int vb_fits(int side, const VbN *n, int front)
+{
+    for (int k = 0; k < 3; k++) {
+        int wx = side ? PW + k : -1 - k;
+        for (int y = (n->y2 - n->r2) / 2 - 1; y <= (n->y2 + n->r2) / 2 + 1; y++) {
+            int dx = wx * 2 + 1 - n->x2, dy = y * 2 + 1 - n->y2;
+            if (y < 0 || y >= PH || dx * dx + dy * dy >= n->r2 * n->r2) continue;
+            if (vb_edge_dep(side, front, wx, y) <= n->dep) return 0;
+        }
+    }
+    return 1;
+}
+static VbN vb_s[700];
+static int vb_add(int side, int n, VbN t, int front, int filler)
+{
+    int dir = side ? 2 : -2;
+    if (n >= 700 || t.don < 0) return n;
+    if (!filler) {
+        int k = 0;
+        while (k < 120 && !vb_fits(side, &t, front)) { t.x2 += dir; k++; }
+        if (k == 120) return n;
+    }
+#ifdef WS_BACKDROP_MAIN
+    if (getenv("WSB_NONEW") && !filler) return n;
+#endif
+    if (side ? (t.x2 + t.r2) / 2 < PW : (t.x2 - t.r2) / 2 >= 0) return n;   /* (all inside the picture) */
+    vb_s[n] = t; return n + 1;
+}
+/* draw the n spheres of vb_s in order; then leave out every new one of which less than a fifth shows (a sliver
+   between the ones in front reads as a cut sphere) and draw them again */
+static void vb_draw_all(int side, int n)
+{
+    size_t np = (size_t)vb_ow * PH; Rgb *c0 = malloc(np * sizeof *c0); u8 *r0 = malloc(np); int *cnt = calloc((size_t)n + 1, sizeof *cnt);
+    vb_id = calloc(np, sizeof *vb_id);
+    if (!c0 || !r0 || !cnt || !vb_id) { free(c0); free(r0); free(cnt); free(vb_id); vb_id = 0; for (int i = 0; i < n; i++) vb_sphere(side, &vb_s[i]); return; }
+    memcpy(c0, cv, np * sizeof *c0); memcpy(r0, rg, np); memset(occ, 0, np);
+    for (int i = 0; i < n; i++) { vb_cur = i + 1; vb_sphere(side, &vb_s[i]); }
+    for (size_t k = 0; k < np; k++) if (vb_id[k]) cnt[vb_id[k]]++;
+    {   int m = 0;
+        for (int i = 0; i < n; i++) {
+            int area = 0, X0 = vb_X(side, (vb_s[i].x2 - vb_s[i].r2) / 2), X1 = vb_X(side, (vb_s[i].x2 + vb_s[i].r2) / 2);
+            for (int y = (vb_s[i].y2 - vb_s[i].r2) / 2; y <= (vb_s[i].y2 + vb_s[i].r2) / 2; y++)
+                for (int wx = (vb_s[i].x2 - vb_s[i].r2) / 2; wx <= (vb_s[i].x2 + vb_s[i].r2) / 2; wx++) {
+                    int dx = wx * 2 + 1 - vb_s[i].x2, dy = y * 2 + 1 - vb_s[i].y2;
+                    if (vb_in(side, wx, y) && dx * dx + dy * dy < vb_s[i].r2 * vb_s[i].r2) area++;
+                }
+            (void)X0; (void)X1;
+            if (vb_s[i].self || vb_s[i].dep < -40 || vb_s[i].y2 < 40 || cnt[i + 1] * 5 >= area) vb_s[m++] = vb_s[i];   /* (not the far ones
+                                                                       nor the top row: nothing behind them) */
+        }
+        memcpy(cv, c0, np * sizeof *c0); memcpy(rg, r0, np); memset(occ, 0, np);
+        for (int i = 0; i < m; i++) { vb_cur = i + 1; vb_sphere(side, &vb_s[i]); }
+    }
+    free(c0); free(r0); free(cnt); free(vb_id); vb_id = 0;
+}
+static void vb_canopy(int side)
+{
+    int n = 0, lo = vb_lo(side), hi = vb_hi(side);
+    for (int i = 0; i < VB_NPS; i++) {
+        const VbS *s = &VB_PS[i]; VbN t;
+        if (s->side != side || (s->fl & VBS_FRONT)) continue;
+        t.x2 = s->x2; t.y2 = s->y2; t.r2 = s->r2; t.cls = s->cls; t.dep = s->dep; t.don = i; t.rot = 0; t.mir = 0; t.da = 0; t.self = 1;
+        t.reg = VB_SPH + s->cls; vb_s[n++] = t;
+    }
+    /* far balloons behind everything (no gaps between the spheres): darker */
+    for (int k = fdiv(lo, 13) - 2; k * 13 < hi + 30; k++)
+        for (int row = 0; row < 6; row++) {
+            u32 h = hash3(k, row, 841); VbN t;
+            t.x2 = 2 * (k * 13 + (int)(h % 13) + (row & 1) * 6); t.y2 = 2 * (row * 11 - 4 + (int)(h >> 4) % 6);
+            t.r2 = 2 * (11 + (int)(h >> 8) % 5); t.cls = vb_cls(h >> 12); t.dep = -60 + row; t.don = vb_donor(t.cls, 0, h >> 20);
+            t.rot = (int)(h >> 24) & 7; t.mir = (int)(h >> 27) & 1; t.da = -46 - (int)(h >> 28) % 8; t.self = 0; t.reg = VB_SPH + t.cls;
+            n = vb_add(side, n, t, 0, 1);
+        }
+    /* three layers of new spheres, 26-column cells, the lower ones in front; the odd one lower still (ragged ends) */
+    for (int k = fdiv(lo, 26) - 2; k * 26 < hi + 56; k++)
+        for (int row = 0; row < 4; row++) {
+            u32 h = hash3(k, row, 851), h2 = hash3(k, row, 853); VbN t;
+            if (row == 3 && (h2 & 3) != 0) continue;
+            t.x2 = 2 * (k * 26 + (int)(h % 26) + row * 9);
+            t.y2 = 2 * (row == 0 ? -2 + (int)(h >> 5) % 12 : row == 1 ? 26 + (int)(h >> 5) % 14 : row == 2 ? 52 + (int)(h >> 5) % 14 : 72 + (int)(h >> 5) % 8);
+            t.r2 = 2 * (row == 0 ? 16 + (int)(h >> 9) % 8 : row == 1 ? 15 + (int)(h >> 9) % 8 : row == 2 ? 14 + (int)(h >> 9) % 7 : 11 + (int)(h >> 9) % 4);
+            t.r2 += (int)(h2 >> 4) & 1;
+            t.cls = vb_cls(h >> 16); t.dep = t.y2 / 2 + (int)(h >> 24) % 12 - 30; t.don = vb_donor(t.cls, 0, h2 >> 8);
+            t.rot = (int)(h2 >> 12) & 7; t.mir = (int)(h2 >> 15) & 1; t.da = (int)(h2 >> 16) % 17 - 8 - (row == 0 ? 6 : 0); t.self = 0;
+            t.reg = VB_SPH + t.cls;
+            n = vb_add(side, n, t, 0, 0);
+        }
+    qsort(vb_s, (size_t)n, sizeof vb_s[0], vb_ncmp);
+    vb_draw_all(side, n);
+}
+static void vb_front(int side)
+{
+    int n = 0, lo = vb_lo(side), hi = vb_hi(side);
+    for (int i = 0; i < VB_NPS; i++) {
+        const VbS *s = &VB_PS[i]; VbN t;
+        if (s->side != side || !(s->fl & VBS_FRONT)) continue;
+        t.x2 = s->x2; t.y2 = s->y2; t.r2 = s->r2; t.cls = s->cls; t.dep = s->dep; t.don = i; t.rot = 0; t.mir = 0; t.da = 0; t.self = 1;
+        t.reg = VB_FRONTR + s->cls; vb_s[n++] = t;
+    }
+    for (int k = fdiv(lo, 46) - 2; k * 46 < hi + 100; k++)
+        for (int row = 0; row < 2; row++) {
+            u32 h = hash3(k, side * 4 + row, 871), h2 = hash3(k, row, 873); VbN t;
+            t.x2 = 2 * (k * 46 + (int)(h % 30) + row * 23); t.y2 = 2 * (row ? 252 + (int)(h >> 5) % 14 : 238 + (int)(h >> 5) % 12);
+            t.r2 = 2 * (row ? 40 + (int)(h >> 10) % 12 : 42 + (int)(h >> 10) % 12);
+            t.cls = vb_cls(h >> 16); t.dep = row ? 5 + (int)(h >> 24) % 4 : 1 + (int)(h >> 24) % 4;
+            if (vb_donor(t.cls, 1, 0) < 0 || VB_n[vb_donor(t.cls, 1, 0)] < 600) t.cls = 1 + (int)(h >> 20 & 1);   /* (a donor too hidden
+                                                                       in the picture gives no texture: the front cream) */
+            t.don = vb_donor(t.cls, 1, h2);
+            t.rot = 0; t.mir = (int)(h2 >> 11) & 1; t.da = (int)(h2 >> 12) % 21 - 10 - (row ? 0 : 8); t.self = 0;   /* (only the donors'
+                                                                       tops are in the picture: not rotated) */
+            t.reg = VB_FRONTR + t.cls;
+            n = vb_add(side, n, t, 1, 0);
+        }
+    qsort(vb_s, (size_t)n, sizeof vb_s[0], vb_ncmp);
+    vb_draw_all(side, n);
+}
 
 static void vb_analyse(void)
 {
     int cnt[3] = { 0, 0, 0 }, n = 0;
-    for (int c = 0; c < 3; c++) {                        /* the canopy's classes (the hut's chimney and roof left out) */
+    for (int c = 0; c < 3; c++) {                        /* the classes' ramps (the hut's chimney and roof left out) */
         nsamp = 0;
         for (int y = 0; y < 90; y++) for (int x = 0; x < PW; x++) {
             Rgb k = rgb15(pic[y][x]);
@@ -1310,316 +1775,24 @@ static void vb_analyse(void)
     }
     VB_share[0] = 0;
     for (int c = 0; c < 3; c++) VB_share[c + 1] = VB_share[c] + (n ? cnt[c] * 256 / n : 85);
-    for (int s = 0; s < 2; s++) {                         /* the fence's wood: left x 0-56 (in the shade), right x 186-234 */
-        nsamp = 0;
-        for (int y = 110; y < VB_LEDGE0; y++) for (int i = 0; i < (s ? 49 : 56); i++) {
-            int ii = s ? i + 85 : i;
-            if (pr_vb_fence(s, ii, y)) samp_add(pic[y][vb_wx(s, ii)]);
-        }
-        ramp_any(&VB_rpost[s]);
-    }
-    for (int s = 0; s < 2; s++) {
-        /* the haze and trunks behind the fence, per row: left x 0-44; right x 290-319 above the jukebox, x 186-234
-           beside it */
-        for (int y = 56; y < VB_LEDGE0; y++) {
-            if (!s) vb_row_ramp(&VB_rrow[s][y], s, y, 0, 44, pr_vb_back);
-            else {                                       /* (rows 104-119: both, so the change of source does not show) */
-                nsamp = 0;
-                for (int yy = y - 2; yy <= y + 2; yy++) {
-                    if (yy < 120) for (int i = 0; i < 30; i++) if (pr_vb_back(s, i, yy)) samp_add(pic[yy][a5x(s, i)]);
-                    if (yy >= 104 && yy < PH) for (int i = 85; i < 134; i++) if (pr_vb_back(s, i, yy)) samp_add(pic[yy][a5x(s, i)]);
-                }
-                if (nsamp >= 10) ramp_any(&VB_rrow[s][y]); else { nsamp = 0; VB_rrow[s][y].ok = 0; }
-            }
-        }
-        for (int y = VB_LEDGE0 - 1; y >= 56; y--) if (!VB_rrow[s][y].ok && y + 1 < VB_LEDGE0) VB_rrow[s][y] = VB_rrow[s][y + 1];
-        /* the ledge, its lip, the bank and the ground: left x 0-36; right x 160-222 (the ladder, the jukebox and the
-           front sphere left out) */
-        for (int y = VB_LEDGE0; y < PH; y++) {
-            if (s) a5_row_ramp(&VB_rrow[s][y], s, y, 97, 160, pr_vb_band);
-            else a5_row_ramp(&VB_rrow[s][y], s, y, 0, 37, pr_vb_band);
-        }
-        for (int y = VB_LEDGE0 + 1; y < PH; y++) if (!VB_rrow[s][y].ok) VB_rrow[s][y] = VB_rrow[s][y - 1];
-    }
+    vb_light();
 }
-
-/* the strip's pixel at picture column wx */
-static int vb_X(int side, int wx) { return side ? wx - (PW - 1) : -wx; }
-static Rgb *vb_px(int side, int wx, int y) { return px_at(vb_X(side, wx), y); }
-static int vb_reg(int side, int wx, int y) { return reg_at(vb_X(side, wx), y); }
-static void vb_put(int side, int wx, int y, Rgb c, int r) { int X = vb_X(side, wx); if (X >= 1 && X <= cw && y >= 0 && y < PH) putr(X, y, c, r); }
-static int vb_lo(int side) { return side ? PW : -cw; }               /* the strip's columns [lo, hi) */
-static int vb_hi(int side) { return side ? PW + cw : 0; }
-
-/* --- the back: haze and trunks, rows 56-137, as ranks in the row's ramp (trunks low, haze high) */
-static int vb_trunk_rank(int kind, int u, int w, int wx, int y)  /* u: column in the trunk 0..w-1 */
-{
-    int f = u * 256 / (w > 1 ? w - 1 : 1), t;
-    if (kind == 2) {                                            /* fluted: light and dark streaks 2-4 columns wide */
-        int k = fdiv(wx, 3), lit = (int)(hash3(k, 0, 811) % 3) != 0;
-        return (lit ? 170 : 50) + (noise(wx, y, 2, 9, 813) - 128) / 3 + (noise(wx * 16, y, 30, 50, 815) - 128) / 4;
-    }
-    t = kind ? 8 + f * 80 / 256 : 70 + f * 60 / 256;            /* lit on the right flank */
-    if (f < 40) t -= 20;                                        /* the shaded left edge */
-    t += (noise(wx, y, 4, 4, 815) - 128) / 3;                   /* mottled */
-    if (noise(wx * 16, y, 24, 40, 817) > 200) t += 60;           /* pale vertical streaks */
-    return t;
-}
-static void vb_back(int side)
-{
-    int lo = vb_lo(side), hi = vb_hi(side);
-    VTrunk tr[64]; int nt = 0;
-    {   int p = side ? VB_TEDGE[1].x1 : VB_TEDGE[0].x0;      /* the edge trunk, then trunks outwards */
-        tr[nt++] = VB_TEDGE[side];
-        for (int k = 0; k < 60 && nt < 64; k++) {
-            u32 h = hash3(side, k, 801); int gap = k ? 12 + (int)(h % 30) : 6 + (int)(h % 10), w = 12 + (int)(h >> 8) % 20, kind = !k || (h >> 16 & 1) != 0;
-            if (side) { tr[nt].x0 = (short)(p + gap); tr[nt].x1 = (short)(p + gap + w); p += gap + w; }
-            else { tr[nt].x1 = (short)(p - gap); tr[nt].x0 = (short)(p - gap - w); p -= gap + w; }
-            tr[nt++].kind = (short)kind;
-            if ((side && p > hi + 40) || (!side && p < lo - 40)) break;
-        }
-    }
-    for (int wx = lo; wx < hi; wx++)
-        for (int y = 56; y < VB_LEDGE0; y++) {
-            int t = -1;
-            for (int i = 0; i < nt && t < 0; i++) {
-                int x0 = tr[i].x0 + (noise(tr[i].x0 * 16, y * 16, 16, 300, 821) - 128) / 80, x1 = tr[i].x1 + (noise(tr[i].x1 * 16, y * 16, 16, 300, 823) - 128) / 80;
-                if (wx >= x0 && wx < x1) t = vb_trunk_rank(tr[i].kind, wx - x0, x1 - x0, wx, y);
-            }
-            if (t < 0) t = 200 + (noise(wx * 16, y, 40, 80, 831) - 128) / 3 + (noise(wx, y, 3, 14, 833) - 128) / 4;
-            vb_put(side, wx, y, ramp(&VB_rrow[side][y], t), VB_BACK);
-        }
-}
-
-/* --- the spheres: lit from the upper right and the front, a soft rim, a cottony grain; before it, a contact shade on
-   what is already drawn behind it (a soft ring outside its outline, deepest on the lower left) */
-static void vb_ball(int side, const VSph *s, const Ramp *rp, int base, int reg, int seed)
-{
-    int r16 = s->r * 16, lo = vb_lo(side), hi = vb_hi(side);
-    for (int y = s->y - s->r - 5; y <= s->y + s->r + 5; y++)
-        for (int wx = s->x - s->r - 5; wx <= s->x + s->r + 5; wx++) {
-            int dx = (wx - s->x) * 16, dy = (y - s->y) * 16, d = isqrt_i(dx * dx + dy * dy), o = d - r16, rr; Rgb *p;
-            if (wx < lo || wx >= hi || y < 0 || y >= PH || o < 0 || o >= 80 || !(p = vb_px(side, wx, y))) continue;
-            rr = vb_reg(side, wx, y);
-            if (rr < VB_C0 || rr > VB_F0 + 3) continue;
-            *p = scale(*p, clampi(190 + o * 66 / 80 + (dx - dy) * 16 / (r16 + 1), 190, 256));
-        }
-    for (int y = s->y - s->r; y <= s->y + s->r; y++)
-        for (int wx = s->x - s->r; wx <= s->x + s->r; wx++) {
-            int dx = (wx - s->x) * 16 + 8, dy = (y - s->y) * 16 + 8, q = r16 * r16 - dx * dx - dy * dy, dz, dot, t;
-            if (q <= 0 || wx < lo || wx >= hi || y < 0 || y >= PH) continue;
-            dz = isqrt_i(q);
-            dot = (dx * 64 - dy * 80 + dz * 230) / r16;                     /* n . light (mostly frontal): -256..256 */
-            t = base + dot * 3 / 8;
-            if (dz < r16 / 4) t -= 24 * (r16 / 4 - dz) / (r16 / 4 + 1);     /* the soft rim */
-            t += (noise(wx * 16 + seed, y * 16, 56, 56, seed) - 128) / 6 + (noise(wx, y, 2, 2, seed + 1) - 128) / 10 + (int)(hash3(wx, y, seed + 2) & 15) - 8;
-            {   Rgb c = ramp(rp, clampi(t, 16, 232)), *p = vb_px(side, wx, y);
-                if (q < r16 * 28 && p && vb_reg(side, wx, y)) c = mix(*p, c, 64 + q * 128 / (r16 * 28));   /* the outline soft */
-                vb_put(side, wx, y, c, reg);
-            }
-        }
-}
-static int vb_cls(u32 h) { int a = (int)(h & 255), c = 0; while (c < 2 && VB_share[c + 1] <= a) c++; return c; }
-static int vb_sph_cmp(const void *a, const void *b) { const VSph *p = a, *q = b; return p->dep != q->dep ? p->dep - q->dep : p->x != q->x ? p->x - q->x : p->y - q->y; }
-static VSph vb_s[600];
-static void vb_canopy(int side)
-{
-    int n = 0, lo = vb_lo(side), hi = vb_hi(side);
-    for (int i = 0; i < 6 && VB_EDGE[side][i].r; i++) vb_s[n++] = VB_EDGE[side][i];
-    /* far balloons behind everything (no gaps), then three layers of new ones on 24-column cells */
-    for (int k = fdiv(lo, 12) - 2; k * 12 < hi + 28 && n < 600; k++)
-        for (int row = 0; row < 7 && n < 600; row++) {
-            u32 h = hash3(k, row, 841); VSph t;
-            t.x = (short)(k * 12 + (int)(h % 12) + (row & 1) * 6); t.y = (short)(row * 11 - 4 + (int)(h >> 4) % 6);
-            t.r = (short)(11 + (int)(h >> 8) % 5); t.cls = (short)vb_cls(h >> 12); t.dep = (short)(-40 + row);
-            if (side ? t.x - t.r <= PW + 1 : t.x + t.r >= -2) continue;
-            vb_s[n++] = t;
-        }
-    for (int k = fdiv(lo, 28) - 2; k * 28 < hi + 56 && n < 600; k++)
-        for (int row = 0; row < 3 && n < 600; row++) {
-            u32 h = hash3(k, row, 851); VSph t; int in;
-            t.x = (short)(k * 28 + (int)(h % 28) + row * 9);
-            t.y = (short)(row == 0 ? -4 + (int)(h >> 5) % 14 : row == 1 ? 24 + (int)(h >> 5) % 16 : 52 + (int)(h >> 5) % 16);
-            t.r = (short)(row == 0 ? 18 + (int)(h >> 9) % 10 : row == 1 ? 17 + (int)(h >> 9) % 9 : 15 + (int)(h >> 9) % 8);
-            if (row == 2 && (h >> 13 & 3) == 0) continue;
-            t.cls = (short)vb_cls(h >> 16); t.dep = (short)(t.y + (int)(h >> 24) % 12);
-            in = side ? t.x - t.r - (PW - 1) : -(t.x + t.r);      /* columns between the join and its inner side */
-            if (in < 1) continue;                                 /* (it would be cut by the join) */
-            if (in < 6) t.dep = (short)(-20 + row);               /* close to the join: behind the edge's spheres */
-            vb_s[n++] = t;
-        }
-    qsort(vb_s, (size_t)n, sizeof vb_s[0], vb_sph_cmp);
-    for (int i = 0; i < n; i++) {
-        int base = vb_s[i].dep < -30 ? 30 : vb_s[i].dep < 0 ? 60 : 80;
-        vb_ball(side, &vb_s[i], &VB_rc[vb_s[i].cls], base, VB_C0 + vb_s[i].cls, 861 + 7 * vb_s[i].x + vb_s[i].y);
-    }
-}
-static void vb_front(int side)
-{
-    int n = 0, lo = vb_lo(side), hi = vb_hi(side);
-    vb_s[n++] = VB_FEDGE[side];
-    for (int k = fdiv(lo, 44) - 2; k * 44 < hi + 90 && n < 64; k++) {
-        u32 h = hash3(k, side, 871); VSph t; int in;
-        t.x = (short)(k * 44 + (int)(h % 30)); t.y = (short)(236 + (int)(h >> 5) % 18); t.r = (short)(36 + (int)(h >> 10) % 16);
-        t.cls = (short)vb_cls(h >> 16); t.dep = (short)(1 + (int)(h >> 24) % 9);
-        in = side ? t.x - t.r - (PW - 1) : -(t.x + t.r);
-        if (in < 1) continue;
-        if (in < 8) t.dep = -1;
-        vb_s[n++] = t;
-    }
-    qsort(vb_s, (size_t)n, sizeof vb_s[0], vb_sph_cmp);
-    for (int i = 0; i < n; i++) vb_ball(side, &vb_s[i], &VB_rf[vb_s[i].cls], 100, VB_F0 + vb_s[i].cls, 881 + vb_s[i].x);
-}
-
-/* --- the fence: posts, then three rails per side */
-static void vb_fence(int side)
-{
-    int lo = vb_lo(side), hi = vb_hi(side), p = side ? PW - 1 : 0, dir = side ? 1 : -1;
-    for (int k = 0; k < 80; k++) {
-        u32 h = hash3(side, k, 891); int w = side ? 3 + (int)(h >> 4) % 4 : 3 + (int)(h >> 4) % 3, gap = side ? w + 1 + (int)(h % 4) : 6 + (int)(h % 7);
-        int top = 111 + (int)(h >> 8) % 8, x0;
-        p += dir * (side ? gap - w + 1 : gap); x0 = side ? p : p - w + 1;
-        if ((side && x0 > hi) || (!side && x0 + w < lo)) break;
-        for (int u = 0; u < w; u++)
-            for (int y = top; y < VB_LEDGE0 + 1; y++) {
-                int t = u == 0 ? 30 : u == w - 1 ? 120 : 165, wx = x0 + u;     /* dark left column, lit middle */
-                t += (noise(wx * 8, y, 4, 7, 893) - 128) / 3 + (int)(hash3(wx, y, 895) & 31) - 16;
-                if (y == top) t += 30;
-                vb_put(side, wx, y, ramp(&VB_rpost[side], t), VB_FENCE);
-            }
-        p += dir * (w - 1);
-    }
-    for (int r = 0; r < 3; r++) {
-        int r0 = VB_RAIL[side][r].r0, r1 = VB_RAIL[side][r].r1;
-        for (int wx = lo; wx < hi; wx++) {
-            int sag = (noise(wx, r, 40, 1, 901 + r) - 128) / 100;           /* (a rough board: +-1 row) */
-            int th = noise(wx, r, 13, 1, 909 + r) < 110;                       /* (thinner here and there) */
-            if (noise(wx, r, 9, 1, 903 + r) > 214) continue;                  /* (here and there a board missing) */
-            for (int y = r0 + sag + th; y <= r1 + 1 + sag; y++) {
-                int t = y == r0 + sag + th ? 150 : y == r1 + sag ? 50 : y > r1 + sag ? -1 : 105;
-                if (t < 0) { Rgb *q = vb_px(side, wx, y); if (q && vb_reg(side, wx, y) != VB_FENCE) *q = scale(*q, 190); continue; }
-                t += (noise(wx, y, 9, 1, 905 + r) - 128) / 3 + (int)(hash3(wx, y, 907) & 31) - 16;
-                vb_put(side, wx, y, ramp(&VB_rpost[side], t), VB_FENCE);
-            }
-        }
-    }
-}
-
-/* --- the ledge, its lip, the bank and the ground: ranks in each row's ramp */
-static void vb_bands(int side)
-{
-    int lo = vb_lo(side), hi = vb_hi(side);
-    for (int wx = lo; wx < hi; wx++) {
-        int bp = 99; u32 bh = 0;                                        /* the bank's nearest blade: distance, hash */
-        for (int k = fdiv(wx, 5) - 1; k <= fdiv(wx, 5) + 1; k++) {
-            u32 h = hash3(k, 0, 921); int c = k * 5 + (int)(h % 5), d = wx - c;
-            d = d < 0 ? -d : d;
-            if (d < bp) { bp = d; bh = h >> 8; }
-        }
-        for (int y = VB_LEDGE0; y < PH; y++) {
-            int t, reg;
-            if (y < VB_LIP0) { t = a5_rank(wx, y, 3, 2, 911, 90); reg = VB_LEDGE; }
-            else if (y < VB_BANK0) { t = a5_rank(wx, y, 4, 2, 913, 60); reg = VB_LEDGE; }
-            else if (y < VB_GROUND0) {
-                int top = VB_BANK0 + (int)(bh & 7), bot = VB_GROUND0 - 2 - (int)(bh >> 3 & 7);
-                t = bp == 0 && y >= top && y < bot ? 200 + (int)(bh >> 6 & 31) : bp == 1 ? 120 : 50;
-                t += (noise(wx, y, 2, 6, 925) - 128) / 3;
-                {   int lv = noise(wx, y, 3, 3, 927) / 2 + noise(wx, y, 7, 5, 928) / 2 + (int)(hash3(wx, y, 929) & 31) - 16;   /* golden leaves
-                                                                                   caught in its lower part, more towards the foot */
-                    lv += (y - 166) * 3;
-                    if (y >= 160 && lv > 150) t = clampi(t + (lv - 150) * 2, 0, 250); }
-                reg = VB_BANK;
-            } else { t = a5_rank(wx, y, 4, 2, 931, 70); reg = VB_GROUND; }
-            vb_put(side, wx, y, ramp(&VB_rrow[side][y], t), reg);
-        }
-    }
-}
-
-/* a colour made lighter / darker along its class's ramp (lighter pinks are paler, not more saturated): shifted by the
-   ramp's step from luminance l to l2 */
-static Rgb vb_at_lum(const Ramp *rp, int l)
-{
-    int i = 0;
-    while (i < NRAMP - 1 && lum(rp->bin[i + 1]) <= l) i++;
-    if (i >= NRAMP - 1 || l <= lum(rp->bin[0])) return rp->bin[l <= lum(rp->bin[0]) ? 0 : NRAMP - 1];
-    {   int a = lum(rp->bin[i]), b = lum(rp->bin[i + 1]); return b > a ? mix(rp->bin[i], rp->bin[i + 1], (l - a) * 256 / (b - a)) : rp->bin[i]; }
-}
-static Rgb vb_relum(int side, int X, int y, int l2)
-{
-    Rgb c = cv[(size_t)y * cw + X - 1]; int r = reg_at(X, y), l = lum(c);
-    (void)side;
-    if (r >= VB_C0 && r < VB_F0 + 3 && r != VB_C0 + 3) {
-        const Ramp *rp = r < VB_F0 ? &VB_rc[r - VB_C0] : &VB_rf[r - VB_F0]; Rgb a = vb_at_lum(rp, l), b = vb_at_lum(rp, l2);
-        Rgb o = { clampi(c.r + b.r - a.r, 0, 255), clampi(c.g + b.g - a.g, 0, 255), clampi(c.b + b.b - a.b, 0, 255) };
-        return o;
-    }
-    return l ? scale(c, clampi(l2 * 256 / l, 0, 1024)) : (Rgb){ l2, l2, l2 };
-}
-/* the strip's region reg as light and as contrasted as the picture's texels of box [x0, x1) x [y0, y1) that pass pred
-   (as a5_match, through vb_relum) */
-static void vb_match(int reg, int x0, int x1, int y0, int y1, int (*pred)(Rgb))
-{
-    static Hist hp, hs; int mp, dp, ms, ds, k;
-    memset(&hp, 0, sizeof hp); memset(&hs, 0, sizeof hs);
-    for (int y = y0; y < y1; y++) for (int x = x0; x < x1; x++) { Rgb c = rgb15(pic[y][x]); if (pred(c)) hist_add(&hp, lum(c)); }
-    for (int y = 0; y < PH; y++) for (int X = 1; X <= cw && X <= 53; X++) if (reg_at(X, y) == reg) hist_add(&hs, lum(cv[(size_t)y * cw + X - 1]));
-    if (hp.n < 40 || hs.n < 40) return;
-    hist_stat(&hp, &mp, &dp); hist_stat(&hs, &ms, &ds);
-    k = ds ? clampi(dp * 256 / ds, 160, 400) : 256;
-    for (int y = 0; y < PH; y++) for (int X = 1; X <= cw; X++) if (reg_at(X, y) == reg) {
-        int l = lum(cv[(size_t)y * cw + X - 1]);
-        cv[(size_t)y * cw + X - 1] = vb_relum(cur_side, X, y, clampi((mp + (l * 16 - ms) * k / 256) / 16, 2, 255));
-    }
-#ifdef WS_BACKDROP_MAIN
-    if (getenv("WSB_INFO")) fprintf(stderr, "vb match region %d: picture %d dev %d, strip %d dev %d\n", reg, mp / 16, dp / 16, ms / 16, ds / 16);
-#endif
-}
-/* the tone per row next to the join matched to the picture's last columns (as a5_seam, through vb_relum) */
-static void vb_seam(int side, int y0, int y1, int n)
-{
-    int lp[PH], ls[PH];
-    for (int y = y0; y < y1; y++) {
-        int a = 0, b = 0;
-        for (int i = 0; i < 3; i++) a += lum(a5p(side, i, y));
-        for (int X = 1; X <= 3 && X <= cw; X++) b += lum(cv[(size_t)y * cw + X - 1]);
-        lp[y] = a; ls[y] = b;
-    }
-    for (int y = y0; y < y1; y++) {
-        int a = 0, b = 0;
-        for (int d = -2; d <= 2; d++) { int yy = clampi(y + d, y0, y1 - 1); a += lp[yy]; b += ls[yy]; }
-        if (b <= 0) continue;
-        {   int k = clampi(a * 256 / b, 160, 400);
-            for (int X = 1; X <= n && X <= cw; X++) {
-                int l = lum(cv[(size_t)y * cw + X - 1]), kk = 256 + (k - 256) * (n + 1 - X) / (n + 1);
-                cv[(size_t)y * cw + X - 1] = vb_relum(side, X, y, clampi(l * kk / 256, 0, 255));
-            }
-        }
-    }
-}
-
-static int vb_fencewood(Rgb k) { return (k.r + k.g) / 2 - k.b > 35 && lum(k) > 50; }
-static int vb_c0(Rgb k) { return vb_class(k) == 0; }
-static int vb_c1(Rgb k) { return vb_class(k) == 1; }
-static int vb_c2(Rgb k) { return vb_class(k) == 2; }
 static void gen_vb(int pad)
 {
-    static int (*const cp[3])(Rgb) = { vb_c0, vb_c1, vb_c2 };
     pal_make(); vb_analyse();
     for (int c = 0; c < 3; c++) if (!VB_rc[c].ok || !VB_rf[c].ok) return;
-    if (!VB_rpost[0].ok || !VB_rpost[1].ok || !canvas_open(pad)) return;
+    vb_ow = pad + 64;
+    if (!canvas_open(vb_ow)) return;
     for (int side = 0; side < 2; side++) {
         canvas_clear(); cur_side = side;
-        vb_back(side); vb_canopy(side); vb_fence(side); vb_bands(side); vb_front(side);
-        for (int c = 0; c < 3; c++) {
-            if (side) vb_match(VB_C0 + c, 240, PW, 0, 90, cp[c]); else vb_match(VB_C0 + c, 0, 80, 0, 90, cp[c]);
-        }
-        if (side) a5_match(VB_FENCE, 186, 235, 112, VB_LEDGE0, vb_fencewood); else a5_match(VB_FENCE, 0, 57, 112, VB_LEDGE0, vb_fencewood);
-        vb_seam(side, 0, VB_LEDGE0, 14);
-        vb_seam(side, VB_LEDGE0, PH, 8);
-        a5_soften(side, 0, 110);
-        a5_soften(side, 110, VB_LEDGE0);
-        a5_soften(side, VB_LEDGE0, VB_GROUND0);
-        emit(side);
+        for (int i = 0; i < 5; i++) vb_quilt(side, &VB_BANDS[side][i], 701 + 13 * i);
+        vb_canopy(side);
+        vb_front(side);
+        for (int y = 0; y < PH; y++)
+            for (int X = 1; X <= pad; X++) {
+                Rgb c = cv[(size_t)y * vb_ow + X - 1];
+                strip[(size_t)y * 2 * pad + (side ? pad + (X - 1) : pad - X)] = quant(c);
+            }
     }
     canvas_close();
 }
