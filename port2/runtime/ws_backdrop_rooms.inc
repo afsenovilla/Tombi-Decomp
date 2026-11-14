@@ -598,46 +598,6 @@ static Rgb a5_stone_col(u32 h)                          /* a stone colour of the
 #define A5_BLUE(c) ((c).b > (c).r + 6)
 #define A5_WSX 21
 #define A5_BLUE(c) ((c).b > (c).r + 6)
-#define A5_WSX 21
-#define A5_BLUE(c) ((c).b > (c).r + 6)
-#define A5_WSX 21
-#define A5_BLUE(c) ((c).b > (c).r + 6)
-#define A5_WSX 21
-#define A5_BLUE(c) ((c).b > (c).r + 6)
-#define A5_WSX 21
-#define A5_BLUE(c) ((c).b > (c).r + 6)
-#define A5_WSX 21
-#define A5_BLUE(c) ((c).b > (c).r + 6)
-#define A5_WSX 21
-#define A5_BLUE(c) ((c).b > (c).r + 6)
-#define A5_WSX 21
-#define A5_BLUE(c) ((c).b > (c).r + 6)
-#define A5_WSX 21
-#define A5_BLUE(c) ((c).b > (c).r + 6)
-#define A5_WSX 21
-#define A5_BLUE(c) ((c).b > (c).r + 6)
-#define A5_WSX 21
-#define A5_BLUE(c) ((c).b > (c).r + 6)
-#define A5_WSX 21
-#define A5_BLUE(c) ((c).b > (c).r + 6)
-#define A5_WSX 21
-#define A5_BLUE(c) ((c).b > (c).r + 6)
-#define A5_WSX 21
-#define A5_BLUE(c) ((c).b > (c).r + 6)
-#define A5_WSX 21
-#define A5_BLUE(c) ((c).b > (c).r + 6)
-#define A5_WSX 21
-#define A5_BLUE(c) ((c).b > (c).r + 6)
-#define A5_WSX 21
-#define A5_BLUE(c) ((c).b > (c).r + 6)
-#define A5_WSX 21
-#define A5_BLUE(c) ((c).b > (c).r + 6)
-#define A5_WSX 21
-#define A5_BLUE(c) ((c).b > (c).r + 6)
-#define A5_WSX 21
-#define A5_BLUE(c) ((c).b > (c).r + 6)
-#define A5_WSX 21
-#define A5_BLUE(c) ((c).b > (c).r + 6)
 static void a5_wall(int side)
 {
     enum { Y0 = A5_STONE0, Y1 = A5_STONE1 };            /* stone rows 106..184 */
@@ -1243,6 +1203,387 @@ static void gen_village(int pad)
         canvas_clear(); cur_side = side;
         v_back(side); v_canopy(side); v_fence(side); v_ground(side); v_front(side);
         balance_regions(side, v_picreg, 1 << V_FENCE | 1 << V_RAIL | 1 << V_LEDGE | 1 << V_PALI | 1 << V_GROUND);
+        emit(side);
+    }
+    canvas_close();
+}
+
+/* ================================================================== AREA02 s1: the Dwarf Village with the balloon trees
+ * (see gen_vb) */
+enum { VB_C0 = 1, VB_F0 = 5, VB_BACK = 9, VB_FENCE, VB_LEDGE, VB_BANK, VB_GROUND };
+typedef struct { short x, y, r, cls, dep; } VSph;       /* centre (picture coordinates), radius, class, depth (front: more) */
+typedef struct { short x0, x1, kind; } VTrunk;            /* columns [x0, x1), kind 0 far (pale), 1 near (dark), 2 fluted */
+static const VSph VB_EDGE[2][6] = {
+    { { -8, 33, 18, 1, 0 }, { 6, 82, 12, 1, 4 }, { 8, 2, 17, 0, 20 }, { 2, 62, 20, 1, 30 }, { 0, 0, 0, 0, 0 } },
+    { { 296, -12, 22, 0, 0 }, { 318, 8, 20, 0, 5 }, { 325, 52, 28, 0, 25 }, { 0, 0, 0, 0, 0 } } };
+static const VSph VB_FEDGE[2] = { { 34, 250, 52, 1, 0 }, { 296, 245, 58, 2, 0 } };
+static const VTrunk VB_TEDGE[2] = { { -16, 9, 0 }, { 302, 326, 2 } };
+typedef struct { short r0, r1; } VRail;
+static const VRail VB_RAIL[2][3] = { { { 119, 122 }, { 125, 129 }, { 134, 137 } }, { { 116, 119 }, { 127, 130 }, { 132, 135 } } };
+#define VB_LEDGE0 138
+#define VB_LIP0 150
+#define VB_BANK0 155
+#define VB_GROUND0 182
+static Ramp VB_rc[3], VB_rf[3], VB_rpost[2], VB_rrow[2][PH];
+static int VB_share[4];                                  /* the classes' shares of the canopy (cumulative, /256) */
+
+static int vb_class(Rgb k)                               /* cream 0, pink / lilac 1, blue 2, else -1 (hues measured:
+                                                            ~40, ~300 (blue - red -8..15), ~250 (blue - red 48-63)) */
+{
+    int mx = k.r > k.g ? (k.r > k.b ? k.r : k.b) : (k.g > k.b ? k.g : k.b), mn = k.r < k.g ? (k.r < k.b ? k.r : k.b) : (k.g < k.b ? k.g : k.b);
+    if (k.b > k.r + 16 && k.b > k.g + 24) return 2;
+    if (k.r > k.g + 20 && k.b > k.g + 8) return 1;
+    if (mx - mn < 40 && lum(k) > 70 && k.r >= k.b) return 0;
+    return -1;
+}
+static int vb_wx(int side, int i) { return side ? PW - 1 - i : i; }
+static int pr_vb_back(int side, int i, int y)            /* haze and trunks: greyish (not the spheres, not the fence's wood) */
+{
+    Rgb k = a5p(side, i, y); int mx = k.r > k.g ? (k.r > k.b ? k.r : k.b) : (k.g > k.b ? k.g : k.b), mn = k.r < k.g ? (k.r < k.b ? k.r : k.b) : (k.g < k.b ? k.g : k.b);
+    return mx - mn < 56 && lum(k) < 160 && !((k.r + k.g) / 2 - k.b > 35 && y >= 110);
+}
+/* the ramp of rows y-2..y+2 (smooth from row to row) */
+static void vb_row_ramp(Ramp *rp, int side, int y, int i0, int i1, A5Pred pred)
+{
+    nsamp = 0;
+    for (int yy = y - 2; yy <= y + 2; yy++)
+        if (yy >= 0 && yy < PH) for (int i = i0; i < i1; i++) if (pred(side, i, yy)) samp_add(pic[yy][a5x(side, i)]);
+    if (nsamp >= 10) ramp_any(rp); else { nsamp = 0; memset(rp, 0, sizeof *rp); }
+}
+static int pr_vb_band(int side, int i, int y)
+{
+    Rgb k = a5p(side, i, y); int mx = k.r > k.g ? (k.r > k.b ? k.r : k.b) : (k.g > k.b ? k.g : k.b), mn = k.r < k.g ? (k.r < k.b ? k.r : k.b) : (k.g < k.b ? k.g : k.b);
+    return mx - mn >= 40 && k.b < 48 && k.r > k.b + 40 && k.r >= k.g   /* the golden leaves and straw (not the stones, the ladder,
+                                                                          the barrel, the spheres) */
+           && (y < VB_GROUND0 || (lum(k) >= 70 && k.g > k.b + 30));    /* (the ground: not the stones' track, not the front
+                                                                          spheres' dark rims) */
+}
+static int pr_vb_fence(int side, int i, int y) { Rgb k = a5p(side, i, y); return (k.r + k.g) / 2 - k.b > 35 && lum(k) > 50; }
+
+static void vb_analyse(void)
+{
+    int cnt[3] = { 0, 0, 0 }, n = 0;
+    for (int c = 0; c < 3; c++) {                        /* the canopy's classes (the hut's chimney and roof left out) */
+        nsamp = 0;
+        for (int y = 0; y < 90; y++) for (int x = 0; x < PW; x++) {
+            Rgb k = rgb15(pic[y][x]);
+            if (y >= 14 && x >= 60 && x < 200) continue;
+            if (vb_class(k) == c && !(c == 0 && y > 62)) { samp_add(pic[y][x]); cnt[c]++; }
+        }
+        ramp_any(&VB_rc[c]);
+        nsamp = 0;
+        for (int y = 186; y < PH; y++) for (int x = 0; x < PW; x++) if (vb_class(rgb15(pic[y][x])) == c) samp_add(pic[y][x]);
+        if (nsamp >= 200) ramp_any(&VB_rf[c]); else { nsamp = 0; VB_rf[c] = VB_rc[c]; }
+        n += cnt[c];
+    }
+    VB_share[0] = 0;
+    for (int c = 0; c < 3; c++) VB_share[c + 1] = VB_share[c] + (n ? cnt[c] * 256 / n : 85);
+    for (int s = 0; s < 2; s++) {                         /* the fence's wood: left x 0-56 (in the shade), right x 186-234 */
+        nsamp = 0;
+        for (int y = 110; y < VB_LEDGE0; y++) for (int i = 0; i < (s ? 49 : 56); i++) {
+            int ii = s ? i + 85 : i;
+            if (pr_vb_fence(s, ii, y)) samp_add(pic[y][vb_wx(s, ii)]);
+        }
+        ramp_any(&VB_rpost[s]);
+    }
+    for (int s = 0; s < 2; s++) {
+        /* the haze and trunks behind the fence, per row: left x 0-44; right x 290-319 above the jukebox, x 186-234
+           beside it */
+        for (int y = 56; y < VB_LEDGE0; y++) {
+            if (!s) vb_row_ramp(&VB_rrow[s][y], s, y, 0, 44, pr_vb_back);
+            else {                                       /* (rows 104-119: both, so the change of source does not show) */
+                nsamp = 0;
+                for (int yy = y - 2; yy <= y + 2; yy++) {
+                    if (yy < 120) for (int i = 0; i < 30; i++) if (pr_vb_back(s, i, yy)) samp_add(pic[yy][a5x(s, i)]);
+                    if (yy >= 104 && yy < PH) for (int i = 85; i < 134; i++) if (pr_vb_back(s, i, yy)) samp_add(pic[yy][a5x(s, i)]);
+                }
+                if (nsamp >= 10) ramp_any(&VB_rrow[s][y]); else { nsamp = 0; VB_rrow[s][y].ok = 0; }
+            }
+        }
+        for (int y = VB_LEDGE0 - 1; y >= 56; y--) if (!VB_rrow[s][y].ok && y + 1 < VB_LEDGE0) VB_rrow[s][y] = VB_rrow[s][y + 1];
+        /* the ledge, its lip, the bank and the ground: left x 0-36; right x 160-222 (the ladder, the jukebox and the
+           front sphere left out) */
+        for (int y = VB_LEDGE0; y < PH; y++) {
+            if (s) a5_row_ramp(&VB_rrow[s][y], s, y, 97, 160, pr_vb_band);
+            else a5_row_ramp(&VB_rrow[s][y], s, y, 0, 37, pr_vb_band);
+        }
+        for (int y = VB_LEDGE0 + 1; y < PH; y++) if (!VB_rrow[s][y].ok) VB_rrow[s][y] = VB_rrow[s][y - 1];
+    }
+}
+
+/* the strip's pixel at picture column wx */
+static int vb_X(int side, int wx) { return side ? wx - (PW - 1) : -wx; }
+static Rgb *vb_px(int side, int wx, int y) { return px_at(vb_X(side, wx), y); }
+static int vb_reg(int side, int wx, int y) { return reg_at(vb_X(side, wx), y); }
+static void vb_put(int side, int wx, int y, Rgb c, int r) { int X = vb_X(side, wx); if (X >= 1 && X <= cw && y >= 0 && y < PH) putr(X, y, c, r); }
+static int vb_lo(int side) { return side ? PW : -cw; }               /* the strip's columns [lo, hi) */
+static int vb_hi(int side) { return side ? PW + cw : 0; }
+
+/* --- the back: haze and trunks, rows 56-137, as ranks in the row's ramp (trunks low, haze high) */
+static int vb_trunk_rank(int kind, int u, int w, int wx, int y)  /* u: column in the trunk 0..w-1 */
+{
+    int f = u * 256 / (w > 1 ? w - 1 : 1), t;
+    if (kind == 2) {                                            /* fluted: light and dark streaks 2-4 columns wide */
+        int k = fdiv(wx, 3), lit = (int)(hash3(k, 0, 811) % 3) != 0;
+        return (lit ? 170 : 50) + (noise(wx, y, 2, 9, 813) - 128) / 3 + (noise(wx * 16, y, 30, 50, 815) - 128) / 4;
+    }
+    t = kind ? 8 + f * 80 / 256 : 70 + f * 60 / 256;            /* lit on the right flank */
+    if (f < 40) t -= 20;                                        /* the shaded left edge */
+    t += (noise(wx, y, 4, 4, 815) - 128) / 3;                   /* mottled */
+    if (noise(wx * 16, y, 24, 40, 817) > 200) t += 60;           /* pale vertical streaks */
+    return t;
+}
+static void vb_back(int side)
+{
+    int lo = vb_lo(side), hi = vb_hi(side);
+    VTrunk tr[64]; int nt = 0;
+    {   int p = side ? VB_TEDGE[1].x1 : VB_TEDGE[0].x0;      /* the edge trunk, then trunks outwards */
+        tr[nt++] = VB_TEDGE[side];
+        for (int k = 0; k < 60 && nt < 64; k++) {
+            u32 h = hash3(side, k, 801); int gap = k ? 12 + (int)(h % 30) : 6 + (int)(h % 10), w = 12 + (int)(h >> 8) % 20, kind = !k || (h >> 16 & 1) != 0;
+            if (side) { tr[nt].x0 = (short)(p + gap); tr[nt].x1 = (short)(p + gap + w); p += gap + w; }
+            else { tr[nt].x1 = (short)(p - gap); tr[nt].x0 = (short)(p - gap - w); p -= gap + w; }
+            tr[nt++].kind = (short)kind;
+            if ((side && p > hi + 40) || (!side && p < lo - 40)) break;
+        }
+    }
+    for (int wx = lo; wx < hi; wx++)
+        for (int y = 56; y < VB_LEDGE0; y++) {
+            int t = -1;
+            for (int i = 0; i < nt && t < 0; i++) {
+                int x0 = tr[i].x0 + (noise(tr[i].x0 * 16, y * 16, 16, 300, 821) - 128) / 80, x1 = tr[i].x1 + (noise(tr[i].x1 * 16, y * 16, 16, 300, 823) - 128) / 80;
+                if (wx >= x0 && wx < x1) t = vb_trunk_rank(tr[i].kind, wx - x0, x1 - x0, wx, y);
+            }
+            if (t < 0) t = 200 + (noise(wx * 16, y, 40, 80, 831) - 128) / 3 + (noise(wx, y, 3, 14, 833) - 128) / 4;
+            vb_put(side, wx, y, ramp(&VB_rrow[side][y], t), VB_BACK);
+        }
+}
+
+/* --- the spheres: lit from the upper right and the front, a soft rim, a cottony grain; before it, a contact shade on
+   what is already drawn behind it (a soft ring outside its outline, deepest on the lower left) */
+static void vb_ball(int side, const VSph *s, const Ramp *rp, int base, int reg, int seed)
+{
+    int r16 = s->r * 16, lo = vb_lo(side), hi = vb_hi(side);
+    for (int y = s->y - s->r - 5; y <= s->y + s->r + 5; y++)
+        for (int wx = s->x - s->r - 5; wx <= s->x + s->r + 5; wx++) {
+            int dx = (wx - s->x) * 16, dy = (y - s->y) * 16, d = isqrt_i(dx * dx + dy * dy), o = d - r16, rr; Rgb *p;
+            if (wx < lo || wx >= hi || y < 0 || y >= PH || o < 0 || o >= 80 || !(p = vb_px(side, wx, y))) continue;
+            rr = vb_reg(side, wx, y);
+            if (rr < VB_C0 || rr > VB_F0 + 3) continue;
+            *p = scale(*p, clampi(190 + o * 66 / 80 + (dx - dy) * 16 / (r16 + 1), 190, 256));
+        }
+    for (int y = s->y - s->r; y <= s->y + s->r; y++)
+        for (int wx = s->x - s->r; wx <= s->x + s->r; wx++) {
+            int dx = (wx - s->x) * 16 + 8, dy = (y - s->y) * 16 + 8, q = r16 * r16 - dx * dx - dy * dy, dz, dot, t;
+            if (q <= 0 || wx < lo || wx >= hi || y < 0 || y >= PH) continue;
+            dz = isqrt_i(q);
+            dot = (dx * 64 - dy * 80 + dz * 230) / r16;                     /* n . light (mostly frontal): -256..256 */
+            t = base + dot * 3 / 8;
+            if (dz < r16 / 4) t -= 24 * (r16 / 4 - dz) / (r16 / 4 + 1);     /* the soft rim */
+            t += (noise(wx * 16 + seed, y * 16, 56, 56, seed) - 128) / 6 + (noise(wx, y, 2, 2, seed + 1) - 128) / 10 + (int)(hash3(wx, y, seed + 2) & 15) - 8;
+            {   Rgb c = ramp(rp, clampi(t, 16, 232)), *p = vb_px(side, wx, y);
+                if (q < r16 * 28 && p && vb_reg(side, wx, y)) c = mix(*p, c, 64 + q * 128 / (r16 * 28));   /* the outline soft */
+                vb_put(side, wx, y, c, reg);
+            }
+        }
+}
+static int vb_cls(u32 h) { int a = (int)(h & 255), c = 0; while (c < 2 && VB_share[c + 1] <= a) c++; return c; }
+static int vb_sph_cmp(const void *a, const void *b) { const VSph *p = a, *q = b; return p->dep != q->dep ? p->dep - q->dep : p->x != q->x ? p->x - q->x : p->y - q->y; }
+static VSph vb_s[600];
+static void vb_canopy(int side)
+{
+    int n = 0, lo = vb_lo(side), hi = vb_hi(side);
+    for (int i = 0; i < 6 && VB_EDGE[side][i].r; i++) vb_s[n++] = VB_EDGE[side][i];
+    /* far balloons behind everything (no gaps), then three layers of new ones on 24-column cells */
+    for (int k = fdiv(lo, 12) - 2; k * 12 < hi + 28 && n < 600; k++)
+        for (int row = 0; row < 7 && n < 600; row++) {
+            u32 h = hash3(k, row, 841); VSph t;
+            t.x = (short)(k * 12 + (int)(h % 12) + (row & 1) * 6); t.y = (short)(row * 11 - 4 + (int)(h >> 4) % 6);
+            t.r = (short)(11 + (int)(h >> 8) % 5); t.cls = (short)vb_cls(h >> 12); t.dep = (short)(-40 + row);
+            if (side ? t.x - t.r <= PW + 1 : t.x + t.r >= -2) continue;
+            vb_s[n++] = t;
+        }
+    for (int k = fdiv(lo, 28) - 2; k * 28 < hi + 56 && n < 600; k++)
+        for (int row = 0; row < 3 && n < 600; row++) {
+            u32 h = hash3(k, row, 851); VSph t; int in;
+            t.x = (short)(k * 28 + (int)(h % 28) + row * 9);
+            t.y = (short)(row == 0 ? -4 + (int)(h >> 5) % 14 : row == 1 ? 24 + (int)(h >> 5) % 16 : 52 + (int)(h >> 5) % 16);
+            t.r = (short)(row == 0 ? 18 + (int)(h >> 9) % 10 : row == 1 ? 17 + (int)(h >> 9) % 9 : 15 + (int)(h >> 9) % 8);
+            if (row == 2 && (h >> 13 & 3) == 0) continue;
+            t.cls = (short)vb_cls(h >> 16); t.dep = (short)(t.y + (int)(h >> 24) % 12);
+            in = side ? t.x - t.r - (PW - 1) : -(t.x + t.r);      /* columns between the join and its inner side */
+            if (in < 1) continue;                                 /* (it would be cut by the join) */
+            if (in < 6) t.dep = (short)(-20 + row);               /* close to the join: behind the edge's spheres */
+            vb_s[n++] = t;
+        }
+    qsort(vb_s, (size_t)n, sizeof vb_s[0], vb_sph_cmp);
+    for (int i = 0; i < n; i++) {
+        int base = vb_s[i].dep < -30 ? 30 : vb_s[i].dep < 0 ? 60 : 80;
+        vb_ball(side, &vb_s[i], &VB_rc[vb_s[i].cls], base, VB_C0 + vb_s[i].cls, 861 + 7 * vb_s[i].x + vb_s[i].y);
+    }
+}
+static void vb_front(int side)
+{
+    int n = 0, lo = vb_lo(side), hi = vb_hi(side);
+    vb_s[n++] = VB_FEDGE[side];
+    for (int k = fdiv(lo, 44) - 2; k * 44 < hi + 90 && n < 64; k++) {
+        u32 h = hash3(k, side, 871); VSph t; int in;
+        t.x = (short)(k * 44 + (int)(h % 30)); t.y = (short)(236 + (int)(h >> 5) % 18); t.r = (short)(36 + (int)(h >> 10) % 16);
+        t.cls = (short)vb_cls(h >> 16); t.dep = (short)(1 + (int)(h >> 24) % 9);
+        in = side ? t.x - t.r - (PW - 1) : -(t.x + t.r);
+        if (in < 1) continue;
+        if (in < 8) t.dep = -1;
+        vb_s[n++] = t;
+    }
+    qsort(vb_s, (size_t)n, sizeof vb_s[0], vb_sph_cmp);
+    for (int i = 0; i < n; i++) vb_ball(side, &vb_s[i], &VB_rf[vb_s[i].cls], 100, VB_F0 + vb_s[i].cls, 881 + vb_s[i].x);
+}
+
+/* --- the fence: posts, then three rails per side */
+static void vb_fence(int side)
+{
+    int lo = vb_lo(side), hi = vb_hi(side), p = side ? PW - 1 : 0, dir = side ? 1 : -1;
+    for (int k = 0; k < 80; k++) {
+        u32 h = hash3(side, k, 891); int gap = side ? 4 + (int)(h % 6) : 6 + (int)(h % 7), w = 2 + (int)(h >> 4) % 3;
+        int top = 111 + (int)(h >> 8) % 8, x0;
+        p += dir * gap; x0 = side ? p : p - w + 1;
+        if ((side && x0 > hi) || (!side && x0 + w < lo)) break;
+        for (int u = 0; u < w; u++)
+            for (int y = top; y < VB_LEDGE0 + 1; y++) {
+                int t = u == 0 ? 30 : u == w - 1 ? 120 : 165, wx = x0 + u;     /* dark left column, lit middle */
+                t += (noise(wx * 8, y, 4, 7, 893) - 128) / 3 + (int)(hash3(wx, y, 895) & 31) - 16;
+                if (y == top) t += 30;
+                vb_put(side, wx, y, ramp(&VB_rpost[side], t), VB_FENCE);
+            }
+        p += dir * (w - 1);
+    }
+    for (int r = 0; r < 3; r++) {
+        int r0 = VB_RAIL[side][r].r0, r1 = VB_RAIL[side][r].r1;
+        for (int wx = lo; wx < hi; wx++) {
+            int sag = (noise(wx, r, 40, 1, 901 + r) - 128) / 100;           /* (a rough board: +-1 row) */
+            if (noise(wx, r, 9, 1, 903 + r) > 214) continue;                  /* (here and there a board missing) */
+            for (int y = r0 + sag; y <= r1 + 1 + sag; y++) {
+                int t = y == r0 + sag ? 170 : y == r1 + sag ? 60 : y > r1 + sag ? -1 : 120;
+                if (t < 0) { Rgb *q = vb_px(side, wx, y); if (q && vb_reg(side, wx, y) != VB_FENCE) *q = scale(*q, 190); continue; }
+                t += (noise(wx, y, 9, 1, 905 + r) - 128) / 3 + (int)(hash3(wx, y, 907) & 31) - 16;
+                vb_put(side, wx, y, ramp(&VB_rpost[side], t), VB_FENCE);
+            }
+        }
+    }
+}
+
+/* --- the ledge, its lip, the bank and the ground: ranks in each row's ramp */
+static void vb_bands(int side)
+{
+    int lo = vb_lo(side), hi = vb_hi(side);
+    for (int wx = lo; wx < hi; wx++) {
+        int bp = 99; u32 bh = 0;                                        /* the bank's nearest blade: distance, hash */
+        for (int k = fdiv(wx, 5) - 1; k <= fdiv(wx, 5) + 1; k++) {
+            u32 h = hash3(k, 0, 921); int c = k * 5 + (int)(h % 5), d = wx - c;
+            d = d < 0 ? -d : d;
+            if (d < bp) { bp = d; bh = h >> 8; }
+        }
+        for (int y = VB_LEDGE0; y < PH; y++) {
+            int t, reg;
+            if (y < VB_LIP0) { t = a5_rank(wx, y, 3, 2, 911, 90); reg = VB_LEDGE; }
+            else if (y < VB_BANK0) { t = a5_rank(wx, y, 4, 2, 913, 60); reg = VB_LEDGE; }
+            else if (y < VB_GROUND0) {
+                int top = VB_BANK0 + (int)(bh & 7), bot = VB_GROUND0 - 2 - (int)(bh >> 3 & 7);
+                t = bp == 0 && y >= top && y < bot ? 200 + (int)(bh >> 6 & 31) : bp == 1 ? 120 : 50;
+                t += (noise(wx, y, 2, 6, 925) - 128) / 3;
+                {   int lv = noise(wx, y, 3, 3, 927) / 2 + noise(wx, y, 7, 5, 928) / 2 + (int)(hash3(wx, y, 929) & 31) - 16;   /* golden leaves
+                                                                                   caught in its lower part, more towards the foot */
+                    lv += (y - 166) * 3;
+                    if (y >= 160 && lv > 150) t = clampi(t + (lv - 150) * 2, 0, 250); }
+                reg = VB_BANK;
+            } else { t = a5_rank(wx, y, 4, 2, 931, 70); reg = VB_GROUND; }
+            vb_put(side, wx, y, ramp(&VB_rrow[side][y], t), reg);
+        }
+    }
+}
+
+/* a colour made lighter / darker along its class's ramp (lighter pinks are paler, not more saturated): shifted by the
+   ramp's step from luminance l to l2 */
+static Rgb vb_at_lum(const Ramp *rp, int l)
+{
+    int i = 0;
+    while (i < NRAMP - 1 && lum(rp->bin[i + 1]) <= l) i++;
+    if (i >= NRAMP - 1 || l <= lum(rp->bin[0])) return rp->bin[l <= lum(rp->bin[0]) ? 0 : NRAMP - 1];
+    {   int a = lum(rp->bin[i]), b = lum(rp->bin[i + 1]); return b > a ? mix(rp->bin[i], rp->bin[i + 1], (l - a) * 256 / (b - a)) : rp->bin[i]; }
+}
+static Rgb vb_relum(int side, int X, int y, int l2)
+{
+    Rgb c = cv[(size_t)y * cw + X - 1]; int r = reg_at(X, y), l = lum(c);
+    (void)side;
+    if (r >= VB_C0 && r < VB_F0 + 3 && r != VB_C0 + 3) {
+        const Ramp *rp = r < VB_F0 ? &VB_rc[r - VB_C0] : &VB_rf[r - VB_F0]; Rgb a = vb_at_lum(rp, l), b = vb_at_lum(rp, l2);
+        Rgb o = { clampi(c.r + b.r - a.r, 0, 255), clampi(c.g + b.g - a.g, 0, 255), clampi(c.b + b.b - a.b, 0, 255) };
+        return o;
+    }
+    return l ? scale(c, clampi(l2 * 256 / l, 0, 1024)) : (Rgb){ l2, l2, l2 };
+}
+/* the strip's region reg as light and as contrasted as the picture's texels of box [x0, x1) x [y0, y1) that pass pred
+   (as a5_match, through vb_relum) */
+static void vb_match(int reg, int x0, int x1, int y0, int y1, int (*pred)(Rgb))
+{
+    static Hist hp, hs; int mp, dp, ms, ds, k;
+    memset(&hp, 0, sizeof hp); memset(&hs, 0, sizeof hs);
+    for (int y = y0; y < y1; y++) for (int x = x0; x < x1; x++) { Rgb c = rgb15(pic[y][x]); if (pred(c)) hist_add(&hp, lum(c)); }
+    for (int y = 0; y < PH; y++) for (int X = 1; X <= cw && X <= 53; X++) if (reg_at(X, y) == reg) hist_add(&hs, lum(cv[(size_t)y * cw + X - 1]));
+    if (hp.n < 40 || hs.n < 40) return;
+    hist_stat(&hp, &mp, &dp); hist_stat(&hs, &ms, &ds);
+    k = ds ? clampi(dp * 256 / ds, 160, 400) : 256;
+    for (int y = 0; y < PH; y++) for (int X = 1; X <= cw; X++) if (reg_at(X, y) == reg) {
+        int l = lum(cv[(size_t)y * cw + X - 1]);
+        cv[(size_t)y * cw + X - 1] = vb_relum(cur_side, X, y, clampi((mp + (l * 16 - ms) * k / 256) / 16, 2, 255));
+    }
+#ifdef WS_BACKDROP_MAIN
+    if (getenv("WSB_INFO")) fprintf(stderr, "vb match region %d: picture %d dev %d, strip %d dev %d\n", reg, mp / 16, dp / 16, ms / 16, ds / 16);
+#endif
+}
+/* the tone per row next to the join matched to the picture's last columns (as a5_seam, through vb_relum) */
+static void vb_seam(int side, int y0, int y1, int n)
+{
+    int lp[PH], ls[PH];
+    for (int y = y0; y < y1; y++) {
+        int a = 0, b = 0;
+        for (int i = 0; i < 3; i++) a += lum(a5p(side, i, y));
+        for (int X = 1; X <= 3 && X <= cw; X++) b += lum(cv[(size_t)y * cw + X - 1]);
+        lp[y] = a; ls[y] = b;
+    }
+    for (int y = y0; y < y1; y++) {
+        int a = 0, b = 0;
+        for (int d = -2; d <= 2; d++) { int yy = clampi(y + d, y0, y1 - 1); a += lp[yy]; b += ls[yy]; }
+        if (b <= 0) continue;
+        {   int k = clampi(a * 256 / b, 160, 400);
+            for (int X = 1; X <= n && X <= cw; X++) {
+                int l = lum(cv[(size_t)y * cw + X - 1]), kk = 256 + (k - 256) * (n + 1 - X) / (n + 1);
+                cv[(size_t)y * cw + X - 1] = vb_relum(side, X, y, clampi(l * kk / 256, 0, 255));
+            }
+        }
+    }
+}
+
+static int vb_c0(Rgb k) { return vb_class(k) == 0; }
+static int vb_c1(Rgb k) { return vb_class(k) == 1; }
+static int vb_c2(Rgb k) { return vb_class(k) == 2; }
+static void gen_vb(int pad)
+{
+    static int (*const cp[3])(Rgb) = { vb_c0, vb_c1, vb_c2 };
+    pal_make(); vb_analyse();
+    for (int c = 0; c < 3; c++) if (!VB_rc[c].ok || !VB_rf[c].ok) return;
+    if (!VB_rpost[0].ok || !VB_rpost[1].ok || !canvas_open(pad)) return;
+    for (int side = 0; side < 2; side++) {
+        canvas_clear(); cur_side = side;
+        vb_back(side); vb_canopy(side); vb_fence(side); vb_bands(side); vb_front(side);
+        for (int c = 0; c < 3; c++) {
+            if (side) vb_match(VB_C0 + c, 240, PW, 0, 90, cp[c]); else vb_match(VB_C0 + c, 0, 80, 0, 90, cp[c]);
+        }
+        vb_seam(side, 0, VB_LEDGE0, 14);
+        vb_seam(side, VB_LEDGE0, PH, 8);
+        a5_soften(side, 0, 110);
+        a5_soften(side, 110, VB_LEDGE0);
+        a5_soften(side, VB_LEDGE0, VB_GROUND0);
         emit(side);
     }
     canvas_close();

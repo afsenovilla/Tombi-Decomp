@@ -744,7 +744,7 @@ static const Room ROOMS[] = {
     { 5, 3, 224, 1, { PIECES_TOP4, { 256, 0, 0, 64, 96, 256, 128 } }, OVER_A5, gen_a5 },
     { 19, 1, 224, 0, { PIECES_TOP4, { 256, 8, 96, 64, 96, 256, 128 } }, OVER_VILLAGE, gen_village, 2, 1, v_cherry },   /* Dwarf
       Village in blossom: AREA19 s1 runs as area 2 s1 (GAME.area), told apart from AREA02 s1 by its picture */
-    { 2, 1, 224, 0, { PIECES_TOP4, { 256, 8, 96, 64, 96, 256, 128 } }, OVER_VILLAGE, gen_village, 0, 0, v_not_cherry },
+    { 2, 1, 224, 0, { PIECES_TOP4, { 256, 8, 96, 64, 96, 256, 128 } }, OVER_VILLAGE, gen_vb, 0, 0, v_not_cherry },
 };
 #define NROOMS ((int)(sizeof ROOMS / sizeof ROOMS[0]))
 const char *port_ws_backdrop_rooms;                      /* --ws-backdrop-rooms A:S,A:S,... (decimal; "all") */
