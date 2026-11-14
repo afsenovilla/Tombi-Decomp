@@ -125,22 +125,33 @@ static void blob(int x16, int y16, int rx, int ry, const Ramp *rp, int tone, int
  *   0-71   the wood: the pale sky between the tree tops in the first ~20 rows; conifers built of drooping branch tiers
  *          (the chevrons of dark gaps under each tier), the near ones bright and lit on their right flank, the far ones
  *          hazy blue-green and softer;
- *   72-102 the front fence: three khaki planks (left rows 72-77, 81-86, 93-99; one row lower on the right) on dark
- *          posts every 20-23 columns, the wood / path showing between them;
- *   103-185 the dry-stone wall: light cream stones (some pale blue, ~3-6 %) 7-30 columns by 5-7 rows in an irregular
- *          bond, 1-texel light-grey mortar; 186-~200 the orange path; the front bushes from ~200.
+ *   71-102 the front fence: two pale khaki rails (rows 71-78 and 82-89) on posts 5 columns wide every ~33 columns, the
+ *          wood seen between and under the rails, the path from row 92; by each edge a short low object in front of it
+ *          (two boards, dark blocks under them: x 0-26 and 286-319) that with the top rail behind it reads as three
+ *          planks: not continued (the strips end it in their first 2 columns);
+ *   103-185 the dry-stone wall: a lit coping (103-104) and its joint (105), then slabs of cream / pinkish limestone
+ *          (median ~8-9 columns by 4-5 rows incl. the joint, some 15-20 long), ~4 % pale blue-white and ~3 % warm sandy
+ *          ones, in irregular courses (no joint runs on for long: they step, slant and drift), 1-texel grey mortar
+ *          (the vertical joints the darker); each slab rounded like a pillow (lightest in its middle rows, the ends ~15
+ *          darker), often a white highlight on its top left, the odd faint joint or layer line inside; the foot row
+ *          185; 186-~200 the orange path; the front bushes from ~200.
  * How each band is drawn (every colour from the user's picture, every size from the picture's own measure):
- *   - per-row ramps: the fence (planks and the gaps between them), the path, the wall's top and foot rows take the
- *     colour distribution of the same row in the picture's columns next to the edge (a ramp of that row's texels,
- *     objects left out), read through stretched value noise (grain along the planks, streaks on the path), so every
- *     row has the picture's tone and spread there;
- *   - the wall: stones laid outwards column by column (a skyline: where a stone ends, the free rows get new stones of
- *     the picture's sizes, so joints never line up); the first stones are the picture's own stones cut by the edge
- *     (rows and colour measured on its last columns, their remaining length from the visible one); every stone's
- *     colour drawn from the list of the picture's stone colours next to the edges, as often as their area (so the share
- *     of blue-grey ones is the picture's), the layout warped by smooth noise (irregular polygons, slanted joints; none
- *     at the join), the mortar the one-texel boundary of each stone, a darker lower and right rim, a softened corner;
- *     mortar from the picture's mortar ramp; the foot's shade per row as the picture's;
+ *   - per-row ramps: the fence's rails (the sunlit stretch x 250-292; on the left the shaded top rail at the edge),
+ *     the wood between them, the path (lit orange texels next to the edge), the coping and the wall's foot take the
+ *     colour distribution of the same row in the picture (a ramp of that row's texels, objects left out), read through
+ *     stretched value noise (grain along the rails, streaks on the path), so every row has the picture's tone and
+ *     spread; posts from the picture post's ramp, lit across as it is (dark left column, light right half), casting
+ *     a shadow on the rails and the path to their left;
+ *   - the wall: stones laid outwards column by column (a skyline: where a stone ends, the free rows get new stones);
+ *     the first stones are the picture's own stones cut by the edge (rows and colour measured on its last columns,
+ *     their remaining length from the visible one); so that no course runs on, a stone over or under the free rows
+ *     that would end within 6 columns ends with them (their rows join), a new stone's joint is never in line with the
+ *     one just before it, and a 1-2 row sliver goes to the stone over it; lengths scaled per side by the density of
+ *     the picture's vertical joints next to that edge; then the vertical joints slanted (-1..+1 columns over the
+ *     stone), some horizontal ones stepped by a row, and the courses drifting up / down by a slow offset (+-2 rows
+ *     over ~20 columns: slanted pixel lines); the mortar the one-texel boundary of each stone; stone colours from the
+ *     list of the picture's stone cores (bluish ones left out), the pale blue and the warm stones from their own
+ *     measured colour and share (the blue ones neat slabs, lightest on top); the foot's shade per row as the picture's;
  *   - the trees: the tree cut by each edge continued (its centre, top and width in A5_ETREE, its tier lines measured
  *     on the edge columns so the chevrons meet), then new conifers of varying height and width, near (bright) and
  *     far (hazy) mixed, in front of a hazy back row; the tone per row matched to the edge columns over the first
@@ -149,7 +160,8 @@ static void blob(int x16, int y16, int rx, int ry, const Ramp *rp, int tone, int
  *     hole), the first mound's top starting at the picture's bush top at the edge;
  *   - each band softened to the picture's own sharpness next to the edge (the mean fine detail |L - box3(L)| matched by
  *     a 3x3 blur of the right strength: the distant trees and the path are soft, the wall crisp).
- * Not continued: the stepping stones jutting out of the wall, the barrels, the bench, the notice board, the pipe. */
+ * Not continued: the stepping stones jutting out of the wall, the ferns in it, the barrels, the bench, the notice board,
+ * the pipe, the low two-board object by each edge. */
 enum { A5_SKY = 1, A5_TREE, A5_FENCE, A5_STONE, A5_PATH, A5_BUSH, A5_TREEN };
 #define A5_WALL0 103
 #define A5_WALL1 186
@@ -178,7 +190,6 @@ static Ramp A5_rrow[2][PH];                              /* per-row ramps (fence
 static Ramp A5_rsky[2], A5_rnear, A5_rhaze, A5_rpost, A5_rmortar, A5_rbush;
 static Rgb A5_stc[256]; static int A5_nst, A5_sta[257]; /* the picture's stone colours, their areas (cumulative) */
 static int A5_thr;                                       /* stone / mortar threshold (luminance) */
-static int A5_railk[2];                                  /* the rails' light per side (x 256) */
 static int A5_lk[2];
 static Rgb A5_cblue, A5_cwarm; static int A5_pblue, A5_pwarm;   /* the pale blue / warm stones: colour, share (/1000) */                                     /* the stones' length per side (x 256) */
 static int A5_foot[PH];                                  /* the wall's light per row (x 256) */
@@ -233,7 +244,7 @@ static int pu_lit(u16 c) { Rgb k = rgb15(c); return lum(k) >= 150 && !a5_green(k
 static int pr_path(int side, int i, int y) { Rgb k = a5p(side, i, y); return a5_orange(k) || (y < 190 && !a5_green(k) && lum(k) > 120); }
 static int pr_lit(int side, int i, int y) { return pu_lit(pic[y][a5x(side, i)]); }
 static int pr_wall(int side, int i, int y) { return !a5_obj(a5p(side, i, y)); }
-static int pr_orange(int side, int i, int y) { return a5_orange(a5p(side, i, y)); }
+static int pr_orange(int side, int i, int y) { Rgb k = a5p(side, i, y); return a5_orange(k) && lum(k) >= 128; }   /* (lit: no shadows of objects) */
 static int pr_sky(int side, int i, int y) { return a5_sky(a5p(side, i, y)); }
 
 /* Otsu's threshold of a luminance histogram */
@@ -295,13 +306,16 @@ static void a5_analyse(void)
         nsamp = 0;
         for (int y = 0; y < 24; y++) for (int i = 0; i < 64; i++) for (int s2 = 0; s2 < 2; s2++) if (pr_sky(s2, i, y)) samp_add(pic[y][a5x(s2, i)]);   /* (both edges: the clouds too) */
         ramp_any(&A5_rsky[s]);
-        /* the fence's rows: the rails and the gaps from the sunlit stretch (both sides; the left's rails then in the
-           shade, below), the path per side from its orange texels next to the edge */
+        /* the fence's rows: the rails and the gaps from the sunlit stretch; the left's rails in the shade, as its top
+           rail at the edge (x 0-15: the lower rail's rows from the same rows of it); the path per side from its lit
+           orange texels next to the edge */
         for (int y = A5_FEN0; y < A5_PATH0; y++) {
-            int rail = (y < A5_FEN0 + A5_RAILH) || (y >= A5_RAIL1 && y < A5_RAIL1 + A5_RAILH);
+            int rail = (y < A5_FEN0 + A5_RAILH) || (y >= A5_RAIL1 && y < A5_RAIL1 + A5_RAILH), yt = y < A5_RAIL1 ? y : y - (A5_RAIL1 - A5_FEN0);
             nsamp = 0;
-            for (int x = 250; x < 292; x++) if (a5_fence_col(x) && (rail ? pu_rail(pic[y][x]) : pu_gap(pic[y][x]))) samp_add(pic[y][x]);
-            if (nsamp < 6) { nsamp = 0; for (int x = 250; x < 292; x++) if (a5_fence_col(x)) samp_add(pic[y][x]); }
+            if (rail && !s) for (int x = 0; x < 16; x++) { if (pu_rail(pic[yt][x])) samp_add(pic[yt][x]); }
+            else for (int x = 250; x < 292; x++) if (a5_fence_col(x) && (rail ? pu_rail(pic[y][x]) : pu_gap(pic[y][x]))) samp_add(pic[y][x]);
+            if (nsamp < 6) { nsamp = 0; for (int x = 250; x < 292; x++) if (a5_fence_col(x)) samp_add(pic[y][x]); }   /* (a picture without the
+                                                                                                             fence's tones there) */
             ramp_any(&A5_rrow[s][y]);
         }
         for (int y = A5_PATH0; y < A5_WALL0; y++) a5_row_ramp(&A5_rrow[s][y], s, y, 0, 70, pr_orange);
@@ -314,13 +328,6 @@ static void a5_analyse(void)
     nsamp = 0;                                               /* the posts: the picture's at x 262-268 */
     for (int y = 72; y < 92; y++) for (int x = 262; x < 269; x++) if (pu_post(pic[y][x])) samp_add(pic[y][x]);
     ramp_any(&A5_rpost);
-    {   int a = 0, na = 0, b = 0, nb = 0;                   /* the left's rails: as light as its top rail at the edge */
-        for (int y = 72; y < 78; y++) {
-            for (int x = 0; x < 16; x++) { a += lum(rgb15(pic[y][x])); na++; }
-            for (int x = 250; x < 292; x++) if (a5_fence_col(x)) { b += lum(rgb15(pic[y][x])); nb++; }
-        }
-        A5_railk[0] = na && b ? clampi((int)((long long)a * nb * 256 / ((long long)b * na)), 160, 256) : 256; A5_railk[1] = 256;
-    }
     {   int vj[2], n[2];                                     /* the stones' length per side: the density of vertical
                                                                 joints in the 40 columns next to each edge */
         for (int s = 0; s < 2; s++) {
@@ -332,9 +339,9 @@ static void a5_analyse(void)
             }
         }
         for (int s = 0; s < 2; s++)
-            A5_lk[s] = vj[s] && n[0] && n[1] ? clampi((int)((long long)(vj[0] + vj[1]) * n[s] * 256 / ((long long)vj[s] * (n[0] + n[1]))), 232, 288) : 256;
+            A5_lk[s] = vj[s] && n[0] && n[1] ? clampi((int)((long long)(vj[0] + vj[1]) * n[s] * 256 / ((long long)vj[s] * (n[0] + n[1]))), 232, 320) : 256;
 #ifdef WS_BACKDROP_MAIN
-        if (getenv("WSB_INFO")) fprintf(stderr, "stone length k %d %d (vertical joints %d / %d, %d / %d), rails k %d\n", A5_lk[0], A5_lk[1], vj[0], n[0], vj[1], n[1], A5_railk[0]);
+        if (getenv("WSB_INFO")) fprintf(stderr, "stone length k %d %d (vertical joints %d / %d, %d / %d))\n", A5_lk[0], A5_lk[1], vj[0], n[0], vj[1], n[1]);
 #endif
     }
     nsamp = 0;
@@ -539,6 +546,8 @@ static int a5_post_at(int side, int wx)                  /* the column (0..4, sc
 static void a5_fence(int side)
 {
     static const int lit[A5_POSTW] = { 18, 90, 205, 225, 120 };   /* across a post, as the picture's (x 263-267) */
+    int lr = lum(ramp_mean(&A5_rrow[1][A5_FEN0 + 2])), pk = lr ? clampi(lum(ramp_mean(&A5_rrow[side][A5_FEN0 + 2])) * 256 / lr, 160, 256) : 256;   /* (the posts in the
+                                                                    shade with the rails: the left's) */
     for (int X = 1; X <= cw; X++) {
         int wx = wx_of(side, X), pc = a5_post_at(side, wx), sh = a5_post_at(side, wx + 1) == 0 ? 1 : a5_post_at(side, wx + 2) == 0 ? 2 : 0;
         for (int y = A5_FEN0; y < A5_WALL0; y++) {
@@ -551,16 +560,16 @@ static void a5_fence(int side)
                 int t = lit[pc] + (noise(wx * 4, y, 1, 7, 653) - 128) / 4 + (int)(hash3(wx, y, 655) & 15) - 8;
                 if (y == A5_FEN0) t += 16;
                 if (y >= A5_PATH0) t -= 24;
-                c = ramp(&A5_rpost, t);
+                c = scale(ramp(&A5_rpost, t), pk);
             } else if (rail >= 0) {                                              /* the rails: grain along them */
                 int t = a5_rank(wx, y, 9, 1, 661 + rail, 70) + (noise(wx, y, 23, 4, 667 + rail) - 128) / 4;
-                c = scale(ramp(&A5_rrow[side][y], t), A5_railk[side]);
+                c = ramp(&A5_rrow[side][y], t);
                 if (sh) c = scale(c, sh == 1 ? 200 : 228);                        /* the post's shadow */
             } else if (y < A5_PATH0) {                                           /* the wood behind the fence */
                 c = ramp(&A5_rrow[side][y], a5_rank(wx, y, 3, 2, 681, 90));
                 if (sh) c = scale(c, 220);
             } else {                                                             /* the path */
-                c = ramp(&A5_rrow[side][y], a5_rank(wx, y * 3, 4, 4, 691, 60));
+                c = ramp(&A5_rrow[side][y], 40 + a5_rank(wx, y * 3, 6, 3, 691, 50) * 11 / 16);   /* (the extremes left out: no specks) */
                 if (y < A5_PATH0 + 3 && (sh || a5_post_at(side, wx + 3) == 0)) c = scale(c, 200);
             }
             putr(X, y, c, A5_FENCE);
@@ -586,6 +595,20 @@ static Rgb a5_stone_col(u32 h)                          /* a stone colour of the
     while (i < A5_nst - 1 && A5_sta[i + 1] <= a) i++;
     return A5_stc[i];
 }
+#define A5_BLUE(c) ((c).b > (c).r + 6)
+#define A5_WSX 21
+#define A5_BLUE(c) ((c).b > (c).r + 6)
+#define A5_WSX 21
+#define A5_BLUE(c) ((c).b > (c).r + 6)
+#define A5_WSX 21
+#define A5_BLUE(c) ((c).b > (c).r + 6)
+#define A5_WSX 21
+#define A5_BLUE(c) ((c).b > (c).r + 6)
+#define A5_WSX 21
+#define A5_BLUE(c) ((c).b > (c).r + 6)
+#define A5_WSX 21
+#define A5_BLUE(c) ((c).b > (c).r + 6)
+#define A5_WSX 21
 #define A5_BLUE(c) ((c).b > (c).r + 6)
 #define A5_WSX 21
 #define A5_BLUE(c) ((c).b > (c).r + 6)
@@ -689,7 +712,7 @@ static void a5_wall(int side)
                                                                                      its list of stone colours */
                         if (h2 < A5_pblue) { sc = A5_cblue; L = 8 + (int)(h >> 26) % 6; if (H > 5 && len - 5 >= 3) H = 5; }
                         else if (h2 < A5_pblue + A5_pwarm) sc = A5_cwarm;
-                        else { sc = a5_stone_col(h >> 4); for (int r = 0; r < 4 && A5_BLUE(sc); r++) sc = a5_stone_col(hash3(wx_of(side, X), yy, 715 + r)); }
+                        else { sc = a5_stone_col(h >> 4); for (int r = 0; r < 6 && sc.b >= sc.r - 2; r++) sc = a5_stone_col(hash3(wx_of(side, X), yy, 715 + r)); }
                     }
                     {   int s = a5_new(yy, H > 1 ? H - 1 : H, H > 1 ? 1 : 0, X, L, sc, 0);
                         if (s >= 0) for (int q = yy; q < yy + H; q++) act[q] = s; }
@@ -706,7 +729,7 @@ static void a5_wall(int side)
         const A5Slot *k = &a5s[s]; int x0 = k->x0, x1 = k->x1, H = k->hs + k->jh, e = x1 - 1, len = x1 - x0;
         u32 h = hash3(wx_of(side, x0), k->y0, 761 + side);
         int vs = (int)(h % 2) ? 1 : -1, D = 1 + (int)(h >> 4) % 2, hd = (int)(h >> 6) % 3, xs = x0 + len * (1 + (int)(h >> 9) % 3) / 4, hside = (int)(h >> 12) & 1;
-        if (x0 < 4 || x1 > cw || k->y0 < Y0 || k->y0 + H > Y1 || A5_BLUE(k->c)) continue;   /* (the blue-grey ones stay neat slabs) */
+        if (x0 < 4 || k->y0 < Y0 || k->y0 + H > Y1 || A5_BLUE(k->c)) continue;   /* (the blue-grey ones stay neat slabs) */
         /* the outer joint slanted: shifted by -D/2..D/2 columns from the top row to the bottom one */
         for (int y = k->y0; y < k->y0 + H && vs && e + 1 <= cw; y++) {
             int sh = vs * (fdiv((2 * (y - k->y0) + 1) * (D + 1), 2 * H) - (D + 1) / 2), t = own[(size_t)y * cw + e];   /* (X e + 1 is column index e) */
@@ -716,7 +739,7 @@ static void a5_wall(int side)
         }
         if (hd < 2 && H >= 4) {
             int yb = k->y0 + H - 1;
-            for (int X = x0; X < x1 - 1; X++) {
+            for (int X = x0; X < x1 - 1 && X <= cw; X++) {
                 int t; if ((X >= xs) != hside || yb + 1 >= Y1) continue;   /* (one side of xs) */
                 t = own[(size_t)(yb + 1) * cw + X - 1];
                 if (t < 0 || t == s || A5_BLUE(a5s[t].c)) continue;
@@ -756,7 +779,9 @@ static void a5_wall(int side)
                 if (s < 0) continue;
                 if (jt[o]) {                                     /* mortar; darker in the shadow under a stone */
                     int vert = y + 1 < Y1 && o2[o + cw] == s && !jt[o + cw];      /* a vertical joint (else under the stone) */
-                    c = ramp(&A5_rmortar, (vert ? 10 : 40) + (int)(hash3(s, 1, 747) % 50) + a5_rank(wx, y, 3, 3, 723, 120) / 2);
+                    c = ramp(&A5_rmortar, (vert ? 0 : 40) + (int)(hash3(s, 1, 747) % 50) + a5_rank(wx, y, 3, 3, 723, 120) / 2);
+                    if (vert) c = scale(c, 244);                                  /* (the vertical joints the darker, as the picture's) */
+                    else if (hash3(wx, y, 751) % 10 == 0) c = scale(c, 216);    /* deeper spots */
                     if (!vert && (hash3(s, 1, 743) % 10) < 3) c = mix(c, a5s[s].c, 110);   /* a faint joint */
                 } else {
                     Rgb m = ramp(&A5_rmortar, 110);
@@ -766,8 +791,8 @@ static void a5_wall(int side)
                     for (;;) { int Xn = X + dr * dxr; size_t on; if (Xn < 1 || Xn > cw) break; on = (size_t)y * cw + Xn - 1; if (o2[on] != s || jt[on]) break; dr++; }
                     for (;;) { int Xn = X - dl * dxr; size_t on; if (Xn < 1 || Xn > cw) break; on = (size_t)y * cw + Xn - 1; if (o2[on] != s || jt[on]) break; dl++; }
                     d = (int)(hash3(s, 0, 741) % 21) - 15;                         /* each stone its own tone */
-                    if (a5s[s].hs >= 3 && (hash3(s, 2, 745) % 10) < 3 && y == a5s[s].y0 + 1 + (int)(hash3(s, 3, 745) % (u32)(a5s[s].hs - 2))
-                        && X >= a5s[s].x0 + (int)(hash3(s, 4, 745) % 3) && X < a5s[s].x1 - 1 - (int)(hash3(s, 5, 745) % 4)) d -= 16;   /* a layer line */
+                    if (a5s[s].hs >= 3 && (hash3(s, 2, 745) % 10) < 2 && y == a5s[s].y0 + 1 + (int)(hash3(s, 3, 745) % (u32)(a5s[s].hs - 2))
+                        && X >= a5s[s].x0 + (int)(hash3(s, 4, 745) % 3) && X < a5s[s].x1 - 1 - (int)(hash3(s, 5, 745) % 4)) d -= 11;   /* a layer line */
                     d += (noise(wx, y, 6, 2, 727 + s % 7) - 128) / 7 + (int)(hash3(wx, y, 725) % 9) - 4;
                     /* rounded like a pillow (the picture's profiles across its stones): the middle rows lightest, the
                        first row a little and the last one more below them, both end columns ~15 darker */
@@ -775,7 +800,7 @@ static void a5_wall(int side)
                     else if (du == 1 && dd == 1) d += 2;
                     else if (du + dd == 3) d += du == 1 ? 6 : 3;
                     else d += du == 1 ? 0 : dd == 1 ? -6 : du == 2 ? 18 : 12;
-                    if (du == 2 && dl >= 2 && dr >= 3 && (hash3(s, 6, 749) % 3) == 0) d += 14;      /* a sunlit patch */
+                    if (du <= 2 && dd >= 2 && dl >= 2 && dr >= 3 && dl <= 2 + (int)(hash3(s, 7, 749) % 8) && (hash3(s, 6, 749) % 2) == 0) d += du == 1 ? 18 : 12;   /* a white highlight on the top left */
                     d -= dl == 1 ? 15 : 0;
                     d += dr == 1 ? -17 : dr == 2 ? 4 : 0;
                     c = a5s[s].c; c.r += d; c.g += d; c.b += d;

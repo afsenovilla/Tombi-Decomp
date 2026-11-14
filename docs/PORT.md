@@ -2856,26 +2856,35 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   is covered at: the village's jukebox), `emit()` (the join and the quantisation to the picture's colours), foliage
   `blob()`, `sphere()`.  The rooms:
   - AREA05 s1 / s3 (the same picture: the house with the dry-stone wall), a frontal scene, every band continued
-    sideways from what the picture has in its last columns (rows: wood 0-71, front fence 72-102 with planks 72-77 /
-    81-86 / 93-99 on the left and one row lower on the right, the wall 103-185, path 186-~200, bushes ~200-223).
-    Redrawn 2026-11-14 after the user rejected the first version (regular clone trees, big contrasted bluish stones,
-    flat fence, visible joins, repeated bushes).  How each band is drawn now:
-    - per-row ramps: the fence planks, the gap rows between them, the path, the wall's top and foot rows take the
-      colour distribution of the same picture row in the 26-40 columns next to the edge (objects left out: posts, the
-      pipe, plants), read through stretched value noise (grain along the planks, streaks on the path), so each row has
-      the picture's tone and spread there; the right edge's gap rows (filled by the pipe) take the left's.  Posts every
-      20-24 columns continue the picture's (left 22 / 2, right 291 / 314), lit on their left side;
-    - the wall: a skyline of stones laid outwards column by column (where a stone ends, the free rows get new stones,
-      7-18 x 5-6 incl. the joint, so joints never line up), the first ones the picture's stones cut by the edge (rows
-      from the horizontal joints of its last 3 columns, colour from their texels, the remaining length from the visible
-      one).  Sizes re-measured on the picture's mortar lines (second pass, 2026-11-14): stones 7-30 texels long (median
-      ~14) by 5-7 rows incl. the joint; the layout then warped by smooth noise (up to +-2 texels, none in the first 2 columns) and the mortar is
-      the one-texel boundary of each stone, so stones are irregular polygons with slanted joints.  Stone colours: the
-      picture's stones next to both edges (bright cores, 4-connected, rows 104-180, 70 columns each side, Otsu
-      threshold) picked as often as their area, the blue-grey ones then halved (their bright cores overstate them) and
-      kept short, so their texel share is the picture's (~3-6 %); each stone its own tone (+-18), a bevel: a light top
-      row (+22, +9 under it), a dark lower row and right column (towards the mortar), the mortar darker under a stone;
-      no per-texel tint of the mortar (that made blue specks); the foot's shade per row as measured;
+    sideways from what the picture has in its last columns (rows: wood 0-70, front fence 71-102, the wall 103-185,
+    path 186-~200, bushes ~200-223).  Redrawn 2026-11-14 after the user rejected the first version (regular clone
+    trees, big contrasted bluish stones, flat fence, visible joins, repeated bushes); wall and fence redone again the
+    same day after a closer study of the picture (the user: shabby stones, the fence has two rails, not three):
+    - the fence, as measured on the picture's sunlit stretch (x 250-292): two rails of 8 rows (71-78, 82-89: a lit
+      top row, the board with grain along it, a darker lower row), the wood seen between them (79-81) and under the
+      lower one (90-91), the path from 92; posts 5 columns wide (rows 71-93; the picture's at x 263-267 and ~296-300,
+      i.e. one every 33 columns), dark left column, light right half, a shadow on the rails and the path to their
+      left.  What looked like a third plank by each edge is a short low object standing in front of the fence (two
+      boards, rows 80-87 / 93-100, dark blocks under them; x 0-26 on the left, 286-319 on the right, both cut by the
+      edge, so the fence's top rail behind it makes three planks there): the strips end it in their first 2 columns
+      and go on with the two-rail fence.  Rails, gaps and path are per-row ramps (rails: the sunlit stretch on the
+      right, the shaded top rail at the edge, x 0-15, on the left; the path from lit orange texels next to the edge);
+    - the wall, as studied on 8x zooms and measured (column runs between horizontal joints, row runs between vertical
+      ones, the light profile across the stones): a lit coping (103-104, from the lit texels of those rows: the right
+      edge lies in the object's shadow) over a joint row (105); then flat slabs of cream / pinkish limestone, median
+      ~8-9 columns (left) / ~7 (right) by 4-5 rows incl. the joint, some 15-20 long, in irregular courses whose joints
+      step, slant and drift, never a long ruled line; the mortar one texel of mid grey (the vertical joints darker,
+      ~150, than the horizontal ones, ~160, some faint), each slab rounded like a pillow (lightest in its middle rows,
+      the first row a little and the last one more below them, both end columns ~15 darker), often a white highlight
+      on its top left; ~4 % pale blue-white slabs (lightest on top, neat rectangles 8-13 x 3-5) and ~3 % warm sandy
+      ones.  Drawn as a skyline of stones laid outwards column by column (the first ones the picture's stones cut by
+      the edge); so that no course runs on (the first version's brick-grid look: every new stone took the height of
+      the free rows), a stone over or under the free rows that would end within 6 columns ends with them, a new
+      stone's joint is never in line with the one just before it, a 1-2 row sliver goes to the stone over it; lengths
+      scaled per side by the density of the picture's vertical joints next to that edge; then vertical joints slanted,
+      some horizontal ones stepped, the courses drifting by a slow vertical offset (+-2 rows over ~20 columns, none at
+      the join); the mortar the one-texel boundary of each stone; colours from the picture's stone cores (bluish ones
+      left out) and the blue / warm stones' own measured colour and share; the foot's shade per row as measured;
     - the wood: the sky's ramp; a hazy back row; the tree cut by each edge continued (A5_ETREE: left near tree centre
       12 top 3, right hazy tree centre 309 top 1), its tier lines from the dark rows of the edge columns so the
       chevrons meet; then conifers outwards spaced by their widths (crowns 40-76 wide, tops -5..15, near / hazy mixed,
