@@ -610,7 +610,20 @@ static int slot_pick(int a, int n, int b, int m) {
    (more textures in a frame than slots of the size), [8] into a free slot */
 unsigned long long pica_dec_why[9];
 int pica_n128x;
+static int ws_res;   /* the two last 256 slots hold a top-down room's side strips (pica_ws_strips) */
+static unsigned ws_seen;
+static struct { int n; struct { int tx, ty, u0, v0, w, h, sx, slot; } e[16]; } wso;
+static void ws_release(void);
 static int tex_slot(const GpuTex *t, int u0, int v0, int u1, int v1, int *obx, int *oby) {
+    if (wso.n && t->depth == 1)   /* a side strip's SPRT: its piece in the strips' slot */
+        for (int k = 0; k < wso.n; k++)
+            if (t->tx == wso.e[k].tx && t->ty == wso.e[k].ty && u0 >= wso.e[k].u0 && u1 <= wso.e[k].u0 + wso.e[k].w
+                && v0 >= wso.e[k].v0 && v1 <= wso.e[k].v0 + wso.e[k].h) {   /* (a sprite's far corner: one past its last texel) */
+                *obx = wso.e[k].u0 - wso.e[k].sx; *oby = wso.e[k].v0;
+                slots[wso.e[k].slot].used = ++use_clock;
+                return wso.e[k].slot;
+            }
+    if (ws_res && present_no - ws_seen > 120) ws_release();   /* (out of the top-down rooms: the slots back) */
     int tw = gs->twmx | gs->twmy << 5 | gs->twox << 10 | gs->twoy << 15;
     if (memo.ok && memo.ver == ver_clock && memo.epoch == drawn_epoch && memo.tx == t->tx && memo.ty == t->ty && memo.depth == t->depth
         && memo.tw == tw && (t->depth == 2 || (memo.cx == t->cx && memo.cy == t->cy))
@@ -704,7 +717,7 @@ static int tex_slot(const GpuTex *t, int u0, int v0, int u1, int v1, int *obx, i
         else was = s->used;   /* (stale: decoded again in its slot) */
     }
     if (!nc || fresh) {
-        if (z == 256) i = slot_pick(0, PICA_N256, 0, 0);
+        if (z == 256) i = slot_pick(0, PICA_N256 - 2 * ws_res, 0, 0);
         else if (z == 128) i = slot_pick(PICA_N256, PICA_N128, PICA_X128, pica_n128x);
         else i = slot_pick(PICA_N256 + PICA_N128, 128, PICA_N256 + PICA_N128 + 128, PICA_N64 - 128);
         if (memo.slot == i) memo.ok = 0;
@@ -735,7 +748,7 @@ static int tex_slot(const GpuTex *t, int u0, int v0, int u1, int v1, int *obx, i
         for (int c = 0; c < 64; c++) {
             if (keep && cellh[i][c] == nh[c]) continue;
             int done = 0;
-            for (int j = 0; j < PICA_N256 && !done; j++) {
+            for (int j = 0; j < PICA_N256 - 2 * ws_res && !done; j++) {
                 if (j == i || !cellok[j] || !slots[j].live || slots[j].chash != hc) continue;
                 for (int k = 0; k < 64; k++) if (cellh[j][k] == nh[c]) {
                     dev->cell_copy(i, c, j, k, busy); busy = 0; slot_kinds[i][c] = slot_kinds[j][k]; done = 1; st_cells_copied++; break;
@@ -771,6 +784,70 @@ found:
     memo.bx = bx; memo.by = by; memo.z = z; memo.slot = i; memo.ver = ver_clock; memo.epoch = drawn_epoch;
     return i;
 }
+
+/* ---- --widescreen, the side strips of a top-down room's map (runtime/ws_topdown.c).  The game's window of the map is
+   in fixed VRAM; the windows beside it went into that same VRAM and back in every frame, so every block of it was
+   decoded or copied cell by cell twice a frame (an Old 3DS: several ms a frame).  Here the strips' pieces are
+   decoded straight from the picture in RAM into two 256 slots of their own (left, right), only when a piece changed
+   (the camera moved), only the cells it is in, and the strip SPRTs read their slot while pica_ws_strips is on. */
+static u32 *ws_buf[2];                   /* the two slots' texels, 256 x 256 */
+static struct { const unsigned char *pic; int col, row, w, h, sx, cx, cy; unsigned ch; } ws_key[2][16];
+static void ws_slot_free(int i) {
+    if (slots[i].live) {
+        Slot *o = &slots[i]; const int z = 256;
+        unsigned ok = ((unsigned)(o->tx >> 6) * 7 + (unsigned)(o->ty >> 8) * 3 + (unsigned)o->cx * 13 + (unsigned)o->cy * 31 + (unsigned)(o->bx >> 5) * 5
+                       + (unsigned)(o->by >> 5) * 17 + (unsigned)z + (unsigned)o->tw * 11 + (unsigned)o->depth) & 255;
+        if (hinit) { short *q = &hhead[ok]; while (*q >= 0 && *q != i) q = &slots[*q].next; if (*q == i) *q = o->next; }
+    }
+    slots[i].live = 0; cellok[i] = 0;
+    if (memo.slot == i) memo.ok = 0;
+}
+static void ws_release(void) {
+    for (int s = 0; s < 2; s++) ws_slot_free(PICA_N256 - 2 + s);
+    ws_res = 0; memset(ws_key, 0, sizeof ws_key);
+}
+void pica_ws_strips(int side, int n, const PicaStrip *e) {
+    const int slot = PICA_N256 - 2 + (side & 1);
+    if (!ws_buf[0]) { ws_buf[0] = calloc(256 * 256, 4); ws_buf[1] = calloc(256 * 256, 4); if (!ws_buf[0] || !ws_buf[1]) return; }
+    if (!ws_res) {
+        flush();
+        for (int s = 0; s < 2; s++) { ws_slot_free(PICA_N256 - 2 + s); memset(ws_buf[s], 0, 256 * 256 * 4); }
+        memset(ws_key, 0, sizeof ws_key); ws_res = 1;
+    }
+    ws_seen = present_no;
+    const u16 *vram = port_vram();
+    unsigned long long mask = 0; int sx = 0;
+    wso.n = 0;
+    for (int k = 0; k < n && k < 16; k++) {
+        const PicaStrip *p = &e[k];
+        if (p->w <= 0 || p->h <= 0 || p->h > 256 || sx + p->w > 256) continue;
+        unsigned ch = 2166136261u;   /* (the CLUT's words: a palette animation changes the strip too) */
+        for (int i = 0; i < 256; i++) ch = (ch ^ vram[(p->cy & 511) * 1024 + ((p->cx + i) & 1023)]) * 16777619u;
+        if (ws_key[side][k].pic != p->pic || ws_key[side][k].col != p->col || ws_key[side][k].row != p->row || ws_key[side][k].w != p->w
+            || ws_key[side][k].h != p->h || ws_key[side][k].sx != sx || ws_key[side][k].ch != ch) {
+            u32 *d = ws_buf[side];
+            for (int j = 0; j < p->h; j++) {
+                const unsigned char *src = p->pic + (size_t)(p->row + j) * p->stride + p->col;
+                for (int i = 0; i < p->w; i++) d[j * 256 + sx + i] = texel(vram[(p->cy & 511) * 1024 + ((p->cx + src[i]) & 1023)]);
+            }
+            for (int cy = 0; cy < (p->h + 31) / 32; cy++) for (int cx = sx / 32; cx <= (sx + p->w - 1) / 32; cx++) mask |= 1ull << (cy * 8 + cx);
+            ws_key[side][k].pic = p->pic; ws_key[side][k].col = p->col; ws_key[side][k].row = p->row; ws_key[side][k].w = p->w;
+            ws_key[side][k].h = p->h; ws_key[side][k].sx = sx; ws_key[side][k].ch = ch;
+        }
+        wso.e[wso.n].tx = p->tx; wso.e[wso.n].ty = p->ty; wso.e[wso.n].u0 = p->u; wso.e[wso.n].v0 = p->v;
+        wso.e[wso.n].w = p->w; wso.e[wso.n].h = p->h; wso.e[wso.n].sx = sx; wso.e[wso.n].slot = slot; wso.n++;
+        sx += (p->w + 7) & ~7;
+    }
+    if (mask) {
+        if (nbv && slots[slot].used > batch_clock) flush();   /* (a pending batch samples the slot) */
+        memset(slot_kinds[slot], 1, 64);
+        if (dev->cell_upload) dev->cell_upload(slot, ws_buf[side], mask, slots[slot].used > frame_clock);
+        else dev->tex_upload(slot, ws_buf[side], slots[slot].used > frame_clock);
+        st_cells_decoded += (unsigned long long)__builtin_popcountll(mask);
+    }
+    memo.ok = 0;
+}
+void pica_ws_strips_end(void) { wso.n = 0; memo.ok = 0; }
 
 /* ---- primitives */
 static PState base_state(void) {

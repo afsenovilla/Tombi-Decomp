@@ -46,8 +46,12 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    menu cursor sound (its boot program's second VAB, sound 0: SsUtKeyOnV(23, vab, 0, 0, 8, 0, 100, 100)).  Not yet seen
    on the console.
    Measured on the console: gameplay 58-60 vblank/s in most rooms (the mansion AREA04 ~52: game logic 14 ms), Baccus
-   wide 59 (tiles of the top-down map copied by 32 x 32 cells, not decoded again; on the 3DS ws_topdown.c draws no
-   map windows beside the game's: 8 px of black at a map edge).  3D: the left eye is the game's picture, the right
+   wide 59 (tiles of the top-down map copied by 32 x 32 cells, not decoded again).  Top-down map side strips (the map
+   pieces past the game's 384-px window, which filled in as the camera moved): on the pica backend they are decoded
+   straight from the map picture in RAM into two 256 slots of their own (gpu_pica.c pica_ws_strips, only when a piece
+   changes, only its cells) instead of being written into the game's VRAM and back every frame (that was ~0.9 M
+   instructions a frame on the PC's count, now ~0.2 M); frames identical to the VRAM way (PORT_WS_VRAM_STRIPS=1) in
+   AREA05/02/08/19 s0, 460 frames compared.  Not yet measured on the console.  3D: the left eye is the game's picture, the right
    one the same batches drawn again by the GPU with a per-vertex shift (GTE SZ, else drawing order), in front of the
    screen too; ~52 in the first village with the slider up before the last present change (presents no longer wait
    for the GPU: not measured yet).  Open: the 3D's speed on the console; the PC syntax check for 3DS code uses

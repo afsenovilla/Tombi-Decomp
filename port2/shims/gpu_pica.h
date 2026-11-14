@@ -74,4 +74,9 @@ typedef struct {
     void (*cell_copy)(int dslot, int dcell, int sslot, int scell, int busy);
     void (*cell_upload)(int slot, const unsigned *rgba, unsigned long long mask, int busy);
 } PicaDev;
+/* --widescreen, a top-down room's side strips (runtime/ws_topdown.c): pieces of the map picture (8 bpp, in RAM) that the
+   SPRT copies beside the game's window read from texels (u, v) .. (u + w - 1, v + h - 1) of page (tx, ty), CLUT (cx, cy) */
+typedef struct { const unsigned char *pic; int stride, col, row, w, h, tx, ty, u, v, cx, cy; } PicaStrip;
+void pica_ws_strips(int side, int n, const PicaStrip *e);   /* side 0 left, 1 right: those pieces, until ... */
+void pica_ws_strips_end(void);                               /* ... the game's own map packets */
 #endif
