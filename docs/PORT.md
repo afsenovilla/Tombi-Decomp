@@ -2868,29 +2868,35 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     - the wall: a skyline of stones laid outwards column by column (where a stone ends, the free rows get new stones,
       7-18 x 5-6 incl. the joint, so joints never line up), the first ones the picture's stones cut by the edge (rows
       from the horizontal joints of its last 3 columns, colour from their texels, the remaining length from the visible
-      one); the layout then warped by smooth noise (up to +-2 texels, none in the first 2 columns) and the mortar is
+      one).  Sizes re-measured on the picture's mortar lines (second pass, 2026-11-14): stones 7-30 texels long (median
+      ~14) by 5-7 rows incl. the joint; the layout then warped by smooth noise (up to +-2 texels, none in the first 2 columns) and the mortar is
       the one-texel boundary of each stone, so stones are irregular polygons with slanted joints.  Stone colours: the
       picture's stones next to both edges (bright cores, 4-connected, rows 104-180, 70 columns each side, Otsu
-      threshold) picked as often as their area, so the share of blue-grey ones is the picture's; a darker lower and
-      right rim, a softened corner, per-texel grain; the foot's shade per row as measured;
+      threshold) picked as often as their area, the blue-grey ones then halved (their bright cores overstate them) and
+      kept short, so their texel share is the picture's (~3-6 %); each stone its own tone (+-18), a bevel: a light top
+      row (+22, +9 under it), a dark lower row and right column (towards the mortar), the mortar darker under a stone;
+      no per-texel tint of the mortar (that made blue specks); the foot's shade per row as measured;
     - the wood: the sky's ramp; a hazy back row; the tree cut by each edge continued (A5_ETREE: left near tree centre
       12 top 3, right hazy tree centre 309 top 1), its tier lines from the dark rows of the edge columns so the
       chevrons meet; then conifers outwards spaced by their widths (crowns 40-76 wide, tops -5..15, near / hazy mixed,
       the odd gap): each a dark crown shade, then tiers from the bottom up of needle clumps (ellipses along the
       drooping branch, lit on top, dark underside, needle gaps), the right flank in the light (as the picture's),
-      uneven tier widths; near trees matched in brightness / contrast to the picture's near conifer (x 252-288), hazy
+      uneven tier widths, sunlit patches on the clumps' tops, the odd clump missing and dark patches in the crown
+      shade (the picture's holes); near trees matched in brightness / contrast to the picture's near conifer (x 252-288), hazy
       ones to the hazy one (x 298-320), then balance_regions() at the edge and a per-row tone match over the first 12
       columns;
     - the bushes: mounds 22-50 columns apart (tops 198-211, lumpy outline), the first one starting at the picture's
       bush top at the edge; leaf clusters on a jittered 6 x 5 grid, each lit from the top left, crevices, holes, bright
-      leaves on top;
+      leaves on top; then matched in brightness / contrast to the picture's bushes (contrast up to x2, the full range);
+    - the sky: the ramp of both edges' sky texels (the clouds too, not only the white);
     - sharpness: per band (and per tree kind) a 3x3 blur of the strength that gives the strip the picture's own mean
       fine detail |L - box3(L)| next to the edge (the hazy trees, the path and the bushes are soft; the wall crisp);
       the hazy trees are blurred with the sky around them (soft tops).
     The stepping stones, barrels, bench, notice board and pipe are not continued.  A wider strip (21:9, 32:9) starts
     with the same columns as the 16:9 one (stats measured on columns 1-53 only; the last column differs by the blur).
-    Weak points: the generated conifers are still more regular than the painted ones (cleaner chevrons, less of the
-    picture's large sunlit patches and deep holes); the strips' blue-grey stones can bunch.
+    Weak points: the generated conifers are still more regular than the painted ones (cleaner, stripier chevrons; pure
+    green rather than the picture's olive / yellow mix); the strip's courses run in longer straight lines than the
+    picture's; blue-grey stones can still bunch locally.
   - AREA19 s1 / AREA02 s1 (the Dwarf Village: one layout, two pictures): canopy 0-~100 (AREA19: blossom as value
     noise masses with small flower clusters on a jittered 8 x 7 grid, a ragged shaded lower edge; AREA02: soft
     spheres of radius 13-25 in the picture's own four balloon colours, far ones first, lit upper left), the haze /

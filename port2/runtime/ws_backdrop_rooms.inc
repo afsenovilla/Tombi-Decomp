@@ -127,7 +127,7 @@ static void blob(int x16, int y16, int rx, int ry, const Ramp *rp, int tone, int
  *          hazy blue-green and softer;
  *   72-102 the front fence: three khaki planks (left rows 72-77, 81-86, 93-99; one row lower on the right) on dark
  *          posts every 20-23 columns, the wood / path showing between them;
- *   103-185 the dry-stone wall: light cream stones (some pale blue, ~6-9 %) 7-18 columns by 5-6 rows in an irregular
+ *   103-185 the dry-stone wall: light cream stones (some pale blue, ~3-6 %) 7-30 columns by 5-7 rows in an irregular
  *          bond, 1-texel light-grey mortar; 186-~200 the orange path; the front bushes from ~200.
  * How each band is drawn (every colour from the user's picture, every size from the picture's own measure):
  *   - per-row ramps: the fence (planks and the gaps between them), the path, the wall's top and foot rows take the
@@ -277,10 +277,10 @@ static void a5_analyse(void)
     for (int s = 0; s < 2; s++) {
         for (int y = 0; y < 28; y++) ;
         nsamp = 0;
-        for (int y = 0; y < 24; y++) for (int i = 0; i < 64; i++) if (pr_sky(s, i, y)) samp_add(pic[y][a5x(s, i)]);
+        for (int y = 0; y < 24; y++) for (int i = 0; i < 64; i++) for (int s2 = 0; s2 < 2; s2++) if (pr_sky(s2, i, y)) samp_add(pic[y][a5x(s2, i)]);   /* (both edges: the clouds too) */
         ramp_any(&A5_rsky[s]);
         for (int y = A5_FEN[s].pl[0][0] - 1; y < A5_WALL0; y++)
-            a5_row_ramp(&A5_rrow[s][y], s, y, 0, 26, y >= 100 ? pr_path : a5_plank_row(s, y) ? pr_plank : pr_gap);
+            a5_row_ramp(&A5_rrow[s][y], s, y, 0, a5_plank_row(s, y) ? 12 : 26, y >= 100 ? pr_path : a5_plank_row(s, y) ? pr_plank : pr_gap);   /* (planks: their tone at the join) */
         for (int y = A5_FEN[s].pl[0][0]; y < A5_WALL0; y++) if (!A5_rrow[s][y].ok) A5_rrow[s][y] = A5_rrow[s][y - 1];
         if (s) for (int y = A5_FEN[1].pl[0][1]; y < 100; y++)          /* the right's gap rows: the pipe fills them there */
             if (!a5_plank_row(1, y) && !a5_plank_row(0, y - 1)) A5_rrow[1][y] = A5_rrow[0][y - 1];
@@ -369,6 +369,7 @@ static void a5_clump(const A5Tree *t, int side, int x16, int y16, int rx, int ry
         {   int c = base - v * (t->kind == 2 ? 28 : 16) / ry + dx * 10 / rx + (int)(hash3(wx, y, seed + 1) & 15) - 8 + (noise(wx, y, 2, 2, seed + 3) - 128) / 4;
             if (q > 150 && v > 0) c -= 34;                                                 /* the underside */
             if ((hash3(wx, y, seed + 5) & 7) == 0) c -= 24;                                /* gaps between the needles */
+            if (t->kind == 2 && v < 0 && noise(wx, y, 7, 6, 821) > 160) c += 56;             /* sunlit patches */
             putr(X, y, a5_tcol(t, c), t->kind == 2 ? A5_TREEN : A5_TREE);
         }
     }
@@ -382,7 +383,7 @@ static void a5_tree(const A5Tree *t, int side)
         for (int wx = (xs - W) / 16 - 2; wx <= (xs + W) / 16 + 2; wx++) {
             int X = side ? wx - (PW - 1) : -wx, dx = wx * 16 + 8 - xs;
             if (X < 1 || X > cw || (dx < 0 ? -dx : dx) > W + (noise(wx, y, 3, 2, 811 + t->seed) - 128) / 4) continue;
-            putr(X, y, a5_tcol(t, 24 + noise(wx, y, 3, 3, 801 + t->seed) / 4 + dx * 16 / (W + 16)), t->kind == 2 ? A5_TREEN : A5_TREE);
+            putr(X, y, a5_tcol(t, (noise(wx, y, 5, 4, 823 + t->seed) < 80 ? -20 : 24) + noise(wx, y, 3, 3, 801 + t->seed) / 4 + dx * 16 / (W + 16)), t->kind == 2 ? A5_TREEN : A5_TREE);
         }
     }
     /* the tiers, bottom first: tier rows from the edge's measured tier lines (the edge tree) or every sp rows */
@@ -409,7 +410,7 @@ static void a5_tree(const A5Tree *t, int side)
                     v += s > 0 ? 18 + i * 40 / (W + 16) : -18 - i * 22 / (W + 16);   /* the right flank in the light */
                     if (s > 0 && i > W / 2 && rndi(&r, 2)) v += 34;                  /* its bright tips */
                     if (i > W - 8 && rndi(&r, 2)) ry += 8;                           /* drooping tips */
-                    if (rndi(&r, 8)) a5_clump(t, side, x16, y16, rx, ry, v, t->seed * 16 + k, s);
+                    if (rndi(&r, 6)) a5_clump(t, side, x16, y16, rx, ry, v, t->seed * 16 + k, s);   /* (the odd one missing: a deep hole) */
                     step = 16 + rndi(&r, 18);
                 }
             }
@@ -422,7 +423,7 @@ static void a5_wood(int side)
     for (int X = 1; X <= cw; X++)                                            /* the sky */
         for (int y = 0; y < A5_FEN[side].pl[0][0]; y++) {
             int wx = wx_of(side, X);
-            putr(X, y, ramp(&A5_rsky[side], 112 + a5_rank(wx, y, 20, 9, 621, 30) * 9 / 16), A5_SKY);
+            putr(X, y, ramp(&A5_rsky[side], 24 + a5_rank(wx, y, 20, 9, 621, 30) * 7 / 8), A5_SKY);
         }
     /* the hazy back row: far trees every ~13 columns */
     for (int k = fdiv(x0, 13) - 3; k * 13 < x1 + 30 && n < 96; k++) {
@@ -444,7 +445,7 @@ static void a5_wood(int side)
                 q->kind = h % 9 < 5 ? 2 : 1; q->wmax = 20 + (int)(h >> 4) % 18;
                 c += dir * ((pw + q->wmax) * 2 / 3 + (int)(h2 % 9) - 4 + ((h2 >> 4) % 4 == 0 ? 10 : 0));
                 if ((side && c > x1) || (!side && c < x0)) break;
-                q->cx = c; q->ty = (int)(h >> 10) % 21 - 5 + (q->kind == 1 ? 3 : 0);
+                q->cx = c; q->ty = (int)(h >> 10) % 17 - 6 + (q->kind == 1 ? 3 : 0);
                 q->h = 36 + (int)(h >> 16) % 26; q->sp = 6 + (int)(h >> 22) % 3;
                 q->seed = 700 + i * 5 + side; q->nb = 0; q->B = 0; q->adx0 = 0;
                 pw = q->wmax; n++; i++;
@@ -545,7 +546,7 @@ static void a5_wall(int side)
                 for (int yy = a; yy < b; yy++) for (int i = 0; i < 6 && i < v + 1; i++) { Rgb k = a5p(side, i, yy); if (lum(k) >= A5_thr && !a5_obj(k)) { t.r += k.r; t.g += k.g; t.b += k.b; n++; } ms++; }
                 if (b - a > 6) { b = a + 4 + (int)(hash3(side, a, 703) % 2); jh = 0; }   /* a joint too faint to see: split */
                 if (n && vj * 2 < b - a) {
-                    u32 h = hash3(side, a, 701); int T = 8 + (int)(h % 6) + (int)(h >> 8) % 6, rem = T - v;
+                    u32 h = hash3(side, a, 701); int T = 7 + (int)(h % 8) + (int)(h >> 8) % 9, rem = T - v;
                     Rgb c = { t.r / n, t.g / n, t.b / n };
                     if (rem < 2) rem = 2 + (int)(h >> 16) % 2;
                     {   int s = a5_new(a, b - a, jh, 1, rem, c, 0); if (s >= 0) for (int yy = a; yy < b + jh && yy < Y1; yy++) act[yy] = s; }
@@ -566,9 +567,15 @@ static void a5_wall(int side)
             {   int yy = a;
                 while (len > 0) {
                     u32 h = hash3(wx_of(side, X), yy, 711 + side);
-                    int H = len <= 8 ? len : 5 + (int)(h % 5) / 2, L = 7 + (int)(h >> 8) % 6 + (int)(h >> 12) % 6, sl = (int)(h >> 20) % 7;
-                    if (len > 8 && len - H < 4) H = len - 4;
-                    {   int s = a5_new(yy, H > 1 ? H - 1 : H, H > 1 ? 1 : 0, X, L, a5_stone_col(h >> 4), sl == 0 ? -1 : sl == 1 ? 1 : 0);
+                    int H = len <= 9 ? len : 5 + (int)(h % 3), L = 7 + (int)(h >> 8) % 8 + (int)(h >> 12) % 9 + ((h >> 24) % 6 == 0 ? 6 : 0), sl = (int)(h >> 20) % 7;
+                    if (len > 9 && len - H < 5) H = len - 5;
+                    Rgb sc = a5_stone_col(h >> 4);
+                    if (sc.b > sc.r + 6) {                       /* the blue-grey stones: half as often (their bright cores
+                                                                    overstate them in the list), and short as the picture's */
+                        if (hash3(wx_of(side, X), yy, 713) & 1) sc = a5_stone_col(hash3(wx_of(side, X), yy, 715) | 1);
+                        if (sc.b > sc.r + 6 && L > 11) L = 7 + (int)(h >> 26) % 5;
+                    }
+                    {   int s = a5_new(yy, H > 1 ? H - 1 : H, H > 1 ? 1 : 0, X, L, sc, sl == 0 ? -1 : sl == 1 ? 1 : 0);
                         if (s >= 0) for (int q = yy; q < yy + H; q++) act[q] = s; }
                     yy += H; len -= H;
                 }
@@ -606,18 +613,23 @@ static void a5_wall(int side)
             if (y == A5_WALL0 || y >= Y1) { c = ramp(&A5_rrow[side][y], a5_rank(wx, y, 5, 2, 721, 80)); putr(X, y, c, A5_STONE); continue; }
             {   size_t o = (size_t)y * cw + X - 1; int s = own[o];
                 if (s < 0) continue;
-                if (jt[o]) c = mix(ramp(&A5_rmortar, 64 + a5_rank(wx, y, 3, 3, 723, 120) * 3 / 4), a5_stone_col(hash3(wx, y, 729)), 22);
-                else {
+                if (jt[o]) {                                     /* mortar; darker in the shadow under a stone */
+                    c = ramp(&A5_rmortar, 64 + a5_rank(wx, y, 3, 3, 723, 120) * 3 / 4);
+                    if (y > Y0 && !jt[o - cw]) c = scale(c, 236);
+                } else {
                     Rgb m = ramp(&A5_rmortar, 150);
-                    int jb = y + 1 < Y1 && jt[o + cw], ju = y > Y0 && jt[o - cw];
+                    int jb = y + 1 < Y1 && jt[o + cw], ju = y > Y0 && jt[o - cw], jb2 = y + 2 < Y1 && jt[o + 2 * cw] && !jb;
+                    int ju2 = y > Y0 + 1 && jt[o - 2 * cw] && !ju;
                     int jr = Xr >= 1 && Xr <= cw ? jt[(size_t)y * cw + Xr - 1] : 0, jl = Xl >= 1 && Xl <= cw ? jt[(size_t)y * cw + Xl - 1] : 0;
-                    int d = (int)(hash3(wx, y, 725) % 25) - 12 + (noise(wx, y, 3, 2, 727 + s % 7) - 128) / 6;
+                    int d = (int)(hash3(wx, y, 725) % 13) - 6 + (noise(wx, y, 4, 3, 727 + s % 7) - 128) / 5
+                            + (int)(hash3(s, 0, 741) % 37) - 18;                     /* each stone its own tone */
                     c = a5s[s].c;
+                    if (ju) d += 22; else if (ju2) d += 9;                            /* the lit top edge */
+                    if (jl) d += 5;
+                    if (jb2) d -= 8;
                     c.r += d; c.g += d; c.b += d;
-                    if (ju) { c.r += 4; c.g += 4; c.b += 4; }
-                    if (jb) c = mix(c, m, 80);
-                    if (jr) c = mix(c, m, 56);
-                    if (jl && !ju) c = mix(c, m, 20);
+                    if (jb) c = mix(c, m, 110);                                       /* the dark lower edge */
+                    if (jr) c = mix(c, m, 64);
                     if ((jb || ju) && (jr || jl)) c = mix(c, m, 70);   /* a rounded corner */
                 }
             }
@@ -669,7 +681,7 @@ static void a5_bushes(int side)
                 if ((bh >> 6 & 7) == 0 && d > 4) tone = 56 + d / 2;                   /* a hole into the bush */
                 if (d < 9 && (bh >> 9 & 1)) tone += 44;                          /* bright leaves on top */
                 tone += (int)(hash3(wx, y, 753) & 15) - 8;
-                putr(X, y, ramp(&A5_rbush, clampi(tone, 44, 255)), A5_BUSH);
+                putr(X, y, ramp(&A5_rbush, clampi(tone, 6, 255)), A5_BUSH);
             }
         }
     }
@@ -810,6 +822,7 @@ static void gen_a5(int pad)
         a5_wood(side); a5_fence(side); a5_wall(side); a5_ground(side); a5_bushes(side);
         a5_match(A5_TREEN, 252, 288, 8, 64, a5_greenish);
         a5_match(A5_TREE, 298, 320, 8, 64, a5_greenish);
+        a5_match(A5_BUSH, 0, 48, 208, PH, a5_green);
         balance_regions(side, a5_picreg, 0);
         a5_seam(side, 0, A5_FEN[side].pl[0][0], 12);
         a5_seam(side, 196, PH, 10);
