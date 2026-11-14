@@ -2907,44 +2907,59 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     more regular than the painted ones (cleaner, stripier chevrons; pure green rather than the picture's olive /
     yellow mix); at 8x the strip's slabs are a touch greyer and busier than the picture's (whose mortar reads lighter
     and whose stones more often have a white top), and its vertical joints are straighter.
-  - AREA02 s1 (the Dwarf Village with the balloon trees), redrawn 2026-11-15 (`gen_vb`) after the user rejected the
-    first version as garbage (flat saturated spheres lit from the wrong side, a regular stake fence and palisade, seams).
-    Measured on the picture at 5-12x next to both edges (the comment over `gen_vb` has every number):
-    - the canopy (rows 0-~90): soft woolly spheres of radius ~12-30 (most 15-22) in three colour classes, cream,
-      pink-lilac and blue (hues ~40, ~300, ~250 degrees: what looked like a fourth, violet, class is the pink one in
-      shade), packed with no gap down to row ~60, ragged lower ends to ~90, the lower ones in front; lit mostly from
-      the front and a little from the upper right (each brightest just right of and above its centre: the first
-      version lit them from the upper left), low contrast, darker where a front one overlaps them, a cottony grain.
-      The spheres cut by each edge are completed from measured centres / radii / classes (`VB_EDGE`), then far
-      balloons (no gaps) and three layers of new ones (radius 15-27) laid outwards; a new sphere that would be cut by
-      the join is left out, one close to it goes behind the edge's.  The shading is a rank in its class's ramp (the
-      picture's quantiles), and every lightness change on a sphere (the match to the picture next to the edge, the
-      tone per row at the join) moves along that ramp (`vb_relum`): the picture's lighter pinks are paler, and
-      scaling the colour had made them hot pink;
-    - behind them (rows ~56-138) the balloon trees' trunks and the haze, as ranks in per-row ramps of the edge
-      columns (rows y-2..y+2, so no banding): broad brown trunks lit on their right flank, mottled with pale streaks,
-      pale haze and far trunks between them, the far trunk by the left edge and the fluted one by the right edge
-      continued;
-    - the fence (rows 110-138): posts with a dark left column and a lit middle, tops 111-118; sparse and in the shade
-      by the left edge (3-5 columns every 6-12), dense by the jukebox (3-6 columns, 1-4 apart); three rails per side,
-      the rows measured per side (left 119-122, 125-129, 134-137; right, from the stretch x 186-234 beside the
-      jukebox, 116-119, 127-130, 132-135), boards here and there thinner or missing; matched in brightness / contrast
-      to the picture's fence wood next to the edge;
-    - the ledge of golden leaves (138-150), its dark lip (150-155), the bank (155-182: straw blades every 3-6 columns,
-      its top in the ledge's shade, golden leaves caught in its lower part), the ground (182-): per-row ramps of the
-      golden texels next to the edge (the right edge's rows 112-192 are the jukebox's: the right takes them from x
-      160-234 beside it; the stones, their track and the front spheres' dark rims left out);
-    - the front (~186-223): the big soft spheres cut by the frame's bottom completed (left pink, right blue), new ones
-      outwards, the ground between them.
-    Then the per-row tone at the join (`vb_seam`) and each band blurred to the picture's own fine detail there.  Not
-    continued: the huts, the dwarves, the jukebox, the ladder, the stones, the barrel; no roots.  Weak points (8x
-    sheets): the new spheres are a little smoother and more evenly sized than the painted ones, the pinks a touch
-    more saturated and the shadows between spheres a deeper blue; the fence is cleaner and more regular than the
-    picture's blurred jumble (its rails read more, its posts are straighter); the bank's blades are more regular; the
-    trunk outlines step by whole columns; under the canopy (rows ~70-80) the odd dark line where a far balloon meets
-    the haze.  Checked (headless, 2026-11-15): 16:9 and 21:9 (the 21:9 strip starts with the 16:9 one's columns);
-    i386 = wasm2c frames; with the default flags AREA02 s1 and AREA02 s5 / AREA05 s1 / s3 identical to the build
-    before; 4:3 with `--ws-backdrop on` identical to 4:3; not checked on the device.
+  - AREA02 s1 (the Dwarf Village with the balloon trees), third version 2026-11-16 (`gen_vb`): made from the user's
+    own picture at run time instead of hand-made procedures.  The second version (2026-11-15, procedural spheres,
+    fence, palisade, trunks) was reviewed by the user point by point: the spheres cut by the edges were not continued
+    and closed, the front ones not round, the fence "invented instead of looking at the fences literally next to it",
+    the straw bank "practically a repeating texture", the ground needing a pass, the right trunks "blobs".  The
+    approach now (the comment over `gen_vb` has every number):
+    - **run-time texture synthesis (image quilting)** for everything that is a texture.  Each band (`VB_BANDS`, per
+      side: rows, the picture columns it may copy from, rows to reflect into, block / overlap sizes) is filled
+      outwards from the join in blocks of 9-24 columns.  A block is a window of the picture's own texels on the same
+      rows (rails, the ledge's lip and the ground's perspective rows stay aligned; the back and the ground may shift
+      up to 3 / 1 rows), chosen by the error of its overlap with what is already there: the first block against the
+      picture's columns at the edge (so the texture continues with its phase), the next ones against the block before,
+      and against the band above / below (overlap rows).  Among the windows within 1/8 of the best one is picked by a
+      position hash; windows near the last three used are penalised, and where a band has a clear horizontal period
+      (autocorrelation of its rows next to the edge, `vb_period`; the bank's straw: 12 columns) an off-phase window
+      too.  The block is pasted along minimum-error boundary cuts (dynamic programming: vertical through the column
+      overlap, horizontal through the row overlap), never over the picture.  Bands: the fence first (left x 0-43, the
+      shaded stretch by the edge; right x 186-225 beside the jukebox, rows 108-137), then the trunks and haze above it
+      (left x 0-43, right x 186-319, rows 90/92-109; the canopy hides the picture's rows above, so higher rows reflect
+      the band's top 6 rows: the trunks go straight on up), matched to the fence band's top rows so the trunks run
+      down behind the posts; the ledge (its rows 138-143 on the left are a log, x 6-52: left out, taken from rows
+      144-155), the bank (left x 0-215 without the barrel, right x 150-215 before the ladder), the ground (rows
+      181-197 of x 0-99 for both sides: the right edge's ground is all under the jukebox, the ladder and the front
+      sphere, and its only clean patch, x 214-261 rows 194-203, tiled visibly).  Objects never copied (`VB_EXCL`):
+      the huts, the log, the bucket, the barrel, the stones and their track, the plank stack, the ladder, the jukebox
+      and its lever;
+    - **geometric completion of the spheres**.  The circles of the spheres cut by each edge, canopy and front, were
+      fitted on the picture (outline points at 8x, then refined to the strongest colour step along the visible arc;
+      `VB_PS`: left cream (11, 9.5) r 14, pink (14, 38) r 16, pink (2.5, 69.5) r 19, the dark lilac one behind seen in
+      columns 0-3; right cream (296, -7) r 12, (322, 22) r 20, (315.5, 60.5) r 22.5; front pink (28, 248) r 50, blue
+      (295, 236) r 47; plus donors).  At run time each one's shading is fitted on its visible texels (inside 0.9 r,
+      under no sphere in front, of its colour class): luminance = a + b (normal . light), the light direction fitted
+      over all of them (30 candidates; it comes out from the front and upper right).  A completed sphere is drawn
+      whole, in depth order: each hidden texel takes the residual texture (texel - model) of a texel of the same
+      sphere (its reflection across the picture's edge first, so the grain runs on through the join; then the same
+      direction nearer the centre, then mirrored, then rotated) on the model's tone at its own place, as a shift along
+      the class's ramp; the rim takes its texture from just inside and fades softly into what is behind.  New spheres
+      (far ones, three layers, the front row) are drawn the same way from a donor sphere of the picture of their class
+      (scaled, texture rotated / mirrored by hash, tone by depth), with a contact shade (once per texel) on what is
+      behind; a new one may reach the strip's first 3 columns only under an edge sphere in front of it (so the join
+      shows exactly the picture's spheres), and one of which less than a fifth stays visible is left out (no slivers).
+    Nothing of the picture is stored: the tables are coordinates; every texel is read from VRAM when the room is
+    entered (once per picture: the strips are cached by its hash).  Width-independent: the work canvas is the strip
+    plus 64 columns, so a 21:9 strip starts with exactly the 16:9 one's columns (checked: 0 of 23744 texels differ).
+    Weak points, bluntly (8x sheets): the left fence and trunks come from only 44 columns of picture (the hut starts at
+    x 44), so at 21:9 and wider the same post groups and trunks recur (every ~30-50 columns, never side by side); the
+    right bank (66 source columns) and the ground (from the left's patch) repeat a little too; the new spheres are
+    cleaner and more evenly coloured than the painted ones (few donors: two cream, two pink, one blue in the canopy;
+    the front cream sphere of the picture is too hidden to lend its texture, so the new front row is pink and blue
+    only) and their outlines are rounder and sharper; between back and fence the odd pale haze column ends at the cut;
+    the right edge's canopy completion (the cream spheres behind the pink one) is mostly guessed: little of them is
+    visible.  Checked (headless): 16:9 and 21:9 in the game, i386 = wasm2c frames, default flags identical to the build
+    before for AREA02 s1 (off) and the approved rooms; not checked on the device.
   - AREA19 s1 (the blossom village; it shares the layout, the pieces and the first generator, `gen_village`, with the
     old AREA02 s1): the first version, rejected by the user, still to be redone the way AREA02 s1 was: canopy 0-~100
     (blossom as value noise masses with small flower clusters on a jittered 8 x 7 grid, a ragged shaded lower edge),

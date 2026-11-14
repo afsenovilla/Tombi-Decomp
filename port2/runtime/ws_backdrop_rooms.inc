@@ -1248,11 +1248,13 @@ static void gen_village(int pad)
  *    depth), with a contact shade on what lies behind them.  A new sphere may reach the join only where the edge's
  *    completed spheres are in front of it there, so the join shows exactly the picture's spheres.
  *
- * Bands and objects (rows measured on the picture at 6-12x): back (trunks / haze) to ~105, fence ~104-137 (left in
- * the shade x 0-43; right beside the jukebox x 186-227), the ledge 137/138-155 (its top rows on the left are a log,
- * x 6-52, left out), the bank 156-181 (left x 0-215 without the barrel; right x 150-215, before the ladder), the
- * ground 182-~200 (left x 0-99; right x 214-255 under the ladder; the stones' track left out), the front spheres from
- * ~190.  Not continued: the huts, the dwarves, the jukebox, the ladder, the log, the barrel, the stones. */
+ * Bands and objects (rows measured on the picture at 6-12x): the fence 108-137 (left in the shade, x 0-43; right
+ * beside the jukebox, x 186-225), made first; then the trunks and haze above it (picture rows 90/92-109; left x 0-43,
+ * right x 186-319), matched to the fence band's top rows; the ledge 137/138-155 (its top rows on the left are a log,
+ * x 6-52, left out: taken from rows 144-155), the bank 156-180 (left x 0-215 without the barrel; right x 150-215,
+ * before the ladder), the ground 181- (rows 181-197 of x 0-99 for both sides: the right edge's ground is under the
+ * jukebox, the ladder and the front sphere), the front spheres from ~190.  Not continued: the huts, the dwarves, the
+ * jukebox, the ladder, the log, the barrel, the stones. */
 enum { VB_SPH = 1, VB_FRONTR = 5, VB_BACK = 9, VB_FENCE, VB_LEDGE, VB_BANK, VB_GROUND };
 typedef struct { short x2, y2, r2, cls, dep, side, fl; } VbS;   /* centre / radius in half texels, colour class (cream 0,
                                                                    pink 1, blue 2), depth (more: in front), the edge that
@@ -1292,12 +1294,12 @@ static const VbBand VB_BANDS[2][5] = {          /* (in the order they are made: 
       { 0, 108, 90, 110, 0, 44, 16, 6, 0, 6, 3, VB_BACK, 0, 6 },
       { 138, 156, 144, 156, 0, 216, 16, 5, 4, 0, 0, VB_LEDGE, 0, 0 },
       { 156, 181, 156, 181, 0, 216, 16, 5, 4, 0, 0, VB_BANK, 1, 0 },
-      { 181, PH, 181, 199, 0, 100, 16, 5, 4, 0, 1, VB_GROUND, 0, 0 } },
+      { 181, PH, 181, 198, 0, 100, 16, 5, 4, 0, 1, VB_GROUND, 0, 0 } },
     { { 108, 137, 108, 137, 186, 256, 12, 5, 0, 0, 0, VB_FENCE, 1, 0 },
       { 0, 108, 92, 110, 186, 320, 24, 8, 0, 6, 3, VB_BACK, 0, 6 },
       { 137, 156, 143, 156, 150, 216, 16, 5, 4, 0, 0, VB_LEDGE, 0, 0 },
       { 156, 181, 156, 181, 150, 216, 16, 5, 4, 0, 0, VB_BANK, 1, 0 },
-      { 181, PH, 188, 204, 214, 262, 14, 5, 4, 0, 1, VB_GROUND, 0, 0 } } };
+      { 181, PH, 181, 198, 0, 262, 16, 5, 4, 0, 1, VB_GROUND, 0, 0 } } };
 static Ramp VB_rc[3], VB_rf[3];
 static int VB_share[4];                                  /* the classes' shares of the canopy (cumulative, /256) */
 static int VB_L[3];                                      /* the light (x 256) */
@@ -1619,7 +1621,14 @@ static int vb_cls(u32 h) { int a = (int)(h & 255), c = 0; while (c < 2 && VB_sha
 static int vb_ncmp(const void *a, const void *b)
 {
     const VbN *p = a, *q = b;
-    return p->dep != q->dep ? p->dep - q->dep : p->x2 != q->x2 ? p->x2 - q->x2 : p->y2 - q->y2;
+    if (p->dep != q->dep) return p->dep - q->dep;       /* (a total order: any qsort gives the same) */
+    if (p->x2 != q->x2) return p->x2 - q->x2;
+    if (p->y2 != q->y2) return p->y2 - q->y2;
+    if (p->r2 != q->r2) return p->r2 - q->r2;
+    if (p->don != q->don) return p->don - q->don;
+    if (p->cls != q->cls) return p->cls - q->cls;
+    if (p->rot != q->rot) return p->rot - q->rot;
+    return p->mir != q->mir ? p->mir - q->mir : p->da - q->da;
 }
 static int vb_donor(int cls, int front, u32 h)            /* a donor of the class (by hash among them) */
 {
