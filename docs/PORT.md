@@ -2767,15 +2767,30 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   picture in VRAM, no pixels shipped or copied (the source holds coordinates only: the bond, the floor line, where
   to sample).  Analysis of the picture: back wall in 18-row courses (mortar rows 13 + 18k, 2 rows), 27-column bricks
   in half bond (joints at x 22 / 49 even courses, 8 / 35 odd on the left; 242 / 269 / 296 and 256 / 283 on the
-  right), floor from row 176; the right pillar's front face (x 303-314, 19.5-row courses) is narrow and ends in a
-  dark ivy-covered corner, so both strips continue the back wall; ivy is 2-4 px leaves over near-black gaps, 42
-  greens, the picture uses 191 colours.  Generator: 32-bin colour ramps (brick faces, mortar, floor, ivy, roots)
-  and per-course brick tones next to each edge; bricks laid by a hash of course / index (joints wander a column,
-  own tone, bevel lit top-left, mottling, grain, stains, the odd crack); floor = streak / slab / pebble value noise
-  over the floor ramp and the edge's row tones; left: the trunk behind the edge ivy and three tapered roots
-  curving into the floor; ivy grown as stems (cascades of 3-6 stems hanging from the top, middle ones longest,
-  long near the edge and here and there further out, short along the whole wall top; climbers from the roots /
-  the floor; branching), plus a mass next to each edge as deep as the picture's own ivy on that row and in its
+  right), floor from row 176; ivy is 2-4 px leaves over near-black gaps, 42 greens, the picture uses 191 colours.
+  The room is a box, not an endless wall (the user's reading of the right corner): at x 297-302 the back wall
+  turns towards the viewer (a narrow face whose mortar lines slant down-right, slopes 0.33 / 0.65 / 0.75 / 0.8 at
+  rows 122 / 141 / 160 / 178) onto a lit front face (x 303-314) whose courses are 19.5 rows (x 1.083) with mortar at
+  124 / 143.5 / 163 and its foot at 181; each of those rows lies on the line from the back wall's row (121 / 139 /
+  157 / 176) through row 85, so the horizon is row 85; a least-squares fit of the slanted face puts the vanishing
+  point at x 173 (horizon 72: the painted face is steeper than exact), the door's axis is x 160: VP (172, 85).  The
+  left corner is hidden by the tree (the back wall's rows reach the edge unchanged, the floor line ~179).  So both
+  strips are side walls receding towards the camera: the right one starts at the front face's plane (scale 1.083
+  at the edge), the left one at the back wall's; strip column X has the scale s = (D + X - 1/2) / D (D: the
+  corner's distance from the VP: 147.5 / 172.5), a pixel's back-wall height is 85 + (y - 85) / (s kc) and its place
+  along the wall U = F (1 - 1/s) / kc (F = 320 px): courses taller, bricks wider (about 13 px at the corner), the
+  mortar lines diverging from the VP, verticals vertical.  The walls are lit as the picture's sideways face against
+  the back wall beside it (x 298-301 vs 284-291, ~0.88; the left wall 7/8 of that, in the tree's shade), darker
+  towards the viewer and in the corner.  Generator: 32-bin colour ramps (brick faces, mortar, floor, ivy, roots)
+  and per-course brick tones next to each edge; bricks laid in wall coordinates by a hash of course / index (own
+  tone, bevel lit top-left, mottling, grain, stains, the odd crack; joints and bevels at least a column wide);
+  floor below the walls' foot = streak / slab / pebble value noise in floor coordinates (rows of equal depth stay
+  horizontal, the texture grows towards the viewer) over the floor ramp and the edge's row tones; left: the trunk
+  behind the edge ivy and three tapered roots curving down onto the floor in front of the wall's foot; ivy grown as
+  stems (cascades of 3-6 stems hanging from the top of the side wall, every 22 back-wall columns along the wall so
+  further apart towards the viewer, middle ones longest, long near the corner and here and there further out,
+  short along the whole wall top; climbers from the roots / the wall's foot; branching; leaves sized by the wall's
+  scale where they hang), plus a mass next to each edge as deep as the picture's own ivy on that row and in its
   tone; every leaf drawn one by one (tapered ellipse, 16 angles, lit top-left, rim shadow, grain), back leaves dark
   first, front leaves light last, the wall shadowed under them; the three columns next to the picture blended with
   its edge column; every pixel quantised to the nearest colour the picture uses.  Integers only (no float, no
@@ -2784,7 +2799,9 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   right: that made the first wasm2c strips differ).  Checked at 16:9 / 21:9 / 32:9: i386 = wasm2c = the standalone
   build (`cc -DWS_BACKDROP_MAIN`, see the file header), software = OpenGL (xvfb), the 4:3 centre unchanged, 4:3 runs
   identical.  `--ws-backdrop mirror` keeps the first preview (the picture mirrored at its edge over 56 columns with
-  the edge ivy laid over again), rejected by the user ("mirroring, not redrawing").
+  the edge ivy laid over again), rejected by the user ("mirroring, not redrawing"); the first redraw continued the
+  back wall flat into the strips, replaced by the side walls after "the room doesn't extend sideways, it closes like
+  a box, judging by the angle of the corner".
 - **Sub-screens** (Select screens Objetos / Eventos / Estado / Mapa, memory card, options, button config, screen
   adjust).  The Select screens (`subScreenDrawTabs`, D0SPSUB / D0SPSUB3, `#ifdef PORT2`) call `port_ws_layout(left cut,
   right cut, below)` each frame; while it is set, `shims/gpu.c` spreads the textured primitives of the frame

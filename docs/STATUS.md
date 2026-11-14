@@ -83,10 +83,15 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    return NPCs, x ~340 / ~384), not fixed yet (their walk is not in the overlay step).  Backdrop strips for this
    room: opt-in preview `--ws-backdrop on`, now a procedural redraw (2026-11-14; the user rejected the first preview,
    a mirror of the picture's edge, still there as `--ws-backdrop mirror`): wall, floor, roots and ivy drawn by code
-   from colours sampled from the picture (docs/PORT.md "Room picture strips").  Waiting for the user's approval
+   from colours sampled from the picture (docs/PORT.md "Room picture strips").  Second user report: "the room
+   doesn't extend sideways, it closes like a box (the angle of the corner)": the strips are now the room's side walls
+   in perspective (vanishing point (172, 85) measured from the picture's right edge; bricks in wall coordinates,
+   floor in perspective up to the walls' foot, ivy spaced and sized along the wall).  Waiting for the user's approval
    before it becomes the default.  Checked headless at 16:9 / 21:9 / 32:9: i386 software = OpenGL (xvfb) = wasm2c
-   strips, 4:3 runs identical; not checked on the device.  Known weak points: the new ivy is a little more even in
-   tone than the painted one (fewer near-black gaps), the far 32:9 wall is evenly lit, roots only at the left edge.
+   strips, 4:3 runs identical, the 4:3 centre unchanged; not checked on the device.  Known weak points: the picture's
+   own sideways face is steeper than the measured vanishing point predicts (hand-painted, not exact), the left corner
+   is a guess (hidden by the tree), near the viewer at 32:9 the bricks and leaves get big and soft, the new ivy is a
+   little more even in tone than the painted one.
 0. **Widescreen pop-in, second pass: pixel checks (2026-11-14)**: report: AREA09 s0 (Mushroom Forest) still pops at
    16:9, worst moving left, straight vertical cut edges.  Built pixel checks that cannot undercount (docs/PORT.md
    "Pop-in check", "Pixel check"): `tools/ws_popscan.py` (frame against the shifted previous frame, both ways), a
