@@ -1303,7 +1303,8 @@ static const VbBand VB_BANDS[2][5] = {          /* (in the order they are made: 
 static Ramp VB_rc[3], VB_rf[3];
 static int VB_share[4];                                  /* the classes' shares of the canopy (cumulative, /256) */
 static int VB_L[3];                                      /* the light (x 256) */
-static int VB_a[VB_NPS], VB_b[VB_NPS], VB_n[VB_NPS];    /* each sphere's shading: L = a + b (n . light) / 256 */
+static int VB_a[VB_NPS], VB_b[VB_NPS], VB_n[VB_NPS], VB_m[VB_NPS];   /* each sphere's shading: L = a + b (n . light) / 256;
+                                                                       m: its visible texels' mean luminance */
 static int vb_ow;                                        /* the working canvas' width (the strip + a margin, so a block
                                                             or sphere at the strip's end is the same at any width) */
 
@@ -1524,7 +1525,7 @@ static long long vb_fit(const int *L, int apply)
         }
         /* the error: sum (l - a - b d / 256)^2 */
         tot += sll - 2 * a * sl - 2 * (long long)b * sdl / 256 + n * a * a + 2 * (long long)a * b * sd / 256 + (long long)b * b / 256 * sdd / 256;
-        if (apply) { VB_a[i] = a; VB_b[i] = b; VB_n[i] = (int)n; }
+        if (apply) { VB_a[i] = a; VB_b[i] = b; VB_n[i] = (int)n; VB_m[i] = n ? (int)(sl / n) : a; }
     }
     return tot;
 }
@@ -1563,12 +1564,44 @@ static Rgb vb_shift(const Ramp *rp, Rgb c, int dl)
 }
 typedef struct { int x2, y2, r2, cls, dep, don, rot, mir, da, self, reg; } VbN;
 static u16 *vb_id; static int vb_cur;                    /* which sphere is on top at each strip texel (1 + index) */   /* a sphere to draw in the strip */
+/* source texel try t for sphere n (donor D) at offset (sdx, sdy) (1/16 texel): 0 the same place, 1 across the edge (a
+   completed sphere: any texel of it there), 2-4 the same direction nearer the centre, 5 mirrored, 6-12 rotated */
+static int vb_try(const VbN *n, const VbS *D, int side, int sdx, int sdy, int t, int *qx, int *qy)
+{
+    int rot = n->rot, mir = n->mir, ux, uy, q16x, q16y, k = 256;
+    if (t == 1 && !n->self) return 0;
+    if (t >= 2 && t <= 4) k = 256 - 51 * (t - 1);
+    if (t == 5) mir ^= 1;
+    if (t >= 6) rot = (rot + t - 5) & 7;
+    ux = (mir ? -sdx : sdx) * k / 256; uy = sdy * k / 256;
+    {   int rx = (ux * VB_COS[rot] - uy * VB_SIN[rot]) / 256, ry = (ux * VB_SIN[rot] + uy * VB_COS[rot]) / 256;
+        q16x = D->x2 * 8 + rx * D->r2 / n->r2; q16y = D->y2 * 8 + ry * D->r2 / n->r2; }
+    *qx = fdiv(q16x, 16); *qy = fdiv(q16y, 16);
+    if (t == 1) { *qx = side ? 2 * PW - 1 - *qx : -1 - *qx; return vb_vis_geo(n->don, *qx, *qy); }
+    return vb_vis(n->don, *qx, *qy);
+}
+/* the colour of source texel (qx, qy) of donor D moved to model tone lt at its new place: along the donor's ramp, or,
+   for a sphere of another class (a texture transfer), its luminance on the target class's ramp */
+static Rgb vb_col(const VbN *n, const VbS *D, const Ramp *rp, const Ramp *rpt, int qx, int qy, int lt, int front)
+{
+    int ls = VB_a[n->don] + VB_b[n->don] * vb_dot(D->x2, D->y2, D->r2, qx, qy, VB_L) / 256;
+    Rgb c = rgb15(pic[qy][qx]);
+    if (front) {                                          /* the front: the model's tone (a completed one never below its
+                                                             mean by more than 28: its flank is not the brown of the
+                                                             picture's rim), the texture's grain only (+-20) */
+        int l = (!n->self || lt > VB_m[n->don] - 28 ? lt : VB_m[n->don] - 28) + clampi(lum(c) - ls, -20, 20);
+        return vb_at_lum(rpt, clampi(l, 4, 250));
+    }
+    if (n->cls != D->cls) return vb_at_lum(rpt, clampi(lum(c) + lt - ls, 4, 250));
+    return vb_shift(rp, c, lt - ls);
+}
 /* sphere n into the strip: each texel the donor's texel at the same place on the sphere (scaled, rotated, mirrored),
    or, where the donor's is hidden, another visible texel of the donor (across the edge, across its axis, rotated);
    its residual on n's model tone at that place */
 static void vb_sphere(int side, const VbN *n)
 {
     const VbS *D = &VB_PS[n->don]; const Ramp *rp = D->fl & VBS_FRONT ? &VB_rf[D->cls] : &VB_rc[D->cls];
+    const Ramp *rpt = D->fl & VBS_FRONT ? &VB_rf[n->cls] : &VB_rc[n->cls];      /* the target class's */
     int R16 = n->r2 * 8, lo = vb_lo(side), hi = vb_hi(side), xa = (n->x2 - n->r2) / 2 - 7, xb = (n->x2 + n->r2) / 2 + 7;
     int ya = (n->y2 - n->r2) / 2 - 7, yb = (n->y2 + n->r2) / 2 + 7;
     /* the contact shade on the spheres behind it: a soft ring outside its outline, deeper at the lower left */
@@ -1590,27 +1623,31 @@ static void vb_sphere(int side, const VbN *n)
             dt = vb_dot(n->x2, n->y2, n->r2, wx, y, VB_L);
             {   int rin = R16 * 86 / 100; if (d > rin) { sdx = dx * rin / d; sdy = dy * rin / d; } else { sdx = dx; sdy = dy; } }   /* (the rim: texture
                                                                        from just inside it, the tone of its own place) */
-            /* the source texel: the donor's at the same place; for a completed sphere its reflection across the edge
-               (any texel of it there, whatever its colour: the geometry says it is this sphere); then the same
-               direction nearer the centre (continuous, so no patchwork); then mirrored, then rotated */
-            for (int t = 0; t < 13 && !src; t++) {
-                int rot = n->rot, mir = n->mir, ux, uy, q16x, q16y, k = 256;
-                if (t == 1 && !n->self) continue;
-                if (t >= 2 && t <= 4) k = 256 - 51 * (t - 1);
-                if (t == 5) mir ^= 1;
-                if (t >= 6) rot = (rot + t - 5) & 7;
-                ux = (mir ? -sdx : sdx) * k / 256; uy = sdy * k / 256;
-                {   int rx = (ux * VB_COS[rot] - uy * VB_SIN[rot]) / 256, ry = (ux * VB_SIN[rot] + uy * VB_COS[rot]) / 256;
-                    q16x = D->x2 * 8 + rx * D->r2 / n->r2; q16y = D->y2 * 8 + ry * D->r2 / n->r2; }
-                qx = fdiv(q16x, 16); qy = fdiv(q16y, 16);
-                if (t == 1) { qx = side ? 2 * PW - 1 - qx : -1 - qx; src = vb_vis_geo(n->don, qx, qy); }
-                else src = vb_vis(n->don, qx, qy);
-            }
-            {   int lt = VB_a[n->don] + n->da + VB_b[n->don] * dt / 256;
-                if (src) {
-                    int ls = VB_a[n->don] + VB_b[n->don] * vb_dot(D->x2, D->y2, D->r2, qx, qy, VB_L) / 256;
-                    c = vb_shift(rp, rgb15(pic[qy][qx]), lt - ls);
-                } else c = vb_at_lum(rp, clampi(lt + (int)(hash3(wx, y, 977) & 15) - 8, 4, 250));
+            {   int front = (D->fl & VBS_FRONT) != 0, li = n->don, lt;
+                if (front && !n->self)                    /* a new front sphere: lit as the picture's front sphere of
+                                                             its class (the cream one: lilac grey in the shade, warm
+                                                             on the lit right), its grain from the donor */
+                    for (int i = 0; i < VB_NPS; i++) if ((VB_PS[i].fl & VBS_FRONT) && VB_PS[i].cls == n->cls && VB_n[i] >= 60) li = i;
+                lt = VB_a[li] + n->da + VB_b[li] * dt / 256;
+                if (n->self && front) {
+                    /* a completed front sphere: the texture reflected across the edge (else its other flank), on the
+                       model's light; the first 12 columns blended from the exact continuation of the picture's texel */
+                    int X = side ? wx - (PW - 1) : -wx, ok = vb_try(n, D, side, sdx, sdy, 1, &qx, &qy);
+                    static const signed char ord[4] = { 5, 2, 3, 4 };
+                    for (int i = 0; i < 4 && !ok; i++) ok = vb_try(n, D, side, sdx, sdy, ord[i], &qx, &qy);
+                    if (!ok) c = vb_at_lum(rpt, clampi(lt > VB_m[n->don] - 28 ? lt : VB_m[n->don] - 28, 4, 250));
+                    else {
+                        c = vb_col(n, D, rp, rpt, qx, qy, lt, 1);
+                        if (X <= 12) {
+                            int ls = VB_a[n->don] + VB_b[n->don] * vb_dot(D->x2, D->y2, D->r2, qx, qy, VB_L) / 256;
+                            c = mix(vb_shift(rp, rgb15(pic[qy][qx]), lt - ls), c, X * 256 / 13);
+                        }
+                    }
+                } else {
+                    for (int t = 0; t < 13 && !src; t++) src = vb_try(n, D, side, sdx, sdy, t, &qx, &qy);
+                    if (src) c = vb_col(n, D, rp, rpt, qx, qy, lt, front);
+                    else c = vb_at_lum(rpt, clampi(lt + (int)(hash3(wx, y, 977) & 15) - 8, 4, 250));
+                }
             }
             if (d >= R16 - 24) { Rgb *p = vb_px(side, wx, y); if (p && vb_reg(side, wx, y)) c = mix(*p, c, 256 - (d - (R16 - 24)) * 150 / 24); }   /* (a soft outline) */
             vb_put(side, wx, y, c, n->reg);
@@ -1741,7 +1778,9 @@ static void vb_canopy(int side)
 }
 static void vb_front(int side)
 {
-    int n = 0, lo = vb_lo(side), hi = vb_hi(side);
+    int n = 0, lo = vb_lo(side), hi = vb_hi(side), fdon = -1;
+    for (int i = 0; i < VB_NPS; i++)
+        if ((VB_PS[i].fl & VBS_FRONT) && (VB_PS[i].fl & VBS_DONOR) && (fdon < 0 || VB_n[i] > VB_n[fdon])) fdon = i;
     for (int i = 0; i < VB_NPS; i++) {
         const VbS *s = &VB_PS[i]; VbN t;
         if (s->side != side || !(s->fl & VBS_FRONT)) continue;
@@ -1754,11 +1793,11 @@ static void vb_front(int side)
             t.x2 = 2 * (k * 46 + (int)(h % 30) + row * 23); t.y2 = 2 * (row ? 252 + (int)(h >> 5) % 14 : 238 + (int)(h >> 5) % 12);
             t.r2 = 2 * (row ? 40 + (int)(h >> 10) % 12 : 42 + (int)(h >> 10) % 12);
             t.cls = vb_cls(h >> 16); t.dep = row ? 5 + (int)(h >> 24) % 4 : 1 + (int)(h >> 24) % 4;
-            if (vb_donor(t.cls, 1, 0) < 0 || VB_n[vb_donor(t.cls, 1, 0)] < 600) t.cls = 1 + (int)(h >> 20 & 1);   /* (a donor too hidden
-                                                                       in the picture gives no texture: the front cream) */
-            t.don = vb_donor(t.cls, 1, h2);
-            t.rot = 0; t.mir = (int)(h2 >> 11) & 1; t.da = (int)(h2 >> 12) % 21 - 10 - (row ? 0 : 8); t.self = 0;   /* (only the donors'
-                                                                       tops are in the picture: not rotated) */
+            t.don = fdon;                                 /* (the front sphere best seen in the picture lends its
+                                                                     texture to every class: the pink and cream ones are
+                                                                     too hidden, their rims brown) */
+            t.rot = 0; t.mir = (int)(h2 >> 11) & 1; t.self = 0;  /* (only the donors' tops are in the picture: not rotated) */
+            t.da = (int)(h2 >> 12) % 21 - 10 - (row ? 0 : 8);
             t.reg = VB_FRONTR + t.cls;
             n = vb_add(side, n, t, 1, 0);
         }
@@ -1778,7 +1817,10 @@ static void vb_analyse(void)
         }
         ramp_any(&VB_rc[c]);
         nsamp = 0;
-        for (int y = 186; y < PH; y++) for (int x = 0; x < PW; x++) if (vb_class(rgb15(pic[y][x])) == c) samp_add(pic[y][x]);
+        for (int i = 0; i < VB_NPS; i++)                   /* the front: the visible texels of its spheres of the class
+                                                              (not the stones' greys nor the rims' browns) */
+            if ((VB_PS[i].fl & VBS_FRONT) && VB_PS[i].cls == c)
+                for (int y = 186; y < PH; y++) for (int x = 0; x < PW; x++) if (vb_vis(i, x, y)) samp_add(pic[y][x]);
         if (nsamp >= 200) ramp_any(&VB_rf[c]); else { nsamp = 0; VB_rf[c] = VB_rc[c]; }
         n += cnt[c];
     }

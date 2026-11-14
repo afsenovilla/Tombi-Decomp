@@ -2948,6 +2948,15 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
       (scaled, texture rotated / mirrored by hash, tone by depth), with a contact shade (once per texel) on what is
       behind; a new one may reach the strip's first 3 columns only under an edge sphere in front of it (so the join
       shows exactly the picture's spheres), and one of which less than a fifth stays visible is left out (no slivers).
+      The front row (revised after the coordinator's review: the completed pink sphere's hidden flank had taken the
+      brown of the picture's rim and read as a separate dark wedge, and the new front spheres were blotchy brown-pink
+      from the pink donor, of which only a rim-darkened cap is visible): a completed front sphere keeps its model's
+      light, never more than 28 below its visible texels' mean, with only the texture's grain (+-20) from the texel
+      reflected across the edge (else its other flank), blended over 12 columns from the exact continuation of the
+      picture's texel so the join stays seamless; the new front spheres all take their grain from the best-seen front
+      sphere (the blue one), are lit with the fitted light of the picture's front sphere of their class (the cream:
+      lilac grey in the shade, warm on the lit right) and coloured on ramps made of the front spheres' own visible
+      texels (no stones' greys, no rims' browns).
     Nothing of the picture is stored: the tables are coordinates; every texel is read from VRAM when the room is
     entered (once per picture: the strips are cached by its hash).  Width-independent: the work canvas is the strip
     plus 64 columns, so a 21:9 strip starts with exactly the 16:9 one's columns (checked: 0 of 23744 texels differ).
@@ -2955,8 +2964,9 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     x 44), so at 21:9 and wider the same post groups and trunks recur (every ~30-50 columns, never side by side); the
     right bank (66 source columns) and the ground (from the left's patch) repeat a little too; the new spheres are
     cleaner and more evenly coloured than the painted ones (few donors: two cream, two pink, one blue in the canopy;
-    the front cream sphere of the picture is too hidden to lend its texture, so the new front row is pink and blue
-    only) and their outlines are rounder and sharper; between back and fence the odd pale haze column ends at the cut;
+    the new front spheres share the blue one's grain, and the cream ones are a little greyer than the picture's) and
+    their outlines are rounder and sharper; where the completed left front sphere meets the picture its first columns
+    keep the picture's own dark shading; between back and fence the odd pale haze column ends at the cut;
     the right edge's canopy completion (the cream spheres behind the pink one) is mostly guessed: little of them is
     visible.  Checked (headless): 16:9 and 21:9 in the game, i386 = wasm2c frames, default flags identical to the build
     before for AREA02 s1 (off) and the approved rooms; not checked on the device.
