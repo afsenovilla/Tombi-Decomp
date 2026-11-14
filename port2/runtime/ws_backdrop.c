@@ -306,7 +306,7 @@ static void draw_root(int x0, int y0, int x1, int y1, int x2, int y2, int r0, in
                 int dx = X * 16 + 8 - cx, dy = py * 16 + 8 - cy;
                 if (dx * dx + dy * dy > r * r) continue;
                 int v = dy * 128 / (r + 1);                                  /* -128 top .. 128 bottom */
-                int tone = 125 - v - (dx * dx + dy * dy) * 70 / (r * r + 1);
+                int tone = 125 - v - (dx * dx + dy * dy) * 70 / (r * r + 1) - i * 2 / 3;   /* darker towards the tip */
                 tone += noise(i * 2 + seed * 50, dy / 4 + 64, 3, 1, 43) / 4 - 32;  /* bark streaks along the root */
                 put(X, py, ramp(&R_root, tone));
             }
@@ -323,7 +323,7 @@ static void draw_roots(void)
     /* the fan: roots leaving the trunk outwards, down to the floor */
     for (int i = 0; i < 3; i++) {
         Rng r = rng_at(901, i, 3);
-        int y0 = 132 + i * 10 + rndi(&r, 5), x2 = 24 + i * 8 + rndi(&r, 8), y2 = 179 + rndi(&r, 4);
+        int y0 = 132 + i * 10 + rndi(&r, 5), x2 = 20 + i * 7 + rndi(&r, 6), y2 = 181 + rndi(&r, 4);
         draw_root(1 + rndi(&r, 3), y0, x2 * 3 / 4 + rndi(&r, 4), y0 + 2 + rndi(&r, 4), x2, y2, 132 - i * 16 + rndi(&r, 16), 24, i);
     }
 }
