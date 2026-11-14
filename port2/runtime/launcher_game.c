@@ -6,6 +6,9 @@
      SYSTEM/A00802.000  their 256-colour CLUT
      SYSTEM/A00804.000  4 bpp, 256 x 256: the 8 x 16 font (rows of 32 characters from ' ', then A-grave.., a-grave..)
      SYSTEM/A00803.000  the font's CLUT (row 0)
+   and the bottom screen in the LOAD screen's pink wall of TOMBI! logos:
+     SYSTEM/A00500.000  8 bpp, 384 x 256: the wall, 160 x 256 at x 128, repeating both ways
+     SYSTEM/A00502.000  its 256-colour CLUT
    With no disc readable the plain screen (n3ds/launcher_ui.c) is drawn instead.  Pictures: RGB, rows from the top. */
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,9 +19,9 @@
 
 typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32;
 
-static u8 *sq, *font;                 /* the squares' page (8 bpp), the font page (4 bpp) */
-static u32 sq_pal[256], font_pal[16]; /* 0xRRGGBB */
-static unsigned sq_n, font_n;
+static u8 *sq, *font, *wall;          /* the squares' page (8 bpp), the font page (4 bpp), the logo wall's (8 bpp) */
+static u32 sq_pal[256], font_pal[16], wall_pal[256]; /* 0xRRGGBB */
+static unsigned sq_n, font_n, wall_n;
 
 static u32 c15(unsigned v) { return (v & 31) << 19 | (v >> 5 & 31) << 11 | (v >> 10 & 31) << 3; }
 static int read_pal(const char *name, u32 *pal, int n) {
@@ -27,14 +30,16 @@ static int read_pal(const char *name, u32 *pal, int n) {
     for (int i = 0; i < n; i++) pal[i] = c15(d[2 * i] | d[2 * i + 1] << 8);
     free(d); return 1;
 }
-void port_launcher_game_end(void) { free(sq); free(font); sq = font = NULL; }
+void port_launcher_game_end(void) { free(sq); free(font); free(wall); sq = font = wall = NULL; }
 /* 1: the pieces were read */
 int port_launcher_game_begin(void) {
     port_launcher_game_end();
     sq = pa_read("SYSTEM/A00801.GAM", &sq_n);
     font = pa_read("SYSTEM/A00804.000", &font_n);
-    if (!sq || sq_n < 384 * 256 || !font || font_n < 128 * 256 || !read_pal("SYSTEM/A00802.000", sq_pal, 256) ||
-        !read_pal("SYSTEM/A00803.000", font_pal, 16)) {
+    wall = pa_read("SYSTEM/A00500.000", &wall_n);
+    if (!sq || sq_n < 384 * 256 || !font || font_n < 128 * 256 || !wall || wall_n < 384 * 256 ||
+        !read_pal("SYSTEM/A00802.000", sq_pal, 256) || !read_pal("SYSTEM/A00803.000", font_pal, 16) ||
+        !read_pal("SYSTEM/A00502.000", wall_pal, 256)) {
         port_launcher_game_end(); return 0;
     }
     return 1;
@@ -58,6 +63,9 @@ static void squares(Cv *c, int y0) {
         for (int y = 0; y < 84; y++) for (int x = 0; x < 80; x++)
             put(c, i * 80 + x, y0 + j * 84 + y, sq_pal[sq[(t[1] * 86 + y) * 384 + t[0] * 80 + x]]);
     }
+}
+static void logo_wall(Cv *c) {
+    for (int y = 0; y < c->h; y++) for (int x = 0; x < c->w; x++) put(c, x, y, wall_pal[wall[((y + 128) & 255) * 384 + 128 + x % 160]]);   /* (framed as on the LOAD screen) */
 }
 static int glyph_cell(unsigned ch, int *u, int *v) {
     if (ch >= 0x20 && ch < 0x80) { *u = (ch & 31) * 8; *v = (ch - 0x20) / 32 * 16; return 1; }
@@ -126,7 +134,7 @@ void port_launcher_game_draw(unsigned char *top, unsigned char *bot, const LuiSt
     }
     text(&t, 200 - text_w("UP/DOWN: OPTION   LEFT/RIGHT: CHANGE") / 2, 204, "UP/DOWN: OPTION   LEFT/RIGHT: CHANGE");
     /* ---- the bottom screen: what the option does, the disc and the console, Start */
-    squares(&b, -6);
+    logo_wall(&b);
     text(&b, 160 - text_w(name[s->row]) / 2, 8, name[s->row]);
     {   const char *d0 = 0, *d1 = 0; int y = 32;
         if (s->row == 0) {
