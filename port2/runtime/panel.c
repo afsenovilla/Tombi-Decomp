@@ -767,12 +767,10 @@ static int n3ds_worker_ok(void) {
 #endif
 /* every vblank (shims/gpu.c port_gpu_vblank) while the panel is on */
 void panel_hud_update(void);      /* runtime/panel_hud.c: --hud-bottom */
-#ifndef __3DS__
-static void launcher_preview(const char *dir);
-#endif
 void port_panel_vblank(void) {
 #ifndef __3DS__
-    { static int done; const char *e = getenv("PORT_LAUNCHER_PREVIEW"); if (e && !done && pa_ok && pa_font_ok && port_frame > 1500) { done = 1; launcher_preview(e); } }
+    { void port_launcher_game_preview(const char *dir);   /* runtime/launcher_game.c */
+      static int done; const char *e = getenv("PORT_LAUNCHER_PREVIEW"); if (e && !done && port_frame > 10) { done = 1; port_launcher_game_preview(e); } }
 #endif
     panel_hud_update();
     int dump = port_panel_dump_dir && port_dump_every > 0 && port_frame % port_dump_every == 0;
@@ -872,106 +870,3 @@ void port_event_log(const char *what, int e, int before) {
     port_printf("[event] frame %d: %s %d (0x%02X) %d -> %d at area %d section %d, x %d y %d\n", port_frame, what, e, e, before,
                 G_EVENT(e), G_AREA, G_SECTION, (s16)G16(PV_PLAYER_X), (s16)G16(PV_PLAYER_Y));
 }
-
-/* ---------------------------------------------------------------- the 3DS start screen in the game's pieces
-   (n3ds/main_3ds.c choose_lang): the options as wood planks on the stone, the chosen one's letters yellow, under a
-   plank with the title; the bottom screen a cream window that says what the option does, the disc and the console, and
-   a big plank to start.  The pieces and letters are the user's disc's (pa_init), read before the game starts; with no
-   disc readable the plain screen (n3ds/launcher_ui.c) is drawn instead.  Pictures: RGB, rows from the top. */
-#include "../n3ds/launcher_ui.h"
-static u32 *lg_top, *lg_bot;
-static void lg_canvas(u32 *buf, int w, int h) { pa_cv = buf; pa_cw = w; pa_ch = h; pa_clip_x0 = pa_clip_y0 = 0; pa_clip_x1 = w; pa_clip_y1 = h; }
-static void lg_rgb(unsigned char *out, const u32 *in, int n) {
-    for (int i = 0; i < n; i++) { u32 c = in[i]; out[3 * i] = c & 0xFF; out[3 * i + 1] = c >> 8 & 0xFF; out[3 * i + 2] = c >> 16 & 0xFF; }
-}
-static void lg_title(int W, const char *s) {
-    plank(0, 0, W);
-    u32 o = pa_outline; pa_outline = C_DARK;
-    if (pa_has_glyphs(24, s)) pa_text_scaled(W / 2 - pa_text_w(24, s) / 2, 0, 24, s, C_WHITE, C_WOODE, 1, 0);
-    else pa_text_ol(W / 2 - pa_text_w(16, s) / 2, 4, 16, s, C_WHITE, C_WOODE, C_DARK);
-    pa_outline = o;
-}
-/* 1: the disc's pieces are there (the game's fonts of language lang) */
-int port_launcher_game_begin(int lang) {
-    extern int pa_font_also;
-    int keep = port_lang; port_lang = lang; pa_font_also = 0;   /* (English's letters where that font has none: W, w, the comma) */
-    pa_init();
-    port_lang = keep; pa_font_also = -1;
-    if (!pa_ok || !pa_font_ok) return 0;
-    if (!lg_top) lg_top = malloc(400 * 240 * sizeof *lg_top);
-    if (!lg_bot) lg_bot = malloc(320 * 240 * sizeof *lg_bot);
-    return lg_top && lg_bot;
-}
-void port_launcher_game_end(void) {
-    free(lg_top); free(lg_bot); lg_top = lg_bot = NULL;
-    pa_release();
-}
-void port_launcher_game_start_rect(int *x0, int *y0, int *x1, int *y1) { *x0 = 8; *y0 = 168; *x1 = 311; *y1 = 215; }
-void port_launcher_game_draw(unsigned char *top, unsigned char *bot, const LuiState *s) {
-    static const char *lab[4] = { "Language", "Movies", "Speed", "Picture" };
-    const char *val[4] = { s->lang, s->movies ? "Play" : "Skip", s->hz == 50 ? "50 Hz" : "60 Hz",
-                           s->picture == 1 ? "Wide (experimental)" : s->picture == 2 ? "3D (experimental)" : "4:3" };
-    u32 *cv = pa_cv; int cw = pa_cw, ch = pa_ch, c0 = pa_clip_x0, c1 = pa_clip_y0, c2 = pa_clip_x1, c3 = pa_clip_y1;
-    /* ---- the top screen */
-    lg_canvas(lg_top, 400, 240);
-    stone(0, 0, 400, 240);
-    lg_title(400, "Tombi!");
-    for (int i = 0; i < 4; i++) {
-        const int y = 44 + i * 46; const u32 c = i == s->row ? C_YELLOW : C_WHITE;
-        plank_h(16, y, 368, 36);
-        pa_text_ol(32, y + 10, 16, lab[i], c, C_WOODE, C_DARK);
-        pa_text_ol(368 - pa_text_w(16, val[i]), y + 10, 16, val[i], c, C_WOODE, C_DARK);
-    }
-    lg_rgb(top, lg_top, 400 * 240);
-    /* ---- the bottom screen: what the option does */
-    lg_canvas(lg_bot, 320, 240);
-    stone(0, 0, 320, 240);
-    lg_title(320, lab[s->row]);
-    window_(8, 30, 304, 128);
-    {   const char *t[3] = { 0 }; u32 tc[3] = { C_MUTED8, C_MUTED8, C_MUTED8 }; int y = 42;
-        if (s->row == 0) {
-            t[0] = "The language of all the texts in the game.";
-            if (s->lang_es_improved) {
-                t[1] = s->es_ready ? "La traducci\xF3n mejorada ya est\xE1 preparada."
-                                   : "La traducci\xF3n mejorada se prepara la primera vez: unos minutos, con una barra.";
-                tc[1] = C_GREEN;
-            }
-        } else if (s->row == 1) {
-            t[0] = "Play: the logos, the intro and the movies of the game.";
-            t[1] = "Skip: straight to the title screen, and no movie in the game either.";
-        } else if (s->row == 2) {
-            t[0] = "60 Hz: the speed of the 3DS screens and of the US game.";
-            t[1] = "50 Hz: the speed of the PAL disc.";
-        } else {
-            t[0] = "4:3 as on the PS1. Wide: all of the top screen. 3D: depth, set by the 3D slider.";
-            t[1] = "Wide and 3D are experimental: slower in the busiest places.";
-        }
-        for (int i = 0; i < 3 && t[i]; i++) y += 11 * text_wrap(20, y, 8, 280, 11, 4, 0, t[i], tc[i], C_EDGE) + 4;
-    }
-    pa_fill(20, 102, 280, 1, RGB(230, 200, 180));
-    {   int n = text_wrap(80, 106, 8, 220, 11, 3, 0, s->disc && *s->disc ? s->disc : "-", C_DARK, C_EDGE), y = 106 + 11 * (n ? n : 1) + 2;
-        pa_text(20, 106, 8, "Disc", C_MUTED8, C_EDGE);
-        pa_text(20, y, 8, "Model", C_MUTED8, C_EDGE); pa_text(80, y, 8, s->new3ds ? "New 3DS" : "Old 3DS", C_DARK, C_EDGE);
-    }
-    it_btn_big(8, 168, 304, "Start", s->start_down ? 2 : 0, 0);
-    {   const char *h = "D-pad: choose and change   A: start";
-        pa_text_ol(160 - pa_text_w(8, h) / 2, 224, 8, h, C_WHITE, C_WOODE, C_DARK); }
-    lg_rgb(bot, lg_bot, 320 * 240);
-    pa_cv = cv; pa_cw = cw; pa_ch = ch; pa_clip_x0 = c0; pa_clip_y0 = c1; pa_clip_x1 = c2; pa_clip_y1 = c3;
-}
-#ifndef __3DS__
-/* PORT_LAUNCHER_PREVIEW=DIR (a PC): that screen for each option, as DIR/launcher_<row>_{top,bottom}.png */
-static void launcher_preview(const char *dir) {
-    static unsigned char top[400 * 240 * 3], bot[320 * 240 * 3]; char p[512];
-    if (!lg_top) lg_top = malloc(400 * 240 * sizeof *lg_top);
-    if (!lg_bot) lg_bot = malloc(320 * 240 * sizeof *lg_bot);
-    if (!lg_top || !lg_bot) return;
-    { extern int pa_font_also; pa_release(); pa_font_also = 0; pa_init(); pa_font_also = -1; }
-    for (int r = 0; r < 5; r++) {
-        LuiState st = { r & 3, "Espa\xF1ol (traducci\xF3n mejorada)", 1, r != 4, 1, 60, r == 3 ? 2 : 0, "Tombi! (Europe) (En,Fr,De,Es,It,Nl,Sv,Da).chd", 0, r == 4 };
-        port_launcher_game_draw(top, bot, &st);
-        snprintf(p, sizeof p, "%s/launcher_%d_top.png", dir, r); port_gpu_write_png(p, top, 400, 240);
-        snprintf(p, sizeof p, "%s/launcher_%d_bottom.png", dir, r); port_gpu_write_png(p, bot, 320, 240);
-    }
-}
-#endif

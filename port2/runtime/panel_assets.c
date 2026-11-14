@@ -275,8 +275,7 @@ void pa_item_icon(int x, int y, int n, int flags) {
 /* ---------------------------------------------------------------- WFM fonts */
 typedef struct { u8 w, h; const u8 *img; } Glyph;
 static Glyph glyphs[3][256];         /* heights 8, 16, 24 */
-static u8 *font_blobs[48]; static unsigned blob_n[48]; static int nblobs;
-int pa_font_also = -1;
+static u8 *font_blobs[48]; static int nblobs;
 
 /* SHA-1 (only to name the glyph bitmaps) */
 static void sha1(const u8 *m, unsigned n, u8 out[20]) {
@@ -377,7 +376,7 @@ static void load_wfm(const char *name) {
     if (n < 144 || memcmp(d, "WFM3", 4) || nblobs >= 48) { free(d); return; }
     used = load_wfm_bank(d, n);
 #endif
-    if (used) { blob_n[nblobs] = n; font_blobs[nblobs++] = d; } else free(d);
+    if (used) font_blobs[nblobs++] = d; else free(d);
 }
 static void load_fonts(void) {
 #if PORT_VERSION_USA
@@ -392,11 +391,8 @@ static void load_fonts(void) {
         }
     }
 #else
-    static const char L[9] = { 'B', 'F', 'G', 'I', 'H', 'S', 'P', 'W', 'D' };
-    for (int pass = 0; pass < 2; pass++) {
-    /* (a second language's letters where the first's font has none: pa_font_also, the 3DS start screen's) */
-    if (pass && (pa_font_also < 0 || pa_font_also > 8 || pa_font_also == port_lang)) break;
-    char l = pass ? L[pa_font_also] : port_lang >= 0 && port_lang < 9 ? L[port_lang] : 'B', name[40];
+    {   static const char L[9] = { 'B', 'F', 'G', 'I', 'H', 'S', 'P', 'W', 'D' };
+    char l = port_lang >= 0 && port_lang < 9 ? L[port_lang] : 'B', name[40];
     snprintf(name, sizeof name, "AREA00/CFNT999%c.WFM", l); load_wfm(name);
     snprintf(name, sizeof name, "AREA00/MFNT000%c.WFM", l); load_wfm(name);
     snprintf(name, sizeof name, "AREA00/MFNT001%c.WFM", l); load_wfm(name);
@@ -408,23 +404,6 @@ static void load_fonts(void) {
     }
     }
 #endif
-    /* a font with no colon (8 and 16 px): the full stop's dot twice, the second one its height and a gap higher */
-    for (int k = 0; k < 2; k++) {
-        const Glyph *d = &glyphs[k]['.']; int w = d->w, h = d->h, r0 = -1, r1 = -1;
-        if (glyphs[k][':'].img || !d->img) continue;
-        #define PXD(x, y) ((d->img[((y) * w + (x)) >> 1] >> ((((y) * w + (x)) & 1) * 4)) & 15)
-        for (int y = 0; y < h; y++) for (int x = 0; x < w; x++) if (PXD(x, y)) { if (r0 < 0) r0 = y; r1 = y; }
-        int up = r1 - r0 + 1 + (k ? 2 : 1);
-        if (r0 < 0 || r0 - up < 0) continue;
-        u8 *img = calloc((size_t)(w * h + 1) / 2, 1);
-        if (!img) continue;
-        for (int y = r0; y <= r1; y++) for (int x = 0; x < w; x++) {
-            int v = PXD(x, y);
-            for (int t = 0; t < 2; t++) { int p = (y - t * up) * w + x; img[p >> 1] |= (u8)(v << ((p & 1) * 4)); }
-        }
-        #undef PXD
-        glyphs[k][':'].w = (u8)w; glyphs[k][':'].h = (u8)h; glyphs[k][':'].img = img;
-    }
     /* the fonts that lack the Spanish opening marks: draw them as the ? / ! glyph turned 180 degrees */
     for (int k = 0; k < 3; k++) for (int m = 0; m < 2; m++) {
         int inv = m ? 0xA1 : 0xBF, src = m ? '!' : '?';
@@ -618,24 +597,10 @@ int pa_text_fit(int x, int y, int h, int w, const char *s, u32 body, u32 edge) {
     return x;
 }
 
-static int pa_done;
-/* everything pa_init read, let go (the 3DS start screen draws with the pictures before the game, whose language the
-   fonts follow, starts): the next pa_init reads them again */
-void pa_release(void) {
-    for (int k = 0; k < 3; k++) for (int c = 0; c < 256; c++) {
-        const u8 *g = glyphs[k][c].img; int in_blob = 0;
-        for (int b = 0; b < nblobs && g; b++) if (g >= font_blobs[b] && g < font_blobs[b] + blob_n[b]) in_blob = 1;
-        if (g && !in_blob) free((void *)g);
-        glyphs[k][c].img = NULL; glyphs[k][c].w = glyphs[k][c].h = 0;
-    }
-    for (int b = 0; b < nblobs; b++) free(font_blobs[b]);
-    nblobs = 0;
-    free(vram); vram = NULL;
-    pa_ok = pa_font_ok = icons_ok = 0; pa_done = 0;
-}
 void pa_init(void) {
-    if (pa_done) return;
-    pa_done = 1;
+    static int done;
+    if (done) return;
+    done = 1;
     vram = calloc(1024 * 512, 2);
     if (!vram) return;
 #if PORT_VERSION_USA

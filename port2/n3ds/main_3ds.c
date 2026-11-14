@@ -163,8 +163,8 @@ static void blit(gfxScreen_t scr, const unsigned char *rgb, int w) {   /* RGB, w
         }
     }
 }
-/* the start screen in the game's own pieces (runtime/panel.c), when the disc can be read before the game starts */
-int port_launcher_game_begin(int lang);
+/* the start screen in the look of the game's OPTIONS (runtime/launcher_game.c), when the disc can be read */
+int port_launcher_game_begin(void);
 void port_launcher_game_end(void);
 void port_launcher_game_start_rect(int *x0, int *y0, int *x1, int *y1);
 void port_launcher_game_draw(unsigned char *top, unsigned char *bot, const LuiState *s);
@@ -184,9 +184,8 @@ static int choose_lang(int code) {
     gfxInitDefault();
     gfxSetDoubleBuffering(GFX_TOP, false); gfxSetDoubleBuffering(GFX_BOTTOM, false);
     static unsigned char top[400 * 240 * 3], bot[320 * 240 * 3];
-    /* (the disc opened for its pictures and letters, the Spanish font with the English one's missing letters, then closed
-       again: the game opens it itself) */
-    int game = (launch_image ? port_cd_open(launch_image) : port_cd_open_data(DIR_ "/data")) == 0 && port_launcher_game_begin(5);
+    /* (the disc opened for the OPTIONS screen's squares and letters, then closed again: the game opens it itself) */
+    int game = (launch_image ? port_cd_open(launch_image) : port_cd_open_data(DIR_ "/data")) == 0 && port_launcher_game_begin();
     int sx0, sy0, sx1, sy1;
     if (game) port_launcher_game_start_rect(&sx0, &sy0, &sx1, &sy1); else lui_start_rect(&sx0, &sy0, &sx1, &sy1);
     while (aptMainLoop()) {
