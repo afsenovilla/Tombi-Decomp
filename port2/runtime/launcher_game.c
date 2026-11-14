@@ -186,7 +186,7 @@ static float seg_d2(float px, float py, float ax, float ay, float bx, float by) 
     const float dx = wx - t * vx, dy = wy - t * vy;
     return dx * dx + dy * dy;
 }
-/* the console's START key: a square-cornered black key with a thin grey rim, START in thin light grey strokes drawn
+/* the console's START key: a black key with slightly rounded corners and a thin grey rim, START in thin light grey strokes drawn
    here (not the game font: the A key's look), w x 16 from (x0, y0); each pixel from 8 x 8 samples */
 static int exit_style;
 static float seg_d2(float px, float py, float ax, float ay, float bx, float by);
@@ -213,10 +213,22 @@ static void startkey(Cv *c, int x0, int y0, int w) {
             }
             ink += hit;
         }
-        const int rim = x == 0 || y == 0 || x == w - 1 || y == 15;
+        /* the corners rounded (radius 3.5): coverage of the key and of its inside (1 px in) from 4 x 4 samples */
+        int out = 0, in = 0;
+        for (int sy = 0; sy < 4; sy++) for (int sx = 0; sx < 4; sx++) {
+            const float px = x + (sx + 0.5f) / 4, py = y + (sy + 0.5f) / 4;
+            for (int k = 0; k < 2; k++) {
+                const float r = 3.5f - k, l = (float)k, t = (float)k, rr = (float)w - k, bb = 16.0f - k;
+                const float cx = px < l + r ? l + r : px > rr - r ? rr - r : px, cy = py < t + r ? t + r : py > bb - r ? bb - r : py;
+                const int hit = px >= l && px <= rr && py >= t && py <= bb && (px - cx) * (px - cx) + (py - cy) * (py - cy) <= r * r;
+                if (k) in += hit; else out += hit;
+            }
+        }
+        if (!out) continue;
         const int body = (int)(0x2C - 0x12 * y / 15);   /* (a touch lighter at the top, as the A key) */
-        const int v = rim ? 0x6E : (body * (64 - ink) + 0xDA * ink) / 64;
-        put(c, x0 + x, y0 + y, (u32)v * 0x010101);
+        const int face = (body * (64 - ink) + 0xDA * ink) / 64;
+        const int v = (0x6E * (16 - in) + face * in) / 16;   /* (the rim where the inside does not reach) */
+        blend(c, x0 + x, y0 + y, (u32)v * 0x010101, out * 255 / 16);
     }
 }
 static void abutton(Cv *c, int cx, int cy, int n) {
