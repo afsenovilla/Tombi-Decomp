@@ -76,6 +76,16 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    extents relative to its origin) to see whether it swings on a hinge like the other doors or slides / lifts.
    A port mod (runtime data patch / spawned objects), never shipped game data.
 
+0. **Widescreen picture strips for more rooms: previews waiting for approval (2026-11-14)**: the AREA02 s5 redraw is
+   now a per-room table (`runtime/ws_backdrop.c` `ROOMS`, generators in `runtime/ws_backdrop_rooms.inc`; docs/PORT.md
+   "More rooms with picture strips").  New, OFF by default: AREA05 s1 / s3 (the house: wood, fence, dry-stone wall,
+   path, bushes), AREA19 s1 (Dwarf Village in blossom; runs as area 2 s1, told apart by its picture) and AREA02 s1
+   (the village with the balloon trees).  Preview: `--ws-backdrop on` (every room) or `--ws-backdrop-rooms
+   5:1,5:3,19:1,2:1` (only those); AREA02 s5 stays on by default.  To approve a room: set `approved` to 1 in its
+   `ROOMS` entry.  Not done: AREA17 s3 / s4 (Iron Castle hall): its side walls look oblique (the measured lines do not
+   meet in one vanishing point; numbers in PORT.md), needs a geometry fit first.  Checked headless (16:9 / 21:9, 4:3
+   identical, defaults identical, i386 = wasm2c); not on the device.
+
 0. **Widescreen AREA02 s5, Small Strange Room (2026-11-14)**: user report: Baron visible at 16:9 waiting right of
    the picture before his walk-in.  Fixed (`runtime/ws_entrance.c`, docs/PORT.md "Widescreen", "Parked actors"): he
    waits pad further right and walks in over the retail frame count (arrives on the same frame, script / events /

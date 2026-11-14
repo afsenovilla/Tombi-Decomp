@@ -1,5 +1,6 @@
-/* --widescreen: side strips of the pre-rendered backdrop of AREA02 s5, "Small Strange Room" (docs/PORT.md
- * "Widescreen", "Room picture strips").
+/* --widescreen: side strips of the pre-rendered backdrops of fixed-camera rooms (docs/PORT.md "Widescreen", "Room
+ * picture strips", "More rooms with picture strips"): AREA02 s5, "Small Strange Room" (this file, approved, on by
+ * default) and the previews in ws_backdrop_rooms.inc (the ROOMS table below; off until the user approves each).
  *
  * That room's background is one 320x224 8 bpp picture (stone wall, brick arch, the carved face door, ivy at both
  * sides, the cobbled floor) drawn as two sprites (256 + 64 columns, pages 128 / 256 x 0, CLUT 128,511) at frame row
@@ -7,9 +8,11 @@
  * shims/gpu.c calls port_ws_backdrop when it meets the left sprite of the picture while the wide plane is on and fills
  * the strips of the wide copy before the game draws the picture itself, so everything the game draws on top (drums,
  * actors, boxes) stays on top.  Identity without --widescreen and in every other room (the sprite signature and the
- * room are both checked).  On by default with --widescreen since the user approved it (2026-11-14); `--ws-backdrop off` disables it, `--ws-backdrop on` (the redraw)
- * or `--ws-backdrop mirror` (the first preview: the picture mirrored at its edge); also PORT_WS_BACKDROP=1 / 2 (not
- * in the wasm2c build, which has no environment).
+ * room are both checked).  The approved rooms are on by default with --widescreen (AREA02 s5 since 2026-11-14);
+ * `--ws-backdrop off` disables them, `--ws-backdrop on` takes every room of the table (the previews too),
+ * `--ws-backdrop-rooms A:S,...` exactly those rooms, `--ws-backdrop mirror` AREA02 s5's first preview (the picture
+ * mirrored at its edge); also PORT_WS_BACKDROP=1 (approved) / 2 (mirror) / 3 (every room) (not in the wasm2c build,
+ * which has no environment).
  *
  * The redraw (build_redraw) is drawn by code, the way shims/gfx_es.c makes its Spanish graphics: nothing of the
  * picture is copied or mirrored and no pixels are shipped.  The tables below hold coordinates only (the brick bond,
@@ -63,7 +66,7 @@ typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32;
 
 static u16 pic[PH][PW];                 /* the picture as 15-bit colours */
 static u16 *strip; static int strip_pad; static u32 strip_sum;
-int port_ws_backdrop_on = 1;            /* default on with --widescreen (user approved 2026-11-14); --ws-backdrop off = 0, mirror = 2 (main.c) */
+int port_ws_backdrop_on = 1;            /* 1: the approved rooms (default); --ws-backdrop off = 0, mirror = 2, on = 3 (main.c) */
 static int enabled = -1;                /* 0 off, 1 the approved rooms, 2 mirror (AREA02 s5), 3 every room */
 
 static int r5(u16 c) { return c & 31; } static int g5(u16 c) { return (c >> 5) & 31; } static int b5(u16 c) { return (c >> 10) & 31; }

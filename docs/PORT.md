@@ -2831,6 +2831,56 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   the edge ivy laid over again), rejected by the user ("mirroring, not redrawing"); the first redraw continued the
   back wall flat into the strips, replaced by the side walls after "the room doesn't extend sideways, it closes like
   a box, judging by the angle of the corner".
+- **More rooms with picture strips (previews, off by default; 2026-11-14)**: the system takes a per-room table
+  (`ROOMS` in `runtime/ws_backdrop.c`, the generators in `runtime/ws_backdrop_rooms.inc`).  Every fixed-camera
+  picture room found so far draws its 320 x 224 8 bpp picture with CLUT (128, 511): the left 256 columns are page
+  (128, 0) rows 0-223 as one sprite at frame (0, 16) (h 224; the Iron Castle hall draws 256 x 256, clipped); the
+  right 64 columns are page (256, 0) u 0-63 (AREA02 s5, AREA17 s3/s4) or are pieced together: four 64 x 32 pieces
+  from page (128, 0) rows 224-255 (u 0 / 64 / 128 / 192 -> picture rows 0 / 32 / 64 / 96) and page (256, 0) for
+  rows 128-223 (u 0 v 0 in AREA05, u 8 v 96 in the Dwarf Village); some rooms draw parts of the scene as further
+  unscaled quads (texel 0 clear, the same CLUT): AREA05's tree tops / roof / fence (page 256: u 0-55 and 56-255 v
+  112-215 -> rows 0-103; u 144-207 v 0-79 -> x 256, rows 24-103; the front bushes u 64-215 v 80-111 -> x 88, rows
+  192-223), the village's hut (u 80 v 96 152 x 104 -> 44, 44), a stump (u 144 v 48 -> 4, 137), the jukebox (u 8 v
+  200 -> 260, 116) and the front blossoms / balloons (u 8 v 8 192 x 32 -> 0, 192; u 8 v 48 128 x 40 -> 192, 184).
+  The table lists those pieces (coordinates only) and `grab()` puts the picture together from VRAM with them, so the
+  redraw samples what the player sees (`PORT_WS_BACKDROP_DUMP=FILE` writes it; the standalone build takes the room:
+  `wsb 5:1 PIC.raw 53 OUT.ppm`).  gpu.c's hook now takes the strips' row count from the call (224) instead of the
+  sprite's height.  AREA19 s1 (the blossom village) runs as area 2 s1 (GAME.area): its table entry names the game's
+  numbers (`garea` / `gsec`) and `is()` tells the two pictures apart (over 60 % of the canopy's texels pink).
+  Flags: by default only the approved rooms (`approved` in the table: AREA02 s5); `--ws-backdrop on` = every
+  room in the table (previews too), `--ws-backdrop off` = none, `--ws-backdrop-rooms 2:5,5:1,...` = exactly those
+  rooms (decimal area:section, the debug select's numbers; `all`), so the user can approve rooms one by one; a room
+  becomes default by setting its `approved`.  Shared helpers: ramps of a region's texels (`samp_box` /
+  `samp_edges`), a region map of the strip and `balance_regions()` (per region, the strip's columns 4-15 mapped onto
+  the trimmed mean / spread of the picture's 32 columns next to the edge, or next to both edges for regions one edge
+  is covered at: the village's jukebox), `emit()` (the join and the quantisation to the picture's colours), foliage
+  `blob()`, `sphere()`.  The rooms:
+  - AREA05 s1 / s3 (the same picture: the house with the dry-stone wall), a frontal scene, every band continued
+    sideways (rows: wood 0-71, fence planks 72-77 / 81-87 / 92-100, the wall 103-185, path 186-~205, bushes
+    ~205-223): conifers (tiers of needle clumps, lit upper left, a dark crown inside; hazy trees behind mixed with
+    the sky), the three khaki planks on dark posts with board ends every 61 columns, the wall as irregular
+    rectangular stones (a jittered 12 x 6 grid, squarish distance stretched sideways, mortar where two stones meet,
+    one stone in seven pale blue, lit upper edge, shaded lower edge), the orange path with a shade under the wall,
+    mounds of bush leaves.  The stepping stones, barrels, bench, notice board and pipe are not continued.  Weak
+    points: the strips' stones are a little larger and more contrasted than the picture's, the wood is more regular.
+  - AREA19 s1 / AREA02 s1 (the Dwarf Village: one layout, two pictures): canopy 0-~100 (AREA19: blossom as value
+    noise masses with small flower clusters on a jittered 8 x 7 grid, a ragged shaded lower edge; AREA02: soft
+    spheres of radius 13-25 in the picture's own four balloon colours, far ones first, lit upper left), the haze /
+    rock band behind, the fence 112-138 (posts 5-7 columns, two rails), the ledge 138-150 (grass / golden leaves),
+    its lip, the palisade 155-182 (4-column stakes in the ledge's shade), the ground, the front 195-223 (blossom
+    mounds / big spheres half under the frame).  Huts, dwarves, jukebox, bench and barrel are not continued.  Weak
+    points: the fence is sparser than the picture's, the blossom's flower clusters are rounder than the painted
+    ones, the front band is lower and flatter than the picture's front quads, no trunks between the balloons (by
+    design: no trunks).
+  - AREA17 s3 / s4 (the Iron Castle hall) is not redrawn yet: its side walls are not simply planes towards the
+    camera.  Measured edges (left / right edge columns): the top rail of the side balustrade rises outwards (row 136
+    at x 34, 131 at x 1), its lower rail stays at row 146-147 across, the walls' foot falls outwards (180 at x 25,
+    186 at x 1) and the cornice rises steeply (47 at x 34, 30 at x 5): with a horizon near row 146 those slopes put
+    the vanishing point at x ~100 / ~160 / ~200, so the walls are probably oblique (an octagonal hall with angled
+    corner walls) and need a proper fit before the strips can continue them.
+  Checked (headless, 2026-11-14): at 16:9 and 21:9 in the four rooms; 4:3 runs identical with `--ws-backdrop on` and
+  off; with the default flags the new rooms are identical to `--ws-backdrop off`, and AREA02 s5 is identical to the
+  build before the table; i386 = wasm2c strips; not checked on the device.
 - **Sub-screens** (Select screens Objetos / Eventos / Estado / Mapa, memory card, options, button config, screen
   adjust).  The Select screens (`subScreenDrawTabs`, D0SPSUB / D0SPSUB3, `#ifdef PORT2`) call `port_ws_layout(left cut,
   right cut, below)` each frame; while it is set, `shims/gpu.c` spreads the textured primitives of the frame
