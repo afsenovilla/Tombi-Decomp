@@ -196,7 +196,8 @@ endif()
 # function, the overlay set, the areas and their signature words)
 file(GLOB PORT2_RT ${CMAKE_CURRENT_SOURCE_DIR}/runtime/*.c ${CMAKE_CURRENT_SOURCE_DIR}/shims/*.c)
 if(NINTENDO_3DS)   # the 3DS entry point (main: SD card paths, then the port's main as port_main); the citro3d renderer
-  list(APPEND PORT2_RT ${CMAKE_CURRENT_SOURCE_DIR}/n3ds/main_3ds.c ${CMAKE_CURRENT_SOURCE_DIR}/n3ds/pica_c3d.c)
+  list(APPEND PORT2_RT ${CMAKE_CURRENT_SOURCE_DIR}/n3ds/main_3ds.c ${CMAKE_CURRENT_SOURCE_DIR}/n3ds/pica_c3d.c
+       ${CMAKE_CURRENT_SOURCE_DIR}/n3ds/launcher_ui.c ${CMAKE_CURRENT_SOURCE_DIR}/n3ds/launcher_font.c)
   # its vertex shader (picasso), embedded as pica_vsh_shbin[] (pica_vsh_shbin.h)
   ctr_add_shader_library(pica_vsh ${CMAKE_CURRENT_SOURCE_DIR}/n3ds/pica.v.pica)
   dkp_add_embedded_binary_library(pica_vsh_bin pica_vsh)
