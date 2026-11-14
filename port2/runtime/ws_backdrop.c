@@ -64,7 +64,7 @@ typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32;
 static u16 pic[PH][PW];                 /* the picture as 15-bit colours */
 static u16 *strip; static int strip_pad; static u32 strip_sum;
 int port_ws_backdrop_on = 1;            /* default on with --widescreen (user approved 2026-11-14); --ws-backdrop off = 0, mirror = 2 (main.c) */
-static int enabled = -1;
+static int enabled = -1;                /* 0 off, 1 the approved rooms, 2 mirror (AREA02 s5), 3 every room */
 
 static int r5(u16 c) { return c & 31; } static int g5(u16 c) { return (c >> 5) & 31; } static int b5(u16 c) { return (c >> 10) & 31; }
 static int is_ivy(u16 c) { int r = r5(c), g = g5(c), b = b5(c); return g >= r + 2 && g >= b + 2; }
@@ -707,43 +707,108 @@ static void build_redraw(int pad)
     free(cv); free(occ); free(S256); free(WU16); cv = 0; occ = 0; S256 = WU16 = 0; free(leaves); leaves = 0; nleaves = capleaves = 0;
 }
 
+/* --- the rooms (docs/PORT.md "Room picture strips").  Every one is a fixed-camera room whose background is one
+   pre-rendered 320 x 224 8 bpp picture with CLUT (128, 511): its left 256 columns are page (128, 0) rows 0-223, drawn as
+   one sprite at frame (0, 16) (256 x 224, or 256 x 256 clipped by the frame); the right 64 columns come from page
+   (256, 0) or are pieced together from 64 x 32 leftovers, and some rooms draw parts of the scene as further unscaled
+   quads over it (the roof and tree tops of AREA05, the hut and the front blossoms of the Dwarf Village).  The table
+   holds where those pieces are (coordinates only); grab() puts the room's picture together from VRAM with them, so
+   the redraw samples what the player sees.  approved: on by default (the user approved that room's strips); the
+   others only with --ws-backdrop on or --ws-backdrop-rooms. */
+typedef struct { short tx, u, v, w, h, x, y; } Piece;   /* 8 bpp page (tx, 0): w x h texels from (u, v) to picture (x, y) */
+typedef struct {
+    short area, sec, h, approved;
+    Piece right[6]; Piece over[6];                       /* the right 64 columns; quads over the picture (texel 0 clear) */
+    void (*gen)(int pad);
+} Room;
+static const Room *room;                                 /* the room being drawn */
+static void build_redraw(int pad);
+#include "ws_backdrop_rooms.inc"
+#define PIECES_TOP4 { 128, 0, 224, 64, 32, 256, 0 }, { 128, 64, 224, 64, 32, 256, 32 }, { 128, 128, 224, 64, 32, 256, 64 }, \
+                    { 128, 192, 224, 64, 32, 256, 96 }
+#define OVER_A5 { { 256, 0, 112, 56, 104, 0, 0 }, { 256, 56, 112, 200, 104, 56, 0 }, { 256, 144, 0, 64, 80, 256, 24 }, \
+                  { 256, 64, 80, 152, 32, 88, 192 } }
+#define OVER_VILLAGE { { 256, 80, 96, 152, 104, 44, 44 }, { 256, 144, 48, 72, 48, 4, 137 }, { 256, 8, 200, 56, 32, 260, 116 }, \
+                       { 256, 8, 8, 192, 32, 0, 192 }, { 256, 8, 48, 128, 40, 192, 184 } }
+static const Room ROOMS[] = {
+    { 2, 5, 224, 1, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, build_redraw },            /* Small Strange Room */
+    { 5, 1, 224, 0, { PIECES_TOP4, { 256, 0, 0, 64, 96, 256, 128 } }, OVER_A5, gen_a5 },    /* the house with the wall */
+    { 5, 3, 224, 0, { PIECES_TOP4, { 256, 0, 0, 64, 96, 256, 128 } }, OVER_A5, gen_a5 },
+    { 19, 1, 224, 0, { PIECES_TOP4, { 256, 8, 96, 64, 96, 256, 128 } }, OVER_VILLAGE, gen_village },   /* Dwarf Village */
+    { 2, 1, 224, 0, { PIECES_TOP4, { 256, 8, 96, 64, 96, 256, 128 } }, OVER_VILLAGE, gen_village },
+    { 17, 3, 256, 0, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, gen_hall },               /* Iron Castle hall */
+    { 17, 4, 256, 0, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, gen_hall },
+};
+#define NROOMS ((int)(sizeof ROOMS / sizeof ROOMS[0]))
+const char *port_ws_backdrop_rooms;                      /* --ws-backdrop-rooms A:S,A:S,... (decimal; "all") */
+static int room_enabled(const Room *r)
+{
+    const char *l = port_ws_backdrop_rooms;
+    if (l) {
+        if (!strcmp(l, "all")) return 1;
+        while (*l) {
+            int a, s, n = 0;
+            if (sscanf(l, "%d:%d%n", &a, &s, &n) == 2 && a == r->area && s == r->sec) return 1;
+            while (*l && *l != ',') l++;
+            if (*l == ',') l++;
+        }
+        return 0;
+    }
+    return enabled == 3 || r->approved;
+}
+
 static void build(int pad)
 {
     free(strip); strip = calloc((size_t)2 * pad * PH, 2); strip_pad = pad;
     if (!strip) return;
-    if (enabled == 2) build_mirror(pad); else build_redraw(pad);
+    if (enabled == 2 && room->gen == build_redraw) build_mirror(pad); else room->gen(pad);
 }
 
-/* the picture's texels: 8 bpp page at (tx, ty), CLUT at (cx, cy); vram is 1024x512 words */
-static u32 grab(const u16 *vram, int tx, int ty, int cx, int cy)
+/* the room's picture (with its pieces and quads) from VRAM: 8 bpp pages at row 0, CLUT at (cx, cy); vram is 1024 x 512
+   words */
+static u16 tex8(const u16 *vram, int tx, int u, int v, int cx, int cy)
+{
+    u16 w = vram[(size_t)(v & 511) * 1024 + ((tx + u / 2) & 1023)];
+    return vram[(size_t)(cy & 511) * 1024 + ((cx + (u & 1 ? w >> 8 : w & 255)) & 1023)];
+}
+static u32 grab(const u16 *vram, int cx, int cy)
 {
     u32 h = 2166136261u;
-    for (int y = 0; y < PH; y++)
-        for (int x = 0; x < PW; x++) {
-            u16 w = vram[(size_t)((ty + y) & 511) * 1024 + ((tx + x / 2) & 1023)];
-            int i = x & 1 ? w >> 8 : w & 255;
-            u16 c = vram[(size_t)(cy & 511) * 1024 + ((cx + i) & 1023)];
-            pic[y][x] = c; h = (h ^ c) * 16777619u;
+    for (int y = 0; y < PH; y++) for (int x = 0; x < 256; x++) pic[y][x] = tex8(vram, 128, x, y, cx, cy);
+    for (int i = 0; i < 6; i++) {
+        const Piece *p = &room->right[i];
+        for (int y = 0; y < p->h; y++) for (int x = 0; x < p->w; x++)
+            if (p->y + y < PH && p->x + x < PW) pic[p->y + y][p->x + x] = tex8(vram, p->tx, p->u + x, p->v + y, cx, cy);
+    }
+    for (int i = 0; i < 6; i++) {
+        const Piece *p = &room->over[i];
+        for (int y = 0; y < p->h; y++) for (int x = 0; x < p->w; x++) {
+            u16 c = tex8(vram, p->tx, p->u + x, p->v + y, cx, cy);
+            if (c && p->y + y < PH && p->x + x < PW) pic[p->y + y][p->x + x] = c;
         }
+    }
+    for (int y = 0; y < PH; y++) for (int x = 0; x < PW; x++) h = (h ^ pic[y][x]) * 16777619u;
     return h;
 }
 
 #ifndef WS_BACKDROP_MAIN
 /* sprite (cmd 0x64/0x65) at screen (x, y) of w x h texels from (u, v), page (tx, ty, depth), CLUT (cx, cy):
-   the strip buffer when it is the left part of the room's picture (left strip at columns 0..pad-1, right strip
-   at pad..2pad-1, PH rows), else 0 */
+   the strip buffer when it is the left part of a listed room's picture (left strip at columns 0..pad-1, right strip
+   at pad..2pad-1, PH rows, *rows set to PH), else 0 */
 const u16 *port_ws_backdrop(const u16 *vram, int pad, int x, int y, int w, int h, int u, int v, int tx, int ty,
-                            int depth, int cx, int cy)
+                            int depth, int cx, int cy, int *rows)
 {
-    if (enabled < 0) { const char *e = getenv("PORT_WS_BACKDROP"); enabled = e && *e >= '1' && *e <= '2' ? *e - '0' : port_ws_backdrop_on; }
-    if (!enabled || pad <= 0 || x != 0 || y != 16 || w != 256 || h != PH || u || v || tx != 128 || ty || depth != 1
+    const Room *r = 0;
+    if (enabled < 0) { const char *e = getenv("PORT_WS_BACKDROP"); enabled = e && *e >= '1' && *e <= '3' ? *e - '0' : port_ws_backdrop_on; }
+    if (!enabled || pad <= 0 || x != 0 || y != 16 || w != 256 || u || v || tx != 128 || ty || depth != 1
         || cx != 128 || cy != 511) return 0;
     {
-        u8 *g = port_ram_ptr(PORT_A_GAME);
-        if (*(u16 *)(g + 0) != 2 || *(u16 *)(g + 2) != 5) return 0;
+        u8 *g = port_ram_ptr(PORT_A_GAME); int a = *(u16 *)(g + 0), s = *(u16 *)(g + 2);
+        for (int i = 0; i < NROOMS; i++) if (ROOMS[i].area == a && ROOMS[i].sec == s && ROOMS[i].h == h) { r = &ROOMS[i]; break; }
+        if (!r || !room_enabled(r)) return 0;
     }
     {
-        u32 s = grab(vram, 128, 0, cx, cy);
+        u32 s; room = r; s = grab(vram, cx, cy);
         if (!strip || strip_pad != pad || s != strip_sum) {
             strip_sum = s; build(pad);
             {   const char *e = getenv("PORT_WS_BACKDROP_DUMP");      /* research: the picture, raw 15-bit LE */
@@ -755,13 +820,17 @@ const u16 *port_ws_backdrop(const u16 *vram, int pad, int x, int y, int w, int h
             }
         }
     }
+    *rows = PH;
     return strip;
 }
 #else
 int main(int argc, char **argv)
 {
     FILE *f; int pad;
-    if (argc < 4 || !(f = fopen(argv[1], "rb"))) { fprintf(stderr, "usage: wsb PIC.raw PAD OUT.ppm [mirror]\n"); return 1; }
+    int a = 2, sc = 5;
+    if (argc > 1 && sscanf(argv[1], "%d:%d", &a, &sc) == 2) { argc--; argv++; }   /* the room, default 2:5 */
+    for (int i = 0; i < NROOMS; i++) if (ROOMS[i].area == a && ROOMS[i].sec == sc) { room = &ROOMS[i]; break; }
+    if (!room || argc < 4 || !(f = fopen(argv[1], "rb"))) { fprintf(stderr, "usage: wsb [AREA:SECTION] PIC.raw PAD OUT.ppm [mirror]\n"); return 1; }
     for (int y = 0; y < PH; y++) for (int x = 0; x < PW; x++) { u8 b[2]; if (fread(b, 1, 2, f) != 2) return 1; pic[y][x] = (u16)(b[0] | b[1] << 8); }
     fclose(f);
     pad = atoi(argv[2]); enabled = argc > 4 ? 2 : 1;

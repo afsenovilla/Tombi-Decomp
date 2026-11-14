@@ -906,9 +906,9 @@ unsigned long long port_prof_draw_us;   /* time spent walking + rasterizing orde
 /* --widescreen: the side strips of a pre-rendered room picture (runtime/ws_backdrop.c), filled into the wide copy
    just before the game draws the picture's left sprite (drawn first, so everything else stays on top) */
 static void ws_backdrop(const Vtx *a, int w, int h, int u, int v, const GpuTex *t) {
-    extern const unsigned short *port_ws_backdrop(const unsigned short *, int, int, int, int, int, int, int, int, int, int, int, int);
+    extern const unsigned short *port_ws_backdrop(const unsigned short *, int, int, int, int, int, int, int, int, int, int, int, int, int *);
     int P = port_widescreen, fx = a->x - gs.ox - ws_dx, fy = a->y - gs.oy, bx = ws_base(ws_ax), y = a->y;
-    const unsigned short *s = port_ws_backdrop(&vram[0][0], P, fx, fy, w, h, u, v, t->tx, t->ty, t->depth, t->cx, t->cy);
+    const unsigned short *s = port_ws_backdrop(&vram[0][0], P, fx, fy, w, h, u, v, t->tx, t->ty, t->depth, t->cx, t->cy, &h);   /* h: the strips' rows */
     if (!s || y < 0 || y + h > 512 || bx + 320 + 2 * P > WS_STRIDE) return;
     for (int j = 0; j < h; j++) {
         memcpy(&wvram[y + j][bx], s + (size_t)j * 2 * P, (size_t)P * 2);
