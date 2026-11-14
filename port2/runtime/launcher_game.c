@@ -137,7 +137,8 @@ static const int START_X0 = 40, START_Y0 = 172, START_X1 = 279, START_Y1 = 201, 
 int port_launcher_game_button(int i, int *x0, int *y0, int *x1, int *y1) {
     if (i < 0 || i > 4) return 0;
     if (!i) { *x0 = START_X0; *y0 = START_Y0; *x1 = START_X1; *y1 = START_Y1; return 1; }
-    *x0 = 6 + (i - 1) * 78; *x1 = *x0 + 73; *y0 = ARROW_Y0; *y1 = ARROW_Y1;
+    /* (in two groups as the hints were: up / down + OPTION, left / right + CHANGE) */
+    *x0 = (i <= 2 ? 10 : 168) + ((i - 1) & 1) * 34; *x1 = *x0 + 31; *y0 = ARROW_Y0 + 3; *y1 = ARROW_Y1 - 3;
     return 1;
 }
 /* a dark arrow (0 up, 1 down, 2 left, 3 right) centred on (cx, cy), its edge pixels blended by coverage */
@@ -199,13 +200,15 @@ void port_launcher_game_draw(unsigned char *top, unsigned char *bot, const LuiSt
     }
     bar(&b, START_X0, START_Y0, START_X1, START_Y1, s->start_down);
     text(&b, 160 - text_w("START") / 2, START_Y0 + 7, "START");
-    for (int i = 1; i <= 4; i++) {   /* the arrows: a message box, the game's green bar while touched */
+    for (int g = 0; g < 2; g++) {   /* a message box holding two arrow keys and what they do */
+        const int gx = g ? 164 : 6;
+        box(&b, gx, ARROW_Y0, gx + 149, ARROW_Y1);
+        text(&b, gx + 72 + (77 - text_w(g ? "CHANGE" : "OPTION")) / 2, ARROW_Y0 + 6, g ? "CHANGE" : "OPTION");
+    }
+    for (int i = 1; i <= 4; i++) {   /* the keys: a message box, the game's green bar while touched */
         int x0, y0, x1, y1; port_launcher_game_button(i, &x0, &y0, &x1, &y1);
         if (s->pressed == i + 1) bar(&b, x0, y0, x1, y1, 1); else box(&b, x0, y0, x1, y1);
-        /* (what it does beside it: up / down choose the option, left / right change it) */
-        const char *what = i <= 2 ? "OPTION" : "CHANGE"; const int w = 14 + text_w(what), ax = (x0 + x1 + 1) / 2 - w / 2;
-        arrow(&b, ax + 6, (y0 + y1 + 1) / 2, i - 1);
-        text(&b, ax + 14, y0 + 7, what);
+        arrow(&b, (x0 + x1 + 1) / 2, (y0 + y1 + 1) / 2, i - 1);
     }
 }
 
