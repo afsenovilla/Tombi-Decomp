@@ -2758,8 +2758,8 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   ~340 / ~384 right of the picture and walk in after the room's "CLEAR!" event (~frame 2150 of the select run); their
   walk is not in the overlay's NPC step (likely animation-driven), not fixed yet.  AREA05 s1 / s3: an NPC half inside
   the 4:3 picture (x -14..18), not parked.  Only the select's default story flags were covered.
-- **Room picture strips, opt-in preview** (`runtime/ws_backdrop.c`, `shims/gpu.c` `ws_backdrop`; `--ws-backdrop on`,
-  off by default until the user picks it): AREA02 s5's background is one pre-rendered 320x224 8 bpp picture (VRAM
+- **Room picture strips** (`runtime/ws_backdrop.c`, `shims/gpu.c` `ws_backdrop`; on by default with `--widescreen`
+  since the user approved it on 2026-11-14, `--ws-backdrop off` disables it): AREA02 s5's background is one pre-rendered 320x224 8 bpp picture (VRAM
   page x 128, CLUT 128,511) drawn as two sprites (256 + 64 columns) at frame row 16, nothing past 4:3 (the strips
   showed the clear grey).  When the left sprite comes (signature + room checked) the strips of the wide copy are
   filled before the game draws it (so drums, actors and boxes stay on top).  `on` is a procedural redraw, made the

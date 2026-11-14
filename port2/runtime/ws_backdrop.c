@@ -7,7 +7,7 @@
  * shims/gpu.c calls port_ws_backdrop when it meets the left sprite of the picture while the wide plane is on and fills
  * the strips of the wide copy before the game draws the picture itself, so everything the game draws on top (drums,
  * actors, boxes) stays on top.  Identity without --widescreen and in every other room (the sprite signature and the
- * room are both checked).  Opt-in preview, off by default until the user picks it: `--ws-backdrop on` (the redraw)
+ * room are both checked).  On by default with --widescreen since the user approved it (2026-11-14); `--ws-backdrop off` disables it, `--ws-backdrop on` (the redraw)
  * or `--ws-backdrop mirror` (the first preview: the picture mirrored at its edge); also PORT_WS_BACKDROP=1 / 2 (not
  * in the wasm2c build, which has no environment).
  *
@@ -63,7 +63,7 @@ typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32;
 
 static u16 pic[PH][PW];                 /* the picture as 15-bit colours */
 static u16 *strip; static int strip_pad; static u32 strip_sum;
-int port_ws_backdrop_on;                /* --ws-backdrop on = 1 (redraw), mirror = 2 (main.c) */
+int port_ws_backdrop_on = 1;            /* default on with --widescreen (user approved 2026-11-14); --ws-backdrop off = 0, mirror = 2 (main.c) */
 static int enabled = -1;
 
 static int r5(u16 c) { return c & 31; } static int g5(u16 c) { return (c >> 5) & 31; } static int b5(u16 c) { return (c >> 10) & 31; }
