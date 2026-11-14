@@ -8,11 +8,20 @@ keeps its own dark outline + drop shadow and overlaps its neighbour by 3 px on a
 
 The result is one 144x71 block at VRAM (0,72), right under NOW LOADING in the same texture page / CLUT, unused while the
 loading screen shows; drawNowLoadingSprite draws it as sprite 0 (port/fixes.txt). Needs Pillow.
+
+That is version 1 (image_v1, kept). VERSION 2 (image_v2, the one used) keeps every letter at the logo's own pixel size:
+A G A N D O cut from the logo as above (the first A recoloured plain yellow), a C and an R drawn by hand in the logo's
+style (C_GRID, R_GRID: a thick red C whose inner curve follows the outer one, an R built like the logo's blue D), set on a
+gentle arch, each with its dark ring + drop shadow, and the outer edge of that dark shape softened with the logo's two
+browns (indices 3 and 10) as the original does. 108x34 at VRAM (0,72), drawn centred where NOW LOADING sits. No Pillow.
 """
 import struct
 
+VERSION = 2               # 1: the first CARGANDO (big C, upscaled letters); 2: letters at the logo's own size
 VRAM_X, VRAM_Y = 0, 72
-OUT_W, OUT_H = 144, 71
+OUT_W1, OUT_H1 = 144, 71  # version 1
+OUT_W2, OUT_H2 = 108, 34  # version 2
+OUT_W, OUT_H = (OUT_W2, OUT_H2) if VERSION == 2 else (OUT_W1, OUT_H1)
 PW, PH = 112, 64          # logo area of the page
 BG = {0, 2, 3, 10, 11}    # transparent / outline / shadow indices of the original logo
 K = 8                     # supersampling
@@ -182,8 +191,8 @@ def _render(items, w, h, sh=3):
     return [[can.get((x, y), 0) for x in range(w)] for y in range(h)]
 
 
-def image(raw):
-    """the 144x71 grid of palette indices"""
+def image_v1(raw):
+    """version 1: the 144x71 grid of palette indices"""
     L = _letters(raw)
     A1 = _upscale(_shade(L['A'], 5, 4), 1.18)
     A2 = _shade(L['A'], 1, 9)
@@ -192,10 +201,100 @@ def image(raw):
     arc = [16, 7, 2, 0, 0, 2, 7, 16]
     gap = -3
     wd = lambda m: max(p[0] for p in m) + 1
-    x = (OUT_W - (sum(wd(m) for m in row) + gap*7))//2; its = []
+    x = (OUT_W1 - (sum(wd(m) for m in row) + gap*7))//2; its = []
     for m, b, a in zip(row, base, arc):
         its.append((m, x, 12 + b + a)); x += wd(m) + gap
-    return _render(its[::-1], OUT_W, OUT_H)
+    return _render(its[::-1], OUT_W1, OUT_H1)
+
+
+# version 2: the C and the R drawn by hand (palette indices of the logo's CLUT, '.' = empty)
+C_GRID = [
+    "......999999........",
+    "....99c8888c999.....",
+    "...9c88888888889....",
+    "..9c8888888888889...",
+    "..9888888888888889..",
+    ".9c888888888888889..",
+    ".9888888c99988889...",
+    "9c8888889...9889....",
+    "98888889.....99.....",
+    "9888889.............",
+    "9888889.............",
+    "9888889.............",
+    "9888889.............",
+    "9888889.............",
+    "98888889............",
+    ".9888889......99....",
+    ".98888889....9c89...",
+    "..988888c9999c8889..",
+    "..988888888888888c99",
+    "...98888888888888889",
+    "....988888888888889.",
+    ".....9888888888889..",
+    "......99888888c99...",
+    "........9999999.....",
+]
+R_GRID = [
+    "9999999.........",
+    "977777e99.......",
+    "97777777e9......",
+    "977777777e9.....",
+    "9777222777e9....",
+    "9777222777e9....",
+    "9777222777e9....",
+    "97777777e99.....",
+    "977777777e99....",
+    "977777977777e9..",
+    "97779.97777777e9",
+    "97779..9777777e9",
+    "97779...9777779.",
+    "97779....97779..",
+    "97779.....999...",
+    "99999...........",
+]
+
+
+def _grid(rows):
+    return {(x, y): int(c, 16) for y, r in enumerate(rows) for x, c in enumerate(r) if c != '.'}
+
+
+def _soften(g):
+    """the outer edge of the dark ring / shadow in the logo's two lighter browns: a dark pixel with 2 or fewer filled
+    4-neighbours becomes 3, one with 3 whose lower neighbour is empty becomes 10"""
+    H = len(g); W = len(g[0]); out = [r[:] for r in g]
+    at = lambda x, y: g[y][x] if 0 <= x < W and 0 <= y < H else 0
+    for y in range(H):
+        for x in range(W):
+            if g[y][x] != 2: continue
+            n = sum(at(x+a, y+b) != 0 for a, b in ((1, 0), (-1, 0), (0, 1), (0, -1)))
+            if n <= 2: out[y][x] = 3
+            elif n == 3 and at(x, y+1) == 0: out[y][x] = 10
+    return out
+
+
+def image_v2(raw):
+    """version 2: the 108x34 grid of palette indices"""
+    L = _letters(raw)
+    row = [_grid(C_GRID), {p: (5 if v in (6, 15) else v) for p, v in L['A'].items()}, _grid(R_GRID), L['G'],
+           _shade(L['A'], 1, 9), L['N'], L['D'], L['O']]
+    arc = [11, 6, 2, 0, 0, 2, 6, 11]
+    gap, W, H, top, cbase = -3, 180, 60, 4, -7
+    wd = lambda m: max(p[0] for p in m) + 1
+    ht = lambda m: max(p[1] for p in m) + 1
+    hmax = max(ht(m) for m in row[1:])
+    x = (W - (sum(wd(m) for m in row) + gap*7))//2; its = []
+    for i, (m, a) in enumerate(zip(row, arc)):
+        its.append((m, x, top + a + (cbase if i == 0 else hmax - ht(m)))); x += wd(m) + gap
+    g = _soften(_render(its[::-1], W, H))
+    xs = [x for r in g for x, v in enumerate(r) if v]; ys = [y for y, r in enumerate(g) if any(r)]
+    x0, y0 = min(xs), min(ys)
+    if max(xs) - x0 + 1 > OUT_W2 or max(ys) - y0 + 1 > OUT_H2:
+        raise ValueError("CARGANDO does not fit %dx%d" % (OUT_W2, OUT_H2))
+    return [[g[y0+y][x0+x] if y0+y < H and x0+x < W else 0 for x in range(OUT_W2)] for y in range(OUT_H2)]
+
+
+def image(raw):
+    return image_v2(raw) if VERSION == 2 else image_v1(raw)
 
 
 def key(raw):

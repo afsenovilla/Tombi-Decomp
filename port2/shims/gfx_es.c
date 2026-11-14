@@ -1119,7 +1119,8 @@ static Map *ca_big_r(void) {
     map_free(&r);
     return res;
 }
-static int part_cargando(Out *o, const u8 *raw, size_t n) {
+/* version 1 of cargando.py (image_v1, 144 x 71): kept, not used while CARGANDO_VERSION is 2 */
+__attribute__((unused)) static int part_cargando_v1(Out *o, const u8 *raw, size_t n) {
     Key k; Map *O, *A, *D, *N, *G, *row[8] = {0}, *tmp; u16 words[36 * 71];
     static const int base[8] = {-14, 1, 1, 3, 4, 3, 6, 6}, arc[8] = {16, 7, 2, 0, 0, 2, 7, 16};
     int i, x, y, wd[8], sum = 0, ok = 0; signed char can[71][144];
@@ -1150,6 +1151,92 @@ static int part_cargando(Out *o, const u8 *raw, size_t n) {
         words[y * 36 + x / 4] = (u16)(can[y][x] | can[y][x + 1] << 4 | can[y][x + 2] << 8 | can[y][x + 3] << 12);
     if (g_err) goto done;
     out_rect(o, 0, 72, 36, 71, words, &k);
+    ok = 1;
+done:
+    map_free(&row[0]); map_free(&row[1]); map_free(&row[2]); map_free(&row[4]);
+    map_free(&O); map_free(&A); map_free(&D); map_free(&N); map_free(&G);
+    return ok;
+}
+
+/* version 2 of cargando.py (image_v2, 108 x 34): letters at the logo's own size, a hand-drawn C and R */
+#define CARGANDO_VERSION 2
+static const char *const CA_C_GRID[] = {
+    "......999999........", "....99c8888c999.....", "...9c88888888889....", "..9c8888888888889...",
+    "..9888888888888889..", ".9c888888888888889..", ".9888888c99988889...", "9c8888889...9889....",
+    "98888889.....99.....", "9888889.............", "9888889.............", "9888889.............",
+    "9888889.............", "9888889.............", "98888889............", ".9888889......99....",
+    ".98888889....9c89...", "..988888c9999c8889..", "..988888888888888c99", "...98888888888888889",
+    "....988888888888889.", ".....9888888888889..", "......99888888c99...", "........9999999.....", 0};
+static const char *const CA_R_GRID[] = {
+    "9999999.........", "977777e99.......", "97777777e9......", "977777777e9.....", "9777222777e9....",
+    "9777222777e9....", "9777222777e9....", "97777777e99.....", "977777777e99....", "977777977777e9..",
+    "97779.97777777e9", "97779..9777777e9", "97779...9777779.", "97779....97779..", "97779.....999...",
+    "99999...........", 0};
+static Map *ca_grid(const char *const *rows) {
+    Map *m = map_new(); int x, y;
+    if (m) for (y = 0; rows[y]; y++) for (x = 0; rows[y][x]; x++) {
+        char c = rows[y][x];
+        if (c != '.') mset(m, x, y, c <= '9' ? c - '0' : c - 'a' + 10);
+    }
+    return m;
+}
+#define CA2_W 180
+#define CA2_H 60
+static int part_cargando(Out *o, const u8 *raw, size_t n) {
+    Key k; Map *O, *A, *D, *N, *G, *row[8] = {0}; u16 words[27 * 34];
+    static const int arc[8] = {11, 6, 2, 0, 0, 2, 6, 11};
+    int i, x, y, wd[8], ht[8], hmax = 0, sum = 0, ok = 0, x0 = CA2_W, y0 = CA2_H, x1 = -1, y1 = -1;
+    static signed char can[CA2_H][CA2_W], sof[CA2_H][CA2_W];
+    if (n < 72 * 128) return 0;
+    if (!page_key(&k, raw, n, 128, 0, 0, 0, 0, 256, 72)) return 0;
+    ca_raw = raw;
+    O = ca_grab(32, 45, 0); A = ca_grab(48, 45, 1); D = ca_grab(60, 45, 2); N = ca_grab(80, 45, 0); G = ca_grab(93, 47, 0);
+    if (g_err || !O || !A || !D || !N || !G) goto done;
+    row[0] = ca_grid(CA_C_GRID);
+    row[1] = map_new(); if (row[1]) MFOR(A, x, y) { int v = mget(A, x, y); mset(row[1], x, y, v == 6 || v == 15 ? 5 : v); }
+    row[2] = ca_grid(CA_R_GRID);
+    row[3] = G; row[4] = ca_shade(A, 1, 9); row[5] = N; row[6] = D; row[7] = O;
+    for (i = 0; i < 8; i++) {
+        int bx0, by0, bx1, by1;
+        if (!row[i]) goto done;
+        mbbox(row[i], &bx0, &by0, &bx1, &by1); wd[i] = bx1 + 1; ht[i] = by1 + 1; sum += wd[i];
+        if (i && ht[i] > hmax) hmax = ht[i];
+    }
+    if (g_err) goto done;
+    memset(can, 0, sizeof can);
+    {   int ox[8], oy[8], xx = py_floordiv(CA2_W - (sum + -3 * 7), 2), it;
+        for (i = 0; i < 8; i++) { ox[i] = xx; oy[i] = 4 + arc[i] + (i == 0 ? -7 : hmax - ht[i]); xx += wd[i] + -3; }
+        for (it = 7; it >= 0; it--) {          /* back to front */
+            const Map *m = row[it]; int kk, dx, dy;
+            MFOR(m, x, y) for (kk = 0; kk <= 3; kk++) for (dx = -1; dx <= 1; dx++) for (dy = -1; dy <= 1; dy++) {
+                int cx = ox[it] + x + dx - py_floordiv(kk + 1, 3), cy = oy[it] + y + dy + kk;
+                if (cx >= 0 && cx < CA2_W && cy >= 0 && cy < CA2_H) can[cy][cx] = 2;
+            }
+            MFOR(m, x, y) { int cx = ox[it] + x, cy = oy[it] + y; if (cx >= 0 && cx < CA2_W && cy >= 0 && cy < CA2_H) can[cy][cx] = (signed char)mget(m, x, y); }
+        }
+    }
+    /* _soften: the outer edge of the dark shape in the browns 3 / 10 */
+    memcpy(sof, can, sizeof sof);
+    for (y = 0; y < CA2_H; y++) for (x = 0; x < CA2_W; x++) {
+        int nb = 0;
+        if (can[y][x] != 2) continue;
+        nb += x + 1 < CA2_W && can[y][x + 1]; nb += x > 0 && can[y][x - 1]; nb += y + 1 < CA2_H && can[y + 1][x]; nb += y > 0 && can[y - 1][x];
+        if (nb <= 2) sof[y][x] = 3;
+        else if (nb == 3 && !(y + 1 < CA2_H && can[y + 1][x])) sof[y][x] = 10;
+    }
+    for (y = 0; y < CA2_H; y++) for (x = 0; x < CA2_W; x++) if (sof[y][x]) {
+        if (x < x0) x0 = x;
+        if (x > x1) x1 = x;
+        if (y < y0) y0 = y;
+        if (y > y1) y1 = y;
+    }
+    if (x1 < 0 || x1 - x0 + 1 > 108 || y1 - y0 + 1 > 34) goto done;
+    for (y = 0; y < 34; y++) for (x = 0; x < 108; x += 4) {
+        int q[4], j;
+        for (j = 0; j < 4; j++) { int sx = x0 + x + j, sy = y0 + y; q[j] = sx < CA2_W && sy < CA2_H ? sof[sy][sx] : 0; }
+        words[y * 27 + x / 4] = (u16)(q[0] | q[1] << 4 | q[2] << 8 | q[3] << 12);
+    }
+    out_rect(o, 0, 72, 27, 34, words, &k);
     ok = 1;
 done:
     map_free(&row[0]); map_free(&row[1]); map_free(&row[2]); map_free(&row[4]);
@@ -1448,7 +1535,7 @@ u8 *gfx_es_build(gfx_es_reader read, gfx_es_logger log, size_t *len, int *count)
             else if ((d = read("SYSTEM/A10003.GAM", &sz))) { page = gam_unpack(d, sz, &pn); free(d); d = page; }
             else if ((d = read("SYSTEM/A10003.000", &sz))) { page = d; pn = sz; }
         } else if ((d = read(part == 1 ? "SYSTEM/A00400.000" : "SYSTEM/A00900.000", &sz))) { page = d; pn = sz; }
-        if (page) got = part == 0 ? part_tryagain(&o, page, pn) : part == 1 ? part_cargar_guardar(&o, page, pn) : part_cargando(&o, page, pn);
+        if (page) got = part == 0 ? part_tryagain(&o, page, pn) : part == 1 ? part_cargar_guardar(&o, page, pn) : (CARGANDO_VERSION == 1 ? part_cargando_v1 : part_cargando)(&o, page, pn);
         free(d);
         if (!got || g_err) {
             o.n = mark; o.count = cnt;
