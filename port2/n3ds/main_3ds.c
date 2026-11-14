@@ -200,11 +200,16 @@ static int choose_lang(int code) {
     if (game) { while (nb < 5 && port_launcher_game_button(nb, &bx0[nb], &by0[nb], &bx1[nb], &by1[nb])) nb++; port_launcher_game_button(0, &bx0[0], &by0[0], &bx1[0], &by1[0]); }
     else lui_start_rect(&bx0[0], &by0[0], &bx1[0], &by1[0]);
     SDL_AudioDeviceID adev = 0;
+    /* (an Old 3DS: mixed at 22050 Hz without the reverb, as the game does there (--audio-half --audio-dry); at 44100
+       the mixer, on this core, left the screen seconds behind the keys) */
+    extern int port_sound_half, port_sound_dry;
+    if (!n3) { port_sound_half = 1; port_sound_dry = 1; }
     if (game && port_launcher_music_start()) {
         if (SDL_Init(SDL_INIT_AUDIO) == 0) {
             SDL_AudioSpec want, have;
             SDL_zero(want);
-            want.freq = 44100; want.format = AUDIO_S16SYS; want.channels = 2; want.samples = 1024; want.callback = launcher_audio_cb;
+            want.freq = n3 ? 44100 : 22050; want.format = AUDIO_S16SYS; want.channels = 2; want.samples = n3 ? 1024 : 512;
+            want.callback = launcher_audio_cb;
             adev = SDL_OpenAudioDevice(NULL, 0, &want, &have, 0);
             if (adev) SDL_PauseAudioDevice(adev, 0); else SDL_QuitSubSystem(SDL_INIT_AUDIO);
         }
@@ -257,6 +262,7 @@ static int choose_lang(int code) {
     }
     if (adev) { SDL_CloseAudioDevice(adev); SDL_QuitSubSystem(SDL_INIT_AUDIO); }
     port_launcher_music_stop();
+    port_sound_half = port_sound_dry = 0;   /* (the game's own options set them again) */
     port_launcher_game_end();
     port_cd_close();
     screens_black();

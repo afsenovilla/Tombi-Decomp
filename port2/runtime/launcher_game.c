@@ -31,7 +31,8 @@ static int read_pal(const char *name, u32 *pal, int n) {
     for (int i = 0; i < n; i++) pal[i] = c15(d[2 * i] | d[2 * i + 1] << 8);
     free(d); return 1;
 }
-void port_launcher_game_end(void) { free(sq); free(font); free(logo); sq = font = logo = NULL; }
+static u8 *bg_top, *bg_bot; static int bg_ok;   /* the screens' parts that never change (port_launcher_game_draw) */
+void port_launcher_game_end(void) { free(sq); free(font); free(logo); free(bg_top); free(bg_bot); sq = font = logo = bg_top = bg_bot = NULL; bg_ok = 0; }
 /* 1: the pieces were read */
 int port_launcher_game_begin(void) {
     port_launcher_game_end();
@@ -77,6 +78,12 @@ static void box(Cv *c, int x0, int y0, int x1, int y1) {
     static const u32 ring[3] = { 0x0000FF, 0x393939, 0xFFEFDE };   /* rim, line, inside */
     const float r = 5.5f;
     for (int y = y0; y <= y1; y++) for (int x = x0; x <= x1; x++) {
+        const int dx = x - x0 < x1 - x ? x - x0 : x1 - x, dy = y - y0 < y1 - y ? y - y0 : y1 - y;
+        if (dx >= 7 || dy >= 7) {   /* (away from the corners: the rings by the distance to the nearest side) */
+            const int d = dx < dy ? dx : dy;
+            put(c, x, y, ring[d > 2 ? 2 : d]);
+            continue;
+        }
         int a[3] = { 0, 0, 0 };   /* coverage (of 16) of the rounded rect shrunk by 0, 1, 2 px */
         for (int k = 0; k < 3; k++) for (int sy = 0; sy < 4; sy++) for (int sx = 0; sx < 4; sx++) {
             float px = x + (sx + 0.5f) / 4, py = y + (sy + 0.5f) / 4, l = x0 + k, t = y0 + k, rr = x1 + 1 - k, bb = y1 + 1 - k, q = r - k;
@@ -190,7 +197,7 @@ static float seg_d2(float px, float py, float ax, float ay, float bx, float by) 
    here (not the game font: the A key's look), w x 16 from (x0, y0); each pixel from 8 x 8 samples */
 static int exit_style;
 static float seg_d2(float px, float py, float ax, float ay, float bx, float by);
-static void startkey(Cv *c, int x0, int y0, int w) {
+static void startkey_draw(Cv *c, int x0, int y0, int w) {
     /* the letters on a 4 x 7 grid (y down), as polylines; NaN-free: a pair (-1, -1) breaks a line */
     static const float S_[] = { 4, 1, 3, 0, 1, 0, 0, 1, 0, 2.4f, 1, 3.4f, 3, 3.6f, 4, 4.6f, 4, 6, 3, 7, 1, 7, 0, 6 };
     static const float T_[] = { 0, 0, 4, 0, -1, -1, 2, 0, 2, 7 };
@@ -231,7 +238,28 @@ static void startkey(Cv *c, int x0, int y0, int w) {
         blend(c, x0 + x, y0 + y, (u32)v * 0x010101, out * 255 / 16);
     }
 }
-static void abutton(Cv *c, int cx, int cy, int n) {
+/* the keys never change: each is drawn once over black and over white, its colour and coverage recovered from the
+   two (blend is linear), and later copies blend that (the drawing itself takes 64 samples a pixel: too slow on a 3DS) */
+typedef struct { int w, h, ok; u8 rgb[64 * 16 * 3], a[64 * 16]; } Spr;
+static void spr_make(Spr *sp, int w, int h, void (*draw)(Cv *, int, int, int), int arg) {
+    static u8 k0[64 * 16 * 3], k1[64 * 16 * 3];
+    Cv c0 = { k0, w, h }, c1 = { k1, w, h };
+    memset(k0, 0, sizeof k0); memset(k1, 255, sizeof k1);
+    draw(&c0, 0, 0, arg); draw(&c1, 0, 0, arg);
+    for (int i = 0; i < w * h; i++) {
+        const int al = 255 - (k1[3 * i] - k0[3 * i]);   /* (black: a * col; white: a * col + (1 - a) * 255) */
+        sp->a[i] = (u8)(al < 0 ? 0 : al > 255 ? 255 : al);
+        for (int k = 0; k < 3; k++) { const int v = al > 0 ? k0[3 * i + k] * 255 / al : 0; sp->rgb[3 * i + k] = (u8)(v > 255 ? 255 : v); }
+    }
+    sp->w = w; sp->h = h; sp->ok = 1;
+}
+static void spr_put(Cv *c, const Spr *sp, int x0, int y0) {
+    for (int y = 0; y < sp->h; y++) for (int x = 0; x < sp->w; x++) {
+        const int i = y * sp->w + x;
+        if (sp->a[i]) blend(c, x0 + x, y0 + y, (u32)sp->rgb[3 * i] << 16 | (u32)sp->rgb[3 * i + 1] << 8 | sp->rgb[3 * i + 2], sp->a[i]);
+    }
+}
+static void abutton_draw(Cv *c, int cx, int cy, int n) {
     const float R = n / 2.0f, s = n / 16.0f, hw = 0.72f * s;   /* radius, scale, half the stroke */
     for (int y = 0; y < n; y++) for (int x = 0; x < n; x++) {
         int disc = 0, rim = 0, ink = 0; float shade = 0;
@@ -258,6 +286,15 @@ static void abutton(Cv *c, int cx, int cy, int n) {
         blend(c, cx - n / 2 + x, cy - n / 2 + y, col, disc * 255 / 64);
     }
 }
+static void abutton_at(Cv *c, int x0, int y0, int n) { abutton_draw(c, x0 + n / 2, y0 + n / 2, n); }
+static void abutton(Cv *c, int cx, int cy, int n) {
+    static Spr sp; if (!sp.ok || sp.w != n) spr_make(&sp, n, n, abutton_at, n);
+    spr_put(c, &sp, cx - n / 2, cy - n / 2);
+}
+static void startkey(Cv *c, int x0, int y0, int w) {
+    static Spr sp; if (!sp.ok || sp.w != w) spr_make(&sp, w, 16, startkey_draw, w);
+    spr_put(c, &sp, x0, y0);
+}
 
 void port_launcher_game_draw(unsigned char *top, unsigned char *bot, const LuiState *s) {
     static const char *lab[4] = { "LANGUAGE:", "MOVIES:", "SPEED:", "PICTURE:" }, *name[4] = { "LANGUAGE", "MOVIES", "SPEED", "PICTURE" };
@@ -265,27 +302,40 @@ void port_launcher_game_draw(unsigned char *top, unsigned char *bot, const LuiSt
     const char *val[4] = { lang, s->movies ? "PLAY" : "SKIP", s->hz == 50 ? "50 HZ" : "60 HZ",
                            s->picture == 1 ? "WIDE (EXPERIMENTAL)" : s->picture == 2 ? "3D (EXPERIMENTAL)" : "4:3" };
     Cv t = { top, 400, 240 }, b = { bot, 320, 240 };
-    /* ---- the top screen: the options, as the game's OPTIONS, on the green squares */
-    squares(&t, -6, 0);
-    if (logo) logo_half(&t, 200 - 74, 4);
-    else { box(&t, 200 - text_w("TOMBI!") / 2 - 14, 10, 200 + text_w("TOMBI!") / 2 + 13, 37); text(&t, 200 - text_w("TOMBI!") / 2, 16, "TOMBI!"); }
+    /* ---- the top screen: the options, as the game's OPTIONS, on the green squares.  What never changes (the squares,
+       the logo, the keys' hint; the bottom screen's squares) is drawn once and copied afterwards: drawing it all again
+       took the 3DS a good part of a second */
+    if (!bg_top) bg_top = malloc(400 * 240 * 3);
+    if (!bg_bot) bg_bot = malloc(320 * 240 * 3);
+    if (!bg_top || !bg_bot) return;
+    if (!bg_ok) {
+        Cv bt = { bg_top, 400, 240 }, bb = { bg_bot, 320, 240 };
+        {   Cv t = bt;
+            squares(&t, -6, 0);
+            if (logo) logo_half(&t, 200 - 74, 4);
+            else { box(&t, 200 - text_w("TOMBI!") / 2 - 14, 10, 200 + text_w("TOMBI!") / 2 + 13, 37); text(&t, 200 - text_w("TOMBI!") / 2, 16, "TOMBI!"); }
+            {   /* what the keys do: the arrows drawn, the words in the game's letters */
+                static const char *w[3] = { "OPTION", "CHANGE", "START" };
+                const int gap = 24, wa = 2 * 14 + 4, wt = wa + text_w(w[0]) + gap + wa + text_w(w[1]) + gap + 20 + text_w(w[2]);
+                int x = 200 - wt / 2;
+                box(&t, x - 14, 204, x + wt + 13, 231);
+                arrow(&t, x + 6, 217, 0); arrow(&t, x + 20, 217, 1); x += wa; text(&t, x, 210, w[0]); x += text_w(w[0]) + gap;
+                arrow(&t, x + 6, 217, 2); arrow(&t, x + 20, 217, 3); x += wa; text(&t, x, 210, w[1]); x += text_w(w[1]) + gap;
+                abutton(&t, x + 8, 217, 16); x += 20; text(&t, x, 210, w[2]);
+            }
+        }
+        squares(&bb, -6, 1);
+        bg_ok = 1;
+    }
+    memcpy(top, bg_top, 400 * 240 * 3);
     for (int i = 0; i < 4; i++) {
         const int y = 72 + i * 34;
         if (i == s->row) bar(&t, 16, y - 4, 383, y + 17, 0);
         text(&t, 28, y, lab[i]);
         text(&t, 132, y, val[i]);
     }
-    {   /* what the keys do: the arrows drawn, the words in the game's letters */
-        static const char *w[3] = { "OPTION", "CHANGE", "START" };
-        const int gap = 24, wa = 2 * 14 + 4, wt = wa + text_w(w[0]) + gap + wa + text_w(w[1]) + gap + 20 + text_w(w[2]);
-        int x = 200 - wt / 2;
-        box(&t, x - 14, 204, x + wt + 13, 231);
-        arrow(&t, x + 6, 217, 0); arrow(&t, x + 20, 217, 1); x += wa; text(&t, x, 210, w[0]); x += text_w(w[0]) + gap;
-        arrow(&t, x + 6, 217, 2); arrow(&t, x + 20, 217, 3); x += wa; text(&t, x, 210, w[1]); x += text_w(w[1]) + gap;
-        abutton(&t, x + 8, 217, 16); x += 20; text(&t, x, 210, w[2]);
-    }
     /* ---- the bottom screen, on the yellow squares: what the option does, the disc and the console, Start */
-    squares(&b, -6, 1);
+    memcpy(bot, bg_bot, 320 * 240 * 3);
     box(&b, 160 - text_w(name[s->row]) / 2 - 14, 4, 160 + text_w(name[s->row]) / 2 + 13, 29);
     text(&b, 160 - text_w(name[s->row]) / 2, 9, name[s->row]);
     {   const char *d0 = 0, *d1 = 0;
@@ -414,6 +464,13 @@ void port_launcher_game_preview(const char *dir) {
     static unsigned char top[400 * 240 * 3], bot[320 * 240 * 3]; char p[512];
     if (!port_launcher_game_begin()) { port_printf("[launcher] the options screen's pieces are not readable\n"); return; }
     { const char *v = getenv("PORT_LAUNCHER_EXIT"); if (v) exit_style = atoi(v); }
+    if (getenv("PORT_LAUNCHER_BENCH")) {   /* (the time of one drawing of both screens) */
+        extern unsigned long long port_time_us(void);
+        LuiState st = { 0, "Espa\xF1ol (traducci\xF3n mejorada)", 1, 1, 1, 60, 0, "Tombi.chd", 0, 0, 0 };
+        unsigned long long t0 = port_time_us();
+        for (int i = 0; i < 20; i++) { st.row = i & 3; port_launcher_game_draw(top, bot, &st); }
+        port_printf("[launcher] bench: %llu us a drawing\n", (port_time_us() - t0) / 20);
+    }
     for (int r = 0; r < 5; r++) {
         LuiState st = { r & 3, "Espa\xF1ol (traducci\xF3n mejorada)", 1, r != 4, 1, 60, r == 3 ? 2 : 0, r == 1 ? "Tombi! (Europe) (En,Fr,De,Es,It,Nl,Sv,Da).chd" : "Tombi.chd", 0, r == 4, r == 4 ? 1 : 0 };
         port_launcher_game_draw(top, bot, &st);
