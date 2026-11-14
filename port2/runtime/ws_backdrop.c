@@ -713,13 +713,17 @@ static void build_redraw(int pad)
    (256, 0) or are pieced together from 64 x 32 leftovers, and some rooms draw parts of the scene as further unscaled
    quads over it (the roof and tree tops of AREA05, the hut and the front blossoms of the Dwarf Village).  The table
    holds where those pieces are (coordinates only); grab() puts the room's picture together from VRAM with them, so
-   the redraw samples what the player sees.  approved: on by default (the user approved that room's strips); the
+   the redraw samples what the player sees.  area / sec name the room (the debug select's numbers; --ws-backdrop-rooms
+   takes them); AREA19 s1 runs as area 2 s1, so garea / gsec / is() tell the game's numbers and which picture it is.
+   approved: on by default (the user approved that room's strips); the
    others only with --ws-backdrop on or --ws-backdrop-rooms. */
 typedef struct { short tx, u, v, w, h, x, y; } Piece;   /* 8 bpp page (tx, 0): w x h texels from (u, v) to picture (x, y) */
 typedef struct {
     short area, sec, h, approved;
     Piece right[6]; Piece over[6];                       /* the right 64 columns; quads over the picture (texel 0 clear) */
     void (*gen)(int pad);
+    short garea, gsec;                                   /* the game's area / section there, when not area / sec */
+    int (*is)(void);                                     /* rooms that share them: is the grabbed picture this one's? */
 } Room;
 static const Room *room;                                 /* the room being drawn */
 static void build_redraw(int pad);
@@ -734,8 +738,9 @@ static const Room ROOMS[] = {
     { 2, 5, 224, 1, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, build_redraw },            /* Small Strange Room */
     { 5, 1, 224, 0, { PIECES_TOP4, { 256, 0, 0, 64, 96, 256, 128 } }, OVER_A5, gen_a5 },    /* the house with the wall */
     { 5, 3, 224, 0, { PIECES_TOP4, { 256, 0, 0, 64, 96, 256, 128 } }, OVER_A5, gen_a5 },
-    { 19, 1, 224, 0, { PIECES_TOP4, { 256, 8, 96, 64, 96, 256, 128 } }, OVER_VILLAGE, gen_village },   /* Dwarf Village */
-    { 2, 1, 224, 0, { PIECES_TOP4, { 256, 8, 96, 64, 96, 256, 128 } }, OVER_VILLAGE, gen_village },
+    { 19, 1, 224, 0, { PIECES_TOP4, { 256, 8, 96, 64, 96, 256, 128 } }, OVER_VILLAGE, gen_village, 2, 1, v_cherry },   /* Dwarf
+      Village in blossom: AREA19 s1 runs as area 2 s1 (GAME.area), told apart from AREA02 s1 by its picture */
+    { 2, 1, 224, 0, { PIECES_TOP4, { 256, 8, 96, 64, 96, 256, 128 } }, OVER_VILLAGE, gen_village, 0, 0, v_not_cherry },
     { 17, 3, 256, 0, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, gen_hall },               /* Iron Castle hall */
     { 17, 4, 256, 0, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, gen_hall },
 };
@@ -803,12 +808,15 @@ const u16 *port_ws_backdrop(const u16 *vram, int pad, int x, int y, int w, int h
     if (!enabled || pad <= 0 || x != 0 || y != 16 || w != 256 || u || v || tx != 128 || ty || depth != 1
         || cx != 128 || cy != 511) return 0;
     {
-        u8 *g = port_ram_ptr(PORT_A_GAME); int a = *(u16 *)(g + 0), s = *(u16 *)(g + 2);
-        for (int i = 0; i < NROOMS; i++) if (ROOMS[i].area == a && ROOMS[i].sec == s && ROOMS[i].h == h) { r = &ROOMS[i]; break; }
+        u8 *g = port_ram_ptr(PORT_A_GAME); int a = *(u16 *)(g + 0), sc = *(u16 *)(g + 2); u32 s = 0;
+        for (int i = 0; i < NROOMS && !r; i++) {
+            const Room *q = &ROOMS[i];
+            if ((q->garea ? q->garea : q->area) != a || (q->garea ? q->gsec : q->sec) != sc || q->h != h) continue;
+            room = q; s = grab(vram, cx, cy);
+            if (!q->is || q->is()) r = q;
+        }
         if (!r || !room_enabled(r)) return 0;
-    }
-    {
-        u32 s; room = r; s = grab(vram, cx, cy);
+        room = r;
         if (!strip || strip_pad != pad || s != strip_sum) {
             strip_sum = s; build(pad);
             {   const char *e = getenv("PORT_WS_BACKDROP_DUMP");      /* research: the picture, raw 15-bit LE */
