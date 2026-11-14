@@ -652,6 +652,7 @@ static int c3d_present(int x, int y, int w, int h, int masked) {
             for (int i = 0; i < 9; i++) { d[i] = pica_dec_why[i] - last[i]; last[i] = pica_dec_why[i]; }
             port_printf("[3ds] pica: area %d; decodes in these %d presents: %llu texels written, %llu CLUT changed, %llu/%llu/%llu took a slot (256/128/64), %llu/%llu/%llu took one used in the frame, %llu free\n",
                         port_current_area(), TK_N, d[0], d[1], d[2], d[3], d[4], d[5], d[6], d[7], d[8]);
+            { extern void pica_thrash_report(void); if (d[5] + d[6] + d[7] > 20) pica_thrash_report(); }
         }
         for (unsigned i = 0; i < 4 && i < n_rd; i++) port_printf("[3ds] pica: read-back %d,%d %dx%d\n", rd_log[i][0], rd_log[i][1], rd_log[i][2], rd_log[i][3]);
         { extern unsigned long long port_sound_underruns(void); unsigned long long u = port_sound_underruns();
@@ -941,7 +942,8 @@ static int c3d_start(void) {
        the read-back buffer come first) */
     {   /* (whole, 64 slots, with 6 MB free; an Old 3DS had 5.9 MB left: half of it there, 32 slots in 2 MB) */
         u32 free = linearSpaceFree();
-        int h = free > (6u << 20) ? PICA_ATLAS : free > (7u << 19) ? PICA_ATLAS / 2 : 0;
+        /* (the half needs 2 MB and 1.4 MB are kept for what comes after: the stereo builds ran with 2.3 MB left) */
+        int h = free > (6u << 20) ? PICA_ATLAS : free > (3448u << 10) ? PICA_ATLAS / 2 : 0;
         if (h && C3D_TexInit(&atlas_tex[2], PICA_ATLAS, (u16)h, GPU_RGBA8)) {
             C3D_TexSetFilter(&atlas_tex[2], GPU_NEAREST, GPU_NEAREST);
             C3D_TexSetWrap(&atlas_tex[2], GPU_CLAMP_TO_EDGE, GPU_CLAMP_TO_EDGE);

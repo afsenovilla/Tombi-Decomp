@@ -204,6 +204,7 @@ static int choose_lang(int code) {
        the mixer, on this core, left the screen seconds behind the keys) */
     extern int port_sound_half, port_sound_dry;
     if (!n3) { port_sound_half = 1; port_sound_dry = 1; }
+    fprintf(stderr, "[3ds] start screen: %u KB of linear memory free\n", (unsigned)(linearSpaceFree() >> 10));
     if (game && port_launcher_music_start()) {
         if (SDL_Init(SDL_INIT_AUDIO) == 0) {
             SDL_AudioSpec want, have;
@@ -263,6 +264,7 @@ static int choose_lang(int code) {
     if (adev) { SDL_CloseAudioDevice(adev); SDL_QuitSubSystem(SDL_INIT_AUDIO); }
     port_launcher_music_stop();
     port_sound_half = port_sound_dry = 0;   /* (the game's own options set them again) */
+    fprintf(stderr, "[3ds] start screen closed: %u KB of linear memory free\n", (unsigned)(linearSpaceFree() >> 10));
     port_launcher_game_end();
     port_cd_close();
     screens_black();
@@ -295,6 +297,7 @@ int main(int argc, char **argv) {
     mkdir(DIR_, 0777);
     chdir(DIR_);
     if (!freopen(DIR_ "/log.txt", "w", stderr)) { /* (no SD card: the log goes nowhere) */ }
+    fprintf(stderr, "[3ds] %u KB of linear memory free at start\n", (unsigned)(linearSpaceFree() >> 10));
     dsp_component_for_emulators();
     static char image[512], extra[2048];
     static char *args[64];
@@ -382,6 +385,7 @@ int main(int argc, char **argv) {
         for (char *p = strtok(extra, " \t\r\n"); p && n < 62; p = strtok(0, " \t\r\n")) args[n++] = p;
     }
     args[n] = 0;
+    fprintf(stderr, "[3ds] %u KB of linear memory free before the game\n", (unsigned)(linearSpaceFree() >> 10));
     fprintf(stderr, "[3ds] port_main:");
     for (int i = 1; i < n; i++) fprintf(stderr, " %s", args[i]);
     fprintf(stderr, "\n");

@@ -610,6 +610,26 @@ static int slot_pick(int a, int n, int b, int m) {
    (more textures in a frame than slots of the size), [8] into a free slot */
 unsigned long long pica_dec_why[9];
 int pica_n128x;
+/* the blocks that took a slot used in the same frame (the frame's textures do not fit the slots), counted by page,
+   CLUT and size, for the device's log (pica_thrash_report) */
+static struct { int tx, ty, cx, cy, depth, z, n; } thr[32]; static int nthr;
+static void thrash_note(const GpuTex *t, int z, int bx, int by) {
+    (void)bx; (void)by;
+    for (int k = 0; k < nthr; k++)
+        if (thr[k].tx == t->tx && thr[k].ty == t->ty && thr[k].cx == t->cx && thr[k].cy == t->cy && thr[k].depth == t->depth && thr[k].z == z) { thr[k].n++; return; }
+    if (nthr < 32) { thr[nthr].tx = t->tx; thr[nthr].ty = t->ty; thr[nthr].cx = t->cx; thr[nthr].cy = t->cy; thr[nthr].depth = t->depth; thr[nthr].z = z; thr[nthr].n = 1; nthr++; }
+}
+void pica_thrash_report(void) {   /* (n3ds/pica_c3d.c, every 120 presents; also on a PC with PICA_THRASH=1 at the end) */
+    if (!nthr) return;
+    char b[600]; int o = 0;
+    for (int k = 0; k < nthr && o < 520; k++)
+        o += snprintf(b + o, sizeof b - (size_t)o, " %d,%d d%d clut %d,%d z%d x%d;", thr[k].tx, thr[k].ty, thr[k].depth, thr[k].cx, thr[k].cy, thr[k].z, thr[k].n);
+    port_printf("[gpu] pica: blocks that took a slot used in the frame (page, depth, CLUT, size, times):%s\n", b);
+    {   int used128 = 0; for (int i = PICA_N256; i < PICA_N256 + PICA_N128; i++) used128 += slots[i].live && slots[i].used > frame_clock;
+        for (int i = PICA_X128; i < PICA_X128 + pica_n128x; i++) used128 += slots[i].live && slots[i].used > frame_clock;
+        port_printf("[gpu] pica: 128 slots used in the last frame: %d of %d\n", used128, PICA_N128 + pica_n128x); }
+    nthr = 0;
+}
 static int ws_res;   /* the two last 256 slots hold a top-down room's side strips (pica_ws_strips) */
 static unsigned ws_seen;
 static struct { int n; struct { int tx, ty, u0, v0, w, h, sx, slot; } e[16]; } wso;
@@ -732,7 +752,8 @@ static int tex_slot(const GpuTex *t, int u0, int v0, int u1, int v1, int *obx, i
         }
         v = tex_ver(t, tw, bx, by, z);
         was = slots[i].live ? slots[i].used : 0;
-        { int zi = z == 256 ? 0 : z == 128 ? 1 : 2; pica_dec_why[!slots[i].live ? 8 : was > frame_clock ? 5 + zi : 2 + zi]++; }
+        { int zi = z == 256 ? 0 : z == 128 ? 1 : 2; pica_dec_why[!slots[i].live ? 8 : was > frame_clock ? 5 + zi : 2 + zi]++;
+          if (slots[i].live && was > frame_clock) thrash_note(t, z, bx, by); }
         slots[i] = (Slot){ .tx = t->tx, .ty = t->ty, .depth = t->depth, .cx = cx, .cy = cy, .tw = tw, .bx = bx, .by = by, .live = 1, .next = hhead[hk] };
         hhead[hk] = (short)i;
     }
@@ -1278,6 +1299,7 @@ static int pica_start(void) {
 static void pica_stop(void) {
     port_printf("[gpu] pica: decodes: %llu texels written, %llu CLUT changed, %llu/%llu/%llu took a slot (256/128/64), %llu/%llu/%llu took one used in the frame, %llu free\n",
                 pica_dec_why[0], pica_dec_why[1], pica_dec_why[2], pica_dec_why[3], pica_dec_why[4], pica_dec_why[5], pica_dec_why[6], pica_dec_why[7], pica_dec_why[8]);
+    pica_thrash_report();
     if (ref_sw[0] | ref_sw[3]) port_printf("[gpu] pica: changes of target: %llu by triangles, %llu fills, %llu writes, %llu wide fills, %llu wide writes, %llu copies down\n",
                                            ref_sw[0], ref_sw[1], ref_sw[2], ref_sw[3], ref_sw[4], ref_sw[5]);
     port_printf("[gpu] pica: %llu blocks written again the same, not decoded; 8 bpp 256 blocks by cells: %llu copied, %llu decoded\n", st_same, st_cells_copied, st_cells_decoded);
