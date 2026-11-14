@@ -16,14 +16,20 @@
  * the floor line, where to sample); every colour comes from the user's picture in VRAM at run time:
  *   - colour ramps (dark to light, 32 quantile bins) sampled from the picture's brick faces, mortar, floor, ivy
  *     leaves and the left tree roots, and the per-course tone of the bricks next to each edge;
- *   - the wall continued course by course with the picture's bond (18-row courses, 27-column bricks, half bond),
- *     every brick with its own tone, bevel (lit top-left, shadowed bottom-right), grain (value noise), stains and
- *     the odd crack, laid out by a hash of its course / index (no copy of the picture's bricks);
- *   - the floor continued with streaky value noise over the floor ramp and the row tones of the picture's floor;
- *   - on the left, the tree trunk behind the edge ivy and a fan of new roots (tapered curves, shaded across);
- *   - ivy grown as stems: a fringe hanging from the top, curtains (long stems that sway and branch), climbers from
- *     the roots, and a mass next to each edge as deep as the picture's own ivy on that row so the join closes; every
- *     leaf drawn one by one (a tapered ellipse at one of 16 angles, lit top-left, rim shadow), back leaves darker
+ *   - the room is a box: both strips are its side walls in perspective (vanishing point and horizon measured from the
+ *     picture, see "the side walls in perspective" below), laid with the picture's bond (18-row courses, 27-column
+ *     bricks, half bond) in wall coordinates, so courses get taller, bricks wider and the mortar lines diverge from
+ *     the vanishing point towards the viewer; every brick with its own tone, bevel (lit top-left, shadowed
+ *     bottom-right), grain (value noise), stains and the odd crack, laid out by a hash of its course / index (no copy
+ *     of the picture's bricks); the walls lit as the picture's one sideways face, darker towards the viewer;
+ *   - the floor up to the side wall's foot, streaky value noise in floor coordinates (perspective) over the floor
+ *     ramp and the row tones of the picture's floor;
+ *   - on the left, the tree trunk behind the edge ivy and a fan of new roots (tapered curves, shaded across) down to
+ *     the floor in front of the side wall's foot;
+ *   - ivy grown as stems: a fringe hanging from the top of the side wall, curtains (long stems that sway and branch,
+ *     spaced along the wall, thicker near the corner), climbers from the roots and the wall's foot, and a mass next to
+ *     each edge as deep as the picture's own ivy on that row so the join closes; leaves sized by the wall's scale where
+ *     they hang (bigger towards the viewer); every leaf drawn one by one (a tapered ellipse at one of 16 angles, lit top-left, rim shadow), back leaves darker
  *     first, front leaves lighter last, and the wall shadowed under the leaves;
  *   - the three columns next to the picture blended with its edge column; every pixel quantised to the nearest colour
  *     the picture itself uses (the room's 8 bpp CLUT).
@@ -155,6 +161,7 @@ static int floor_tone[2][PH];           /* the floor's row tone next to each edg
 static int edge_ivy[2][PH];             /* 0..256: share of ivy texels in the 6 columns at the edge (+-2 rows) */
 static int edge_depth[2][PH];           /* how far (columns) the picture's ivy reaches in from the edge on that row */
 static int edge_tone[2][PH];            /* the tone (on R_ivy) of the picture's ivy at the edge on that row */
+static int side_k[2];                   /* light of each side wall against the back wall (x 256) */
 
 static int green(u16 c) { Rgb k = rgb15(c); return k.g >= k.r + 16 && k.g >= k.b + 16; }
 static int greenish(u16 c) { Rgb k = rgb15(c); return k.g >= k.r + 8 && k.g >= k.b + 8; }
@@ -237,6 +244,18 @@ static void analyse(void)
         Rgb c = { floor_tone[side][y], floor_tone[side][y], floor_tone[side][y] };
         if (y >= FLOOR) floor_tone[side][y] = R_floor.ok ? tone_of(&R_floor, c) : 128;
     }
+    /* the side walls' light: the picture's one wall face turned sideways (x 298-301, between the mortar rows) against
+       the back wall beside it (x 284-291); the left wall a little darker still, in the tree's shade */
+    {
+        static const int rows[3][2] = { { 127, 138 }, { 147, 156 }, { 166, 174 } };
+        int sa = 0, sn = 0, ba = 0, bn = 0;
+        for (int i = 0; i < 3; i++) for (int y = rows[i][0]; y < rows[i][1]; y++) {
+            for (int x = 298; x < 302; x++) { sa += lum(rgb15(pic[y][x])); sn++; }
+            for (int x = 284; x < 292; x++) { ba += lum(rgb15(pic[y][x])); bn++; }
+        }
+        side_k[1] = clampi(sa * 256 / sn * bn / (ba ? ba : 1), 160, 256);
+        side_k[0] = side_k[1] * 7 / 8;
+    }
 }
 
 /* --- the canvas of one strip: X = 1..pad, y = 0..PH-1 */
@@ -244,55 +263,104 @@ static Rgb *cv; static u8 *occ; static int cw;         /* occ: leaf coverage (fo
 static Rgb *px_at(int X, int y) { return (X >= 1 && X <= cw && y >= 0 && y < PH) ? &cv[(size_t)y * cw + X - 1] : 0; }
 static void put(int X, int y, Rgb c) { Rgb *p = px_at(X, y); if (p) *p = c; }
 
+/* --- the side walls in perspective.  The room is a box: at the right edge the back wall turns towards the viewer
+   (the narrow face at x 297-302 whose mortar lines slant down-right from the back wall's rows 121 / 139 / 157 / 176 to
+   the lit front face's rows 124 / 143.5 / 163 / 181), and both strips are the room's side walls, receding towards the
+   camera.  Measured: the back wall is frontal (the same mortar rows at both edges); the front face's courses are 19.5
+   rows against the back wall's 18 (scale 1.083) and each of its mortar rows lies on the line from a back-wall row
+   through the horizon at row 85 (124 = 85 + 1.083 * (121 - 85), 143.5, 163 alike); a least-squares fit of the slanted
+   face's mortar slopes (0.33 / 0.65 / 0.75 / 0.8 at rows 122 / 141 / 160 / 178) puts the vanishing point at x 173, the
+   door's axis is x 160: VP = (172, 85).  The right side wall starts at the front face's plane (scale 1.083 at the
+   picture's edge), the left one at the back wall's (the tree hides that corner).  A wall pixel at strip column X has
+   the scale s = (D + X - 1/2) / D (D: the corner's distance from the VP), its back-wall height yb = 85 + (y - 85) /
+   (s * kc), and its place along the wall U = F (1 - 1 / s) / kc (focal length F 320 px): bricks get wider, courses
+   taller and their mortar lines diverge from the VP as the wall comes towards the viewer; verticals stay vertical. */
+#define VPX16 (172 * 16)
+#define VPY16 (85 * 16)
+#define FOC16 (320 * 16)
+static const int KC[2] = { 256, 277 };                     /* the wall's scale at the corner (x 256) */
+static int D16(int side) { return side ? (PW - 1) * 16 + 8 - VPX16 : VPX16 + 8; }
+static int *S256, *WU16;                                   /* per strip column 0..cw+1: scale (x 256), U (back-wall px x 16) */
+static int s_at(int X) { return S256[clampi(X, 0, cw + 1)]; }
+static void persp_cols(int side)
+{
+    for (int X = 0; X <= cw + 1; X++) {
+        int d = D16(side), s = (d + X * 16 - 8) * 256 / d;
+        S256[X] = s;
+        WU16[X] = (s - 256) * FOC16 / s * 256 / KC[side];
+    }
+}
+/* screen row (x 16) of back-wall height yb16 at column X, and back-wall height (x 16) of screen row y16 */
+static int wall_y16(int side, int X, int yb16) { return VPY16 + (int)((long long)(yb16 - VPY16) * KC[side] * s_at(X) / 65536); }
+static int wall_yb16(int side, int X, int y16) { return VPY16 + (int)((long long)(y16 - VPY16) * 65536 / ((long long)KC[side] * s_at(X))); }
+static int foot_y(int side, int X) { return wall_y16(side, X, FLOOR * 16) / 16; }        /* the wall's foot, screen row */
+/* strip column of a place U16 along the wall (the inverse of WU16) */
+static int X_of_U(int side, int U16)
+{
+    int u = U16 * KC[side] / 256; if (u > FOC16 * 15 / 16) u = FOC16 * 15 / 16;
+    { int s = (int)((long long)256 * FOC16 / (FOC16 - u)), d = D16(side); return ((long long)s * d / 256 - d + 8) / 16; }
+}
+
 static void draw_wall(int side)
 {
-    for (int y = 0; y < FLOOR; y++) {
-        int k = fdiv(y - COURSE0, COURSE), t = fmodi(y - COURSE0, COURSE);      /* course k: rows below mortar k */
-        int odd = k & 1, j0 = odd ? JOINT_ODD[side] : JOINT_EVEN[side];
-        int base = course_tone[side][clampi(k + 1, 0, 13)];
-        for (int X = 1; X <= cw; X++) {
-            int n = fdiv(X - j0, BRICK), u = fmodi(X - j0, BRICK);        /* brick n of the course, column u in it */
+    for (int X = 1; X <= cw; X++) {
+        int s = s_at(X), U = WU16[X], dU = WU16[X + 1] - WU16[X];
+        int jw = dU > 16 ? dU : 16;                                         /* a joint is at least a column wide */
+        int lit = side_k[side] * (256 - clampi((s - 256) * 40 / 256, 0, 120) - (X < 8 ? (8 - X) * 4 : 0)) / 256;
+                                                                            /* side light, darker towards the viewer and in the corner */
+        for (int y = 0; y < PH; y++) {
+            int yb = wall_yb16(side, X, y * 16 + 8);
+            if (yb >= FLOOR * 16) break;
+            int k = fdiv(yb - COURSE0 * 16, COURSE * 16), t = yb - COURSE0 * 16 - k * COURSE * 16;  /* course k, t in it */
+            int odd = k & 1, j0 = odd ? JOINT_ODD[side] : JOINT_EVEN[side];
+            int base = course_tone[side][clampi(k + 1, 0, 13)];
+            int n = fdiv(U - j0 * 16, BRICK * 16), u = U - j0 * 16 - n * BRICK * 16;   /* brick n, u in it */
             u32 h = hash3(side * 1000 + k, n, 17);
-            int jit = (int)(h >> 24) % 3 - 1;                               /* joints wander by a column */
-            if (u < 1 + jit && n > fdiv(1 - j0, BRICK)) { n--; u += BRICK; h = hash3(side * 1000 + k, n, 17); }
-            int w = BRICK + ((int)(hash3(side * 1000 + k, n + 1, 17) >> 24) % 3 - 1) - (int)(h >> 24) % 3 + 1;
+            int w = (BRICK + (int)(h >> 24) % 3 - 1) * 16;                  /* bricks a column longer or shorter */
             Rgb c;
-            if (t < MORTAR || u == 0 || u >= w) {                              /* mortar */
-                int m = noise(X, y, 3, 2, 5) - 128;
+            if (t < MORTAR * 16 || u < jw || u >= w) {                           /* mortar */
+                int m = noise(U, yb, 48, 32, 5) - 128;
                 c = mix(C_mortar, ramp(&R_wall, 0), 64 + m / 4);
             } else {
-                int tone = base + (int)(h & 63) - 32;                       /* per-brick tone */
-                int bt = t - MORTAR, bh = COURSE - MORTAR;
-                tone += noise(X + n * 7, y, 6, 4, 11 + side) / 5 - 25;     /* mottling */
-                tone += noise(X, y, 2, 2, 13) / 8 - 16;                     /* grain */
-                if ((h >> 8 & 7) == 0) { int s = noise(X, y, 5, 3, 29); if (s > 150) tone -= (s - 150) / 2; }   /* stain */
-                if (bt == 0) tone += 34; else if (bt == 1) tone += 14;     /* bevel: lit top edge */
-                if (bt == bh - 1) tone -= 42; else if (bt == bh - 2) tone -= 18;
-                if (u == 1) tone += 20;                                     /* lit left edge, shadowed right */
-                if (u == w - 1) tone -= 34; else if (u == w - 2) tone -= 12;
-                if ((h >> 12 & 15) == 0) {                                   /* a crack: a dark diagonal hairline */
-                    int cx = (int)(h >> 16 & 15) + 4, cy = (int)(h >> 20 & 7) + 3;
-                    if ((u - cx) == (bt - cy) / 2 && bt >= cy && bt < cy + 8) tone -= 60;
+                int tone = base + (int)(h & 63) - 32;
+                int bt = t - MORTAR * 16, bh = (COURSE - MORTAR) * 16;
+                int lo = side ? u - jw : w - u, hi = side ? w - u : u - jw;     /* screen-left / -right edge of the brick */
+                tone += noise(U + n * 112, yb, 96, 64, 11 + side) / 5 - 25;     /* mottling */
+                tone += noise(U, yb, 32, 32, 13) / 8 - 16;                       /* grain */
+                if ((h >> 8 & 7) == 0) { int st = noise(U, yb, 80, 48, 29); if (st > 150) tone -= (st - 150) / 2; }   /* stain */
+                if (bt < 16) tone += 34; else if (bt < 32) tone += 14;            /* bevel: lit top edge */
+                if (bt >= bh - 16) tone -= 42; else if (bt >= bh - 32) tone -= 18;
+                if (lo < jw) tone += 20;                                         /* lit left edge, shadowed right */
+                if (hi < jw) tone -= 34; else if (hi < 2 * jw) tone -= 12;
+                if ((h >> 12 & 15) == 0) {                                       /* a crack: a dark diagonal hairline */
+                    int cx = (int)(h >> 16 & 15) + 4, cy = (int)(h >> 20 & 7) + 3, uu = u / 16, tt = bt / 16;
+                    if ((uu - cx) == (tt - cy) / 2 && tt >= cy && tt < cy + 8) tone -= 60;
                 }
                 c = ramp(&R_wall, tone);
             }
-            put(X, y, c);
+            put(X, y, scale(c, lit));
         }
     }
 }
 
+/* the floor between the side wall's foot and the frame, in perspective: streaks across (rows of constant depth stay
+   horizontal), slabs and pebbles scaled with the distance (texture coordinates at the scale of picture row 200) */
 static void draw_floor(int side)
 {
-    for (int y = FLOOR; y < PH; y++)
-        for (int X = 1; X <= cw; X++) {
+    for (int X = 1; X <= cw; X++) {
+        int fy = foot_y(side, X), x16 = pcol(side, X) * 16 + 8;
+        for (int y = fy < 0 ? 0 : fy; y < PH; y++) {
+            int dy = y * 16 + 8 - VPY16; if (dy < 16) dy = 16;
+            int fu = (int)((long long)(x16 - VPX16) * 115 * 16 / dy) + 8192, fv = 115 * 115 * 256 / dy;
             int tone = floor_tone[side][y];
-            tone += noise(X, y, 13, 2, 31 + side) / 2 - 64;                 /* streaks */
-            tone += noise(X, y, 5, 2, 37) / 4 - 32;                         /* slabs */
-            tone += noise(X, y, 1, 1, 41) / 10 - 12;                        /* grain */
-            tone += noise(X, y, 3, 1, 43) / 5 - 25;                         /* pebbles: short light dashes */
-            if (y == FLOOR) tone -= 70; else if (y == FLOOR + 1) tone -= 30; /* the wall's foot */
+            tone += noise(fu, fv, 13 * 16, 2 * 16, 31 + side) / 2 - 64;              /* streaks */
+            tone += noise(fu, fv, 5 * 16, 2 * 16, 37) / 4 - 32;                      /* slabs */
+            tone += noise(X, y, 1, 1, 41) / 10 - 12;                                  /* grain */
+            tone += noise(fu, fv, 3 * 16, 16, 43) / 5 - 25;                           /* pebbles: short light dashes */
+            if (y <= fy) tone -= 70; else if (y == fy + 1) tone -= 34; else if (y <= fy + 3) tone -= 14;   /* the wall's foot */
             put(X, y, ramp(&R_floor, tone));
         }
+    }
 }
 
 /* a tapered curve (root / trunk): quadratic bezier p0 -> p2 via p1 (pixels), radius r0 -> r1 (1/16 px) */
@@ -324,8 +392,8 @@ static void draw_roots(void)
     /* the fan: roots leaving the trunk outwards, down to the floor */
     for (int i = 0; i < 3; i++) {
         Rng r = rng_at(901, i, 3);
-        int y0 = 132 + i * 10 + rndi(&r, 5), x2 = 20 + i * 7 + rndi(&r, 6), y2 = 181 + rndi(&r, 4);
-        int x0 = 1 + rndi(&r, 3), x1 = x2 * 3 / 4 + rndi(&r, 4), y1 = y0 + 2 + rndi(&r, 4), r0 = 132 - i * 16 + rndi(&r, 16);
+        int y0 = 132 + i * 10 + rndi(&r, 5), x2 = 20 + i * 7 + rndi(&r, 6), y2 = foot_y(0, x2) + 3 + rndi(&r, 4);
+        int x0 = 1 + rndi(&r, 3), x1 = x2 * 3 / 4 + rndi(&r, 4), y1 = y0 + 2 + rndi(&r, 4) + (y2 - 181) / 2, r0 = 132 - i * 16 + rndi(&r, 16);
         draw_root(x0, y0, x1, y1, x2, y2, r0, 24, i);
     }
 }
@@ -407,7 +475,8 @@ static void grow(int side, Rng *r, int x16, int y16, int dir, int len, int drift
                 int ox = rndr(r, -spread, spread), oy = rndr(r, -spread / 2 - 8, spread / 2 + 8);
                 int front = rndi(r, 2);
                 int lx = rndr(r, 18, 34), ly = rndr(r, 13, 22), la = rndi(r, 16), lt = front ? rndr(r, 90, 230) : rndr(r, 0, 80);
-                leaf_add(px + ox, py + oy, lx, ly, la, lt, front ? 2 : 1);
+                int ks = s_at((px + ox) / 16);                              /* nearer the viewer, bigger */
+                leaf_add(px + ox * ks / 256, py + oy * ks / 256, lx * ks / 256, ly * ks / 256, la, lt, front ? 2 : 1);
             }
             want -= 256;
         }
@@ -434,17 +503,22 @@ static void grow_ivy(int side)
             int front = rndi(&r, 2), et = edge_tone[side][clampi(y, 0, PH - 1)];
             if (et < 0) et = 120;
             int lx = X * 16 + rndr(&r, -16, 16), ly = y * 16 + rndr(&r, -16, 16), rx = rndr(&r, 18, 34), ry = rndr(&r, 13, 22);
-            int la = rndi(&r, 16), lt = front ? et + rndr(&r, -10, 90) : et - rndr(&r, 30, 100);
-            leaf_add(lx, ly, rx, ry, la, lt, front ? 2 : 1);
+            int la = rndi(&r, 16), lt = front ? et + rndr(&r, -10, 90) : et - rndr(&r, 30, 100), ks = s_at(X);
+            leaf_add(lx, ly, rx * ks / 256, ry * ks / 256, la, lt, front ? 2 : 1);
         }
-    /* 2. hanging from the top: cascades (several stems side by side, the middle ones longest), short ones along the
-       whole wall top, long ones near the edge and here and there further out */
-    for (int slot = -1; slot * 22 <= cw + 22; slot++) {
+    /* 2. hanging from the top of the side wall: cascades (several stems side by side, the middle ones longest), laid
+       out along the wall (every 22 back-wall columns, so further apart and wider towards the viewer), short ones along
+       the whole wall top, long ones near the corner and here and there further out */
+    for (int slot = -1; ; slot++) {
         Rng r = rng_at(side * 7 + 2, slot, 0);
-        int X = slot * 22 + rndi(&r, 10), near = X < 48 ? 256 - X * 4 : 70;
-        int W = rndr(&r, 8, 22), L = 8 + rndi(&r, 22), n = W / 4 + 1;
+        int X = X_of_U(side, (slot * 22 + rndi(&r, 10)) * 16), ks, near;
+        if (slot < 0) X = -8 + rndi(&r, 6);
+        if (X > cw + 22) break;
+        ks = s_at(X); near = X < 48 ? 256 - X * 4 : 70;
+        int W = rndr(&r, 8, 22) * ks / 256, L = 8 + rndi(&r, 22), n = W / 4 + 1;
         if (rndi(&r, 256) < near) L += 40 + rndi(&r, 100);
         if (X < 30) L += 50;
+        L = L * ks / 256;
         for (int j = 0; j < n; j++) {
             int off = 2 * j - (n - 1), m = n > 1 ? (off < 0 ? -off : off) * 256 / n : 0;   /* 0 middle .. 256 sides */
             int len = L * (256 - m * 5 / 8) / 256 * rndr(&r, 180, 256) / 256;
@@ -456,7 +530,7 @@ static void grow_ivy(int side)
     for (int k = 0; k < 3 + cw / 60; k++) {
         Rng r = rng_at(side * 7 + 3, k, 0);
         int X = side == 0 ? (k < 3 ? 6 + k * 9 + rndi(&r, 6) : 30 + rndi(&r, cw)) : (k < 2 ? 3 + k * 10 + rndi(&r, 6) : 30 + rndi(&r, cw));
-        int y = side == 0 && k < 3 ? 150 + rndi(&r, 20) : FLOOR - 2;
+        int y = side == 0 && k < 3 ? 150 + rndi(&r, 20) : foot_y(side, X) - 2;
         if (k >= 3 && rndi(&r, 2)) continue;
         int cl = 30 + rndi(&r, 70), dr = rndr(&r, -4, 4);
         grow(side, &r, X * 16, y * 16, -1, cl, dr, 24, 40, 260, 1, sc2);
@@ -504,8 +578,12 @@ static void build_redraw(int pad)
 {
     analyse(); pal_make();
     cw = pad; cv = calloc((size_t)pad * PH, sizeof *cv); occ = calloc((size_t)pad * PH, 1);
-    if (!cv || !occ || !R_wall.ok || !R_floor.ok || !R_ivy.ok) { free(cv); free(occ); cv = 0; occ = 0; return; }
+    S256 = calloc((size_t)pad + 2, sizeof *S256); WU16 = calloc((size_t)pad + 2, sizeof *WU16);
+    if (!cv || !occ || !S256 || !WU16 || !R_wall.ok || !R_floor.ok || !R_ivy.ok) {
+        free(cv); free(occ); free(S256); free(WU16); cv = 0; occ = 0; S256 = WU16 = 0; return;
+    }
     for (int side = 0; side < 2; side++) {
+        persp_cols(side);
         draw_wall(side); draw_floor(side);
         if (side == 0) draw_roots();
         grow_ivy(side);
@@ -516,7 +594,7 @@ static void build_redraw(int pad)
                 strip[(size_t)y * 2 * pad + (side ? pad + (X - 1) : pad - X)] = quant(c);
             }
     }
-    free(cv); free(occ); cv = 0; occ = 0; free(leaves); leaves = 0; nleaves = capleaves = 0;
+    free(cv); free(occ); free(S256); free(WU16); cv = 0; occ = 0; S256 = WU16 = 0; free(leaves); leaves = 0; nleaves = capleaves = 0;
 }
 
 static void build(int pad)
