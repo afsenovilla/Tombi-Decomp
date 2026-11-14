@@ -120,220 +120,702 @@ static void blob(int x16, int y16, int rx, int ry, const Ramp *rp, int tone, int
 
 /* ================================================================== AREA05 s1 / s3: the house with the stone wall
  * A frontal scene (a straight wall seen square on): every element is a horizontal band, so the strips continue each
- * band sideways.  Rows measured on the picture (the same at both edges within a row or two):
- *   0-71   the wood behind: conifers, lit yellow-green on their upper left, hazier ones behind, the pale sky between
- *          their tops in the first ~20 rows;
- *   72-100 the fence: three khaki planks (rows 72-77, 81-87, 92-100) on dark posts, the shade under each plank;
- *   100-102 the shadow of the wall's top edge on the path behind; 103-185 the dry-stone wall: light beige and pale blue
- *          stones 8-25 columns long in courses of 5-8 rows, grey mortar lines, each stone lit on its upper edge; the
- *          wall's foot 184-186 in shade;
- *   186-~205 the orange path; ~205-223 the front bushes, mounds of dark leaves.
- * The stepping stones jutting out of the wall, the barrels, the bench, the notice board and the pipe are objects of the
- * picture and are not continued. */
-enum { A5_SKY = 1, A5_TREE, A5_TREE2, A5_PLANK, A5_GAP, A5_PATH, A5_STONE, A5_MORTAR, A5_GROUND, A5_BUSH };
-#define A5_FENCE0 72
+ * band sideways, and at the join every band starts from what the picture has in its last columns.  Rows measured on
+ * the picture (A5_FEN / A5_ETREE below hold the per-side ones):
+ *   0-71   the wood: the pale sky between the tree tops in the first ~20 rows; conifers built of drooping branch tiers
+ *          (the chevrons of dark gaps under each tier), the near ones bright and lit on their right flank, the far ones
+ *          hazy blue-green and softer;
+ *   72-102 the front fence: three khaki planks (left rows 72-77, 81-86, 93-99; one row lower on the right) on dark
+ *          posts every 20-23 columns, the wood / path showing between them;
+ *   103-185 the dry-stone wall: light cream stones (some pale blue, ~6-9 %) 7-15 columns by 4-6 rows in an irregular
+ *          bond, 1-texel light-grey mortar; 186-~200 the orange path; the front bushes from ~200.
+ * How each band is drawn (every colour from the user's picture, every size from the picture's own measure):
+ *   - per-row ramps: the fence (planks and the gaps between them), the path, the wall's top and foot rows take the
+ *     colour distribution of the same row in the picture's columns next to the edge (a ramp of that row's texels,
+ *     objects left out), read through stretched value noise (grain along the planks, streaks on the path), so every
+ *     row has the picture's tone and spread there;
+ *   - the wall: stones laid outwards column by column (a skyline: where a stone ends, the free rows get new stones of
+ *     the picture's sizes, so joints never line up); the first stones are the picture's own stones cut by the edge
+ *     (rows and colour measured on its last columns, their remaining length from the visible one); every stone's
+ *     colour drawn from the list of the picture's stone colours next to the edges (so the share of blue-grey ones is
+ *     the picture's), a darker lower and right rim, a softened corner, the odd slanted joint; mortar from the
+ *     picture's mortar ramp; the foot's shade per row as the picture's;
+ *   - the trees: the tree cut by each edge continued (its centre, top and width in A5_ETREE, its tier lines measured
+ *     on the edge columns so the chevrons meet), then new conifers of varying height and width, near (bright) and
+ *     far (hazy) mixed, in front of a hazy back row; the tone per row matched to the edge columns over the first
+ *     columns;
+ *   - the bushes: mounds of leaf clusters (cellular: each cluster lit on top, dark crevices between them, the odd
+ *     hole), the first mound's top starting at the picture's bush top at the edge;
+ *   - each band softened to the picture's own sharpness next to the edge (the mean fine detail |L - box3(L)| matched by
+ *     a 3x3 blur of the right strength: the distant trees and the path are soft, the wall crisp).
+ * Not continued: the stepping stones jutting out of the wall, the barrels, the bench, the notice board, the pipe. */
+enum { A5_SKY = 1, A5_TREE, A5_FENCE, A5_STONE, A5_PATH, A5_BUSH, A5_TREEN };
 #define A5_WALL0 103
 #define A5_WALL1 186
-static Ramp A5_rsky, A5_rtree, A5_rplank, A5_rpost, A5_rstone, A5_rblue, A5_rmortar, A5_rground, A5_rbush, A5_rpath;
-static int a5_green(u16 c) { Rgb k = rgb15(c); return k.g >= k.r + 6 && k.g >= k.b + 16; }
-static int a5_sky(u16 c) { Rgb k = rgb15(c); return lum(k) > 170 && k.b + 24 >= k.g && k.g < k.r + 24; }
-static int a5_plank(u16 c) { Rgb k = rgb15(c); return lum(k) > 130 && k.r >= k.b + 30 && k.g >= k.b + 20 && k.r < k.g + 40; }
-static int a5_dark(u16 c) { return lum(rgb15(c)) < 90; }
-static int a5_stone(u16 c) { Rgb k = rgb15(c); return lum(k) > 170 && k.r >= k.b - 8 && k.r < k.b + 50; }
-static int a5_bluestone(u16 c) { Rgb k = rgb15(c); return lum(k) > 140 && k.b > k.r + 12; }
-static int a5_mortar(u16 c) { Rgb k = rgb15(c); int l = lum(k); return l > 95 && l < 160 && k.r < k.b + 30 && k.g + 16 > k.r; }
-static int a5_orange(u16 c) { Rgb k = rgb15(c); return k.r >= k.g + 40 && k.g >= k.b + 30; }
+typedef struct { short pl[3][2]; short post_in, post_edge; } A5Fence;
+static const A5Fence A5_FEN[2] = { { { { 72, 78 }, { 81, 87 }, { 93, 100 } }, 22, 2 },
+                                   { { { 73, 79 }, { 82, 88 }, { 94, 101 } }, 291, 314 } };
+typedef struct { short kind, cx, ty, wk; } A5ETree;      /* kind 0 far, 1 hazy, 2 near; centre column, top row, w x16 */
+static const A5ETree A5_ETREE[2] = { { 2, 12, 3, 9 }, { 1, 309, 1, 9 } };
 
-/* the picture's region of a texel by the edge (for balance_regions): bands by row, objects left out by colour */
-static int a5_picreg(int side, int x, int y)
+static Ramp A5_rrow[2][PH];                              /* per-row ramps (fence, wall top / foot, path) */
+static Ramp A5_rsky[2], A5_rnear, A5_rhaze, A5_rpost, A5_rmortar, A5_rbush;
+static Rgb A5_stc[256]; static int A5_nst, A5_sta[257]; /* the picture's stone colours, their areas (cumulative) */
+static int A5_thr;                                       /* stone / mortar threshold (luminance) */
+static int A5_foot[PH];                                  /* the wall's light per row (x 256) */
+static int A5_tb[2][24], A5_ntb[2];                      /* tier lines (dark rows) of the edge tree at the edge */
+static int A5_btop[2];                                   /* the bush top at the edge */
+static Rgb A5_skyc;
+
+static int a5x(int side, int i) { return side ? PW - 1 - i : i; }      /* picture column i in from the edge */
+static Rgb a5p(int side, int i, int y) { return rgb15(pic[clampi(y, 0, PH - 1)][clampi(a5x(side, i), 0, PW - 1)]); }
+static int a5_green(Rgb k) { return k.g >= k.r + 6 && k.g >= k.b + 16; }
+static int a5_obj(Rgb k) { int l = lum(k); return k.r > k.g + 30 || k.g > k.r + 8 || l < 110 || k.r > k.b + 60; }  /* stepping
+   stones, plants, shadows, barrels (in the wall) */
+static int a5_sky(Rgb k) { return lum(k) > 170 && k.b + 24 >= k.g && k.g < k.r + 24 && !(k.g > k.r + 8); }
+static int a5_plank(Rgb k) { return lum(k) > 120 && k.r >= k.b + 30 && k.g >= k.b + 20 && k.r < k.g + 40; }
+static int a5_orange(Rgb k) { return k.r >= k.g + 30 && k.g >= k.b + 20; }
+
+/* a ramp from any number (>= 1) of samples */
+static void ramp_any(Ramp *rp)
 {
-    u16 c = pic[y][x]; (void)side;
-    if (y < A5_FENCE0) return a5_sky(c) ? A5_SKY : a5_green(c) ? A5_TREE : 0;
-    if (y < 101) return a5_plank(c) ? A5_PLANK : 0;
-    if (y < A5_WALL0) return 0;
-    if (y < A5_WALL1 - 2) return a5_stone(c) || a5_bluestone(c) ? A5_STONE : a5_mortar(c) ? A5_MORTAR : 0;
-    if (y < 200) return a5_orange(c) ? A5_GROUND : 0;
-    if (y >= 210) return a5_green(c) ? A5_BUSH : 0;
-    return 0;
+    int n = nsamp;
+    memset(rp, 0, sizeof *rp);
+    if (n < 1) return;
+    qsort(samp, (size_t)n, sizeof samp[0], samp_cmp);
+    for (int i = 0; i < NRAMP; i++) {
+        int a = n * i / NRAMP, b = n * (i + 1) / NRAMP; Rgb s = { 0, 0, 0 };
+        if (b <= a) b = a + 1;
+        if (b > n) { a = n - 1; b = n; }
+        for (int j = a; j < b; j++) { Rgb c = rgb15((u16)samp[j]); s.r += c.r; s.g += c.g; s.b += c.b; }
+        rp->bin[i].r = s.r / (b - a); rp->bin[i].g = s.g / (b - a); rp->bin[i].b = s.b / (b - a);
+    }
+    rp->ok = 1; nsamp = 0;
+}
+/* the ramp of row y: the texels of columns [i0, i1) from the edge that pass pred (widened to +-3 rows if too few) */
+typedef int (*A5Pred)(int side, int i, int y);
+static void a5_row_ramp(Ramp *rp, int side, int y, int i0, int i1, A5Pred pred)
+{
+    for (int d = 0; d <= 3; d++) {
+        nsamp = 0;
+        for (int yy = y - d; yy <= y + d; yy++)
+            if (yy >= 0 && yy < PH)
+                for (int i = i0; i < i1; i++) if (pred(side, i, yy)) samp_add(pic[yy][a5x(side, i)]);
+        if (nsamp >= 10 || d == 3) break;
+    }
+    if (nsamp) ramp_any(rp); else memset(rp, 0, sizeof *rp);
+}
+static int a5_post_col(int side, int i)                  /* a column of one of the picture's posts by the edge */
+{
+    int x = a5x(side, i), a = A5_FEN[side].post_in, b = A5_FEN[side].post_edge;
+    return (x >= a - 4 && x <= a + 4) || (x >= b - 4 && x <= b + 4);
+}
+static int a5_plank_row(int side, int y) { for (int p = 0; p < 3; p++) if (y >= A5_FEN[side].pl[p][0] && y < A5_FEN[side].pl[p][1]) return 1; return 0; }
+static int pr_plank(int side, int i, int y) { return a5_plank(a5p(side, i, y)); }
+static int pr_gap(int side, int i, int y) { Rgb k = a5p(side, i, y); return !a5_post_col(side, i) && !(k.b > k.r + 8) && !a5_plank(k) && (k.g > k.r || lum(k) < 140 || a5_orange(k)); }
+static int pr_post(int side, int i, int y) { Rgb k = a5p(side, i, y); return a5_post_col(side, i) && lum(k) < 150 && !a5_green(k) && !a5_plank(k) && k.r > k.b + 16 && !(k.g > k.r); }
+static int pr_path(int side, int i, int y) { Rgb k = a5p(side, i, y); return a5_orange(k) || (y < 190 && !a5_green(k) && lum(k) > 120); }
+static int pr_wallrow(int side, int i, int y) { return !a5_obj(a5p(side, i, y)) || y == A5_WALL0 || y >= A5_WALL1 - 1; }
+static int pr_sky(int side, int i, int y) { return a5_sky(a5p(side, i, y)); }
+static int pr_any(int side, int i, int y) { (void)side; (void)i; (void)y; return 1; }
+
+/* Otsu's threshold of a luminance histogram */
+static int otsu(const int *h)
+{
+    long long n = 0, s = 0, w0 = 0, s0 = 0, best = -1; int bt = 128;
+    for (int l = 0; l < 256; l++) { n += h[l]; s += (long long)h[l] * l; }
+    for (int t = 1; t < 256; t++) {
+        w0 += h[t - 1]; s0 += (long long)h[t - 1] * (t - 1);
+        if (!w0 || w0 == n) continue;
+        {   long long m0 = s0 * 16 / w0, m1 = (s - s0) * 16 / (n - w0), d = m0 - m1, v = (w0 * (n - w0) / 64) * (d * d / 16);
+            if (v > best) { best = v; bt = t; } }
+    }
+    return bt;
+}
+
+/* the picture's stones next to both edges: 4-connected bright cores in rows 104-180, columns 0-69 from each edge */
+#define A5_SW 70
+static void a5_stones(void)
+{
+    static u8 m[2][77][A5_SW]; static short stk[77 * A5_SW * 2]; int hist[256];
+    memset(hist, 0, sizeof hist); A5_nst = 0; A5_sta[0] = 0;
+    for (int s = 0; s < 2; s++) for (int y = 104; y < 181; y++) for (int i = 0; i < A5_SW; i++) {
+        Rgb k = a5p(s, i, y); int ob = 0;
+        for (int dy = -1; dy <= 1; dy++) for (int di = -1; di <= 1; di++) if (a5_obj(a5p(s, i + di, y + dy))) ob = 1;
+        m[s][y - 104][i] = ob ? 0 : 1;
+        if (!ob) hist[lum(k)]++;
+    }
+    A5_thr = otsu(hist);
+    nsamp = 0;
+    for (int s = 0; s < 2; s++) for (int y = 104; y < 181; y++) for (int i = 0; i < A5_SW; i++)
+        if (m[s][y - 104][i] && lum(a5p(s, i, y)) < A5_thr - 20) samp_add(pic[y][a5x(s, i)]);
+    ramp_any(&A5_rmortar);
+    for (int s = 0; s < 2; s++) {
+        for (int y = 0; y < 77; y++) for (int i = 0; i < A5_SW; i++) m[s][y][i] = m[s][y][i] && lum(a5p(s, i, y + 104)) >= A5_thr ? 1 : 0;
+        for (int y0 = 0; y0 < 77; y0++) for (int i0 = 0; i0 < A5_SW; i0++) {
+            int sp = 0, n = 0, border = 0; Rgb t = { 0, 0, 0 };
+            if (m[s][y0][i0] != 1) continue;
+            m[s][y0][i0] = 2; stk[sp++] = (short)y0; stk[sp++] = (short)i0;
+            while (sp) {
+                int i = stk[--sp], y = stk[--sp]; Rgb k = a5p(s, i, y + 104);
+                t.r += k.r; t.g += k.g; t.b += k.b; n++;
+                if (i == 0 || i == A5_SW - 1 || y == 0 || y == 76) border = 1;
+                {   static const int D[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+                    for (int d = 0; d < 4; d++) {
+                        int yy = y + D[d][0], ii = i + D[d][1];
+                        if (yy >= 0 && yy < 77 && ii >= 0 && ii < A5_SW && m[s][yy][ii] == 1) { m[s][yy][ii] = 2; stk[sp++] = (short)yy; stk[sp++] = (short)ii; }
+                    } }
+            }
+            if (!border && n >= 8 && n <= 160 && A5_nst < 256) { Rgb c = { t.r / n, t.g / n, t.b / n }; A5_stc[A5_nst] = c; A5_sta[A5_nst + 1] = A5_sta[A5_nst] + n; A5_nst++; }
+        }
+    }
 }
 
 static void a5_analyse(void)
 {
-    samp_edges(0, 64, 0, 30, a5_sky); ramp_make(&A5_rsky);
-    samp_edges(0, 48, 0, 70, a5_green); ramp_make(&A5_rtree);
-    samp_edges(0, 24, 72, 100, a5_plank); ramp_make(&A5_rplank);
-    samp_edges(0, 24, 72, 101, a5_dark); ramp_make(&A5_rpost);
-    samp_edges(0, 80, A5_WALL0, A5_WALL1 - 2, a5_stone); ramp_make(&A5_rstone);
-    samp_edges(0, 80, A5_WALL0, A5_WALL1 - 2, a5_bluestone); ramp_make(&A5_rblue);
-    samp_edges(0, 80, A5_WALL0, A5_WALL1 - 2, a5_mortar); ramp_make(&A5_rmortar);
-    samp_edges(0, 64, 188, 200, a5_orange); ramp_make(&A5_rground);
-    samp_edges(0, 64, 92, 100, a5_orange); samp_edges(0, 40, 96, 101, a5_orange); ramp_make(&A5_rpath);
-    samp_edges(0, 64, 210, PH, a5_green); ramp_make(&A5_rbush);
-    if (!A5_rpath.ok) A5_rpath = A5_rground;
-    if (!A5_rblue.ok) A5_rblue = A5_rstone;
-}
-
-/* the wood: hazy trees behind (a band of soft clumps), then conifers in front: each a stack of drooping tiers of
-   needle clumps, narrow at the top, widest low down; the sky (its ramp) above them */
-static void a5_wood(int side)
-{
-    int x0 = side ? PW : -cw - 40, x1 = side ? PW + cw + 40 : 0;     /* picture columns the strip spans (+ margin) */
-    for (int X = 1; X <= cw; X++)
-        for (int y = 0; y < A5_FENCE0; y++) {
-            int wx = wx_of(side, X), t = 150 + y * 2 + noise(wx, y, 23, 9, 301) / 4 - 32;
-            putr(X, y, ramp(&A5_rsky, t), A5_SKY);
-        }
-    /* the hazy row behind: clumps on a wavy line (top row 10-24) */
-    for (int wx = (x0 / 6) * 6 - 12; wx < x1; wx += 3) {
-        int top = 12 + noise(wx, 0, 37, 1, 311) * 14 / 256;
-        for (int y = top; y < A5_FENCE0 + 4; y += 4) {
-            u32 h = hash3(wx, y, 313); int X = side ? wx - (PW - 1) : -wx;
-            blob(X * 16 + (int)(h & 31) - 16, y * 16, 40 + (int)(h >> 8 & 31), 28 + (int)(h >> 16 & 15), &A5_rtree,
-                 60 + (int)(h >> 20 & 31) - (y - top), A5_TREE2, 317);
-        }
+    for (int s = 0; s < 2; s++) {
+        for (int y = 0; y < 28; y++) ;
+        nsamp = 0;
+        for (int y = 0; y < 24; y++) for (int i = 0; i < 64; i++) if (pr_sky(s, i, y)) samp_add(pic[y][a5x(s, i)]);
+        ramp_any(&A5_rsky[s]);
+        for (int y = A5_FEN[s].pl[0][0] - 1; y < A5_WALL0; y++)
+            a5_row_ramp(&A5_rrow[s][y], s, y, 0, 26, y >= 100 ? pr_path : a5_plank_row(s, y) ? pr_plank : pr_gap);
+        for (int y = A5_FEN[s].pl[0][0]; y < A5_WALL0; y++) if (!A5_rrow[s][y].ok) A5_rrow[s][y] = A5_rrow[s][y - 1];
+        if (s) for (int y = A5_FEN[1].pl[0][1]; y < 100; y++)          /* the right's gap rows: the pipe fills them there */
+            if (!a5_plank_row(1, y) && !a5_plank_row(0, y - 1)) A5_rrow[1][y] = A5_rrow[0][y - 1];
+        a5_row_ramp(&A5_rrow[s][A5_WALL0], s, A5_WALL0, 0, 40, pr_any);
+        for (int y = A5_WALL1 - 1; y < PH; y++) a5_row_ramp(&A5_rrow[s][y], s, y, 0, 40, pr_path);
+        for (int y = A5_WALL1; y < PH; y++) if (!A5_rrow[s][y].ok) A5_rrow[s][y] = A5_rrow[s][y - 1];   /* rows hidden by bushes */
+        nsamp = 0;
+        for (int y = 76; y < 103; y++) for (int i = 0; i < 30; i++) if (pr_post(s, i, y)) samp_add(pic[y][a5x(s, i)]);
+        ramp_any(&A5_rpost);   /* (both sides end up in the last one: the right's; similar posts) */
     }
-    {   Rgb sky = ramp_mean(&A5_rsky);                                       /* the haze on the trees behind */
-        for (int y = 0; y < A5_FENCE0; y++) for (int X = 1; X <= cw; X++) if (reg_at(X, y) == A5_TREE2) { Rgb *p = px_at(X, y); *p = mix(*p, sky, 80); }
+    nsamp = 0;
+    for (int y = 8; y < 66; y++) { for (int x = 250; x < 292; x++) if (a5_green(rgb15(pic[y][x]))) samp_add(pic[y][x]);
+                                   for (int x = 0; x < 34; x++) if (a5_green(rgb15(pic[y][x]))) samp_add(pic[y][x]); }
+    ramp_any(&A5_rnear);
+    nsamp = 0;
+    for (int y = 8; y < 66; y++) for (int x = 300; x < 320; x++) { Rgb k = rgb15(pic[y][x]); if (k.g > k.r && !(k.b > k.r + 8 && y > 48)) samp_add(pic[y][x]); }
+    for (int y = 10; y < 44; y++) for (int x = 44; x < 80; x++) { Rgb k = rgb15(pic[y][x]); if (k.g > k.r) samp_add(pic[y][x]); }
+    ramp_any(&A5_rhaze);
+    nsamp = 0;
+    for (int y = 204; y < PH; y++) for (int i = 0; i < 48; i++) for (int s = 0; s < 2; s++) if (a5_green(a5p(s, i, y))) samp_add(pic[y][a5x(s, i)]);
+    ramp_any(&A5_rbush);
+    A5_skyc = ramp_mean(&A5_rsky[1]);
+    a5_stones();
+    /* the wall's light per row: the mean of its stones and mortar (objects left out) next to both edges over the mean
+       of rows 110-170 */
+    {   int mean = 0, nm = 0, rowm[PH];
+        for (int y = 104; y < A5_WALL1 - 1; y++) {
+            int s = 0, n = 0;
+            for (int sd = 0; sd < 2; sd++) for (int i = 0; i < 40; i++) { Rgb k = a5p(sd, i, y); if (!a5_obj(k)) { s += lum(k); n++; } }
+            rowm[y] = n ? s / n : 0;
+            if (y >= 110 && y < 170 && n) { mean += rowm[y]; nm++; }
+        }
+        mean = nm ? mean / nm : 1;
+        for (int y = 0; y < PH; y++) A5_foot[y] = 256;
+        for (int y = 172; y < A5_WALL1 - 1; y++) A5_foot[y] = rowm[y] ? clampi(rowm[y] * 256 / mean, 128, 256) : 256;
     }
-    /* the conifers: one every ~34 columns, top row -8..22; a dark silhouette first (the shade inside the crown), then
-       its tiers from the bottom up, so each tier's drooping tips lie over the top of the one below */
-    for (int k = fdiv(x0, 34) - 1; k * 34 < x1 + 34; k++) {
-        u32 h = hash3(k, 0, 331);
-        int cx = k * 34 + (int)(h % 16) - 8, top = (int)(h >> 8) % 30 - 8, wmax = 17 + (int)(h >> 16 & 7), ntier = (A5_FENCE0 + 8 - top) / 7;
-        for (int y = top + 2; y < A5_FENCE0 + 4; y++) {
-            int w = clampi((y - top) * wmax / 44 + 1, 1, wmax) - 1;
-            for (int lx = cx - w; lx <= cx + w; lx++) {
-                int X = side ? lx - (PW - 1) : -lx;
-                if (X >= 1 && X <= cw && y >= 0) putr(X, y, ramp(&A5_rtree, 8 + noise(lx, y, 4, 4, 333) / 8), A5_TREE);
-            }
+    /* the edge tree's tier lines: the dark rows of the edge columns (local minima of their luminance) */
+    for (int s = 0; s < 2; s++) {
+        int P[PH]; A5_ntb[s] = 0;
+        for (int y = 0; y < 72; y++) { int t = 0; for (int i = 0; i < 3; i++) t += lum(a5p(s, i, y - 1)) + 2 * lum(a5p(s, i, y)) + lum(a5p(s, i, y + 1)); P[y] = t / 12; }
+        for (int y = A5_ETREE[s].ty + 5; y < 70; y++) {
+            int loc = (P[y - 3] + P[y + 3] + P[y - 2] + P[y + 2]) / 4;
+            if (P[y] <= P[y - 1] && P[y] <= P[y + 1] && P[y] <= P[y - 2] && P[y] <= P[y + 2] && P[y] < loc - 3
+                && (!A5_ntb[s] || y - A5_tb[s][A5_ntb[s] - 1] >= 4) && A5_ntb[s] < 24) A5_tb[s][A5_ntb[s]++] = y;
         }
-        for (int j = ntier - 1; j >= 0; j--) {
-            int y = top + j * 6, w = clampi((y + 5 - top) * wmax / 44 + 3, 3, wmax), n = w / 2 + 2;
-            Rng r = rng_at(k, j, 339);
-            for (int q = 0; q < n; q++) {
-                int i = rndr(&r, -w, w), dy = rndi(&r, 5), jx = rndi(&r, 32), sz = rndi(&r, 24), lt = rndi(&r, 48);
-                int lx = cx + i, ly = y + dy + (i < 0 ? -i : i) * 3 / 8;               /* the tier droops outwards */
-                int X = side ? lx - (PW - 1) : -lx;
-                int tone = 165 - j * 3 - i * 5 + lt - 24;                               /* lit on the upper left */
-                blob(X * 16 + jx - 8, ly * 16 + 8, 44 + sz, 34 + sz / 2, &A5_rtree, tone, A5_TREE, 347);
-            }
-        }
+        /* the bush top at the edge */
+        A5_btop[s] = PH;
+        for (int y = 194; y < PH; y++) { int g = 0; for (int i = 0; i < 3; i++) g += a5_green(a5p(s, i, y)); if (g >= 2) { A5_btop[s] = y; break; } }
     }
 }
 
-/* the fence: three planks on posts, dark between them (the posts and the shade of the wood) */
-static const int A5_PLANKS[3][2] = { { 72, 78 }, { 81, 88 }, { 92, 101 } };
-static void a5_fence(int side)
+/* value noise stretched to an even spread of 0..255 (a rank in a ramp) plus a share of per-texel grain */
+static int a5_rank(int wx, int y, int sx, int sy, int seed, int grain)
 {
-    for (int X = 1; X <= cw; X++) {
-        int wx = wx_of(side, X);
-        for (int y = A5_FENCE0; y < A5_WALL0; y++) {
-            int t = 70 + noise(wx, y, 7, 3, 351) / 3 - 40, r = A5_GAP; Rgb c = ramp(&A5_rpost, t);
-            if (y >= 98) { c = ramp(&A5_rpath, 110 + noise(wx, y, 9, 2, 353) / 4 - 32 - (y >= 100 ? 70 : 0)); r = A5_PATH; }
-            for (int p = 0; p < 3; p++) {
-                int y0 = A5_PLANKS[p][0], y1 = A5_PLANKS[p][1], seg = fdiv(wx + p * 23, 61), u = wx + p * 23 - seg * 61;
-                if (y < y0 || y >= y1) continue;
-                {   u32 h = hash3(seg, p, 357);
-                    int tone = 130 + (int)(h & 63) - 32 + noise(wx * 1, y * 6, 23, 16, 359 + p) / 4 - 32;   /* grain along the board */
-                    if (y == y0) tone += 40; else if (y == y1 - 1) tone -= 70; else if (y == y1 - 2) tone -= 25;
-                    if (u == 0) tone -= 70; else if (u == 1) tone += 20;                 /* the board's ends */
-                    c = ramp(&A5_rplank, tone); r = A5_PLANK;
+    int n = noise(wx, y, sx, sy, seed), h = (int)(hash3(wx, y, seed + 7) & 255);
+    int t = 128 + (n - 128) * 7 / 4;
+    return clampi((t * (256 - grain) + h * grain) / 256, 0, 255);
+}
+
+/* --- the trees: conifers built of clumps of needles along drooping branches, tier by tier from the bottom up (so each
+   tier's dark underside lies on the lit top of the one below: the chevrons), over the dark shade inside the crown */
+typedef struct { int cx, ty, h, wmax, sp, kind, seed, nb, adx0; const int *B; } A5Tree;
+#define A5_DROOP 10                                      /* the branches' droop: rows per column x 16 */
+static int a5_tw(const A5Tree *t, int rel)               /* the crown's half-width (columns x 16) rel rows below the top */
+{
+    if (rel < 0) return 0;
+    if (rel >= t->h) return t->wmax * 16;
+    return t->wmax * isqrt_i(rel * 256 / t->h) * (rel < 3 ? 2 + rel : 5) / 5;   /* a rounded cone */
+}
+static Rgb a5_tcol(const A5Tree *t, int v)
+{
+    if (t->kind == 2) return ramp(&A5_rnear, v);
+    v = 128 + (v - 128) * 3 / 5;
+    {   Rgb c = ramp(&A5_rhaze, v); return t->kind == 0 ? mix(c, A5_skyc, 40) : c; }
+}
+static void a5_clump(const A5Tree *t, int side, int x16, int y16, int rx, int ry, int base, int seed, int dir)
+{
+    int R = (rx > ry ? rx : ry) / 16 + 2, xc = x16 / 16, yc = y16 / 16;
+    for (int y = yc - R; y <= yc + R; y++) for (int wx = xc - R; wx <= xc + R; wx++) {
+        int X = side ? wx - (PW - 1) : -wx, dx = wx * 16 + 8 - x16, dy = y * 16 + 8 - y16;
+        int u = (dx * dir * 217 + dy * 136) / 256, v = (dy * 217 - dx * dir * 136) / 256;   /* along / across the branch */
+        long long q;
+        if (X < 1 || X > cw || y < 0 || y >= A5_WALL0) continue;
+        q = (long long)u * u * 256 / (rx * rx) + (long long)v * v * 256 / (ry * ry);
+        if (q > 256 + (int)(hash3(wx, y, seed) & 127) - 80) continue;                      /* a ragged rim */
+        {   int c = base - v * 36 / ry + dx * 10 / rx + (int)(hash3(wx, y, seed + 1) & 15) - 8 + (noise(wx, y, 2, 2, seed + 3) - 128) / 4;
+            if (q > 150 && v > 0) c -= 34;                                                 /* the underside */
+            if ((hash3(wx, y, seed + 5) & 7) == 0) c -= 24;                                /* gaps between the needles */
+            putr(X, y, a5_tcol(t, c), t->kind == 2 ? A5_TREEN : A5_TREE);
+        }
+    }
+}
+static void a5_tree(const A5Tree *t, int side)
+{
+    int xs = t->cx * 16 + 8;
+    /* the shade inside the crown */
+    for (int y = t->ty + 2; y < A5_WALL0; y++) {
+        int W = a5_tw(t, y - t->ty) * 13 / 16;
+        for (int wx = (xs - W) / 16 - 2; wx <= (xs + W) / 16 + 2; wx++) {
+            int X = side ? wx - (PW - 1) : -wx, dx = wx * 16 + 8 - xs;
+            if (X < 1 || X > cw || (dx < 0 ? -dx : dx) > W + (noise(wx, y, 3, 2, 811 + t->seed) - 128) / 4) continue;
+            putr(X, y, a5_tcol(t, 24 + noise(wx, y, 3, 3, 801 + t->seed) / 4 + dx * 16 / (W + 16)), t->kind == 2 ? A5_TREEN : A5_TREE);
+        }
+    }
+    /* the tiers, bottom first: tier rows from the edge's measured tier lines (the edge tree) or every sp rows */
+    {   int rows[40], nr = 0;
+        if (t->nb) {
+            int off = t->adx0 * A5_DROOP / 256 + 2, y;
+            for (int k = 0; k < t->nb && nr < 40; k++) rows[nr++] = t->B[k] - off;
+            for (y = rows[0] - t->sp; y > t->ty && nr < 40; y -= t->sp) { for (int k = nr; k > 0; k--) rows[k] = rows[k - 1]; rows[0] = y; nr++; }
+            for (y = rows[nr - 1] + t->sp; y < A5_WALL0 && nr < 40; y += t->sp) rows[nr++] = y;
+        } else
+            for (int y = t->ty + 1 + (int)(hash3(t->seed, 0, 803) % 3); y < A5_WALL0 && nr < 40; y += t->sp + (int)(hash3(t->seed, y, 805) % 4) - 1) rows[nr++] = y;
+        for (int k = nr - 1; k >= 0; k--) {
+            int yk = rows[k], rel = yk - t->ty, W = a5_tw(t, rel + t->sp), base = 128 + 14 - rel / 6;
+            if (rel < 0) continue;
+            for (int s = -1; s <= 1; s += 2) {
+                Rng r = rng_at(t->seed * 64 + k, s + 1, 807);
+                int step = 20 + rndi(&r, 12);
+                for (int i = rndi(&r, 16); i <= W + 6; i += step) {
+                    int x16 = xs + s * i, y16 = yk * 16 + i * A5_DROOP / 16 + rndi(&r, 48) - 24;
+                    int rx = 28 + rndi(&r, 26), ry = 16 + rndi(&r, 10), v = base + rndi(&r, 70) - 35;
+                    int wx = x16 / 16;
+                    v += (noise(wx, yk, 9, 11, 809 + t->seed) - 128) * 4 / 5;          /* patches of sun and shade */
+                    v += s > 0 ? 14 + i * 30 / (W + 16) : -14 - i * 10 / (W + 16);   /* the right flank in the light */
+                    if (s > 0 && i > W / 2 && rndi(&r, 2)) v += 34;                  /* its bright tips */
+                    if (i > W - 8 && rndi(&r, 2)) ry += 8;                           /* drooping tips */
+                    if (rndi(&r, 8)) a5_clump(t, side, x16, y16, rx, ry, v, t->seed * 16 + k, s);
+                    step = 16 + rndi(&r, 18);
                 }
             }
-            putr(X, y, c, r);
+        }
+    }
+}
+static void a5_wood(int side)
+{
+    A5Tree tr[96]; int n = 0, dir = side ? 1 : -1, x0 = side ? PW - 8 : -cw - 40, x1 = side ? PW + cw + 40 : 8;
+    for (int X = 1; X <= cw; X++)                                            /* the sky */
+        for (int y = 0; y < A5_FEN[side].pl[0][0]; y++) {
+            int wx = wx_of(side, X);
+            putr(X, y, ramp(&A5_rsky[side], a5_rank(wx, y, 14, 7, 621, 40)), A5_SKY);
+        }
+    /* the hazy back row: far trees every ~13 columns */
+    for (int k = fdiv(x0, 13) - 3; k * 13 < x1 + 30 && n < 96; k++) {
+        u32 h = hash3(k, 0, 631); A5Tree *t = &tr[n];
+        t->cx = k * 13 + (int)(h % 7) - 3; t->ty = 4 + (int)(h >> 8) % 14; t->h = 50 + (int)(h >> 16) % 20; t->wmax = 13 + (int)(h >> 20) % 6;
+        t->sp = 6; t->kind = 0; t->seed = k * 7 + 3; t->nb = 0; t->B = 0; t->adx0 = 0;
+        if ((side && t->cx > PW - 4) || (!side && t->cx < 4)) n++;
+    }
+    {   int c = A5_ETREE[side].cx, i = 0, ne;
+        A5Tree *t = &tr[n]; ne = n++;                                        /* the tree cut by the edge */
+        t->cx = c; t->ty = A5_ETREE[side].ty; t->h = 70; t->wmax = A5_ETREE[side].wk * 70 / 16; t->sp = 7;
+        t->kind = A5_ETREE[side].kind; t->seed = 900 + side; t->nb = A5_ntb[side]; t->B = A5_tb[side];
+        t->adx0 = (side ? PW - 1 : 0) - c; if (t->adx0 < 0) t->adx0 = -t->adx0; t->adx0 *= 16;
+        /* new conifers outwards: 20-34 columns apart, near and hazy mixed, tops -4..14, crowns 22-36 wide */
+        while (n < 96) {
+            u32 h = hash3(side, i, 641); A5Tree *q = &tr[n];
+            c += dir * (20 + (int)(h % 15));
+            if ((side && c > x1) || (!side && c < x0)) break;
+            q->cx = c; q->kind = (h >> 8) % 5 < 3 ? 2 : 1; q->ty = (int)(h >> 12) % 17 - 4;
+            q->h = 55 + (int)(h >> 17) % 30; q->wmax = 22 + (int)(h >> 22) % 14; q->sp = 6 + (int)(h >> 26) % 3;
+            q->seed = 700 + i * 5 + side; q->nb = 0; q->B = 0; q->adx0 = 0;
+            n++; i++;
+        }
+        /* draw: the back row, the hazy trees, the near ones; the edge tree last within its kind */
+        for (int pass = 0; pass < 3; pass++) {
+            for (int j = 0; j < n; j++) if (tr[j].kind == pass && j != ne) a5_tree(&tr[j], side);
+            if (tr[ne].kind == pass) a5_tree(&tr[ne], side);
         }
     }
 }
 
-/* the dry-stone wall: irregular stones laid as a jittered grid (cells 12 x 6, every other row shifted by half a cell)
-   and each texel given to its nearest stone centre (a squarish distance, stretched sideways, so the stones are long,
-   flat and roughly rectangular);
-   where the two nearest centres are almost as near, the grey mortar; each stone its own tone (one in seven pale blue),
-   lit on its upper edge and shaded on its lower one (the neighbouring texels above / below belong to another stone),
-   the wall's lit top edge and its foot in shade */
-#define A5_CW 12
-#define A5_CH 6
-static int a5_stone_at(int wx, int y, int *edge)
+/* the fence: per-row ramps (planks / the gap rows between them), posts every 20-24 columns continuing the picture's */
+static int a5_post_at(int side, int wx, int *lit)       /* 1 inside a post (lit: 0..255 across it, left to right) */
 {
-    int gy = fdiv(y - A5_WALL0, A5_CH), best = 1 << 30, second = 1 << 30, id = 0;
-    for (int j = gy - 1; j <= gy + 1; j++) {
-        int sh = (j & 1) * A5_CW / 2, gx = fdiv(wx - sh, A5_CW);
-        for (int i = gx - 1; i <= gx + 1; i++) {
-            u32 h = hash3(i, j, 441);
-            int px = i * A5_CW + sh + (int)(h % 9) - 4, py = A5_WALL0 + j * A5_CH + (int)(h >> 8) % 3 - 1;
-            int dx = (wx - px) * 16 * 2 / 5, dy = (y - py) * 16, d;                    /* sideways stretched */
-            dx = dx < 0 ? -dx : dx; dy = dy < 0 ? -dy : dy; d = (dx > dy ? dx : dy) * 3 + (dx + dy);   /* squarish */
-            if (d < best) { second = best; best = d; id = (int)(hash3(i, j, 443) & 0x7FFFFFFF); }
-            else if (d < second) second = d;
+    int p = A5_FEN[side].post_edge, dir = side ? 1 : -1;
+    for (int k = 1; k < 64; k++) {
+        u32 h = hash3(side, k, 651);
+        p += dir * (20 + (int)(h % 5));
+        if (wx >= p - 3 && wx <= p + 3) { *lit = (wx - p + 3) * 255 / 6; return 1; }
+        if ((side && p > wx + 4) || (!side && p < wx - 4)) break;
+    }
+    return 0;
+}
+static void a5_fence(int side)
+{
+    const A5Fence *F = &A5_FEN[side];
+    for (int X = 1; X <= cw; X++) {
+        int wx = wx_of(side, X), lit, post = a5_post_at(side, wx, &lit);
+        for (int y = F->pl[0][0] - 1; y < A5_WALL0; y++) {
+            Rgb c; int plank = a5_plank_row(side, y);
+            if (plank) {
+                int p = y < F->pl[1][0] ? 0 : y < F->pl[2][0] ? 1 : 2, t = a5_rank(wx, y * 5, 11, 4, 661 + p, 70);
+                int wth = (noise(wx, y, 17, 5, 667 + p) - 128) / 5;                       /* weathered patches */
+                int jn = 0;
+                {   int lit2, pp = A5_FEN[side].post_edge, dir = side ? 1 : -1;           /* board ends at some posts */
+                    for (int k = 1; k < 64; k++) {
+                        u32 h = hash3(side, k, 651); pp += dir * (20 + (int)(h % 5));
+                        if ((hash3(k, p, 671) & 3) == 0 && (wx == pp || wx == pp + 1)) jn = wx == pp ? 1 : 2;
+                        if ((side && pp > wx + 4) || (!side && pp < wx - 4)) break;
+                    }
+                    (void)lit2;
+                }
+                c = ramp(&A5_rrow[side][y], t + wth);
+                if (jn == 1) c = scale(c, 236);
+            } else {
+                c = ramp(&A5_rrow[side][y], a5_rank(wx, y, 4, 2, 681, 90));
+                if (post && y >= F->pl[0][1]) {
+                    int t = 60 + (255 - lit) * 3 / 4 - 60 + (int)(hash3(wx, y, 683) & 31) - 16 + (noise(wx, y, 2, 6, 685) - 128) / 3;
+                    if (y >= A5_WALL0 - 3) t -= 10;
+                    c = ramp(&A5_rpost, t);
+                }
+            }
+            putr(X, y, c, A5_FENCE);
         }
     }
-    *edge = (second - best) / 4;
-    return id;
+}
+
+/* --- the wall: a skyline of stones (see the comment at the top of this generator) */
+typedef struct { short y0, hs, jh, x0, x1, slant; Rgb c; } A5Slot;
+static A5Slot *a5s; static int a5ns, a5cap;
+static int a5_new(int y0, int hs, int jh, int x0, int len, Rgb c, int slant)
+{
+    if (a5ns >= a5cap) { int nc = a5cap ? a5cap * 2 : 1024; A5Slot *p = realloc(a5s, (size_t)nc * sizeof *p); if (!p) return -1; a5s = p; a5cap = nc; }
+    a5s[a5ns].y0 = (short)y0; a5s[a5ns].hs = (short)hs; a5s[a5ns].jh = (short)jh; a5s[a5ns].x0 = (short)x0; a5s[a5ns].x1 = (short)(x0 + len);
+    a5s[a5ns].slant = (short)slant; a5s[a5ns].c = c;
+    return a5ns++;
+}
+static Rgb a5_stone_col(u32 h)                          /* a stone colour of the picture's, as often as its area */
+{
+    int a, i = 0;
+    if (!A5_nst) return ramp(&A5_rmortar, 255);
+    a = (int)(h % (u32)A5_sta[A5_nst]);
+    while (i < A5_nst - 1 && A5_sta[i + 1] <= a) i++;
+    return A5_stc[i];
 }
 static void a5_wall(int side)
 {
-    for (int X = 1; X <= cw; X++) {
-        int wx = wx_of(side, X);
-        for (int y = A5_WALL0; y < A5_WALL1; y++) {
-            int e, eu, ed, id = a5_stone_at(wx, y, &e), up = a5_stone_at(wx, y - 1, &eu), dn = a5_stone_at(wx, y + 1, &ed);
-            Rgb c; int r;
-            if (y >= A5_WALL1 - 3) {                                            /* the foot in shade */
-                c = scale(ramp(&A5_rmortar, 60 + noise(wx, y, 5, 2, 403) / 4), y == A5_WALL1 - 1 ? 150 : 190); putr(X, y, c, A5_MORTAR); continue;
+    enum { Y0 = A5_WALL0 + 1, Y1 = A5_WALL1 - 1 };      /* stone rows 104..184 */
+    int act[PH]; short *own = calloc((size_t)cw * PH, sizeof *own); u8 *jt = calloc((size_t)cw * PH, 1);
+    if (!own || !jt) { free(own); free(jt); return; }
+    a5ns = 0;
+    for (int y = 0; y < PH; y++) act[y] = -1;
+    /* the picture's stones cut by the edge: runs of rows between the horizontal joints of its last columns */
+    {   int y = Y0;
+        while (y < Y1) {
+            int j0 = 0;
+            for (int i = 0; i < 3; i++) j0 += lum(a5p(side, i, y)) < A5_thr - 12;
+            if (j0 >= 2) { y++; continue; }
+            {   int a = y, b = y, jh = 0, v = 0, ms = 0, n = 0, vj; Rgb t = { 0, 0, 0 };
+                while (b < Y1) { int j = 0; for (int i = 0; i < 3; i++) j += lum(a5p(side, i, b)) < A5_thr - 12; if (j >= 2) break; b++; }
+                while (b + jh < Y1 && jh < 2) { int j = 0; for (int i = 0; i < 3; i++) j += lum(a5p(side, i, b + jh)) < A5_thr - 12; if (j < 2) break; jh++; }
+                if (!jh && b < Y1) jh = 1;
+                {   int ym = (a + b - 1) / 2;
+                    while (v < 30 && lum(a5p(side, v, ym)) >= A5_thr - 12) v++; }
+                vj = 0; for (int yy = a; yy < b; yy++) vj += lum(a5p(side, 0, yy)) < A5_thr - 12;   /* a joint right at the edge */
+                for (int yy = a; yy < b; yy++) for (int i = 0; i < 6 && i < v + 1; i++) { Rgb k = a5p(side, i, yy); if (lum(k) >= A5_thr && !a5_obj(k)) { t.r += k.r; t.g += k.g; t.b += k.b; n++; } ms++; }
+                if (b - a > 6) { b = a + 4 + (int)(hash3(side, a, 703) % 2); jh = 0; }   /* a joint too faint to see: split */
+                if (n && vj * 2 < b - a) {
+                    u32 h = hash3(side, a, 701); int T = 7 + (int)(h % 5) + (int)(h >> 8) % 5, rem = T - v;
+                    Rgb c = { t.r / n, t.g / n, t.b / n };
+                    if (rem < 2) rem = 2 + (int)(h >> 16) % 2;
+                    {   int s = a5_new(a, b - a, jh, 1, rem, c, 0); if (s >= 0) for (int yy = a; yy < b + jh && yy < Y1; yy++) act[yy] = s; }
+                }
+                (void)ms;
+                y = b + jh;
             }
-            if (e < 11) { c = ramp(&A5_rmortar, 115 + noise(wx, y, 3, 3, 413) / 3 - 42); r = A5_MORTAR; }
-            else {
-                u32 h = (u32)id; int blue = (h >> 4) % 7 == 0;
-                int tone = 140 + (int)(h >> 8 & 63) - 32 + noise(wx, y, 6, 4, 415) / 5 - 25;
-                if (up != id || eu < 11) tone += 45;                            /* the lit upper edge */
-                else if (dn != id || ed < 11) tone -= 55;                       /* the shaded lower edge */
-                else if (e < 26) tone -= 12;
-                if ((h >> 12 & 15) == 0) tone -= 40;                            /* a weathered stone */
-                c = ramp(blue ? &A5_rblue : &A5_rstone, tone); r = A5_STONE;
-            }
-            if (y == A5_WALL0) c = scale(c, 290);                               /* the lit top edge of the wall */
-            putr(X, y, c, r);
         }
     }
+    /* outwards: where stones end, new ones fill the free rows */
+    for (int X = 1; X <= cw; X++) {
+        int y = Y0;
+        while (y < Y1) {
+            int a, len;
+            if (act[y] >= 0 && a5s[act[y]].x1 > X) { y++; continue; }
+            a = y; while (y < Y1 && !(act[y] >= 0 && a5s[act[y]].x1 > X)) y++;
+            len = y - a;
+            {   int yy = a;
+                while (len > 0) {
+                    u32 h = hash3(wx_of(side, X), yy, 711 + side);
+                    int H = len <= 7 ? len : 4 + (int)(h % 3), L = 6 + (int)(h >> 8) % 5 + (int)(h >> 12) % 5, sl = (int)(h >> 20) % 7;
+                    if (len > 7 && len - H < 4) H = len - 4;
+                    {   int s = a5_new(yy, H > 1 ? H - 1 : H, H > 1 ? 1 : 0, X, L, a5_stone_col(h >> 4), sl == 0 ? -1 : sl == 1 ? 1 : 0);
+                        if (s >= 0) for (int q = yy; q < yy + H; q++) act[q] = s; }
+                    yy += H; len -= H;
+                }
+            }
+        }
+        for (int yy = Y0; yy < Y1; yy++) {
+            int s = act[yy];
+            own[(size_t)yy * cw + X - 1] = (short)s;
+
+        }
+    }
+    /* irregular stones: the layout warped by smooth noise (up to +-2 texels, none at the join), the mortar the one-texel
+       boundary of every stone (its lower row and outer column) */
+    {   short *w2 = malloc((size_t)cw * PH * sizeof *w2);
+        if (w2) {
+            for (int X = 1; X <= cw; X++) for (int y = Y0; y < Y1; y++) {
+                int wx = wx_of(side, X), A = X <= 2 ? 0 : X >= 7 ? 256 : (X - 2) * 51;
+                int ox = (noise(wx, y, 6, 5, 731) - 128) * 3 * A / 32768, oy = (noise(wx, y, 5, 3, 733) - 128) * 5 * A / 65536;
+                int sx = clampi(X + ox, 1, cw), sy = clampi(y + oy, Y0, Y1 - 1);
+                w2[(size_t)y * cw + X - 1] = own[(size_t)sy * cw + sx - 1];
+            }
+            for (int X = 1; X <= cw; X++) for (int y = Y0; y < Y1; y++) {
+                size_t o = (size_t)y * cw + X - 1; int s0 = w2[o];
+                own[o] = (short)s0;
+                jt[o] = (y + 1 < Y1 && w2[o + cw] != s0) || (X < cw && w2[o + 1] != s0) || (X == cw && s0 >= 0 && a5s[s0].x1 - 1 == X) ? 1 : 0;
+            }
+            free(w2);
+        }
+    }
+    /* draw */
+    for (int X = 1; X <= cw; X++) {
+        int wx = wx_of(side, X), Xr = side ? X + 1 : X - 1, Xl = side ? X - 1 : X + 1;   /* screen right / left neighbours */
+        for (int y = A5_WALL0; y < A5_WALL1; y++) {
+            Rgb c;
+            if (y == A5_WALL0 || y >= Y1) { c = ramp(&A5_rrow[side][y], a5_rank(wx, y, 5, 2, 721, 80)); putr(X, y, c, A5_STONE); continue; }
+            {   size_t o = (size_t)y * cw + X - 1; int s = own[o];
+                if (s < 0) continue;
+                if (jt[o]) c = ramp(&A5_rmortar, 64 + a5_rank(wx, y, 3, 3, 723, 120) * 3 / 4);
+                else {
+                    Rgb m = ramp(&A5_rmortar, 150);
+                    int jb = y + 1 < Y1 && jt[o + cw], ju = y > Y0 && jt[o - cw];
+                    int jr = Xr >= 1 && Xr <= cw ? jt[(size_t)y * cw + Xr - 1] : 0, jl = Xl >= 1 && Xl <= cw ? jt[(size_t)y * cw + Xl - 1] : 0;
+                    int d = (int)(hash3(wx, y, 725) % 25) - 12 + (noise(wx, y, 3, 2, 727 + s % 7) - 128) / 6;
+                    c = a5s[s].c;
+                    c.r += d; c.g += d; c.b += d;
+                    if (ju) { c.r += 4; c.g += 4; c.b += 4; }
+                    if (jb) c = mix(c, m, 80);
+                    if (jr) c = mix(c, m, 56);
+                    if (jl && !ju) c = mix(c, m, 20);
+                    if ((jb || ju) && (jr || jl)) c = mix(c, m, 70);   /* a rounded corner */
+                }
+            }
+            c = scale(c, A5_foot[y]);
+            putr(X, y, c, A5_STONE);
+        }
+    }
+    free(own); free(jt);
 }
 
-/* the path: orange, mottled, a little shade under the wall; the bushes in front: mounds of leaf clumps */
+/* the path (per-row ramps, streaks along it) and the bushes */
 static void a5_ground(int side)
 {
     for (int X = 1; X <= cw; X++) {
         int wx = wx_of(side, X);
-        for (int y = A5_WALL1; y < PH; y++) {
-            int t = 150 + noise(wx, y, 19, 4, 421) / 4 - 32 + noise(wx, y, 3, 2, 423) / 6 - 21;
-            if (y < A5_WALL1 + 2) t -= 60; else if (y < A5_WALL1 + 4) t -= 25;
-            putr(X, y, ramp(&A5_rground, t), A5_GROUND);
+        for (int y = A5_WALL1; y < PH; y++) putr(X, y, ramp(&A5_rrow[side][y], a5_rank(wx, y * 3, 9, 4, 731, 30)), A5_PATH);
+    }
+}
+static int a5_bush_top(int side, int wx, int X)
+{
+    int best = PH + 20, dir = side ? 1 : -1, p = side ? PW - 30 : 30;
+    for (int k = 0; k < 64; k++) {                       /* mounds: 26-44 columns apart, half-width 15-25, top 199-207 */
+        u32 h = hash3(side, k, 741); int hw = 15 + (int)(h % 11), top = 199 + (int)(h >> 8) % 9, d = wx - p, t;
+        t = top + d * d * 13 / (hw * hw);
+        if (t < best) best = t;
+        p += dir * (26 + (int)(h >> 12) % 19);
+        if ((side && p - 40 > wx) || (!side && p + 40 < wx)) break;
+    }
+    best += (noise(wx, 0, 4, 1, 743) - 128) / 36;                                  /* leaf clusters on the outline */
+    if (X <= 14 && A5_btop[side] < PH) best += (A5_btop[side] - best) * (15 - X) / 14;   /* from the picture's top at the edge */
+    return best;
+}
+static void a5_bushes(int side)
+{
+    for (int X = 1; X <= cw; X++) {
+        int wx = wx_of(side, X), top = a5_bush_top(side, wx, X);
+        for (int y = top; y < PH; y++) {
+            int d = y - top, best = 1 << 30, sec = 1 << 30, bh = 0, cy = 0, cx = 0;
+            int gx = fdiv(wx, 6), gy = fdiv(y, 5);
+            for (int j = gy - 1; j <= gy + 1; j++) for (int i = gx - 1; i <= gx + 1; i++) {   /* leaf clusters on a jittered grid */
+                u32 h = hash3(i, j, 751); int px = i * 6 + (int)(h % 6), py = j * 5 + (int)(h >> 8) % 5;
+                int dx = (wx - px) * 16, dy = (y - py) * 19, dd = dx * dx + dy * dy;
+                if (dd < best) { sec = best; best = dd; bh = (int)(h >> 16); cy = (y - py) * 16; cx = (wx - px) * 16; } else if (dd < sec) sec = dd;
+            }
+            {   int r1 = isqrt_i(best), r2 = isqrt_i(sec), tone = 150 - d * 3;
+                tone += -cy - cx / 3;                                                 /* each cluster lit from the top left */
+                tone += (int)(bh & 127) - 64 + (noise(wx, y, 13, 9, 755) - 128) / 2;  /* cluster by cluster, patches of sun */
+                if (r2 - r1 < 12) tone -= 40;                                         /* the crevices between them */
+                if ((bh >> 6 & 7) == 0 && d > 4) tone = 56 + d / 2;                   /* a hole into the bush */
+                if (d < 9 && (bh >> 9 & 1)) tone += 44;                          /* bright leaves on top */
+                tone += (int)(hash3(wx, y, 753) & 15) - 8;
+                putr(X, y, ramp(&A5_rbush, clampi(tone, 44, 255)), A5_BUSH);
+            }
         }
     }
-    {   int x0 = side ? PW - 20 : -cw - 30, x1 = side ? PW + cw + 30 : 20;
-        for (int k = fdiv(x0, 22) - 1; k * 22 < x1; k++) {                   /* a mound every ~22 columns */
-            u32 h = hash3(k, 0, 431); int mx = k * 22 + (int)(h % 10) - 5, top = 198 + (int)(h >> 8) % 9, w = 12 + (int)(h >> 12 & 7);
-            for (int y = top; y < PH + 6; y += 4)
-                for (int i = -w; i <= w; i += 4) {
-                    int hw = w * isqrt_i(clampi(256 - (top + 14 - y) * (top + 14 - y) * 256 / 196, 0, 256)) / 16;   /* rounded top */
-                    u32 g = hash3(mx * 64 + i, y, 433); int lx, X, tone;
-                    if ((i < 0 ? -i : i) > hw + 2) continue;
-                    lx = mx + i + (int)(g & 3) - 1; X = side ? lx - (PW - 1) : -lx;
-                    tone = 120 - (y - top) * 5 - i * 3 + (int)(g >> 8 & 63) - 32;
-                    blob(X * 16 + 8, (y + (int)(g >> 4 & 1)) * 16, 56 + (int)(g >> 16 & 15), 40 + (int)(g >> 20 & 7), &A5_rbush, tone, A5_BUSH, 437);
-                }
+}
+
+/* the picture's trees and bushes next to the edge (for balance_regions: the strip's as light and as contrasted) */
+static int a5_picreg(int side, int x, int y)
+{
+    Rgb k = rgb15(pic[y][x]); (void)side;
+    if (y < 70 && (side ? x >= 296 : x < 24)) return a5_green(k) || k.g > k.r ? (A5_ETREE[side].kind == 2 ? A5_TREEN : A5_TREE) : 0;
+    if (y >= 206) return a5_green(k) ? A5_BUSH : 0;
+    return 0;
+}
+/* the strip's region reg as light and as contrasted as the picture's texels in box [x0, x1) x [y0, y1) that pass pred */
+static void a5_match(int reg, int x0, int x1, int y0, int y1, int (*pred)(Rgb))
+{
+    static Hist hp, hs; int mp, dp, ms, ds, k;
+    memset(&hp, 0, sizeof hp); memset(&hs, 0, sizeof hs);
+    for (int y = y0; y < y1; y++) for (int x = x0; x < x1; x++) { Rgb c = rgb15(pic[y][x]); if (pred(c)) hist_add(&hp, lum(c)); }
+    for (int y = 0; y < PH; y++) for (int X = 1; X <= cw; X++) if (reg_at(X, y) == reg) hist_add(&hs, lum(cv[(size_t)y * cw + X - 1]));
+    if (hp.n < 40 || hs.n < 40) return;
+    hist_stat(&hp, &mp, &dp); hist_stat(&hs, &ms, &ds);
+    k = ds ? clampi(dp * 256 / ds, 160, 512) : 256;
+    for (int y = 0; y < PH; y++) for (int X = 1; X <= cw; X++) if (reg_at(X, y) == reg) {
+        Rgb *p = &cv[(size_t)y * cw + X - 1]; int l = lum(*p), l2 = clampi((mp + (l * 16 - ms) * k / 256) / 16, 2, 255);
+        *p = l ? scale(*p, clampi(l2 * 256 / l, 0, 1024)) : (Rgb){ l2, l2, l2 };
+    }
+#ifdef WS_BACKDROP_MAIN
+    if (getenv("WSB_INFO")) fprintf(stderr, "match region %d: picture %d dev %d, strip %d dev %d\n", reg, mp / 16, dp / 16, ms / 16, ds / 16);
+#endif
+}
+static int a5_greenish(Rgb k) { return k.g > k.r && k.g > k.b + 8; }
+/* the tone per row next to the join matched to the picture's last columns, fading out over n columns */
+static void a5_seam(int side, int y0, int y1, int n)
+{
+    int lp[PH], ls[PH];
+    for (int y = y0; y < y1; y++) {
+        int a = 0, b = 0;
+        for (int i = 0; i < 3; i++) a += lum(a5p(side, i, y));
+        for (int X = 1; X <= 3 && X <= cw; X++) b += lum(cv[(size_t)y * cw + X - 1]);
+        lp[y] = a; ls[y] = b;
+    }
+    for (int y = y0; y < y1; y++) {
+        int a = 0, b = 0;
+        for (int d = -2; d <= 2; d++) { int yy = clampi(y + d, y0, y1 - 1); a += lp[yy]; b += ls[yy]; }
+        if (b <= 0) continue;
+        {   int k = clampi(a * 256 / b, 160, 400);
+            for (int X = 1; X <= n && X <= cw; X++) { Rgb *p = px_at(X, y); *p = scale(*p, 256 + (k - 256) * (n + 1 - X) / (n + 1)); }
         }
     }
+}
+/* soften rows [y0, y1) to the picture's sharpness next to the edge: the mean |L - box3(L)| of its columns 1-24 against
+   the strip's 2-28 after a 3x3 blur of strength w (0: none, 256: one box, 512: two) */
+static int a5_fine(const Rgb *b, int w, int h, int x0, int x1)
+{
+    long long s = 0; int n = 0;
+    for (int y = 1; y < h - 1; y++) for (int x = x0; x < x1 && x < w - 1; x++) {
+        int t = 0;
+        for (int dy = -1; dy <= 1; dy++) for (int dx = -1; dx <= 1; dx++) t += lum(b[(size_t)(y + dy) * w + x + dx]);
+        t = lum(b[(size_t)y * w + x]) * 9 - t; s += t < 0 ? -t : t; n++;
+    }
+    return n ? (int)(s * 16 / 9 / n) : 0;
+}
+static void a5_box(const Rgb *in, Rgb *out, int w, int h)
+{
+    for (int y = 0; y < h; y++) for (int x = 0; x < w; x++) {
+        int r = 0, g = 0, b = 0, n = 0;
+        for (int dy = -1; dy <= 1; dy++) for (int dx = -1; dx <= 1; dx++) {
+            int yy = y + dy, xx = x + dx;
+            if (yy < 0 || yy >= h || xx < 0 || xx >= w) continue;
+            r += in[(size_t)yy * w + xx].r; g += in[(size_t)yy * w + xx].g; b += in[(size_t)yy * w + xx].b; n++;
+        }
+        out[(size_t)y * w + x].r = r / n; out[(size_t)y * w + x].g = g / n; out[(size_t)y * w + x].b = b / n;
+    }
+}
+/* the same for the strip's texels of region reg only, against the picture's box [px0, px1) x [y0, y1) (columns from the
+   left), measured on the strip's texels of that region whose 3x3 is all that region */
+static void a5_soften_reg(int side, int y0, int y1, int reg, int px0, int px1, int py0, int py1, int wmin)
+{
+    int h = y1 - y0, ep, best = 0, bd = 1 << 30, pw = px1 - px0, ph = py1 - py0;
+    Rgb *p = malloc((size_t)pw * ph * sizeof *p), *b1 = malloc((size_t)cw * h * sizeof *b1), *b2 = malloc((size_t)cw * h * sizeof *b2);
+    if (!p || !b1 || !b2) { free(p); free(b1); free(b2); return; }
+    (void)side;
+    for (int y = 0; y < ph; y++) for (int i = 0; i < pw; i++) p[(size_t)y * pw + i] = rgb15(pic[py0 + y][px0 + i]);
+    ep = a5_fine(p, pw, ph, 1, pw - 1);
+    a5_box(&cv[(size_t)y0 * cw], b1, cw, h); a5_box(b1, b2, cw, h);
+    for (int w = 0; w <= 512; w += 32) {
+        long long sum = 0; int n = 0;
+        for (int y = 1; y < h - 1; y++) for (int X = 2; X < cw; X++) {
+            int t = 0, ok = 1, c = 0;
+            for (int dy = -1; dy <= 1 && ok; dy++) for (int dx = -1; dx <= 1; dx++) {
+                size_t i = (size_t)(y + dy) * cw + X - 1 + dx; Rgb q;
+                if (rg[(size_t)y0 * cw + i] != reg) { ok = 0; break; }
+                q = w <= 256 ? mix(cv[(size_t)y0 * cw + i], b1[i], w) : mix(b1[i], b2[i], w - 256);
+                t += lum(q); if (!dx && !dy) c = lum(q);
+            }
+            if (ok) { t = c * 9 - t; sum += t < 0 ? -t : t; n++; }
+        }
+        if (n < 30) { free(p); free(b1); free(b2); return; }
+        {   int e = (int)(sum * 16 / 9 / n), d = e - ep; d = d < 0 ? -d : d; if (d < bd && w >= wmin) { bd = d; best = w; } }
+    }
+    for (int y = 0; y < h; y++) for (int X = 1; X <= cw; X++) {
+        size_t i = (size_t)y * cw + X - 1;
+        if (rg[(size_t)y0 * cw + i] == reg) cv[(size_t)y0 * cw + i] = best <= 256 ? mix(cv[(size_t)y0 * cw + i], b1[i], best) : mix(b1[i], b2[i], best - 256);
+    }
+#ifdef WS_BACKDROP_MAIN
+    if (getenv("WSB_INFO")) fprintf(stderr, "side %d region %d: picture fine %d, blur %d (left %d)\n", side, reg, ep, best, bd);
+#endif
+    free(p); free(b1); free(b2);
+}
+static void a5_soften(int side, int y0, int y1)
+{
+    int h = y1 - y0, pw = 26, ep, best = 0, bd = 1 << 30;
+    Rgb *p = malloc((size_t)pw * h * sizeof *p), *b1 = malloc((size_t)cw * h * sizeof *b1), *b2 = malloc((size_t)cw * h * sizeof *b2), *t = malloc((size_t)cw * h * sizeof *t);
+    if (!p || !b1 || !b2 || !t || cw < 30) { free(p); free(b1); free(b2); free(t); return; }
+    for (int y = 0; y < h; y++) for (int i = 0; i < pw; i++) p[(size_t)y * pw + i] = a5p(side, i, y0 + y);
+    ep = a5_fine(p, pw, h, 1, 25);
+    a5_box(&cv[(size_t)y0 * cw], b1, cw, h); a5_box(b1, b2, cw, h);
+    for (int w = 0; w <= 512; w += 32) {
+        for (size_t i = 0; i < (size_t)cw * h; i++) t[i] = w <= 256 ? mix(cv[(size_t)y0 * cw + i], b1[i], w) : mix(b1[i], b2[i], w - 256);
+        {   int e = a5_fine(t, cw, h, 2, 28), d = e - ep; d = d < 0 ? -d : d;
+            if (d < bd) { bd = d; best = w; } }
+    }
+    for (size_t i = 0; i < (size_t)cw * h; i++) cv[(size_t)y0 * cw + i] = best <= 256 ? mix(cv[(size_t)y0 * cw + i], b1[i], best) : mix(b1[i], b2[i], best - 256);
+#ifdef WS_BACKDROP_MAIN
+    if (getenv("WSB_INFO")) fprintf(stderr, "side %d rows %d-%d: picture fine %d, blur %d (left %d)\n", side, y0, y1, ep, best, bd);
+#endif
+    free(p); free(b1); free(b2); free(t);
 }
 
 static void gen_a5(int pad)
 {
     pal_make(); a5_analyse();
-    if (!A5_rsky.ok || !A5_rtree.ok || !A5_rplank.ok || !A5_rpost.ok || !A5_rstone.ok || !A5_rmortar.ok || !A5_rground.ok
-        || !A5_rbush.ok || !canvas_open(pad)) return;
+    if (!A5_rsky[0].ok || !A5_rsky[1].ok || !A5_rnear.ok || !A5_rhaze.ok || !A5_rpost.ok || !A5_rmortar.ok || !A5_rbush.ok
+        || !canvas_open(pad)) return;
     for (int side = 0; side < 2; side++) {
         canvas_clear();
-        a5_wood(side); a5_fence(side); a5_wall(side); a5_ground(side);
+        a5_wood(side); a5_fence(side); a5_wall(side); a5_ground(side); a5_bushes(side);
+        a5_match(A5_TREEN, 252, 288, 8, 64, a5_greenish);
+        a5_match(A5_TREE, 298, 320, 8, 64, a5_greenish);
         balance_regions(side, a5_picreg, 0);
+        a5_seam(side, 0, A5_FEN[side].pl[0][0], 12);
+        a5_seam(side, 196, PH, 10);
+        a5_soften_reg(side, 0, A5_WALL0, A5_TREEN, 252, 288, 8, 64, 128);
+        a5_soften_reg(side, 0, A5_WALL0, A5_TREE, 298, 320, 8, 64, 64);
+        a5_soften(side, A5_FEN[side].pl[0][0], A5_WALL0);
+        a5_soften(side, A5_WALL0 + 1, A5_WALL1 - 1);
+        a5_soften(side, A5_WALL1, 200);
+        a5_soften(side, 200, PH);
         emit(side);
     }
+    free(a5s); a5s = 0; a5ns = a5cap = 0;
     canvas_close();
 }
 
