@@ -2758,7 +2758,7 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   ~340 / ~384 right of the picture and walk in after the room's "CLEAR!" event (~frame 2150 of the select run); their
   walk is not in the overlay's NPC step (likely animation-driven), not fixed yet.  AREA05 s1 / s3: an NPC half inside
   the 4:3 picture (x -14..18), not parked.  Only the select's default story flags were covered.
-- **Room picture strips, opt-in preview** (`runtime/ws_backdrop.c`, `shims/gpu.c` `ws_backdrop`; `PORT_WS_BACKDROP=1`,
+- **Room picture strips, opt-in preview** (`runtime/ws_backdrop.c`, `shims/gpu.c` `ws_backdrop`; `--ws-backdrop on`,
   off by default until the user picks it): AREA02 s5's background is one pre-rendered 320x224 8 bpp picture (VRAM
   page x 128, CLUT 128,511) drawn as two sprites (256 + 64 columns) at frame row 16, nothing past 4:3 (the strips
   showed the clear grey).  When the left sprite comes (signature + room checked) the strips of the wide copy are
@@ -2766,7 +2766,8 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   texels in VRAM: the picture mirrored at its edge over the 56 columns next to it (bricks, the left roots, the right
   pillar and the floor run on without a seam), and on the wall rows (above row 176) the green texels of the 24-column
   ivy band at the edge laid over again at another phase and 4-14 rows lower, so the ivy covers the strip and the
-  mirror does not show.  Software and OpenGL strips identical (xvfb).  At 21:9 / 32:9 the pattern repeats.
+  mirror does not show.  Software and OpenGL strips identical (xvfb), wasm2c frames identical to i386.  At 21:9 /
+  32:9 the pattern repeats.
 - **Sub-screens** (Select screens Objetos / Eventos / Estado / Mapa, memory card, options, button config, screen
   adjust).  The Select screens (`subScreenDrawTabs`, D0SPSUB / D0SPSUB3, `#ifdef PORT2`) call `port_ws_layout(left cut,
   right cut, below)` each frame; while it is set, `shims/gpu.c` spreads the textured primitives of the frame

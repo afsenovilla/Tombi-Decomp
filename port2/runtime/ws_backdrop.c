@@ -8,8 +8,9 @@
  * are carried outwards (see build()).  shims/gpu.c calls port_ws_backdrop when it meets the left sprite of the
  * picture while the wide plane is on and fills the strips of the wide copy before the game draws the picture itself,
  * so everything the game draws on top (drums, actors, boxes) stays on top.  Identity without --widescreen and in
- * every other room (the sprite signature and the room are both checked).  Opt-in preview: `PORT_WS_BACKDROP=1` (off by
- * default until the user picks it). */
+ * every other room (the sprite signature and the room are both checked).  Opt-in preview: `--ws-backdrop on` (also
+ * `PORT_WS_BACKDROP=1`, research: 2 = the plain mirror without the ivy layer; not in the wasm2c build, which has no
+ * environment); off by default until the user picks it. */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -22,6 +23,7 @@ typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32;
 
 static u16 pic[PH][PW];                 /* the picture as 15-bit colours */
 static u16 *strip; static int strip_pad; static u32 strip_sum;
+int port_ws_backdrop_on;            /* --ws-backdrop on (main.c) */
 static int enabled = -1;
 
 static int r5(u16 c) { return c & 31; } static int g5(u16 c) { return (c >> 5) & 31; } static int b5(u16 c) { return (c >> 10) & 31; }
@@ -76,7 +78,7 @@ static u32 grab(const u16 *vram, int tx, int ty, int cx, int cy)
 const u16 *port_ws_backdrop(const u16 *vram, int pad, int x, int y, int w, int h, int u, int v, int tx, int ty,
                             int depth, int cx, int cy)
 {
-    if (enabled < 0) { const char *e = getenv("PORT_WS_BACKDROP"); enabled = e && *e >= '1' && *e <= '2' ? *e - '0' : 0; }
+    if (enabled < 0) { const char *e = getenv("PORT_WS_BACKDROP"); enabled = e && *e >= '1' && *e <= '2' ? *e - '0' : port_ws_backdrop_on; }
     if (!enabled || pad <= 0 || x != 0 || y != 16 || w != 256 || h != PH || u || v || tx != 128 || ty || depth != 1
         || cx != 128 || cy != 511) return 0;
     {
