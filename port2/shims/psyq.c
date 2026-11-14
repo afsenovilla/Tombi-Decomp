@@ -499,6 +499,7 @@ void port_vblank(void) {
                 { void *p = port_ram_ptr(a); if (!p) continue;
                   if (pokes[i].size == 4) *(u32 *)p = v; else if (pokes[i].size == 2) *(u16 *)p = v; else *(u8 *)p = v; }
         }
+    { extern void port_sweep_vblank(void); port_sweep_vblank(); }   /* --sweep-x (runtime/ws_poplog.c) */
     port_trace("vblank", port_frame);
     { extern void port_ovl_snapshot(void); port_ovl_snapshot(); }
     if (dump_ram_path && port_frame == dump_ram_frame) dump_ram();

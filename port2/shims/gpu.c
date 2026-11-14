@@ -816,8 +816,9 @@ static void tex_patch_apply(int x, int y, int w, int h) {
         if (!tex_patches[i].keyed && rect_overlap(x, y, w, h, px, py, pw, ph)) vram_write_rect(px, py, pw, ph, tex_patches[i].data);
     }
 }
+int port_ws_dry;   /* --widescreen: set while an area's block hook runs again for the side strips (main0_handwritten.c) */
 int LoadImage(RECT *r, u32 *p) {
-    if (r->w <= 0 || r->h <= 0) return 0;
+    if (r->w <= 0 || r->h <= 0 || port_ws_dry) return 0;
     tex_patch_pre(r->x, r->y, r->w, r->h);
     vram_write_rect(r->x, r->y, r->w, r->h, (const u16 *)p);
     tex_patch_apply(r->x, r->y, r->w, r->h);
@@ -843,7 +844,7 @@ u16 LoadClut2(u32 *clut, int x, int y) {
     return (u16)((y << 6) | ((x >> 4) & 0x3F));
 }
 int MoveImage(RECT *r, int x, int y) {
-    if (r->w <= 0 || r->h <= 0) return 0;
+    if (r->w <= 0 || r->h <= 0 || port_ws_dry) return 0;
     tex_patch_pre(x & 1023, y & 511, r->w, r->h);
     if (port_texpack_on) port_texpack_copy(r->x & 1023, r->y & 511, x & 1023, y & 511, r->w, r->h);
     be->copy(r->x & 1023, r->y & 511, x & 1023, y & 511, r->w, r->h);

@@ -603,27 +603,34 @@ void port_ws_area_model_link(void (*hook)(char *, int), char *list, int wmd, int
         extern void port_funga_room(const u8 *, int, int);
         port_funga_room((const u8 *)(unsigned long)(u32)wmd, game, *(volatile u16 *)port_ram_ptr(PORT_A_GAME + 2));
     }
-    if (!port_ws_cull || !(game == 0 || game == 1 || game == 2 || game == 3 || game == 7)) return;
+    if (!port_ws_cull || !(game == 0 || game == 1 || game == 2 || game == 3 || game == 7 || game == 9 || game == 10)) return;
     static u32 tmp[0x5b + 4];
+    extern int port_ws_dry;
     int d = 2 * port_ws_cull + 40;
+    int steps = (d + 159) / 160;                                  /* windows at most 160 apart: no gap at 32:9 */
     u16 sec = *(volatile u16 *)port_ram_ptr(PORT_A_GAME + 2);     /* GAME.section */
     int a3 = game == 3 && (sec == 2 || sec == 3);
-    for (int s = -1; s <= 1; s += 2) {
+    for (int s = -1; s <= 1; s += 2)
+    for (int k = 1; k <= steps; k++) {
+        int off = s * d * k / steps;
         s16 cam = SPAD(s16, 0x176); u16 ox = *origin_x;
         memset(tmp, 0, sizeof tmp);
-        SPAD(s16, 0x176) = cam + s * d; *origin_x = ox + s * d;
+        SPAD(s16, 0x176) = cam + off; *origin_x = ox + off;
+        port_ws_dry = 1;                                          /* no palette uploads / VRAM copies from these runs */
         if (a3) area3_blocks(tmp, (u8 *)wmd);
         else hook((char *)tmp, wmd);
+        port_ws_dry = 0;
         SPAD(s16, 0x176) = cam; *origin_x = ox;
         int n = ((u8 *)tmp)[3]; if (n > 88) n = 88;
         for (int i = 0; i < n; i++) {
-            u8 cnt = (u8)list[3]; int k;
-            if (cnt >= 88) return;
+            u8 cnt = (u8)list[3]; int j;
+            if (cnt >= 88) goto full;
             if (!tmp[1 + i]) continue;                        /* a slot the hook counted but did not fill */
-            for (k = 0; k < cnt; k++) if (((u32 *)list)[1 + k] == tmp[1 + i]) break;
-            if (k == cnt) { ((u32 *)list)[1 + cnt] = tmp[1 + i]; list[3] = cnt + 1; }
+            for (j = 0; j < cnt; j++) if (((u32 *)list)[1 + j] == tmp[1 + i]) break;
+            if (j == cnt) { ((u32 *)list)[1 + cnt] = tmp[1 + i]; list[3] = cnt + 1; }
         }
     }
+full:
     {   /* the room's ends carried on past the first / last sector (runtime/ws_edge.c) */
         extern void port_ws_edge_blocks(char *, const u8 *, int, int);
         port_ws_edge_blocks(list, (const u8 *)(unsigned long)(u32)wmd, game, sec);

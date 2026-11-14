@@ -354,8 +354,11 @@ src/x009/drawArea9ModelGT4.c | p->x3 < 0x141 | PORT_WSX(p->x3) < PORT_WSW(0x141)
 src/cullObjectToDrawList.c | SCREEN_ORIGIN_X + x) > (short)x * 2 + 0x140 | SCREEN_ORIGIN_X + x + port_ws_cull) > (short)x * 2 + 0x140 + 2 * port_ws_cull
 src/cullObjectToDrawListMargin.c | SCREEN_ORIGIN_X + x) > (short)x * 2 + 0x140 | SCREEN_ORIGIN_X + x + port_ws_cull) > (short)x * 2 + 0x140 + 2 * port_ws_cull
 src/ObjCullRegister.c | SCREEN_ORIGIN_X + 0x40) >= 0x1c1 | SCREEN_ORIGIN_X + 0x40 + port_ws_cull) >= 0x1c1 + 2 * port_ws_cull
-src/x004/cullObjectPerspective.c | + 0x40 + h) > h * 2 + 0x1c0 | + 0x40 + h + port_ws_cull) > h * 2 + 0x1c0 + 2 * port_ws_cull
-src/x004/cullObjectPerspectiveWide.c | + 0x40 + h) > h * 2 + 0x1c0 | + 0x40 + h + port_ws_cull) > h * 2 + 0x1c0 + 2 * port_ws_cull
+# isObjectInView: the same window as ObjCullRegister; drawing (rope chains) and activation (crawlers, KomaPigs, spear
+# pigs, eggs...) then follow the wide frame (every object starts / stops where the wide picture shows it)
+src/isObjectInView.c | (unsigned short)(p->pos->y - *(unsigned short *)SCR_X + 0x40) >= 0x1c1 | (unsigned short)(p->pos->y - *(unsigned short *)SCR_X + 0x40 + port_ws_cull) >= 0x1c1 + 2 * port_ws_cull
+src/x004/cullObjectPerspective.c | + 0x40 + h) > h * 2 + 0x1c0 | + 0x40 + h + (port_ws_cull * k >> 8)) > h * 2 + 0x1c0 + 2 * (port_ws_cull * k >> 8)
+src/x004/cullObjectPerspectiveWide.c | + 0x40 + h) > h * 2 + 0x1c0 | + 0x40 + h + (port_ws_cull * k >> 8)) > h * 2 + 0x1c0 + 2 * (port_ws_cull * k >> 8)
 # --widescreen: the gameplay HUD anchored to the wide frame's edges (lives, vitality, weapon left; AP right)
 src/drawHud.c | drawHudLives(o, 0x18, 0xf0); | drawHudLives(o, 0x18 - port_ws_cull, 0xf0);
 src/drawHud.c | drawHudAP(o, 0x12c, 0x10); | drawHudAP(o, 0x12c + port_ws_cull, 0x10);
@@ -406,6 +409,13 @@ src/d0spsub2/memCardDrawModeTitle.c | s->w = 0x28; | { extern int port_lang; ext
 # --widescreen: the area background's block selection (camera X window of 80-unit blocks) also takes the blocks
 # just outside the 4:3 window (port2/runtime/main0_handwritten.c port_ws_area_model_link; identity when off)
 src/callAreaModelLinkHook.c | PTR_DAT_80079b3c[GAME](AREA_MODEL_DRAW_LIST, WMD_DATA); | { extern unsigned short SCREEN_ORIGIN_X; extern void port_ws_area_model_link(void (*)(char *, int), char *, int, int, unsigned short *); port_ws_area_model_link(PTR_DAT_80079b3c[GAME], AREA_MODEL_DRAW_LIST, WMD_DATA, GAME, &SCREEN_ORIGIN_X); }
+# AREA04 sections 0-3 pick their background blocks by a view-frustum test (corners at x = +-z * 220 / 544, the 4:3
+# view plus margin); --widescreen widens it by the strip (identity when off)
+src/x004/area4ScriptOpSetQuad.c | x = z * 220 / 544; | x = z * (220 + port_ws_cull) / 544;
+# --log-pop FILE (research): screen-X range of what each object / background block drew this frame
+# (port2/runtime/ws_poplog.c; only a pointer test without the option)
+src/drawObject.c | void drawObject(TObj *o) | static void port_drawObject(TObj *o); void drawObject(TObj *o) { extern unsigned long port_pop_begin(void); extern void port_pop_end(unsigned long, const void *, int); unsigned long b = port_pop_begin(); port_drawObject(o); port_pop_end(b, o, 0); } static void port_drawObject(TObj *o)
+src/drawAreaModelList.c | drawModelUnlit(p[1], CURRENT_OT + 0x10); | { extern unsigned long port_pop_begin(void); extern void port_pop_end(unsigned long, const void *, int); unsigned long b = port_pop_begin(); drawModelUnlit(p[1], CURRENT_OT + 0x10); port_pop_end(b, (const void *)(unsigned long)p[1], 1); }
 #
 # --widescreen: the top-down map (I0NFO / I0NFO2 and their USA / JP builds) is a 384-px window of the room's map
 # picture; the windows left and right of it are drawn through the same VRAM, uploaded at marker packets

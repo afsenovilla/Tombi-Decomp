@@ -1084,6 +1084,8 @@ int main(int argc, char **argv) {
             port_texpack_on = 1;
         }
         else if (!strcmp(a, "--dump-draws") && v) { extern const char *port_drawdump_path; port_drawdump_path = argv[++i]; }
+        else if (!strcmp(a, "--log-pop") && v) { extern const char *port_poplog_path; port_poplog_path = argv[++i]; }
+        else if (!strcmp(a, "--sweep-x") && v) { extern void port_sweep_add(const char *); port_sweep_add(argv[++i]); }
         else if (!strcmp(a, "--dump-ram") && v) port_dump_ram_add(argv[++i]);
         else if (!strcmp(a, "--dump-audio") && v) port_audio_path = argv[++i];
         else if (!strcmp(a, "--gfx-es")) port_gfx_es = 1;
