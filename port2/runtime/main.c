@@ -1146,7 +1146,7 @@ int main(int argc, char **argv) {
     if (port_ntsc) port_printf("[port2] NTSC picture: the US build's 320x224 screen (--picture pal for the PAL 320x256 one)\n");
     if (port_ws_auto) { extern int port_widescreen; port_widescreen = port_ws_resolve(); }
     { extern int port_widescreen, port_renderer, port_ws_cull;
-      port_ws_cull = port_widescreen; { extern int port_ws_xtra; const char *e = getenv("PORT_WSXTRA"); if (e && port_widescreen) port_ws_xtra = atoi(e); }
+      port_ws_cull = port_widescreen; { extern int port_ws_xtra; const char *e = getenv("PORT_WSXTRA"); if (e && port_widescreen) port_ws_xtra = atoi(e); extern void port_primlog_init(void); port_primlog_init(); }
       (void)port_renderer; }
     setvbuf(stderr, NULL, _IONBF, 0);     /* the launcher reads a pipe: every line must leave the process at once */
     { extern const char port_build_id[], port_build_date[]; port_printf("[port2] build %s %s\n", port_build_id, port_build_date); }

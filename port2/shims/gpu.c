@@ -99,7 +99,23 @@ static inline u16 blend(u16 bg, u16 fg, int mode) {
    a side plane where that buffer is ws_pad columns wider on each side (the drawing offset shifted by ws_pad), so
    whatever the game draws past the 4:3 edges is kept.  plot() writes through tgt/tgt_stride: vram when off. */
 int port_ws_cull;                    /* the game's screen-X culls widened by this (port_prelude.h PORT_WSX), = port_widescreen */
-int port_ws_xtra;                    /* EXPERIMENT: PORT_WSXTRA */
+/* research (docs/PORT.md "Pop-in check"), environment variables read at start-up with --widescreen:
+ * PORT_WSXTRA=N   the culls keep N more columns each side (port_prelude.h PORT_WSX): a reference that draws more
+ * PORT_PRIMLOG=F0:F1:FILE   every primitive of vblanks F0..F1: kind, tpage, CLUT, UV box, screen box (frame coords) */
+int port_ws_xtra;
+int port_primlog_on;
+static FILE *primlog_f; static int primlog_f0, primlog_f1, primlog_last = -1;
+static void port_primlog(int tpage, int clut, int u0, int v0, int u1, int v1, int x0, int y0, int x1, int y1, int kind)
+{
+    if (port_frame < primlog_f0 || port_frame > primlog_f1) return;
+    if (port_frame != primlog_last) { primlog_last = port_frame; fprintf(primlog_f, "F %d\n", port_frame); }
+    fprintf(primlog_f, "%d %04x %04x %d %d %d %d %d %d %d %d\n", kind, tpage & 0xffff, clut & 0xffff, u0, v0, u1, v1, x0, y0, x1, y1);
+}
+void port_primlog_init(void)
+{
+    const char *e = getenv("PORT_PRIMLOG"); char path[400];
+    if (e && sscanf(e, "%d:%d:%399s", &primlog_f0, &primlog_f1, path) == 3 && (primlog_f = fopen(path, "w"))) port_primlog_on = 1;
+}
 int port_widescreen;                 /* extra columns on each side of a 320-wide frame; 0 = off (53 = 16:9, 120 = 21:9, 267 = 32:9) */
 #define WS_STRIDE 2048
 static u16 wvram_store[512][WS_STRIDE];
@@ -525,6 +541,14 @@ static int gp0(const u32 *p, int n) {
             }
             port_drawdump(&vram[0][0], t.tx, t.ty, t.depth, t.cx, t.cy, tpage, clut, u0, v0, u1 - u0 + 1, v1 - v0 + 1, x0, y0, x1 - x0, y1 - y0, semi ? 1 : 0, quad ? 1 : 0);
         }
+        if (port_primlog_on) {   /* PORT_PRIMLOG (research) */
+            int u0 = 255, u1 = 0, v0 = 255, v1 = 0, x0 = 1 << 20, x1 = -(1 << 20), y0 = 1 << 20, y1 = -(1 << 20);
+            for (int i = 0; i < nv; i++) {
+                if (v[i].u < u0) u0 = v[i].u; if (v[i].u > u1) u1 = v[i].u; if (v[i].v < v0) v0 = v[i].v; if (v[i].v > v1) v1 = v[i].v;
+                if (v[i].x < x0) x0 = v[i].x; if (v[i].x > x1) x1 = v[i].x; if (v[i].y < y0) y0 = v[i].y; if (v[i].y > y1) y1 = v[i].y;
+            }
+            { int dx = gs.ox + (ws_on ? ws_dx : 0); port_primlog(tex ? tpage : -1, tex ? clut : -1, u0, v0, u1, v1, x0 - dx, y0 - gs.oy, x1 - dx, y1 - gs.oy, quad ? 4 : 3); }
+        }
         if (tex && raw) shade = 0;
         if (ws_on && !tex && quad) ws_full_width_quad(v);
         if (hfr_rec && hfr_test_cut_dx && port_frame >= hfr_test_cut_frame) for (int i = 0; i < nv; i++) v[i].x += hfr_test_cut_dx;
@@ -593,6 +617,7 @@ static int gp0(const u32 *p, int n) {
         }
         if (tex && port_drawdump_path && w && h && t.cy != PORT_CLUT_Y)            /* --dump-draws (drawdump.c) */
             port_drawdump(&vram[0][0], t.tx, t.ty, t.depth, t.cx, t.cy, (tpg.tx >> 6) | (tpg.ty >> 8) << 4 | tpg.tp << 7, (p[2] >> 16) & 0xFFFF, u, v, w, h, a.x, a.y, w, h, semi ? 1 : 0, 2);
+        if (port_primlog_on) port_primlog(tex ? (tpg.tx >> 6) | (tpg.ty >> 8) << 4 | tpg.tp << 7 : -1, tex ? (int)((p[2] >> 16) & 0xFFFF) : -1, u, v, u + w - 1, v + h - 1, a.x, a.y, a.x + w, a.y + h, 1);
         if (tex) t.rep = port_texpack_on && w && h && t.cy != PORT_CLUT_Y ? port_texpack_box(&t, u, v, (u + w - 1) & 255, (v + h - 1) & 255) : 0;
         if (ws_on && !tex && w && h) ws_full_width_rect(&a.x, &w);
         if (w && h && ws_layout_active()) {

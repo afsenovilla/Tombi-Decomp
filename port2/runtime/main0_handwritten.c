@@ -606,7 +606,8 @@ void port_ws_area_model_link(void (*hook)(char *, int), char *list, int wmd, int
     if (!port_ws_cull || !(game == 0 || game == 1 || game == 2 || game == 3 || game == 7 || game == 9 || game == 10)) return;
     static u32 tmp[0x5b + 4];
     extern int port_ws_dry;
-    static int dx = -1; if (dx < 0) { const char *e = getenv("PORT_WSBLK"); dx = e ? atoi(e) : 0; }
+    static int dx = -1;                       /* research: PORT_WSBLK=N moves the extra runs N units further (a reference) */
+    if (dx < 0) { const char *e = getenv("PORT_WSBLK"); dx = e ? atoi(e) : 0; }
     int d = 2 * port_ws_cull + 40 + dx;
     int steps = (d + 159) / 160;                                  /* windows at most 160 apart: no gap at 32:9 */
     u16 sec = *(volatile u16 *)port_ram_ptr(PORT_A_GAME + 2);     /* GAME.section */
