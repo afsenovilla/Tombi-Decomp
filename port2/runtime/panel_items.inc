@@ -91,7 +91,7 @@ static u16 *it_task(void) {   /* the task running gameMainTask (its state words 
 static const char *it_open_reason(void) {
     u16 *w = it_task();
     if (!in_gameplay() || !w || w[0] != 1 || w[1] != 1) return T("Not in a game", "Fuera de la partida");
-    if (!(w[2] == 1 || w[2] == 2 || w[2] == 4 || w[2] == 5) || w[3] != 1) return T("Not now (menu, loading or scene)", "Ahora no (men\xFA, carga o escena)");
+    if (!(w[2] == 1 || w[2] == 2 || w[2] == 4 || w[2] == 5 || w[2] == 6) || w[3] != 1) return T("Not now (menu, loading or scene)", "Ahora no (men\xFA, carga o escena)");
     if (SPAD8(0x3CE) | SPAD8(0x1CC) || SPAD16(0x1C6)) return T("The game is paused", "El juego est\xE1 en pausa");
     if (G8(PV_GAME_FADE) != 0 && G8(PV_GAME_FADE) != 0x10) return T("The screen is fading", "La pantalla est\xE1 en transici\xF3n");
     if (G8(PV_GCD_NO_MENU)) return T("Not available in this scene", "No disponible en esta escena");
