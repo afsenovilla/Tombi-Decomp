@@ -177,22 +177,40 @@ static void arrow(Cv *c, int cx, int cy, int dir) {
         blend(c, x, y, 0x080008, in * 255 / 16);
     }
 }
-/* the console's A button as the port's button prompts draw the AYN Thor's (shims/prompts.c, PROMPT_THOR_BLACK: the A on the
-   black disc, white letter, at the east position as on the 3DS): its 12 x 12 disc (rows 2..13 of the glyph) scaled
-   to n x n to stand as tall as the capitals, each pixel the mean of 4 x 4 samples and its edge blended by their
-   coverage; centred on (cx, cy) */
-void port_prompt_rgb(int src, int style, unsigned *rgb, unsigned char *a);
+/* the console's A button as on the AYN Thor with black buttons: a matt black round key, a touch lighter at its upper
+   left and darker at its rim, and a thin light grey A (two legs and a bar); drawn n x n (16: the capitals' height)
+   centred on (cx, cy), every pixel from 8 x 8 samples */
+static float seg_d2(float px, float py, float ax, float ay, float bx, float by) {
+    const float vx = bx - ax, vy = by - ay, wx = px - ax, wy = py - ay, l = vx * vx + vy * vy;
+    float t = l > 0 ? (wx * vx + wy * vy) / l : 0; t = t < 0 ? 0 : t > 1 ? 1 : t;
+    const float dx = wx - t * vx, dy = wy - t * vy;
+    return dx * dx + dy * dy;
+}
 static void abutton(Cv *c, int cx, int cy, int n) {
-    unsigned rgb[12 * 16]; unsigned char on[12 * 16];
-    port_prompt_rgb(1 /* east */, 5 /* PROMPT_THOR_BLACK */, rgb, on);
+    const float R = n / 2.0f, s = n / 16.0f, hw = 0.72f * s;   /* radius, scale, half the stroke */
     for (int y = 0; y < n; y++) for (int x = 0; x < n; x++) {
-        int r = 0, g = 0, b = 0, k = 0;
-        for (int sy = 0; sy < 4; sy++) for (int sx = 0; sx < 4; sx++) {
-            const int u = (int)((x + (sx + 0.5f) / 4) * 12 / n), v = 2 + (int)((y + (sy + 0.5f) / 4) * 12 / n);
-            if (!on[v * 12 + u]) continue;
-            const unsigned q = rgb[v * 12 + u]; r += q >> 16 & 255; g += q >> 8 & 255; b += q & 255; k++;
+        int disc = 0, rim = 0, ink = 0; float shade = 0;
+        for (int sy = 0; sy < 8; sy++) for (int sx = 0; sx < 8; sx++) {
+            const float px = x + (sx + 0.5f) / 8 - R, py = y + (sy + 0.5f) / 8 - R, d2 = px * px + py * py;
+            if (d2 > R * R) continue;
+            disc++; rim += d2 > (R - 1.1f * s) * (R - 1.1f * s);
+            shade += (px + py) / (2 * R);   /* -1 upper left .. 1 lower right */
+            /* the A: apex (0, -4.3), feet (+-3.5, 4.3), bar at y 1.6 (in 16 px units) */
+            const float qx = px / s, qy = py / s, h2 = (hw / s) * (hw / s);
+            if (seg_d2(qx, qy, 0, -4.3f, -3.5f, 4.3f) <= h2 || seg_d2(qx, qy, 0, -4.3f, 3.5f, 4.3f) <= h2 ||
+                (qy >= 1.6f - hw / s && qy <= 1.6f + hw / s && qx > -2.6f && qx < 2.6f)) ink++;
         }
-        if (k) blend(c, cx - n / 2 + x, cy - n / 2 + y, (unsigned)(r / k) << 16 | (unsigned)(g / k) << 8 | (unsigned)(b / k), k * 255 / 16);
+        if (!disc) continue;
+        const float t = shade / disc;   /* the body: 0x3A at the upper left to 0x1A at the lower right */
+        int v = (int)(0x2A - 0x10 * t);
+        v = (v * (disc - rim) + 0x12 * rim) / disc;   /* the rim darker */
+        u32 col = (u32)v * 0x010101;
+        if (ink) {   /* the letter over it */
+            const int a = ink * 255 / disc;
+            const int r = (0xD8 * a + v * (255 - a)) / 255;
+            col = (u32)r * 0x010101;
+        }
+        blend(c, cx - n / 2 + x, cy - n / 2 + y, col, disc * 255 / 64);
     }
 }
 

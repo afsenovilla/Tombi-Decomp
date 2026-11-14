@@ -37,7 +37,7 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    50/60 Hz, picture 4:3 / wide (`--widescreen 5:3`, experimental, off by default) / 3D (`--stereo`, experimental).
    Drawn in the look of the title screen's OPTIONS (runtime/launcher_game.c: the Tomba squares SYSTEM/A00801.GAM +
    A00802, green on the top screen and yellow on the bottom one, the 8 x 16 font A00804 + A00803, the green bar, the
-   fixed texts in the LOAD screen's cream message boxes, the keys hint with drawn arrows and the Thor black-button A prompt (shims/prompts.c port_prompt_rgb), the title logo A00202 at half size, Start touchable; the disc is opened before the game and closed again,
+   fixed texts in the LOAD screen's cream message boxes, the keys hint with drawn arrows and an A key drawn like the black Thor buttons, the title logo A00202 at half size, Start touchable; the disc is opened before the game and closed again,
    port_cd_close), the plain DejaVu screen (n3ds/launcher_ui.c) when the disc cannot be read; PC preview
    `PORT_LAUNCHER_PREVIEW=DIR` (with `--second-screen`).
    Not yet seen on the console.
