@@ -710,7 +710,8 @@ static void build_redraw(int pad)
 /* --- the rooms (docs/PORT.md "Room picture strips").  Every one is a fixed-camera room whose background is one
    pre-rendered 320 x 224 8 bpp picture with CLUT (128, 511): its left 256 columns are page (128, 0) rows 0-223, drawn as
    one sprite at frame (0, 16) (256 x 224, or 256 x 256 clipped by the frame); the right 64 columns come from page
-   (256, 0) or are pieced together from 64 x 32 leftovers, and some rooms draw parts of the scene as further unscaled
+   (256, 0) or are pieced together from 64 x 32 leftovers (the Iron Castle hall, AREA17 s3 / s4, draws its left part
+   256 x 256 and its right one from page (256, 0): not redrawn yet, see docs/PORT.md), and some rooms draw parts of the scene as further unscaled
    quads over it (the roof and tree tops of AREA05, the hut and the front blossoms of the Dwarf Village).  The table
    holds where those pieces are (coordinates only); grab() puts the room's picture together from VRAM with them, so
    the redraw samples what the player sees.  area / sec name the room (the debug select's numbers; --ws-backdrop-rooms
@@ -741,8 +742,6 @@ static const Room ROOMS[] = {
     { 19, 1, 224, 0, { PIECES_TOP4, { 256, 8, 96, 64, 96, 256, 128 } }, OVER_VILLAGE, gen_village, 2, 1, v_cherry },   /* Dwarf
       Village in blossom: AREA19 s1 runs as area 2 s1 (GAME.area), told apart from AREA02 s1 by its picture */
     { 2, 1, 224, 0, { PIECES_TOP4, { 256, 8, 96, 64, 96, 256, 128 } }, OVER_VILLAGE, gen_village, 0, 0, v_not_cherry },
-    { 17, 3, 256, 0, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, gen_hall },               /* Iron Castle hall */
-    { 17, 4, 256, 0, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, gen_hall },
 };
 #define NROOMS ((int)(sizeof ROOMS / sizeof ROOMS[0]))
 const char *port_ws_backdrop_rooms;                      /* --ws-backdrop-rooms A:S,A:S,... (decimal; "all") */

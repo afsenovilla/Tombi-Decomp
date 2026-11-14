@@ -380,7 +380,7 @@ static int v_picreg(int side, int x, int y)
     u16 c = pic[y][x]; (void)side;
     if (v_jukebox(x, y)) return 0;
     if (y < 88) return V_CANOPY;
-    if (y < V_FENCE0) return 0;
+    if (y < V_FENCE0) return y >= 92 && v_grey(c) ? V_BACK : 0;
     if (y < V_LEDGE0) return v_wood(c) ? V_FENCE : 0;
     if (y < V_LIP0) return y > 142 ? V_LEDGE : 0;
     if (y < V_PALI0) return 0;
@@ -422,7 +422,8 @@ static void sphere(int cx16, int cy16, int r16, const Ramp *rp, int base, int r,
             dot = (-dx * 120 - dy * 150 + dz * 170) / r16;                           /* n . light, -256..256 */
             t = base + dot * 3 / 4 - 40 + noise(X * 16 + seed, py * 16, 40, 40, seed) / 6 - 21;
             if (dz < r16 / 5) t -= 30;                                               /* the soft rim */
-            putr(X, py, ramp(rp, t), r);
+            if (q < r16 * 24) { Rgb *p = px_at(X, py); putr(X, py, mix(*p, ramp(rp, t), 128), r); }   /* its edge blended */
+            else putr(X, py, ramp(rp, t), r);
         }
 }
 
@@ -570,4 +571,3 @@ static void gen_village(int pad)
     }
     canvas_close();
 }
-static void gen_hall(int pad) { (void)pad; }
