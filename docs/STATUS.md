@@ -79,7 +79,7 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
 0. **Widescreen pop-in in the side-view rooms (2026-11-14)**: user report (AYN Thor, 16:9 auto): "quite a lot of
    popping" in the Forest of 100 Flowers and the other side-view stages.  Measured with the new research options
    `--log-pop` / `--sweep-x` and `tools/ws_popcheck.py` over the 52 scrolling side-view rooms (docs/PORT.md
-   "Widescreen", "Pop-in check"): 1543 -> 261 pops in the strips at 16:9 (i386 and wasm2c the same).  Fixed: block hooks
+   "Widescreen", "Pop-in check"): 1543 -> 254 pops in the strips at 16:9 (i386 and wasm2c the same).  Fixed: block hooks
    of AREA09 / AREA10 widened (palette uploads of the extra runs suppressed, `port_ws_dry`), AREA04's frustum
    widened, object windows 2 * pad world units (objects behind the screen plane), isObjectInView / isOnScreen widened
    (activation too), despawns keep their margin past the wide edges, edge spawns (AREA03 lizards, wind streaks,

@@ -2800,15 +2800,17 @@ vblank, walking it through a list of positions (`=X` jumps), so a room scrolls e
 columns showing on its first / last frame (something scrolling in shows a sliver), tagged "strip" (reaches into the
 side strips) or "4:3".  Run over the 52 scrolling side-view rooms the debug select enters (rooms of AREA00-04, 06, 09,
 10, 14, 17 whose camera range is wider than a screen; top-down rooms and the tunnels are elsewhere), sweeping each
-from its start to past both camera limits, 16:9, PC i386 and the wasm2c build (same counts): strip events
+from its start to past both camera limits, 16:9, PC i386 and the wasm2c build (same counts): strip events (objects and
+blocks; layer 7 is logged too but left out here: its 61 events are whole backdrop layers the game switches on / off at
+once, the same at 4:3)
 
 | area | sections swept | before | after | 4:3 events, widescreen off |
 |---|---|---|---|---|
-| AREA00 | 0-5 | 58 | 29 | 94 |
-| AREA01 | 0-4 | 290 | 62 | 116 |
+| AREA00 | 0-5 | 58 | 25 | 94 |
+| AREA01 | 0-4 | 290 | 60 | 116 |
 | AREA03 | 0-5 | 36 | 34 | 139 |
 | AREA04 | 0-3, 5-7, 9, 13, 16 | 326 | 71 | 241 |
-| AREA09 | 0-2 | 108 | 10 | 42 |
+| AREA09 | 0-2 | 108 | 9 | 42 |
 | AREA10 | 0-7 | 719 | 53 | 185 |
 | AREA14 | 0-7 | 6 | 2 | 15 |
 | AREA02 s4, AREA06 s0/s1, AREA17 s2 | | 0 | 0 | 0 |
