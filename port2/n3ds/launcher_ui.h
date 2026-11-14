@@ -10,6 +10,7 @@ typedef struct {
     const char *disc;        /* the disc image's name */
     int new3ds;
     int start_down;          /* the Start button is being touched */
+    int pressed;             /* the touched button (runtime/launcher_game.c): 0 none, 1 Start, 2 up, 3 down, 4 left, 5 right */
 } LuiState;
 /* top: 400 x 240, bottom: 320 x 240, both RGB, three bytes a pixel, rows from the top */
 void lui_draw(unsigned char *top, unsigned char *bot, const LuiState *s);

@@ -166,7 +166,7 @@ static void blit(gfxScreen_t scr, const unsigned char *rgb, int w) {   /* RGB, w
 /* the start screen in the look of the game's OPTIONS (runtime/launcher_game.c), when the disc can be read */
 int port_launcher_game_begin(void);
 void port_launcher_game_end(void);
-void port_launcher_game_start_rect(int *x0, int *y0, int *x1, int *y1);
+int port_launcher_game_button(int i, int *x0, int *y0, int *x1, int *y1);
 void port_launcher_game_draw(unsigned char *top, unsigned char *bot, const LuiState *s);
 extern int port_cd_open_data(const char *dir);
 extern int port_cd_open(const char *path);
@@ -186,11 +186,29 @@ static int choose_lang(int code) {
     static unsigned char top[400 * 240 * 3], bot[320 * 240 * 3];
     /* (the disc opened for the OPTIONS screen's squares and letters, then closed again: the game opens it itself) */
     int game = (launch_image ? port_cd_open(launch_image) : port_cd_open_data(DIR_ "/data")) == 0 && port_launcher_game_begin();
-    int sx0, sy0, sx1, sy1;
-    if (game) port_launcher_game_start_rect(&sx0, &sy0, &sx1, &sy1); else lui_start_rect(&sx0, &sy0, &sx1, &sy1);
+    /* the touch buttons: Start (0), and on the game-look screen up, down, left, right (1-4) */
+    int bx0[5], by0[5], bx1[5], by1[5], nb = 1;
+    if (game) { while (nb < 5 && port_launcher_game_button(nb, &bx0[nb], &by0[nb], &bx1[nb], &by1[nb])) nb++; port_launcher_game_button(0, &bx0[0], &by0[0], &bx1[0], &by1[0]); }
+    else lui_start_rect(&bx0[0], &by0[0], &bx1[0], &by1[0]);
     while (aptMainLoop()) {
         hidScanInput();
         u32 k = hidKeysDown() | (hidKeysDownRepeat() & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT));
+        {   /* a button: pressed while the finger is on it, done when it is lifted there (Start: the game starts) */
+            touchPosition tp; static int lx, ly;
+            int on = 0;
+            if (hidKeysHeld() & KEY_TOUCH) {
+                hidTouchRead(&tp); lx = tp.px; ly = tp.py;
+                for (int i = 0; i < nb && !on; i++) if (lx >= bx0[i] && lx <= bx1[i] && ly >= by0[i] && ly <= by1[i]) on = i + 1;
+                if (on != touching) { touching = on; redraw = 1; }
+            } else if (touching) {
+                const int i = touching - 1;
+                touching = 0; redraw = 1;
+                if (lx >= bx0[i] && lx <= bx1[i] && ly >= by0[i] && ly <= by1[i]) {
+                    static const u32 key[5] = { KEY_A, KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT };
+                    k |= key[i];
+                }
+            }
+        }
         if (k & KEY_START) break;
         if ((k & KEY_DOWN) && row < ROWS - 1) { row++; redraw = 1; }
         if ((k & KEY_UP) && row > 0) { row--; redraw = 1; }
@@ -203,19 +221,8 @@ static int choose_lang(int code) {
             redraw = 1;
         }
         if (k & KEY_A) { ok = 1; break; }
-        {   /* the Start button: pressed while the finger is on it, started when it is lifted there */
-            touchPosition tp; static int lx, ly;
-            if (hidKeysHeld() & KEY_TOUCH) {
-                hidTouchRead(&tp); lx = tp.px; ly = tp.py;
-                int on = lx >= sx0 && lx <= sx1 && ly >= sy0 && ly <= sy1;
-                if (on != touching) { touching = on; redraw = 1; }
-            } else if (touching) {
-                touching = 0; redraw = 1;
-                if (lx >= sx0 && lx <= sx1 && ly >= sy0 && ly <= sy1) { ok = 1; break; }
-            }
-        }
         if (redraw) {
-            LuiState st = { row, name[lang], codes[lang] == 9, es_ready, opt_movies, opt_hz, opt_wide, launch_disc, n3, touching };
+            LuiState st = { row, name[lang], codes[lang] == 9, es_ready, opt_movies, opt_hz, opt_wide, launch_disc, n3, touching == 1, touching };
             if (game) port_launcher_game_draw(top, bot, &st); else lui_draw(top, bot, &st);
             blit(GFX_TOP, top, 400); blit(GFX_BOTTOM, bot, 320);
             gfxFlushBuffers();

@@ -132,8 +132,27 @@ static int wrap(Cv *c, int x, int y, int w, const char *s, int maxl) {
     return n;
 }
 
-static const int START_X0 = 40, START_Y0 = 176, START_X1 = 279, START_Y1 = 203;
-void port_launcher_game_start_rect(int *x0, int *y0, int *x1, int *y1) { *x0 = START_X0; *y0 = START_Y0; *x1 = START_X1; *y1 = START_Y1; }
+/* the touch buttons of the bottom screen: Start, then up, down, left, right in a row under it */
+static const int START_X0 = 40, START_Y0 = 172, START_X1 = 279, START_Y1 = 201, ARROW_Y0 = 207, ARROW_Y1 = 235;
+int port_launcher_game_button(int i, int *x0, int *y0, int *x1, int *y1) {
+    if (i < 0 || i > 4) return 0;
+    if (!i) { *x0 = START_X0; *y0 = START_Y0; *x1 = START_X1; *y1 = START_Y1; return 1; }
+    *x0 = 8 + (i - 1) * 78; *x1 = *x0 + 69; *y0 = ARROW_Y0; *y1 = ARROW_Y1;
+    return 1;
+}
+/* a dark arrow (0 up, 1 down, 2 left, 3 right) centred on (cx, cy), its edge pixels blended by coverage */
+static void arrow(Cv *c, int cx, int cy, int dir) {
+    const float L = 9.0f, W = 6.0f;   /* half its width across, half its length along */
+    for (int y = cy - 10; y <= cy + 10; y++) for (int x = cx - 10; x <= cx + 10; x++) {
+        int in = 0;
+        for (int sy = 0; sy < 4; sy++) for (int sx = 0; sx < 4; sx++) {
+            float dx = x + (sx + 0.5f) / 4 - cx, dy = y + (sy + 0.5f) / 4 - cy, a, w;   /* a: along (tip at -W), w: across */
+            if (dir == 0) { a = dy; w = dx; } else if (dir == 1) { a = -dy; w = dx; } else if (dir == 2) { a = dx; w = dy; } else { a = -dx; w = dy; }
+            if (a >= -W && a <= W && (w < 0 ? -w : w) <= L * (a + W) / (2 * W)) in++;
+        }
+        blend(c, x, y, 0x080008, in * 255 / 16);
+    }
+}
 
 void port_launcher_game_draw(unsigned char *top, unsigned char *bot, const LuiState *s) {
     static const char *lab[4] = { "LANGUAGE:", "MOVIES:", "SPEED:", "PICTURE:" }, *name[4] = { "LANGUAGE", "MOVIES", "SPEED", "PICTURE" };
@@ -141,19 +160,16 @@ void port_launcher_game_draw(unsigned char *top, unsigned char *bot, const LuiSt
     const char *val[4] = { lang, s->movies ? "PLAY" : "SKIP", s->hz == 50 ? "50 HZ" : "60 HZ",
                            s->picture == 1 ? "WIDE (EXPERIMENTAL)" : s->picture == 2 ? "3D (EXPERIMENTAL)" : "4:3" };
     Cv t = { top, 400, 240 }, b = { bot, 320, 240 };
-    static const char *hint = "UP/DOWN: OPTION   LEFT/RIGHT: CHANGE";
     /* ---- the top screen: the options, as the game's OPTIONS, on the green squares */
     squares(&t, -6, 0);
     box(&t, 200 - text_w("TOMBI!") / 2 - 14, 10, 200 + text_w("TOMBI!") / 2 + 13, 37);
     text(&t, 200 - text_w("TOMBI!") / 2, 16, "TOMBI!");
     for (int i = 0; i < 4; i++) {
-        const int y = 58 + i * 32;
+        const int y = 64 + i * 40;
         if (i == s->row) bar(&t, 16, y - 4, 383, y + 17, 0);
         text(&t, 28, y, lab[i]);
         text(&t, 132, y, val[i]);
     }
-    box(&t, 200 - text_w(hint) / 2 - 14, 196, 200 + text_w(hint) / 2 + 13, 223);
-    text(&t, 200 - text_w(hint) / 2, 202, hint);
     /* ---- the bottom screen, on the yellow squares: what the option does, the disc and the console, Start */
     squares(&b, -6, 1);
     box(&b, 160 - text_w(name[s->row]) / 2 - 14, 4, 160 + text_w(name[s->row]) / 2 + 13, 29);
@@ -182,9 +198,12 @@ void port_launcher_game_draw(unsigned char *top, unsigned char *bot, const LuiSt
         wrap(&b, 16, y + 20, 288, disc, 3);
     }
     bar(&b, START_X0, START_Y0, START_X1, START_Y1, s->start_down);
-    text(&b, 160 - text_w("START") / 2, 182, "START");
-    box(&b, 160 - text_w("A: START   START: EXIT") / 2 - 14, 210, 160 + text_w("A: START   START: EXIT") / 2 + 13, 236);
-    text(&b, 160 - text_w("A: START   START: EXIT") / 2, 215, "A: START   START: EXIT");
+    text(&b, 160 - text_w("START") / 2, START_Y0 + 7, "START");
+    for (int i = 1; i <= 4; i++) {   /* the arrows: a message box, the game's green bar while touched */
+        int x0, y0, x1, y1; port_launcher_game_button(i, &x0, &y0, &x1, &y1);
+        if (s->pressed == i + 1) bar(&b, x0, y0, x1, y1, 1); else box(&b, x0, y0, x1, y1);
+        arrow(&b, (x0 + x1 + 1) / 2, (y0 + y1 + 1) / 2, i - 1);
+    }
 }
 
 #ifndef __3DS__
@@ -194,7 +213,7 @@ void port_launcher_game_preview(const char *dir) {
     static unsigned char top[400 * 240 * 3], bot[320 * 240 * 3]; char p[512];
     if (!port_launcher_game_begin()) { port_printf("[launcher] the options screen's pieces are not readable\n"); return; }
     for (int r = 0; r < 5; r++) {
-        LuiState st = { r & 3, "Espa\xF1ol (traducci\xF3n mejorada)", 1, r != 4, 1, 60, r == 3 ? 2 : 0, r == 1 ? "Tombi! (Europe) (En,Fr,De,Es,It,Nl,Sv,Da).chd" : "Tombi.chd", 0, r == 4 };
+        LuiState st = { r & 3, "Espa\xF1ol (traducci\xF3n mejorada)", 1, r != 4, 1, 60, r == 3 ? 2 : 0, r == 1 ? "Tombi! (Europe) (En,Fr,De,Es,It,Nl,Sv,Da).chd" : "Tombi.chd", 0, r == 4, r == 4 ? 1 : r == 2 ? 4 : 0 };
         port_launcher_game_draw(top, bot, &st);
         snprintf(p, sizeof p, "%s/launcher_%d_top.png", dir, r); port_gpu_write_png(p, top, 400, 240);
         snprintf(p, sizeof p, "%s/launcher_%d_bottom.png", dir, r); port_gpu_write_png(p, bot, 320, 240);
