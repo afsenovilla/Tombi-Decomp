@@ -72,9 +72,11 @@ void *port_bios_tcb_table(void);
 #define port_otlink(p) port_otaddr(p)
 #include "port2_syms.h"
 extern int port_ws_cull;          /* --widescreen: extra screen columns each side the culls keep (shims/gpu.c); 0 = off */
-#define PORT_WSX(v) ((unsigned short)((v) + port_ws_cull))
-#define PORT_WSW(c) ((c) + 2 * port_ws_cull)
+extern int port_ws_xtra;          /* research: PORT_WSXTRA (shims/gpu.c), culls widened further to find what they miss */
+#define PORT_WSX(v) ((unsigned short)((v) + port_ws_cull + port_ws_xtra))
+#define PORT_WSW(c) ((c) + 2 * (port_ws_cull + port_ws_xtra))
 #define PORT_WSO (2 * port_ws_cull)   /* object windows (world units): fixes.txt "object windows" */
+extern int port_funga_lane_flip;  /* runtime/funga.c; used by the playerStepLaneJump hooks, whose signature line differs per version */
 extern int port_ws_backdrop_period(void *, int);   /* --widescreen: repeat a wrapping backdrop column (port2 main0_handwritten.c) */
 /* the NTSC picture (--hz 60 unless --picture pal; docs/PORT.md "NTSC picture"): the US build's 320x224 screen.  The game
    values the PAL build changed for its 256-line picture (screen centre, camera offsets and clamps, HUD, menus...) take
