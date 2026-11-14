@@ -172,6 +172,7 @@ int port_launcher_game_button(int i, int *x0, int *y0, int *x1, int *y1);
 void port_launcher_game_draw(unsigned char *top, unsigned char *bot, const LuiState *s);
 int port_launcher_music_start(void);
 void port_launcher_music_stop(void);
+void port_launcher_sfx_move(void);
 extern int port_sound_pull(short *dst, int frames);
 /* the OPTIONS screen's music under the start screen: the port's mixer (shims/sound.c) pulled by an SDL audio device of
    its own, closed again before the game opens its one */
@@ -229,6 +230,7 @@ static int choose_lang(int code) {
             }
         }
         if (k & KEY_START) break;
+        const int was_row = row, was_val = lang * 64 + opt_movies * 16 + (opt_hz == 50) * 8 + opt_wide;
         if ((k & KEY_DOWN) && row < ROWS - 1) { row++; redraw = 1; }
         if ((k & KEY_UP) && row > 0) { row--; redraw = 1; }
         if (k & (KEY_LEFT | KEY_RIGHT)) {
@@ -238,6 +240,10 @@ static int choose_lang(int code) {
             else if (row == 2) opt_hz = opt_hz == 60 ? 50 : 60;
             else opt_wide = (opt_wide + d + 3) % 3;
             redraw = 1;
+        }
+        /* the language menu's cursor sound when the option or its value moves */
+        if (adev && (row != was_row || lang * 64 + opt_movies * 16 + (opt_hz == 50) * 8 + opt_wide != was_val)) {
+            SDL_LockAudioDevice(adev); port_launcher_sfx_move(); SDL_UnlockAudioDevice(adev);
         }
         if (k & KEY_A) { ok = 1; break; }
         if (redraw) {

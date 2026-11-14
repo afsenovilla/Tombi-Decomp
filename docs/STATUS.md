@@ -42,7 +42,9 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    `PORT_LAUNCHER_PREVIEW=DIR` (with `--second-screen`).
    The OPTIONS screen's music plays under it (SOUND/SND_SYS.WVD + S_SYS00.SEQ through shims/sound.c, an SDL audio
    device of its own closed before the game's; PC check: PORT_LAUNCHER_MUSIC_WAV=FILE with the preview, its envelope
-   matched the game's own options music, r 0.83, same level).  Not yet seen on the console.
+   matched the game's own options music, r 0.83, same level); moving an option or its value plays the disc's language
+   menu cursor sound (its boot program's second VAB, sound 0: SsUtKeyOnV(23, vab, 0, 0, 8, 0, 100, 100)).  Not yet seen
+   on the console.
    Measured on the console: gameplay 58-60 vblank/s in most rooms (the mansion AREA04 ~52: game logic 14 ms), Baccus
    wide 59 (tiles of the top-down map copied by 32 x 32 cells, not decoded again; on the 3DS ws_topdown.c draws no
    map windows beside the game's: 8 px of black at a map edge).  3D: the left eye is the game's picture, the right

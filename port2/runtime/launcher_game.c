@@ -281,13 +281,53 @@ void SpuSetTransferStartAddr(unsigned a); unsigned SpuRead(unsigned char *p, uns
 short SsVabFakeHead(unsigned char *h, short vabid, unsigned sbaddr); void SsVabClose(short id);
 short SsSeqOpen(unsigned char *d, short vab); void SsSeqPlay(short id, char mode, short loops);
 void SsSeqStop(short id); void SsSeqClose(short id); void SsSeqSetVol(short id, short l, short r); void SsSetMVol(short l, short r);
-static u8 *mus_wvd, *mus_seq;
-static short mus_vab = -1, mus_id = -1;
+short SsUtKeyOnV(short voice, short vabid, short prog, short tone, short note, short fine, short voll, short volr);
+char SsSetReservedVoice(char n);
 static unsigned rd32le(const u8 *d) { return d[0] | d[1] << 8 | d[2] << 16 | (unsigned)d[3] << 24; }
+static u8 *mus_wvd, *mus_seq;
+static short mus_vab = -1, mus_id = -1, sfx_vab = -1;
+/* the disc's language menu's own sounds (its boot program, SYSTEM.CNF BOOT: SCES_013.31 / .30): the second VAB inside
+   it (the first is this music again); a VAB's body (fsize - its header's size) lies just before its header there.  Its cursor sound, when the flag changes:
+   sound 0 of its table at 0x800AC328 (prog, tone, note, volume = 0, 0, 8, 100), played by its playSfx (0x80012108)
+   as SsUtKeyOnV(23, that VAB, 0, 0, 8, 0, 100, 100); the sequencer keeps to voices 0-22 meanwhile */
+static void sfx_load(void) {
+    unsigned n = 0, m = 0; char path[64] = "";
+    u8 *cnf = pa_read("SYSTEM.CNF", &n), *exe = NULL;
+    if (cnf) {
+        char t[256]; const unsigned k0 = n < sizeof t - 1 ? n : (unsigned)sizeof t - 1;
+        memcpy(t, cnf, k0); t[k0] = 0;
+        const char *b = strstr(t, "cdrom:");
+        if (b) {
+            b += 6; while (*b == '\\' || *b == '/') b++;
+            int k = 0;
+            while (b[k] && b[k] != ';' && b[k] != '\r' && b[k] != '\n' && k < 60) { path[k] = b[k] == '\\' ? '/' : b[k]; k++; }
+            path[k] = 0;
+        }
+        free(cnf);
+    }
+    if (path[0]) exe = pa_read(path, &m);
+    int seen = 0;
+    for (unsigned o = 0; exe && o + 0x20 < m; o += 4) {
+        if (memcmp(exe + o, "pBAV", 4) || ++seen != 2) continue;
+        const unsigned ps = exe[o + 0x12] | exe[o + 0x13] << 8, fsize = rd32le(exe + o + 0xC), hs = 0x20 + 0x800 + ps * 0x200 + 0x200;
+        if (ps > 128 || fsize <= hs || fsize - hs > o || o + hs > m) break;
+        SpuSetTransferStartAddr(0x10000);   /* (past the music's bank) */
+        SpuRead(exe + o - (fsize - hs), fsize - hs);
+        sfx_vab = SsVabFakeHead(exe + o, -1, 0x10000);
+        break;
+    }
+    free(exe);
+    if (sfx_vab >= 0) SsSetReservedVoice(23);
+    else port_printf("[launcher] the language menu's sounds are not readable (%s)\n", path[0] ? path : "no SYSTEM.CNF");
+}
+void port_launcher_sfx_move(void) {   /* (the caller holds the audio device's lock) */
+    if (sfx_vab >= 0) SsUtKeyOnV(23, sfx_vab, 0, 0, 8, 0, 100, 100);
+}
 void port_launcher_music_stop(void) {
     if (mus_id >= 0) { SsSeqStop(mus_id); SsSeqClose(mus_id); }
     if (mus_vab >= 0) SsVabClose(mus_vab);
-    mus_id = mus_vab = -1;
+    if (sfx_vab >= 0) { SsVabClose(sfx_vab); SsSetReservedVoice(24); }
+    mus_id = mus_vab = sfx_vab = -1;
     free(mus_wvd); free(mus_seq); mus_wvd = mus_seq = NULL;
 }
 int port_launcher_music_start(void) {   /* 1: playing */
@@ -308,6 +348,7 @@ int port_launcher_music_start(void) {   /* 1: playing */
         }
     }
     if (mus_id < 0) { port_printf("[launcher] the options music is not readable\n"); port_launcher_music_stop(); return 0; }
+    sfx_load();
     SsSetMVol(100, 100);
     SsSeqSetVol(mus_id, 100, 100);
     SsSeqPlay(mus_id, 1, 1);
@@ -334,7 +375,10 @@ void port_launcher_game_preview(const char *dir) {
         if (f && port_launcher_music_start()) {
             static short buf[2 * 1024]; unsigned total = 0; u8 h[44] = "RIFF\0\0\0\0WAVEfmt ";
             fwrite(h, 1, 44, f);
-            for (int i = 0; i < 20 * 44100 / 1024; i++) { port_sound_pull(buf, 1024); fwrite(buf, 4, 1024, f); total += 4096; }
+            for (int i = 0; i < 20 * 44100 / 1024; i++) {
+                if (i % 86 == 43) port_launcher_sfx_move();   /* (the cursor sound once a second) */
+                port_sound_pull(buf, 1024); fwrite(buf, 4, 1024, f); total += 4096;
+            }
             port_launcher_music_stop();
             const unsigned v[] = { 36 + total, 16, 1 | 2u << 16, 44100, 44100 * 4, 4 | 16u << 16 };
             fseek(f, 4, SEEK_SET); fwrite(&v[0], 4, 1, f); fseek(f, 16, SEEK_SET); fwrite(&v[1], 4, 5, f);
