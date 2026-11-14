@@ -689,3 +689,25 @@ int port_prompt_tex_clut(int tx, int ty, int u0, int v0, int u1, int v1) {
     }
     return 0;
 }
+
+/* A button glyph as colours, for screens the port draws itself (the 3DS start screen, runtime/launcher_game.c):
+   src = the physical button by position (SRC_SOUTH .. SRC_NORTH), style = PROMPT_*; rgb gets 12 x 16 pixels 0xRRGGBB,
+   a 0 / 1 (transparent / drawn).  The colours come from the port CLUT row the glyph uses, else the game font's
+   (the indices measured above). */
+void port_prompt_rgb(int src, int style, unsigned *rgb, unsigned char *a) {
+    static const unsigned font_clut[16] = { 0, 0x000000, 0x9C9C9C, 0x4A4A4A, 0x6B6B6B, 0x848484, 0x292929, 0x6B94FF, 0x00FF00,
+                                            0xFF8484, 0xFF5A52, 0xCEC6A5, 0xA59C8C, 0x8C8473, 0xFFEFDE, 0xFFEFDE };
+    const int big = port_prompt_big;
+    port_prompt_big = 0;
+    const int r = draw(0, src, style);
+    port_prompt_big = big;
+    for (int y = 0; y < GH; y++) for (int x = 0; x < GW; x++) {
+        const int k = img[y][x] & 15;
+        unsigned c = 0; int on = k != 0;
+        if (on && r) {
+            const u16 v = port_prompt_clut[(r - 1) * 16 + k];
+            on = v != 0; c = (unsigned)(v & 31) << 19 | (unsigned)(v >> 5 & 31) << 11 | (unsigned)(v >> 10 & 31) << 3;
+        } else if (on) c = font_clut[k];
+        rgb[y * GW + x] = c; a[y * GW + x] = (unsigned char)on;
+    }
+}

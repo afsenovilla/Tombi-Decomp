@@ -177,22 +177,13 @@ static void arrow(Cv *c, int cx, int cy, int dir) {
         blend(c, x, y, 0x080008, in * 255 / 16);
     }
 }
-/* the console's A button: a dark round key, its letter white (the game font's A), centred on (cx, cy) */
+/* the console's A button as the port's button prompts draw the AYN Thor's (shims/prompts.c, PROMPT_THOR: the A on the
+   red disc, white letter, at the east position as on the 3DS), 12 x 16, its disc centred on (cx, cy) */
+void port_prompt_rgb(int src, int style, unsigned *rgb, unsigned char *a);
 static void abutton(Cv *c, int cx, int cy) {
-    for (int y = cy - 9; y <= cy + 9; y++) for (int x = cx - 9; x <= cx + 9; x++) {
-        int in = 0, rim = 0;
-        for (int sy = 0; sy < 4; sy++) for (int sx = 0; sx < 4; sx++) {
-            const float dx = x + (sx + 0.5f) / 4 - (cx + 0.5f), dy = y + (sy + 0.5f) / 4 - (cy + 0.5f), d2 = dx * dx + dy * dy;
-            in += d2 <= 8.5f * 8.5f; rim += d2 <= 7.5f * 7.5f;
-        }
-        blend(c, x, y, 0x080008, in * 255 / 16);
-        blend(c, x, y, 0x4A4A52, rim * 255 / 16);
-    }
-    int u, v; glyph_cell('A', &u, &v);
-    for (int j = 0; j < 16; j++) for (int i = 0; i < 8; i++) {
-        const int px = u + i, k = (font[(v + j) * 128 + px / 2] >> ((px & 1) * 4)) & 15;
-        if (k == 1) put(c, cx - 3 + i, cy - 7 + j, 0xFFFFFF); else if (k) blend(c, cx - 3 + i, cy - 7 + j, 0xFFFFFF, 110);
-    }
+    unsigned rgb[12 * 16]; unsigned char on[12 * 16];
+    port_prompt_rgb(1 /* east */, 4 /* PROMPT_THOR */, rgb, on);
+    for (int y = 0; y < 16; y++) for (int x = 0; x < 12; x++) if (on[y * 12 + x]) put(c, cx - 6 + x, cy - 8 + y, rgb[y * 12 + x]);
 }
 
 void port_launcher_game_draw(unsigned char *top, unsigned char *bot, const LuiState *s) {
@@ -213,12 +204,12 @@ void port_launcher_game_draw(unsigned char *top, unsigned char *bot, const LuiSt
     }
     {   /* what the keys do: the arrows drawn, the words in the game's letters */
         static const char *w[3] = { "OPTION", "CHANGE", "START" };
-        const int gap = 24, wa = 2 * 14 + 4, wt = wa + text_w(w[0]) + gap + wa + text_w(w[1]) + gap + 20 + text_w(w[2]);
+        const int gap = 24, wa = 2 * 14 + 4, wt = wa + text_w(w[0]) + gap + wa + text_w(w[1]) + gap + 16 + text_w(w[2]);
         int x = 200 - wt / 2;
         box(&t, x - 14, 204, x + wt + 13, 231);
         arrow(&t, x + 6, 217, 0); arrow(&t, x + 20, 217, 1); x += wa; text(&t, x, 210, w[0]); x += text_w(w[0]) + gap;
         arrow(&t, x + 6, 217, 2); arrow(&t, x + 20, 217, 3); x += wa; text(&t, x, 210, w[1]); x += text_w(w[1]) + gap;
-        abutton(&t, x + 8, 217); x += 20; text(&t, x, 210, w[2]);
+        abutton(&t, x + 6, 218); x += 16; text(&t, x, 210, w[2]);
     }
     /* ---- the bottom screen, on the yellow squares: what the option does, the disc and the console, Start */
     squares(&b, -6, 1);
