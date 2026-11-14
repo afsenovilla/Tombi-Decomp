@@ -65,7 +65,7 @@ void port_pop_end(unsigned long b, const void *key, int kind)
         (void)step; (void)first;
         n++;
     }
-    if (!n) return;
+    if (!n) { if (kind == 0 && getenv("POPZ")) fprintf(pl_f, "Z %lx %d %d\n", (unsigned long)(uintptr_t)key, ((const uint8_t *)key)[1], *(const int16_t *)(*(const uint8_t *const *)((const uint8_t *)key + 0x40) + 2)); return; }
     const uint8_t *o = (const uint8_t *)key;
     if (kind == 0) fprintf(pl_f, "O %lx %02x %02x %02x %d %d %d %d %d\n", (unsigned long)(uintptr_t)key, o[0x1c], o[2], o[3],
                            x0, x1, y0, y1, n);

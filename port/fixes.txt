@@ -351,14 +351,19 @@ src/x009/drawArea9ModelGT4.c | p->x1 < 0x141 | PORT_WSX(p->x1) < PORT_WSW(0x141)
 src/x009/drawArea9ModelGT4.c | p->x2 < 0x141 | PORT_WSX(p->x2) < PORT_WSW(0x141)
 src/x009/drawArea9ModelGT4.c | p->x3 < 0x141 | PORT_WSX(p->x3) < PORT_WSW(0x141)
 # and the object on-screen tests (world X around SCREEN_ORIGIN_X / the camera, in pixels)
-src/cullObjectToDrawList.c | SCREEN_ORIGIN_X + x) > (short)x * 2 + 0x140 | SCREEN_ORIGIN_X + x + port_ws_cull) > (short)x * 2 + 0x140 + 2 * port_ws_cull
-src/cullObjectToDrawListMargin.c | SCREEN_ORIGIN_X + x) > (short)x * 2 + 0x140 | SCREEN_ORIGIN_X + x + port_ws_cull) > (short)x * 2 + 0x140 + 2 * port_ws_cull
-src/ObjCullRegister.c | SCREEN_ORIGIN_X + 0x40) >= 0x1c1 | SCREEN_ORIGIN_X + 0x40 + port_ws_cull) >= 0x1c1 + 2 * port_ws_cull
+# object windows (world units; PORT_WSO = 2 * pad, port_prelude.h: an object behind the screen plane moves less than one
+# column per unit, so a strip of pad columns needs up to ~2 * pad units; measured AREA00 0.81, AREA04 s0 0.51 columns per unit)
+src/cullObjectToDrawList.c | SCREEN_ORIGIN_X + x) > (short)x * 2 + 0x140 | SCREEN_ORIGIN_X + x + PORT_WSO) > (short)x * 2 + 0x140 + 2 * PORT_WSO
+src/cullObjectToDrawListMargin.c | SCREEN_ORIGIN_X + x) > (short)x * 2 + 0x140 | SCREEN_ORIGIN_X + x + PORT_WSO) > (short)x * 2 + 0x140 + 2 * PORT_WSO
+src/ObjCullRegister.c | SCREEN_ORIGIN_X + 0x40) >= 0x1c1 | SCREEN_ORIGIN_X + 0x40 + PORT_WSO) >= 0x1c1 + 2 * PORT_WSO
 # isObjectInView: the same window as ObjCullRegister; drawing (rope chains) and activation (crawlers, KomaPigs, spear
 # pigs, eggs...) then follow the wide frame (every object starts / stops where the wide picture shows it)
-src/isObjectInView.c | (unsigned short)(p->pos->y - *(unsigned short *)SCR_X + 0x40) >= 0x1c1 | (unsigned short)(p->pos->y - *(unsigned short *)SCR_X + 0x40 + port_ws_cull) >= 0x1c1 + 2 * port_ws_cull
-src/x004/cullObjectPerspective.c | + 0x40 + h) > h * 2 + 0x1c0 | + 0x40 + h + (port_ws_cull * k >> 8)) > h * 2 + 0x1c0 + 2 * (port_ws_cull * k >> 8)
-src/x004/cullObjectPerspectiveWide.c | + 0x40 + h) > h * 2 + 0x1c0 | + 0x40 + h + (port_ws_cull * k >> 8)) > h * 2 + 0x1c0 + 2 * (port_ws_cull * k >> 8)
+src/isObjectInView.c | (unsigned short)(p->pos->y - *(unsigned short *)SCR_X + 0x40) >= 0x1c1 | (unsigned short)(p->pos->y - *(unsigned short *)SCR_X + 0x40 + PORT_WSO) >= 0x1c1 + 2 * PORT_WSO
+# the off-screen despawns keep their margin past the wide frame's edges (objects in the strips are not removed)
+src/despawnObjectOffscreen.c | (unsigned short)(o->h[1] - SCREEN_ORIGIN_X + 0xa0) > 0x27f | (unsigned short)(o->h[1] - SCREEN_ORIGIN_X + 0xa0 + PORT_WSO) > 0x27f + 2 * PORT_WSO
+src/despawnObjectOffscreenMargin.c | (unsigned short)(o->h->p.whole - (*(unsigned short*)((char*)&SPAD.i174 + 2)) + a) < (short)a * 2 + 0x140 | (unsigned short)(o->h->p.whole - (*(unsigned short*)((char*)&SPAD.i174 + 2)) + a + PORT_WSO) < (short)a * 2 + 0x140 + 2 * PORT_WSO
+src/x004/cullObjectPerspective.c | + 0x40 + h) > h * 2 + 0x1c0 | + 0x40 + h + (port_ws_cull * k >> 7)) > h * 2 + 0x1c0 + 2 * (port_ws_cull * k >> 7)
+src/x004/cullObjectPerspectiveWide.c | + 0x40 + h) > h * 2 + 0x1c0 | + 0x40 + h + (port_ws_cull * k >> 7)) > h * 2 + 0x1c0 + 2 * (port_ws_cull * k >> 7)
 # --widescreen: the gameplay HUD anchored to the wide frame's edges (lives, vitality, weapon left; AP right)
 src/drawHud.c | drawHudLives(o, 0x18, 0xf0); | drawHudLives(o, 0x18 - port_ws_cull, 0xf0);
 src/drawHud.c | drawHudAP(o, 0x12c, 0x10); | drawHudAP(o, 0x12c + port_ws_cull, 0x10);
