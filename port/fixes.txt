@@ -434,6 +434,7 @@ src/x004/area4ScriptOpSetQuad.c | x = z * 220 / 544; | x = z * (220 + port_ws_cu
 # (port2/runtime/ws_poplog.c; only a pointer test without the option)
 src/drawObject.c | void drawObject(TObj *o) | static void port_drawObject(TObj *o); void drawObject(TObj *o) { extern unsigned long port_pop_begin(void); extern void port_pop_end(unsigned long, const void *, int); unsigned long b = port_pop_begin(); port_drawObject(o); port_pop_end(b, o, 0); } static void port_drawObject(TObj *o)
 src/drawAreaModelList.c | drawModelUnlit(p[1], CURRENT_OT + 0x10); | { extern unsigned long port_pop_begin(void); extern void port_pop_end(unsigned long, const void *, int); unsigned long b = port_pop_begin(); drawModelUnlit(p[1], CURRENT_OT + 0x10); port_pop_end(b, (const void *)(unsigned long)p[1], 1); }
+src/drawGameplayScene.c |     drawPlayer(); |     { extern unsigned long port_pop_begin(void); extern void port_pop_end(unsigned long, const void *, int); unsigned long b = port_pop_begin(); drawPlayer(); port_pop_end(b, 0, 2); }
 #
 # --widescreen: the top-down map (I0NFO / I0NFO2 and their USA / JP builds) is a 384-px window of the room's map
 # picture; the windows left and right of it are drawn through the same VRAM, uploaded at marker packets

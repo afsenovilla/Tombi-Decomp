@@ -68,7 +68,8 @@ void port_pop_end(unsigned long b, const void *key, int kind)
     }
     if (!n) return;
     const uint8_t *o = (const uint8_t *)key;
-    if (kind == 0) fprintf(pl_f, "O %lx %02x %02x %02x %d %d %d %d %d\n", (unsigned long)(uintptr_t)key, o[0x1c], o[2], o[3],
+    if (kind == 2) fprintf(pl_f, "O player 00 00 00 %d %d %d %d %d\n", x0, x1, y0, y1, n);   /* drawPlayer */
+    else if (kind == 0) fprintf(pl_f, "O %lx %02x %02x %02x %d %d %d %d %d\n", (unsigned long)(uintptr_t)key, o[0x1c], o[2], o[3],
                            x0, x1, y0, y1, n);
     else fprintf(pl_f, "B %lx %d %d %d %d %d\n", (unsigned long)(uintptr_t)key, x0, x1, y0, y1, n);
 }
@@ -76,7 +77,11 @@ void port_pop_end(unsigned long b, const void *key, int kind)
 /* --sweep-x FRAME:STEP:X,X,... (research, with --log-pop): from vblank FRAME on, the player's X is set every vblank,
  * moving STEP units a frame through the listed X positions (=X jumps there), so a room can be scrolled end to end
  * without playing it.  The game still runs: gravity, the camera, the spawners all see an ordinary walk. */
-static int sw_frame = -1, sw_step = 4, sw_n, sw_i, sw_x, sw_on;
+static int sw_frame = -1, sw_step = 4, sw_n, sw_i, sw_x, sw_on, sw_fly, sw_fly_on, sw_y;
+/* --sweep-fly DY (with --sweep-x): the player flies at a fixed height, DY units from where the sweep starts (negative
+ * = up), as the debug menu's fly does (GVARS.b3e holds updatePlayer, velocities cleared): no gravity, no walls, so
+ * the camera scrolls at a steady speed at mid height. */
+void port_sweep_fly(int dy) { sw_fly = 1; sw_y = dy; }
 static int sw_wp[64]; static char sw_jump[64];
 void port_sweep_add(const char *s)
 {
@@ -96,12 +101,21 @@ void port_sweep_vblank(void)
     if (sw_frame < 0 || port_frame < sw_frame || sw_i >= sw_n) return;
     uint8_t *hp = *(uint8_t **)(PORT_M0(0x800A6038u) + 0x40);
     if (!port_is_ram_ptr(hp)) return;
-    if (!sw_on) { sw_on = 1; sw_x = *(int16_t *)(hp + 2); }
+    if (!sw_on) { sw_on = 1; sw_x = *(int16_t *)(hp + 2); if (sw_fly) sw_y += *(int16_t *)(PORT_M0(PORT_A_PLAYER) + 0x16); }
+    if (sw_fly && sw_i < sw_n) {
+        uint8_t *pl = PORT_M0(PORT_A_PLAYER);
+        *(uint8_t *)PORT_M0(PORT_A_GVARS + 0x0E) = 1; sw_fly_on = 1;
+        *(int32_t *)(pl + 0x14) = sw_y << 16;
+        *(int16_t *)(pl + 0x7C) = *(int16_t *)(pl + 0x7E) = *(int16_t *)(pl + 0x80) = *(int16_t *)(pl + 0x82) = 0;
+    }
     int t = sw_wp[sw_i];
     if (sw_jump[sw_i]) { sw_x = t; sw_i++; }
     else if (sw_x < t) { sw_x += sw_step; if (sw_x >= t) { sw_x = t; sw_i++; } }
     else if (sw_x > t) { sw_x -= sw_step; if (sw_x <= t) { sw_x = t; sw_i++; } }
     else sw_i++;
     *(int16_t *)(hp + 2) = (int16_t)sw_x;
-    if (sw_i >= sw_n) port_printf("[port] --sweep-x: done at frame %d\n", port_frame);
+    if (sw_i >= sw_n) {
+        port_printf("[port] --sweep-x: done at frame %d\n", port_frame);
+        if (sw_fly_on) *(uint8_t *)PORT_M0(PORT_A_GVARS + 0x0E) = 0;
+    }
 }

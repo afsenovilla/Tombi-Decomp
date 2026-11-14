@@ -328,7 +328,7 @@ static int port_ws_resolve(void) {
 static int usage(const char *argv0) {
     port_printf("usage: %s [--data DIR | --disc Tombi.bin|.cue|.iso] [--lang N] [--cut-content] [--crawler-patrol] [--no-save-heal] [--memcard-mono] [--memcard-prop [GAP[,SPACE]]] [--log-anim [FILE]] [--log-anim-force CAT:TYPE,...] [--noclip] [--frames N] [--headless] [--window [--scale N] [--fit] [--aspect 4:3|square|16:9|21:9|32:9|auto] [--widescreen [16:9|21:9|32:9|auto]] [--display-size WxH] [--fullscreen] [--keys up=Up,cross=X,...] [--pad-map r1=rightshoulder,l2=lefttrigger,...]]\n"
                 "       [--renderer gl|soft] [--internal-res 1..4] [--fps N|auto|unlimited] [--dump-presents DIR[:FROM:TO]] [--realtime] [--hz 50|60] [--picture ntsc|pal] [--show-fps [1|2]] [--log-fps [1|2]] [--patch-tex FILE]... [--no-gfx-es] [--subscreen-labels item=..,event=..,status=..,exit=..,map=..,use=..|..,view=..,sort=..] [--text-patch FILE.tpatch|.tombipatch.json]... [--no-translation-file] [--patch-dir DIR] [--title-bg FILE] [--early-title PREPRE8_DIR] [--wings-glide JPDEMO_DIR --wings-pre9 PRE9_DIR]\n"
-                "       [--dump-frames DIR [--dump-every N] [--dump-vram]] [--dump-draws FILE] [--dump-textures DIR] [--texture-pack DIR] [--pad-script FRAME:BUTTONS[:LEN[xCOUNT/PERIOD]],...]\n"
+                "       [--dump-frames DIR [--dump-every N] [--dump-from N] [--dump-vram]] [--dump-draws FILE] [--dump-textures DIR] [--texture-pack DIR] [--pad-script FRAME:BUTTONS[:LEN[xCOUNT/PERIOD]],...]\n"
                 "       [--poke FRAME:ADDR:VALUE[:SIZE[xCOUNT]]] [--poke-every INTERVAL:ADDR:VALUE[:SIZE]] [--menu FRAME:N] [--title FRAME:ID[:start]] [--movie FRAME:ID]\n"
                 "       [--dump-audio PATH] [--skip-movies] [--skip-intro] [--title-debug] [--launcher-exit] [--debug-menu] [--log-events] [--second-screen] [--hud-bottom] [--dump-panel DIR] [--panel-size WxH] [--panel-input FRAME:ACTION,...] [--trace-cd] [--save-dir DIR] [-v]\n"
                 "  --subscreen-labels KEY=TEXT,... writes the Select sub-screen's tabs (item event status exit map) and leaf buttons (use view\n"
@@ -1076,6 +1076,7 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--pad-script") && v) port_pad_script(argv[++i]);
         else if (!strcmp(a, "--dump-frames") && v) port_dump_dir = argv[++i];
         else if (!strcmp(a, "--dump-every") && v) port_dump_every = atoi(argv[++i]);
+        else if (!strcmp(a, "--dump-from") && v) { extern int port_dump_from; port_dump_from = atoi(argv[++i]); }
         else if (!strcmp(a, "--dump-vram")) port_dump_vram = 1;
         else if ((!strcmp(a, "--dump-textures") || !strcmp(a, "--texture-pack")) && v) {   /* shims/texpack.c */
             extern const char *port_texdump_dir, *port_texpack_dir; extern int port_texpack_on; extern void port_texpack_stop(void);
@@ -1086,6 +1087,7 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--dump-draws") && v) { extern const char *port_drawdump_path; port_drawdump_path = argv[++i]; }
         else if (!strcmp(a, "--log-pop") && v) { extern const char *port_poplog_path; port_poplog_path = argv[++i]; }
         else if (!strcmp(a, "--sweep-x") && v) { extern void port_sweep_add(const char *); port_sweep_add(argv[++i]); }
+        else if (!strcmp(a, "--sweep-fly") && v) { extern void port_sweep_fly(int); port_sweep_fly(atoi(argv[++i])); }
         else if (!strcmp(a, "--dump-ram") && v) port_dump_ram_add(argv[++i]);
         else if (!strcmp(a, "--dump-audio") && v) port_audio_path = argv[++i];
         else if (!strcmp(a, "--gfx-es")) port_gfx_es = 1;
@@ -1144,7 +1146,7 @@ int main(int argc, char **argv) {
     if (port_ntsc) port_printf("[port2] NTSC picture: the US build's 320x224 screen (--picture pal for the PAL 320x256 one)\n");
     if (port_ws_auto) { extern int port_widescreen; port_widescreen = port_ws_resolve(); }
     { extern int port_widescreen, port_renderer, port_ws_cull;
-      port_ws_cull = port_widescreen;
+      port_ws_cull = port_widescreen; { extern int port_ws_xtra; const char *e = getenv("PORT_WSXTRA"); if (e && port_widescreen) port_ws_xtra = atoi(e); }
       (void)port_renderer; }
     setvbuf(stderr, NULL, _IONBF, 0);     /* the launcher reads a pipe: every line must leave the process at once */
     { extern const char port_build_id[], port_build_date[]; port_printf("[port2] build %s %s\n", port_build_id, port_build_date); }
