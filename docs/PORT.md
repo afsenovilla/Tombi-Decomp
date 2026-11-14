@@ -2648,8 +2648,25 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   the `x < 0x140` / `< 0x141` screen tests of the model drawers (modelDraw*, drawModel*, area 9 models) and sprite
   drawers (drawObjectSprite*, drawScreenSpriteObject, isQuadOnScreen, the i0nfo ones) become
   `(u16)(x + pad) < 0x140 + 2*pad`; the object on-screen tests (cullObjectToDrawList[Margin], ObjCullRegister,
-  cullObjectPerspective[Wide]) get the same margin.  Ground, trees and objects then fill the side strips.  Note that
+  cullObjectPerspective[Wide]) get a margin too.  Ground, trees and objects then fill the side strips.  Note that
   `o->visible` feeds some object logic, so objects in the strips may be "active" earlier than on 4:3.
+- **Object windows and edge spawns (2026-11-14)**: the object windows are in world units, and an object behind the
+  screen plane moves less than one column per unit (measured: 0.81 in AREA00, 0.51 in AREA04 s0), so a margin of `pad`
+  units let objects appear up to ~20 columns inside the strip.  The object windows (cullObjectToDrawList[Margin],
+  ObjCullRegister, isObjectInView, isOnScreen) now take `PORT_WSO` = 2 * pad units (`port_prelude.h`), the AREA04
+  perspective culls pad * k / 128 (k = the game's own depth ratio; its 4:3 margin assumes a projection that the
+  measured one does not match).  isObjectInView also gates activation (KomaPigs, crawlers, spear pigs, eggs, flying
+  bugs, AREA01 rope chains' drawing), so these start when the wide frame shows them.  The off-screen despawns
+  (despawnObjectOffscreen[Margin]) keep their margin past the wide edges (+PORT_WSO), so nothing started in a strip is
+  removed while it shows.  Per-object windows and spawn points at the 4:3 edges moved out by PORT_WSO: winged fork
+  pigs (AREA03), the spiky lizards' reset window and their spawner (AREA03),
+  AREA03's wind streaks and drifting translucent sprites, and AREA01's KomaPig drop-ins (they land 2 * pad units
+  further out and walk in a little later; near the left room limit 0x3CA a left drop-in is skipped a little more
+  often).  Gameplay timing changes only by that walk; nothing is spawned that the game would not spawn.
+  Not changed: windows already wider than 16:9 needs (the spear pigs' [-224, 545), AREA06's [-200, 701)): widening
+  the spear pigs' made one in AREA10 s0 start early and walk off before Tomba arrived (found by comparing runs), so
+  activation windows are only widened where 4:3 + pad is not covered.  Gameplay positions, not screen tests: the
+  jellyfish targets (AREA09), komaPigDropIn's "walked in" test, the rolling barrel's camera range.
 - **HUD** (`drawHud`, fixes.txt): lives, vitality and weapon move left by pad, the AP counter right by pad (anchored to
   the wide frame's edges).  Other HUDs (race, item gauges, menus) stay at their 4:3 place, centred.
 
@@ -2659,9 +2676,15 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   rows, its centred 56.24 % the game's 320 columns (measured on a 2000x848 picture); wider than the picture is black.
 - **Background blocks** (`callAreaModelLinkHook`, fixes.txt -> `port_ws_area_model_link` in
   `runtime/main0_handwritten.c`): the area background is one model in RAM split into 80-unit-wide blocks; a per-area
-  hook picks the blocks around the camera X each frame (nothing streams from CD).  For the hooks that only select
-  (areas 0, 1, 2, 3, 7; the others also animate palettes or keep counters) it is run again with the camera X moved
-  2*pad+40 each way and the extra blocks are merged into the list (cap 88), so the edges no longer pop in.  Drawing only.
+  hook picks the blocks around the camera X each frame (nothing streams from CD).  The hook is run again with the camera
+  X moved 2*pad+40 each way (in steps of at most 160 units, so 32:9 leaves no gap) and the extra blocks are merged into the list (cap 88), so the edges no longer pop in.  Drawing only.
+  Areas 0, 1, 2, 3, 7, 9, 10 (2026-11-14: 9 and 10 added).  Some hooks also animate palettes / copy VRAM from
+  counters kept in the list (AREA03 s2/s3, AREA09 s0, AREA10 s1/s5, AREA14 s3/s6): the extra runs fill a zeroed
+  copy of the list and `port_ws_dry` (`shims/gpu.c`) turns LoadImage / MoveImage into no-ops while they run, so the
+  uploads happen once, from the game's own run (AREA03 s2/s3 still run only their selection, area3_blocks).  AREA04
+  s0-s3 select by a view-frustum test, not by camera X: its corners (x = +-z * 220 / 544) widen to
+  220 + pad (fixes.txt, area4ScriptOpSetQuad).  AREA06 s0 (selects by GVARS+0x48, not the camera X; no pop seen), 13, 14, 18 (one
+  block, the whole room) need nothing.
 - **Room ends** (`runtime/ws_edge.c`, called from `port_ws_area_model_link`; `--ws-edge off|on|all`): a room's
   model stops where the 4:3 camera stops, so past its first / last sector a wide frame showed the clear colour (the
   ground and the tree line of the first room ended in mid-air on the left).  Once per room model and end, one extra
@@ -2722,6 +2745,176 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   (just past 4:3, inside the wide frame, where they popped into view) and left at x 480 (inside 21:9 / 32:9).  They
   now start `pad + 160` further right (the tiles sit up to ~150 either side of the title's x) and leave once past `320 + pad`; the fly-in speed is derived from the distance over
   the same 30 frames, so they land on the same frame.
+- **Parked actors** (`runtime/ws_entrance.c`, fixes.txt `spawnPigGateSceneNpcs` / `pigGateDiscoveryScene`, 2026-11-14):
+  an actor the game keeps just past a 4:3 edge for a scripted entrance showed waiting in the strip.  AREA02 s5 (Small
+  Strange Room): Baron (SCRIPT_OBJECTS[1], x 340, z 0; 1 unit = 1 column there) sat 4 columns right of the picture
+  until pigGateDiscoveryScene state 22/23 walks him to Tomba.  He is now parked `pad` units further right (as far
+  past the wide edge as past the 4:3 one) and the walk covers the extra distance over the retail frame count (about
+  1.6x the retail speed at 16:9, 2.3x at 21:9, 4x at 32:9; the walk animation advances once more on frames that move
+  2+ units), so he arrives on the same frame and the script, its timers, events and flags run exactly as at 4:3
+  (checked: the 4:3 centre of 16:9 and 32:9 frames equals the retail 16:9 run on every frame outside the walk; 4:3
+  runs byte-identical).  Search over the 96 debug-select rooms (2200 frames each, 16:9; the 30 with a static camera
+  looked at): one more case, AREA17 s5 (the engine room, raft return NPCs, updateRaftReturnNpc): two NPCs wait at x
+  ~340 / ~384 right of the picture and walk in after the room's "CLEAR!" event (~frame 2150 of the select run); their
+  walk is not in the overlay's NPC step (likely animation-driven), not fixed yet.  AREA05 s1 / s3: an NPC half inside
+  the 4:3 picture (x -14..18), not parked.  Only the select's default story flags were covered.
+- **Room picture strips** (`runtime/ws_backdrop.c`, `shims/gpu.c` `ws_backdrop`; on by default with `--widescreen`
+  since the user approved it on 2026-11-14, `--ws-backdrop off` disables it): AREA02 s5's background is one pre-rendered 320x224 8 bpp picture (VRAM
+  page x 128, CLUT 128,511) drawn as two sprites (256 + 64 columns) at frame row 16, nothing past 4:3 (the strips
+  showed the clear grey).  When the left sprite comes (signature + room checked) the strips of the wide copy are
+  filled before the game draws it (so drums, actors and boxes stay on top).  `on` is a procedural redraw, made the
+  way `shims/gfx_es.c` makes the Spanish graphics: drawn by code at run time, colours sampled from the user's
+  picture in VRAM, no pixels shipped or copied (the source holds coordinates only: the bond, the floor line, where
+  to sample).  Analysis of the picture: back wall in 18-row courses (mortar rows 13 + 18k, 2 rows), 27-column bricks
+  in half bond (joints at x 22 / 49 even courses, 8 / 35 odd on the left; 242 / 269 / 296 and 256 / 283 on the
+  right), floor from row 176; ivy is 2-4 px leaves over near-black gaps, 42 greens, the picture uses 191 colours.
+  The room is a box, not an endless wall (the user's reading of the right corner): at x 297-302 the back wall
+  turns towards the viewer (a narrow face whose mortar lines slant down-right, slopes 0.33 / 0.65 / 0.75 / 0.8 at
+  rows 122 / 141 / 160 / 178) onto a lit front face (x 303-314) whose courses are 19.5 rows (x 1.083) with mortar at
+  124 / 143.5 / 163 and its foot at 181; each of those rows lies on the line from the back wall's row (121 / 139 /
+  157 / 176) through row 85, so the horizon is row 85; a least-squares fit of the slanted face puts the vanishing
+  point at x 173 (horizon 72: the painted face is steeper than exact), the door's axis is x 160: VP (172, 85).
+  Which plane the right side wall is (the user: "the right wall meets the floor at the wrong height against the
+  corner"; it first started at the front face's plane, foot at row 184 at the edge): the slanted face's foot runs
+  from the room corner (x 296.5, the dark vertical line, row 176) through the VP, and the dark ivy-covered wall right
+  of the pillar (x 315-319) ends on the floor on the very same line (rows 190 / 193 at x 315 / 319), so the slanted
+  face is the side wall and the lit front face (x 303-314, foot 181, with its shadow wedge on the floor x 303-314,
+  rows 181-190) is a pillar standing out of it.  The right strip is that plane: foot row 193 at the edge, reaching
+  the frame's bottom at X ~41.  The left corner is hidden by the trunk (back wall bricks show from x 22): x 19.5
+  (the mirror of the right corner about the door's axis would be 23.5), foot row 187.6 at x 0, under the ivy that
+  drapes onto the floor down to row ~194 there.  So both strips are side walls receding towards the camera: strip
+  column X has the scale s = (E + X) / D (E: the edge column's centre from the VP, 147.5 / 171.5; D: the corner's,
+  124.5 / 152.5), a pixel's back-wall height is 85 + (y - 85) / s, its place along the wall U = F (1 - 1/s) (F = 320
+  px), the foot 85 + 90.5 s: courses taller, bricks wider, the mortar lines diverging from the VP, verticals
+  vertical; the floor's texture and the foot use the same VP.  Light (the user: "take the room's lighting into
+  account"), measured: one soft pool centred on the door, the floor 130 on the door's axis falling to ~82 at floor
+  lateral |f| = |x - 172| / (y - 85) = 1.2 and lateral only (equal f keeps its tone from row 186 to 223); the back
+  wall 130 by the arch, 50-65 by the edges; the pillar's front face (80) brighter than the back wall beside it (57),
+  the slanted face ~0.7 of it; the wall beside the pillar (~30) and the left edge (~29) dark.  The strips first
+  followed all of that (pillar / trunk shadows, dark foot and top, steep falloff) and the user found them "far too
+  dark": now the walls only fall off gently towards the viewer (at most 14 %) with a soft corner at the foot, the
+  floor follows a line fitted per side on the picture's floor (luminance against |f|, 0.6-1.15) carried on past the
+  edge but at most 1/8 darker than at the edge, with a soft contact line at the walls' foot; the leaves take the
+  same light.  Then `balance()` sets the level: per region (wall = non-green above the foot, floor = below it, ivy =
+  green), the luminance of strip columns 4-13 is mapped (L' = m + (L - ms) k) onto the mean m and the spread
+  (k = picture deviation / strip deviation, 0.75-2) of the picture's 40 columns next to the edge (wall rows 4-169,
+  left 4-121 above the root; floor rows 196-223), each pixel's colour scaled by L' / L; the 15-bit conversion rounds
+  (it truncated: ~9 % darker at these levels).  Measured on the port's 16:9 frame (strip / outer 10 columns /
+  picture 40 columns): left wall 44 / 44 / 40, floor 84 / 82 / 81, ivy 61 / 62 / 64; right wall 47 / 47 / 48, ivy
+  47 / 50 / 49, floor 83 vs 87 (the picture's floor without the drums); at 21:9 the outer columns are 79-104 % of
+  the picture (left ivy 79 %); before this pass the walls were 24-26.  Generator: 32-bin colour ramps (brick faces,
+  mortar, floor, ivy)
+  and per-course brick tones next to each edge; bricks laid in wall coordinates by a hash of course / index (own
+  tone, bevel lit top-left, mottling, grain, stains, the odd crack; joints and bevels at least a column wide);
+  floor below the walls' foot = streak / slab / pebble value noise in floor coordinates (rows of equal depth stay
+  horizontal, the texture grows towards the viewer) over the floor ramp at the fitted light.  No roots, by the
+  user's decision: a sweep of generated roots drawn like the picture's root fan (tapered cubic curves shaded across)
+  was rejected outright ("the roots you drew are horrible, never draw roots again"), so the left strip is side wall,
+  floor and ivy only, and no root shape of any kind is to be drawn there again; the picture's own root ends at its
+  edge (rows ~123-150 at x 0), where the edge ivy mass is kept dense down to the floor (rows 112-201) to cover the
+  cut.  Ivy grown as
+  stems (cascades of 3-6 stems hanging from the top of the side wall, every 22 back-wall columns along the wall so
+  further apart towards the viewer, middle ones longest, long near the corner and here and there further out,
+  short along the whole wall top; climbers from the wall's foot; branching; leaves sized by the wall's
+  scale where they hang, relative to the edge's so they start as big as the picture's), plus a mass next to each edge as deep as the picture's own ivy on that row and in its
+  tone; every leaf drawn one by one (tapered ellipse, 16 angles, lit top-left, rim shadow, grain), back leaves dark
+  first, front leaves light last, the wall shadowed under them; the three columns next to the picture blended with
+  its edge column; every pixel quantised to the nearest colour the picture uses.  Integers only (no float, no
+  libm), seeds by position, so a 21:9 / 32:9 strip starts with the 16:9 columns and goes on without repeating;
+  never two random draws in one argument list (gcc i386 evaluates arguments right to left, clang / wasm2c left to
+  right: that made the first wasm2c strips differ).  Checked at 16:9 / 21:9 / 32:9: i386 = wasm2c = the standalone
+  build (`cc -DWS_BACKDROP_MAIN`, see the file header), software = OpenGL (xvfb), the 4:3 centre unchanged, 4:3 runs
+  identical (after the corner / light / roots pass: i386 = wasm2c whole frames at 16:9 and 21:9, 4:3 on = off, the
+  4:3 centre unchanged; 32:9 only in the standalone build, OpenGL not re-run; after the no-roots / lighter pass:
+  i386 = wasm2c whole frames at 16:9, 21:9 and 4:3 (frames 1600-2400), 4:3 on = off, the 4:3 centre unchanged, the
+  standalone strips identical with gcc x86-64, gcc -m32 and clang at 16:9 / 21:9 / 32:9).  `--ws-backdrop mirror` keeps the first preview (the picture mirrored at its edge over 56 columns with
+  the edge ivy laid over again), rejected by the user ("mirroring, not redrawing"); the first redraw continued the
+  back wall flat into the strips, replaced by the side walls after "the room doesn't extend sideways, it closes like
+  a box, judging by the angle of the corner".
+- **More rooms with picture strips (previews, off by default; 2026-11-14)**: the system takes a per-room table
+  (`ROOMS` in `runtime/ws_backdrop.c`, the generators in `runtime/ws_backdrop_rooms.inc`).  Every fixed-camera
+  picture room found so far draws its 320 x 224 8 bpp picture with CLUT (128, 511): the left 256 columns are page
+  (128, 0) rows 0-223 as one sprite at frame (0, 16) (h 224; the Iron Castle hall draws 256 x 256, clipped); the
+  right 64 columns are page (256, 0) u 0-63 (AREA02 s5, AREA17 s3/s4) or are pieced together: four 64 x 32 pieces
+  from page (128, 0) rows 224-255 (u 0 / 64 / 128 / 192 -> picture rows 0 / 32 / 64 / 96) and page (256, 0) for
+  rows 128-223 (u 0 v 0 in AREA05, u 8 v 96 in the Dwarf Village); some rooms draw parts of the scene as further
+  unscaled quads (texel 0 clear, the same CLUT): AREA05's tree tops / roof / fence (page 256: u 0-55 and 56-255 v
+  112-215 -> rows 0-103; u 144-207 v 0-79 -> x 256, rows 24-103; the front bushes u 64-215 v 80-111 -> x 88, rows
+  192-223), the village's hut (u 80 v 96 152 x 104 -> 44, 44), a stump (u 144 v 48 -> 4, 137), the jukebox (u 8 v
+  200 -> 260, 116) and the front blossoms / balloons (u 8 v 8 192 x 32 -> 0, 192; u 8 v 48 128 x 40 -> 192, 184).
+  The table lists those pieces (coordinates only) and `grab()` puts the picture together from VRAM with them, so the
+  redraw samples what the player sees (`PORT_WS_BACKDROP_DUMP=FILE` writes it; the standalone build takes the room:
+  `wsb 5:1 PIC.raw 53 OUT.ppm`).  gpu.c's hook now takes the strips' row count from the call (224) instead of the
+  sprite's height.  AREA19 s1 (the blossom village) runs as area 2 s1 (GAME.area): its table entry names the game's
+  numbers (`garea` / `gsec`) and `is()` tells the two pictures apart (over 60 % of the canopy's texels pink).
+  Flags: by default only the approved rooms (`approved` in the table: AREA02 s5); `--ws-backdrop on` = every
+  room in the table (previews too), `--ws-backdrop off` = none, `--ws-backdrop-rooms 2:5,5:1,...` = exactly those
+  rooms (decimal area:section, the debug select's numbers; `all`), so the user can approve rooms one by one; a room
+  becomes default by setting its `approved`.  Shared helpers: ramps of a region's texels (`samp_box` /
+  `samp_edges`), a region map of the strip and `balance_regions()` (per region, the strip's columns 4-15 mapped onto
+  the trimmed mean / spread of the picture's 32 columns next to the edge, or next to both edges for regions one edge
+  is covered at: the village's jukebox), `emit()` (the join and the quantisation to the picture's colours), foliage
+  `blob()`, `sphere()`.  The rooms:
+  - AREA05 s1 / s3 (the same picture: the house with the dry-stone wall), a frontal scene, every band continued
+    sideways from what the picture has in its last columns (rows: wood 0-71, front fence 72-102 with planks 72-77 /
+    81-86 / 93-99 on the left and one row lower on the right, the wall 103-185, path 186-~200, bushes ~200-223).
+    Redrawn 2026-11-14 after the user rejected the first version (regular clone trees, big contrasted bluish stones,
+    flat fence, visible joins, repeated bushes).  How each band is drawn now:
+    - per-row ramps: the fence planks, the gap rows between them, the path, the wall's top and foot rows take the
+      colour distribution of the same picture row in the 26-40 columns next to the edge (objects left out: posts, the
+      pipe, plants), read through stretched value noise (grain along the planks, streaks on the path), so each row has
+      the picture's tone and spread there; the right edge's gap rows (filled by the pipe) take the left's.  Posts every
+      20-24 columns continue the picture's (left 22 / 2, right 291 / 314), lit on their left side;
+    - the wall: a skyline of stones laid outwards column by column (where a stone ends, the free rows get new stones,
+      7-18 x 5-6 incl. the joint, so joints never line up), the first ones the picture's stones cut by the edge (rows
+      from the horizontal joints of its last 3 columns, colour from their texels, the remaining length from the visible
+      one).  Sizes re-measured on the picture's mortar lines (second pass, 2026-11-14): stones 7-30 texels long (median
+      ~14) by 5-7 rows incl. the joint; the layout then warped by smooth noise (up to +-2 texels, none in the first 2 columns) and the mortar is
+      the one-texel boundary of each stone, so stones are irregular polygons with slanted joints.  Stone colours: the
+      picture's stones next to both edges (bright cores, 4-connected, rows 104-180, 70 columns each side, Otsu
+      threshold) picked as often as their area, the blue-grey ones then halved (their bright cores overstate them) and
+      kept short, so their texel share is the picture's (~3-6 %); each stone its own tone (+-18), a bevel: a light top
+      row (+22, +9 under it), a dark lower row and right column (towards the mortar), the mortar darker under a stone;
+      no per-texel tint of the mortar (that made blue specks); the foot's shade per row as measured;
+    - the wood: the sky's ramp; a hazy back row; the tree cut by each edge continued (A5_ETREE: left near tree centre
+      12 top 3, right hazy tree centre 309 top 1), its tier lines from the dark rows of the edge columns so the
+      chevrons meet; then conifers outwards spaced by their widths (crowns 40-76 wide, tops -5..15, near / hazy mixed,
+      the odd gap): each a dark crown shade, then tiers from the bottom up of needle clumps (ellipses along the
+      drooping branch, lit on top, dark underside, needle gaps), the right flank in the light (as the picture's),
+      uneven tier widths, sunlit patches on the clumps' tops, the odd clump missing and dark patches in the crown
+      shade (the picture's holes); near trees matched in brightness / contrast to the picture's near conifer (x 252-288), hazy
+      ones to the hazy one (x 298-320), then balance_regions() at the edge and a per-row tone match over the first 12
+      columns;
+    - the bushes: mounds 22-50 columns apart (tops 198-211, lumpy outline), the first one starting at the picture's
+      bush top at the edge; leaf clusters on a jittered 6 x 5 grid, each lit from the top left, crevices, holes, bright
+      leaves on top; then matched in brightness / contrast to the picture's bushes (contrast up to x2, the full range);
+    - the sky: the ramp of both edges' sky texels (the clouds too, not only the white);
+    - sharpness: per band (and per tree kind) a 3x3 blur of the strength that gives the strip the picture's own mean
+      fine detail |L - box3(L)| next to the edge (the hazy trees, the path and the bushes are soft; the wall crisp);
+      the hazy trees are blurred with the sky around them (soft tops).
+    The stepping stones, barrels, bench, notice board and pipe are not continued.  A wider strip (21:9, 32:9) starts
+    with the same columns as the 16:9 one (stats measured on columns 1-53 only; the last column differs by the blur).
+    Weak points: the generated conifers are still more regular than the painted ones (cleaner, stripier chevrons; pure
+    green rather than the picture's olive / yellow mix); the strip's courses run in longer straight lines than the
+    picture's; blue-grey stones can still bunch locally.
+  - AREA19 s1 / AREA02 s1 (the Dwarf Village: one layout, two pictures): canopy 0-~100 (AREA19: blossom as value
+    noise masses with small flower clusters on a jittered 8 x 7 grid, a ragged shaded lower edge; AREA02: soft
+    spheres of radius 13-25 in the picture's own four balloon colours, far ones first, lit upper left), the haze /
+    rock band behind, the fence 112-138 (posts 5-7 columns, two rails), the ledge 138-150 (grass / golden leaves),
+    its lip, the palisade 155-182 (4-column stakes in the ledge's shade), the ground, the front 195-223 (blossom
+    mounds / big spheres half under the frame).  Huts, dwarves, jukebox, bench and barrel are not continued.  Weak
+    points: the fence is sparser than the picture's, the blossom's flower clusters are rounder than the painted
+    ones, the front band is lower and flatter than the picture's front quads, no trunks between the balloons (by
+    design: no trunks).
+  - AREA17 s3 / s4 (the Iron Castle hall) is not redrawn yet: its side walls are not simply planes towards the
+    camera.  Measured edges (left / right edge columns): the top rail of the side balustrade rises outwards (row 136
+    at x 34, 131 at x 1), its lower rail stays at row 146-147 across, the walls' foot falls outwards (180 at x 25,
+    186 at x 1) and the cornice rises steeply (47 at x 34, 30 at x 5): with a horizon near row 146 those slopes put
+    the vanishing point at x ~100 / ~160 / ~200, so the walls are probably oblique (an octagonal hall with angled
+    corner walls) and need a proper fit before the strips can continue them.
+  Checked (headless, 2026-11-14): at 16:9 and 21:9 in the four rooms; 4:3 runs identical with `--ws-backdrop on` and
+  off; with the default flags the new rooms are identical to `--ws-backdrop off`, and AREA02 s5 is identical to the
+  build before the table; i386 = wasm2c strips; not checked on the device.
 - **Sub-screens** (Select screens Objetos / Eventos / Estado / Mapa, memory card, options, button config, screen
   adjust).  The Select screens (`subScreenDrawTabs`, D0SPSUB / D0SPSUB3, `#ifdef PORT2`) call `port_ws_layout(left cut,
   right cut, below)` each frame; while it is set, `shims/gpu.c` spreads the textured primitives of the frame
@@ -2768,6 +2961,66 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   Our letters also cover the digits, punctuation and the keyboard's symbols, the grave / diaeresis / cedilla marks
   (à è ì ò ù, ä ë ï ö ü, ç and capitals), and replace the disc's leaf U / u (turned 8 degrees left: `REPLACE`);
   marks above the leaf's u / U sit a few texels right (`MARK_SHIFT`). 130 characters per font.
+
+**Pop-in check** (`--log-pop FILE`, `--sweep-x FRAME:STEP:X,X,...`, `tools/ws_popcheck.py`; research options,
+`runtime/ws_poplog.c`): `--log-pop` writes, per frame, the screen-X / Y range of the primitives each object
+(drawObject, layer 7) and each background block (drawAreaModelList) emitted; `--sweep-x` sets the player's X every
+vblank, walking it through a list of positions (`=X` jumps), so a room scrolls end to end with the game running
+(spawners, gravity, camera).  `ws_popcheck.py` lists what appeared or vanished inside the frame with at least 16
+columns showing on its first / last frame (something scrolling in shows a sliver), tagged "strip" (reaches into the
+side strips) or "4:3".  Run over the 52 scrolling side-view rooms the debug select enters (rooms of AREA00-04, 06, 09,
+10, 14, 17 whose camera range is wider than a screen; top-down rooms and the tunnels are elsewhere), sweeping each
+from its start to past both camera limits, 16:9, PC i386 and the wasm2c build (same counts): strip events (objects and
+blocks; layer 7 is logged too but left out here: its 61 events are whole backdrop layers the game switches on / off at
+once, the same at 4:3)
+
+| area | sections swept | before | after | 4:3 events, widescreen off |
+|---|---|---|---|---|
+| AREA00 | 0-5 | 58 | 25 | 94 |
+| AREA01 | 0-4 | 290 | 60 | 116 |
+| AREA03 | 0-5 | 36 | 34 | 139 |
+| AREA04 | 0-3, 5-7, 9, 13, 16 | 326 | 71 | 241 |
+| AREA09 | 0-2 | 108 | 9 | 42 |
+| AREA10 | 0-7 | 719 | 53 | 185 |
+| AREA14 | 0-7 | 6 | 2 | 15 |
+| AREA02 s4, AREA06 s0/s1, AREA17 s2 | | 0 | 0 | 0 |
+
+Before, by source: AREA10 / AREA09 / AREA04 background blocks (hooks not widened: ~1000), AREA01 s2 rope chains
+(isObjectInView: 228), AREA04 collectibles and other objects behind the screen plane (object windows one pad wide).
+What is left: things that really appear / vanish in view (collected items, a layer-8 overlay of AREA04 that toggles as
+a whole, AREA01 s2 / AREA10 s3 s7 blocks that the game selects by camera Y too, flickering in a row at the top edge,
+the same at 4:3), blocks flickering every other frame at a thin polygon (AREA01 s0, AREA01 s2: a polygon seen edge
+on, not a selection), and objects of room start / respawn frames.  The last column is the retail count of the same
+metric inside the 4:3 picture (widescreen off): the PS1 game itself pops blocks and objects in near its edges, which
+the wide frame now mostly hides.  Headless only; the device (AYN Thor) not checked.
+
+**Pixel check (2026-11-14, second pass).**  `ws_popcheck.py` counts whole objects / blocks, so it cannot see a block
+drawn in part (a polygon culled inside it, a sub-block selection).  Three checks that look at pixels instead:
+- `tools/ws_popscan.py RUN`: every dumped frame against the previous dump, in 8x8 tiles; a tile no shift of the previous
+  frame explains (camera step found first, then +-24 columns) is content that appeared, and the same backwards for
+  content that vanished; frame edges, HUD rows and the boxes of the player and small objects (`--log-pop` now logs the
+  player too) are left out.  Validated with a control run that puts the 4:3 culls back on a 16:9 frame
+  (`PORT_WSXTRA=-53 PORT_WSBLK=-146`): AREA09 s0 at mid height 0 -> 312 strip events.  Animated scenery (flowers, the
+  AREA04 fading wall, fast near layers) gives false events: look at its `--png` overlays.
+- A reference run: research environment variables `PORT_WSXTRA=N` (every patched cull keeps N more columns,
+  port_prelude.h `PORT_WSX`) and `PORT_WSBLK=N` (the block hooks' extra runs move N units further,
+  `port_ws_area_model_link`), drawing only, so the game runs the same: with N large the frame shows everything the
+  culls / block selection could still leave out, and every pixel that differs from the normal run is a miss.
+- The 4:3 run of the same input: the middle 320 columns of the 16:9 frame against it.
+Research options added for this: `--sweep-fly DY` (with `--sweep-x`: the player flies at a fixed height, DY units from
+the sweep's start, as the debug menu's fly does, so a room is crossed at a steady speed at mid height in both
+directions), `--dump-from N` (no frame dumps before vblank N), `PORT_PRIMLOG=F0:F1:FILE` (every primitive of those
+vblanks: kind, texture page, CLUT, UV box and screen box, for finding which one went missing).
+Results, 16:9, the 49 scrolling rooms of the sweep list (DOOR_ROOMS and top-down rooms out), flying start -> right end
+-> left end at 30 and 110 units above the start: the reference run (`PORT_WSXTRA=300 PORT_WSBLK=600`) draws nothing in
+the frame that the normal run misses (AREA01 s0-s2 and AREA10 s0/s3/s4 show a few hundred pixels over a whole sweep;
+the ones looked at are the reference's own artefact: its far-off-screen polygons, not a missing piece); the middle 320
+columns equal the 4:3 frame (HUD apart); i386 and wasm2c frames equal; the OpenGL renderer and `--fps 60` presents
+give the same pixel-check result in the AREA09 s0 climb.  AREA09 s0 in particular (the room of the report): walking
+sweep both ways, fly at 30 / 40 / 110 / 150 / 260 above the start, the climb at the start, i386 and wasm2c: no event
+in the strips.  The straight vertical edges seen in that room are the rock blocks' and bush cards' own edges, the same
+in the 4:3 picture.  What the pixel check still flags are the game's own switches, the same at 4:3: AREA03's cloud
+quads (page 0x29) recycled five at a time, small pickups appearing.  Headless only; the device not checked.
 
 Launcher: Play tab, "Imagen" 16:9 / 21:9 / 32:9.  Remaining: some far backdrop layers still end near the 4:3 edges (sky
 colour in the top corners in AREA00), and any screen-space cull not matching the patterns above is untouched.

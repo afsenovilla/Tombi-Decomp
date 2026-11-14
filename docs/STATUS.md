@@ -76,6 +76,74 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    extents relative to its origin) to see whether it swings on a hinge like the other doors or slides / lifts.
    A port mod (runtime data patch / spawned objects), never shipped game data.
 
+0. **Widescreen picture strips for more rooms: previews waiting for approval (2026-11-14)**: the AREA02 s5 redraw is
+   now a per-room table (`runtime/ws_backdrop.c` `ROOMS`, generators in `runtime/ws_backdrop_rooms.inc`; docs/PORT.md
+   "More rooms with picture strips").  New, OFF by default: AREA05 s1 / s3 (the house: wood, fence, dry-stone wall,
+   path, bushes; redrawn 2026-11-14 after the user rejected the first version, PORT.md has how), AREA19 s1 (Dwarf Village in blossom; runs as area 2 s1, told apart by its picture) and AREA02 s1
+   (the village with the balloon trees).  Preview: `--ws-backdrop on` (every room) or `--ws-backdrop-rooms
+   5:1,5:3,19:1,2:1` (only those); AREA02 s5 stays on by default.  To approve a room: set `approved` to 1 in its
+   `ROOMS` entry.  Not done: AREA17 s3 / s4 (Iron Castle hall): its side walls look oblique (the measured lines do not
+   meet in one vanishing point; numbers in PORT.md), needs a geometry fit first.  Checked headless (16:9 / 21:9, 4:3
+   identical, defaults identical, i386 = wasm2c); not on the device.
+
+0. **Widescreen AREA02 s5, Small Strange Room (2026-11-14)**: user report: Baron visible at 16:9 waiting right of
+   the picture before his walk-in.  Fixed (`runtime/ws_entrance.c`, docs/PORT.md "Widescreen", "Parked actors"): he
+   waits pad further right and walks in over the retail frame count (arrives on the same frame, script / events /
+   flags as at 4:3; 4:3 runs identical).  Search of the 96 select rooms found one more parked pair, AREA17 s5 (raft
+   return NPCs, x ~340 / ~384), not fixed yet (their walk is not in the overlay step).  Backdrop strips for this
+   room: opt-in preview `--ws-backdrop on`, now a procedural redraw (2026-11-14; the user rejected the first preview,
+   a mirror of the picture's edge, still there as `--ws-backdrop mirror`): wall, floor, roots and ivy drawn by code
+   from colours sampled from the picture (docs/PORT.md "Room picture strips").  Second user report: "the room
+   doesn't extend sideways, it closes like a box (the angle of the corner)": the strips are now the room's side walls
+   in perspective (vanishing point (172, 85) measured from the picture's right edge; bricks in wall coordinates,
+   floor in perspective up to the walls' foot, ivy spaced and sized along the wall).  Third user report (fixed the
+   same day): "the right wall meets the floor at the wrong height against the corner", "take the room's lighting
+   into account", "the left root is shabby, redraw it from the picture's root".  The right side wall is now the plane
+   of the picture's slanted face (corner x 296.5, foot on the line from there through the VP: row 193 at the edge,
+   where the picture's own ivy-covered wall beside the pillar ends; it was 184), the left one from a corner behind the
+   trunk (x 19.5); walls, floor and ivy follow the picture's light (floor falloff fitted on the picture, the pillar's
+   and the trunk's shadows, darker towards the viewer, contact shadows at the foot); the roots are a sweep of tapered
+   roots shaded like the picture's root fan.  Waiting for the user's approval before it becomes the default.  Checked
+   headless at 16:9 / 21:9: i386 = wasm2c strips, 4:3 runs identical, the 4:3 centre unchanged; not checked on the
+   device.  Known weak points: the picture's lighting is painterly, not one consistent light (the pillar's front face
+   is lit as from the camera, its floor shadow points towards the viewer), so the side walls follow the measured
+   tones rather than a physical light; the left corner is a guess (hidden by the tree); near the viewer at 32:9 the
+   bricks get big and soft; the right strip is mostly ivy.  Fourth user report: "the roots you drew are horrible,
+   never draw roots again; and it's far too dark".  By the user's decision there are no generated roots any more
+   (the left strip is side wall + floor + ivy; the edge ivy comes down to the floor over the picture's root, cut at
+   its edge; no replacement root shapes, do not add any), and the strips are as light as the room next to them: the
+   extra darkening (pillar / trunk shadows, under-ivy and contact shadows, steep falloff) removed or softened, then a
+   per-region balance (wall / floor / ivy) maps the strip's luminance next to the join onto the mean and spread of
+   the picture's 40 columns next to the edge.  Measured on the port's 16:9 frame (luminance, strip vs those 40
+   columns; outer = the 10 outermost strip columns): left wall 44 (outer 44) vs 40, floor 84 (82) vs 81, ivy 61 (62)
+   vs 64; right wall 47 (47) vs 48, ivy 47 (50) vs 49, floor 83-88 vs 87 (the picture's floor without the drums);
+   before this pass the walls were 24-26.  Checked headless at 16:9 / 21:9: i386 = wasm2c strips, 4:3 on = off,
+   the 4:3 centre unchanged; not checked on the device.
+0. **Widescreen pop-in, second pass: pixel checks (2026-11-14)**: report: AREA09 s0 (Mushroom Forest) still pops at
+   16:9, worst moving left, straight vertical cut edges.  Built pixel checks that cannot undercount (docs/PORT.md
+   "Pop-in check", "Pixel check"): `tools/ws_popscan.py` (frame against the shifted previous frame, both ways), a
+   reference run with every cull / block window widened far (`PORT_WSXTRA`, `PORT_WSBLK`), the 4:3 run of the same
+   input; new research options `--sweep-fly DY`, `--dump-from N`, `PORT_PRIMLOG`.  A control with the 4:3 culls shows
+   the method catches strip pops (AREA09 s0: 312 events).  Result on current master, 49 rooms flown both ways at two
+   heights: nothing missing against the reference; AREA09 s0 clean in every pass (walk, fly at five heights, the climb;
+   i386, wasm2c, OpenGL, `--fps 60`); its vertical cut edges are the rock / bush geometry, identical in the 4:3 picture.
+   No game code changed (no fix was needed by these checks); frames with and without --widescreen identical to the
+   build before.  Not checked: the device.  If the device still pops, get the app version (a build before
+   2026-11-14 had the AREA09 / AREA10 block hooks unwidened: popping in the strips moving left) and a screen recording.
+0. **Widescreen pop-in in the side-view rooms (2026-11-14)**: user report (AYN Thor, 16:9 auto): "quite a lot of
+   popping" in the Forest of 100 Flowers and the other side-view stages.  Measured with the new research options
+   `--log-pop` / `--sweep-x` and `tools/ws_popcheck.py` over the 52 scrolling side-view rooms (docs/PORT.md
+   "Widescreen", "Pop-in check"): 1543 -> 254 pops in the strips at 16:9 (i386 and wasm2c the same).  Fixed: block hooks
+   of AREA09 / AREA10 widened (palette uploads of the extra runs suppressed, `port_ws_dry`), AREA04's frustum
+   widened, object windows 2 * pad world units (objects behind the screen plane), isObjectInView / isOnScreen widened
+   (activation too), despawns keep their margin past the wide edges, edge spawns (AREA03 lizards, wind streaks,
+   drifting sprites, AREA01 KomaPig drop-ins) moved out by 2 * pad.  Windows already wide enough are left alone (the
+   AREA10 spear pigs' widened made one walk off before Tomba arrived).  Gameplay side effect: those objects start / are
+   placed a little further out (they walk in a little later); listed in PORT.md.  No widescreen: frames identical.
+   Headless only, not seen on the device.  Left: things that really appear (collected items, whole-layer toggles), a
+   thin polygon that flickers every other frame (AREA01 s0/s2, same at 4:3), AREA10 s3/s7 and AREA01 s2 rows chosen by
+   camera Y at the top edge.
+
 0. **Widescreen room ends (2026-11-12)**: `runtime/ws_edge.c` carries a room's model on past its end (the free
    outward edges of the ground strips, risers and tree cards extruded along X with the room's own tiling; docs/PORT.md
    "Widescreen", "Room ends").  On: AREA00 section 0, left end (the sky strip left of the first hill at 16:9 / 21:9 /
@@ -276,6 +344,20 @@ Stop after about 90 minutes on one function: write what was tried under "tried" 
 - [ ] x04 func_80115FD0 (6472 B), x00 func_800F4CDC (5464 B), x10 func_8011DCC8 (3872 B): no PAL twin, from scratch.
 
 ## Recently done (context)
+- Graffiti rock in PrePre 9 (2026-11-12, docs/CUT_CONTENT.md "PrePre Vol. 9: the "2" rock can be examined"): layer 4
+  type 0x13 at AREA01 (4110,-399) is examinable in PCPX-96093 (X01 0x800F1980): the plaque flies to the camera at
+  twice the size until Circle, and the big "?" bubble (unused in retail) pops over Tombi; no text, event or flag.
+  Same code in SLPM-80165 X00 (no rock placed); retail kept only the draw. Run in tools/psxemu on 2026-11-13
+  (`tools/psxemu/pre9_rock.py video|trace`): confirmed; the trigger is Up held + Circle in front of the plaque; the
+  run-time trace finds no script flag, event, text or counter tied to it (only the "?" SFX 0x1A, and the demo countdown is held while it runs).
+- tools/psxemu multi-build (2026-11-13, tools/psxemu/README.md): `Machine(build=pal|usa|jp|beta|jpdemo|prepre9|
+  prepre8|dengeki|hyper|yoiko2)`; non-PAL entry points from byte-signature tables (`libsig.py` -> `syms/<build>.csv`, FMV task
+  included). All ten boot to gameplay (title, START, AREA00 or PrePre 9's Dwarf Village); PAL bit-identical.
+- PAPX-90023 (*Yoi Ko to Yoi Otona no. PlayStation Taikenban Vol.2*, 2026-11-13, docs/JPDEMO.md "PAPX-90023, the
+  same-day sampler build"): SLPM-80165 rebuilt two hours later for a sampler disc; data identical but for the text.
+  New: no debug area select (the only 1997 build without it), no disclaimer / OP_UTA / 100JP, CdSearchFile loading,
+  START+SELECT back to MAIN.EXE, the wise man's "this version ends here" moved into dialogue 56 with a new line, and
+  event hint 4 "you have to be able to swim". No new area, object, graphic or sound.
 - WSS scripts across all builds (2026-11-12, `tools/wss.py`, docs/CUT_CONTENT.md "WSS event scripts across builds"):
   retail orphan entries are movement/fade helpers only; 0200.WSS stages the woodcutter line (2,54) for villager 16,
   whose talk case is missing (every build); JP/beta 0201 give 2 Torches for event 177 and no Baron after 113 (PAL

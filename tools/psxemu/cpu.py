@@ -66,6 +66,7 @@ class CPU:
         self.icount = 0
         self.pc_override = None
         self.trace = None           # fn(cpu, pc) called at every block start (debug)
+        self.store_hook = None      # fn(cpu, pc, addr, value, size) before every store (debug; set_store_hook)
         self.unknown_io = {}
 
     # ------------------------------------------------------------------ memory (slow path, used by HLE and by compiled code off RAM)
@@ -178,6 +179,14 @@ class CPU:
         """Psy-Q's EnterCriticalSection (a0=1) / ExitCriticalSection (a0=2): no interrupts here, just succeed."""
         self.R[2] = 1
         return pc + 4
+
+    def set_store_hook(self, fn):
+        """Calls fn(cpu, pc, addr, value, size) before every store of game code (size 1/2/4; swl/swr report the aligned word address with
+        size 4 and the register value).  Blocks are recompiled with the hook (slower) and again without it when fn is None."""
+        global _STORE_HOOK
+        self.store_hook = fn
+        _STORE_HOOK = fn is not None
+        self.blocks.clear()
 
     # ------------------------------------------------------------------ execution
     def run(self, until=STOP, max_instr=None):
@@ -324,11 +333,18 @@ def _load(rs, imm, rt, kind):
     return out
 
 
-def _store(rs, imm, rt, kind):
+_STORE_HOOK = False
+
+
+def _hook(pc, rt, size):
+    return ["cpu.store_hook(cpu,%d,a,%s,%d)" % (pc, "R[%d]" % rt if rt else "0", size)] if _STORE_HOOK else []
+
+
+def _store(rs, imm, rt, kind, pc=0):
     v = "R[%d]" % rt if rt else "0"
     fast = {"w": "P32(mem,o,%s)" % v, "h": "P16(mem,o,%s&0xFFFF)" % v, "b": "mem[o]=%s&0xFF" % v}[kind]
     slow = {"w": "cpu.w32(a,%s)" % v, "h": "cpu.w16(a,%s)" % v, "b": "cpu.w8(a,%s)" % v}[kind]
-    return [_addr(rs, imm), "p=a&0x1FFFFFFF",
+    return [_addr(rs, imm)] + _hook(pc, rt, {"w": 4, "h": 2, "b": 1}[kind]) + ["p=a&0x1FFFFFFF",
             "if p<0x800000:", "    o=p&0x1FFFFF; " + fast,
             "elif 0x1F800000<=p<0x1F800400:", "    o=p-0x1F600000; " + fast,
             "else:", "    " + slow]
@@ -431,19 +447,19 @@ def gen(w, pc):
     if op == 0x24:
         return _load(rs, imm, rt, "bu")
     if op == 0x2B:
-        return _store(rs, imm, rt, "w")
+        return _store(rs, imm, rt, "w", pc)
     if op == 0x29:
-        return _store(rs, imm, rt, "h")
+        return _store(rs, imm, rt, "h", pc)
     if op == 0x28:
-        return _store(rs, imm, rt, "b")
+        return _store(rs, imm, rt, "b", pc)
     if op == 0x22:
         return [_addr(rs, imm)] + (["R[%d]=cpu.lwl(a,R[%d])" % (rt, rt)] if rt else [])
     if op == 0x26:
         return [_addr(rs, imm)] + (["R[%d]=cpu.lwr(a,R[%d])" % (rt, rt)] if rt else [])
     if op == 0x2A:
-        return [_addr(rs, imm), "cpu.swl(a,R[%d])" % rt]
+        return [_addr(rs, imm)] + _hook(pc, rt, 4) + ["cpu.swl(a,R[%d])" % rt]
     if op == 0x2E:
-        return [_addr(rs, imm), "cpu.swr(a,R[%d])" % rt]
+        return [_addr(rs, imm)] + _hook(pc, rt, 4) + ["cpu.swr(a,R[%d])" % rt]
     if op == 0x10:          # COP0
         if rs == 0:
             return ["R[%d]=cpu.mfc0(%d)" % (rt, rd)] if rt else []
@@ -467,7 +483,8 @@ def gen(w, pc):
     if op == 0x32:          # lwc2
         return [_addr(rs, imm), "gte.write_data(%d,cpu.r32(a))" % rt]
     if op == 0x3A:          # swc2
-        return [_addr(rs, imm), "cpu.w32(a,gte.read_data(%d))" % rt]
+        return [_addr(rs, imm)] + (["cpu.store_hook(cpu,%d,a,gte.read_data(%d),4)" % (pc, rt)] if _STORE_HOOK else []) + \
+            ["cpu.w32(a,gte.read_data(%d))" % rt]
     if op in (0x11, 0x13, 0x31, 0x33, 0x39, 0x3B):
         return []           # other coprocessors: absent
     raise EmuError("unknown opcode %08X at %08X" % (w, pc))

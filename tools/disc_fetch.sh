@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Fetch and extract one demo / prototype disc for this session, from its GAME_FILES_URL_<NAME> environment variable:
-#   bash tools/disc_fetch.sh DENGEKI_D5      (or PREPRE9, PREPRE8, HYPER12, JP_DEMO, BETA980203, USA, SCES01330)
+#   bash tools/disc_fetch.sh DENGEKI_D5      (or PREPRE9, PREPRE8, HYPER12, YOIKO2, JP_DEMO, BETA980203, USA, SCES01330)
 # -> game_<name>/fs (the files) and game_<name>/disc.bin (the image), in the repo root, ignored by git (never
 # committed; /dev/shm was tried first and is wiped whenever the idle container restarts). Does nothing when the disc
 # is already there. tools/event_icons.py and the code hunts read these paths.

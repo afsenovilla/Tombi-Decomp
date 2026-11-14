@@ -71,7 +71,8 @@ Main references: `README.md`, `docs/PORT.md` (long; search it), `docs/STATUS.md`
   SCES-01331), `GAME_FILES_URL_SCES01330` (FR/DE/IT/NL), `GAME_FILES_URL_USA` (SCUS-94236), `GAME_FILES_URL_JP`
   (SLPS-01144), `GAME_FILES_URL_JP_DEMO` (SLPM-80165), `GAME_FILES_URL_BETA980203`, `GAME_FILES_URL_PREPRE8`
   (PCPX-96084), `GAME_FILES_URL_PREPRE9` (PCPX-96093), `GAME_FILES_URL_DENGEKI_D5` (SLPM-80186), `GAME_FILES_URL_HYPER12`
-  (SLPM-80167, Hyper PlayStation Re-mix No.12). The owner keeps the
+  (SLPM-80167, Hyper PlayStation Re-mix No.12), `GAME_FILES_URL_YOIKO2` (PAPX-90023, Yoi Ko to Yoi Otona no. PlayStation
+  Taikenban Vol.2). The owner keeps the
   zips in a Cloudflare R2 bucket (public dev URL, no egress quota); a direct URL, Dropbox, Drive or public MEGA link
   works too (all through `tools/ci_download.sh`). The zip may hold the image inside a folder or the extracted files:
   `tools/disc_unpack.sh` handles every shape (PrePre 8 through `tools/prepre8.py extract`). On Actions the downloads
@@ -82,7 +83,7 @@ Main references: `README.md`, `docs/PORT.md` (long; search it), `docs/STATUS.md`
   rebuilds the reports when `notes/report_stamp.txt` changes (`date -u > notes/report_stamp.txt`).
 - Cloud bootstrap also fetches the JP disc when `GAME_FILES_URL_JP` is set (step 3b) and builds
   `build/slps01144/report.json`.
-- The demo discs are never fetched by the bootstrap: `bash tools/disc_fetch.sh DENGEKI_D5` (PREPRE9, PREPRE8, HYPER12,
+- The demo discs are never fetched by the bootstrap: `bash tools/disc_fetch.sh DENGEKI_D5` (PREPRE9, PREPRE8, HYPER12, YOIKO2,
   JP_DEMO, BETA980203, USA, SCES01330) extracts the one a task needs from its `GAME_FILES_URL_<NAME>` variable to
   `game_<name>/fs` (+ `disc.bin`, git-ignored; not /dev/shm, which the idle restarts of the container wipe), once
   per container; `tools/event_icons.py` reads those paths.
