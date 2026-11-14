@@ -177,12 +177,12 @@ static void arrow(Cv *c, int cx, int cy, int dir) {
         blend(c, x, y, 0x080008, in * 255 / 16);
     }
 }
-/* the console's A button as the port's button prompts draw the AYN Thor's (shims/prompts.c, PROMPT_THOR: the A on the
-   red disc, white letter, at the east position as on the 3DS), 12 x 16, its disc centred on (cx, cy) */
+/* the console's A button as the port's button prompts draw the AYN Thor's (shims/prompts.c, PROMPT_THOR_BLACK: the A on the
+   black disc, white letter, at the east position as on the 3DS), 12 x 16, its disc centred on (cx, cy) */
 void port_prompt_rgb(int src, int style, unsigned *rgb, unsigned char *a);
 static void abutton(Cv *c, int cx, int cy) {
     unsigned rgb[12 * 16]; unsigned char on[12 * 16];
-    port_prompt_rgb(1 /* east */, 4 /* PROMPT_THOR */, rgb, on);
+    port_prompt_rgb(1 /* east */, 5 /* PROMPT_THOR_BLACK */, rgb, on);
     for (int y = 0; y < 16; y++) for (int x = 0; x < 12; x++) if (on[y * 12 + x]) put(c, cx - 6 + x, cy - 8 + y, rgb[y * 12 + x]);
 }
 
