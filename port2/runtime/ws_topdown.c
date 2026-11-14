@@ -85,12 +85,21 @@ static void mark(u32 id)
     int b = id & 7;
     if (!s->used) return;
     if (b < 5) { upload(s, b - 2); return; }
-    for (int i = 0; i < s->n; i++) if (s->saved[i]) {
-        Rect *r = &s->r[i];
-        RECT rc = { (s16)r->x, (s16)r->y, (s16)r->w, (s16)r->h };
-        LoadImage(&rc, (u32 *)s->save[i]);
-        s->saved[i] = 0;
+    /* the game's pixels back, only where a strip went (the rest of its window was never touched: putting it all back
+       made every texture cache cell of it look written, a cost a 3DS feels) */
+    static u16 buf[256 * 288];
+    for (int i = 0; i < s->nup; i++) {
+        const int ri = s->up[i].ri, du = s->up[i].du, dw = s->up[i].dw, j0 = s->up[i].j0, j1 = s->up[i].j1;
+        if (!s->saved[ri]) continue;
+        Rect *r = &s->r[ri];
+        int dup = 0;   /* (the same strip twice: k = +-1 and +-2 can share one) */
+        for (int q = 0; q < i; q++) dup |= s->up[q].ri == ri && s->up[q].du == du && s->up[q].dw == dw && s->up[q].j0 == j0 && s->up[q].j1 == j1;
+        if (dup) continue;
+        for (int j = j0; j < j1; j++) memcpy(buf + (size_t)(j - j0) * (dw / 2), &s->save[ri][j * r->w + du / 2], (size_t)dw);
+        RECT rc = { (s16)(r->x + du / 2), (s16)(r->y + j0), (s16)(dw / 2), (s16)(j1 - j0) };
+        LoadImage(&rc, (u32 *)buf);
     }
+    for (int i = 0; i < s->n; i++) s->saved[i] = 0;
     s->used = 0;
 }
 
