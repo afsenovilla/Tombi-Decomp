@@ -857,9 +857,10 @@ int port_civ_list(void) {
 int port_noclip;          /* --noclip: research only; I0NFO3 tunnels (AREA02 s3): no walls, gates, pushes, slide zones, triggers, exits */
 int port_cut_content;     /* --cut-content[=LIST]: opt-in cut content (port/fixes.txt), a bit per item: 1 boatman (AREA00 extra lines),
                              2 letter (AREA03 sign), 4 board (AREA05 notice board + extra save points), 8 berries (silver / golden),
-                             16 bubble (big "?"), 32 titles (event titles PAL left empty); --cut-content alone = all (0xFF) */
+                             16 bubble (big "?"), 32 titles (event titles PAL left empty), 64 funga (AREA10 s2: the unused Funga
+                             stage behind the palisade gate); --cut-content alone = all (0xFF) */
 int port_cut_content_parse(const char *list) {
-    static const struct { const char *name; int bit; } items[] = {{"boatman", 1}, {"letter", 2}, {"board", 4}, {"berries", 8}, {"bubble", 16}, {"titles", 32}, {"all", 0xFF}};
+    static const struct { const char *name; int bit; } items[] = {{"boatman", 1}, {"letter", 2}, {"board", 4}, {"berries", 8}, {"bubble", 16}, {"titles", 32}, {"funga", 64}, {"all", 0xFF}};
     int mask = 0; const char *p = list;
     while (*p) {
         const char *e = p; size_t i, n; int hit = 0;
@@ -867,7 +868,7 @@ int port_cut_content_parse(const char *list) {
         n = (size_t)(e - p);
         for (i = 0; i < sizeof items / sizeof items[0]; i++)
             if (n == strlen(items[i].name) && !strncmp(p, items[i].name, n)) { mask |= items[i].bit; hit = 1; }
-        if (!hit && n) port_printf("[port] --cut-content: unknown item '%.*s' (boatman, letter, board, berries, bubble, titles, all)\n", (int)n, p);
+        if (!hit && n) port_printf("[port] --cut-content: unknown item '%.*s' (boatman, letter, board, berries, bubble, titles, funga, all)\n", (int)n, p);
         p = *e ? e + 1 : e;
     }
     return mask;
@@ -1106,6 +1107,8 @@ int main(int argc, char **argv) {
             port_texpack_on = 1;
         }
         else if (!strcmp(a, "--dump-draws") && v) { extern const char *port_drawdump_path; port_drawdump_path = argv[++i]; }
+        else if (!strcmp(a, "--log-pop") && v) { extern const char *port_poplog_path; port_poplog_path = argv[++i]; }
+        else if (!strcmp(a, "--sweep-x") && v) { extern void port_sweep_add(const char *); port_sweep_add(argv[++i]); }
         else if (!strcmp(a, "--dump-ram") && v) port_dump_ram_add(argv[++i]);
         else if (!strcmp(a, "--dump-audio") && v) port_audio_path = argv[++i];
         else if (!strcmp(a, "--gfx-es")) port_gfx_es = 1;

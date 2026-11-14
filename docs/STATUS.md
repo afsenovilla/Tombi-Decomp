@@ -4,8 +4,8 @@ Update this file whenever something lands or a task is decided. Newest first.
 
 ## Last release
 
-v0.3.1 (build of 66a8281, 2026-11-10): .zip / .7z disc images in both launchers, language flags on the cards, Disco and
-home layout fixes, the Japanese card title オレっ！トンバ, release number in the PC launcher. Previous: v0.3.0 (5da1fc8).
+v0.5.4 (build of f7973c4, 2026-11-12): widescreen top-down maps fill the side strips; the first room's left end (wavy
+ground, fence, far hills strip); update check at start in both launchers. Earlier: v0.5.3, v0.5.2, ... v0.3.1 (66a8281).
 
 Release number: `VERSION` (repo root) is the version the Android launcher shows (build.gradle versionName) and the
 default of release.yml; bump it before each release (it used to show 0.1.<CI run number>).
@@ -52,6 +52,67 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    screen too; ~52 in the first village with the slider up before the last present change (presents no longer wait
    for the GPU: not measured yet).  Open: the 3D's speed on the console; the PC syntax check for 3DS code uses
    devkitPro headers in a scratch folder (not in the repo).
+
+-2. **WIP (owner's request): restore the Funga Chief's cut event** on the Funga stage (`--cut-content=funga`, AREA10 s2,
+   chief already walking there: runtime/funga.c).  What survives (docs/CUT_CONTENT.md "Jungle (AREA10)", "Funga Chief"):
+   the judgement dialogue MFNT100S group 2 dx 11-18 (PAL #222-#229: "It's you! Our friend!...", "If I had a **Funga
+   drum** I would dance", "You may go!", "You hurt my friends!... I'll look into your fate... Fungaaa! Hongaaa!",
+   "You were good, I forgive you", "You were wicked! You'll pay!"; dx 14 / 18 are the same speeches in Masakari
+   gibberish, shown before Tombi understands the language), no code calls them; JP X10 event titles 59 (the chief's
+   request), 60 (soak up words II), 61 (Masakari secret), 184 ("Am I a bad kid?": the fate check), 186 (Masakari
+   village?); unused items Funga Leather / Tree / Sap (119/122/123, "drum material"), Small Drum (137), Funga Drum
+   (125), Chief's Spear (140); the chief's sprite (talk / point / sit / stand frames on page 3).  To design: talking
+   to the chief (playerTryTalkToNpc), which speech (friend vs. "you hurt my friends" by whether Tombi hit the spear
+   Fungas, then the fate check by event 184 or AP), the drum request (bring materials -> Funga drum -> he dances),
+   the event start/complete with titles 59/184, the reward.  Not started.
+
+-1. **In progress: AREA10 section 2 (Old Tree Hill) unused Funga area (`--cut-content=funga`, bit 64).**  Done: the
+   camera's right bound (SECTION_CAMERA_BOUNDS 220..1038, read by initSectionCamera) goes to 1680, so Tombi walks past
+   the gate to x 1904 (the WHM ground already runs to 1920; the drums are updateSolidScenery objects already placed);
+   the gate (updateAreaMechanisms subtype 2) swings open (+0x88 to 0x400, hinge at its edge) once Tombi passes x 1080.
+   Gate: the game's door block (16 x 97 x 50, x -8..7 z -25..25) swings a quarter turn on its back edge once Tombi
+   passes x 1180 (runtime/funga.c; its room copy flattened).  NOT the room's 21 polygons at x 1268..1296 z 155..205:
+   those are the lintel over the gap (swinging them broke the top, reverted).  Drums: updateSolidScenery subtypes
+   13..21 get no box (not solid) -> subtype 0, the springy drum; only the front one (x 1808) is on the path, the rest
+   and the straw stand stand in the back row (z 258..286), off the single walking line (WHM plane 2 only).
+   Back lane (runtime/funga.c back_lane): a copy of the WHM with a 4th plane (z 270..359, the plane cap lifted to 3 for
+   the copy only in getCollisionPlaneAt) replaces WHM slot 0 on each load: ground from x 1336 (wall at its left end),
+   the stand's top (x 1528..1615, y -232) as a one-way floor.  The game's own lane moves: floor bit 0x2000 = Up+Cross
+   -> step 0x11 (+90 depth, into the background here), 0x1000 = Down+Cross -> step 0x12 (-90, to the front); the
+   section's pier at x 352..384 uses both.  Front floors in front of the stand carry 0x2000, every back-lane floor
+   0x1000.  Up+Cross there is turned into the lane jump (step 0x12) with depth +90 (port_funga_lane_flip, fixes.txt on
+   src/playerStepIdle.c / src/playerStepLaneJump.c: velY -0x7A0 and 1 unit of extra lift a tick while rising, the
+   gravity limit capping the plain arc below the roof) so it lands straight on the stand's top, in step 0x11's
+   into-the-background pose (anim 0x15, his back) instead of 0x19.  Drum boxes take |dz| < 45: solid in the back lane only.  Fungas moved to drums 1353/1741/1788 (the middle
+   drums and the stand are the back lane's path).  Verified headless: Up+Cross at x 1563 lands on the stand top, walk off onto drum 1643 / 1501 and bounce back up, Down+Cross back to the front; normal game unchanged.
+   Next: the Funga Chief and Fungas.  Their sprites are SPR table 0x37 (SPR_DATA[7], frames 31, 47-58 chief, 59+ Fungas,
+   docs/CONTENIDO_RECORTADO.md "Jungla"), loaded only by AREA10 lists 1 and 5 (sections 0/4: the 0x37 piece of the
+   LD0SYS stream after D005.GAM); section 2 (list 3) has slot 7 empty, so the table has to be loaded there too; no
+   animation scripts and no palette in use (the community rip shows a blue chief): a new object with its own frame
+   cycle.  Also: the black past the model's right end at wide ratios.
+   Original request:  Open the door object
+   4:07 / 02 (82FF #026 "Door", WMD bank 1 model 7, position (1288, -187, 180), APD offset 0x01A0, SYS/LDAR10.BIN group 3)
+   and make the unused area behind it walkable (collision for the ground strip; Tombi could climb the wooden stand in
+   the middle and jump on the drums); add a Funga Chief walking around (he has walk and talk animations) and some
+   Funga guys.  The owner's screenshot shows the area: palm cards, torches, drums, the straw stand, a river in front.
+   The door is the palisade gate with the round Funga emblem (second screenshot): check the model's pivot (vertex
+   extents relative to its origin) to see whether it swings on a hinge like the other doors or slides / lifts.
+   A port mod (runtime data patch / spawned objects), never shipped game data.
+
+0. **Widescreen pop-in in the side-view rooms (2026-11-14)**: user report (AYN Thor, 16:9 auto): "quite a lot of
+   popping" in the Forest of 100 Flowers and the other side-view stages.  Measured with the new research options
+   `--log-pop` / `--sweep-x` and `tools/ws_popcheck.py` over the 52 scrolling side-view rooms (docs/PORT.md
+   "Widescreen", "Pop-in check"): 1543 -> 254 pops in the strips at 16:9 (i386 and wasm2c the same).  Fixed: block hooks
+   of AREA09 / AREA10 widened (palette uploads of the extra runs suppressed, `port_ws_dry`), AREA04's frustum
+   widened, object windows 2 * pad world units (objects behind the screen plane), isObjectInView / isOnScreen widened
+   (activation too), despawns keep their margin past the wide edges, edge spawns (AREA03 lizards, wind streaks,
+   drifting sprites, AREA01 KomaPig drop-ins) moved out by 2 * pad.  Windows already wide enough are left alone (the
+   AREA10 spear pigs' widened made one walk off before Tomba arrived).  Gameplay side effect: those objects start / are
+   placed a little further out (they walk in a little later); listed in PORT.md.  No widescreen: frames identical.
+   Headless only, not seen on the device.  Left: things that really appear (collected items, whole-layer toggles), a
+   thin polygon that flickers every other frame (AREA01 s0/s2, same at 4:3), AREA10 s3/s7 and AREA01 s2 rows chosen by
+   camera Y at the top edge.
+
 0. **Widescreen room ends (2026-11-12)**: `runtime/ws_edge.c` carries a room's model on past its end (the free
    outward edges of the ground strips, risers and tree cards extruded along X with the room's own tiling; docs/PORT.md
    "Widescreen", "Room ends").  On: AREA00 section 0, left end (the sky strip left of the first hill at 16:9 / 21:9 /
@@ -252,6 +313,24 @@ Stop after about 90 minutes on one function: write what was tried under "tried" 
 - [ ] x04 func_80115FD0 (6472 B), x00 func_800F4CDC (5464 B), x10 func_8011DCC8 (3872 B): no PAL twin, from scratch.
 
 ## Recently done (context)
+- Graffiti rock in PrePre 9 (2026-11-12, docs/CUT_CONTENT.md "PrePre Vol. 9: the "2" rock can be examined"): layer 4
+  type 0x13 at AREA01 (4110,-399) is examinable in PCPX-96093 (X01 0x800F1980): the plaque flies to the camera at
+  twice the size until Circle, and the big "?" bubble (unused in retail) pops over Tombi; no text, event or flag.
+  Same code in SLPM-80165 X00 (no rock placed); retail kept only the draw. Run in tools/psxemu on 2026-11-13
+  (`tools/psxemu/pre9_rock.py video|trace`): confirmed; the trigger is Up held + Circle in front of the plaque; the
+  run-time trace finds no script flag, event, text or counter tied to it (only the "?" SFX 0x1A, and the demo countdown is held while it runs).
+- tools/psxemu multi-build (2026-11-13, tools/psxemu/README.md): `Machine(build=pal|usa|jp|beta|jpdemo|prepre9|
+  prepre8|dengeki|hyper|yoiko2)`; non-PAL entry points from byte-signature tables (`libsig.py` -> `syms/<build>.csv`, FMV task
+  included). All ten boot to gameplay (title, START, AREA00 or PrePre 9's Dwarf Village); PAL bit-identical.
+- PAPX-90023 (*Yoi Ko to Yoi Otona no. PlayStation Taikenban Vol.2*, 2026-11-13, docs/JPDEMO.md "PAPX-90023, the
+  same-day sampler build"): SLPM-80165 rebuilt two hours later for a sampler disc; data identical but for the text.
+  New: no debug area select (the only 1997 build without it), no disclaimer / OP_UTA / 100JP, CdSearchFile loading,
+  START+SELECT back to MAIN.EXE, the wise man's "this version ends here" moved into dialogue 56 with a new line, and
+  event hint 4 "you have to be able to swim". No new area, object, graphic or sound.
+- WSS scripts across all builds (2026-11-12, `tools/wss.py`, docs/CUT_CONTENT.md "WSS event scripts across builds"):
+  retail orphan entries are movement/fade helpers only; 0200.WSS stages the woodcutter line (2,54) for villager 16,
+  whose talk case is missing (every build); JP/beta 0201 give 2 Torches for event 177 and no Baron after 113 (PAL
+  fixed); PrePre 9 keeps the 14 / 20 / 177 triggers as dead code, the 177 branch rewarding Charity Wings.
 - PAL X000 at 100 % (2026-11-08): the A00_WOODEN_BRANCH_HANDLERS subtype 1/2 handlers func_80132BB8 / func_80132DD0
   (only port2/runtime/x000_handwritten.c had C for them), matched with the JP-round tricks (a `static __inline__`
   for the bend body moved the last register). Checked with tools/ncheck.py (no dosbox for matchcheck here). The

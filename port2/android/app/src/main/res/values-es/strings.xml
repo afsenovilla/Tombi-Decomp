@@ -18,6 +18,7 @@
     <string name="cut_berries">Bayas plateadas y doradas en lo que sueltan enemigos y cofres (2 de vida)</string>
     <string name="cut_bubble">El bocadillo grande «?» al repetir una conversación (vista cenital)</string>
     <string name="cut_titles">Títulos de evento que la versión PAL dejó vacíos (de la japonesa)</string>
+    <string name="cut_funga">El escenario Funga sin usar de la Colina del árbol viejo (Jungla profunda): la puerta de la empalizada se abre</string>
     <string name="opt_wings">Animación perdida: planeo con las Alas de la caridad (demo japonesa)</string>
     <string name="opt_wings_short">planeo</string>
     <string name="wings_jp">Imagen de la demo japonesa (SLPM-80165)</string>
@@ -193,4 +194,6 @@
     <string name="rail_disc">Disco</string>
     <string name="rail_app">App</string>
     <string name="page_extras">Extras</string>
+    <string name="upd_new">Nueva versión %1$s: descargar</string>
+    <string name="opt_checkupd">Buscar actualizaciones al abrir</string>
 </resources>

@@ -78,6 +78,10 @@ discs, by frame/sample comparison, or by eye.
 9. **Sound**: 15 samples are new (JOCHU 1, 5, 11, 12 (2.4 s), 19-21, 23-25, 27; S_AREA01 0, 25, 28, 29). The others are
    in PAL `SND_INI`/`SND0000`/`SND0044X`... and SLPM-80165 `SND002_`. No SEQ file is on the disc; one `pQES`
    sequence sits inside DATA000.
+10. **Graffiti rocks (checked 2026-11-12): not in this build.** PrePre 8 has only AREA00 rooms (no forest, where the
+    "2" rock stands in PrePre 9 and retail) and none of the PrePre 9 / SLPM-80165 graffiti-rock close-up code (signature search over `TOMBA.EXE`). The
+    examinable rock (close-up of the plaque and a "?" over Tombi) is PrePre 9's: docs/CUT_CONTENT.md "PrePre Vol. 9: the
+    "2" rock can be examined".
 
 ## Civilization top-down data (checked 2026-10-29)
 

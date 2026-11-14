@@ -568,7 +568,7 @@ void func_8004AE7C(u8 *o) {
 /* --widescreen (port/fixes.txt, callAreaModelLinkHook): the per-area hook picks which 80-unit-wide blocks of the
  * area's background model (all already in RAM) are drawn this frame from the camera X (scratchpad 0x176,
  * SCREEN_ORIGIN_X).  With wider screens the blocks just past the 4:3 window popped in at the edges, so for the areas
- * whose hook selects blocks (GAME 0, 1, 2, 3, 7; AREA03's other work is kept out, below) it is run again with the camera
+ * whose hook selects blocks (GAME 0, 1, 2, 3, 7, 9, 10; their palette uploads are kept out: port_ws_dry, and AREA03 s2/s3 below) it is run again with the camera
  * moved left and right and the extra blocks are added to the list (capacity 88, the size the game's own clear keeps).
  * Drawing only: nothing else reads the list.  Off (port_ws_cull 0) the hook runs once exactly as before.
  * What of AREA03's hook (animateArea3Palettes) the extra runs must not pick up or repeat:
@@ -599,27 +599,38 @@ extern int port_ws_cull;
 void port_ws_area_model_link(void (*hook)(char *, int), char *list, int wmd, int game, u16 *origin_x)
 {
     hook(list, wmd);
-    if (!port_ws_cull || !(game == 0 || game == 1 || game == 2 || game == 3 || game == 7)) return;
+    {   /* --cut-content=funga: the room's copy of the AREA10 s2 gate block (runtime/funga.c) */
+        extern void port_funga_room(const u8 *, int, int);
+        port_funga_room((const u8 *)(unsigned long)(u32)wmd, game, *(volatile u16 *)port_ram_ptr(PORT_A_GAME + 2));
+    }
+    if (!port_ws_cull || !(game == 0 || game == 1 || game == 2 || game == 3 || game == 7 || game == 9 || game == 10)) return;
     static u32 tmp[0x5b + 4];
+    extern int port_ws_dry;
     int d = 2 * port_ws_cull + 40;
+    int steps = (d + 159) / 160;                                  /* windows at most 160 apart: no gap at 32:9 */
     u16 sec = *(volatile u16 *)port_ram_ptr(PORT_A_GAME + 2);     /* GAME.section */
     int a3 = game == 3 && (sec == 2 || sec == 3);
-    for (int s = -1; s <= 1; s += 2) {
+    for (int s = -1; s <= 1; s += 2)
+    for (int k = 1; k <= steps; k++) {
+        int off = s * d * k / steps;
         s16 cam = SPAD(s16, 0x176); u16 ox = *origin_x;
         memset(tmp, 0, sizeof tmp);
-        SPAD(s16, 0x176) = cam + s * d; *origin_x = ox + s * d;
+        SPAD(s16, 0x176) = cam + off; *origin_x = ox + off;
+        port_ws_dry = 1;                                          /* no palette uploads / VRAM copies from these runs */
         if (a3) area3_blocks(tmp, (u8 *)wmd);
         else hook((char *)tmp, wmd);
+        port_ws_dry = 0;
         SPAD(s16, 0x176) = cam; *origin_x = ox;
         int n = ((u8 *)tmp)[3]; if (n > 88) n = 88;
         for (int i = 0; i < n; i++) {
-            u8 cnt = (u8)list[3]; int k;
-            if (cnt >= 88) return;
+            u8 cnt = (u8)list[3]; int j;
+            if (cnt >= 88) goto full;
             if (!tmp[1 + i]) continue;                        /* a slot the hook counted but did not fill */
-            for (k = 0; k < cnt; k++) if (((u32 *)list)[1 + k] == tmp[1 + i]) break;
-            if (k == cnt) { ((u32 *)list)[1 + cnt] = tmp[1 + i]; list[3] = cnt + 1; }
+            for (j = 0; j < cnt; j++) if (((u32 *)list)[1 + j] == tmp[1 + i]) break;
+            if (j == cnt) { ((u32 *)list)[1 + cnt] = tmp[1 + i]; list[3] = cnt + 1; }
         }
     }
+full:
     {   /* the room's ends carried on past the first / last sector (runtime/ws_edge.c) */
         extern void port_ws_edge_blocks(char *, const u8 *, int, int);
         port_ws_edge_blocks(list, (const u8 *)(unsigned long)(u32)wmd, game, sec);
@@ -633,6 +644,7 @@ void port_ws_area_model_link(void (*hook)(char *, int), char *list, int wmd, int
  * period to the left and right wherever that lands on the wide frame.  Same scroll, same texture: no seams. */
 extern int port_frame;
 static struct { void *o; int period, frame; } ws_rep[32];
+static void port_ws_cat7_draw(void *o, void (*draw)(void *));
 int port_ws_backdrop_period(void *o, int period)
 {
     int k, free_k = -1;
@@ -646,11 +658,21 @@ int port_ws_backdrop_period(void *o, int period)
 }
 void port_ws_cat7(void *o, void (*draw)(void *))
 {
+    extern unsigned long port_pop_begin(void); extern void port_pop_end(unsigned long, const void *, int);
+    unsigned long pb = port_pop_begin();                 /* --log-pop: the whole layer-7 object, repeats included */
+    port_ws_cat7_draw(o, draw);
+    port_pop_end(pb, o, 0);
+}
+static void port_ws_cat7_draw(void *o, void (*draw)(void *))
+{
     draw(o);
     if (!port_ws_cull) return;
     for (int k = 0; k < 32; k++) {
         if (ws_rep[k].o != o || port_frame - ws_rep[k].frame > 8) continue;
         s16 x = S16(o, 0x12);
+        if (ws_rep[k].period < 0) {                       /* carried on to the left only, as far as the strip shows */
+            for (int nx = x + ws_rep[k].period; nx + 256 >= -port_ws_cull; nx += ws_rep[k].period) { S16(o, 0x12) = nx; draw(o); }
+        } else
         for (int c = -1; c <= 1; c += 2) {
             int nx = x + c * ws_rep[k].period;
             if (nx + 128 < -port_ws_cull || nx - 128 >= 320 + port_ws_cull) continue;   /* (parts sit within +-128) */

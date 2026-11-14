@@ -351,11 +351,32 @@ src/x009/drawArea9ModelGT4.c | p->x1 < 0x141 | PORT_WSX(p->x1) < PORT_WSW(0x141)
 src/x009/drawArea9ModelGT4.c | p->x2 < 0x141 | PORT_WSX(p->x2) < PORT_WSW(0x141)
 src/x009/drawArea9ModelGT4.c | p->x3 < 0x141 | PORT_WSX(p->x3) < PORT_WSW(0x141)
 # and the object on-screen tests (world X around SCREEN_ORIGIN_X / the camera, in pixels)
-src/cullObjectToDrawList.c | SCREEN_ORIGIN_X + x) > (short)x * 2 + 0x140 | SCREEN_ORIGIN_X + x + port_ws_cull) > (short)x * 2 + 0x140 + 2 * port_ws_cull
-src/cullObjectToDrawListMargin.c | SCREEN_ORIGIN_X + x) > (short)x * 2 + 0x140 | SCREEN_ORIGIN_X + x + port_ws_cull) > (short)x * 2 + 0x140 + 2 * port_ws_cull
-src/ObjCullRegister.c | SCREEN_ORIGIN_X + 0x40) >= 0x1c1 | SCREEN_ORIGIN_X + 0x40 + port_ws_cull) >= 0x1c1 + 2 * port_ws_cull
-src/x004/cullObjectPerspective.c | + 0x40 + h) > h * 2 + 0x1c0 | + 0x40 + h + port_ws_cull) > h * 2 + 0x1c0 + 2 * port_ws_cull
-src/x004/cullObjectPerspectiveWide.c | + 0x40 + h) > h * 2 + 0x1c0 | + 0x40 + h + port_ws_cull) > h * 2 + 0x1c0 + 2 * port_ws_cull
+# object windows (world units; PORT_WSO = 2 * pad, port_prelude.h: an object behind the screen plane moves less than one
+# column per unit, so a strip of pad columns needs up to ~2 * pad units; measured AREA00 0.81, AREA04 s0 0.51 columns per unit)
+src/cullObjectToDrawList.c | SCREEN_ORIGIN_X + x) > (short)x * 2 + 0x140 | SCREEN_ORIGIN_X + x + PORT_WSO) > (short)x * 2 + 0x140 + 2 * PORT_WSO
+src/cullObjectToDrawListMargin.c | SCREEN_ORIGIN_X + x) > (short)x * 2 + 0x140 | SCREEN_ORIGIN_X + x + PORT_WSO) > (short)x * 2 + 0x140 + 2 * PORT_WSO
+src/ObjCullRegister.c | SCREEN_ORIGIN_X + 0x40) >= 0x1c1 | SCREEN_ORIGIN_X + 0x40 + PORT_WSO) >= 0x1c1 + 2 * PORT_WSO
+# isObjectInView: the same window as ObjCullRegister; drawing (rope chains) and activation (crawlers, KomaPigs, spear
+# pigs, eggs...) then follow the wide frame (every object starts / stops where the wide picture shows it)
+src/isObjectInView.c | (unsigned short)(p->pos->y - *(unsigned short *)SCR_X + 0x40) >= 0x1c1 | (unsigned short)(p->pos->y - *(unsigned short *)SCR_X + 0x40 + PORT_WSO) >= 0x1c1 + 2 * PORT_WSO
+# the off-screen despawns keep their margin past the wide frame's edges (objects in the strips are not removed)
+src/despawnObjectOffscreen.c | (unsigned short)(o->h[1] - SCREEN_ORIGIN_X + 0xa0) > 0x27f | (unsigned short)(o->h[1] - SCREEN_ORIGIN_X + 0xa0 + PORT_WSO) > 0x27f + 2 * PORT_WSO
+src/despawnObjectOffscreenMargin.c | (unsigned short)(o->h->p.whole - (*(unsigned short*)((char*)&SPAD.i174 + 2)) + a) < (short)a * 2 + 0x140 | (unsigned short)(o->h->p.whole - (*(unsigned short*)((char*)&SPAD.i174 + 2)) + a + PORT_WSO) < (short)a * 2 + 0x140 + 2 * PORT_WSO
+# per-object windows and spawn points at the 4:3 edges (identity when off): a thing that would appear / start / reset
+# just past 4:3 does so just past the wide frame instead
+src/isOnScreen.c | if ((u16)(x - SCREEN_ORIGIN_X + 0x40) < 0x1C1) { | if ((u16)(x - SCREEN_ORIGIN_X + 0x40 + PORT_WSO) < 0x1C1 + 2 * PORT_WSO) {
+src/x003/wingedForkPigWaitAppear.c | + 0x64) >= 0x209) return 0; | + 0x64 + PORT_WSO) >= 0x209 + 2 * PORT_WSO) return 0;
+src/x003/spikyLizardIdle.c | + 0x70) >= 0x220 || | + 0x70 + PORT_WSO) >= 0x220 + 2 * PORT_WSO ||
+src/x003/spikyLizardWalk.c | + 0x70) >= 0x220 || | + 0x70 + PORT_WSO) >= 0x220 + 2 * PORT_WSO ||
+src/x003/updateSpikyLizardSpawner.c | (*(unsigned short*)((char*)&SPAD.i174 + 2)) - 0x40, | (*(unsigned short*)((char*)&SPAD.i174 + 2)) - 0x40 - PORT_WSO,
+src/x003/windStreakRespawn.c | o->a.raw = ((*(short*)((char*)&SPAD.i174 + 2)) - 0x10) << 16; | o->a.raw = ((*(short*)((char*)&SPAD.i174 + 2)) - 0x10 - PORT_WSO) << 16;
+src/x003/translucentSpriteDrift.c | o->a.raw = (SCREEN_ORIGIN_X[0] - 0xa0) << 16; | o->a.raw = (SCREEN_ORIGIN_X[0] - 0xa0 - PORT_WSO) << 16;
+src/x003/translucentSpriteDrift.c | > SCREEN_ORIGIN_X[0] + 0x168) o->step = 1; | > SCREEN_ORIGIN_X[0] + 0x168 + PORT_WSO) o->step = 1;
+# AREA01 KomaPigs dropping in from the spawner (needs the story flag GCD 0xb5): placed 16 columns past either 4:3 edge
+src/x001/komaPigDropIn.c | o->h->p.whole = (*(unsigned short*)((char*)&SPAD.i174 + 2)) - 0x10; | o->h->p.whole = (*(unsigned short*)((char*)&SPAD.i174 + 2)) - 0x10 - PORT_WSO;
+src/x001/komaPigDropIn.c | o->h->p.whole = (*(unsigned short*)((char*)&SPAD.i174 + 2)) + 0x150; | o->h->p.whole = (*(unsigned short*)((char*)&SPAD.i174 + 2)) + 0x150 + PORT_WSO;
+src/x004/cullObjectPerspective.c | + 0x40 + h) > h * 2 + 0x1c0 | + 0x40 + h + (port_ws_cull * k >> 7)) > h * 2 + 0x1c0 + 2 * (port_ws_cull * k >> 7)
+src/x004/cullObjectPerspectiveWide.c | + 0x40 + h) > h * 2 + 0x1c0 | + 0x40 + h + (port_ws_cull * k >> 7)) > h * 2 + 0x1c0 + 2 * (port_ws_cull * k >> 7)
 # --widescreen: the gameplay HUD anchored to the wide frame's edges (lives, vitality, weapon left; AP right)
 src/drawHud.c | drawHudLives(o, 0x18, 0xf0); | drawHudLives(o, 0x18 - port_ws_cull, 0xf0);
 src/drawHud.c | drawHudAP(o, 0x12c, 0x10); | drawHudAP(o, 0x12c + port_ws_cull, 0x10);
@@ -406,6 +427,13 @@ src/d0spsub2/memCardDrawModeTitle.c | s->w = 0x28; | { extern int port_lang; ext
 # --widescreen: the area background's block selection (camera X window of 80-unit blocks) also takes the blocks
 # just outside the 4:3 window (port2/runtime/main0_handwritten.c port_ws_area_model_link; identity when off)
 src/callAreaModelLinkHook.c | PTR_DAT_80079b3c[GAME](AREA_MODEL_DRAW_LIST, WMD_DATA); | { extern unsigned short SCREEN_ORIGIN_X; extern void port_ws_area_model_link(void (*)(char *, int), char *, int, int, unsigned short *); port_ws_area_model_link(PTR_DAT_80079b3c[GAME], AREA_MODEL_DRAW_LIST, WMD_DATA, GAME, &SCREEN_ORIGIN_X); }
+# AREA04 sections 0-3 pick their background blocks by a view-frustum test (corners at x = +-z * 220 / 544, the 4:3
+# view plus margin); --widescreen widens it by the strip (identity when off)
+src/x004/area4ScriptOpSetQuad.c | x = z * 220 / 544; | x = z * (220 + port_ws_cull) / 544;
+# --log-pop FILE (research): screen-X range of what each object / background block drew this frame
+# (port2/runtime/ws_poplog.c; only a pointer test without the option)
+src/drawObject.c | void drawObject(TObj *o) | static void port_drawObject(TObj *o); void drawObject(TObj *o) { extern unsigned long port_pop_begin(void); extern void port_pop_end(unsigned long, const void *, int); unsigned long b = port_pop_begin(); port_drawObject(o); port_pop_end(b, o, 0); } static void port_drawObject(TObj *o)
+src/drawAreaModelList.c | drawModelUnlit(p[1], CURRENT_OT + 0x10); | { extern unsigned long port_pop_begin(void); extern void port_pop_end(unsigned long, const void *, int); unsigned long b = port_pop_begin(); drawModelUnlit(p[1], CURRENT_OT + 0x10); port_pop_end(b, (const void *)(unsigned long)p[1], 1); }
 #
 # --widescreen: the top-down map (I0NFO / I0NFO2 and their USA / JP builds) is a 384-px window of the room's map
 # picture; the windows left and right of it are drawn through the same VRAM, uploaded at marker packets
@@ -438,6 +466,9 @@ src/x009/updateParallaxBackdropSprite.c | if ((short)t < 0x160) { | if (((short)
 # and the world-placed parallax sprites of AREA06 / AREA10 keep the ones over the side strips
 src/x006/updateParallaxBackdropSprite.c | if (x - 0x40 < 0x141 && x + 0x40 >= 0) { | if (x - 0x40 < 0x141 + port_ws_cull && x + 0x40 + port_ws_cull >= 0) {
 src/x010/updateParallaxBackdropSprite.c | if (o->a.p.whole - 0x40 < 0x141 && o->a.p.whole + 0x40 >= 0) { | if (o->a.p.whole - 0x40 < 0x141 + port_ws_cull && o->a.p.whole + 0x40 + port_ws_cull >= 0) {
+# and AREA00's far sky / sea strip (two 232-column sprites from world x 1400, scrolled at 1/8) starts at the room's left
+# end: its two first sprites repeat to the left (period 464) over the wide frame's left strip
+src/updateA00FarBackdropWest.c | *(unsigned char *)&o->visible = 1; | *(unsigned char *)&o->visible = 1; if (port_ws_cull && x < 3300) { extern int port_ws_backdrop_period(void *, int); port_ws_backdrop_period(o, -464); }
 #
 # --title-bg (widescreen, runtime/titlebg.c): mark the ordering-table node the title background / logo sprites go into
 src/o0ptsub0/titleLogoDraw.c |     addTilePrim(&r, 0, 0, 1); |     { extern unsigned long *CURRENT_OT; extern void port_title_bg_mark(void *); port_title_bg_mark(CURRENT_OT + 1); } addTilePrim(&r, 0, 0, 1);
@@ -461,6 +492,32 @@ src/showMessageBoxDirectTimed.c |     openMessageBox(a, b, c, 1, d); |     retur
 # opt-in; console build unchanged): text cut from the game that the Japanese release
 # still has (tools/jp_text.py). 1) AREA00 boatman scene: after his third line (7,2) a00Variant0EventScene
 # ends the scene; with the flag it first shows the three unused lines (7,3), (7,4), (7,5) (MFNT000 #162-164).
+# 64 funga: AREA10 section 2 (Old Tree Hill) has a Funga stage past the palisade gate at x 1288 (drums, torches, a straw
+# stand; its WHM ground runs on to x 1920) that the camera bounds (220..1038) keep out of reach: the right bound goes to 1760
+src/initSectionCamera.c |     D_800A457E = *p++; |     D_800A457E = *p++; { extern int port_cut_content; if ((port_cut_content & 64) && GAME[0] == 10 && GAME_SELECTED_SECTION == 2) D_800A457E = 1680; }
+# and the gate (updateAreaMechanisms subtype 2, a block the game never moves, with a copy in the room model) swings open on a
+# hinge as Tombi comes near (port2/runtime/funga.c)
+# and its drums (updateSolidScenery subtypes 13..21, which the game gives no box: not solid) become subtype 0, the springy
+# drum (its box, and solidSceneryPlayerCollision bounces Tombi off its top)
+src/x010/updateSolidScenery.c |         o->d8c = o->animFrame << 4; |         o->d8c = o->animFrame << 4; { extern int port_cut_content; if ((port_cut_content & 64) && o->subtype >= 13 && o->subtype <= 21) o->subtype = 0; }
+# and the Funga Chief: layer 3 updateAnimDecorSprite objects spawned with marker b3 0x5A (runtime/funga.c port_funga_npc_*)
+src/x010/updateAnimDecorSprite.c |         *(signed char *)&o->b0f = 4; |         *(signed char *)&o->b0f = 4; { extern void port_funga_npc_init(void *); port_funga_npc_init(o); }
+src/x010/updateAnimDecorSprite.c |             AnimAdvance(o); |             { extern int port_funga_npc_step(void *); if (!port_funga_npc_step(o)) AnimAdvance(o); }
+src/x010/updateAreaMechanisms.c |         ObjCullRegister(o); |         ObjCullRegister(o); { extern void port_funga_gate(void *, int); extern TObj PLAYER; port_funga_gate(o, PLAYER.h->p.whole); }
+# and a back lane along the drums' row (runtime/funga.c back_lane: a copy of the WHM with a fourth plane, put in slot 0):
+# the plane cap of the section (2) is lifted to 3 for that copy only
+src/getCollisionPlaneAt.c |     { unsigned char *q = D_8007B55C[M960]; lim = q[GAME.selectedSection]; } |     { unsigned char *q = D_8007B55C[M960]; lim = q[GAME.selectedSection]; } { extern unsigned char port_funga_whm[]; if (b == (char *)port_funga_whm) lim = 3; }
+# and Up+Cross in front of the straw stand is a lane jump (step 0x12) into the background onto the stand's top: the depth
+# direction of that one jump is turned (port_funga_lane_flip, set by port_funga_up_lane, cleared when the step ends)
+src/playerStepIdle.c |             o->step = 0x11; |             o->step = 0x11; { extern int port_funga_up_lane(void *); if (port_funga_up_lane(o)) o->step = 0x12; }
+src/playerStepLaneJump.c | *(unsigned short *)0x1F8001C8 & 1 | (*(unsigned short *)0x1F8001C8 ^ port_funga_lane_flip) & 1
+src/playerStepLaneJump.c | void playerStepLaneJump(PO *o) | extern int port_funga_lane_flip; void playerStepLaneJump(PO *o)
+src/playerStepLaneJump.c | o->t.velY = -0x570; | o->t.velY = port_funga_lane_flip ? -0x7A0 : -0x570;
+src/playerStepLaneJump.c | ObjAddVelY7E(o); | ObjAddVelY7E(o); if (port_funga_lane_flip && o->t.state == 1) o->t.y.p.whole -= 1;
+# (that jump shows the into-the-background pose of step 0x11, anim 0x15: Tombi's back, not the front-facing 0x19)
+src/playerStepLaneJump.c | PlayerSetAnimIfChanged(o, 0x19); | PlayerSetAnimIfChanged(o, port_funga_lane_flip ? 0x15 : 0x19);
+src/playerStepLaneJump.c |             o->t.step = 0xe; |             o->t.step = 0xe; port_funga_lane_flip = 0;
+src/playerStepLaneJump.c |             o->t.step = 0; |             o->t.step = 0; port_funga_lane_flip = 0;
 src/a00Variant0EventScene.c | GAME_AREA00_EVENT_CONTROL |= 0x28; | { extern int port_cut_content, port_cc_boatman; if ((port_cut_content & 1) && port_cc_boatman < 3) { PLAYER_MESSAGE_BOX->b04 = 3; PLAYER_MESSAGE_BOX = showMessageBox(7, 3 + port_cc_boatman++, 0x120, 0x6c); break; } } GAME_AREA00_EVENT_CONTROL |= 0x28;
 src/a00Variant0EventScene.c | o->w08 = 100; | o->w08 = 100; { extern int port_cc_boatman; port_cc_boatman = 0; }
 # 2) AREA03 letter (MFNT030 #208 = sign text (1,1), no sign shows it): next to the save-point sign of Phoenix Mountain

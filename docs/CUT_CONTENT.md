@@ -25,7 +25,7 @@ What the game data says and what is our choice are kept apart in every entry ("O
 | Baccus notice board (AREA05 s1) | `spawnNpcSet09` (X005, table `D_80117AC8[GCD.bceed]`) does spawn the board sign: subtype 19 = MFNT050 (1,5) MISSING MOUSE (reading it starts event 46 "Where's the Baby Mouse?"), 20 = (1,7) ADVENTURER WANTED once the mouse is back (`bceed` 2; starts event 49 "A Drink for Grownups"), 35 after event 50. But it stands at (28,-144) depth 90 beside the townsfolk who mentions it, and nothing Tombi can stand on is within its hit depth (ledge above the wall at depth 144, \|dz\| 54 > 45; the ground 88 px too low): never readable, so events 46/49 never started from it. (1,6) CONGRATULATIONS has no sign-table row at all. `tools/dialogue_refs.py` missed the code-spawned sign (it reads only room lists). | fixes.txt `updateL4Type1AObject` + runtime/main.c `port_cc_sign`: the sign is moved to the ground under the painted board (28,-60, depth 0); read with Up + Square. `port_cc_sign_text` / `port_cc_sign_next`: when the mouse is back and event 49 has not started, (1,6) is shown first and (1,7) follows in the same read (then event 49 starts as in the code). | ground position; (1,6) before the first (1,7) |
 | Mermaid's Singing Rock save (AREA06 s1) | MFNT060 (1,0) "The Mermaid's Singing Rock / Save DATA?" in no table row nor room; the race man (1,1): "the finish line ... is near the Mermaid's Singing Rock". AREA06 s1 (finish beach) has the record board (subtype 36) only. | `port_cc_sign` spawns a port sign (subtype 0x40+i, text from `port_cc_saves`) 48 px left of the record board; it saves like any save sign (block named "La roca de la sirena"). | placement |
 | Silver / golden berries | `initItemObject` CLUT rows 503/504; `rewardHeart` pays 2 HP when `b0c & 0x7f != 0`; no drop table uses b0c 2/3. | fixes.txt `spawnItemFromEntry` + `initItemObject` (dafdbcf) | rates 1/8 silver, 1/32 gold |
-| Big "?" bubble | `D_80079D34[1]` (SPR 0x34 f48); `spawnItemPickupObject` is only called with 0. | fixes.txt `topdownActorOpenDialogue` (dafdbcf) | when it shows |
+| Big "?" bubble | `D_80079D34[1]` (SPR 0x34 f48); `spawnItemPickupObject` is only called with 0. Original user: the graffiti rock of PrePre Vol. 9 (examine -> "?" over Tombi, section "PrePre Vol. 9: the "2" rock can be examined"). | fixes.txt `topdownActorOpenDialogue` (dafdbcf) | when it shows |
 | **Early title screen** (PrePre Vol. 8) | PCPX-96084 `SYSTEM/SYS005.GAM` (8 bpp, 768x256 page; x 0..319, y 0..239 = landscape with a rock spire and a river) + `SYS006.000` (its palette). Retail draws its landscape `SYSTEM/A00200` (8 bpp, 320x240) from VRAM (0,0) with the palette at (128,511), so the old picture fits the same slot. | `--early-title DIR` (needs `--cut-content`), `port2/runtime/titlebg.c`: while the title is up (`titleLogoDraw`, via `port_title_bg_mark`) the page and palette are written over A00200's. Launcher: folder field under the checkbox. | We keep the retail TOMBI! logo, menu and text: the old "オレっ！トンバ" logo pieces are on the same page (x 512..767, palette SYS007) but how they were assembled is unknown. Files are read from the user's extraction (`tools/prepre8.py extract DISC OUT`). |
 
 Screenshot check (headless port, frame 400 of `--skip-intro`): retail landscape vs PrePre8 landscape under the retail
@@ -37,7 +37,7 @@ logo.
 |---|---|---|
 | "DIRT MOTOCROSS RACE  Let's challenge it!!" sign | MFNT000 #165 = (8,0); no call with k=8 in X000/MAIN0 (PAL or JP). PrePre8's event-title strip has モトクロスコース. | A sign that maps to (8,0) (a port-side subtype; `D_80079EBC` has none) and a place for it: **no evidence where it stood**, so placement would be ours. Cheap (same pattern as the letter). |
 | AREA00 hint signs per button config | MFNT000 k1 dx 8,10,14,15,21,22 and 24..29: variants of hints PAL already shows; `D_80079E8C..EB0[BUTTON_CONFIG_INDEX]` never selects them. | Nothing new to show: the same advice exists. Not worth it. |
-| Dwarf woodcutter lines (AREA02/19) | MFNT020 (2,54..56) "Dwarves... good at cutting trees", "you want a tree cut down?"; no WSS literal/variable reaches dx 54-56. Unused event 18 "The Dwarves' Help" ("Ask the lumberjack dwarf for some wood"). | A WSS script change (AREA15/02xx.WSS op 0x85) and a dwarf actor that offers it; medium. |
+| Dwarf woodcutter lines (AREA02/19) | MFNT020 (2,54..56) "Dwarves... good at cutting trees", "you want a tree cut down?" (JP text; PAL has `!!!!!!!!!!` placeholders). 0200.WSS stages (2,54) in register r11 for villager 16, whose talk case is missing (section "WSS event scripts across builds"); nothing reaches dx 55-56. Villager 16 is the chopping dwarf at the top left (0200 obj 16 / 0201 obj 13, world (8, 154), anim 56, while event 168 is complete and 80 is not): he stands in solid cells, 40-56 px beyond the nearest walkable cell, in every build's cell map, so he can never be touched (section "The village woodcutter"). Not spawned in PrePre 9 or Hyper 12. Unused event 18 "The Dwarves' Help" ("Ask the lumberjack dwarf for some wood"). | A WSS script change (AREA15/02xx.WSS op 0x85) and a dwarf actor that offers it; medium. |
 | AREA02 group 3/4/6 lines ("We're being pushed back!", "Big brother... hurry!") | MFNT020 (3,5..6), (4,0..2), (6,16); X002 calls only k 2, 3 (dx 0-4), 7, 9. | No scene to hang them on: medium-hard. |
 | Unused items (47; 21 with a JP description) | `scratchpad`-built list `unused_items_jp.txt`: e.g. Rain Essence (52), Torn Map halves (57/58), Rubber Gloves (59), Iron (61), Letter (90), Wood (91), Shovel (97), Electric Eel (108), Black Water (109), five Candies (110-114), Funga Leather/Tree/Sap (119/122/123), Small Drum (137), Chief's Spear (140), Coal (147). Name = D0SPSUB `ITEM_NAME_STRINGS[id]` (MFNT id+3 only for ids < 10), description = D0SPSUB block 0 id+4 (PAL English "···???"). | Giving them is one `addItemToInventory`, but nothing uses them; most belong to the cut Civilization / Masakari chains. Only a viewer would be honest. The JP descriptions could go into a text patch. |
 | Unused events (68; 26 with JP info) | `unused_events_jp.txt`: e.g. 6 "A Big Puddle?" (PrePre8's strip has あれま大きな水たまり: the same idea, now confirmed in two builds), 18 Dwarves' Help, 45 AP Slot Machine, 52 "Now I Can't Cross...", 59-61 Masakari chain, 74 Catch the Electric Eel, 76 Black Water, 77 Civilization Machine, 83 Iron Car. No `setEventStarted/Complete` with those ids anywhere. | Each needs its own trigger and goal; none has code. Medium-hard each; only the titles/descriptions are cheap (text patch). |
@@ -118,6 +118,12 @@ Full table: notes/secrets.md, "Where the 0xFF events are started / completed". S
 - **76 (Black Water)** and **99 (Where's the Material!?)** are started only in the cut Iron Town (AREA17 s0) and completed nowhere. **61** is only read by the cut Stonetown dialogue.
 - **The other 19** (6, 18, 45, 52, 59, 60, 67, 74, 83, 89, 94, 95, 96, 100, 138, 139, 140, 184, 186) have no code, room data or script that starts, completes or reads them.
   **89 (Green Fortune Teller)** is one of these. Its only context is the cut Wood village line "a fortune-teller lives in this hut, but he has a condition" (AREA11 s0).
+- **Pre-release builds** (2026-11-12, notes/secrets.md "Pre-release builds"): USA, beta 980203, JP demo, PrePre 9, Dengeki D5, Hyper 12 and
+  PrePre 8 add **no trigger** for any of these ids; USA and the beta have exactly the retail sites. The demos only add titles and hints:
+  event 6 is titled in Hyper 12 (大きな水たまり？) and PrePre 8 (slot 7, PrePre 8 numbering = retail + 1) and hinted in the JP demo; event 18 is
+  ドワーフの助け ("Help from the Dwarves") in PrePre 8 (slot 19) and PrePre 9; in the Dengeki hint bank event 83 is a dinner-party feast, not
+  the iron car. Side finding: event 169 (Biting Plant Flower) is completed by using item 8 from the sub-screen in JP retail and the beta;
+  USA/PAL moved it to giving the flower to witch Mizuno (X018).
 
 ## Jungle (AREA10): what is left of the Masakari / Funga content
 
@@ -177,7 +183,7 @@ These are the rest, checked only where it was cheap. **Unverified** means we did
 | Navy Evil Pig Bag from the chief | unverified | |
 | GoGoCar cacti and an extra track piece | **partly** | The cacti are confirmed (see "GoGoCart cacti / sign" above). The track piece was not checked. |
 | Haunted Mansion metal sign model | unverified | |
-| Doodle Rock textures/sprites in the Underground Forest | **confirmed (corrected)** | The graffiti rocks exist: five distinct dot-and-bar plaques (2, 5, 18, 139, 59) on room texture pages, two of them placed in retail as 3D decor models (Dwarf Forest AREA01 s1/s3 = 2, Haunted Mansion AREA04 s0/s1 = 5). See "Graffiti rocks (らくがき岩): the plaques exist". |
+| Doodle Rock textures/sprites in the Underground Forest | **confirmed (corrected)** | The graffiti rocks exist: five distinct dot-and-bar plaques (2, 5, 18, 139, 59) on room texture pages, two of them placed in retail as 3D decor models (Dwarf Forest AREA01 s1/s3 = 2, Haunted Mansion AREA04 s0/s1 = 5). See "Graffiti rocks (らくがき岩): the plaques exist". In PrePre 9 the "2" rock can be examined (close-up + big "?" bubble; no text or event). |
 | Growing flower sprites, cursed and uncursed | **partly** | AREA02 SPR 0x3B frames 27-32 exist, but the VRAM they point at is empty on PAL (see Lost). |
 | Iron door in the Iron Castle | **partly** | Event 100 "Iron Keyhole" has an icon (frame 209), is not in the menu order, and nothing starts it. No door sprite checked. |
 | Weird plant in the Masakari Jungle VRAM | **not found** | AREA10 4 bpp pages of all 10 load lists rendered (tools/vram.py + find_unused_gfx.py): the unsampled regions are palms, reeds, flowers and wall textures used by backdrops/models, plus the known withdrawn B002 page. No isolated plant sprite. No palette, so a small plant could be missed. |
@@ -643,10 +649,104 @@ GAM files unpacked, PAL, US and JP): five distinct plaques, every hit listed.
 - **Checked in the port:** with the fly mode of the port debug menu (`--debug-menu`, L1+R1+Select), AREA04 s0 at player (978, -716) shows the "5" rock right of
   Tombi on the mansion terrace (`--dump-draws`: CLUT (240,491), page (960,0), uv 129..197 x 186..248, frames 1809+);
   AREA01 s1 at (4252, -521) shows the small "2" plaque on the stone wall before the exit (CLUT (144,481), page (768,0)).
-- **No code uses them:** `updateStaticDecorModel` (X001 = X004, 0x800EE18C) only sets the draw flags and draws; no
-  talk, flag, event or check. Event 67 has no start/complete/read (above). The Stonetown villager says he saw one
+- **No code uses them in retail:** `updateStaticDecorModel` (X001 = X004, 0x800EE18C) only sets the draw flags and
+  draws; no talk, flag, event or check. Event 67 has no start/complete/read (above). The Stonetown villager says he saw one
   "at the wood people's workshop" (木人の加工場, AREA16 #188): that fits the "59" texture on the AREA11 page. No other
-  JP line names a rock, a number, an order or a symbol.
+  JP line names a rock, a number, an order or a symbol. **In the 1997 demos the same object type could be examined:**
+  see the next section.
+
+### PrePre Vol. 9: the "2" rock can be examined (close-up and "?" bubble), 12 November 2026
+
+A player of PrePre Vol. 9 remembered that Tombi reacts with a "?" at a rock near the Dwarf Village. Checked statically
+on `game_prepre9/fs/TOMBA` (PCPX-96093, `tools/disc_fetch.sh PREPRE9`); the list below is read from the code. It was
+then run in `tools/psxemu` (2026-11-13, "Seen at run time" at the end of this section), which confirms it and adds
+the Up gate and the run-time trace.
+
+- **The record is the retail one.** `AREA01/D004.GAM` = `D104.GAM` (unpacked, offset 0x2D7FC, again at 0x2E13C):
+  `01 04 13 00 00 00 | x 4110 y -399 z 48 | bc 0x10 bd 0 be 24 bf 0`: layer 4, type 0x13, subtype 0, same position as
+  retail AREA01 s1/s3 (retail be 22 / 10). Model 24 of Pre9's second object-model table (0x272B0, 25 models) is the
+  retail plaque model 22 polygon for polygon: 19 polygons, the same vertices (x -12..12, y -16..16, z -1..1) and the same
+  UVs (u 88..157, v 41..133); only the texture address moved (Pre9 CLUT word 0x7C49 = (144,497), tpage 15; retail
+  0x7849 = (144,481), tpage 12). The Pre9 texel pattern of the plaque was not found in the Pre9 A/B pages by the
+  index-pattern scan (Pre9 reorganised its pages and CLUT rows), so the picture itself was not compared. No other Pre9
+  record anywhere (AREA01, AREA02) uses layer 4 type 0x13; in retail too only the two graffiti rocks (and their AREA07 /
+  AREA12 copies) use it: the type is the graffiti-rock class.
+- **The handler.** Pre9's `updateMainObjects` (TOMBA.EXE 0x8001EBD8, xmatch) dispatches kind 2/3/4/5 through the tables
+  0x8007041C / 0x800725D8 / 0x80072D2C / 0x80073850; layer 4 entry 0x13 = **X01 0x800F1980** (X01.BIN + 0x4438, base
+  0x800ED548; X02.BIN has the same function at the same address). It is not a decor stub:
+  - init: box (8, 16, 16, 32), `b0f` = -10;
+  - idle: `ObjCullRegister`; when `o->b69 == 1` (player contact) **and** `PLAYER+0xC0 & 1` (0x800AB728) it sets
+    0x800A222F = 1, `o->h20` = 10, spawns a **layer-8 type 0 object** (0x800F1B58: `allocObjectLayer8`, b0a 0x10,
+    b0c 5, `da0` = the rock's own model pointer, same position): a copy of the plaque left on the wall; and, when
+    0x800A2244 is 0, an **ObjAlloc object type 0x0D with b0c = 1**;
+  - next state, every frame, the close-up (0x800F1BF0, four steps): (0) scale 1.0, z speed 0x18 units/frame toward the
+    camera, x speed 6 units/frame (sign from the player's x against the x of the object at `*0x800A9BCC`, not
+    identified), a y step that is a tenth of a camera-relative offset (`SPAD+0x17A`) in area 1 (a fixed 1 unit/frame
+    elsewhere), draw flags `b0a` 0x13; (1) 10 frames of that motion with x/y scale +0x190 per frame in area 1
+    (+0x64 elsewhere; "area 1" = 0x800A2248 == 1, read as the current area because Pre9's icon code tests it where
+    retail tests `GAME[0]`): about 240 units toward the camera and twice the size; (2) waits for pad bit 0x20 in `SPAD.s1fc`;
+    (3) 10 frames back (scale -0x190 per frame in every area), `b0a` back to 0x10;
+  - end: clears 0x800A222F, 0x800A2232, `PLAYER+0xC0`, `SPAD.s1c6`; player state 1 / 0 / 0 (normal); the layer-8 copy
+    is freed; the rock goes back to idle (it can be examined again).
+- **The "?"**: Pre9's pool type 0x0D (TOMBA.EXE 0x8002F78C) is retail `updateItemGetIcon`: it pops `ANIMS[b0c]` (table
+  0x800726A4, retail `ITEM_GET_ICON_ANIMS` 0x80079D34) above Tombi's head (player position - 0x1E) with SFX 0x1A and
+  sets 0x800A2244 (retail `D_8009C954`) while it lives. Entry 1 is the same anim in both builds (frames 0x30, 0x31,
+  0x4B); rendered from retail with `tools/objdraw.py 1 1 P/0D:0:1` it is the **big "?" speech bubble** (entry 0 = the "!"
+  bubble of event starts). In Pre9 the only spawns of this icon are the two event paths in TOMBA.EXE (b0c 0) and the rock
+  (b0c 1). Retail never spawns b0c 1 (`spawnItemPickupObject` is only called with 0; the bubble is listed in the table at
+  the top of this page): **the rock was the original user of the big "?" bubble.**
+- **The button.** The Pre9 idle step (X01 0x800F4F74) does what retail `playerStepIdle` does for contact result 4 (the
+  retail "check" press that signs answer to): on pad bit 0x20 it puts Tombi in event mode (b04 5, step 0x61) and sets
+  0x800A222F, 0x800A2232 and `PLAYER+0xC0` = 1. Retail tests `BUTTON_MASK_A` (default Square) there; Pre9 tests the
+  fixed bit 0x20. Reading 0x20 as **Circle** is an inference: X01 tests 0x40 (jump, X) 34 times, and 0x10/0x20/0x40/0x80
+  and 0x1000..0x8000 fit the byte-swapped pad word (face buttons low, d-pad high). Retail signs (`updateL4Type1AObject`)
+  use the same gate as the Pre9 rock (`o->b69 == 1 && D_800A60F8 & 1`, D_800A60F8 = retail `PLAYER+0xC0`).
+- **No text, event or flag.** The handler and its helpers call only `ObjCullRegister`, `allocObjectLayer8`, `ObjAlloc`,
+  the close-up step and the free routine: no message box, no `setEventStarted/Complete` (event 67 or any other), no
+  script flag, no counter, no WSS entry. Examining the rock shows the numerals up close and nothing else; the puzzle
+  that would read them (above) is not in the demo.
+- **Other builds.** The close-up code (signature: `0x1800` stored to `+0x7E` next to the 0x13 draw flags) is also in the
+  SLPM-80165 demo (1997-10-10): `SYSTEM/X00.BIN`, layer 4 entry 0x13 = 0x800EB774 with the same `ObjAlloc` type 0x0D /
+  b0c 1 spawn at 0x800EB89C, but that disc has only AREA00 data, so no rock is placed. Same in *Yoi Ko to Yoi Otona
+  no. PlayStation Taikenban Vol.2* (PAPX-90023, exe 1997-10-10, `GAME_FILES_URL_YOIKO2`): its `TOMBA/AREA00/X00.BIN`
+  holds the same handler bytes (at file offset 0x40DC), and the disc has only `TOMBA/AREA00` + `SYSTEM`. Not in Hyper 12 (`A00.BIN`),
+  PrePre 8 (no AREA01 data either), JP retail SLPS-01144 (1997-12-02), the beta 980203, USA or PAL: by the December 1997
+  JP release the type was reduced to the draw-only `updateStaticDecorModel`. PrePre 9 has no AREA04, so the "5" rock is
+  not in it. The demo the user remembers is therefore PrePre 9 (inference from the data: it is the only local disc that
+  has both the code and a placed rock).
+- **Side correction** to "What was checked for the object they act on" (PrePre Vol. 9 section below): the Pre9 kind 2
+  type 0x0D record at (4187, -378, 618) runs layer-2 entry 0x0D = X01 0x8012E708 (an animated actor with a
+  `r[1]=%01d r[2]=%01d` debug print; not analysed further); X01 + 0x2E8F8 (0x8011BE40), the four-state stub quoted there,
+  is layer-4 entry 0x12.
+
+**Seen at run time (2026-11-13).** The demo now runs in `tools/psxemu` (build profile `prepre9`), and
+`python3 tools/psxemu/pre9_rock.py video|trace` replays the scene from the boot: the opening dialogue in the Dwarf
+Village, then AREA01 section 1 spawn 1 (Tombi lands at x 4168, next to the rock) through the game's own area loader
+(Pre9 `GAME` = 0x800A2248: +0x334 / +0x336 / +0x340 next area / section / spawn, game task mode 5; the only RAM write),
+then pad input. Video (MP4, 2x, 60 fps, no sound: audio is not emulated) kept outside the repo.
+- **How to trigger it.** Standing (no Left/Right) in front of the plaque (x about 4093..4112, the cells with attribute
+  4), **hold Up and press Circle**. Up is part of the gate, which the static reading missed: contact result 4 of
+  0x800F49FC needs `PLAYER+0x2E` bit 2 (no Left/Right in the pad word 0x800A2FF8) and bit 8 (Up held, 0x1000 there)
+  and cell attribute 4; Circle is bit 0x20 of `SPAD+0x1FC` (confirmed). Circle alone is Tombi's normal action.
+- **What it shows.** As read: the "?" bubble pops over Tombi, the plaque (Maya "2", two dots) leaves a copy on the
+  cliff and comes forward from z 48 to z -192 at twice the size (scale 0x1000 -> 0x2000 in 10 frames, drifting left),
+  then holds until Circle and goes back in 10 frames. While it is up, the HUD (vitality, AP, timer) is hidden and the
+  pad words (0x800A2FF8/2FFC, `SPAD+0x1FC/1FE`) are cleared every frame by 0x8010FAAC (input locked).
+- **Call tree** of X01 0x800F1980 at run time (every `jal`/`jalr` under it, VBlank interrupt excluded): 0x80023C68 ->
+  0x80019984 every frame (visible flag + per-frame draw list), and once at the trigger 0x80019160 (pool alloc: the "?"
+  object, type 0x0D b0c 1) and 0x800F1B58 -> 0x80019278 (allocObjectLayer8: the copy); the close-up step 0x800F1BF0
+  calls nothing. No library call (no text, no sound) inside the tree.
+- **Writes outside the rock and the player** in that tree: 0x800A222F = 1 (and 0 at the end), 0x800A2232 = 0 at the
+  end, `SPAD+0x1C6` = 0 at the end, the pool / free-list bookkeeping (`SPAD+0x208/0x20C/0x238/0x23A`), the draw list
+  (`SPAD+0x224/0x24C`), and the two new objects. The player's idle step adds 0x800A222F = 1, 0x800A2232 = 1,
+  0x800A2A98 = 2, `PLAYER+0xC0` = 1 and `*(0x80090E08)+0x1E/0x1F` = 0. The "?" object (TOMBA.EXE 0x8002F78C) sets
+  0x800A2244 = 1 while it lives (159 frames, then 0 again: the bubble shows on every examine) and queues **SFX 0x1A**
+  (sound queue 0x80021C40 -> `SsUtKeyOnV`, stubbed here).
+- **Differential** (the same input without the Circle presses, all RAM 0x80010000..0x800B8000 and the scratchpad,
+  ordering tables left out): besides the above, only the demo countdown differs: 0x80090E14..16 (min / s / ticks,
+  0x800A7E38 its text) does not move while Tombi is in event mode, i.e. for the whole examine (more time left at the end). No
+  write to the script flags (0x800A258C..), no event start/complete, no text or dialogue state, no item, AP or counter.
+  Examining the plaque is a self-contained look at the numerals; nothing else is tied to it in this demo.
 
 ### Reading the numbers (Maya base 20)
 Dot = 1, bar = 5, levels read bottom (x1) to top (x20); within a level the dots sit above the bars.
@@ -787,6 +887,9 @@ The 84 frames these scripts use are exactly the new frames no table reaches; the
   units (two scenery sprites, three items, one chest) plus one L2 type 13 at (4187,-378,618) whose handler
   (X01.BIN +0x2E8F8, overlay base 0x800ED548) is a four-state stub that only calls two exe functions. AREA02 is
   identical record for record.
+  (Correction 2026-11-12: that stub is layer-4 entry 0x12; the kind-2 type-0x0D record runs X01 0x8012E708, see
+  "PrePre Vol. 9: the "2" rock can be examined". The graffiti rock at (4110,-399,48), layer 4 type 0x13, is the Pre9
+  object with demo-only behaviour: it can be examined, with a close-up and the big "?" bubble.)
 - **Texture pages**: `AREA01/A002.GAM` (objects: chests, barrels, pots, arrow sign, a rolling log in 4 views at page
   x 768-880, y 220-240) differs from retail's `AREA01/A002.GAM` in 21 regions, all retouches; the log is in retail
   AREA01 and AREA07 too. `AREA01/B000.GAM` 3 retouches (the slanted two-pronged trident at (208,192) / (208,216) is the
@@ -927,3 +1030,203 @@ identification; the frames are retouched / on another page there, so the block m
 (slots 34, 36, 44, 45, 52, 61, listed above); the Japanese title logo, faces, kanji font and sub-screen labels (all in
 retail JP); the feather, the Evil Pig trident and the logs (sampled, or in retail JP). JP AREA00/AREA08 room pages, the
 Pre9 AREA01 object atlases and AREA02 room pages hold no other unreferenced art. USA and SCES-01330 discs not checked.
+
+## WSS event scripts across builds: orphan entries, dead branches, build-only reward changes (2026-11-12)
+
+Tool: `tools/wss.py` (disassembler, reachability walk, census `sem` / `semdiff` of events, items, dialogue, flags and
+spawns; `--ops N` for a pre-release op table). Facts checked in the binaries [V] unless marked [I].
+
+**How a script runs.** The loader (`initAreaScripts`, the only caller of `scriptStart`: one `jal` in MAIN0..8, no data
+word) starts **entry 0** only; every other entry of the 64-slot table is reached by `CALL e` (op 0x12, immediate
+entry byte). So an entry that no reached code CALLs can never run. Game op 0x85 is a generic object command (cmd 2
+walk, 4/8 dialogue with `k, dx` = WFM group and index, ...), not only the message box. The game-op tables differ per
+build (exe dispatchers, `op - 0x80` + `sltiu N`): retail PAL/USA/JP and beta 980203 44 ops (Yield 0xAB), JP demo and
+Dengeki D5 40 (Yield 0xA7), PrePre 9 39 (Yield 0xA6; its 0xA2 GiveItem has no `-1` = max-health branch), Hyper 12 32
+(Yield 0x9F: no GiveItem, no Fade). The ops below the Yield keep the retail numbers (handlers compared by their calls).
+Pre-release dialogue: `k + dx` indexes the WFM1 block of the area (no group table), e.g. PrePre 9 0200 `k = 59`
+-> `TOMBA/AREA02/A003.GAM` block 0 (`tools/jpdemo_text.py` dump); the `dx` values are the retail MFNT020 group-2 ones.
+
+**Hashes.** USA = PAL for all 9 files (byte-identical). Beta 980203 and JP share 0120 and SCR0100; 0130 is the same in all
+three; beta 0140 = PAL 0140, JP 0140 differs. JP demo 0000 = Dengeki 0000 (byte-identical). PrePre 9 (`TOMBA/AREA01`, 7 files, no 0201 /
+0220) and Hyper 12 (`TOMBA/AREA15`, 8 files, no 0201) share no file. Apart from the 0201 rewards below, the retail versions differ only in staging
+(`WriteGlobal(363, ...)` = `TALK_POSE` 0x8009D00F, Tombi's reaction pose, 25 writes added in PAL/USA, none in JP / beta;
+extra NPC placements in 0200/0201 depending on events 80 / 168; one tutorial-line order in X000 sequence 7).
+
+### Retail (PAL = USA; JP and beta have the same orphans)
+| file / entry | what it is | text |
+|---|---|---|
+| 0130 e4 | empty (`RET`) | none |
+| 0140 e23, e24, e25 | turn-and-walk helpers for objects 0, 2, 3 (flip frame, anim 24, `ObjCmd 2` walk 120 ticks at x +-80); the live 0140 code drives these objects with other entries | none |
+| 0200 e15 | same helper for object 3 (anim 20 + facing, walk 180 ticks, speed 100) | none |
+| 0200 e50, e51 | generic helpers taking registers (`obj, frame, speed, ticks` / `obj, anim, ticks`) | none |
+| 0210 e2, e3 | turn-and-walk helpers for objects 0, 2 (same code as 0140 e23/e24) | none |
+| 0220 e6 | fade-in loop (8 steps of `Fade(0, 16 - 2n)`) | none |
+No retail file has a dead branch inside a reached entry (only the `Yield; JMP` after a loop). So the orphan WSS code of
+the retail discs is movement/fade boilerplate: **no cut dialogue, event or item in a retail WSS** [V].
+
+**The woodcutter line is staged by the scripts.** `0200.WSS` (PAL, USA, JP, beta) sets `r11 = 54` in its five
+post-rescue dialogue-stage entries (e8-e12, PAL 0x1E6B..0x2039): every villager `n` talks with register `r(n+1)`
+(`ObjCmd n, 4, 2, r(n+1)`), and `r11` belongs to villager **16**, but the talk switch has no case for object 16
+(15 -> r10, then 17 -> r12) and nothing else reads `r11`. Object 16 is spawned (class 9, at 8,154, anim 56, only
+while event 168 is complete and event 80 is not: correction 2026-11-12, see "The village woodcutter" below). So MFNT020 (2,54) "ドワーフ、木を切るのとくい... わしらの なかまにたのむといい"
+("Dwarves are good at cutting trees... ask one of us if you are in trouble"; PAL has `!!!!!!!!!!` placeholders at
+2,54-56 in every language) was wired to a villager whose talk case was removed. PrePre 9 has the same `r11 = 54`
+(dialogue 59+54 = 113, same JP text) and no talk case either; Hyper 12's 0200 has neither. The follow-ups (2,55)
+"you want a tree cut?" / (2,56) "this tree is fine, step back" stay unreferenced in every build (the 0x55/0x56 lines
+belong to the cut event 18, table "Possible" above) [V for the registers, I for the purpose].
+
+### The village woodcutter (AREA02 s0 / AREA19 s0, 2026-11-12)
+
+The user remembers a dwarf at the top left of the Dwarf Village who chops all the time and cannot be talked to,
+and a loose axe sprite in memory. Checked in the binaries and in i386 port renders [V] unless marked.
+
+**He is the WSS object 16, not an I0NFO record.** AREA02 s0 (and AREA19 s0) run `I0NFO.BIN` (`overhead*`). That
+overlay has no actor or patrol table. Everybody in the village is spawned by `AREA15/0200.WSS` (or `0201.WSS`).
+The only placement records are APD[0] types 0x25 / 0x26 at (120, 172) / (-77, 292). `SpawnObject(16, 9, 0, 8, 154,
+0)` (PAL 0x2A55) makes class 9 = layer 2 type 0x19 = `overheadActorHandler`, subtype 0 (`OVERHEAD_ACTOR_DEFS[0]`:
+box {8, 16, 8, 16}, `w1e` 0x10, `SPR_DATA[11]`, anims 0x800F0E40). Op 0x81 (wss.py "SetObjAnim") sets `w74` = anim
+56 (`overheadActorSetScriptAnim`), and op 0x89 sets facing 2.
+- **When.** 0200 entry 1 spawns him only if event 168 "The Evil Pig Bag" is complete (255) and event 80 "The 100
+  Flower Forest" is not. The other villagers are gated by their register `r(n+1) != 255`; he is not gated by r11.
+  `0201.WSS` (loaded while event 20 is in progress) spawns the same dwarf as **object 13** at (8, 154), anim 56,
+  whenever event 80 is not complete (0x10B2). Once the forest is purified, `resolveAreaVariant` loads AREA02 s0/s1
+  with `AREA_VARIANT` 17, i.e. the AREA19 data (green village, same script), and 0200 no longer spawns him.
+  So he chops from the bag event until the 100 Flower Forest. That is a long stretch of the game, but not "always".
+- **Where.** I0NFO maps world (x, y) to cell ((x + 0x80) >> 3, (y - 0x30) >> 3) (`overheadCollideMapTile`), so
+  picture pixel = (x + 128, y - 48). His feet are at picture (136, 106) of the 448 x 576 map: behind the fence,
+  under the balloon tree at the top left, left of the upper hut. The port render shows him there, axe swinging, half
+  hidden by the canopy prop.
+- **Anim 56** = frames 19, 20, 21, 22, 23, 21 (32 / 2 / 2 / 2 / 16 / 3 ticks, then loop): the chop. Each frame is
+  the body part (CLUT 0x7809) plus 1-2 **separate axe parts** (CLUT 0x7909, page `w1e` 0x10, u 128..239,
+  v 80..119). This is the "loose axe": the axe is cut as its own parts with its own palette on the page. Every one
+  of them is referenced, and only by frames 19-23. No frame holds the axe alone.
+- **Unused copies.** `SPR_DATA[11]` repeats the 70-frame dwarf set in four palettes (frames 0-69 brown,
+  70-139 purple, 140-209 green, 210-279 grey). No anim of I0NFO (216 actor scripts + 24 prop scripts) uses
+  the chop copies 89-93, 159-163, 229-233, the anim-57 copies 85-88, 155-158, 225-228, frames 69/139/209/279
+  (page +1) or 354. In the copies the axe parts take the body CLUT (a pink / green axe). So they are generated
+  palette variants, not new art.
+- **Same chop script in every INFO.** `AREA02/I0NFO` = `AREA19/I0NFO` = `SYSTEM/I0NFO`; USA, JP, beta 980203,
+  PrePre 9 (`TOMBA/INFO.BIN` = `TOMBA/AREA02/INFO.BIN`) and even the JP demo's leftover `AREA08/INFO.BIN` hold the
+  same 6-step script at anim slot 56.
+- **The axe in the stump** at picture (~280, 410) is painted into both map pictures (AREA02 autumn, AREA19 green),
+  not a sprite.
+
+**Why he cannot be talked to.** Talk in I0NFO is contact: `overheadPlayerNpcCollision` runs
+`overheadResolveNpcContact` on every type 0x19 / 0x25 / 0x26 object. The boxes push Tombi out and, if he faces the
+dwarf and pressed the button (`wac == 1`), set the dwarf's `b68 = 1`. The 0200 loop (0x05DF, objects 0..27) then
+dispatches on `GetObj68`. Class 9 is talkable (all villagers are class 9, `active = 1`). With Tombi's box {8, 16, 2,
+8} and the dwarf's {8, 16, 8, 16}, contact needs dx in [-16, 16] and dy in [-10, 14] (b9c 0), i.e. Tombi's feet in
+world x -8..24, y 144..168. **Every cell of that window is solid (shape 9)**: the whole top-left block is 9 down
+to y 208. The nearest walkable cell is 40 px right of and 56 px below the window (plaza edge at (64, 224)); the
+house trigger cells under the upper hut start at x 88, y 176. So he stands outside the walkable area by design of
+the cell map, which is the same in PAL, USA, JP, beta 980203 (byte-identical maps, found in `AREA02/D004.000` /
+`D005.000` and the AREA19 copy) and PrePre 9 (`TOMBA/AREA02/D007.000`: 48 cells differ, all at y >= 248). Even
+if he were reached, 0200 has no case 16 and 0201's talk loop only covers objects 0..9 (he is 13 there). Then `b68`
+would stay 1 and nothing would open.
+
+**Across builds** (0200 / 0201, `tools/wss.py`, ops 44 / 39 / 32):
+| build | woodcutter | r11 / (2,54..56) | talk case |
+|---|---|---|---|
+| PAL = USA (byte-identical 02xx.WSS) | 0200 obj 16 and 0201 obj 13 at (8, 154), anim 56 | r11 = 54 in e8-e12 | none |
+| JP retail, beta 980203 | identical (same spawns, conditions, anim) | identical | none |
+| PrePre 9 (`TOMBA/AREA01/0200`) | **not spawned** (no object 16; entry 1 ends at 15) | r11 = 54 in e8 (live), e9-e11 dead, e12 = 255 | none |
+| Hyper 12 | not spawned (object 16 is a prop, the canopy at (-16, 142)) | no r11 | none (switch 0..15) |
+| JP demo SLPM-80165, Dengeki D5, PrePre 8 | no village script (only `0000.WSS` / no AREA15) | - | - |
+No build references (2,55) / (2,56), or their pre-release index (PrePre 9 59 + 55/56), as an immediate or a register
+value.
+
+**The other villagers (the user asked about patrols).** I0NFO has no patrol boxes (those are the I0NFO2 SpawnA
+records of AREA05/08/19 s2). Village movement is WSS `ObjCmd n, 2, ticks, speed` legs that flip the facing each
+call. That covers object 2 (horizontal, 120 x 100 or 40 x 400) and object 9 (vertical, 220 x 100 or 80 x 360,
+e16/e17 or e19/e20 by global 0), plus 14, 18, 28, 29 in their scenes. Leg length ~ ticks x speed / 256 px [I, not
+traced]. The 0200 entry-1 spawn table (objects 0-29) is the same in PAL, USA, JP and beta. The diffs are elsewhere.
+- PAL/USA's 0200 entry 13 adds two event-80 alternative props that JP and beta lack (35 at (198, 533), 41 at
+  (18, 589)) and moves prop 38 from (98, 567) to (95, 570). 0201 e2 likewise adds props 28, 34 and 40-42.
+- PAL shows the rescued friends' balloons (2,160..166) for 180 frames, JP for 120.
+- PrePre 9 lacks objects 5, 6, 16-29, puts 12 at (-64, 345) and 14 at (48, 286), and walks 14 for 180 ticks
+  (PAL 75).
+- Hyper 12 puts 0/1 at x 223 (PAL 234) and 4 at (120, 180) (PAL (80, 188)).
+Nobody else is placed outside the walkable area.
+
+**Port mod feasibility (no implementation).**
+1. **Reach.** He must be reachable, because a talk case alone does nothing while he stands in solid cells. Three
+   ways:
+   - Move his spawn to a walkable spot near the plaza edge, e.g. around (40, 228). This changes the scene, but keeps
+     all data.
+   - Open cells of the 0x8E map. Tombi would then walk through the painted fence and tree.
+   - A port-side contact exception for this object, e.g. a larger box in `overheadResolveNpcContact` when `b0c` is
+     16 in AREA02 s0. `OVERHEAD_ACTOR_DEFS[0]` is shared by every villager, so it cannot be widened, and `b9c = 1`
+     only adds 8 / 16 px to y.
+2. **Talk case.** Add one to 0200 e0 (and 0201, object 13, outside its 0..9 loop): `CMPI r1E, 16; JNE next;
+   ObjCmd 16, 4, 2, r11, 70; wait GetObj6A == 0; SetObjAnim 16, 56, 0; SetObjFrame 16, 2`. This copies the case of
+   object 19, a brown dwarf whose talk anims are 70-73. r11 is already 54 in exactly the stages in which he exists
+   (e9-e11 = 168 complete, 80 not).
+3. **Text.** PAL (2,54..56) are `!!!!!!!!!!` in every language. The lines come from JP via the text patch
+   (`--text-patch`), as for the other restored lines.
+4. **Event 18** "The Dwarves' Help" (JP title only, set by nothing) could hang off the same case:
+   - the first talk shows (2,54) and runs `AwardEvent(18, 0)`;
+   - (2,55) "you want a tree cut?" needs a tree or target to ask about, which the scripts and maps do not provide
+     [I];
+   - completion and a reward would have to be invented.
+
+So the talk and the start of 18 are cheap (one WSS case plus a reach fix), but a faithful completion of 18 is not
+recoverable from the data.
+
+**What the wood was probably for: the cut raft quest** [I, suggested in the community discussion, 2026-11-12]. Event
+18's hint is "ask the lumberjack dwarf for some wood", and the only wood the cut content asks for is the raft's: the
+AREA11 raft craftsman (JP #220-#224, docs/CIVILIZATION.md) agrees to build a raft, tells Tombi to bring wood, and hands
+it over to be used "at the riverside of the Old Tree hill"; JP-only item description DSPSUB#0 #95 is "just the wood
+to make a raft", and the AREA11 event table has "Let's Build a Raft!". The raft craftsman says the wood he uses falls
+under the Wise Old Tree, not that a dwarf cuts it, so the chain woodcutter -> wood -> raft -> crossing the river
+(where the bridge of events 52 / 95 / 96 is broken or unfinished, docs/CIVILIZATION.md point 8) is an inference
+from the hints, not from code: no build links event 18 to the raft events or to item 95.
+
+Evidence renders (local, not committed): overlay of the cell map, the woodcutter, the contact window and the
+villagers. Port frames, 168 poked to 255: debug select AREA02 s0 and AREA19 s0, both with him in place.
+
+### JP retail and beta 980203 vs PAL (meaningful script changes)
+| file | JP / beta | PAL / USA |
+|---|---|---|
+| 0201 e15 (the village script loaded instead of 0200 while event 20 "Stop the Fight!" is in progress, `SCRIPT_FLAGS[20] == 1`) | completing 177 "Something's Cookin'?" (the gassy dwarf, (2,12)/(2,13)) gives `GiveItem(17, 2, 1)` = **2 Torches** (JP 0x1E3A) | gives `GiveItem(-1)` = max health +1 (0x1FBA), the same reward as 0200 |
+| 0201 e16 | completing 113 "Baron's Strength" sets global 101 = 2 and returns: **Baron (item 14) is not given back** (JP 0x2290) | `GiveItem(14, 1, 1)` after it (0x241D), as 0200 does |
+| 0201 | dialogue (2, r05) twice | one of them fixed to (2,71) |
+JP and beta 0200 give -1 / 14 correctly, so in the two 1997-98 Japanese builds the outcome of these two quests
+depended on which of the two village scripts was loaded; PAL/USA (and only they) fixed 0201 [V]. Seen in game only
+if 177 or 113 is finished while event 20 is in progress [I].
+
+### PrePre Vol. 9 (PCPX-96093, `TOMBA/AREA01/*.WSS`, 39 ops)
+Read this table as "switched off in the demo", not as cut content: events 14 "A Lost Child", 20 "Stop the Fight!",
+177 "Something's Cookin'?", and the lines 187 (the leaf butterfly), 185 (the Elder's bag), 175 (the friends vanished)
+and 171 (the right entrance to the Elder's house) are all in the retail game. The demo jumps over them because it
+ends early. The one real difference is the **reward of 177: the Charity Wings** (item 7) in the demo's dead branch
+(the live demo branch gives the Broken Vase; retail gives max health +1, JP / beta 0201 two Torches).
+| file / place | what | text (PrePre 9 bank `AREA02/A003` block 0) |
+|---|---|---|
+| 0200 e0 0x06FF..0x0828 (dead: after the unconditional `JMP` at 0x06FC, talker 14 always says dialogue 69) | the gassy dwarf's 177 quest as a talk branch: flag 177 == 4 -> dialogue 71, flag := 255, **AwardEvent(177, complete)**, wait 300 frames, **GiveItem(7) = Charity Wings**; other states dialogue 69 / 70 | 71 "おやっ！これ、くれるのかい？... かわりに これをもらっとくれ" ("oh, you're giving me this? ... take this in exchange"); 69 "4 dwarves suddenly vanished... the Koma Pigs hid them" |
+| 0200 e26 (live, flag 177 == 5) | the version that runs: `GiveItem(26, 1, 1)` (Broken Vase), dialogue 71, then 72 (the gas speech + "take this, it's something rare"), no event award | 72 "・・・ふうーーーっ・・・じつは、おなかの中にガスがたまってて..." |
+| 0200 e0 0x00EF..0x0140 (dead) and **orphan entries e4, e9, e10, e11, e12** | the dialogue-stage tables of the later village (event 20 "Stop the Fight!" in progress / done, rescue counts): entry 0 jumps over the event-20 test, so these tables never load | e9-e11 hand out 187 "a strange butterfly in the dead leaves", 130 (the doctor), 185 "the Elder has the Forest seal bag", 186, 193, 194, 74/73 (the torch keeper), **113 (the woodcutter line, register r11)**; e4: 175 "our friends vanished!", 176, 169/170, 171 "the right entrance leads to the Elder's house", 174, 181; e12 all 255 |
+| 0210 e0 0x031F..0x03AC (dead, after `JMP` 0x031C) | right after 17 "Save the Dwarves" completes: dialogue 99 and **AwardEvent(14, start)** "A Lost Child" | 99 "the seven friends are back, but one child is still lost in the forest" |
+| 0210 e0 0x0A84..0x0BF7 (dead) | talker 4 (dialogue 192/193, by flag 12) and talker 5: when 179 is not started, dialogue 116/117 then **AwardEvent(20, start)** "Stop the Fight!", the dwarf walks off and is disabled | 116 "two dwarves started fighting at the village gate... could you stop them?"; 117 "if the Elder were here..."; 192 "I'm a lookout... for what? can't tell"; 193 "have you met the Elder?" |
+| 0130 | starts 181 "Ready, Set, Go!" (retail starts it in SCR0100) | - |
+| 0140 e17, e18, e19 | the same turn-and-walk helpers as retail 0140 e23-e25 (orphans) | none |
+So the 1997 demo had all of the village chain (14, 20, 177) in its scripts and cut the demo short by inserting
+`JMP`s over the triggers; the earlier notes list 14, 20 and 177 among PrePre 9's WSS awards: they are all in dead
+code [V]. The gassy dwarf's quest had two rewards in the same file, **Charity Wings** (the talk branch, cut) and the
+Broken Vase (live); retail gives max health. Charity Wings later come from other givers (X003 hollow, I0NFO2
+`npcSet07SceneStep1`) [V].
+
+### Hyper Re-mix 12 (SLPM-80167, 32 ops) and the area-0 demos
+- Hyper 0200 orphan **e11** is an all-255 stage table (no lines); 0200 starts 168 (already listed in notes/secrets.md)
+  and completes 177 with no reward (the op table has no GiveItem at all). 0220 e0 0x01FF..0x0251 is dead
+  (player-x 130..158 trigger, `ObjCmd 0, 4, 65, 82`, wait 240). Hyper ships only the AREA00 text (`TOMBA/AREA00/
+  DATA000`, 64 + 16 entries), so the dialogue of its 0100..0220 scripts is not on the disc and they cannot run.
+- JP demo / Dengeki D5 / Hyper `0000.WSS`: no orphan entry, no dead branch; the area-0 opening plays 4 lines
+  (`k` 24 in the JP demo / Dengeki, 22 in Hyper; dx 0..3) where retail plays 9 (MFNT000 group 3, dx 0..8) plus `ReadGlobal(120)`; award 1 only.
+
+### Other "scripts" checked
+- Scene-sequence step tables (`tools/objects.py` SEQ_TABLES, X000/X002/X004/X006/X013), looked up by content: USA = PAL
+  for all; JP/beta differ in X000 sequence 7 (the weapon-workout tutorial: PAL shows (1,17) and (1,15), JP (1,16),
+  beta (1,15): button-layout variants of the same text), X002 sequence 2 and the X004 sequences (step reordering, no
+  new event id: the event census of notes/secrets.md "Pre-release builds" stands). The pre-release X00/A00 sequence
+  tables share no 3-step run with PAL (other op numbering); their event ops were already censused. Nothing new.
+- Not done: message-box control codes in the dialogue banks, I0NFO/I0NFO2 town-scene step tables across builds.

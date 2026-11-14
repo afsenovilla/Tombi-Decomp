@@ -1306,6 +1306,21 @@ new is in the JP **text**, the JP **per-area event-title tables**, and one stale
    reads "a lump of iron that looks like it could make sturdy tools"; AREA16 JP #219 "once I tried to go into the river
    and got zapped" foreshadows the electric eel.
 
+8. **The bridge, gathered (JP text survey 2026-11-12, all 7710 JP dialogues searched for 橋 / 渡 / 向こう / 木材).**
+   Every bridge reference is an event title or hint, none is dialogue, and none has code (notes/secrets.md "Where the
+   0xFF events are started / completed"):
+   - event 96, title 「未完の橋…」 "The Unfinished Bridge..." (JP AREA11 A002 block 1 #5; in the AREA11 / AREA18
+     per-area title tables, point 5);
+   - event 95, hint 「こわれた橋で　あしどめ」, PAL DSPSUB#1 #95 "A broken bridge blocks the way." (the hint text is on
+     the PAL disc too, in every language; title "The Wood Village's Big Rock");
+   - event 52, title 「渡れなくなっちゃった…」 "No Way Across..." (JP AREA03 A005 block 1 #14), hint 「橋がなくて　こまる」,
+     PAL DSPSUB#1 #52 "Can't cross without a bridge." (AREA03's title table, not a Civilization town).
+   The way across that survives as dialogue is the raft: the AREA11 raft craftsman (JP #220-#224) builds one from wood
+   found under the Wise Old Tree, "use it at the riverside of the Old Tree hill", with the JP-only item description
+   DSPSUB#0 #95 「イカダをつくるには、もってこいの　木材」 ("just the wood to make a raft") and event title
+   「イカダを作ろう！」 "Let's Build a Raft!" (event 150 in the AREA11 table). Whether the raft replaced the bridge is an
+   inference. The only other "can't go to the other side" line is the AREA00 boatman's lock (point 6), not a bridge.
+
 Checked, nothing new: JP INFO2 vs PAL I0NFO2 civ tables (identical; PAL has ~9 KB of data JP lacks, not the reverse);
 town placements (only clouds, backdrop sprites, moved chests); JP-only `AREA18/B100.000` (a copy of PAL B101 textures);
 JP X11/16/17/18 code (rewrites with the same message/event/item calls); AREA15 scripts; JP exe strings. Open: which

@@ -4,6 +4,7 @@ game/*
 # the disc extracted by tools/extract_data.py for the native port (port2/)
 data/
 data_usa/
+data_jp/
 # ...but not the C data files of the decomp (src/data/)
 !src/data/
 game_jp/
@@ -62,3 +63,4 @@ game_hyper12
 game_sces01330
 game_jp_demo
 .sdl3ds/
+game_yoiko2
