@@ -127,7 +127,7 @@ static void blob(int x16, int y16, int rx, int ry, const Ramp *rp, int tone, int
  *          hazy blue-green and softer;
  *   72-102 the front fence: three khaki planks (left rows 72-77, 81-86, 93-99; one row lower on the right) on dark
  *          posts every 20-23 columns, the wood / path showing between them;
- *   103-185 the dry-stone wall: light cream stones (some pale blue, ~6-9 %) 7-15 columns by 4-6 rows in an irregular
+ *   103-185 the dry-stone wall: light cream stones (some pale blue, ~6-9 %) 7-18 columns by 5-6 rows in an irregular
  *          bond, 1-texel light-grey mortar; 186-~200 the orange path; the front bushes from ~200.
  * How each band is drawn (every colour from the user's picture, every size from the picture's own measure):
  *   - per-row ramps: the fence (planks and the gaps between them), the path, the wall's top and foot rows take the
@@ -137,9 +137,10 @@ static void blob(int x16, int y16, int rx, int ry, const Ramp *rp, int tone, int
  *   - the wall: stones laid outwards column by column (a skyline: where a stone ends, the free rows get new stones of
  *     the picture's sizes, so joints never line up); the first stones are the picture's own stones cut by the edge
  *     (rows and colour measured on its last columns, their remaining length from the visible one); every stone's
- *     colour drawn from the list of the picture's stone colours next to the edges (so the share of blue-grey ones is
- *     the picture's), a darker lower and right rim, a softened corner, the odd slanted joint; mortar from the
- *     picture's mortar ramp; the foot's shade per row as the picture's;
+ *     colour drawn from the list of the picture's stone colours next to the edges, as often as their area (so the share
+ *     of blue-grey ones is the picture's), the layout warped by smooth noise (irregular polygons, slanted joints; none
+ *     at the join), the mortar the one-texel boundary of each stone, a darker lower and right rim, a softened corner;
+ *     mortar from the picture's mortar ramp; the foot's shade per row as the picture's;
  *   - the trees: the tree cut by each edge continued (its centre, top and width in A5_ETREE, its tier lines measured
  *     on the edge columns so the chevrons meet), then new conifers of varying height and width, near (bright) and
  *     far (hazy) mixed, in front of a hazy back row; the tone per row matched to the edge columns over the first

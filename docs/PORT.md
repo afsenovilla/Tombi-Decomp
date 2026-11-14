@@ -2856,13 +2856,41 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   is covered at: the village's jukebox), `emit()` (the join and the quantisation to the picture's colours), foliage
   `blob()`, `sphere()`.  The rooms:
   - AREA05 s1 / s3 (the same picture: the house with the dry-stone wall), a frontal scene, every band continued
-    sideways (rows: wood 0-71, fence planks 72-77 / 81-87 / 92-100, the wall 103-185, path 186-~205, bushes
-    ~205-223): conifers (tiers of needle clumps, lit upper left, a dark crown inside; hazy trees behind mixed with
-    the sky), the three khaki planks on dark posts with board ends every 61 columns, the wall as irregular
-    rectangular stones (a jittered 12 x 6 grid, squarish distance stretched sideways, mortar where two stones meet,
-    one stone in seven pale blue, lit upper edge, shaded lower edge), the orange path with a shade under the wall,
-    mounds of bush leaves.  The stepping stones, barrels, bench, notice board and pipe are not continued.  Weak
-    points: the strips' stones are a little larger and more contrasted than the picture's, the wood is more regular.
+    sideways from what the picture has in its last columns (rows: wood 0-71, front fence 72-102 with planks 72-77 /
+    81-86 / 93-99 on the left and one row lower on the right, the wall 103-185, path 186-~200, bushes ~200-223).
+    Redrawn 2026-11-14 after the user rejected the first version (regular clone trees, big contrasted bluish stones,
+    flat fence, visible joins, repeated bushes).  How each band is drawn now:
+    - per-row ramps: the fence planks, the gap rows between them, the path, the wall's top and foot rows take the
+      colour distribution of the same picture row in the 26-40 columns next to the edge (objects left out: posts, the
+      pipe, plants), read through stretched value noise (grain along the planks, streaks on the path), so each row has
+      the picture's tone and spread there; the right edge's gap rows (filled by the pipe) take the left's.  Posts every
+      20-24 columns continue the picture's (left 22 / 2, right 291 / 314), lit on their left side;
+    - the wall: a skyline of stones laid outwards column by column (where a stone ends, the free rows get new stones,
+      7-18 x 5-6 incl. the joint, so joints never line up), the first ones the picture's stones cut by the edge (rows
+      from the horizontal joints of its last 3 columns, colour from their texels, the remaining length from the visible
+      one); the layout then warped by smooth noise (up to +-2 texels, none in the first 2 columns) and the mortar is
+      the one-texel boundary of each stone, so stones are irregular polygons with slanted joints.  Stone colours: the
+      picture's stones next to both edges (bright cores, 4-connected, rows 104-180, 70 columns each side, Otsu
+      threshold) picked as often as their area, so the share of blue-grey ones is the picture's; a darker lower and
+      right rim, a softened corner, per-texel grain; the foot's shade per row as measured;
+    - the wood: the sky's ramp; a hazy back row; the tree cut by each edge continued (A5_ETREE: left near tree centre
+      12 top 3, right hazy tree centre 309 top 1), its tier lines from the dark rows of the edge columns so the
+      chevrons meet; then conifers outwards spaced by their widths (crowns 40-76 wide, tops -5..15, near / hazy mixed,
+      the odd gap): each a dark crown shade, then tiers from the bottom up of needle clumps (ellipses along the
+      drooping branch, lit on top, dark underside, needle gaps), the right flank in the light (as the picture's),
+      uneven tier widths; near trees matched in brightness / contrast to the picture's near conifer (x 252-288), hazy
+      ones to the hazy one (x 298-320), then balance_regions() at the edge and a per-row tone match over the first 12
+      columns;
+    - the bushes: mounds 22-50 columns apart (tops 198-211, lumpy outline), the first one starting at the picture's
+      bush top at the edge; leaf clusters on a jittered 6 x 5 grid, each lit from the top left, crevices, holes, bright
+      leaves on top;
+    - sharpness: per band (and per tree kind) a 3x3 blur of the strength that gives the strip the picture's own mean
+      fine detail |L - box3(L)| next to the edge (the hazy trees, the path and the bushes are soft; the wall crisp);
+      the hazy trees are blurred with the sky around them (soft tops).
+    The stepping stones, barrels, bench, notice board and pipe are not continued.  A wider strip (21:9, 32:9) starts
+    with the same columns as the 16:9 one (stats measured on columns 1-53 only; the last column differs by the blur).
+    Weak points: the generated conifers are still more regular than the painted ones (cleaner chevrons, less of the
+    picture's large sunlit patches and deep holes); the strips' blue-grey stones can bunch.
   - AREA19 s1 / AREA02 s1 (the Dwarf Village: one layout, two pictures): canopy 0-~100 (AREA19: blossom as value
     noise masses with small flower clusters on a jittered 8 x 7 grid, a ragged shaded lower edge; AREA02: soft
     spheres of radius 13-25 in the picture's own four balloon colours, far ones first, lit upper left), the haze /
