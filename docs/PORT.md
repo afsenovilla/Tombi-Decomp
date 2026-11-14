@@ -2745,6 +2745,28 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   (just past 4:3, inside the wide frame, where they popped into view) and left at x 480 (inside 21:9 / 32:9).  They
   now start `pad + 160` further right (the tiles sit up to ~150 either side of the title's x) and leave once past `320 + pad`; the fly-in speed is derived from the distance over
   the same 30 frames, so they land on the same frame.
+- **Parked actors** (`runtime/ws_entrance.c`, fixes.txt `spawnPigGateSceneNpcs` / `pigGateDiscoveryScene`, 2026-11-14):
+  an actor the game keeps just past a 4:3 edge for a scripted entrance showed waiting in the strip.  AREA02 s5 (Small
+  Strange Room): Baron (SCRIPT_OBJECTS[1], x 340, z 0; 1 unit = 1 column there) sat 4 columns right of the picture
+  until pigGateDiscoveryScene state 22/23 walks him to Tomba.  He is now parked `pad` units further right (as far
+  past the wide edge as past the 4:3 one) and the walk covers the extra distance over the retail frame count (about
+  1.6x the retail speed at 16:9, 2.3x at 21:9, 4x at 32:9; the walk animation advances once more on frames that move
+  2+ units), so he arrives on the same frame and the script, its timers, events and flags run exactly as at 4:3
+  (checked: the 4:3 centre of 16:9 and 32:9 frames equals the retail 16:9 run on every frame outside the walk; 4:3
+  runs byte-identical).  Search over the 96 debug-select rooms (2200 frames each, 16:9; the 30 with a static camera
+  looked at): one more case, AREA17 s5 (the engine room, raft return NPCs, updateRaftReturnNpc): two NPCs wait at x
+  ~340 / ~384 right of the picture and walk in after the room's "CLEAR!" event (~frame 2150 of the select run); their
+  walk is not in the overlay's NPC step (likely animation-driven), not fixed yet.  AREA05 s1 / s3: an NPC half inside
+  the 4:3 picture (x -14..18), not parked.  Only the select's default story flags were covered.
+- **Room picture strips, opt-in preview** (`runtime/ws_backdrop.c`, `shims/gpu.c` `ws_backdrop`; `PORT_WS_BACKDROP=1`,
+  off by default until the user picks it): AREA02 s5's background is one pre-rendered 320x224 8 bpp picture (VRAM
+  page x 128, CLUT 128,511) drawn as two sprites (256 + 64 columns) at frame row 16, nothing past 4:3 (the strips
+  showed the clear grey).  When the left sprite comes (signature + room checked) the strips of the wide copy are
+  filled before the game draws it (so drums, actors and boxes stay on top), built at run time from the picture's own
+  texels in VRAM: the picture mirrored at its edge over the 56 columns next to it (bricks, the left roots, the right
+  pillar and the floor run on without a seam), and on the wall rows (above row 176) the green texels of the 24-column
+  ivy band at the edge laid over again at another phase and 4-14 rows lower, so the ivy covers the strip and the
+  mirror does not show.  Software and OpenGL strips identical (xvfb).  At 21:9 / 32:9 the pattern repeats.
 - **Sub-screens** (Select screens Objetos / Eventos / Estado / Mapa, memory card, options, button config, screen
   adjust).  The Select screens (`subScreenDrawTabs`, D0SPSUB / D0SPSUB3, `#ifdef PORT2`) call `port_ws_layout(left cut,
   right cut, below)` each frame; while it is set, `shims/gpu.c` spreads the textured primitives of the frame

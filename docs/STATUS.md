@@ -76,6 +76,14 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    extents relative to its origin) to see whether it swings on a hinge like the other doors or slides / lifts.
    A port mod (runtime data patch / spawned objects), never shipped game data.
 
+0. **Widescreen AREA02 s5, Small Strange Room (2026-11-14)**: user report: Baron visible at 16:9 waiting right of
+   the picture before his walk-in.  Fixed (`runtime/ws_entrance.c`, docs/PORT.md "Widescreen", "Parked actors"): he
+   waits pad further right and walks in over the retail frame count (arrives on the same frame, script / events /
+   flags as at 4:3; 4:3 runs identical).  Search of the 96 select rooms found one more parked pair, AREA17 s5 (raft
+   return NPCs, x ~340 / ~384), not fixed yet (their walk is not in the overlay step).  Backdrop strips for this
+   room: opt-in preview `PORT_WS_BACKDROP=1` (ivy carried into the strips from the picture's own texels), waiting for
+   the user's approval before it becomes the default at 16:9.  Checked headless (i386 software + OpenGL xvfb,
+   wasm2c); not checked on the device.
 0. **Widescreen pop-in, second pass: pixel checks (2026-11-14)**: report: AREA09 s0 (Mushroom Forest) still pops at
    16:9, worst moving left, straight vertical cut edges.  Built pixel checks that cannot undercount (docs/PORT.md
    "Pop-in check", "Pixel check"): `tools/ws_popscan.py` (frame against the shifted previous frame, both ways), a
