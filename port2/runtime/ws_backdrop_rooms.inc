@@ -365,7 +365,7 @@ static void a5_clump(const A5Tree *t, int side, int x16, int y16, int rx, int ry
         if (X < 1 || X > cw || y < 0 || y >= A5_WALL0) continue;
         q = (long long)u * u * 256 / (rx * rx) + (long long)v * v * 256 / (ry * ry);
         if (q > 256 + (int)(hash3(wx, y, seed) & 127) - 80) continue;                      /* a ragged rim */
-        {   int c = base - v * (t->kind == 2 ? 36 : 16) / ry + dx * 10 / rx + (int)(hash3(wx, y, seed + 1) & 15) - 8 + (noise(wx, y, 2, 2, seed + 3) - 128) / 4;
+        {   int c = base - v * (t->kind == 2 ? 28 : 16) / ry + dx * 10 / rx + (int)(hash3(wx, y, seed + 1) & 15) - 8 + (noise(wx, y, 2, 2, seed + 3) - 128) / 4;
             if (q > 150 && v > 0) c -= 34;                                                 /* the underside */
             if ((hash3(wx, y, seed + 5) & 7) == 0) c -= 24;                                /* gaps between the needles */
             putr(X, y, a5_tcol(t, c), t->kind == 2 ? A5_TREEN : A5_TREE);
@@ -544,7 +544,7 @@ static void a5_wall(int side)
                 for (int yy = a; yy < b; yy++) for (int i = 0; i < 6 && i < v + 1; i++) { Rgb k = a5p(side, i, yy); if (lum(k) >= A5_thr && !a5_obj(k)) { t.r += k.r; t.g += k.g; t.b += k.b; n++; } ms++; }
                 if (b - a > 6) { b = a + 4 + (int)(hash3(side, a, 703) % 2); jh = 0; }   /* a joint too faint to see: split */
                 if (n && vj * 2 < b - a) {
-                    u32 h = hash3(side, a, 701); int T = 7 + (int)(h % 5) + (int)(h >> 8) % 5, rem = T - v;
+                    u32 h = hash3(side, a, 701); int T = 8 + (int)(h % 6) + (int)(h >> 8) % 6, rem = T - v;
                     Rgb c = { t.r / n, t.g / n, t.b / n };
                     if (rem < 2) rem = 2 + (int)(h >> 16) % 2;
                     {   int s = a5_new(a, b - a, jh, 1, rem, c, 0); if (s >= 0) for (int yy = a; yy < b + jh && yy < Y1; yy++) act[yy] = s; }
@@ -565,8 +565,8 @@ static void a5_wall(int side)
             {   int yy = a;
                 while (len > 0) {
                     u32 h = hash3(wx_of(side, X), yy, 711 + side);
-                    int H = len <= 7 ? len : 4 + (int)(h % 3), L = 6 + (int)(h >> 8) % 5 + (int)(h >> 12) % 5, sl = (int)(h >> 20) % 7;
-                    if (len > 7 && len - H < 4) H = len - 4;
+                    int H = len <= 8 ? len : 5 + (int)(h % 5) / 2, L = 7 + (int)(h >> 8) % 6 + (int)(h >> 12) % 6, sl = (int)(h >> 20) % 7;
+                    if (len > 8 && len - H < 4) H = len - 4;
                     {   int s = a5_new(yy, H > 1 ? H - 1 : H, H > 1 ? 1 : 0, X, L, a5_stone_col(h >> 4), sl == 0 ? -1 : sl == 1 ? 1 : 0);
                         if (s >= 0) for (int q = yy; q < yy + H; q++) act[q] = s; }
                     yy += H; len -= H;
@@ -605,7 +605,7 @@ static void a5_wall(int side)
             if (y == A5_WALL0 || y >= Y1) { c = ramp(&A5_rrow[side][y], a5_rank(wx, y, 5, 2, 721, 80)); putr(X, y, c, A5_STONE); continue; }
             {   size_t o = (size_t)y * cw + X - 1; int s = own[o];
                 if (s < 0) continue;
-                if (jt[o]) c = ramp(&A5_rmortar, 64 + a5_rank(wx, y, 3, 3, 723, 120) * 3 / 4);
+                if (jt[o]) c = mix(ramp(&A5_rmortar, 64 + a5_rank(wx, y, 3, 3, 723, 120) * 3 / 4), a5_stone_col(hash3(wx, y, 729)), 22);
                 else {
                     Rgb m = ramp(&A5_rmortar, 150);
                     int jb = y + 1 < Y1 && jt[o + cw], ju = y > Y0 && jt[o - cw];
