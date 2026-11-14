@@ -86,12 +86,20 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    from colours sampled from the picture (docs/PORT.md "Room picture strips").  Second user report: "the room
    doesn't extend sideways, it closes like a box (the angle of the corner)": the strips are now the room's side walls
    in perspective (vanishing point (172, 85) measured from the picture's right edge; bricks in wall coordinates,
-   floor in perspective up to the walls' foot, ivy spaced and sized along the wall).  Waiting for the user's approval
-   before it becomes the default.  Checked headless at 16:9 / 21:9 / 32:9: i386 software = OpenGL (xvfb) = wasm2c
-   strips, 4:3 runs identical, the 4:3 centre unchanged; not checked on the device.  Known weak points: the picture's
-   own sideways face is steeper than the measured vanishing point predicts (hand-painted, not exact), the left corner
-   is a guess (hidden by the tree), near the viewer at 32:9 the bricks and leaves get big and soft, the new ivy is a
-   little more even in tone than the painted one.
+   floor in perspective up to the walls' foot, ivy spaced and sized along the wall).  Third user report (fixed the
+   same day): "the right wall meets the floor at the wrong height against the corner", "take the room's lighting
+   into account", "the left root is shabby, redraw it from the picture's root".  The right side wall is now the plane
+   of the picture's slanted face (corner x 296.5, foot on the line from there through the VP: row 193 at the edge,
+   where the picture's own ivy-covered wall beside the pillar ends; it was 184), the left one from a corner behind the
+   trunk (x 19.5); walls, floor and ivy follow the picture's light (floor falloff fitted on the picture, the pillar's
+   and the trunk's shadows, darker towards the viewer, contact shadows at the foot); the roots are a sweep of tapered
+   roots shaded like the picture's root fan.  Waiting for the user's approval before it becomes the default.  Checked
+   headless at 16:9 / 21:9: i386 = wasm2c strips, 4:3 runs identical, the 4:3 centre unchanged; not checked on the
+   device.  Known weak points: the picture's lighting is painterly, not one consistent light (the pillar's front face
+   is lit as from the camera, its floor shadow points towards the viewer), so the side walls follow the measured
+   tones rather than a physical light; the left corner is a guess (hidden by the tree); the new roots are drawn
+   cleaner (more regular sweep, finer streaks) than the painted ones and their tips leave the 16:9 frame; near the
+   viewer at 32:9 the bricks get big and soft; the right strip is mostly ivy.
 0. **Widescreen pop-in, second pass: pixel checks (2026-11-14)**: report: AREA09 s0 (Mushroom Forest) still pops at
    16:9, worst moving left, straight vertical cut edges.  Built pixel checks that cannot undercount (docs/PORT.md
    "Pop-in check", "Pixel check"): `tools/ws_popscan.py` (frame against the shifted previous frame, both ways), a

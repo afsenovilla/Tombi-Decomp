@@ -21,15 +21,20 @@
  *     bricks, half bond) in wall coordinates, so courses get taller, bricks wider and the mortar lines diverge from
  *     the vanishing point towards the viewer; every brick with its own tone, bevel (lit top-left, shadowed
  *     bottom-right), grain (value noise), stains and the odd crack, laid out by a hash of its course / index (no copy
- *     of the picture's bricks); the walls lit as the picture's one sideways face, darker towards the viewer;
+ *     of the picture's bricks); the right wall on the plane of the picture's slanted face (its foot continues the
+ *     line from the room corner through the vanishing point), the left one from a corner behind the trunk;
+ *   - the room's light measured on the picture ("the room's light" below): the walls lit as its one sideways face,
+ *     darker towards the viewer, in the pillar's / the trunk's shadow by the edges, darker at the foot; the floor at
+ *     the picture's lateral falloff (a line fitted per side) with a contact shadow along the walls' foot; the ivy too;
  *   - the floor up to the side wall's foot, streaky value noise in floor coordinates (perspective) over the floor
- *     ramp and the row tones of the picture's floor;
- *   - on the left, the tree trunk behind the edge ivy and a fan of new roots (tapered curves, shaded across) down to
- *     the floor in front of the side wall's foot;
+ *     ramp;
+ *   - on the left, the trunk's foot and a sweep of new roots drawn the way the picture's own root fan is painted
+ *     (tapered cubic curves shaded across: rim, highlight, strands, underside, outline, bark streaks, rust flecks;
+ *     their shadows first), down onto the floor in front of the side wall's foot;
  *   - ivy grown as stems: a fringe hanging from the top of the side wall, curtains (long stems that sway and branch,
  *     spaced along the wall, thicker near the corner), climbers from the roots and the wall's foot, and a mass next to
  *     each edge as deep as the picture's own ivy on that row so the join closes; leaves sized by the wall's scale where
- *     they hang (bigger towards the viewer); every leaf drawn one by one (a tapered ellipse at one of 16 angles, lit top-left, rim shadow), back leaves darker
+ *     they hang relative to the edge's (bigger towards the viewer); every leaf drawn one by one (a tapered ellipse at one of 16 angles, lit top-left, rim shadow), back leaves darker
  *     first, front leaves lighter last, and the wall shadowed under the leaves;
  *   - the three columns next to the picture blended with its edge column; every pixel quantised to the nearest colour
  *     the picture itself uses (the room's 8 bpp CLUT).
@@ -339,6 +344,7 @@ static int DC16(int side) { return side ? CORNER16[1] - VPX16 : VPX16 - CORNER16
 static int DE16(int side, int X) { return side ? (PW - 1) * 16 + 8 + X * 16 - VPX16 : VPX16 - 8 + X * 16; }   /* column centre */
 static int *S256, *WU16;                                   /* per strip column 0..cw+1: scale (x 256), U (back-wall px x 16) */
 static int s_at(int X) { return S256[clampi(X, 0, cw + 1)]; }
+static int ivy_s(int X) { return s_at(X) * 256 / s_at(1); }   /* the ivy's size: as the picture's own at the edge, growing outwards */
 static void persp_cols(int side)
 {
     for (int X = 0; X <= cw + 1; X++) {
@@ -654,7 +660,7 @@ static void grow(int side, Rng *r, int x16, int y16, int dir, int len, int drift
                 int ox = rndr(r, -spread, spread), oy = rndr(r, -spread / 2 - 8, spread / 2 + 8);
                 int front = rndi(r, 2);
                 int lx = rndr(r, 18, 34), ly = rndr(r, 13, 22), la = rndi(r, 16), lt = front ? rndr(r, 70, 205) : rndr(r, 0, 70);
-                int ks = s_at((px + ox) / 16);                              /* nearer the viewer, bigger */
+                int ks = ivy_s((px + ox) / 16);                              /* nearer the viewer, bigger */
                 leaf_add(px + ox * ks / 256, py + oy * ks / 256, lx * ks / 256, ly * ks / 256, la, lt, front ? 2 : 1);
             }
             want -= 256;
@@ -682,7 +688,7 @@ static void grow_ivy(int side)
             int front = rndi(&r, 2), et = edge_tone[side][clampi(y, 0, PH - 1)];
             if (et < 0) et = 120;
             int lx = X * 16 + rndr(&r, -16, 16), ly = y * 16 + rndr(&r, -16, 16), rx = rndr(&r, 18, 34), ry = rndr(&r, 13, 22);
-            int la = rndi(&r, 16), lt = front ? et + rndr(&r, -10, 90) : et - rndr(&r, 30, 100), ks = s_at(X);
+            int la = rndi(&r, 16), lt = front ? et + rndr(&r, -10, 90) : et - rndr(&r, 30, 100), ks = ivy_s(X);
             leaf_add(lx, ly, rx * ks / 256, ry * ks / 256, la, lt, front ? 2 : 1);
         }
     /* 2. hanging from the top of the side wall: cascades (several stems side by side, the middle ones longest), laid
@@ -693,7 +699,7 @@ static void grow_ivy(int side)
         int X = X_of_U(side, WU16[1] + (slot * 22 + rndi(&r, 10)) * 16), ks, near;
         if (slot < 0) X = -8 + rndi(&r, 6);
         if (X > cw + 22) break;
-        ks = s_at(X); near = X < 48 ? 256 - X * 4 : 70;
+        ks = ivy_s(X); near = X < 48 ? 256 - X * 4 : 70;
         int W = rndr(&r, 8, 22) * ks / 256, L = 8 + rndi(&r, 22), n = W / 4 + 1;
         if (rndi(&r, 256) < near) L += 40 + rndi(&r, 100);
         if (X < 30) L += 50;

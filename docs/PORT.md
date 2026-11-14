@@ -2773,24 +2773,47 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   rows 122 / 141 / 160 / 178) onto a lit front face (x 303-314) whose courses are 19.5 rows (x 1.083) with mortar at
   124 / 143.5 / 163 and its foot at 181; each of those rows lies on the line from the back wall's row (121 / 139 /
   157 / 176) through row 85, so the horizon is row 85; a least-squares fit of the slanted face puts the vanishing
-  point at x 173 (horizon 72: the painted face is steeper than exact), the door's axis is x 160: VP (172, 85).  The
-  left corner is hidden by the tree (the back wall's rows reach the edge unchanged, the floor line ~179).  So both
-  strips are side walls receding towards the camera: the right one starts at the front face's plane (scale 1.083
-  at the edge), the left one at the back wall's; strip column X has the scale s = (D + X - 1/2) / D (D: the
-  corner's distance from the VP: 147.5 / 172.5), a pixel's back-wall height is 85 + (y - 85) / (s kc) and its place
-  along the wall U = F (1 - 1/s) / kc (F = 320 px): courses taller, bricks wider (about 13 px at the corner), the
-  mortar lines diverging from the VP, verticals vertical.  The walls are lit as the picture's sideways face against
-  the back wall beside it (x 298-301 vs 284-291, ~0.88; the left wall 7/8 of that, in the tree's shade), darker
-  towards the viewer and in the corner.  Generator: 32-bin colour ramps (brick faces, mortar, floor, ivy, roots)
+  point at x 173 (horizon 72: the painted face is steeper than exact), the door's axis is x 160: VP (172, 85).
+  Which plane the right side wall is (the user: "the right wall meets the floor at the wrong height against the
+  corner"; it first started at the front face's plane, foot at row 184 at the edge): the slanted face's foot runs
+  from the room corner (x 296.5, the dark vertical line, row 176) through the VP, and the dark ivy-covered wall right
+  of the pillar (x 315-319) ends on the floor on the very same line (rows 190 / 193 at x 315 / 319), so the slanted
+  face is the side wall and the lit front face (x 303-314, foot 181, with its shadow wedge on the floor x 303-314,
+  rows 181-190) is a pillar standing out of it.  The right strip is that plane: foot row 193 at the edge, reaching
+  the frame's bottom at X ~41.  The left corner is hidden by the trunk (back wall bricks show from x 22): x 19.5
+  (the mirror of the right corner about the door's axis would be 23.5), foot row 187.6 at x 0, under the ivy that
+  drapes onto the floor down to row ~194 there.  So both strips are side walls receding towards the camera: strip
+  column X has the scale s = (E + X) / D (E: the edge column's centre from the VP, 147.5 / 171.5; D: the corner's,
+  124.5 / 152.5), a pixel's back-wall height is 85 + (y - 85) / s, its place along the wall U = F (1 - 1/s) (F = 320
+  px), the foot 85 + 90.5 s: courses taller, bricks wider, the mortar lines diverging from the VP, verticals
+  vertical; the floor's texture and the foot use the same VP.  Light (the user: "take the room's lighting into
+  account"), measured: one soft pool centred on the door, the floor 130 on the door's axis falling to ~82 at floor
+  lateral |f| = |x - 172| / (y - 85) = 1.2 and lateral only (equal f keeps its tone from row 186 to 223); the back
+  wall 130 by the arch, 50-65 by the edges; the pillar's front face (80) brighter than the back wall beside it (57),
+  the slanted face ~0.7 of it; the wall beside the pillar (~30) and the left edge (~29) dark.  The strips: the floor
+  follows a line fitted per side on the picture's floor (luminance against |f|, 0.6-1.15) carried on past the edge,
+  with a contact shadow along the walls' foot (a few rows, wider towards the viewer); the walls as the picture's
+  sideways face against the back wall (x 298-301 vs 284-291; the left 15/16 of it), darker towards the viewer, in the
+  pillar's shadow next to the right edge and the trunk's next to the left one, darker at the foot and under the top
+  ivy; the leaves take the same light.  Generator: 32-bin colour ramps (brick faces, mortar, floor, ivy, roots)
   and per-course brick tones next to each edge; bricks laid in wall coordinates by a hash of course / index (own
   tone, bevel lit top-left, mottling, grain, stains, the odd crack; joints and bevels at least a column wide);
   floor below the walls' foot = streak / slab / pebble value noise in floor coordinates (rows of equal depth stay
-  horizontal, the texture grows towards the viewer) over the floor ramp and the edge's row tones; left: the trunk
-  behind the edge ivy and three tapered roots curving down onto the floor in front of the wall's foot; ivy grown as
+  horizontal, the texture grows towards the viewer) over the floor ramp at the fitted light; left (the user: "a very
+  shabby root, redraw it from the other one"): the picture's root fan (x 10-66, rows 124-184) is a sweep of 4-5
+  roots 3-6 px thick that leave the trunk outwards and a little up, arch over, come down steeply and flatten onto the
+  floor into long points; across each (lit top-left): a thin dark rim, a pale highlight ~2 px (luminance ~110), a
+  dark line, the brown body (55-75) in strands with dark seams, the underside (~30), a near-black outline; bark
+  streaks along it, rust flecks, black gaps and shadow under the fan.  The strip draws the same: the trunk's bark
+  ridges flaring at the foot (behind the edge ivy), dim roots in the hollow, two darker roots behind, a sweep of
+  five in front (lowest and shortest first, the top one longest and in front of all; cubic curves, thick then
+  pointed), one towards the viewer off the frame, each shaded across with that profile (luminance mapped onto the
+  ramp of the texels inside the picture's fan outline, its rust and gap black taken apart), the shadows cast down
+  and away from the light first; tips on the floor below the wall's foot; ivy kept off the sweep.  Ivy grown as
   stems (cascades of 3-6 stems hanging from the top of the side wall, every 22 back-wall columns along the wall so
   further apart towards the viewer, middle ones longest, long near the corner and here and there further out,
   short along the whole wall top; climbers from the roots / the wall's foot; branching; leaves sized by the wall's
-  scale where they hang), plus a mass next to each edge as deep as the picture's own ivy on that row and in its
+  scale where they hang, relative to the edge's so they start as big as the picture's), plus a mass next to each edge as deep as the picture's own ivy on that row and in its
   tone; every leaf drawn one by one (tapered ellipse, 16 angles, lit top-left, rim shadow, grain), back leaves dark
   first, front leaves light last, the wall shadowed under them; the three columns next to the picture blended with
   its edge column; every pixel quantised to the nearest colour the picture uses.  Integers only (no float, no
