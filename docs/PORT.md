@@ -2762,12 +2762,29 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   off by default until the user picks it): AREA02 s5's background is one pre-rendered 320x224 8 bpp picture (VRAM
   page x 128, CLUT 128,511) drawn as two sprites (256 + 64 columns) at frame row 16, nothing past 4:3 (the strips
   showed the clear grey).  When the left sprite comes (signature + room checked) the strips of the wide copy are
-  filled before the game draws it (so drums, actors and boxes stay on top), built at run time from the picture's own
-  texels in VRAM: the picture mirrored at its edge over the 56 columns next to it (bricks, the left roots, the right
-  pillar and the floor run on without a seam), and on the wall rows (above row 176) the green texels of the 24-column
-  ivy band at the edge laid over again at another phase and 4-14 rows lower, so the ivy covers the strip and the
-  mirror does not show.  Software and OpenGL strips identical (xvfb), wasm2c frames identical to i386.  At 21:9 /
-  32:9 the pattern repeats.
+  filled before the game draws it (so drums, actors and boxes stay on top).  `on` is a procedural redraw, made the
+  way `shims/gfx_es.c` makes the Spanish graphics: drawn by code at run time, colours sampled from the user's
+  picture in VRAM, no pixels shipped or copied (the source holds coordinates only: the bond, the floor line, where
+  to sample).  Analysis of the picture: back wall in 18-row courses (mortar rows 13 + 18k, 2 rows), 27-column bricks
+  in half bond (joints at x 22 / 49 even courses, 8 / 35 odd on the left; 242 / 269 / 296 and 256 / 283 on the
+  right), floor from row 176; the right pillar's front face (x 303-314, 19.5-row courses) is narrow and ends in a
+  dark ivy-covered corner, so both strips continue the back wall; ivy is 2-4 px leaves over near-black gaps, 42
+  greens, the picture uses 191 colours.  Generator: 32-bin colour ramps (brick faces, mortar, floor, ivy, roots)
+  and per-course brick tones next to each edge; bricks laid by a hash of course / index (joints wander a column,
+  own tone, bevel lit top-left, mottling, grain, stains, the odd crack); floor = streak / slab / pebble value noise
+  over the floor ramp and the edge's row tones; left: the trunk behind the edge ivy and three tapered roots
+  curving into the floor; ivy grown as stems (cascades of 3-6 stems hanging from the top, middle ones longest,
+  long near the edge and here and there further out, short along the whole wall top; climbers from the roots /
+  the floor; branching), plus a mass next to each edge as deep as the picture's own ivy on that row and in its
+  tone; every leaf drawn one by one (tapered ellipse, 16 angles, lit top-left, rim shadow, grain), back leaves dark
+  first, front leaves light last, the wall shadowed under them; the three columns next to the picture blended with
+  its edge column; every pixel quantised to the nearest colour the picture uses.  Integers only (no float, no
+  libm), seeds by position, so a 21:9 / 32:9 strip starts with the 16:9 columns and goes on without repeating;
+  never two random draws in one argument list (gcc i386 evaluates arguments right to left, clang / wasm2c left to
+  right: that made the first wasm2c strips differ).  Checked at 16:9 / 21:9 / 32:9: i386 = wasm2c = the standalone
+  build (`cc -DWS_BACKDROP_MAIN`, see the file header), software = OpenGL (xvfb), the 4:3 centre unchanged, 4:3 runs
+  identical.  `--ws-backdrop mirror` keeps the first preview (the picture mirrored at its edge over 56 columns with
+  the edge ivy laid over again), rejected by the user ("mirroring, not redrawing").
 - **Sub-screens** (Select screens Objetos / Eventos / Estado / Mapa, memory card, options, button config, screen
   adjust).  The Select screens (`subScreenDrawTabs`, D0SPSUB / D0SPSUB3, `#ifdef PORT2`) call `port_ws_layout(left cut,
   right cut, below)` each frame; while it is set, `shims/gpu.c` spreads the textured primitives of the frame

@@ -27,7 +27,8 @@
  *     first, front leaves lighter last, and the wall shadowed under the leaves;
  *   - the three columns next to the picture blended with its edge column; every pixel quantised to the nearest colour
  *     the picture itself uses (the room's 8 bpp CLUT).
- * Deterministic: integers only (no floating point, no libm), fixed seeds and position hashes; a structure depends on
+ * Deterministic: integers only (no floating point, no libm), fixed seeds and position hashes, and never two random
+ * draws in one argument list (gcc on i386 evaluates arguments right to left, clang / wasm2c left to right); a structure depends on
  * where it is, not on the strip width, so a 21:9 / 32:9 strip starts with the same columns as the 16:9 one and goes
  * on with new content (no repeat).  The same code gives the same strips on i386, x86-64 and the wasm2c build.
  *
@@ -324,7 +325,8 @@ static void draw_roots(void)
     for (int i = 0; i < 3; i++) {
         Rng r = rng_at(901, i, 3);
         int y0 = 132 + i * 10 + rndi(&r, 5), x2 = 20 + i * 7 + rndi(&r, 6), y2 = 181 + rndi(&r, 4);
-        draw_root(1 + rndi(&r, 3), y0, x2 * 3 / 4 + rndi(&r, 4), y0 + 2 + rndi(&r, 4), x2, y2, 132 - i * 16 + rndi(&r, 16), 24, i);
+        int x0 = 1 + rndi(&r, 3), x1 = x2 * 3 / 4 + rndi(&r, 4), y1 = y0 + 2 + rndi(&r, 4), r0 = 132 - i * 16 + rndi(&r, 16);
+        draw_root(x0, y0, x1, y1, x2, y2, r0, 24, i);
     }
 }
 
@@ -404,15 +406,17 @@ static void grow(int side, Rng *r, int x16, int y16, int dir, int len, int drift
             if (rndi(r, 256) < (want > 256 ? 256 : want)) {
                 int ox = rndr(r, -spread, spread), oy = rndr(r, -spread / 2 - 8, spread / 2 + 8);
                 int front = rndi(r, 2);
-                leaf_add(px + ox, py + oy, rndr(r, 18, 34), rndr(r, 13, 22), rndi(r, 16),
-                         front ? rndr(r, 90, 230) : rndr(r, 0, 80), front ? 2 : 1);
+                int lx = rndr(r, 18, 34), ly = rndr(r, 13, 22), la = rndi(r, 16), lt = front ? rndr(r, 90, 230) : rndr(r, 0, 80);
+                leaf_add(px + ox, py + oy, lx, ly, la, lt, front ? 2 : 1);
             }
             want -= 256;
         }
         /* a branch now and then */
         if (depth < 2 && i > 4 && rndi(r, 96) == 0)
-            grow(side, r, px, py, dir, len / 3 + rndi(r, len / 3 + 1), (rndi(r, 2) ? 1 : -1) * rndr(r, 3, 8),
-                 spread0 / 2 + 16, 16, dens * 3 / 4, depth + 1, sc);
+        {
+            int bl = len / 3 + rndi(r, len / 3 + 1), bs = rndi(r, 2) ? 1 : -1, bd = bs * rndr(r, 3, 8);
+            grow(side, r, px, py, dir, bl, bd, spread0 / 2 + 16, 16, dens * 3 / 4, depth + 1, sc);
+        }
         if (px / 16 < -6 || px / 16 > cw + 6) break;
     }
 }
@@ -429,8 +433,9 @@ static void grow_ivy(int side)
             if (dn <= 0 || rndi(&r, 256) >= dn) continue;
             int front = rndi(&r, 2), et = edge_tone[side][clampi(y, 0, PH - 1)];
             if (et < 0) et = 120;
-            leaf_add(X * 16 + rndr(&r, -16, 16), y * 16 + rndr(&r, -16, 16), rndr(&r, 18, 34), rndr(&r, 13, 22),
-                     rndi(&r, 16), front ? et + rndr(&r, -10, 90) : et - rndr(&r, 30, 100), front ? 2 : 1);
+            int lx = X * 16 + rndr(&r, -16, 16), ly = y * 16 + rndr(&r, -16, 16), rx = rndr(&r, 18, 34), ry = rndr(&r, 13, 22);
+            int la = rndi(&r, 16), lt = front ? et + rndr(&r, -10, 90) : et - rndr(&r, 30, 100);
+            leaf_add(lx, ly, rx, ry, la, lt, front ? 2 : 1);
         }
     /* 2. hanging from the top: cascades (several stems side by side, the middle ones longest), short ones along the
        whole wall top, long ones near the edge and here and there further out */
@@ -443,7 +448,8 @@ static void grow_ivy(int side)
         for (int j = 0; j < n; j++) {
             int off = 2 * j - (n - 1), m = n > 1 ? (off < 0 ? -off : off) * 256 / n : 0;   /* 0 middle .. 256 sides */
             int len = L * (256 - m * 5 / 8) / 256 * rndr(&r, 180, 256) / 256;
-            grow(side, &r, (X + j * 4) * 16 + rndr(&r, -24, 24), -32, 1, len, rndr(&r, -3, 3), 44, 28, 300, 0, sc);
+            int sx = (X + j * 4) * 16 + rndr(&r, -24, 24), dr = rndr(&r, -3, 3);
+            grow(side, &r, sx, -32, 1, len, dr, 44, 28, 300, 0, sc);
         }
     }
     /* 3. climbing: from the roots (left) / the floor at the edge (right) up the wall */
@@ -452,7 +458,8 @@ static void grow_ivy(int side)
         int X = side == 0 ? (k < 3 ? 6 + k * 9 + rndi(&r, 6) : 30 + rndi(&r, cw)) : (k < 2 ? 3 + k * 10 + rndi(&r, 6) : 30 + rndi(&r, cw));
         int y = side == 0 && k < 3 ? 150 + rndi(&r, 20) : FLOOR - 2;
         if (k >= 3 && rndi(&r, 2)) continue;
-        grow(side, &r, X * 16, y * 16, -1, 30 + rndi(&r, 70), rndr(&r, -4, 4), 24, 40, 260, 1, sc2);
+        int cl = 30 + rndi(&r, 70), dr = rndr(&r, -4, 4);
+        grow(side, &r, X * 16, y * 16, -1, cl, dr, 24, 40, 260, 1, sc2);
     }
     /* draw: shadow on the wall under the leaves, then back leaves, then front leaves */
     memset(occ, 0, (size_t)cw * PH);
