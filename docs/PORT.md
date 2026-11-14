@@ -2824,6 +2824,34 @@ on, not a selection), and objects of room start / respawn frames.  The last colu
 metric inside the 4:3 picture (widescreen off): the PS1 game itself pops blocks and objects in near its edges, which
 the wide frame now mostly hides.  Headless only; the device (AYN Thor) not checked.
 
+**Pixel check (2026-11-14, second pass).**  `ws_popcheck.py` counts whole objects / blocks, so it cannot see a block
+drawn in part (a polygon culled inside it, a sub-block selection).  Three checks that look at pixels instead:
+- `tools/ws_popscan.py RUN`: every dumped frame against the previous dump, in 8x8 tiles; a tile no shift of the previous
+  frame explains (camera step found first, then +-24 columns) is content that appeared, and the same backwards for
+  content that vanished; frame edges, HUD rows and the boxes of the player and small objects (`--log-pop` now logs the
+  player too) are left out.  Validated with a control run that puts the 4:3 culls back on a 16:9 frame
+  (`PORT_WSXTRA=-53 PORT_WSBLK=-146`): AREA09 s0 at mid height 0 -> 312 strip events.  Animated scenery (flowers, the
+  AREA04 fading wall, fast near layers) gives false events: look at its `--png` overlays.
+- A reference run: research environment variables `PORT_WSXTRA=N` (every patched cull keeps N more columns,
+  port_prelude.h `PORT_WSX`) and `PORT_WSBLK=N` (the block hooks' extra runs move N units further,
+  `port_ws_area_model_link`), drawing only, so the game runs the same: with N large the frame shows everything the
+  culls / block selection could still leave out, and every pixel that differs from the normal run is a miss.
+- The 4:3 run of the same input: the middle 320 columns of the 16:9 frame against it.
+Research options added for this: `--sweep-fly DY` (with `--sweep-x`: the player flies at a fixed height, DY units from
+the sweep's start, as the debug menu's fly does, so a room is crossed at a steady speed at mid height in both
+directions), `--dump-from N` (no frame dumps before vblank N), `PORT_PRIMLOG=F0:F1:FILE` (every primitive of those
+vblanks: kind, texture page, CLUT, UV box and screen box, for finding which one went missing).
+Results, 16:9, the 49 scrolling rooms of the sweep list (DOOR_ROOMS and top-down rooms out), flying start -> right end
+-> left end at 30 and 110 units above the start: the reference run (`PORT_WSXTRA=300 PORT_WSBLK=600`) draws nothing in
+the frame that the normal run misses (AREA01 s0-s2 and AREA10 s0/s3/s4 show a few hundred pixels over a whole sweep;
+the ones looked at are the reference's own artefact: its far-off-screen polygons, not a missing piece); the middle 320
+columns equal the 4:3 frame (HUD apart); i386 and wasm2c frames equal; the OpenGL renderer and `--fps 60` presents
+give the same pixel-check result in the AREA09 s0 climb.  AREA09 s0 in particular (the room of the report): walking
+sweep both ways, fly at 30 / 40 / 110 / 150 / 260 above the start, the climb at the start, i386 and wasm2c: no event
+in the strips.  The straight vertical edges seen in that room are the rock blocks' and bush cards' own edges, the same
+in the 4:3 picture.  What the pixel check still flags are the game's own switches, the same at 4:3: AREA03's cloud
+quads (page 0x29) recycled five at a time, small pickups appearing.  Headless only; the device not checked.
+
 Launcher: Play tab, "Imagen" 16:9 / 21:9 / 32:9.  Remaining: some far backdrop layers still end near the 4:3 edges (sky
 colour in the top corners in AREA00), and any screen-space cull not matching the patterns above is untouched.
 

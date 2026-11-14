@@ -76,6 +76,17 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    extents relative to its origin) to see whether it swings on a hinge like the other doors or slides / lifts.
    A port mod (runtime data patch / spawned objects), never shipped game data.
 
+0. **Widescreen pop-in, second pass: pixel checks (2026-11-14)**: report: AREA09 s0 (Mushroom Forest) still pops at
+   16:9, worst moving left, straight vertical cut edges.  Built pixel checks that cannot undercount (docs/PORT.md
+   "Pop-in check", "Pixel check"): `tools/ws_popscan.py` (frame against the shifted previous frame, both ways), a
+   reference run with every cull / block window widened far (`PORT_WSXTRA`, `PORT_WSBLK`), the 4:3 run of the same
+   input; new research options `--sweep-fly DY`, `--dump-from N`, `PORT_PRIMLOG`.  A control with the 4:3 culls shows
+   the method catches strip pops (AREA09 s0: 312 events).  Result on current master, 49 rooms flown both ways at two
+   heights: nothing missing against the reference; AREA09 s0 clean in every pass (walk, fly at five heights, the climb;
+   i386, wasm2c, OpenGL, `--fps 60`); its vertical cut edges are the rock / bush geometry, identical in the 4:3 picture.
+   No game code changed (no fix was needed by these checks); frames with and without --widescreen identical to the
+   build before.  Not checked: the device.  If the device still pops, get the app version (a build before
+   2026-11-14 had the AREA09 / AREA10 block hooks unwidened: popping in the strips moving left) and a screen recording.
 0. **Widescreen pop-in in the side-view rooms (2026-11-14)**: user report (AYN Thor, 16:9 auto): "quite a lot of
    popping" in the Forest of 100 Flowers and the other side-view stages.  Measured with the new research options
    `--log-pop` / `--sweep-x` and `tools/ws_popcheck.py` over the 52 scrolling side-view rooms (docs/PORT.md
