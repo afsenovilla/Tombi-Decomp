@@ -272,6 +272,48 @@ void port_launcher_game_draw(unsigned char *top, unsigned char *bot, const LuiSt
     text(&b, 160 - text_w("START: EXIT") / 2, 214, "START: EXIT");
 }
 
+/* ---- the OPTIONS screen's music while the start screen is up: the game's own (loadSoundSet 8 + startBgmTrack 0:
+   SOUND/SND_SYS.WVD, one bank, and SOUND/S_SYS00.SEQ at volume 100), played by the port's SPU and sequencer
+   (shims/sound.c); the host's audio device pulls it (port_sound_pull).  A WVD: u32 offset of the bodies' table,
+   u32 offset of the headers' table; each table a u32 of its own size (the offset of its first item) and the items'
+   offsets after it, the bodies' one the end of the last body too (src/cdLoadTask.c case 5). */
+void SpuSetTransferStartAddr(unsigned a); unsigned SpuRead(unsigned char *p, unsigned n);
+short SsVabFakeHead(unsigned char *h, short vabid, unsigned sbaddr); void SsVabClose(short id);
+short SsSeqOpen(unsigned char *d, short vab); void SsSeqPlay(short id, char mode, short loops);
+void SsSeqStop(short id); void SsSeqClose(short id); void SsSeqSetVol(short id, short l, short r); void SsSetMVol(short l, short r);
+static u8 *mus_wvd, *mus_seq;
+static short mus_vab = -1, mus_id = -1;
+static unsigned rd32le(const u8 *d) { return d[0] | d[1] << 8 | d[2] << 16 | (unsigned)d[3] << 24; }
+void port_launcher_music_stop(void) {
+    if (mus_id >= 0) { SsSeqStop(mus_id); SsSeqClose(mus_id); }
+    if (mus_vab >= 0) SsVabClose(mus_vab);
+    mus_id = mus_vab = -1;
+    free(mus_wvd); free(mus_seq); mus_wvd = mus_seq = NULL;
+}
+int port_launcher_music_start(void) {   /* 1: playing */
+    unsigned n = 0, m = 0;
+    port_launcher_music_stop();
+    mus_wvd = pa_read("SOUND/SND_SYS.WVD", &n);
+    mus_seq = pa_read("SOUND/S_SYS00.SEQ", &m);
+    if (mus_wvd && mus_seq && n >= 16 && m >= 16) {
+        const unsigned bo = rd32le(mus_wvd), ho = rd32le(mus_wvd + 4);
+        if (bo + 8 <= n && ho + 8 <= n) {
+            const unsigned body = bo + rd32le(mus_wvd + bo), end = bo + rd32le(mus_wvd + bo + 4), head = ho + rd32le(mus_wvd + ho);
+            if (body < end && end <= n && head + 0x20 <= n) {
+                SpuSetTransferStartAddr(0x1010);   /* (the first bank's address in the game) */
+                SpuRead(mus_wvd + body, end - body);
+                mus_vab = SsVabFakeHead(mus_wvd + head, -1, 0x1010);
+                if (mus_vab >= 0) mus_id = SsSeqOpen(mus_seq, mus_vab);
+            }
+        }
+    }
+    if (mus_id < 0) { port_printf("[launcher] the options music is not readable\n"); port_launcher_music_stop(); return 0; }
+    SsSetMVol(100, 100);
+    SsSeqSetVol(mus_id, 100, 100);
+    SsSeqPlay(mus_id, 1, 1);
+    return 1;
+}
+
 #ifndef __3DS__
 /* PORT_LAUNCHER_PREVIEW=DIR (a PC, the disc open): the screen for each option, as DIR/launcher_<n>_{top,bottom}.png */
 extern int port_gpu_write_png(const char *path, const unsigned char *rgb, int w, int h);   /* shims/gpu.c */
@@ -285,5 +327,20 @@ void port_launcher_game_preview(const char *dir) {
         snprintf(p, sizeof p, "%s/launcher_%d_bottom.png", dir, r); port_gpu_write_png(p, bot, 320, 240);
     }
     port_launcher_game_end();
+    {   /* PORT_LAUNCHER_MUSIC_WAV=FILE: 20 s of the music, as the device would pull it */
+        const char *w = getenv("PORT_LAUNCHER_MUSIC_WAV");
+        extern int port_sound_pull(short *dst, int frames);
+        FILE *f = w ? fopen(w, "wb") : NULL;
+        if (f && port_launcher_music_start()) {
+            static short buf[2 * 1024]; unsigned total = 0; u8 h[44] = "RIFF\0\0\0\0WAVEfmt ";
+            fwrite(h, 1, 44, f);
+            for (int i = 0; i < 20 * 44100 / 1024; i++) { port_sound_pull(buf, 1024); fwrite(buf, 4, 1024, f); total += 4096; }
+            port_launcher_music_stop();
+            const unsigned v[] = { 36 + total, 16, 1 | 2u << 16, 44100, 44100 * 4, 4 | 16u << 16 };
+            fseek(f, 4, SEEK_SET); fwrite(&v[0], 4, 1, f); fseek(f, 16, SEEK_SET); fwrite(&v[1], 4, 5, f);
+            fwrite("data", 1, 4, f); fwrite(&total, 4, 1, f);
+        }
+        if (f) fclose(f);
+    }
 }
 #endif

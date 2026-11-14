@@ -17,6 +17,8 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#define SDL_MAIN_HANDLED   /* (SDL2 would rename main() to SDL_main on the 3DS; this file is the entry point) */
+#include <SDL2/SDL.h>
 #include "launcher_ui.h"
 
 u32 __stacksize__ = 1024 * 1024;   /* the main thread runs the game's main loop (libctru's default is 32 KB) */
@@ -168,6 +170,12 @@ int port_launcher_game_begin(void);
 void port_launcher_game_end(void);
 int port_launcher_game_button(int i, int *x0, int *y0, int *x1, int *y1);
 void port_launcher_game_draw(unsigned char *top, unsigned char *bot, const LuiState *s);
+int port_launcher_music_start(void);
+void port_launcher_music_stop(void);
+extern int port_sound_pull(short *dst, int frames);
+/* the OPTIONS screen's music under the start screen: the port's mixer (shims/sound.c) pulled by an SDL audio device of
+   its own, closed again before the game opens its one */
+static void launcher_audio_cb(void *ud, Uint8 *stream, int len) { (void)ud; port_sound_pull((short *)stream, len / 4); }
 extern int port_cd_open_data(const char *dir);
 extern int port_cd_open(const char *path);
 extern void port_cd_close(void);
@@ -190,6 +198,17 @@ static int choose_lang(int code) {
     int bx0[5], by0[5], bx1[5], by1[5], nb = 1;
     if (game) { while (nb < 5 && port_launcher_game_button(nb, &bx0[nb], &by0[nb], &bx1[nb], &by1[nb])) nb++; port_launcher_game_button(0, &bx0[0], &by0[0], &bx1[0], &by1[0]); }
     else lui_start_rect(&bx0[0], &by0[0], &bx1[0], &by1[0]);
+    SDL_AudioDeviceID adev = 0;
+    if (game && port_launcher_music_start()) {
+        if (SDL_Init(SDL_INIT_AUDIO) == 0) {
+            SDL_AudioSpec want, have;
+            SDL_zero(want);
+            want.freq = 44100; want.format = AUDIO_S16SYS; want.channels = 2; want.samples = 1024; want.callback = launcher_audio_cb;
+            adev = SDL_OpenAudioDevice(NULL, 0, &want, &have, 0);
+            if (adev) SDL_PauseAudioDevice(adev, 0); else SDL_QuitSubSystem(SDL_INIT_AUDIO);
+        }
+        fprintf(stderr, "[3ds] start screen music: %s\n", adev ? "playing" : SDL_GetError());
+    }
     while (aptMainLoop()) {
         hidScanInput();
         u32 k = hidKeysDown() | (hidKeysDownRepeat() & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT));
@@ -230,6 +249,8 @@ static int choose_lang(int code) {
         }
         gfxSwapBuffers(); gspWaitForVBlank();
     }
+    if (adev) { SDL_CloseAudioDevice(adev); SDL_QuitSubSystem(SDL_INIT_AUDIO); }
+    port_launcher_music_stop();
     port_launcher_game_end();
     port_cd_close();
     screens_black();

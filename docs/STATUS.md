@@ -40,7 +40,9 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    fixed texts in the LOAD screen's cream message boxes, the keys hint with drawn arrows and an A key drawn like the black Thor buttons, the title logo A00202 at half size, Start touchable; the disc is opened before the game and closed again,
    port_cd_close), the plain DejaVu screen (n3ds/launcher_ui.c) when the disc cannot be read; PC preview
    `PORT_LAUNCHER_PREVIEW=DIR` (with `--second-screen`).
-   Not yet seen on the console.
+   The OPTIONS screen's music plays under it (SOUND/SND_SYS.WVD + S_SYS00.SEQ through shims/sound.c, an SDL audio
+   device of its own closed before the game's; PC check: PORT_LAUNCHER_MUSIC_WAV=FILE with the preview, its envelope
+   matched the game's own options music, r 0.83, same level).  Not yet seen on the console.
    Measured on the console: gameplay 58-60 vblank/s in most rooms (the mansion AREA04 ~52: game logic 14 ms), Baccus
    wide 59 (tiles of the top-down map copied by 32 x 32 cells, not decoded again; on the 3DS ws_topdown.c draws no
    map windows beside the game's: 8 px of black at a map edge).  3D: the left eye is the game's picture, the right
