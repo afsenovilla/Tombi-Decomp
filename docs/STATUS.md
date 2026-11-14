@@ -97,9 +97,18 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    headless at 16:9 / 21:9: i386 = wasm2c strips, 4:3 runs identical, the 4:3 centre unchanged; not checked on the
    device.  Known weak points: the picture's lighting is painterly, not one consistent light (the pillar's front face
    is lit as from the camera, its floor shadow points towards the viewer), so the side walls follow the measured
-   tones rather than a physical light; the left corner is a guess (hidden by the tree); the new roots are drawn
-   cleaner (more regular sweep, finer streaks) than the painted ones and their tips leave the 16:9 frame; near the
-   viewer at 32:9 the bricks get big and soft; the right strip is mostly ivy.
+   tones rather than a physical light; the left corner is a guess (hidden by the tree); near the viewer at 32:9 the
+   bricks get big and soft; the right strip is mostly ivy.  Fourth user report: "the roots you drew are horrible,
+   never draw roots again; and it's far too dark".  By the user's decision there are no generated roots any more
+   (the left strip is side wall + floor + ivy; the edge ivy comes down to the floor over the picture's root, cut at
+   its edge; no replacement root shapes, do not add any), and the strips are as light as the room next to them: the
+   extra darkening (pillar / trunk shadows, under-ivy and contact shadows, steep falloff) removed or softened, then a
+   per-region balance (wall / floor / ivy) maps the strip's luminance next to the join onto the mean and spread of
+   the picture's 40 columns next to the edge.  Measured on the port's 16:9 frame (luminance, strip vs those 40
+   columns; outer = the 10 outermost strip columns): left wall 44 (outer 44) vs 40, floor 84 (82) vs 81, ivy 61 (62)
+   vs 64; right wall 47 (47) vs 48, ivy 47 (50) vs 49, floor 83-88 vs 87 (the picture's floor without the drums);
+   before this pass the walls were 24-26.  Checked headless at 16:9 / 21:9: i386 = wasm2c strips, 4:3 on = off,
+   the 4:3 centre unchanged; not checked on the device.
 0. **Widescreen pop-in, second pass: pixel checks (2026-11-14)**: report: AREA09 s0 (Mushroom Forest) still pops at
    16:9, worst moving left, straight vertical cut edges.  Built pixel checks that cannot undercount (docs/PORT.md
    "Pop-in check", "Pixel check"): `tools/ws_popscan.py` (frame against the shifted previous frame, both ways), a

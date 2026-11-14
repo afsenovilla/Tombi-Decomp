@@ -2790,29 +2790,32 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   account"), measured: one soft pool centred on the door, the floor 130 on the door's axis falling to ~82 at floor
   lateral |f| = |x - 172| / (y - 85) = 1.2 and lateral only (equal f keeps its tone from row 186 to 223); the back
   wall 130 by the arch, 50-65 by the edges; the pillar's front face (80) brighter than the back wall beside it (57),
-  the slanted face ~0.7 of it; the wall beside the pillar (~30) and the left edge (~29) dark.  The strips: the floor
-  follows a line fitted per side on the picture's floor (luminance against |f|, 0.6-1.15) carried on past the edge,
-  with a contact shadow along the walls' foot (a few rows, wider towards the viewer); the walls as the picture's
-  sideways face against the back wall (x 298-301 vs 284-291; the left 15/16 of it), darker towards the viewer, in the
-  pillar's shadow next to the right edge and the trunk's next to the left one, darker at the foot and under the top
-  ivy; the leaves take the same light.  Generator: 32-bin colour ramps (brick faces, mortar, floor, ivy, roots)
+  the slanted face ~0.7 of it; the wall beside the pillar (~30) and the left edge (~29) dark.  The strips first
+  followed all of that (pillar / trunk shadows, dark foot and top, steep falloff) and the user found them "far too
+  dark": now the walls only fall off gently towards the viewer (at most 14 %) with a soft corner at the foot, the
+  floor follows a line fitted per side on the picture's floor (luminance against |f|, 0.6-1.15) carried on past the
+  edge but at most 1/8 darker than at the edge, with a soft contact line at the walls' foot; the leaves take the
+  same light.  Then `balance()` sets the level: per region (wall = non-green above the foot, floor = below it, ivy =
+  green), the luminance of strip columns 4-13 is mapped (L' = m + (L - ms) k) onto the mean m and the spread
+  (k = picture deviation / strip deviation, 0.75-2) of the picture's 40 columns next to the edge (wall rows 4-169,
+  left 4-121 above the root; floor rows 196-223), each pixel's colour scaled by L' / L; the 15-bit conversion rounds
+  (it truncated: ~9 % darker at these levels).  Measured on the port's 16:9 frame (strip / outer 10 columns /
+  picture 40 columns): left wall 44 / 44 / 40, floor 84 / 82 / 81, ivy 61 / 62 / 64; right wall 47 / 47 / 48, ivy
+  47 / 50 / 49, floor 83 vs 87 (the picture's floor without the drums); at 21:9 the outer columns are 79-104 % of
+  the picture (left ivy 79 %); before this pass the walls were 24-26.  Generator: 32-bin colour ramps (brick faces,
+  mortar, floor, ivy)
   and per-course brick tones next to each edge; bricks laid in wall coordinates by a hash of course / index (own
   tone, bevel lit top-left, mottling, grain, stains, the odd crack; joints and bevels at least a column wide);
   floor below the walls' foot = streak / slab / pebble value noise in floor coordinates (rows of equal depth stay
-  horizontal, the texture grows towards the viewer) over the floor ramp at the fitted light; left (the user: "a very
-  shabby root, redraw it from the other one"): the picture's root fan (x 10-66, rows 124-184) is a sweep of 4-5
-  roots 3-6 px thick that leave the trunk outwards and a little up, arch over, come down steeply and flatten onto the
-  floor into long points; across each (lit top-left): a thin dark rim, a pale highlight ~2 px (luminance ~110), a
-  dark line, the brown body (55-75) in strands with dark seams, the underside (~30), a near-black outline; bark
-  streaks along it, rust flecks, black gaps and shadow under the fan.  The strip draws the same: the trunk's bark
-  ridges flaring at the foot (behind the edge ivy), dim roots in the hollow, two darker roots behind, a sweep of
-  five in front (lowest and shortest first, the top one longest and in front of all; cubic curves, thick then
-  pointed), one towards the viewer off the frame, each shaded across with that profile (luminance mapped onto the
-  ramp of the texels inside the picture's fan outline, its rust and gap black taken apart), the shadows cast down
-  and away from the light first; tips on the floor below the wall's foot; ivy kept off the sweep.  Ivy grown as
+  horizontal, the texture grows towards the viewer) over the floor ramp at the fitted light.  No roots, by the
+  user's decision: a sweep of generated roots drawn like the picture's root fan (tapered cubic curves shaded across)
+  was rejected outright ("the roots you drew are horrible, never draw roots again"), so the left strip is side wall,
+  floor and ivy only, and no root shape of any kind is to be drawn there again; the picture's own root ends at its
+  edge (rows ~123-150 at x 0), where the edge ivy mass is kept dense down to the floor (rows 112-201) to cover the
+  cut.  Ivy grown as
   stems (cascades of 3-6 stems hanging from the top of the side wall, every 22 back-wall columns along the wall so
   further apart towards the viewer, middle ones longest, long near the corner and here and there further out,
-  short along the whole wall top; climbers from the roots / the wall's foot; branching; leaves sized by the wall's
+  short along the whole wall top; climbers from the wall's foot; branching; leaves sized by the wall's
   scale where they hang, relative to the edge's so they start as big as the picture's), plus a mass next to each edge as deep as the picture's own ivy on that row and in its
   tone; every leaf drawn one by one (tapered ellipse, 16 angles, lit top-left, rim shadow, grain), back leaves dark
   first, front leaves light last, the wall shadowed under them; the three columns next to the picture blended with
@@ -2822,7 +2825,9 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   right: that made the first wasm2c strips differ).  Checked at 16:9 / 21:9 / 32:9: i386 = wasm2c = the standalone
   build (`cc -DWS_BACKDROP_MAIN`, see the file header), software = OpenGL (xvfb), the 4:3 centre unchanged, 4:3 runs
   identical (after the corner / light / roots pass: i386 = wasm2c whole frames at 16:9 and 21:9, 4:3 on = off, the
-  4:3 centre unchanged; 32:9 only in the standalone build, OpenGL not re-run).  `--ws-backdrop mirror` keeps the first preview (the picture mirrored at its edge over 56 columns with
+  4:3 centre unchanged; 32:9 only in the standalone build, OpenGL not re-run; after the no-roots / lighter pass:
+  i386 = wasm2c whole frames at 16:9, 21:9 and 4:3 (frames 1600-2400), 4:3 on = off, the 4:3 centre unchanged, the
+  standalone strips identical with gcc x86-64, gcc -m32 and clang at 16:9 / 21:9 / 32:9).  `--ws-backdrop mirror` keeps the first preview (the picture mirrored at its edge over 56 columns with
   the edge ivy laid over again), rejected by the user ("mirroring, not redrawing"); the first redraw continued the
   back wall flat into the strips, replaced by the side walls after "the room doesn't extend sideways, it closes like
   a box, judging by the angle of the corner".
