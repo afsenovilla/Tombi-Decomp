@@ -374,6 +374,9 @@ src/x003/updateSpikyLizardSpawner.c | (*(unsigned short*)((char*)&SPAD.i174 + 2)
 src/x003/windStreakRespawn.c | o->a.raw = ((*(short*)((char*)&SPAD.i174 + 2)) - 0x10) << 16; | o->a.raw = ((*(short*)((char*)&SPAD.i174 + 2)) - 0x10 - PORT_WSO) << 16;
 src/x003/translucentSpriteDrift.c | o->a.raw = (SCREEN_ORIGIN_X[0] - 0xa0) << 16; | o->a.raw = (SCREEN_ORIGIN_X[0] - 0xa0 - PORT_WSO) << 16;
 src/x003/translucentSpriteDrift.c | > SCREEN_ORIGIN_X[0] + 0x168) o->step = 1; | > SCREEN_ORIGIN_X[0] + 0x168 + PORT_WSO) o->step = 1;
+# AREA01 KomaPigs dropping in from the spawner (needs the story flag GCD 0xb5): placed 16 columns past either 4:3 edge
+src/x001/komaPigDropIn.c | o->h->p.whole = (*(unsigned short*)((char*)&SPAD.i174 + 2)) - 0x10; | o->h->p.whole = (*(unsigned short*)((char*)&SPAD.i174 + 2)) - 0x10 - PORT_WSO;
+src/x001/komaPigDropIn.c | o->h->p.whole = (*(unsigned short*)((char*)&SPAD.i174 + 2)) + 0x150; | o->h->p.whole = (*(unsigned short*)((char*)&SPAD.i174 + 2)) + 0x150 + PORT_WSO;
 src/x004/cullObjectPerspective.c | + 0x40 + h) > h * 2 + 0x1c0 | + 0x40 + h + (port_ws_cull * k >> 7)) > h * 2 + 0x1c0 + 2 * (port_ws_cull * k >> 7)
 src/x004/cullObjectPerspectiveWide.c | + 0x40 + h) > h * 2 + 0x1c0 | + 0x40 + h + (port_ws_cull * k >> 7)) > h * 2 + 0x1c0 + 2 * (port_ws_cull * k >> 7)
 # --widescreen: the gameplay HUD anchored to the wide frame's edges (lives, vitality, weapon left; AP right)

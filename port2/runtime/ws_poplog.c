@@ -37,20 +37,20 @@ void port_pop_end(unsigned long b, const void *key, int kind)
         const uint32_t *w = (const uint32_t *)(p + 4);
         p += 4 + 4 * len;
         if (!len) continue;
-        int cmd = w[0] >> 24, nv = 0, step = 1, first = 1;
-        if (cmd >= 0x20 && cmd < 0x40) {
-            nv = (cmd & 8) ? 4 : 3;
-            step = 1 + ((cmd & 4) ? 1 : 0) + ((cmd & 0x10) ? 1 : 0);
-            first = (cmd & 0x10) ? 1 : 1;
-        } else if (cmd >= 0x60 && cmd < 0x80) {
+        int cmd = w[0] >> 24, nv;
+        if (cmd >= 0x60 && cmd < 0x80) {                  /* sprite / tile: xy, [uv], [w h] */
             int sz = (cmd >> 3) & 3, ww = sz == 1 ? 1 : sz == 2 ? 8 : 16, hh = ww;
             int16_t vx = (int16_t)(w[1] & 0xffff), vy = (int16_t)(w[1] >> 16);
             if (!sz) { uint32_t s = w[(cmd & 4) ? 3 : 2]; ww = s & 0xffff; hh = s >> 16; }
-            if (vx < x0) x0 = vx; if (vx + ww > x1) x1 = vx + ww;
-            if (vy < y0) y0 = vy; if (vy + hh > y1) y1 = vy + hh;
+            if (vx < x0) x0 = vx;
+            if (vx + ww > x1) x1 = vx + ww;
+            if (vy < y0) y0 = vy;
+            if (vy + hh > y1) y1 = vy + hh;
             n++;
             continue;
-        } else continue;
+        }
+        if (cmd < 0x20 || cmd >= 0x40) continue;
+        nv = (cmd & 8) ? 4 : 3;
         /* polygon: colour+cmd, then per vertex [colour (gouraud, not the first)] xy [uv] */
         int k = 1;
         for (int v = 0; v < nv; v++) {
@@ -58,14 +58,15 @@ void port_pop_end(unsigned long b, const void *key, int kind)
             if (k >= len) break;
             int16_t vx = (int16_t)(w[k] & 0xffff), vy = (int16_t)(w[k] >> 16);
             vx = (int16_t)(vx << 5) >> 5; vy = (int16_t)(vy << 5) >> 5;
-            if (vx < x0) x0 = vx; if (vx > x1) x1 = vx;
-            if (vy < y0) y0 = vy; if (vy > y1) y1 = vy;
+            if (vx < x0) x0 = vx;
+            if (vx > x1) x1 = vx;
+            if (vy < y0) y0 = vy;
+            if (vy > y1) y1 = vy;
             k += 1 + ((cmd & 4) ? 1 : 0);
         }
-        (void)step; (void)first;
         n++;
     }
-    if (!n) { if (kind == 0 && getenv("POPZ")) fprintf(pl_f, "Z %lx %d %d\n", (unsigned long)(uintptr_t)key, ((const uint8_t *)key)[1], *(const int16_t *)(*(const uint8_t *const *)((const uint8_t *)key + 0x40) + 2)); return; }
+    if (!n) return;
     const uint8_t *o = (const uint8_t *)key;
     if (kind == 0) fprintf(pl_f, "O %lx %02x %02x %02x %d %d %d %d %d\n", (unsigned long)(uintptr_t)key, o[0x1c], o[2], o[3],
                            x0, x1, y0, y1, n);

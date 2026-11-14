@@ -644,6 +644,7 @@ full:
  * period to the left and right wherever that lands on the wide frame.  Same scroll, same texture: no seams. */
 extern int port_frame;
 static struct { void *o; int period, frame; } ws_rep[32];
+static void port_ws_cat7_draw(void *o, void (*draw)(void *));
 int port_ws_backdrop_period(void *o, int period)
 {
     int k, free_k = -1;
@@ -656,6 +657,13 @@ int port_ws_backdrop_period(void *o, int period)
     return 1;
 }
 void port_ws_cat7(void *o, void (*draw)(void *))
+{
+    extern unsigned long port_pop_begin(void); extern void port_pop_end(unsigned long, const void *, int);
+    unsigned long pb = port_pop_begin();                 /* --log-pop: the whole layer-7 object, repeats included */
+    port_ws_cat7_draw(o, draw);
+    port_pop_end(pb, o, 0);
+}
+static void port_ws_cat7_draw(void *o, void (*draw)(void *))
 {
     draw(o);
     if (!port_ws_cull) return;
