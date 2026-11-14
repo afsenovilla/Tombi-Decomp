@@ -2901,11 +2901,12 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     - sharpness: per band (and per tree kind) a 3x3 blur of the strength that gives the strip the picture's own mean
       fine detail |L - box3(L)| next to the edge (the hazy trees, the path and the bushes are soft; the wall crisp);
       the hazy trees are blurred with the sky around them (soft tops).
-    The stepping stones, barrels, bench, notice board and pipe are not continued.  A wider strip (21:9, 32:9) starts
-    with the same columns as the 16:9 one (stats measured on columns 1-53 only; the last column differs by the blur).
-    Weak points: the generated conifers are still more regular than the painted ones (cleaner, stripier chevrons; pure
-    green rather than the picture's olive / yellow mix); the strip's courses run in longer straight lines than the
-    picture's; blue-grey stones can still bunch locally.
+    The stepping stones, ferns, barrels, bench, notice board, pipe and the low object by the fence are not continued.
+    A wider strip (21:9, 32:9) starts with the same columns as the 16:9 one (stats measured on columns 1-53 only; the
+    last column differs by the blur and the joint at the strip's end).  Weak points: the generated conifers are still
+    more regular than the painted ones (cleaner, stripier chevrons; pure green rather than the picture's olive /
+    yellow mix); at 8x the strip's slabs are a touch greyer and busier than the picture's (whose mortar reads lighter
+    and whose stones more often have a white top), and its vertical joints are straighter.
   - AREA19 s1 / AREA02 s1 (the Dwarf Village: one layout, two pictures): canopy 0-~100 (AREA19: blossom as value
     noise masses with small flower clusters on a jittered 8 x 7 grid, a ragged shaded lower edge; AREA02: soft
     spheres of radius 13-25 in the picture's own four balloon colours, far ones first, lit upper left), the haze /

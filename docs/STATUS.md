@@ -81,7 +81,9 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
 0. **Widescreen picture strips for more rooms: previews waiting for approval (2026-11-14)**: the AREA02 s5 redraw is
    now a per-room table (`runtime/ws_backdrop.c` `ROOMS`, generators in `runtime/ws_backdrop_rooms.inc`; docs/PORT.md
    "More rooms with picture strips").  New, OFF by default: AREA05 s1 / s3 (the house: wood, fence, dry-stone wall,
-   path, bushes; redrawn 2026-11-14 after the user rejected the first version, PORT.md has how), AREA19 s1 (Dwarf Village in blossom; runs as area 2 s1, told apart by its picture) and AREA02 s1
+   path, bushes; redrawn 2026-11-14 after the user rejected the first version; wall and fence redone the same day from
+   a closer study of the picture: irregular limestone slabs, two-rail fence with posts every 33 columns, the short
+   three-plank-looking object by each edge not continued; PORT.md has how), AREA19 s1 (Dwarf Village in blossom; runs as area 2 s1, told apart by its picture) and AREA02 s1
    (the village with the balloon trees).  Preview: `--ws-backdrop on` (every room) or `--ws-backdrop-rooms
    5:1,5:3,19:1,2:1` (only those); AREA02 s5 stays on by default.  To approve a room: set `approved` to 1 in its
    `ROOMS` entry.  Not done: AREA17 s3 / s4 (Iron Castle hall): its side walls look oblique (the measured lines do not

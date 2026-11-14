@@ -734,7 +734,7 @@ static void a5_wall(int side)
         for (int y = k->y0; y < k->y0 + H && vs && e + 1 <= cw; y++) {
             int sh = vs * (fdiv((2 * (y - k->y0) + 1) * (D + 1), 2 * H) - (D + 1) / 2), t = own[(size_t)y * cw + e];   /* (X e + 1 is column index e) */
             if (!sh || t < 0 || t == s || a5s[t].x0 != e + 1 || A5_BLUE(a5s[t].c)) continue;
-            if (sh > 0 && a5s[t].x1 - a5s[t].x0 >= sh + 4) for (int q = 1; q <= sh; q++) o2[(size_t)y * cw + e + q - 1] = (short)s;
+            if (sh > 0 && a5s[t].x1 - a5s[t].x0 >= sh + 4 && e + sh <= cw) for (int q = 1; q <= sh; q++) o2[(size_t)y * cw + e + q - 1] = (short)s;
             if (sh < 0 && len >= 4 - sh) for (int q = 0; q < -sh; q++) o2[(size_t)y * cw + e - 1 - q] = (short)t;
         }
         if (hd < 2 && H >= 4) {
