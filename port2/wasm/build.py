@@ -8,7 +8,7 @@
 Needs: clang/wasm-ld/llvm-link/llvm-nm 18 (Ubuntu: clang lld llvm), wasi-libc (/usr/lib/wasm32-wasi), libclang-rt-18-dev-wasm32,
 python3, a native cc.  WABT (wasm2c) is cloned at a pinned tag and built into OUT/wabt-build when not there.
 Game data: gen2.py link reads the user's game/MAIN0.EXE etc. as the PC build does; everything stays in OUT."""
-import argparse, os, re, shutil, subprocess, sys
+import argparse, glob, os, re, shutil, subprocess, sys
 from concurrent.futures import ThreadPoolExecutor
 HERE = os.path.dirname(os.path.abspath(__file__)); P2 = os.path.dirname(HERE); ROOT = os.path.dirname(P2)
 WABT_TAG = "1.0.36"
@@ -49,7 +49,8 @@ RT = WCC + ["-include", os.path.join(HERE, "wasm_compat.h"), "-I" + os.path.join
 def compile_all(jobs):
     def run(j):
         src, obj, flags = j
-        if os.path.exists(obj) and os.path.getmtime(obj) > os.path.getmtime(src): return None
+        # (stale too when a .inc next to it changed: runtime/ws_backdrop.c includes ws_backdrop_rooms.inc, ...)
+        if os.path.exists(obj) and os.path.getmtime(obj) > max(os.path.getmtime(x) for x in [src] + glob.glob(os.path.join(os.path.dirname(src), "*.inc"))): return None
         os.makedirs(os.path.dirname(obj), exist_ok=True)
         r = subprocess.run(flags + ["-c", src, "-o", obj], capture_output=True, text=True)
         return (src + ":\n" + r.stderr[-3000:]) if r.returncode else None
