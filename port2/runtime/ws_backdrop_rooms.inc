@@ -319,7 +319,7 @@ static void a5_analyse(void)
     /* the edge tree's tier lines: the dark rows of the edge columns (local minima of their luminance) */
     for (int s = 0; s < 2; s++) {
         int P[PH]; A5_ntb[s] = 0;
-        for (int y = 0; y < 72; y++) { int t = 0; for (int i = 0; i < 3; i++) t += lum(a5p(s, i, y - 1)) + 2 * lum(a5p(s, i, y)) + lum(a5p(s, i, y + 1)); P[y] = t / 12; }
+        for (int y = 0; y < 76; y++) { int t = 0; for (int i = 0; i < 3; i++) t += lum(a5p(s, i, y - 1)) + 2 * lum(a5p(s, i, y)) + lum(a5p(s, i, y + 1)); P[y] = t / 12; }
         for (int y = A5_ETREE[s].ty + 5; y < 70; y++) {
             int loc = (P[y - 3] + P[y + 3] + P[y - 2] + P[y + 2]) / 4;
             if (P[y] <= P[y - 1] && P[y] <= P[y + 1] && P[y] <= P[y - 2] && P[y] <= P[y + 2] && P[y] < loc - 3
