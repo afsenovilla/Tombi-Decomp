@@ -5,6 +5,7 @@
  * loaded file) to them. */
 #include "port_runtime.h"
 #include <string.h>
+#include <stdlib.h>
 
 typedef unsigned char u8; typedef signed char s8; typedef unsigned short u16; typedef short s16;
 typedef unsigned int u32; typedef int s32;
