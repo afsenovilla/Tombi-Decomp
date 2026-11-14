@@ -974,7 +974,7 @@ int main(int argc, char **argv) {
         }
         else if (!strcmp(a, "--log-events")) { extern int port_log_events; port_log_events = 1; }   /* runtime/panel.c */
         else if (!strcmp(a, "--debug-menu")) { extern int port_debug_menu; port_debug_menu = 1; }   /* runtime/debugmenu.c */
-        else if (!strcmp(a, "--ws-backdrop") && v) { extern int port_ws_backdrop_on; port_ws_backdrop_on = !strcmp(argv[++i], "on"); }   /* runtime/ws_backdrop.c (preview) */
+        else if (!strcmp(a, "--ws-backdrop") && v) { extern int port_ws_backdrop_on; const char *m = argv[++i]; port_ws_backdrop_on = !strcmp(m, "on") ? 1 : !strcmp(m, "mirror") ? 2 : 0; }   /* runtime/ws_backdrop.c (preview: on = redraw, mirror = the first preview) */
         else if (!strcmp(a, "--ws-edge") && v) { extern int port_ws_edge; const char *m = argv[++i]; port_ws_edge = !strcmp(m, "off") ? 0 : !strcmp(m, "all") ? 2 : 1; }   /* runtime/ws_edge.c */
         else if (!strcmp(a, "--hud-bottom")) { extern int port_hud_bottom; port_hud_bottom = 1; }   /* runtime/panel_hud.c */
         else if (!strcmp(a, "--second-screen")) { extern int port_panel_on, port_panel_window; port_panel_on = port_panel_window = 1; }   /* runtime/panel.c */
