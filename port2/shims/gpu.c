@@ -158,6 +158,7 @@ static void soft_use_texture(const GpuTex *t) { tp_x = t->tx; tp_y = t->ty; tp_d
 
 /* ------------------------------------------------------------------ triangles */
 typedef GpuVtx Vtx;
+static void ws_backdrop(const Vtx *a, int w, int h, int u, int v, const GpuTex *t);   /* --widescreen room picture strips */
 
 static void soft_tri(const Vtx *a, const Vtx *b, const Vtx *c, int shade, const GpuTex *texp, int semi, int raw) {
     int tex = texp != 0;
@@ -631,6 +632,7 @@ static int gp0(const u32 *p, int n) {
             }
             a.x += dx;
         }
+        if (ws_on && tex && w == 256) ws_backdrop(&a, w, h, u, v, &t);
         if (w && h) { be->rect(a.x, a.y, w, h, p[0] & 0xFFFFFF, tex ? &t : 0, u, v, semi, raw);
                       if (hfr_rec) hfr_rect(a.x, a.y, w, h, p[0] & 0xFFFFFF, tex ? &t : 0, u, v, semi, raw); }
         return need;
@@ -901,6 +903,20 @@ u32 *ClearOTag(u32 *ot, int n) {
 int port_dump_packets;   /* --dump-packets FRAME: print every GP0 packet drawn in that vblank */
 /* GPU DMA linked-list walk: every node is (len << 24 | next), followed by len GP0 words */
 unsigned long long port_prof_draw_us;   /* time spent walking + rasterizing ordering tables (the fps line, shims/psyq.c) */
+/* --widescreen: the side strips of a pre-rendered room picture (runtime/ws_backdrop.c), filled into the wide copy
+   just before the game draws the picture's left sprite (drawn first, so everything else stays on top) */
+static void ws_backdrop(const Vtx *a, int w, int h, int u, int v, const GpuTex *t) {
+    extern const unsigned short *port_ws_backdrop(const unsigned short *, int, int, int, int, int, int, int, int, int, int, int, int);
+    int P = port_widescreen, fx = a->x - gs.ox - ws_dx, fy = a->y - gs.oy, bx = ws_base(ws_ax), y = a->y;
+    const unsigned short *s = port_ws_backdrop(&vram[0][0], P, fx, fy, w, h, u, v, t->tx, t->ty, t->depth, t->cx, t->cy);
+    if (!s || y < 0 || y + h > 512 || bx + 320 + 2 * P > WS_STRIDE) return;
+    for (int j = 0; j < h; j++) {
+        memcpy(&wvram[y + j][bx], s + (size_t)j * 2 * P, (size_t)P * 2);
+        memcpy(&wvram[y + j][bx + P + 320], s + (size_t)j * 2 * P + P, (size_t)P * 2);
+    }
+    if (be->ws_upload) { be->ws_upload(bx, y, P, h, &wvram[y][bx], WS_STRIDE); be->ws_upload(bx + P + 320, y, P, h, &wvram[y][bx + P + 320], WS_STRIDE); }
+    if (hfr_rec) { hfr_upload(bx, y, P, h, 1); hfr_upload(bx + P + 320, y, P, h, 1); }
+}
 /* --title-bg (runtime/titlebg.c): while the title screen's background is in this list, fill the wide copy of the
    buffer with the user's wide picture first (the game then draws its own 4:3 background, logo and text over it) */
 static void ws_title_bg(u32 *ot) {

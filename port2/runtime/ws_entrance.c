@@ -2,9 +2,10 @@
  * "Parked actors").  On a PS1 such an actor is hidden only by standing a few columns outside the 320-column picture;
  * the wide frame showed it waiting there.  It is parked as far past the wide edge instead (port_ws_park_dx), and its
  * scripted walk-in covers the extra distance (port_ws_walkin_frames / port_ws_walkin_step) so it still arrives on the
- * same frame: the walk is spread over the retail number of frames, at most twice the retail speed (beyond that the
- * walk takes (extra - distance) / 2 frames longer, only at 21:9 / 32:9).  Identity without --widescreen: dx 0, the
- * retail frame count, one unit per frame.
+ * same frame: the walk is spread over the retail number of frames (faster: about 1.6x at 16:9 for Baron, 2.3x at
+ * 21:9, 4x at 32:9; the walk animation advances once more on each frame that moves 2+ units), so the script, its
+ * timers, events and flags run exactly as at 4:3.  Identity without --widescreen: dx 0, the retail frame count, one
+ * unit per frame.
  *
  * Users (port/fixes.txt): AREA02 s5 "Small Strange Room", Baron (SCRIPT_OBJECTS[1], spawned at x 340, z 0: 1 unit =
  * 1 column in that single-screen room) waits right of the picture until pigGateDiscoveryScene state 22/23 walks him
@@ -28,12 +29,9 @@ int port_ws_walkin_frames(int dist)
     int d = wi_dx < 0 ? -wi_dx : wi_dx;
     wi_k = 0;
     wi_total = dist;
-    if (!d || dist <= d) { wi_frames = 0; return dist; }           /* retail */
-    {
-        int orig = dist - d, half = (dist + 1) / 2;
-        wi_frames = orig > half ? orig : half;
-    }
-    return wi_frames;
+    if (!d) { wi_frames = 0; return dist; }                         /* retail */
+    wi_frames = dist - d < 1 ? 1 : dist - d;   /* the retail count (the script runs one frame when it is <= 0) */
+    return dist - d;
 }
 
 /* units to move this frame (1 when off); the sum over the walk is the measured distance */
