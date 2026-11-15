@@ -35,7 +35,9 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
 0. **Widescreen room strips, next (2026-11-15).** Approved and on by default: AREA02 s5, AREA05 s1/s3, AREA02 s1
    (the bottom-left pink sphere left as the user accepted it "for now"). AREA19 s1 (Dwarf Village in blossom) redone
    2026-11-17 (`gen_cb`: every band quilted from the picture at run time, the front bushes' scalloped top included;
-   PORT.md has the numbers and the weak points), OFF by default until the user approves it (`--ws-backdrop-rooms
+   the front's bottom joins redone 2026-11-15 after the user found them very noticeable: outline-scored windows,
+   the outline bent to go on from the edge, tone per row and per kind over 20 columns; PORT.md has the numbers and
+   the weak points), OFF by default until the user approves it (`--ws-backdrop-rooms
    19:1`; to approve: `approved` = 1 in its ROOMS entry). Next: the Haunted Mansion 3D side rooms AREA04 s10/s11/s15/s19 (black past the model's outer wall; postponed by the
    user for token budget); then the other fixed-camera pictures (AREA17 s3/s4 hall, AREA18 s2, AREA10 s8, AREA09 s3,
    ...). User rules: show before|after first, never mirror, measure geometry/tones in the picture, no roots, match

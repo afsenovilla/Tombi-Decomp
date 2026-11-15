@@ -3032,12 +3032,8 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     192-319); the ledge in two bands, its lower rows (145-155, grass and dark lip) from x 0-215 and its top (rows
     136-144, where the left edge has the log) from the clean stretch between the hut's pole and the ladder (x
     192-213), so its edge under the fence is the picture's own (a first try reflected the lower rows upwards: a row
-    of dark dots repeating every block); the straw bank; the ground; the front in two bands, its inside (rows
-    218-223 on the left, 214-223 on the right) and then its top (rows 186-217 / 186-213, windows of the picture's
-    front shifted up to 3 / 6 rows) cut into the ground above and the inside below, so the bushes' scalloped outline against the grass is the picture's own, with its
-    blur, and goes on at the height the edge has it (the right edge's bush is high, ~row 189; the left edge is a grass
-    valley down to ~row 213, whose other flank the strip goes on with: its first block is matched on 8 picture columns,
-    a first try on 6 ended the valley in a vertical bush edge on the join).  New in `vb_quilt` (per-band flags in `VbBand.st`, all off for AREA02 s1, whose strips
+    of dark dots repeating every block); the straw bank; the ground; the front (redone 2026-11-15 after the user: "the joins at the BOTTOM are very
+    noticeable", see below).  New in `vb_quilt`New in `vb_quilt` (per-band flags in `VbBand.st`, all off for AREA02 s1, whose strips
     stay byte-identical): `VBB_STRICT` (a window whose shifted rows leave the band's source rows is not taken: no
     reflected rows), `VBB_TIGHT` (the first block is the best match of the picture's columns at the edge, not one
     within 1/8 of it: on a stochastic texture the 1/8 pick showed a seam at the join), `VBB_SOFT` (objects in the
@@ -3057,9 +3053,42 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     100 / 94 / 92 / 87 / 67 / 69 % (the low ones: the right ground's 3 picture columns beside the jukebox's base are
     its shadow; the front's top rows cross the bushes' outline, where a row is grass on one side and blossom on the
     other).  Weak points, bluntly: at 21:9 and wider the left fence (44 source columns) repeats its post groups and
-    the left rock towers recur; the right front's inside is a little greyer-white than the picture's pink right by
-    the edge; the picture's own brown twig dots in its last columns (right edge, rows 54-83) read as a dotted line at
-    8x.  Checked (headless): standalone strips at 16:9 and 21:9 (21:9 starts with the 16:9 strip's columns: 0
+    the left rock towers recur (the front's: below); the picture's own brown twig dots in its last columns (right edge, rows 54-83) read as a dotted line at
+    8x.
+    The front, second version (2026-11-15).  The first one quilted the bushes in two bands (the top rows 186-217 /
+    186-213 and the inside below, cut horizontally) on texels only: at the join the bush mass changed tone and
+    whiteness, its scalloped top jumped (the right edge's bush, high against the jukebox's base, met a strip whose
+    grass started at once), the left valley met a notch, the right bottom rows came out greyer-white, and the
+    inside's horizontal cut showed.  Now: one band, rows 186-223 (source rows 186-223, any column, up to 6 rows of
+    shift), on a grass underlay (rows 191-223 quilted from the clean grass of the central valley, x 60-99 rows
+    188-195), with `VBB_OUTL`: (1) the bushes' outline (`vb_hcol`: per column the first row from 184 of three texels
+    that are neither green nor dark) is scored: each window's outline, shifted, against the one already there over
+    the 20 columns up to its overlap's end (squared row offsets, the 8 nearest twice), plus its next 6 new columns
+    against the height and slope of the 2 nearest (so a valley's flat bottom goes on flat, a bush's flank goes on
+    along its slope, no notch); (2) objects in the source's grass above the bushes (the stones over the bushes at x
+    98-217, the barrel) no longer rule a window out: those texels are holes that keep the underlay's grass (only when
+    the bush top under them is visible, at least 4 rows of grass between; a top the object touches still rules the
+    window out), which opens the stretch under the stones to the quilt (before, only x 0-31 and 60-97 had whole
+    windows, and the strip alternated between them); (3) at the picture's columns the feather counts them as the
+    new block's (the first block's edge columns were blended 40 % into the grass under them: a grey column on the
+    join).  Then `cb_warp`: the strip's columns 1-12 shifted up or down (rows 184 on, a column at a time, at most 6
+    rows) so the outline starts at the picture's last height and goes on with its slope, easing into the strip's own
+    by column 12 (the left edge: 213 flat for 5 columns, then up the other flank; the right: 189, down gently).
+    `cb_ftone` (rows 181-223, replacing `cb_tone` there): per row (rows +- 2) and per kind (grass, blossom) the mean
+    R, G, B of the strip's first 20 columns moved onto the picture's last 20, fully up to column 20, gone at 72 (the
+    chroma, not only the lightness: the grey-white rows go pink as the edge is), then the strip's first 2 columns
+    onto the picture's last 2 (rows +- 1, same kind only) easing out over 12 (the picture's last columns are darker
+    in the right bush, b890a8 against f0b8e0: a light line on the join before).  ws_seam (bands ground /
+    fronttop / front / bottom, right 181-190 / 190-206 / 206-214 / 214-224, left 181-196 / 196-208 / 208-216 /
+    216-224): join step median right 22 / 8 / 14 / 14 (before 24 / 29 / 31 / 13), left 18 / 11 / 9 / 18 (before
+    18 / 30 / 124 / 13); rows within the picture's step right 78 / 100 / 100 / 100 % (before 56 / 75 / 62 / 100),
+    left 87 / 100 / 100 / 88 % (before 87 / 67 / 38 / 100).  What it still fails is the hand-over / tone / contrast
+    of the top rows, where the strip's rows cross the bushes' outline (grass on one side of a row, blossom on the
+    other): the right edge's 20 picture columns there are all blossom (the bush in front of the jukebox), the strip
+    goes down into grass within ~15 columns.  Weak points: the left strip's bushes sit lower (tops ~209-213) than
+    the picture's left bushes (~197-205), a wide grass valley; at 21:9 the front repeats source stretches (few clean
+    bush windows: the jukebox, the stone pile's hidden tops).
+    Checked (headless): standalone strips at 16:9 and 21:9 (21:9 starts with the 16:9 strip's columns: 0
     texels differ), the game at 16:9 and 21:9, i386 = wasm2c frames; AREA02 s1 / s5 and AREA05 s1 / s3 strips
     byte-identical to the build before; not checked on the device.
   - AREA17 s3 / s4 (the Iron Castle hall) is not redrawn yet: its side walls are not simply planes towards the

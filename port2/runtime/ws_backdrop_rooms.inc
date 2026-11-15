@@ -1097,6 +1097,12 @@ typedef struct { short y0, y1, ry0, ry1, sx0, sx1, B, OV, OT, OB, dy, reg, per, 
                                                             or overlaps one of the last three */
 #define VBB_SOFT 4                                       /* objects in the overlap rows (OT / OB) do not rule a window
                                                             out: those texels are neither compared nor pasted */
+#define VBB_OUTL 32                                      /* the bushes' outline (the first blossom row under the grass,
+                                                            vb_hcol) goes on: a window is also scored on how its
+                                                            outline, shifted, meets the one already there over the
+                                                            VB_OCTX columns up to its overlap's end */
+#define VB_OCTX 20
+#define VB_OUTW 40000
 static const VbBand VB_BANDS[2][5] = {          /* (in the order they are made: the fence, then the back above it) */
     { { 108, 138, 108, 138, 0, 44, 9, 4, 0, 0, 0, VB_FENCE, 1, 0 },
       { 0, 108, 90, 110, 0, 44, 16, 6, 0, 6, 3, VB_BACK, 0, 6 },
@@ -1215,6 +1221,28 @@ static void vb_cutpath(int e[VB_MAXH][VB_MAXW], int rows, int w, int vert, int *
         }
     }
 }
+static short vb_hs[PW];                                  /* the picture's outline, per column (VBB_OUTL bands) */
+/* the bushes' outline at picture column wx (picture or canvas): the first row from 184 of three texels that are not
+   grass (green or dark), PH when the column is grass down to the bottom, -1 when it cannot be told (an object, a texel
+   not made yet) */
+static int vb_grass(Rgb k) { return (k.g > k.r + 8 && k.g > k.b + 8) || lum(k) < 60; }
+static int vb_hcol(int side, int wx)
+{
+    int run = 0, ex = -9; Rgb c;
+    for (int y = 184; y < PH; y++) {
+        if (wx >= 0 && wx < PW && vb_excl(wx, y)) { run = 0; ex = y; continue; }   /* (an object in the grass above) */
+        if (!vb_get(side, wx, y, &c)) return -1;
+        run = vb_grass(c) ? 0 : run + 1;
+        if (run == 3) return ex >= y - 4 ? -1 : y - 2;   /* (-1: the top hidden by the object) */
+    }
+    return ex >= PH - 2 ? -1 : PH;
+}
+/* a texel of the window's source an object covers, in the grass above the bushes (VBB_OUTL bands): a hole, neither
+   compared nor pasted (the grass under it, made by the band before, shows) */
+static int vb_hole(const VbBand *b, int x, int y)
+{
+    return (b->st & VBB_OUTL) && vb_excl(x, y) && x >= 0 && x < PW && vb_hs[x] >= 0 && y < vb_hs[x];
+}
 static void vb_quilt(int side, const VbBand *b, int seed)
 {
     int W = b->B + b->OV, ytop = b->y0 - b->OT, ybot = b->y1 + b->OB, H = ybot - ytop, per = b->per ? vb_period(side, b) : 0;
@@ -1222,6 +1250,7 @@ static void vb_quilt(int side, const VbBand *b, int seed)
     static int err[320 * 32], em[VB_MAXH][VB_MAXW], vcut[VB_MAXH], tcut[VB_MAXW], bcut[VB_MAXW];
     static Rgb win[VB_MAXH][VB_MAXW]; static u8 pm[VB_MAXH][VB_MAXW];
     if (H > VB_MAXH || W > VB_MAXW || ncand <= 0 || ncand > 320 * 32) return;
+    if (b->st & VBB_OUTL) for (int x = 0; x < PW; x++) vb_hs[x] = (short)vb_hcol(side, x);
     if (b->mr > 0) {                                     /* the trunk cut by the edge goes on: the picture's last k
                                                             columns repeated, k (mr/2+1 .. 2 mr) the shift at which
                                                             its last 3 columns best match 3 earlier ones (the stripes'
@@ -1244,12 +1273,27 @@ static void vb_quilt(int side, const VbBand *b, int seed)
     while (side ? pos < vb_hi(side) : pos >= vb_lo(side)) {
         int t0 = side ? pos - b->OV : pos - b->B + 1;             /* the window's first picture column (target) */
         int first = nb == 0 && !b->mr, mn = 1 << 30, pick = -1, nc = 0, k, tol;
+        int oc0 = side ? t0 + b->OV - VB_OCTX : t0 + b->B, oht[VB_OCTX];   /* the outline context's first column */
+        int oref = -1, oslope = 0;                       /* the outline next to the new columns (its 2 nearest) and
+                                                            its slope outwards there (x 4, at most 2 rows a column:
+                                                            a valley's flat bottom goes on flat, not down its flank) */
+        if (b->st & VBB_OUTL) {
+            int a = 0, na = 0, c = 0, nc2 = 0;
+            for (int j = 0; j < VB_OCTX; j++) oht[j] = vb_hcol(side, oc0 + j);
+            for (int k = 0; k < 4; k++) {
+                int h = oht[side ? VB_OCTX - 1 - k : k];
+                if (h < 0) continue;
+                if (k < 2) { a += h; na++; } else { c += h; nc2++; }
+            }
+            if (na) oref = a / na;
+            if (na && nc2) { oslope = (a * 4 / na - c * 4 / nc2) / 2; oslope = oslope > 8 ? 8 : oslope < -8 ? -8 : oslope; }
+        }
         for (int c = 0; c < ncand; c++) {
             int sx = b->sx0 + c / nd, dy = c % nd - b->dy, ok = 1, n = 0; long long e = 0;
             if ((b->st & VBB_STRICT) && (ytop + dy < b->ry0 || ybot + dy > b->ry1)) ok = 0;
             for (int y = ytop; y < ybot && ok; y++) {
                 if ((b->st & VBB_SOFT) && (y < b->y0 || y >= b->y1)) continue;
-                for (int j = 0; j < W; j++) if (vb_excl(sx + j, vb_srow(b, y + dy))) { ok = 0; break; }
+                for (int j = 0; j < W; j++) if (vb_excl(sx + j, vb_srow(b, y + dy)) && !vb_hole(b, sx + j, vb_srow(b, y + dy))) { ok = 0; break; }
             }
             if (!ok) { err[c] = -1; continue; }
             for (int y = ytop; y < ybot; y++)
@@ -1258,10 +1302,35 @@ static void vb_quilt(int side, const VbBand *b, int seed)
                     if (!ov && y >= b->y0 && y < b->y1) continue;
                     if (first && ov && (y < b->ry0 || y >= b->ry1)) continue;   /* (the picture's canopy above the back) */
                     if (!vb_get(side, t0 + j, y, &o)) continue;
-                    if ((b->st & VBB_SOFT) && vb_excl(sx + j, vb_srow(b, y + dy))) continue;
+                    if ((b->st & (VBB_SOFT | VBB_OUTL)) && vb_excl(sx + j, vb_srow(b, y + dy))) continue;
                     e += vb_d2(o, rgb15(pic[vb_srow(b, y + dy)][sx + j])); n++;
                 }
             e = n ? e * 64 / n : 0;
+            if (b->st & VBB_OUTL) {                      /* (the outline: squared row offsets, the 8 columns next to
+                                                            the window counted twice; unknown: as 6 rows off) */
+                long long so = 0; int no = 0;
+                for (int j = 0; j < VB_OCTX; j++) {
+                    int sc = sx + oc0 + j - t0, hs = sc >= 0 && sc < PW ? vb_hs[sc] : -1, d, wj;
+                    if (oht[j] < 0 || hs < 0) continue;
+                    d = oht[j] - (hs - dy); if (d < 0) d = -d;
+                    if (d > 12) d = 12;
+                    wj = (side ? j >= VB_OCTX - 8 - b->OV : j < b->OV + 8) ? 2 : 1;
+                    so += (long long)d * d * wj; no += wj;
+                }
+                e += (no ? so / no : 36) * VB_OUTW;
+                so = 0; no = 0;
+                if (oref > 0) for (int k = 1; k <= 6; k++) {   /* (the next 6 columns: on along the slope there,
+                                                                  more and more freely, no notch or step) */
+                    int sc = side ? sx + b->OV - 1 + k : sx + b->B - k, hs = sc >= 0 && sc < PW ? vb_hs[sc] : -1, d;
+                    if (hs < 0) continue;
+                    d = (hs - dy) - (oref + oslope * k / 4); if (d < 0) d = -d;
+                    d -= 1 + k / 2;
+                    if (d > 12) d = 12;
+                    if (d > 0) so += (long long)d * d;
+                    no++;
+                }
+                if (no) e += so / no * VB_OUTW;
+            }
             if (b->up < 0) {                              /* (its top row repeated upwards: windows whose columns go
                                                              straight on up, not a trunk's top or a haze's edge) */
                 long long v = 0;
@@ -1292,6 +1361,15 @@ static void vb_quilt(int side, const VbBand *b, int seed)
         k = (int)(hash3(side * 64 + b->reg, nb, seed) % (u32)nc);
         for (int c = 0; c < ncand && pick < 0; c++) if (err[c] >= 0 && err[c] <= mn + tol && k-- == 0) pick = c;
         {   int sx = b->sx0 + pick / nd, dy = pick % nd - b->dy, j0 = side ? 0 : b->B;
+#ifdef WS_BACKDROP_MAIN
+            if (getenv("WSB_PICK") && (b->st & VBB_OUTL)) {
+                fprintf(stderr, "side %d band %d block %d t0 %d: sx %d dy %d err %d (min %d, %d cands) oref %d slope %d | ctx", side, b->y0, nb, t0, sx, dy, err[pick], mn, nc, oref, oslope);
+                for (int j = 0; j < VB_OCTX; j++) fprintf(stderr, " %d", oht[j]);
+                fprintf(stderr, " | src");
+                for (int j = 0; j < W; j++) fprintf(stderr, " %d", vb_hs[sx + j] < 0 ? -1 : vb_hs[sx + j] - dy);
+                fprintf(stderr, "\n");
+            }
+#endif
             for (int y = 0; y < H; y++) for (int j = 0; j < W; j++) win[y][j] = rgb15(pic[vb_srow(b, ytop + y + dy)][sx + j]);
             used[nb % 3] = sx;
             for (int y = 0; y < H; y++) for (int j = 0; j < W; j++) { Rgb o; em[y][j] = vb_get(side, t0 + j, ytop + y, &o) ? vb_d2(o, win[y][j]) : 0; }
@@ -1321,7 +1399,7 @@ static void vb_quilt(int side, const VbBand *b, int seed)
                     if (tx >= 0 && tx < PW) continue;                     /* never the picture */
                     if (y >= b->y0 && y < b->y1 && (side ? j <= vc : j >= vc)) continue;   /* the old block's side of the cut */
                     if (y < tcut[j] || y >= bcut[j]) continue;
-                    if ((b->st & VBB_SOFT) && vb_excl(sx + j, vb_srow(b, y + dy))) continue;
+                    if ((b->st & (VBB_SOFT | VBB_OUTL)) && vb_excl(sx + j, vb_srow(b, y + dy))) continue;
                     pm[y - ytop][j] = 1;
                     if (!(b->st & VBB_FEATHER)) vb_put(side, tx, y, win[y - ytop][j], b->reg);
                 }
@@ -1331,9 +1409,13 @@ static void vb_quilt(int side, const VbBand *b, int seed)
                     for (int j = 0; j < W; j++) {
                         int tx = t0 + j, a = 0; Rgb o;
                         if (tx >= 0 && tx < PW) continue;
+                        if (vb_hole(b, sx + j, vb_srow(b, y + dy))) continue;
                         for (int v = -2; v <= 2; v++) for (int u = -2; u <= 2; u++) {
                             int yy = y - ytop + v, jj = j + u;
-                            if (yy >= 0 && yy < H && jj >= 0 && jj < W) a += pm[yy][jj];
+                            if (yy >= 0 && yy < H && jj >= 0 && jj < W)   /* (VBB_OUTL: the picture's columns count as
+                                                                              the new block's, so its edge columns are
+                                                                              its own, not blended into the grass under) */
+                                a += pm[yy][jj] || ((b->st & VBB_OUTL) && t0 + jj >= 0 && t0 + jj < PW);
                         }
                         if (!a) continue;
                         if (!vb_get(side, tx, y, &o)) { if (pm[y - ytop][j]) vb_put(side, tx, y, win[y - ytop][j], b->reg); continue; }
@@ -1817,15 +1899,17 @@ static void gen_vb(int pad)
  *   - the green ledge: its lower rows (145-155, the grass and its dark lip) from x 0-215, its top (rows 136/137-144,
  *     where the left edge has the log, x 2-52) from the clean stretch between the hut's pole and the ladder (x 192-213),
  *     so its top edge under the fence is the picture's own; the straw bank (156-180), the ground (181-189);
- *   - the front blossom: its inside (rows 218-223 left, 214-223 right, any column of the picture's front) and then its
- *     top (rows 186-217 / 186-213, cut into the ground above and the inside below):
- *     windows of the picture's front with up to 3 / 6 rows of shift (only rows of the picture, none reflected), so the
- *     scalloped outline of the bushes against the grass is the picture's own, its blur too, and at the join it goes
- *     on at the height the edge has it (the right edge's bush is high, rows ~189; the left edge is a grass valley down
- *     to row ~213, so the left top band reaches lower, and its first block is matched on 8 picture columns, enough of
- *     the valley's flank that the strip goes on with the other flank, not with a vertical bush edge at the join);
- *   - the blurred bands (canopy, front) have their cuts blended over 5 x 5 texels (VBB_FEATHER), and their tone is
- *     matched at the join per row (cb_tone: the strip's first 8 columns onto the picture's columns 2-9, fading out by
+ *   - the front blossom: one band, rows 186-223 (windows of the picture's front, any column, up to 6 rows of shift,
+ *     the bottom rows reflected), on a grass underlay (rows 191-223 from the central valley's clean grass), scored
+ *     on the bushes' outline too (VBB_OUTL: a window's scalloped top, shifted, against the one already there over 20
+ *     columns, and its next 6 columns against the height and slope there), objects in the source's grass above the
+ *     bushes (the stones, the barrel) holes that keep the underlay; then cb_warp bends the strip's first 12 columns
+ *     so the outline starts where the picture's ends and goes on with its slope (the right edge's bush high, ~row
+ *     189; the left edge's valley flat at ~213 and then up its other flank), and cb_ftone matches the tone per row
+ *     and per kind (grass, blossom; R, G, B, so the pink, not only the lightness) over 20 columns, fading by 72,
+ *     then the strip's first 2 columns onto the picture's last 2, fading over 12;
+ *   - the blurred bands (canopy, front) have their cuts blended over 5 x 5 texels (VBB_FEATHER), and the canopy's tone
+ *     is matched at the join per row (cb_tone: the strip's first 8 columns onto the picture's columns 2-9, fading out by
  *     column 64; its first column onto the picture's last one, fading out over 8: the picture's edge columns are a
  *     little darker, about 6 levels, and the strip goes on from them).
  * Objects never copied (CB_EXCL): the hut and its chimney and pole, the log, the bucket, the barrel, the stones and
@@ -1836,6 +1920,7 @@ static const VbBox CB_EXCL[] = {
     { 98, 181, 218, 198 }, { 226, 118, 258, 142 }, { 214, 133, 262, 190 }, { 252, 120, 268, 191 }, { 284, 115, 302, 118 }, { 276, 118, 310, 124 },
     { 262, 124, 317, 191 }, { 252, 182, 316, 202 }, { 0, 0, 0, 0 } };
 #define CB_S (VBB_STRICT | VBB_TIGHT)
+#define CB_F (VBB_TIGHT | VBB_FEATHER | VBB_FAR | VBB_OUTL)
 static const VbBand CB_BANDS[2][9] = {
     { { 108, 138, 108, 138, 0, 44, 9, 5, 0, 0, 0, VB_FENCE, 1, 0, 9, VBB_TIGHT },
       { 60, 108, 50, 124, 0, 320, 12, 6, 0, 6, 8, VB_BACK, 0, 0, 0, CB_S | VBB_SOFT | VBB_FEATHER | VBB_FAR },
@@ -1844,8 +1929,8 @@ static const VbBand CB_BANDS[2][9] = {
       { 138, 145, 136, 148, 192, 214, 8, 4, 2, 3, 0, VB_LEDGE, 0, 0, 0, CB_S },
       { 156, 181, 156, 181, 0, 216, 16, 5, 4, 0, 0, VB_BANK, 1, 0, 0, VBB_TIGHT },
       { 181, 190, 181, 197, 0, 100, 16, 5, 4, 0, 1, VB_GROUND, 0, 0, 0, VBB_TIGHT },
-      { 218, PH, 218, PH, 0, 320, 16, 5, 0, 0, 0, VB_FRONTR, 0, 0, 0, CB_S | VBB_FEATHER | VBB_FAR },
-      { 186, 218, 182, PH, 0, 320, 16, 8, 3, 3, 3, VB_FRONTR, 0, 0, 0, CB_S | VBB_FEATHER | VBB_FAR } },
+      { 191, PH, 188, 196, 60, 100, 16, 5, 1, 0, 0, VB_GROUND, 0, 0, 0, VBB_TIGHT },
+      { 186, PH, 186, PH, 0, 320, 16, 8, 3, 0, 6, VB_FRONTR, 0, 0, 0, CB_F } },
     { { 108, 139, 108, 139, 186, 256, 12, 5, 0, 0, 0, VB_FENCE, 1, 0, 0, VBB_TIGHT },
       { 60, 108, 50, 124, 190, 320, 16, 8, 0, 6, 8, VB_BACK, 0, 0, 0, CB_S | VBB_SOFT | VBB_FEATHER | VBB_FAR },
       { 0, 60, 0, 70, 0, 320, 16, 8, 0, 6, 3, VB_BACK, 0, 0, 0, CB_S | VBB_FEATHER | VBB_FAR },
@@ -1853,8 +1938,8 @@ static const VbBand CB_BANDS[2][9] = {
       { 139, 145, 136, 148, 192, 214, 8, 4, 2, 3, 0, VB_LEDGE, 0, 0, 0, CB_S },
       { 156, 181, 156, 181, 150, 216, 16, 5, 4, 0, 0, VB_BANK, 1, 0, 0, VBB_TIGHT },
       { 181, 190, 181, 197, 0, 262, 16, 5, 4, 0, 1, VB_GROUND, 0, 0, 0, VBB_TIGHT },
-      { 214, PH, 214, PH, 0, 320, 16, 5, 0, 0, 0, VB_FRONTR, 0, 0, 0, CB_S | VBB_FEATHER | VBB_FAR },
-      { 186, 214, 182, PH, 0, 320, 16, 6, 3, 4, 6, VB_FRONTR, 0, 0, 0, CB_S | VBB_FEATHER | VBB_FAR } } };
+      { 191, PH, 188, 196, 60, 100, 16, 5, 1, 0, 0, VB_GROUND, 0, 0, 0, VBB_TIGHT },
+      { 186, PH, 186, PH, 0, 320, 16, 8, 3, 0, 6, VB_FRONTR, 0, 0, 0, CB_F } } };
 /* the tone at the join, per row (rows [y0, y1), means over rows y +- 4 of them): the strip's columns 1-8 moved onto
    the picture's columns 2-9 from the edge (full for 16 columns, gone at 64), and its first column onto the picture's
    last one (easing out over 8 columns), so the join is neither a tone step nor a line (the picture's last columns are
@@ -1890,6 +1975,91 @@ static void cb_tone(int side, int y0, int y1)
             p->b = clampi(p->b + (d[y][0][2] * w2 + d[y][1][2] * w1) / 256, 0, 255);
         }
 }
+/* the bushes' outline at the join, bent: the strip's columns 1-CB_WN shifted up or down (rows 184 on, a column at a
+   time, at most 6 rows) so its outline starts where the picture's ends and goes on with its slope there (the mean of
+   the picture's 2 last known columns, the slope against the 2 before, at most 1 row a column), easing into the
+   strip's own outline by column CB_WN: no notch or step in the outline on the join */
+#define CB_WN 12
+static void cb_warp(int side)
+{
+    int h[4], n = 0, hs[CB_WN + 1], col[PH];
+    for (int i = 0; i < 24 && n < 4; i++) { int v = vb_hcol(side, side ? PW - 1 - i : i); if (v >= 0) h[n++] = v; }
+    if (n < 2) return;
+    for (int X = 1; X <= CB_WN; X++) hs[X] = vb_hcol(side, side ? PW - 1 + X : -X);
+    {   int e4 = (h[0] + h[1]) * 2, sl = n == 4 ? e4 - (h[2] + h[3]) * 2 : 0;   /* (x 4) */
+        sl = sl > 8 ? 8 : sl < -8 ? -8 : sl;                                   /* (2 columns apart: 1 row a column) */
+        for (int X = 1; X <= CB_WN; X++) {
+            int t, sft, k = X * 256 / CB_WN, sm = k * k / 256 * (768 - 2 * k) / 256;   /* (smoothstep) */
+            if (hs[X] < 0 || hs[X] >= PH) continue;
+            t = (e4 + sl * X / 2) / 4; t += (hs[X] - t) * sm / 256;
+            sft = t - hs[X]; sft = sft > 6 ? 6 : sft < -6 ? -6 : sft;
+            if (!sft) continue;
+            for (int y = 184; y < PH; y++) { int sy = y - sft; col[y] = sy < 184 ? 184 : sy >= PH ? PH - 1 : sy; }
+            {   Rgb tmp[PH];
+                for (int y = 184; y < PH; y++) tmp[y] = cv[(size_t)col[y] * vb_ow + X - 1];
+                for (int y = 184; y < PH; y++) cv[(size_t)y * vb_ow + X - 1] = tmp[y];
+            }
+        }
+    }
+}
+/* the front's tone at the join, per row and per kind (grass, blossom), rows [y0, y1), means over rows y +- 2: the
+   strip's first CB_FN columns moved onto the picture's last CB_FN (all three channels, so the blossom's pink, not
+   only its lightness), fully up to column CB_FN, gone at column 72 */
+#define CB_FN 20
+#define CB_FH 12
+static void cb_ftone(int side, int y0, int y1)
+{
+    static int d[PH][2][3];
+    for (int y = y0; y < y1; y++) {
+        int s[2][2][3] = { { { 0 } } }, n[2][2] = { { 0 } };     /* [picture, strip][grass, blossom] */
+        for (int yy = y - 2; yy <= y + 2; yy++) {
+            if (yy < y0 || yy >= y1) continue;
+            for (int i = 0; i < CB_FN; i++) {
+                int x = side ? PW - 1 - i : i; Rgb k;
+                if (vb_excl(x, yy)) continue;
+                k = rgb15(pic[yy][x]); int g = !vb_grass(k);
+                s[0][g][0] += k.r; s[0][g][1] += k.g; s[0][g][2] += k.b; n[0][g]++;
+            }
+            for (int X = 1; X <= CB_FN; X++) {
+                Rgb k = cv[(size_t)yy * vb_ow + X - 1]; int g = !vb_grass(k);
+                s[1][g][0] += k.r; s[1][g][1] += k.g; s[1][g][2] += k.b; n[1][g]++;
+            }
+        }
+        for (int g = 0; g < 2; g++)
+            for (int c = 0; c < 3; c++)
+                d[y][g][c] = n[0][g] >= 8 && n[1][g] >= 8 ? s[0][g][c] / n[0][g] - s[1][g][c] / n[1][g] : 0;
+    }
+    for (int y = y0; y < y1; y++)
+        for (int X = 1; X <= vb_ow; X++) {
+            Rgb *p = &cv[(size_t)y * vb_ow + X - 1];
+            int g = !vb_grass(*p), w = X <= CB_FN ? 256 : X >= 72 ? 0 : (72 - X) * 256 / (72 - CB_FN);
+            p->r = clampi(p->r + d[y][g][0] * w / 256, 0, 255);
+            p->g = clampi(p->g + d[y][g][1] * w / 256, 0, 255);
+            p->b = clampi(p->b + d[y][g][2] * w / 256, 0, 255);
+        }
+    /* then the hand-over: the strip's first 2 columns onto the picture's last 2 (rows y +- 1, texels of the same kind
+       only), easing out over CB_FH columns (the picture's last columns are often a little darker or lighter than
+       the ones before: the strip goes on from them) */
+    for (int y = y0; y < y1; y++) {
+        int s[3] = { 0, 0, 0 }, n = 0;
+        for (int yy = y - 1; yy <= y + 1; yy++) {
+            if (yy < y0 || yy >= y1) continue;
+            for (int i = 0; i < 2; i++) {
+                int x = side ? PW - 1 - i : i; Rgb k = rgb15(pic[yy][x]), q = cv[(size_t)yy * vb_ow + i];
+                if (vb_excl(x, yy) || vb_grass(k) != vb_grass(q)) continue;
+                s[0] += k.r - q.r; s[1] += k.g - q.g; s[2] += k.b - q.b; n++;
+            }
+        }
+        for (int c = 0; c < 3; c++) d[y][0][c] = n >= 3 ? s[c] / n : 0;
+    }
+    for (int y = y0; y < y1; y++)
+        for (int X = 1; X < CB_FH; X++) {
+            Rgb *p = &cv[(size_t)y * vb_ow + X - 1]; int w = (CB_FH - X) * 256 / (CB_FH - 1);
+            p->r = clampi(p->r + d[y][0][0] * w / 256, 0, 255);
+            p->g = clampi(p->g + d[y][0][1] * w / 256, 0, 255);
+            p->b = clampi(p->b + d[y][0][2] * w / 256, 0, 255);
+        }
+}
 static void gen_cb(int pad)
 {
     pal_make();
@@ -1899,7 +2069,7 @@ static void gen_cb(int pad)
     for (int side = 0; side < 2; side++) {
         canvas_clear(); cur_side = side;
         for (int i = 0; i < 9; i++) vb_quilt(side, &CB_BANDS[side][i], 901 + 13 * i);
-        cb_tone(side, 0, 108); cb_tone(side, CB_BANDS[side][7].y0, PH);
+        cb_tone(side, 0, 108); cb_warp(side); cb_ftone(side, 181, PH);
         for (int y = 0; y < PH; y++)
             for (int X = 1; X <= pad; X++)
                 strip[(size_t)y * 2 * pad + (side ? pad + (X - 1) : pad - X)] = quant(cv[(size_t)y * vb_ow + X - 1]);
