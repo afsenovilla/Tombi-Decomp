@@ -1089,6 +1089,7 @@ typedef struct { short y0, y1, ry0, ry1, sx0, sx1, B, OV, OT, OB, dy, reg, per, 
    VBB_SOFT below */
 #define VBB_STRICT 1
 #define VBB_TIGHT 2
+#define VBB_FEATHER 8                                    /* the cuts blended (below) */
 #define VBB_SOFT 4                                       /* objects in the overlap rows (OT / OB) do not rule a window
                                                             out: those texels are neither compared nor pasted */
 static const VbBand VB_BANDS[2][5] = {          /* (in the order they are made: the fence, then the back above it) */
@@ -1214,7 +1215,7 @@ static void vb_quilt(int side, const VbBand *b, int seed)
     int W = b->B + b->OV, ytop = b->y0 - b->OT, ybot = b->y1 + b->OB, H = ybot - ytop, per = b->per ? vb_period(side, b) : 0;
     int pos = side ? PW : -1, nb = 0, used[3] = { -999, -999, -999 }, nd = 2 * b->dy + 1, ncand = (b->sx1 - b->sx0 - W + 1) * nd;
     static int err[320 * 32], em[VB_MAXH][VB_MAXW], vcut[VB_MAXH], tcut[VB_MAXW], bcut[VB_MAXW];
-    static Rgb win[VB_MAXH][VB_MAXW];
+    static Rgb win[VB_MAXH][VB_MAXW]; static u8 pm[VB_MAXH][VB_MAXW];
     if (H > VB_MAXH || W > VB_MAXW || ncand <= 0 || ncand > 320 * 32) return;
     if (b->mr > 0) {                                     /* the trunk cut by the edge goes on: the picture's last k
                                                             columns repeated, k (mr/2+1 .. 2 mr) the shift at which
@@ -1267,7 +1268,12 @@ static void vb_quilt(int side, const VbBand *b, int seed)
             err[c] = (int)(e > (1 << 29) ? (1 << 29) : e);
             if (err[c] < mn) mn = err[c];
         }
-        if (mn == 1 << 30) return;
+        if (mn == 1 << 30) {
+#ifdef WS_BACKDROP_MAIN
+            if (getenv("WSB_INFO")) fprintf(stderr, "side %d band %d-%d: no window for block %d\n", side, b->y0, b->y1, nb);
+#endif
+            return;
+        }
         tol = first && (b->st & VBB_TIGHT) ? 0 : mn / 8;
         for (int c = 0; c < ncand; c++) if (err[c] >= 0 && err[c] <= mn + tol) nc++;
         k = (int)(hash3(side * 64 + b->reg, nb, seed) % (u32)nc);
@@ -1298,12 +1304,28 @@ static void vb_quilt(int side, const VbBand *b, int seed)
             for (int y = ytop; y < ybot; y++)
                 for (int j = 0; j < W; j++) {
                     int tx = t0 + j, vc = vcut[y - ytop];
+                    pm[y - ytop][j] = 0;
                     if (tx >= 0 && tx < PW) continue;                     /* never the picture */
                     if (y >= b->y0 && y < b->y1 && (side ? j <= vc : j >= vc)) continue;   /* the old block's side of the cut */
                     if (y < tcut[j] || y >= bcut[j]) continue;
                     if ((b->st & VBB_SOFT) && vb_excl(sx + j, vb_srow(b, y + dy))) continue;
-                    vb_put(side, tx, y, win[y - ytop][j], b->reg);
+                    pm[y - ytop][j] = 1;
+                    if (!(b->st & VBB_FEATHER)) vb_put(side, tx, y, win[y - ytop][j], b->reg);
                 }
+            if (b->st & VBB_FEATHER)                             /* the cuts blended over 5 x 5 texels (blurred bands:
+                                                                    a cut between two smooth textures shows as an edge) */
+                for (int y = ytop; y < ybot; y++)
+                    for (int j = 0; j < W; j++) {
+                        int tx = t0 + j, a = 0; Rgb o;
+                        if (tx >= 0 && tx < PW) continue;
+                        for (int v = -2; v <= 2; v++) for (int u = -2; u <= 2; u++) {
+                            int yy = y - ytop + v, jj = j + u;
+                            if (yy >= 0 && yy < H && jj >= 0 && jj < W) a += pm[yy][jj];
+                        }
+                        if (!a) continue;
+                        if (!vb_get(side, tx, y, &o)) { if (pm[y - ytop][j]) vb_put(side, tx, y, win[y - ytop][j], b->reg); continue; }
+                        vb_put(side, tx, y, mix(o, win[y - ytop][j], a * 256 / 25), b->reg);
+                    }
         }
         nb++; pos += side ? b->B : -b->B;
     }
@@ -1793,23 +1815,23 @@ static const VbBox CB_EXCL[] = {
 #define CB_S (VBB_STRICT | VBB_TIGHT)
 static const VbBand CB_BANDS[2][9] = {
     { { 108, 138, 108, 138, 0, 44, 9, 5, 0, 0, 0, VB_FENCE, 1, 0, 9, VBB_TIGHT },
-      { 60, 108, 50, 124, 0, 44, 12, 6, 0, 6, 8, VB_BACK, 0, 0, 0, CB_S | VBB_SOFT },
-      { 0, 60, 0, 70, 0, 320, 16, 8, 0, 6, 3, VB_BACK, 0, 0, 0, CB_S },
+      { 60, 108, 50, 124, 0, 44, 12, 6, 0, 6, 8, VB_BACK, 0, 0, 0, CB_S | VBB_SOFT | VBB_FEATHER },
+      { 0, 60, 0, 70, 0, 320, 16, 8, 0, 6, 3, VB_BACK, 0, 0, 0, CB_S | VBB_FEATHER },
       { 145, 156, 145, 156, 0, 216, 16, 5, 0, 0, 0, VB_LEDGE, 0, 0, 0, VBB_TIGHT },
       { 138, 145, 136, 148, 192, 214, 8, 4, 2, 3, 0, VB_LEDGE, 0, 0, 0, CB_S },
       { 156, 181, 156, 181, 0, 216, 16, 5, 4, 0, 0, VB_BANK, 1, 0, 0, VBB_TIGHT },
       { 181, 190, 181, 197, 0, 100, 16, 5, 4, 0, 1, VB_GROUND, 0, 0, 0, VBB_TIGHT },
-      { 206, PH, 206, PH, 0, 320, 16, 5, 0, 0, 0, VB_FRONTR, 0, 0, 0, CB_S },
-      { 186, 206, 182, PH, 0, 320, 16, 6, 3, 6, 10, VB_FRONTR, 0, 0, 0, CB_S } },
+      { 214, PH, 214, PH, 0, 320, 16, 5, 0, 0, 0, VB_FRONTR, 0, 0, 0, CB_S | VBB_FEATHER },
+      { 186, 214, 182, PH, 0, 320, 16, 6, 3, 4, 6, VB_FRONTR, 0, 0, 0, CB_S | VBB_FEATHER } },
     { { 108, 139, 108, 139, 186, 256, 12, 5, 0, 0, 0, VB_FENCE, 1, 0, 0, VBB_TIGHT },
-      { 60, 108, 50, 124, 190, 320, 16, 8, 0, 6, 8, VB_BACK, 0, 0, 0, CB_S | VBB_SOFT },
-      { 0, 60, 0, 70, 0, 320, 16, 8, 0, 6, 3, VB_BACK, 0, 0, 0, CB_S },
+      { 60, 108, 50, 124, 190, 320, 16, 8, 0, 6, 8, VB_BACK, 0, 0, 0, CB_S | VBB_SOFT | VBB_FEATHER },
+      { 0, 60, 0, 70, 0, 320, 16, 8, 0, 6, 3, VB_BACK, 0, 0, 0, CB_S | VBB_FEATHER },
       { 145, 156, 145, 156, 150, 216, 16, 5, 0, 0, 0, VB_LEDGE, 0, 0, 0, VBB_TIGHT },
       { 139, 145, 136, 148, 192, 214, 8, 4, 2, 3, 0, VB_LEDGE, 0, 0, 0, CB_S },
       { 156, 181, 156, 181, 150, 216, 16, 5, 4, 0, 0, VB_BANK, 1, 0, 0, VBB_TIGHT },
       { 181, 190, 181, 197, 0, 262, 16, 5, 4, 0, 1, VB_GROUND, 0, 0, 0, VBB_TIGHT },
-      { 206, PH, 206, PH, 0, 320, 16, 5, 0, 0, 0, VB_FRONTR, 0, 0, 0, CB_S },
-      { 186, 206, 182, PH, 0, 320, 16, 6, 3, 6, 10, VB_FRONTR, 0, 0, 0, CB_S } } };
+      { 214, PH, 214, PH, 0, 320, 16, 5, 0, 0, 0, VB_FRONTR, 0, 0, 0, CB_S | VBB_FEATHER },
+      { 186, 214, 182, PH, 0, 320, 16, 6, 3, 4, 6, VB_FRONTR, 0, 0, 0, CB_S | VBB_FEATHER } } };
 /* the tone at the join, per row (rows [y0, y1), means over rows y +- 4 of them): the strip's columns 1-8 moved onto
    the picture's columns 2-9 from the edge (full for 16 columns, gone at 64), and its first column onto the picture's
    last one (easing out over 8 columns), so the join is neither a tone step nor a line (the picture's last columns are
@@ -1854,7 +1876,7 @@ static void gen_cb(int pad)
     for (int side = 0; side < 2; side++) {
         canvas_clear(); cur_side = side;
         for (int i = 0; i < 9; i++) vb_quilt(side, &CB_BANDS[side][i], 901 + 13 * i);
-        cb_tone(side, 0, 108); cb_tone(side, 206, PH);
+        cb_tone(side, 0, 108); cb_tone(side, 214, PH);
         for (int y = 0; y < PH; y++)
             for (int X = 1; X <= pad; X++)
                 strip[(size_t)y * 2 * pad + (side ? pad + (X - 1) : pad - X)] = quant(cv[(size_t)y * vb_ow + X - 1]);
