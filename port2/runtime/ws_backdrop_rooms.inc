@@ -2374,7 +2374,9 @@ static void gen_cv(int pad)
  *     column where its line parallel to the stair meets it;
  *   - the stair: the picture's own stair four steps further in ((x + 90, y - 55) on the left, (x - 90, y + 55) on the
  *     right; eight steps where that leaves the clean stretch), so rail, balusters, steps and stringer go on exactly on
- *     their lines; its light per row of the stair's cross-section matched at the edge (the stair 90 columns in against
+ *     their lines; the rows below the rail scaled by the band's width at both places (the stringer's lower edge is
+ *     73.3 - 0.013 x rows below the rail: the band widens a little towards the bottom left), so that edge goes on
+ *     along its own line; its light per row of the stair's cross-section matched at the edge (the stair 90 columns in against
  *     the stair at the edge);
  *   - the join: per row, the wall's first 8 columns' mean onto the picture's last 8 (fading by 40) and its first column
  *     onto the picture's last one (fading over 6). */
@@ -2383,8 +2385,20 @@ enum { ST_WALL = 1 };
 #define ST_PY 55
 static int st_y16(int x) { return 3258 - fdiv(880 * x, ST_PX); }     /* the rail's top row (x 16) at column x */
 static int st_t16(int x, int y) { return y * 16 + 8 - st_y16(x); }   /* rows (x 16) below it */
-static int st_band(int x, int y) { int t = st_t16(x, y); return t >= -16 && t < 72 * 16; }
-static int st_exf(int x, int y) { int t = st_t16(x, y); return t >= -48 && t < 74 * 16; }
+static int st_h16(int x) { return 1173 + fdiv(-215 * x, 1024); }   /* the stringer's lower edge (x 16) below it:
+                                                            73.3 - 0.013 x rows (the band widens towards the bottom left) */
+static int st_band(int x, int y) { int t = st_t16(x, y); return t >= -16 && t < st_h16(x) + 16; }
+static int st_exf(int x, int y) { int t = st_t16(x, y); return t >= -48 && t < st_h16(x) + 48; }
+/* the stair's texel for (x, y) from k * four steps further in: its row below the rail scaled by the band's widths
+   there and here, so the stringer's lower edge goes on along its own line */
+static int st_src(int side, int x, int y, int k, int *xs, int *ys)
+{
+    int t = st_t16(x, y);
+    *xs = side ? x - ST_PX * k : x + ST_PX * k;
+    if (t > 0) t = (int)((long long)t * st_h16(*xs) / st_h16(x));
+    *ys = fdiv(st_y16(*xs) + t, 16);
+    return *xs >= 0 && *xs < PW && *ys >= 0 && *ys < PH;
+}
 static const VbBox ST_EXCL[] = {                          /* the sconces (three lit, one bare) */
     { 186, 0, 244, 44 }, { 122, 20, 176, 78 }, { 75, 81, 102, 108 }, { 8, 96, 52, 150 }, { 0, 0, 0, 0 } };
 #define ST_Q (VBB_STRICT | VBB_TIGHT | VBB_FEATHER | VBB_FAR | VBB_EDGEW)
@@ -2452,9 +2466,9 @@ static void st_stair(int side)
     for (int i = 0; i < 16; i++)                         /* the light per row of the cross-section: the edge's stair
                                                             against the stair 90 columns in */
         for (int y = 0; y < PH; y++) {
-            int x = side ? PW - 1 - i : i, xs = side ? x - ST_PX : x + ST_PX, ys = side ? y + ST_PY : y - ST_PY, t = st_t16(x, y);
+            int x = side ? PW - 1 - i : i, xs, ys, t = st_t16(x, y);
             Rgb a, b;
-            if (!st_band(x, y) || ys < 0 || ys >= PH || t < 0) continue;
+            if (!st_band(x, y) || t < 0 || !st_src(side, x, y, 1, &xs, &ys)) continue;
             a = rgb15(pic[y][x]); b = rgb15(pic[ys][xs]); t /= 16;
             sm[t][0][0] += a.r; sm[t][1][0] += a.g; sm[t][2][0] += a.b; sm[t][0][1] += b.r; sm[t][1][1] += b.g; sm[t][2][1] += b.b;
         }
@@ -2470,8 +2484,7 @@ static void st_stair(int side)
             Rgb c;
             if (!st_band(x, y)) continue;
             while ((side ? x - ST_PX * k > 300 : x + ST_PX * k < 8) && k < 8) k++;
-            xs = side ? x - ST_PX * k : x + ST_PX * k; ys = side ? y + ST_PY * k : y - ST_PY * k;
-            if (xs < 0 || xs >= PW || ys < 0 || ys >= PH) continue;
+            if (!st_src(side, x, y, k, &xs, &ys)) continue;
             c = rgb15(pic[ys][xs]); t = clampi(st_t16(x, y) / 16, 0, 71);
             c.r = clampi(c.r * g[t][0] / 256, 0, 255); c.g = clampi(c.g * g[t][1] / 256, 0, 255); c.b = clampi(c.b * g[t][2] / 256, 0, 255);
             cv[(size_t)y * vb_ow + X - 1] = c;
