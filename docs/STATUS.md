@@ -32,6 +32,14 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
 
 ## In progress / open
 
+0. **Widescreen room strips, next (2026-11-15).** Approved and on by default: AREA02 s5, AREA05 s1/s3, AREA02 s1
+   (the bottom-left pink sphere left as the user accepted it "for now"). Next, in order: AREA19 s1 (Dwarf Village in
+   blossom; same method as AREA02 s1: run-time quilting of the picture's own bands + fitted-circle completion);
+   the Haunted Mansion 3D side rooms AREA04 s10/s11/s15/s19 (black past the model's outer wall; postponed by the
+   user for token budget); then the other fixed-camera pictures (AREA17 s3/s4 hall, AREA18 s2, AREA10 s8, AREA09 s3,
+   ...). User rules: show before|after first, never mirror, measure geometry/tones in the picture, no roots, match
+   blur; use tools/ws_seam.py on the joins.
+
 -2. **WIP (owner's request): restore the Funga Chief's cut event** on the Funga stage (`--cut-content=funga`, AREA10 s2,
    chief already walking there: runtime/funga.c).  What survives (docs/CUT_CONTENT.md "Jungle (AREA10)", "Funga Chief"):
    the judgement dialogue MFNT100S group 2 dx 11-18 (PAL #222-#229: "It's you! Our friend!...", "If I had a **Funga
