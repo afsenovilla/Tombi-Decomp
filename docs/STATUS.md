@@ -87,7 +87,9 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    (Dwarf Village in blossom; runs as area 2 s1, told apart by its picture: the first version, rejected by the user as
    garbage, still to be redone like AREA02 s1) and AREA02 s1 (the village with the balloon trees: own generator `gen_vb`;
    third version 2026-11-16 after the user's detailed review: textures quilted from the picture's own texels at run
-   time, the edge spheres completed from fitted circles; waiting for the user's verdict).  Preview: `--ws-backdrop on` (every room) or `--ws-backdrop-rooms
+   time, the edge spheres completed from fitted circles; 2026-11-17: the cut the user saw at the right join fixed (the
+   lightest cream sphere there was cut by a new sphere in front of it; the lit one ran to a flat white dome), measured
+   with `tools/ws_seam.py`; waiting for the user's verdict).  Preview: `--ws-backdrop on` (every room) or `--ws-backdrop-rooms
    5:1,5:3,19:1,2:1` (only those); AREA02 s5 stays on by default.  To approve a room: set `approved` to 1 in its
    `ROOMS` entry.  Not done: AREA17 s3 / s4 (Iron Castle hall): its side walls look oblique (the measured lines do not
    meet in one vanishing point; numbers in PORT.md), needs a geometry fit first.  Checked headless (16:9 / 21:9, 4:3

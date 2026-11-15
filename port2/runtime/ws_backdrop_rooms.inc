@@ -1261,6 +1261,10 @@ typedef struct { short x2, y2, r2, cls, dep, side, fl; } VbS;   /* centre / radi
                                                                    cuts it (-1: none) */
 #define VBS_DONOR 1
 #define VBS_FRONT 2
+#define VBS_KEEP 16                                      /* completed: no new sphere in front of it in the strip (its
+                                                            outline beyond the join stays its own, round) */
+#define VBS_CAP 8                                        /* completed: its model's tone eased below the lightest of
+                                                            its visible texels (a sphere fitted on a short dim rim) */
 #define VBS_SOFTJ 4                                      /* its contact shade fades out over the strip's first 8
                                                             columns (the picture shows none there) */
 static const VbS VB_PS[] = {
@@ -1271,7 +1275,7 @@ static const VbS VB_PS[] = {
     {   5, 139, 38, 1, 20, 0, 0 },                       /* pink (2.5, 69.5) r 19, its lower right in a cast shade */
     /* the canopy at the right edge */
     { 592, -14, 24, 0,  5, 1, 0 },                       /* cream (296, -7) r 12 */
-    { 674,  -4, 50, 0,  4, 1, VBS_SOFTJ },                       /* cream (337, -2) r 25, lit, at the top right: its outline
+    { 674,  -4, 50, 0,  4, 1, VBS_SOFTJ | VBS_CAP },                       /* cream (337, -2) r 25, lit, at the top right: its outline
                                                             x 312 at rows 0-3 leaning to x 318 at row 16 */
     { 638,  36, 45, 0,  2, 1, 0 },                       /* the grey cream (319, 18) r 22.5, in the shade, behind the
                                                             others (its dark lower left at x 297-305, rows 7-14) */
@@ -1282,7 +1286,7 @@ static const VbS VB_PS[] = {
                                                             never takes its texels) */
     { 570,  66, 37, 1, 15, -1, VBS_DONOR },              /* pink (285, 33) r 18.5 */
     { 546, 125, 46, 2, 30, -1, VBS_DONOR },              /* blue (273, 62.5) r 23 */
-    { 631, 121, 45, 0, 25, 1, VBS_DONOR },               /* cream (315.5, 60.5) r 22.5 */
+    { 631, 121, 45, 0, 25, 1, VBS_DONOR | VBS_KEEP },               /* cream (315.5, 60.5) r 22.5 */
     /* the front, cut by the frame's bottom */
     {  56, 496, 100, 1, 10, 0, VBS_FRONT | VBS_DONOR },  /* pink (28, 248) r 50 */
     { 590, 472, 94, 2, 10, 1, VBS_FRONT | VBS_DONOR },   /* blue (295, 236) r 47 */
@@ -1316,7 +1320,7 @@ static const VbBand VB_BANDS[2][5] = {          /* (in the order they are made: 
 static Ramp VB_rc[3], VB_rf[3];
 static int VB_share[4];                                  /* the classes' shares of the canopy (cumulative, /256) */
 static int VB_L[3];                                      /* the light (x 256) */
-static int VB_a[VB_NPS], VB_b[VB_NPS], VB_n[VB_NPS], VB_m[VB_NPS];   /* each sphere's shading: L = a + b (n . light) / 256;
+static int VB_a[VB_NPS], VB_b[VB_NPS], VB_n[VB_NPS], VB_m[VB_NPS], VB_hi[VB_NPS];   /* each sphere's shading: L = a + b (n . light) / 256;
                                                                        m: its visible texels' mean luminance */
 static int vb_ow;                                        /* the working canvas' width (the strip + a margin, so a block
                                                             or sphere at the strip's end is the same at any width) */
@@ -1551,13 +1555,15 @@ static long long vb_fit(const int *L, int apply)
 {
     long long tot = 0;
     for (int i = 0; i < VB_NPS; i++) {
-        const VbS *s = &VB_PS[i]; long long n = 0, sd = 0, sdd = 0, sl = 0, sdl = 0, sll = 0, den; int a, b;
+        const VbS *s = &VB_PS[i]; long long n = 0, sd = 0, sdd = 0, sl = 0, sdl = 0, sll = 0, den; int a, b, hl[256];
+        if (apply) memset(hl, 0, sizeof hl);
         for (int y = (s->y2 - s->r2) / 2 - 1; y <= (s->y2 + s->r2) / 2 + 1; y++)
             for (int x = (s->x2 - s->r2) / 2 - 1; x <= (s->x2 + s->r2) / 2 + 1; x++) {
                 int d, l;
                 if (!vb_vis(i, x, y)) continue;
                 d = vb_dot(s->x2, s->y2, s->r2, x, y, L); l = lum(rgb15(pic[y][x]));
                 n++; sd += d; sdd += (long long)d * d; sl += l; sdl += (long long)d * l; sll += (long long)l * l;
+                if (apply) hl[clampi(l, 0, 255)]++;
             }
         den = n * sdd - sd * sd;
         if (n < 12) { a = n ? (int)(sl / n) : 120; b = 0; }
@@ -1568,7 +1574,12 @@ static long long vb_fit(const int *L, int apply)
         }
         /* the error: sum (l - a - b d / 256)^2 */
         tot += sll - 2 * a * sl - 2 * (long long)b * sdl / 256 + n * a * a + 2 * (long long)a * b * sd / 256 + (long long)b * b / 256 * sdd / 256;
-        if (apply) { VB_a[i] = a; VB_b[i] = b; VB_n[i] = (int)n; VB_m[i] = n ? (int)(sl / n) : a; }
+        if (apply) {
+            int k = 0, l = 255;                          /* (the 90th percentile of its visible texels) */
+            VB_a[i] = a; VB_b[i] = b; VB_n[i] = (int)n; VB_m[i] = n ? (int)(sl / n) : a;
+            while (l > 0 && (k += hl[l]) * 10 < n) l--;
+            VB_hi[i] = n ? l : 255;
+        }
     }
     return tot;
 }
@@ -1587,7 +1598,7 @@ static void vb_light(void)
 #ifdef WS_BACKDROP_MAIN
     if (getenv("WSB_INFO")) {
         fprintf(stderr, "light %d %d %d\n", VB_L[0], VB_L[1], VB_L[2]);
-        for (int i = 0; i < VB_NPS; i++) fprintf(stderr, "sphere %d: a %d b %d (n %d)\n", i, VB_a[i], VB_b[i], VB_n[i]);
+        for (int i = 0; i < VB_NPS; i++) fprintf(stderr, "sphere %d: a %d b %d (n %d, mean %d, p90 %d)\n", i, VB_a[i], VB_b[i], VB_n[i], VB_m[i], VB_hi[i]);
     }
 #endif
 }
@@ -1674,6 +1685,11 @@ static void vb_sphere(int side, const VbN *n)
                                                              on the lit right), its grain from the donor */
                     for (int i = 0; i < VB_NPS; i++) if ((VB_PS[i].fl & VBS_FRONT) && VB_PS[i].cls == n->cls && VB_n[i] >= 60) li = i;
                 lt = VB_a[li] + n->da + VB_b[li] * dt / 256;
+                if (n->self && !front && (VB_PS[n->don].fl & VBS_CAP)) {   /* (eased above its visible texels' 90th
+                                                                             percentile - 8: no flat white dome) */
+                    int K = VB_hi[n->don] - 8;
+                    if (lt > K) lt = K + (lt - K) / 4;
+                }
                 if (n->self && front) {
                     /* a completed front sphere: the texture reflected across the edge (else its other flank), on the
                        model's light; the first 12 columns blended from the exact continuation of the picture's texel */
@@ -1730,9 +1746,15 @@ static int vb_edge_dep(int side, int front, int wx, int y)
     }
     return m;
 }
-/* may new sphere n stand where it is: in the strip's first 3 columns only under an edge sphere in front of it */
+/* may new sphere n stand where it is: in the strip's first 3 columns only under an edge sphere in front of it, and
+   nowhere in front of a VBS_KEEP edge sphere */
 static int vb_fits(int side, const VbN *n, int front)
 {
+    for (int i = 0; i < VB_NPS; i++) {
+        const VbS *s = &VB_PS[i]; int dx = n->x2 - s->x2, dy = n->y2 - s->y2, rr = n->r2 + s->r2;
+        if (!(s->fl & VBS_KEEP) || s->side != side || !(s->fl & VBS_FRONT) != !front || n->dep <= s->dep) continue;
+        if (dx * dx + dy * dy < rr * rr) return 0;
+    }
     for (int k = 0; k < 3; k++) {
         int wx = side ? PW + k : -1 - k;
         for (int y = (n->y2 - n->r2) / 2 - 1; y <= (n->y2 + n->r2) / 2 + 1; y++) {

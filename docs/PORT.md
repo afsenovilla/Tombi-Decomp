@@ -2953,7 +2953,14 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
       direction nearer the centre, then mirrored, then rotated) on the model's tone at its own place, as a shift along
       the class's ramp; the rim takes its texture from just inside and fades softly into what is behind (the contact
       shade of the two new right edge spheres fades out over the strip's first 8 columns: the picture shows none at
-      the join).  New spheres
+      the join).  Two right-edge fixes after the user still saw a cut at the right join (2026-11-17, measured
+      with `tools/ws_seam.py`, below): the lit cream sphere at the top right is fitted on a dim 43-texel rim, so its
+      model ran up to a flat white dome (luminance 215, the ramp's top) right after the join; its model tone is now
+      eased above its visible texels' 90th percentile - 8 (`VBS_CAP`: K + (L - K) / 4), so it goes on at the
+      picture's tone with its grain; and the light cream sphere (315.5, 60.5) r 22.5, the lightest at the join
+      (luminance 229), was cut 3 columns into the strip by a new blue sphere in front of it (a vertical outline over
+      rows 45-75, the cut the user saw): no new sphere may stand in front of it now (`VBS_KEEP`; the new ones in the
+      way move outwards as at the join), so it closes round at strip column ~18.  New spheres
       (far ones, three layers, the front row) are drawn the same way from a donor sphere of the picture of their class
       (scaled, texture rotated / mirrored by hash, tone by depth), with a contact shade (once per texel) on what is
       behind; a new one may reach the strip's first 3 columns only under an edge sphere in front of it (so the join
@@ -2967,6 +2974,15 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
       sphere (the blue one), are lit with the fitted light of the picture's front sphere of their class (the cream:
       lilac grey in the shade, warm on the lit right) and coloured on ramps made of the front spheres' own visible
       texels (no stones' greys, no rims' browns).
+    Seam metric (`tools/ws_seam.py IMG --pad 53 [--y0 16]`, per row: the step between the picture's last 4 columns
+    and the strip's first 4 against the picture's own 90th-percentile step between neighbouring 4-column groups
+    in that row; per band: tone, contrast, gradient energy and stripe period of the strip's first columns against
+    the picture's last ones; `--calib COL` scores the picture against itself, the noise floor).  Right join after
+    the fixes: the join step is within the picture's own in the lit sphere (rows 0-16, 100 % of rows) and the
+    canopy (16-78: 87 %, was 66 %; sphere (315.5, 60.5) 100 %, was 61 %); left over: rows 31-38, where the lump's
+    own outline lies on the join (its rim darkens in the picture's columns 318-319 and the strip's column 0
+    continues it), and the lower bands' texture checks, which the picture itself fails against its own next
+    columns in about half the bands (busy, non-stationary picture: read the texture checks as a hint only).
     Nothing of the picture is stored: the tables are coordinates; every texel is read from VRAM when the room is
     entered (once per picture: the strips are cached by its hash).  Width-independent: the work canvas is the strip
     plus 64 columns, so a 21:9 strip starts with exactly the 16:9 one's columns (checked: 0 of 23744 texels differ).
