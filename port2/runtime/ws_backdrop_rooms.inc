@@ -1261,6 +1261,8 @@ typedef struct { short x2, y2, r2, cls, dep, side, fl; } VbS;   /* centre / radi
                                                                    cuts it (-1: none) */
 #define VBS_DONOR 1
 #define VBS_FRONT 2
+#define VBS_SOFTJ 4                                      /* its contact shade fades out over the strip's first 8
+                                                            columns (the picture shows none there) */
 static const VbS VB_PS[] = {
     /* the canopy at the left edge */
     {  22,  19, 28, 0, 10, 0, VBS_DONOR },               /* cream (11, 9.5) r 14 */
@@ -1269,7 +1271,15 @@ static const VbS VB_PS[] = {
     {   5, 139, 38, 1, 20, 0, 0 },                       /* pink (2.5, 69.5) r 19, its lower right in a cast shade */
     /* the canopy at the right edge */
     { 592, -14, 24, 0,  5, 1, 0 },                       /* cream (296, -7) r 12 */
-    { 644,  44, 40, 0,  2, 1, 0 },                       /* cream (322, 22) r 20, behind the pink and the cream below */
+    { 674,  -4, 50, 0,  4, 1, VBS_SOFTJ },                       /* cream (337, -2) r 25, lit, at the top right: its outline
+                                                            x 312 at rows 0-3 leaning to x 318 at row 16 */
+    { 638,  36, 45, 0,  2, 1, 0 },                       /* the grey cream (319, 18) r 22.5, in the shade, behind the
+                                                            others (its dark lower left at x 297-305, rows 7-14) */
+    { 602,  69, 40, 0,  8, 1, VBS_SOFTJ },               /* the light cream lump (301, 34.5) r 20 between the pink
+                                                            and the grey one, closing round in the strip's first
+                                                            column (its edge to the grey, a 45-degree line from
+                                                            (303, 16) to (318, 31), inside the circle: the grey one
+                                                            never takes its texels) */
     { 570,  66, 37, 1, 15, -1, VBS_DONOR },              /* pink (285, 33) r 18.5 */
     { 546, 125, 46, 2, 30, -1, VBS_DONOR },              /* blue (273, 62.5) r 23 */
     { 631, 121, 45, 0, 25, 1, VBS_DONOR },               /* cream (315.5, 60.5) r 22.5 */
@@ -1285,10 +1295,13 @@ typedef struct { short x0, y0, x1, y1; } VbBox;          /* [x0, x1) x [y0, y1) 
 static const VbBox VB_EXCL[] = {
     { 44, 40, 190, 143 }, { 6, 138, 53, 144 }, { 138, 126, 162, 150 }, { 34, 164, 60, 192 }, { 100, 181, 216, 196 },
     { 226, 118, 254, 142 }, { 216, 133, 262, 188 }, { 252, 120, 268, 190 }, { 262, 108, 316, 196 }, { 0, 0, 0, 0 } };
-typedef struct { short y0, y1, ry0, ry1, sx0, sx1, B, OV, OT, OB, dy, reg, per, up; } VbBand;
+typedef struct { short y0, y1, ry0, ry1, sx0, sx1, B, OV, OT, OB, dy, reg, per, up, mr; } VbBand;
 /* rows [y0, y1) of the strip from the picture's rows [ry0, ry1) (others reflected into them), columns [sx0, sx1);
    blocks of B columns, OV of overlap, OT / OB rows of overlap with the band above / below, windows shifted up to dy rows, per: look
-   for a horizontal period, up: rows above ry0 reflected into the first up rows only (the trunks: straight on up) */
+   for a horizontal period, up: rows above ry0 reflected into the first up rows only (the trunks: straight on up; -1:
+   the row ry0 repeated), mr:
+   the first mr columns the picture's last columns repeated with their own period (the quilt's first block then cut
+   into them) */
 static const VbBand VB_BANDS[2][5] = {          /* (in the order they are made: the fence, then the back above it) */
     { { 108, 138, 108, 138, 0, 44, 9, 4, 0, 0, 0, VB_FENCE, 1, 0 },
       { 0, 108, 90, 110, 0, 44, 16, 6, 0, 6, 3, VB_BACK, 0, 6 },
@@ -1296,7 +1309,7 @@ static const VbBand VB_BANDS[2][5] = {          /* (in the order they are made: 
       { 156, 181, 156, 181, 0, 216, 16, 5, 4, 0, 0, VB_BANK, 1, 0 },
       { 181, PH, 181, 198, 0, 100, 16, 5, 4, 0, 1, VB_GROUND, 0, 0 } },
     { { 108, 137, 108, 137, 186, 256, 12, 5, 0, 0, 0, VB_FENCE, 1, 0 },
-      { 0, 108, 92, 110, 186, 320, 24, 8, 0, 6, 3, VB_BACK, 0, 6 },
+      { 0, 108, 92, 110, 186, 320, 24, 8, 0, 6, 3, VB_BACK, 0, -1, 12 },
       { 137, 156, 143, 156, 150, 216, 16, 5, 4, 0, 0, VB_LEDGE, 0, 0 },
       { 156, 181, 156, 181, 150, 216, 16, 5, 4, 0, 0, VB_BANK, 1, 0 },
       { 181, PH, 181, 198, 0, 262, 16, 5, 4, 0, 1, VB_GROUND, 0, 0 } } };
@@ -1349,6 +1362,8 @@ static int vb_srow(const VbBand *b, int y)               /* a row of the band's 
 {
     int n = b->ry1 - b->ry0, k;
     if (y >= b->ry0 && y < b->ry1) return y;
+    if (b->up < 0) return y < b->ry0 ? b->ry0 : b->ry1 - 1;   /* (the trunks straight on up: no reflected rows, whose
+                                                                 horizontal haze would repeat as bands) */
     if (b->up && y >= b->ry1) { k = fmodi(b->ry1 - 1 - y, 2 * b->up); return b->ry1 - 1 - (k < b->up ? k : 2 * b->up - 1 - k); }
     if (b->up) n = b->up;
     k = fmodi(y - b->ry0, 2 * n);
@@ -1408,9 +1423,28 @@ static void vb_quilt(int side, const VbBand *b, int seed)
     static int err[320 * 9], em[VB_MAXH][VB_MAXW], vcut[VB_MAXH], tcut[VB_MAXW], bcut[VB_MAXW];
     static Rgb win[VB_MAXH][VB_MAXW];
     if (H > VB_MAXH || W > VB_MAXW || ncand <= 0 || ncand > 320 * 9) return;
+    if (b->mr > 0) {                                     /* the trunk cut by the edge goes on: the picture's last k
+                                                            columns repeated, k (mr/2+1 .. 2 mr) the shift at which
+                                                            its last 3 columns best match 3 earlier ones (the stripes'
+                                                            period; the first block is then cut into them) */
+        long long be = -1; int kp = b->mr;
+        for (int k = b->mr / 2 + 1; k <= 2 * b->mr; k++) {
+            long long e = 0;
+            for (int y = b->ry0; y < b->ry1; y++)
+                for (int i = 0; i < 3; i++) {
+                    int xa = side ? PW - 1 - i : i, xb = side ? xa - k : xa + k;
+                    if (!vb_excl(xa, y) && !vb_excl(xb, y)) e += vb_d2(rgb15(pic[y][xa]), rgb15(pic[y][xb]));
+                }
+            if (be < 0 || e < be) { be = e; kp = k; }
+        }
+        for (int X = 1; X <= b->mr; X++)
+            for (int y = b->y0; y < b->y1; y++)
+                vb_put(side, side ? PW - 1 + X : -X, y, rgb15(pic[vb_srow(b, y)][side ? PW - kp + (X - 1) % kp : kp - 1 - (X - 1) % kp]), b->reg);
+        pos += side ? b->mr : -b->mr;
+    }
     while (side ? pos < vb_hi(side) : pos >= vb_lo(side)) {
         int t0 = side ? pos - b->OV : pos - b->B + 1;             /* the window's first picture column (target) */
-        int first = nb == 0, mn = 1 << 30, pick = -1, nc = 0, k;
+        int first = nb == 0 && !b->mr, mn = 1 << 30, pick = -1, nc = 0, k;
         for (int c = 0; c < ncand; c++) {
             int sx = b->sx0 + c / nd, dy = c % nd - b->dy, ok = 1, n = 0; long long e = 0;
             for (int y = ytop; y < ybot && ok; y++) for (int j = 0; j < W; j++) if (vb_excl(sx + j, vb_srow(b, y + dy))) { ok = 0; break; }
@@ -1424,6 +1458,12 @@ static void vb_quilt(int side, const VbBand *b, int seed)
                     e += vb_d2(o, rgb15(pic[vb_srow(b, y + dy)][sx + j])); n++;
                 }
             e = n ? e * 64 / n : 0;
+            if (b->up < 0) {                              /* (its top row repeated upwards: windows whose columns go
+                                                             straight on up, not a trunk's top or a haze's edge) */
+                long long v = 0;
+                for (int j = 0; j < W; j++) v += vb_d2(rgb15(pic[vb_srow(b, b->ry0 + dy)][sx + j]), rgb15(pic[vb_srow(b, b->ry0 + dy + 8)][sx + j]));
+                e += v * 64 / W;
+            }
             for (int u = 0; u < 3; u++) { int d = sx - used[u]; if (d < 0) d = -d; if (d < b->B) e += e / 2 + 2000; }
             if (per) { int ph = fmodi(t0 - sx, per); if (ph > per / 2) ph = per - ph; e += e * ph / per; }
             err[c] = (int)(e > (1 << 29) ? (1 << 29) : e);
@@ -1612,7 +1652,9 @@ static void vb_sphere(int side, const VbN *n)
             rr = vb_reg(side, wx, y);
             if (rr < VB_SPH || rr >= VB_BACK || occ[(size_t)y * vb_ow + vb_X(side, wx) - 1]) continue;   /* (once: not deeper
                                                                        where several spheres in front meet) */
-            *p = scale(*p, clampi(200 + o * 56 / 72 + (dx - dy) * 12 / (R16 + 1), 200, 256));
+            {   int sh = clampi(200 + o * 56 / 72 + (dx - dy) * 12 / (R16 + 1), 200, 256);
+                if (n->self && (VB_PS[n->don].fl & VBS_SOFTJ)) sh = 256 - (256 - sh) * clampi((vb_X(side, wx) - 2) * 256 / 6, 0, 256) / 256;
+                *p = scale(*p, sh); }
             occ[(size_t)y * vb_ow + vb_X(side, wx) - 1] = 1;
         }
     for (int y = ya; y <= yb; y++)
