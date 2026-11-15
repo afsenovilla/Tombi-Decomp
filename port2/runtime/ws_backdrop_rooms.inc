@@ -1090,6 +1090,11 @@ typedef struct { short y0, y1, ry0, ry1, sx0, sx1, B, OV, OT, OB, dy, reg, per, 
 #define VBB_STRICT 1
 #define VBB_TIGHT 2
 #define VBB_FEATHER 8                                    /* the cuts blended (below) */
+#define VBB_FAR 16                                       /* a window is penalised when it lies less than 96 columns
+                                                            from where it goes (a copy of the picture's texels next to
+                                                            them), and taken only when nothing else fits when it goes on
+                                                            from the block before (a run of the picture copied whole)
+                                                            or overlaps one of the last three */
 #define VBB_SOFT 4                                       /* objects in the overlap rows (OT / OB) do not rule a window
                                                             out: those texels are neither compared nor pasted */
 static const VbBand VB_BANDS[2][5] = {          /* (in the order they are made: the fence, then the back above it) */
@@ -1264,6 +1269,14 @@ static void vb_quilt(int side, const VbBand *b, int seed)
                 e += v * 512 / W;                          /* (weighed 8: no haze slab or trunk top) */
             }
             for (int u = 0; u < 3; u++) { int d = sx - used[u]; if (d < 0) d = -d; if (d < b->B) e += e / 2 + 2000; }
+            if (b->st & VBB_FAR) {                       /* (no copy of the picture next to itself, no run of it) */
+                int d = sx - t0, f = nb ? sx - (used[(nb - 1) % 3] + (side ? b->B : -b->B)) : 99;
+                if (d < 0) d = -d;
+                if (f < 0) f = -f;
+                if (d < 96) e += e / 2 + 2000;
+                if (f < b->B) e += 1 << 24;              /* (only when nothing else fits) */
+                for (int u = 0; u < 3; u++) { int g = sx - used[u]; if (g < 0) g = -g; if (g < W) { e += 1 << 24; break; } }
+            }
             if (per) { int ph = fmodi(t0 - sx, per); if (ph > per / 2) ph = per - ph; e += e * ph / per; }
             err[c] = (int)(e > (1 << 29) ? (1 << 29) : e);
             if (err[c] < mn) mn = err[c];
@@ -1793,19 +1806,26 @@ static void gen_vb(int pad)
  * run time with gen_vb's vb_quilt (blocks of the picture's texels on the same rows, chosen by the error of their
  * overlap with the picture's columns at the edge and with the block before, pasted along minimum-error cuts; nothing
  * mirrored, objects never copied):
- *   - the fence first (as AREA02 s1: left x 0-43 rows 108-137, right x 186-255);
- *   - the canopy's lower part with its fringe and the grey rocks under it (rows 60-107; left from x 0-43, right from
- *     x 190-319), cut into the fence's top rows; then its upper part (rows 0-59, from x 0-43 and 192-319, the hut and
- *     its chimney left out), cut into the lower part: the windows keep their rows (up to 3 rows of shift), so the
- *     blossom's vertical structure (light flower clusters above, darker and greyer low, the fringe's brown rim on the
- *     rocks at rows ~85-105) goes on as the picture has it next to each edge;
- *   - the green ledge (rows 137/138-155 from rows 143-155: the log on the left, x 11-47 rows 139-142, left out), the
- *     straw bank (156-180), the ground (181-189);
- *   - the front blossom: its inside (rows 206-223, any column of the picture's front but the grass gap at x 204-231)
- *     and then its top (rows 186-205, cut into the ground above and the inside below): windows of the picture's
- *     front with up to 10 rows of shift (only rows of the picture, none reflected), so the scalloped outline of the
+ *   - the fence first (left x 0-43 rows 108-137, its first 9 columns the picture's own posts continued with their
+ *     period (the post cut by the edge goes on), then cut into by the quilt; right x 186-255 rows 108-138);
+ *   - the canopy's lower part with its fringe and the grey rocks under it (rows 60-107, windows shifted up to 8 rows so
+ *     the fringe goes on at the height the edge has it: ~row 98 at the left edge, ~104 at the right one; left from any
+ *     clean column (the rock towers by the left edge first), right from x 190-319), cut into the fence's top rows; then
+ *     its upper part (rows 0-59, from x 0-43 and 192-319, the hut and its chimney left out), cut into the lower part:
+ *     the windows keep their rows (up to 3 rows of shift), so the blossom's vertical structure (light flower clusters
+ *     above, darker and greyer low, the fringe's brown rim on the rocks) goes on as the picture has it by each edge;
+ *   - the green ledge: its lower rows (145-155, the grass and its dark lip) from x 0-215, its top (rows 136/137-144,
+ *     where the left edge has the log, x 2-52) from the clean stretch between the hut's pole and the ladder (x 192-213),
+ *     so its top edge under the fence is the picture's own; the straw bank (156-180), the ground (181-189);
+ *   - the front blossom: its inside (rows 214-223, any column of the picture's front but the grass gap at x 204-231)
+ *     and then its top (rows 186-213, cut into the ground above and the inside below): windows of the picture's
+ *     front with up to 6 rows of shift (only rows of the picture, none reflected), so the scalloped outline of the
  *     bushes against the grass is the picture's own, its blur too, and at the join it goes on at the height the edge
- *     has it (the right edge's bush is high, rows ~189, the left one's low, rows ~200).
+ *     has it (the right edge's bush is high, rows ~189, the left edge is a grass valley down to row ~215);
+ *   - the blurred bands (canopy, front) have their cuts blended over 5 x 5 texels (VBB_FEATHER), and their tone is
+ *     matched at the join per row (cb_tone: the strip's first 8 columns onto the picture's columns 2-9, fading out by
+ *     column 64; its first column onto the picture's last one, fading out over 8: the picture's edge columns are a
+ *     little darker, about 6 levels, and the strip goes on from them).
  * Objects never copied (CB_EXCL): the hut and its chimney and pole, the log, the bucket, the barrel, the stones and
  * their track, the stone pile, the ladder, the jukebox and its lever, and the grass gap between the front bushes. */
 static const VbBox CB_EXCL[] = {
@@ -1815,23 +1835,23 @@ static const VbBox CB_EXCL[] = {
 #define CB_S (VBB_STRICT | VBB_TIGHT)
 static const VbBand CB_BANDS[2][9] = {
     { { 108, 138, 108, 138, 0, 44, 9, 5, 0, 0, 0, VB_FENCE, 1, 0, 9, VBB_TIGHT },
-      { 60, 108, 50, 124, 0, 320, 12, 6, 0, 6, 8, VB_BACK, 0, 0, 0, CB_S | VBB_SOFT | VBB_FEATHER },
-      { 0, 60, 0, 70, 0, 320, 16, 8, 0, 6, 3, VB_BACK, 0, 0, 0, CB_S | VBB_FEATHER },
+      { 60, 108, 50, 124, 0, 320, 12, 6, 0, 6, 8, VB_BACK, 0, 0, 0, CB_S | VBB_SOFT | VBB_FEATHER | VBB_FAR },
+      { 0, 60, 0, 70, 0, 320, 16, 8, 0, 6, 3, VB_BACK, 0, 0, 0, CB_S | VBB_FEATHER | VBB_FAR },
       { 145, 156, 145, 156, 0, 216, 16, 5, 0, 0, 0, VB_LEDGE, 0, 0, 0, VBB_TIGHT },
       { 138, 145, 136, 148, 192, 214, 8, 4, 2, 3, 0, VB_LEDGE, 0, 0, 0, CB_S },
       { 156, 181, 156, 181, 0, 216, 16, 5, 4, 0, 0, VB_BANK, 1, 0, 0, VBB_TIGHT },
       { 181, 190, 181, 197, 0, 100, 16, 5, 4, 0, 1, VB_GROUND, 0, 0, 0, VBB_TIGHT },
-      { 214, PH, 214, PH, 0, 320, 16, 5, 0, 0, 0, VB_FRONTR, 0, 0, 0, CB_S | VBB_FEATHER },
-      { 186, 214, 182, PH, 0, 320, 16, 6, 3, 4, 6, VB_FRONTR, 0, 0, 0, CB_S | VBB_FEATHER } },
+      { 214, PH, 214, PH, 0, 320, 16, 5, 0, 0, 0, VB_FRONTR, 0, 0, 0, CB_S | VBB_FEATHER | VBB_FAR },
+      { 186, 214, 182, PH, 0, 320, 16, 6, 3, 4, 6, VB_FRONTR, 0, 0, 0, CB_S | VBB_FEATHER | VBB_FAR } },
     { { 108, 139, 108, 139, 186, 256, 12, 5, 0, 0, 0, VB_FENCE, 1, 0, 0, VBB_TIGHT },
-      { 60, 108, 50, 124, 190, 320, 16, 8, 0, 6, 8, VB_BACK, 0, 0, 0, CB_S | VBB_SOFT | VBB_FEATHER },
-      { 0, 60, 0, 70, 0, 320, 16, 8, 0, 6, 3, VB_BACK, 0, 0, 0, CB_S | VBB_FEATHER },
+      { 60, 108, 50, 124, 190, 320, 16, 8, 0, 6, 8, VB_BACK, 0, 0, 0, CB_S | VBB_SOFT | VBB_FEATHER | VBB_FAR },
+      { 0, 60, 0, 70, 0, 320, 16, 8, 0, 6, 3, VB_BACK, 0, 0, 0, CB_S | VBB_FEATHER | VBB_FAR },
       { 145, 156, 145, 156, 150, 216, 16, 5, 0, 0, 0, VB_LEDGE, 0, 0, 0, VBB_TIGHT },
       { 139, 145, 136, 148, 192, 214, 8, 4, 2, 3, 0, VB_LEDGE, 0, 0, 0, CB_S },
       { 156, 181, 156, 181, 150, 216, 16, 5, 4, 0, 0, VB_BANK, 1, 0, 0, VBB_TIGHT },
       { 181, 190, 181, 197, 0, 262, 16, 5, 4, 0, 1, VB_GROUND, 0, 0, 0, VBB_TIGHT },
-      { 214, PH, 214, PH, 0, 320, 16, 5, 0, 0, 0, VB_FRONTR, 0, 0, 0, CB_S | VBB_FEATHER },
-      { 186, 214, 182, PH, 0, 320, 16, 6, 3, 4, 6, VB_FRONTR, 0, 0, 0, CB_S | VBB_FEATHER } } };
+      { 214, PH, 214, PH, 0, 320, 16, 5, 0, 0, 0, VB_FRONTR, 0, 0, 0, CB_S | VBB_FEATHER | VBB_FAR },
+      { 186, 214, 182, PH, 0, 320, 16, 6, 3, 4, 6, VB_FRONTR, 0, 0, 0, CB_S | VBB_FEATHER | VBB_FAR } } };
 /* the tone at the join, per row (rows [y0, y1), means over rows y +- 4 of them): the strip's columns 1-8 moved onto
    the picture's columns 2-9 from the edge (full for 16 columns, gone at 64), and its first column onto the picture's
    last one (easing out over 8 columns), so the join is neither a tone step nor a line (the picture's last columns are
