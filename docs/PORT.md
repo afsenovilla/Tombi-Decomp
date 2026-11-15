@@ -2925,9 +2925,13 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
       too.  The block is pasted along minimum-error boundary cuts (dynamic programming: vertical through the column
       overlap, horizontal through the row overlap), never over the picture.  Bands: the fence first (left x 0-43, the
       shaded stretch by the edge; right x 186-225 beside the jukebox, rows 108-137), then the trunks and haze above it
-      (left x 0-43, right x 186-319, rows 90/92-109; the canopy hides the picture's rows above, so higher rows reflect
-      the band's top 6 rows: the trunks go straight on up), matched to the fence band's top rows so the trunks run
-      down behind the posts; the ledge (its rows 138-143 on the left are a log, x 6-52: left out, taken from rows
+      (left x 0-43, right x 186-319, rows 90/96-109; the canopy hides the picture's rows above, so higher rows reflect
+      the band's top 6 rows on the left, its top 2 on the right: the trunks go straight on up, no haze repeats as a
+      band; on the right windows whose top row differs from the row 8 below weigh 8 times more, so no trunk's flat top
+      or pale haze slab is copied), matched to the fence band's top rows so the trunks run down behind the posts; on
+      the right the striped trunk cut by the edge first goes on for 12 columns with its own stripe period (the shift,
+      5-24 columns, at which the picture's last 3 columns best match 3 earlier ones: 9) and the first block is cut
+      into it; the ledge (its rows 138-143 on the left are a log, x 6-52: left out, taken from rows
       144-155), the bank (left x 0-215 without the barrel, right x 150-215 before the ladder), the ground (rows
       181-197 of x 0-99 for both sides: the right edge's ground is all under the jukebox, the ladder and the front
       sphere, and its only clean patch, x 214-261 rows 194-203, tiled visibly).  Objects never copied (`VB_EXCL`):
@@ -2936,14 +2940,20 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     - **geometric completion of the spheres**.  The circles of the spheres cut by each edge, canopy and front, were
       fitted on the picture (outline points at 8x, then refined to the strongest colour step along the visible arc;
       `VB_PS`: left cream (11, 9.5) r 14, pink (14, 38) r 16, pink (2.5, 69.5) r 19, the dark lilac one behind seen in
-      columns 0-3; right cream (296, -7) r 12, (322, 22) r 20, (315.5, 60.5) r 22.5; front pink (28, 248) r 50, blue
+      columns 0-3; right cream (296, -7) r 12, the lit one at the top right (337, -2) r 25 (its outline x 312 at rows
+      0-3 leaning to x 318 at row 16), the light lump between the pink and the grey one (301, 34.5) r 20 (closing
+      round in the strip's first column; its edge to the grey one, a 45-degree line, lies inside the circle, so the
+      grey one never takes its texels across the edge, which had mirrored that line into an angular wedge), the grey
+      one in the shade behind them (319, 18) r 22.5, (315.5, 60.5) r 22.5; front pink (28, 248) r 50, blue
       (295, 236) r 47; plus donors).  At run time each one's shading is fitted on its visible texels (inside 0.9 r,
       under no sphere in front, of its colour class): luminance = a + b (normal . light), the light direction fitted
       over all of them (30 candidates; it comes out from the front and upper right).  A completed sphere is drawn
       whole, in depth order: each hidden texel takes the residual texture (texel - model) of a texel of the same
       sphere (its reflection across the picture's edge first, so the grain runs on through the join; then the same
       direction nearer the centre, then mirrored, then rotated) on the model's tone at its own place, as a shift along
-      the class's ramp; the rim takes its texture from just inside and fades softly into what is behind.  New spheres
+      the class's ramp; the rim takes its texture from just inside and fades softly into what is behind (the contact
+      shade of the two new right edge spheres fades out over the strip's first 8 columns: the picture shows none at
+      the join).  New spheres
       (far ones, three layers, the front row) are drawn the same way from a donor sphere of the picture of their class
       (scaled, texture rotated / mirrored by hash, tone by depth), with a contact shade (once per texel) on what is
       behind; a new one may reach the strip's first 3 columns only under an edge sphere in front of it (so the join
@@ -2966,9 +2976,9 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     cleaner and more evenly coloured than the painted ones (few donors: two cream, two pink, one blue in the canopy;
     the new front spheres share the blue one's grain, and the cream ones are a little greyer than the picture's) and
     their outlines are rounder and sharper; where the completed left front sphere meets the picture its first columns
-    keep the picture's own dark shading; between back and fence the odd pale haze column ends at the cut;
-    the right edge's canopy completion (the cream spheres behind the pink one) is mostly guessed: little of them is
-    visible.  Checked (headless): 16:9 and 21:9 in the game, i386 = wasm2c frames, default flags identical to the build
+    keep the picture's own dark shading; the right canopy's cream spheres are fitted on short arcs (the lit one's
+    lower left, the lump's diagonal edge), so their size beyond the join is a plausible guess, made round and hidden
+    behind the spheres in front.  Checked (headless): 16:9 and 21:9 in the game, i386 = wasm2c frames, default flags identical to the build
     before for AREA02 s1 (off) and the approved rooms; not checked on the device.
   - AREA19 s1 (the blossom village; it shares the layout, the pieces and the first generator, `gen_village`, with the
     old AREA02 s1): the first version, rejected by the user, still to be redone the way AREA02 s1 was: canopy 0-~100

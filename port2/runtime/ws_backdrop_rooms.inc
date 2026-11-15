@@ -1249,7 +1249,7 @@ static void gen_village(int pad)
  *    completed spheres are in front of it there, so the join shows exactly the picture's spheres.
  *
  * Bands and objects (rows measured on the picture at 6-12x): the fence 108-137 (left in the shade, x 0-43; right
- * beside the jukebox, x 186-225), made first; then the trunks and haze above it (picture rows 90/92-109; left x 0-43,
+ * beside the jukebox, x 186-225), made first; then the trunks and haze above it (picture rows 90/96-109; left x 0-43,
  * right x 186-319), matched to the fence band's top rows; the ledge 137/138-155 (its top rows on the left are a log,
  * x 6-52, left out: taken from rows 144-155), the bank 156-180 (left x 0-215 without the barrel; right x 150-215,
  * before the ladder), the ground 181- (rows 181-197 of x 0-99 for both sides: the right edge's ground is under the
