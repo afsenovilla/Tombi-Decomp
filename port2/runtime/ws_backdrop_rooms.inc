@@ -1309,7 +1309,7 @@ static const VbBand VB_BANDS[2][5] = {          /* (in the order they are made: 
       { 156, 181, 156, 181, 0, 216, 16, 5, 4, 0, 0, VB_BANK, 1, 0 },
       { 181, PH, 181, 198, 0, 100, 16, 5, 4, 0, 1, VB_GROUND, 0, 0 } },
     { { 108, 137, 108, 137, 186, 256, 12, 5, 0, 0, 0, VB_FENCE, 1, 0 },
-      { 0, 108, 92, 110, 186, 320, 24, 8, 0, 6, 3, VB_BACK, 0, -1, 12 },
+      { 0, 108, 96, 110, 186, 320, 24, 8, 0, 6, 3, VB_BACK, 0, -2, 12 },
       { 137, 156, 143, 156, 150, 216, 16, 5, 4, 0, 0, VB_LEDGE, 0, 0 },
       { 156, 181, 156, 181, 150, 216, 16, 5, 4, 0, 0, VB_BANK, 1, 0 },
       { 181, PH, 181, 198, 0, 262, 16, 5, 4, 0, 1, VB_GROUND, 0, 0 } } };
@@ -1362,8 +1362,11 @@ static int vb_srow(const VbBand *b, int y)               /* a row of the band's 
 {
     int n = b->ry1 - b->ry0, k;
     if (y >= b->ry0 && y < b->ry1) return y;
-    if (b->up < 0) return y < b->ry0 ? b->ry0 : b->ry1 - 1;   /* (the trunks straight on up: no reflected rows, whose
-                                                                 horizontal haze would repeat as bands) */
+    if (b->up < 0) {                                     /* (the trunks straight on up: the first -up rows reflected,
+                                                            few, so no haze repeats as bands) */
+        if (y >= b->ry1) return b->ry1 - 1;
+        k = fmodi(y - b->ry0, -2 * b->up); return b->ry0 + (k < -b->up ? k : -2 * b->up - 1 - k);
+    }
     if (b->up && y >= b->ry1) { k = fmodi(b->ry1 - 1 - y, 2 * b->up); return b->ry1 - 1 - (k < b->up ? k : 2 * b->up - 1 - k); }
     if (b->up) n = b->up;
     k = fmodi(y - b->ry0, 2 * n);
@@ -1462,7 +1465,7 @@ static void vb_quilt(int side, const VbBand *b, int seed)
                                                              straight on up, not a trunk's top or a haze's edge) */
                 long long v = 0;
                 for (int j = 0; j < W; j++) v += vb_d2(rgb15(pic[vb_srow(b, b->ry0 + dy)][sx + j]), rgb15(pic[vb_srow(b, b->ry0 + dy + 8)][sx + j]));
-                e += v * 64 / W;
+                e += v * 512 / W;                          /* (weighed 8: no haze slab or trunk top) */
             }
             for (int u = 0; u < 3; u++) { int d = sx - used[u]; if (d < 0) d = -d; if (d < b->B) e += e / 2 + 2000; }
             if (per) { int ph = fmodi(t0 - sx, per); if (ph > per / 2) ph = per - ph; e += e * ph / per; }
