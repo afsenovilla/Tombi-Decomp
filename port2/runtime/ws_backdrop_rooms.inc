@@ -1265,11 +1265,9 @@ typedef struct { short x2, y2, r2, cls, dep, side, fl; } VbS;   /* centre / radi
                                                             outline beyond the join stays its own, round) */
 #define VBS_CAP 8                                        /* completed: its model's tone eased below the lightest of
                                                             its visible texels (a sphere fitted on a short dim rim) */
-#define VBS_RIM 32                                       /* completed front sphere: in the strip only its dark rim goes on
-                                                            (the first VB_RIMW columns, fading into what is behind): the
-                                                            new cream spheres to its left stand in front of its hidden
-                                                            flank, the picture's dark edge reads as their contact shade */
-#define VB_RIMW 8
+#define VBS_EDGE 32                                      /* completed front sphere: not continued in the strip at all;
+                                                            the join is its outline, the picture's dark flank its rim,
+                                                            the new cream spheres behind it reach the join */
 #define VBS_SOFTJ 4                                      /* its contact shade fades out over the strip's first 8
                                                             columns (the picture shows none there) */
 static const VbS VB_PS[] = {
@@ -1293,7 +1291,7 @@ static const VbS VB_PS[] = {
     { 546, 125, 46, 2, 30, -1, VBS_DONOR },              /* blue (273, 62.5) r 23 */
     { 631, 121, 45, 0, 25, 1, VBS_DONOR | VBS_KEEP },               /* cream (315.5, 60.5) r 22.5 */
     /* the front, cut by the frame's bottom */
-    {  56, 496, 100, 1, 10, 0, VBS_FRONT | VBS_DONOR | VBS_RIM },  /* pink (28, 248) r 50: its flank at the edge is dark
+    {  56, 496, 100, 1, 10, 0, VBS_FRONT | VBS_DONOR | VBS_EDGE },  /* pink (28, 248) r 50: its flank at the edge is dark
                                                             brown (x 0-15, luminance 40-100, darkest at x 0-3), its pink
                                                             only from x ~16 */
     { 590, 472, 94, 2, 10, 1, VBS_FRONT | VBS_DONOR },   /* blue (295, 236) r 47 */
@@ -1670,7 +1668,6 @@ static void vb_sphere(int side, const VbN *n)
         for (int wx = xa; wx <= xb; wx++) {
             int dx = (wx * 2 + 1 - n->x2) * 8, dy = (y * 2 + 1 - n->y2) * 8, o = isqrt_i(dx * dx + dy * dy) - R16, rr; Rgb *p;
             if (wx < lo || wx >= hi || y < 0 || y >= PH || o < 0 || o >= 72 || !(p = vb_px(side, wx, y))) continue;
-            if (n->self && (VB_PS[n->don].fl & VBS_RIM) && vb_X(side, wx) > VB_RIMW) continue;
             rr = vb_reg(side, wx, y);
             if (rr < VB_SPH || rr >= VB_BACK || occ[(size_t)y * vb_ow + vb_X(side, wx) - 1]) continue;   /* (once: not deeper
                                                                        where several spheres in front meet) */
@@ -1684,7 +1681,6 @@ static void vb_sphere(int side, const VbN *n)
             int dx = (wx * 2 + 1 - n->x2) * 8, dy = (y * 2 + 1 - n->y2) * 8, d = isqrt_i(dx * dx + dy * dy), dt, src = 0, qx = 0, qy = 0, sdx, sdy;
             Rgb c;
             if (wx < lo || wx >= hi || y < 0 || y >= PH || d >= R16 || (wx >= 0 && wx < PW)) continue;
-            if (n->self && (VB_PS[n->don].fl & VBS_RIM) && vb_X(side, wx) > VB_RIMW) continue;
             dt = vb_dot(n->x2, n->y2, n->r2, wx, y, VB_L);
             {   int rin = R16 * 86 / 100; if (d > rin) { sdx = dx * rin / d; sdy = dy * rin / d; } else { sdx = dx; sdy = dy; } }   /* (the rim: texture
                                                                        from just inside it, the tone of its own place) */
@@ -1720,12 +1716,6 @@ static void vb_sphere(int side, const VbN *n)
                 }
             }
             if (d >= R16 - 24) { Rgb *p = vb_px(side, wx, y); if (p && vb_reg(side, wx, y)) c = mix(*p, c, 256 - (d - (R16 - 24)) * 150 / 24); }   /* (a soft outline) */
-            if (n->self && (VB_PS[n->don].fl & VBS_RIM)) {   /* (its rim: the picture's edge texel reflected, as is,
-                                                                     fading into the sphere behind) */
-                Rgb *p = vb_px(side, wx, y); int X = vb_X(side, wx);
-                c = rgb15(pic[y][side ? 2 * PW - 1 - wx : -1 - wx]);
-                if (p && vb_reg(side, wx, y) >= VB_FRONTR && vb_reg(side, wx, y) < VB_BACK && X > VB_RIMW / 2) c = mix(c, *p, (X - VB_RIMW / 2) * 256 / (VB_RIMW / 2 + 1));
-            }
             vb_put(side, wx, y, c, n->reg);
             if (vb_in(side, wx, y)) { occ[(size_t)y * vb_ow + vb_X(side, wx) - 1] = 0; if (vb_id) vb_id[(size_t)y * vb_ow + vb_X(side, wx) - 1] = (u16)vb_cur; }
         }
@@ -1865,7 +1855,7 @@ static void vb_front(int side)
         if ((VB_PS[i].fl & VBS_FRONT) && (VB_PS[i].fl & VBS_DONOR) && (fdon < 0 || VB_n[i] > VB_n[fdon])) fdon = i;
     for (int i = 0; i < VB_NPS; i++) {
         const VbS *s = &VB_PS[i]; VbN t;
-        if (s->side != side || !(s->fl & VBS_FRONT)) continue;
+        if (s->side != side || !(s->fl & VBS_FRONT) || (s->fl & VBS_EDGE)) continue;
         t.x2 = s->x2; t.y2 = s->y2; t.r2 = s->r2; t.cls = s->cls; t.dep = s->dep; t.don = i; t.rot = 0; t.mir = 0; t.da = 0; t.self = 1;
         t.reg = VB_FRONTR + s->cls; vb_s[n++] = t;
     }

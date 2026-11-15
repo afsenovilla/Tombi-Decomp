@@ -2976,10 +2976,12 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
       texels (no stones' greys, no rims' browns).  At the bottom left the completed pink front sphere (28, 248) r 50
       went on beyond the join as a pink wedge in front of the new cream spheres, cut off from the picture's pink by
       the picture's dark brown flank (x 0-15, luminance 40-100, darkest at x 0-3; its pink only from x ~16): the user
-      read it as a stray pink piece where the cream sphere should go on.  Now (`VBS_RIM`) only its rim goes on: the
-      strip's first 4 columns are the picture's edge texels reflected as they are, fading over the next 4 into the
-      cream sphere behind, so the cream sphere reaches the join and the picture's dark flank reads as its contact
-      shade (front rows 195-224: the join step within the picture's own in 100 % of rows, was 76 %).
+      read it as a stray pink piece where the cream sphere should go on.  Now (`VBS_EDGE`) it does not go on at all:
+      the join is its outline and the picture's dark flank its rim.  The new cream sphere behind it (centre (-43,
+      241) r 52 in picture texels, its outline meeting the join at row 211, where the picture's pink outline starts at
+      row 213 of column 0) fills the strip right up to the join, so cream and pink meet on the join from row 213 to
+      the bottom, the line the user marked on a 2x crop (a first version reflected the picture's edge texels into the
+      strip's first 4 columns, fading over the next 4: it read as a dark gap with a vertical fade on the cream).
     Seam metric (`tools/ws_seam.py IMG --pad 53 [--y0 16]`, per row: the step between the picture's last 4 columns
     and the strip's first 4 against the picture's own 90th-percentile step between neighbouring 4-column groups
     in that row; per band: tone, contrast, gradient energy and stripe period of the strip's first columns against
