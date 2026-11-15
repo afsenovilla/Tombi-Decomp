@@ -2982,6 +2982,14 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
       row 213 of column 0) fills the strip right up to the join, so cream and pink meet on the join from row 213 to
       the bottom, the line the user marked on a 2x crop (a first version reflected the picture's edge texels into the
       strip's first 4 columns, fading over the next 4: it read as a dark gap with a vertical fade on the cream).
+      That straight join read as a cut, so (`vb_edge`) the pink sphere's silhouette now goes on into the strip as an
+      outline zone only: the arc of centre (33, 251) r 50 (through the point where the picture's outline meets the
+      join, row 213.9, tangent to it there; 9 columns into the strip at the bottom row), inside it the picture's dark
+      rim columns 0-3 of the same row ping-ponged outwards, up to 14 % darker towards the outline; the outline blended
+      over 1.5 texels; outside it a contact shade on the cream sphere (x 0.72 at the outline, gone after 5 texels), as
+      the picture's own overlaps darken the rear sphere along a front sphere's outline.  Only frame x 39-52, rows
+      226-239 change.  Seam metric, left front rows 195-224: median join step 69.8 -> 16.0 (rows 216-223 now within
+      the picture's own step; the hand-over step is the new silhouette itself).
     Seam metric (`tools/ws_seam.py IMG --pad 53 [--y0 16]`, per row: the step between the picture's last 4 columns
     and the strip's first 4 against the picture's own 90th-percentile step between neighbouring 4-column groups
     in that row; per band: tone, contrast, gradient energy and stripe period of the strip's first columns against

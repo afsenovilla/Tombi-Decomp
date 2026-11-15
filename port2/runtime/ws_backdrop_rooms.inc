@@ -1265,9 +1265,9 @@ typedef struct { short x2, y2, r2, cls, dep, side, fl; } VbS;   /* centre / radi
                                                             outline beyond the join stays its own, round) */
 #define VBS_CAP 8                                        /* completed: its model's tone eased below the lightest of
                                                             its visible texels (a sphere fitted on a short dim rim) */
-#define VBS_EDGE 32                                      /* completed front sphere: not continued in the strip at all;
-                                                            the join is its outline, the picture's dark flank its rim,
-                                                            the new cream spheres behind it reach the join */
+#define VBS_EDGE 32                                      /* completed front sphere: not drawn whole in the strip; the new
+                                                            cream spheres behind it reach the join, then only its
+                                                            outline zone goes on over them (vb_edge) */
 #define VBS_SOFTJ 4                                      /* its contact shade fades out over the strip's first 8
                                                             columns (the picture shows none there) */
 static const VbS VB_PS[] = {
@@ -1876,6 +1876,42 @@ static void vb_front(int side)
     qsort(vb_s, (size_t)n, sizeof vb_s[0], vb_ncmp);
     vb_draw_all(side, n);
 }
+/* a VBS_EDGE front sphere's silhouette in the strip, over what vb_front drew behind it: only its outline zone, on the
+   arc that leaves the picture where its outline meets the join (centre (33, 251) r 50 in picture texels: through
+   (-0.5, 213.9), tangent to the picture's outline there, which runs about 1.15 columns left per row from row 206;
+   near the bottom it curves 9 columns into the strip).  Inside: the picture's dark rim columns 0-3 of the same row,
+   ping-ponged outwards for their grain, a little darker towards the outline (as the picture's rims, darkest at the
+   silhouette); the outline anti-aliased over 1.5 texels; outside it a contact shade on the sphere behind (the cream
+   one), 0.72 at the outline fading out over 5 texels, as the picture's overlaps darken the rear sphere along the
+   front one's outline. */
+#define VB_EDGE_X2 66
+#define VB_EDGE_Y2 502
+#define VB_EDGE_R2 100
+static void vb_edge(int side)
+{
+    int R16 = VB_EDGE_R2 * 8, lo = vb_lo(side);
+    if (side) return;
+    for (int i = 0; i < VB_NPS; i++) {
+        if (VB_PS[i].side != side || !(VB_PS[i].fl & VBS_EDGE)) continue;
+        for (int y = (VB_EDGE_Y2 - VB_EDGE_R2) / 2; y < PH; y++)
+            for (int wx = -1; wx >= lo; wx--) {
+                int dx = (wx * 2 + 1 - VB_EDGE_X2) * 8, dy = (y * 2 + 1 - VB_EDGE_Y2) * 8, d = isqrt_i(dx * dx + dy * dy) - R16;
+                int X = -wx, rr = vb_reg(side, wx, y), sphere = rr >= VB_SPH && rr < VB_BACK, a;
+                Rgb *p = vb_px(side, wx, y), bg, rim;
+                if (!p || d >= 80) continue;
+                bg = *p;
+                if (sphere) bg = scale(bg, 256 - 72 * (80 - (d > 0 ? d : 0)) / 80);   /* (the contact shade) */
+                a = clampi((12 - d) * 256 / 24, 0, 256);                               /* (the outline's coverage) */
+                if (a > 0) {
+                    int k = (X - 1) % 8, col = k < 4 ? k : 7 - k, t = -d;
+                    rim = rgb15(pic[y][col]);
+                    if (t < 64) rim = scale(rim, 256 - 36 * (64 - (t > 0 ? t : 0)) / 64);
+                    bg = mix(bg, rim, a);
+                }
+                if (sphere || a > 0) *p = bg;
+            }
+    }
+}
 
 static void vb_analyse(void)
 {
@@ -1911,6 +1947,7 @@ static void gen_vb(int pad)
         for (int i = 0; i < 5; i++) vb_quilt(side, &VB_BANDS[side][i], 701 + 13 * i);
         vb_canopy(side);
         vb_front(side);
+        vb_edge(side);
         for (int y = 0; y < PH; y++)
             for (int X = 1; X <= pad; X++) {
                 Rgb c = cv[(size_t)y * vb_ow + X - 1];
