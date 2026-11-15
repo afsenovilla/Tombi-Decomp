@@ -1923,24 +1923,10 @@ static void vb_edge(int side)
                 bg = *p;
                 if (sphere) bg = scale(bg, 256 - 72 * (80 - (d > 0 ? d : 0)) / 80);   /* (the contact shade) */
                 a = clampi((12 - d) * 256 / 24, 0, 256);                               /* (the outline's coverage) */
-                if (a > 0) {
-                    int t = -d > 0 ? -d : 0, dot = vb_dot(VB_EDGE_X2, VB_EDGE_Y2, VB_EDGE_R2, wx, y, VB_L), tone, sx = -1, res = 0;
-                    u32 h = hash3(X, y, 907);
-                    tone = dot == -9999 ? l5 : fa + fb * dot / 256;
-                    if (tone < l5) tone = l5;
-                    if (t < 96) { int e = l5 + (lband - l5) * t / 96; if (tone > e) tone = e; }   /* (eased to its darkest pink) */
-                    else if (tone < lband) tone = lband;
-                    for (int j = 0; j < 16 && sx < 0; j++) {                                  /* a pink texel of the row */
-                        int x = 16 + (int)((h + (u32)j * 7) % 16);
-                        if (vb_vis(i, x, y)) sx = x;
-                    }
-                    if (sx >= 0) {
-                        int sdot = vb_dot(VB_EDGE_X2, VB_EDGE_Y2, VB_EDGE_R2, sx, y, VB_L), sl0 = lum(rgb15(pic[y][sx]));
-                        int st = sdot == -9999 ? sl0 : clampi(fa + fb * sdot / 256, l5, 255);
-                        res = clampi(sl0 - st, -16, 16);
-                        bg = mix(bg, vb_shift(&VB_rf[VB_PS[i].cls], rgb15(pic[y][sx]), clampi(tone + res, l5 - 4, 255) - sl0), a);
-                    } else bg = mix(bg, vb_at_lum(&VB_rf[VB_PS[i].cls], tone), a);
-                }
+                if (a > 0) {                                                           /* the user's call: the */
+                    int yy = y < 214 ? 214 : y;                                        /* sphere's tone right at the */
+                    bg = mix(bg, rgb15(pic[yy][(X - 1) % 3]), a);                      /* cut (picture cols 0-2, */
+                }                                                                      /* same row), no gradient */
                 if (sphere || a > 0) *p = bg;
             }
     }

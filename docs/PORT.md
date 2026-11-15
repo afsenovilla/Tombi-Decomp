@@ -3059,6 +3059,8 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   is `tools/subscreen_glyphs.json`, generated with `tools/subscreen_glyphs.py` (also `--atlas`: a PNG of every glyph
   cut from your disc, for inspection) into `runtime/subscreen_glyphs.h`; the texture and each source label are
   recognised by an FNV hash of its rect (any other data is left alone).  "Inventario" was not used: it does not fit the 64-px tab nor the leaf.
+      Inside that arc the fill is now (the user's call, 2026-11-15) simply the sphere's tone right at the cut: picture
+      columns 0-2 of the same row (from row 214 down), no gradient; the outline blend and the contact shade stay.
 
   **Free text in those fonts (2026-11-04).** `--subscreen-labels item=..,event=..,status=..,exit=..,map=..,use=..|..,view=..,sort=..`
   rewrites any of the eight labels (the five tabs, the three leaf buttons; `|` breaks the leaf's two lines) with
