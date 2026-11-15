@@ -748,6 +748,9 @@ static const Room ROOMS[] = {
     { 2, 1, 224, 1, { PIECES_TOP4, { 256, 8, 96, 64, 96, 256, 128 } }, OVER_VILLAGE, gen_vb, 0, 0, v_not_cherry },
     { 11, 2, 224, 0, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 256, 64, 0, 88, 80, 24, 128 } }, gen_cv },   /* the cave with
       the brick tower (the tower's foot and door drawn again over the player) */
+    { 9, 5, 224, 0, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 256, 64, 0, 192, 152, 0, 80 }, { 256, 64, 144, 128, 112, 192, 8 } },
+      gen_st },                                          /* the brick wall with the staircase (the stair drawn again
+                                                            over the player as two quads) */
 };
 #define NROOMS ((int)(sizeof ROOMS / sizeof ROOMS[0]))
 const char *port_ws_backdrop_rooms;                      /* --ws-backdrop-rooms A:S,A:S,... (decimal; "all") */

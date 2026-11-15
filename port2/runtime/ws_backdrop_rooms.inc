@@ -1137,9 +1137,13 @@ static const VbBox *vb_ex = VB_EXCL;                     /* the room's objects (
    returns the row and sets *tol (rows off it that cost nothing), -1 for no target */
 static int (*vb_otgt)(int side, int X, int *tol);
 #define VB_TGTW 200000
+static int (*vb_exf)(int x, int y);                     /* objects that are not boxes (gen_st's stair), or none */
+static int *vb_srcmap;                                   /* where each canvas texel was copied from (y * PW + x), or
+                                                            none: gen_st relights the copies */
 static int vb_excl(int x, int y)
 {
     if (x < 0 || x >= PW || y < 0 || y >= PH) return 1;
+    if (vb_exf && vb_exf(x, y)) return 1;
     for (int i = 0; vb_ex[i].x1; i++)
         if (x >= vb_ex[i].x0 && x < vb_ex[i].x1 && y >= vb_ex[i].y0 && y < vb_ex[i].y1) return 1;
     return 0;
@@ -1424,6 +1428,7 @@ static void vb_quilt(int side, const VbBand *b, int seed)
                     if ((b->st & (VBB_SOFT | VBB_OUTL)) && vb_excl(sx + j, vb_srow(b, y + dy))) continue;
                     pm[y - ytop][j] = 1;
                     if (!(b->st & VBB_FEATHER)) vb_put(side, tx, y, win[y - ytop][j], b->reg);
+                    if (vb_srcmap && vb_in(side, tx, y)) vb_srcmap[(size_t)y * vb_ow + vb_X(side, tx) - 1] = vb_srow(b, y + dy) * PW + sx + j;
                 }
             if (b->st & VBB_FEATHER)                             /* the cuts blended over 5 x 5 texels (blurred bands:
                                                                     a cut between two smooth textures shows as an edge) */
@@ -1442,6 +1447,7 @@ static void vb_quilt(int side, const VbBand *b, int seed)
                         if (!a) continue;
                         if (!vb_get(side, tx, y, &o)) { if (pm[y - ytop][j]) vb_put(side, tx, y, win[y - ytop][j], b->reg); continue; }
                         vb_put(side, tx, y, mix(o, win[y - ytop][j], a * 256 / 25), b->reg);
+                        if (vb_srcmap && a * 2 > 25 && vb_in(side, tx, y)) vb_srcmap[(size_t)y * vb_ow + vb_X(side, tx) - 1] = vb_srow(b, y + dy) * PW + sx + j;
                     }
         }
         nb++; pos += side ? b->B : -b->B;
@@ -2349,5 +2355,183 @@ static void gen_cv(int pad)
                 strip[(size_t)y * 2 * pad + (side ? pad + (X - 1) : pad - X)] = quant(cv[(size_t)y * vb_ow + X - 1]);
     }
     vb_ex = VB_EXCL;
+    canvas_close();
+}
+
+/* ================================================================== AREA09 s5: the brick wall with the staircase
+ * A frontal brick wall lit by four sconces, crossed by a straight staircase from the bottom left to the top right
+ * (rail, balusters, red steps, the marble stringer).  Measured on the picture: the rail's top row is
+ * yr(x) = 203.6 - 55 x / 90 at every column (16-column profile matches along the stair, within a row), the marble from
+ * yr + 35 to yr + 69, the wall in the stair's shadow from yr + 70; one step is (22.5, 13.75) texels, so four steps are
+ * exactly (90, 55) (the shift with the least error against (89 / 91, 54 / 56)).  The strips:
+ *   - the wall: quilted from the user's picture (vb_quilt, 28-row bands made bottom-up, windows of any clean column
+ *     shifted up to 10 rows, the stair (its band and 2 rows round it) and the sconces never copied: vb_exf / ST_EXCL),
+ *     then relit: every copied texel times the light wanted where it goes over the light where it came from (the
+ *     light: the wall's luminance averaged over 17 x 17 texels, stair and sconces left out).  The light wanted: on the
+ *     left, the edge's light per row with the glow of the sconce by the edge (flame at (26, 120)) falling off
+ *     radially, S^2 / (S^2 + r^2), towards the light far from it (the edge's 20th percentile); on the right the wall is
+ *     mostly in the stair's shadow, whose light runs in bands along the stair, so a texel takes the light of the edge
+ *     column where its line parallel to the stair meets it;
+ *   - the stair: the picture's own stair four steps further in ((x + 90, y - 55) on the left, (x - 90, y + 55) on the
+ *     right; eight steps where that leaves the clean stretch), so rail, balusters, steps and stringer go on exactly on
+ *     their lines; its light per row of the stair's cross-section matched at the edge (the stair 90 columns in against
+ *     the stair at the edge);
+ *   - the join: per row, the wall's first 8 columns' mean onto the picture's last 8 (fading by 40) and its first column
+ *     onto the picture's last one (fading over 6). */
+enum { ST_WALL = 1 };
+#define ST_PX 90
+#define ST_PY 55
+static int st_y16(int x) { return 3258 - fdiv(880 * x, ST_PX); }     /* the rail's top row (x 16) at column x */
+static int st_t16(int x, int y) { return y * 16 + 8 - st_y16(x); }   /* rows (x 16) below it */
+static int st_band(int x, int y) { int t = st_t16(x, y); return t >= -16 && t < 72 * 16; }
+static int st_exf(int x, int y) { int t = st_t16(x, y); return t >= -48 && t < 74 * 16; }
+static const VbBox ST_EXCL[] = {                          /* the sconces (three lit, one bare) */
+    { 186, 0, 244, 44 }, { 122, 20, 176, 78 }, { 75, 81, 102, 108 }, { 8, 96, 52, 150 }, { 0, 0, 0, 0 } };
+#define ST_Q (VBB_STRICT | VBB_TIGHT | VBB_FEATHER | VBB_FAR | VBB_EDGEW)
+#define ST_NB 8
+static const VbBand ST_BANDS[8] = {
+    { 196, PH, 184, PH, 0, 320, 16, 6, 0, 0, 10, ST_WALL, 0, 0, 0, ST_Q },
+    { 168, 196, 156, PH, 0, 320, 16, 6, 0, 8, 10, ST_WALL, 0, 0, 0, ST_Q },
+    { 140, 168, 128, 186, 0, 320, 16, 6, 0, 8, 10, ST_WALL, 0, 0, 0, ST_Q },
+    { 112, 140, 100, 158, 0, 320, 16, 6, 0, 8, 10, ST_WALL, 0, 0, 0, ST_Q },
+    { 84, 112, 72, 130, 0, 320, 16, 6, 0, 8, 10, ST_WALL, 0, 0, 0, ST_Q },
+    { 56, 84, 44, 102, 0, 320, 16, 6, 0, 8, 10, ST_WALL, 0, 0, 0, ST_Q },
+    { 28, 56, 16, 74, 0, 320, 16, 6, 0, 8, 10, ST_WALL, 0, 0, 0, ST_Q },
+    { 0, 28, 0, 46, 0, 320, 16, 6, 0, 8, 10, ST_WALL, 0, 0, 0, ST_Q } };
+#define ST_LX 26                                         /* the edge sconce's flame */
+#define ST_LY 120
+#define ST_S2 900                                        /* its glow's radius, squared */
+static short st_lf[PH][PW];                              /* the wall's light (0: no wall texel near) */
+static int st_le[PH], st_amb;                            /* the light at the edge per row (side being made), far light */
+static void st_light(void)
+{
+    static int S[PH + 1][PW + 1], C[PH + 1][PW + 1];
+    for (int y = 0; y < PH; y++)
+        for (int x = 0; x < PW; x++) {
+            int m = !vb_excl(x, y);
+            S[y + 1][x + 1] = S[y][x + 1] + S[y + 1][x] - S[y][x] + (m ? lum(rgb15(pic[y][x])) : 0);
+            C[y + 1][x + 1] = C[y][x + 1] + C[y + 1][x] - C[y][x] + m;
+        }
+    for (int y = 0; y < PH; y++)
+        for (int x = 0; x < PW; x++) {
+            int x0 = x - 8 < 0 ? 0 : x - 8, x1 = x + 9 > PW ? PW : x + 9, y0 = y - 8 < 0 ? 0 : y - 8, y1 = y + 9 > PH ? PH : y + 9;
+            int s = S[y1][x1] - S[y0][x1] - S[y1][x0] + S[y0][x0], c = C[y1][x1] - C[y0][x1] - C[y1][x0] + C[y0][x0];
+            st_lf[y][x] = (short)(c >= 16 ? (s / c > 4 ? s / c : 4) : 0);
+        }
+}
+static void st_edge(int side)                             /* st_le: the light of the 4 edge columns per row, gaps filled */
+{
+    int h[PH], n = 0;
+    for (int y = 0; y < PH; y++) {
+        int s = 0, c = 0;
+        for (int i = 0; i < 4; i++) { int x = side ? PW - 1 - i : i; if (!vb_excl(x, y) && st_lf[y][x]) { s += st_lf[y][x]; c++; } }
+        st_le[y] = c ? s / c : -1;
+        if (c) h[n++] = st_le[y];
+    }
+    for (int y = PH - 2; y >= 0; y--) if (st_le[y] < 0) st_le[y] = st_le[y + 1];   /* (the stair's rows: the light
+                                                            under it, as the strip's texels there take it) */
+    for (int y = 1; y < PH; y++) if (st_le[y] < 0) st_le[y] = st_le[y - 1];
+    for (int i = 1; i < n; i++) for (int j = i; j > 0 && h[j - 1] > h[j]; j--) { int t = h[j]; h[j] = h[j - 1]; h[j - 1] = t; }
+    st_amb = n ? h[n / 5] : 32;
+}
+static int st_want(int side, int X, int y)               /* the light wanted at strip column X, row y */
+{
+    if (side) {                                          /* (along the stair to the edge column) */
+        int ye = y + fdiv(X * ST_PY, ST_PX);
+        return st_le[clampi(ye, 0, PH - 1)];
+    } else {                                             /* (the edge's light, its sconce's glow falling off) */
+        int dx = -X - ST_LX, dy = y - ST_LY, ex = -ST_LX, g = st_le[y] - st_amb;
+        if (g <= 0) return st_le[y];
+        return st_amb + (int)((long long)g * (ST_S2 + ex * ex + dy * dy) / (ST_S2 + dx * dx + dy * dy));
+    }
+}
+static void st_stair(int side)
+{
+    int g[72][3], sm[72][3][2];
+    memset(sm, 0, sizeof sm);
+    for (int i = 0; i < 16; i++)                         /* the light per row of the cross-section: the edge's stair
+                                                            against the stair 90 columns in */
+        for (int y = 0; y < PH; y++) {
+            int x = side ? PW - 1 - i : i, xs = side ? x - ST_PX : x + ST_PX, ys = side ? y + ST_PY : y - ST_PY, t = st_t16(x, y);
+            Rgb a, b;
+            if (!st_band(x, y) || ys < 0 || ys >= PH || t < 0) continue;
+            a = rgb15(pic[y][x]); b = rgb15(pic[ys][xs]); t /= 16;
+            sm[t][0][0] += a.r; sm[t][1][0] += a.g; sm[t][2][0] += a.b; sm[t][0][1] += b.r; sm[t][1][1] += b.g; sm[t][2][1] += b.b;
+        }
+    for (int t = 0; t < 72; t++)
+        for (int c = 0; c < 3; c++) {
+            int a = 0, b = 0;
+            for (int u = t - 3; u <= t + 3; u++) if (u >= 0 && u < 72) { a += sm[u][c][0]; b += sm[u][c][1]; }
+            g[t][c] = a > 0 && b > 0 ? clampi((int)((long long)a * 256 / b), 160, 400) : 256;
+        }
+    for (int X = 1; X <= vb_ow; X++)
+        for (int y = 0; y < PH; y++) {
+            int x = side ? PW - 1 + X : -X, k = 1, xs, ys, t;
+            Rgb c;
+            if (!st_band(x, y)) continue;
+            while ((side ? x - ST_PX * k > 300 : x + ST_PX * k < 8) && k < 8) k++;
+            xs = side ? x - ST_PX * k : x + ST_PX * k; ys = side ? y + ST_PY * k : y - ST_PY * k;
+            if (xs < 0 || xs >= PW || ys < 0 || ys >= PH) continue;
+            c = rgb15(pic[ys][xs]); t = clampi(st_t16(x, y) / 16, 0, 71);
+            c.r = clampi(c.r * g[t][0] / 256, 0, 255); c.g = clampi(c.g * g[t][1] / 256, 0, 255); c.b = clampi(c.b * g[t][2] / 256, 0, 255);
+            cv[(size_t)y * vb_ow + X - 1] = c;
+        }
+}
+static void st_join(int side)                            /* the wall at the join (stair texels left alone) */
+{
+    static int jd[PH][2][3];
+    for (int st = 0; st < 2; st++) {
+        int R = st ? 1 : 4, N = st ? 1 : 8;
+        for (int y = 0; y < PH; y++) {
+            int s[2][3] = { { 0 } }, n[2] = { 0, 0 };
+            for (int yy = y - R; yy <= y + R; yy++) {
+                if (yy < 0 || yy >= PH) continue;
+                for (int i = 0; i < N; i++) {
+                    int x = side ? PW - 1 - i : i, xo = side ? PW + i : -1 - i; Rgb a;
+                    if (vb_excl(x, yy) || st_exf(xo, yy)) continue;
+                    a = cv[(size_t)yy * vb_ow + i]; s[1][0] += a.r; s[1][1] += a.g; s[1][2] += a.b; n[1]++;
+                    a = rgb15(pic[yy][x]); s[0][0] += a.r; s[0][1] += a.g; s[0][2] += a.b; n[0]++;
+                }
+            }
+            for (int c = 0; c < 3; c++) jd[y][st][c] = n[0] && n[1] ? (s[0][c] / n[0] - s[1][c] / n[1]) * (st ? 3 : 4) / 4 : 0;
+        }
+        for (int y = 0; y < PH; y++)
+            for (int X = 1; X <= (st ? 6 : 40); X++) {
+                Rgb *p = &cv[(size_t)y * vb_ow + X - 1]; int w = st ? (7 - X) * 256 / 6 : X <= 8 ? 256 : (40 - X) * 256 / 32;
+                if (st_band(side ? PW - 1 + X : -X, y)) continue;
+                p->r = clampi(p->r + jd[y][st][0] * w / 256, 0, 255); p->g = clampi(p->g + jd[y][st][1] * w / 256, 0, 255);
+                p->b = clampi(p->b + jd[y][st][2] * w / 256, 0, 255);
+            }
+    }
+}
+static void gen_st(int pad)
+{
+    pal_make();
+    vb_ow = pad + 64;
+    if (!canvas_open(vb_ow)) return;
+    vb_srcmap = (int *)malloc(sizeof(int) * (size_t)vb_ow * PH);
+    if (!vb_srcmap) { canvas_close(); return; }
+    vb_ex = ST_EXCL; vb_exf = st_exf;
+    st_light();
+    for (int side = 0; side < 2; side++) {
+        canvas_clear(); cur_side = side;
+        for (int i = 0; i < vb_ow * PH; i++) vb_srcmap[i] = -1;
+        for (int i = 0; i < ST_NB; i++) vb_quilt(side, &ST_BANDS[i], 1301 + 13 * i);
+        st_edge(side);
+        for (int y = 0; y < PH; y++)                     /* relight */
+            for (int X = 1; X <= vb_ow; X++) {
+                int s = vb_srcmap[(size_t)y * vb_ow + X - 1], ls, lt;
+                if (s < 0) continue;
+                ls = st_lf[s / PW][s % PW]; lt = st_want(side, X, y);
+                if (ls > 0) cv[(size_t)y * vb_ow + X - 1] = scale(cv[(size_t)y * vb_ow + X - 1], clampi(lt * 256 / ls, 128, 512));
+            }
+        st_stair(side);
+        st_join(side);
+        for (int y = 0; y < PH; y++)
+            for (int X = 1; X <= pad; X++)
+                strip[(size_t)y * 2 * pad + (side ? pad + (X - 1) : pad - X)] = quant(cv[(size_t)y * vb_ow + X - 1]);
+    }
+    free(vb_srcmap); vb_srcmap = 0;
+    vb_ex = VB_EXCL; vb_exf = 0;
     canvas_close();
 }
