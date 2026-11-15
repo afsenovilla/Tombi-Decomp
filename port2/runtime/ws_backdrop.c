@@ -8,7 +8,7 @@
  * shims/gpu.c calls port_ws_backdrop when it meets the left sprite of the picture while the wide plane is on and fills
  * the strips of the wide copy before the game draws the picture itself, so everything the game draws on top (drums,
  * actors, boxes) stays on top.  Identity without --widescreen and in every other room (the sprite signature and the
- * room are both checked).  The approved rooms are on by default with --widescreen (AREA02 s5 since 2026-11-14, AREA05 s1/s3 since 2026-11-15);
+ * room are both checked).  The approved rooms are on by default with --widescreen (AREA02 s5 since 2026-11-14, AREA05 s1/s3 and AREA02 s1 since 2026-11-15);
  * `--ws-backdrop off` disables them, `--ws-backdrop on` takes every room of the table (the previews too),
  * `--ws-backdrop-rooms A:S,...` exactly those rooms, `--ws-backdrop mirror` AREA02 s5's first preview (the picture
  * mirrored at its edge); also PORT_WS_BACKDROP=1 (approved) / 2 (mirror) / 3 (every room) (not in the wasm2c build,
@@ -744,7 +744,7 @@ static const Room ROOMS[] = {
     { 5, 3, 224, 1, { PIECES_TOP4, { 256, 0, 0, 64, 96, 256, 128 } }, OVER_A5, gen_a5 },
     { 19, 1, 224, 0, { PIECES_TOP4, { 256, 8, 96, 64, 96, 256, 128 } }, OVER_VILLAGE, gen_village, 2, 1, v_cherry },   /* Dwarf
       Village in blossom: AREA19 s1 runs as area 2 s1 (GAME.area), told apart from AREA02 s1 by its picture */
-    { 2, 1, 224, 0, { PIECES_TOP4, { 256, 8, 96, 64, 96, 256, 128 } }, OVER_VILLAGE, gen_vb, 0, 0, v_not_cherry },
+    { 2, 1, 224, 1, { PIECES_TOP4, { 256, 8, 96, 64, 96, 256, 128 } }, OVER_VILLAGE, gen_vb, 0, 0, v_not_cherry },
 };
 #define NROOMS ((int)(sizeof ROOMS / sizeof ROOMS[0]))
 const char *port_ws_backdrop_rooms;                      /* --ws-backdrop-rooms A:S,A:S,... (decimal; "all") */
