@@ -974,27 +974,9 @@ static void gen_a5(int pad)
 }
 
 /* ================================================================== AREA19 s1 / AREA02 s1: the Dwarf Village
- * The first version, rejected by the user ("garbage"); AREA19 s1 (the blossom picture) still runs it, AREA02 s1 has its
- * own generator since (gen_vb below), so the balloon branches here are no longer used.  To be redone for AREA19 the
- * way gen_vb is (the fence / ledge / bank / ground bands are the same layout).
- * Two pictures with one layout (the same pieces), a frontal scene: bands by row, measured on the pictures:
- *   0-~100  the canopy: cherry blossom (AREA19: dark pink with light flower clusters) or the balloon trees (AREA02:
- *           big soft spheres, cream / pink / violet / blue, lit from the upper left);
- *   ~95-112 behind the canopy's lower edge: grey rock (AREA19) / the hazy wood (AREA02);
- *   112-138 the fence: posts 4-6 columns wide, tops at rows 112-122, two rails (rows 124-127, 130-134);
- *   138-150 the ledge: grass (AREA19) / golden leaves (AREA02), 150-155 its dark lip;
- *   155-182 the palisade under it: stakes 4 columns wide, in the ledge's shade at the top;
- *   182-~205 the ground (grass / leaves); ~198-223 the front: blossom mounds (AREA19) / big spheres (AREA02), as the
- *           picture's own front quads.
- * The huts, the dwarves, the jukebox, the bench and the barrel are objects of the picture and are not continued. */
-enum { V_CANOPY = 1, V_BACK, V_FENCE, V_RAIL, V_LEDGE, V_LIP, V_PALI, V_GROUND, V_FRONT };
-#define V_FENCE0 112
-#define V_LEDGE0 138
-#define V_LIP0 150
-#define V_PALI0 155
-#define V_GROUND0 182
-static Ramp V_rcan, V_rback, V_rfence, V_rledge, V_rpali, V_rground, V_rfront, V_rball[4];
-static int V_nball;
+ * Two pictures with one layout (the same pieces, huts, fence, ledge, bank, ladder and jukebox): AREA02 s1 with the
+ * balloon trees (gen_vb below) and AREA19 s1 in cherry blossom (gen_cb, after gen_vb's machinery).  AREA19 s1 runs as
+ * area 2 s1, so the table tells them apart by the picture: */
 static int v_cherry(void)                                /* the canopy mostly pink: the blossom (AREA19), else balloons */
 {
     int n = 0;
@@ -1002,214 +984,6 @@ static int v_cherry(void)                                /* the canopy mostly pi
     return n * 10 > 44 * 160 * 6;
 }
 static int v_not_cherry(void) { return !v_cherry(); }
-static int v_balloons(void) { return !v_cherry(); }
-static int v_sat(u16 c) { Rgb k = rgb15(c); int mx = k.r > k.g ? (k.r > k.b ? k.r : k.b) : (k.g > k.b ? k.g : k.b), mn = k.r < k.g ? (k.r < k.b ? k.r : k.b) : (k.g < k.b ? k.g : k.b); return mx - mn; }
-static int v_pinkish(u16 c) { Rgb k = rgb15(c); return k.r > k.g + 20 && k.b > k.g + 4; }
-static int v_grey(u16 c) { return v_sat(c) < 48 && lum(rgb15(c)) < 150; }
-static int v_wood(u16 c) { Rgb k = rgb15(c); return k.r > k.b + 40 && k.g > k.b + 16 && lum(k) > 40; }
-static int v_notdark(u16 c) { return lum(rgb15(c)) > 36; }
-static int v_cream(u16 c) { Rgb k = rgb15(c); return v_sat(c) < 40 && lum(k) > 110; }
-static int v_blue(u16 c) { Rgb k = rgb15(c); return k.b > k.r + 12 && k.b > k.g + 24; }
-static int v_violet(u16 c) { Rgb k = rgb15(c); return k.b >= k.r - 8 && k.b <= k.r + 12 && k.r > k.g + 24; }
-static int v_pink(u16 c) { Rgb k = rgb15(c); return k.r > k.b + 12 && k.b > k.g + 12; }
-static int v_jukebox(int x, int y) { return x >= 258 && x < 317 && y >= 112 && y < 192; }   /* (and its lever) */
-
-static int v_picreg(int side, int x, int y)
-{
-    u16 c = pic[y][x]; (void)side;
-    if (v_jukebox(x, y)) return 0;
-    if (y < 88) return V_CANOPY;
-    if (y < V_FENCE0) return y >= 92 && v_grey(c) ? V_BACK : 0;
-    if (y < V_LEDGE0) return v_wood(c) ? V_FENCE : 0;
-    if (y < V_LIP0) return y > 142 ? V_LEDGE : 0;
-    if (y < V_PALI0) return 0;
-    if (y < V_GROUND0 - 2) return x < 34 || x > 290 ? V_PALI : 0;    /* (the barrel) */
-    if (y < 196) return x < 30 || x > 290 ? V_GROUND : 0;
-    if (y >= 214) return V_FRONT;
-    return 0;
-}
-
-static void v_analyse(void)
-{
-    samp_edges(0, 48, 0, 88, v_balloons() ? 0 : v_pinkish); ramp_make(&V_rcan);
-    samp_box(0, 48, 95, V_FENCE0, v_grey); samp_box(PW - 40, PW, 100, V_FENCE0, v_grey); ramp_make(&V_rback);
-    if (!V_rback.ok) { samp_edges(0, 48, 95, V_FENCE0, 0); ramp_make(&V_rback); }
-    samp_box(0, 48, V_FENCE0, V_LEDGE0, v_wood); samp_box(PW - 3, PW, V_FENCE0, V_LEDGE0, v_wood); ramp_make(&V_rfence);
-    samp_box(0, 48, 142, V_LIP0, v_notdark); samp_box(PW - 3, PW, 142, V_LIP0, v_notdark); ramp_make(&V_rledge);
-    samp_box(0, 30, V_PALI0, V_GROUND0 - 2, 0); samp_box(PW - 3, PW, V_PALI0, V_GROUND0 - 2, 0); ramp_make(&V_rpali);
-    samp_box(0, 28, V_GROUND0 + 2, 196, 0); samp_box(PW - 3, PW, V_GROUND0 + 2, 194, 0); ramp_make(&V_rground);
-    samp_edges(0, 48, 214, PH, 0); ramp_make(&V_rfront);
-    {   static const Pred cls[4] = { v_cream, v_pink, v_violet, v_blue };   /* the balloons' colours, as the picture has them */
-        V_nball = 0;
-        for (int i = 0; i < 4; i++) {
-            samp_box(0, PW, 0, 88, cls[i]); samp_box(0, 60, 196, PH, cls[i]); samp_box(PW - 60, PW, 196, PH, cls[i]);
-            if (nsamp >= 600) ramp_make(&V_rball[V_nball++]); else nsamp = 0;
-        }
-    }
-}
-
-/* a soft sphere (a balloon tree's crown): lit from the upper left and the front, a darker rim, a cottony grain */
-static void sphere(int cx16, int cy16, int r16, const Ramp *rp, int base, int r, int seed)
-{
-    int R = r16 / 16 + 1, X0 = cx16 / 16, Y0 = cy16 / 16;
-    for (int py = Y0 - R; py <= Y0 + R; py++)
-        for (int X = X0 - R; X <= X0 + R; X++) {
-            int dx = X * 16 + 8 - cx16, dy = py * 16 + 8 - cy16, q = r16 * r16 - dx * dx - dy * dy, dz, dot, t;
-            if (q <= 0 || X < 1 || X > cw || py < 0 || py >= PH) continue;
-            dz = isqrt_i(q);
-            if (!cur_side) dx = -dx;                                                 /* X grows leftwards on the left strip */
-            dot = (-dx * 120 - dy * 150 + dz * 170) / r16;                           /* n . light, -256..256 */
-            t = base + dot * 3 / 4 - 40 + noise(X * 16 + seed, py * 16, 40, 40, seed) / 6 - 21;
-            if (dz < r16 / 5) t -= 30;                                               /* the soft rim */
-            if (q < r16 * 24) { Rgb *p = px_at(X, py); putr(X, py, mix(*p, ramp(rp, t), 128), r); }   /* its edge blended */
-            else putr(X, py, ramp(rp, t), r);
-        }
-}
-
-static void v_back(int side)
-{
-    for (int X = 1; X <= cw; X++) {
-        int wx = wx_of(side, X);
-        for (int y = 0; y < V_FENCE0 + 30; y++) {
-            int t = 110 + noise(wx, y, 17, 23, 501) / 3 - 42 + (y - 100) / 2;
-            putr(X, y, ramp(&V_rback, t), V_BACK);
-        }
-    }
-}
-
-/* the blossom's texture: flower clusters, small fat stars (radius 3) on a jittered 8 x 7 grid, more of them and
-   lighter on the lit masses (mass 0..255) */
-static int v_flower(int wx, int y, int mass, int seed)
-{
-    int best = 0;
-    for (int gy = fdiv(y, 7) - 1; gy <= fdiv(y, 7) + 1; gy++)
-        for (int gx = fdiv(wx, 8) - 1; gx <= fdiv(wx, 8) + 1; gx++) {
-            u32 h = hash3(gx, gy, seed); int fx = gx * 8 + (int)(h & 7), fy = gy * 7 + (int)(h >> 3) % 7, dx = wx - fx, dy = y - fy, t;
-            dx = dx < 0 ? -dx : dx; dy = dy < 0 ? -dy : dy;
-            if ((int)(h >> 8 & 255) > mass + 20 || dx + dy > 3 || (dx == 0 && dy == 3) || (dy == 0 && dx == 3)) continue;
-            t = 16 + mass / 5 - (dx + dy) * 3;
-            if (dx + dy == 3 && wx >= fx && y >= fy) t = 2;                      /* its rim away from the light */
-            if (t > best) best = t;
-        }
-    return best;
-}
-static void v_canopy(int side)
-{
-    int x0 = side ? PW - 30 : -cw - 40, x1 = side ? PW + cw + 40 : 30;
-    if (!v_balloons()) {
-        /* the blossom, soft as the picture's: light masses and darker hollows (two scales of value noise), small light
-           flower clusters over them, brightest on the lit masses; a ragged, darker lower edge (rows 92-106) */
-        for (int X = 1; X <= cw; X++) {
-            int wx = wx_of(side, X), lo = 96 + noise(wx, 0, 13, 1, 511) * 12 / 256 - 2;
-            for (int y = 0; y < lo; y++) {
-                int mass = noise(wx, y, 38, 28, 513), t = 20 + mass * 3 / 4 + noise(wx, y, 12, 9, 515) / 4;
-                t += v_flower(wx, y, mass, 517);
-                if (y > lo - 7) t -= (y - lo + 7) * 7;                                  /* the shaded underside */
-                putr(X, y, ramp(&V_rcan, t), V_CANOPY);
-            }
-        }
-    } else {
-        /* the balloon trees: spheres of radius 13-25, the far (small, darker) ones first, the picture's own colours */
-        for (int pass = 0; pass < 2; pass++)
-            for (int k = fdiv(x0, 30) - 1; k * 30 < x1 + 30; k++)
-                for (int row = 0; row < 3; row++) {
-                    u32 h = hash3(k, row * 2 + pass, 531);
-                    int cx = k * 30 + (int)(h % 24) - 12 + (pass ? 15 : 0), cy = row * 30 + (int)(h >> 5) % 16 - 4 + (pass ? 10 : 0);
-                    int rad = pass ? 18 + (int)(h >> 10 & 7) : 13 + (int)(h >> 10 & 7), X = side ? cx - (PW - 1) : -cx;
-                    if (row == 2 && pass == 0 && (h >> 14 & 1)) continue;
-                    sphere(X * 16 + 8, cy * 16 + 8, rad * 16, &V_rball[(h >> 16) % (u32)V_nball], pass ? 150 : 110, V_CANOPY, 533 + k);
-                }
-    }
-}
-
-static void v_fence(int side)
-{
-    int x0 = side ? PW - 10 : -cw - 10, x1 = side ? PW + cw + 10 : 10;
-    for (int k = fdiv(x0, 8) - 1; k * 8 < x1; k++) {                      /* the posts, one every ~8 columns */
-        u32 h = hash3(k, 0, 541); int px = k * 8 + (int)(h % 3), w = 5 + (int)(h >> 4) % 3, top = V_FENCE0 + (int)(h >> 8) % 11, base = (int)(h >> 12 & 63) - 32;
-        for (int lx = px; lx < px + w; lx++) {
-            int X = side ? lx - (PW - 1) : -lx, u = lx - px;
-            for (int y = top; y < V_LEDGE0 + 2; y++) {
-                int t = 130 + base + noise(lx * 8, y, 9, 7, 543) / 5 - 25;
-                if (u == 0) t += 30; else if (u == w - 1) t -= 60;                    /* lit from the left */
-                if (y == top) t += 25;
-                putr(X, y, ramp(&V_rfence, t), V_FENCE);
-            }
-        }
-    }
-    for (int X = 1; X <= cw; X++) {                                          /* the rails */
-        int wx = wx_of(side, X);
-        for (int y = 124; y < 134; y++) {
-            int t;
-            if (y >= 128 && y < 130) continue;
-            t = 85 + noise(wx, y * 4, 21, 9, 547) / 5 - 25 + (y == 124 || y == 130 ? 25 : y == 127 || y == 133 ? -35 : 0);
-            putr(X, y, ramp(&V_rfence, t), V_RAIL);
-        }
-    }
-}
-
-static void v_ground(int side)
-{
-    for (int X = 1; X <= cw; X++) {
-        int wx = wx_of(side, X), top = V_LEDGE0 + (noise(wx, 0, 5, 1, 551) >> 7) - 1;
-        for (int y = top; y < PH; y++) {
-            int t, r; Rgb c;
-            if (y < V_LIP0) { t = 140 + noise(wx, y, 3, 2, 553) / 2 - 64 + (int)(hash3(wx, y, 554) & 63) - 32 - (y >= V_LIP0 - 3 ? 60 : 0) + (y == top ? 30 : 0); c = ramp(&V_rledge, t); r = V_LEDGE; }
-            else if (y < V_PALI0) { c = scale(ramp(&V_rpali, 10 + noise(wx, y, 4, 2, 555) / 8), 200); r = V_LIP; }
-            else if (y < V_GROUND0) {                                         /* stakes 4 columns wide */
-                int n = fdiv(wx, 4), u = wx - n * 4; u32 h = hash3(n, 0, 557);
-                t = 140 + (int)(h & 127) - 64 + noise(wx * 6, y, 13, 9, 559) / 2 - 64 + (y - V_PALI0) * 3 - 40;
-                if (u == 0) t -= 45; else if (u == 1) t += 15;
-                if (y >= V_GROUND0 - 2) t -= 50;
-                c = ramp(&V_rpali, t); r = V_PALI;
-            } else {
-                t = 130 + noise(wx, y, 4, 2, 561) / 2 - 64 + noise(wx, y, 23, 7, 563) / 3 - 42 + (int)(hash3(wx, y, 565) & 63) - 32;
-                if (y < V_GROUND0 + 2) t -= 40;
-                c = ramp(&V_rground, t); r = V_GROUND;
-            }
-            putr(X, y, c, r);
-        }
-    }
-}
-
-static void v_front(int side)
-{
-    int x0 = side ? PW - 30 : -cw - 40, x1 = side ? PW + cw + 40 : 30;
-    if (!v_balloons()) {
-        /* blossom mounds: a wavy top (rows 195-210, rounder bumps every ~20 columns), the blossom texture inside, the
-           mound's lower part in its own shade */
-        for (int X = 1; X <= cw; X++) {
-            int wx = wx_of(side, X), k = fdiv(wx, 20), u = wx - k * 20, top;
-            u32 h = hash3(k, 0, 571);
-            top = 195 + (int)(h % 8) + (u - 10) * (u - 10) / 24 + noise(wx, 0, 5, 1, 573) / 50;
-            for (int y = top; y < PH; y++) {
-                int mass = noise(wx, y, 22, 16, 575), t = 70 + mass / 2 + v_flower(wx, y, mass + 40, 577) - (y - top) * 2;
-                if (y == top) t += 20;
-                putr(X, y, ramp(&V_rfront, t), V_FRONT);
-            }
-        }
-    } else {
-        for (int k = fdiv(x0, 34) - 1; k * 34 < x1; k++) {                   /* big spheres, half under the frame */
-            u32 h = hash3(k, 0, 581); int cx = k * 34 + (int)(h % 14) - 7, cy = 228 + (int)(h >> 5) % 10, rad = 22 + (int)(h >> 10 & 7);
-            int X = side ? cx - (PW - 1) : -cx;
-            sphere(X * 16 + 8, cy * 16 + 8, rad * 16, &V_rball[(h >> 16) % (u32)V_nball], 150, V_FRONT, 583 + k);
-        }
-    }
-}
-
-static void gen_village(int pad)
-{
-    pal_make(); v_analyse();
-    if (!V_rcan.ok || !V_rback.ok || !V_rfence.ok || !V_rledge.ok || !V_rpali.ok || !V_rground.ok || !V_rfront.ok
-        || (v_balloons() && !V_nball) || !canvas_open(pad)) return;
-    for (int side = 0; side < 2; side++) {
-        canvas_clear(); cur_side = side;
-        v_back(side); v_canopy(side); v_fence(side); v_ground(side); v_front(side);
-        balance_regions(side, v_picreg, 1 << V_FENCE | 1 << V_RAIL | 1 << V_LEDGE | 1 << V_PALI | 1 << V_GROUND);
-        emit(side);
-    }
-    canvas_close();
-}
 
 /* ================================================================== AREA02 s1: the Dwarf Village with the balloon trees
  * Third version (2026-11-16), after the user's review of the second: the strips are now made from the user's own
@@ -1304,13 +1078,19 @@ typedef struct { short x0, y0, x1, y1; } VbBox;          /* [x0, x1) x [y0, y1) 
 static const VbBox VB_EXCL[] = {
     { 44, 40, 190, 143 }, { 6, 138, 53, 144 }, { 138, 126, 162, 150 }, { 34, 164, 60, 192 }, { 100, 181, 216, 196 },
     { 226, 118, 254, 142 }, { 216, 133, 262, 188 }, { 252, 120, 268, 190 }, { 262, 108, 316, 196 }, { 0, 0, 0, 0 } };
-typedef struct { short y0, y1, ry0, ry1, sx0, sx1, B, OV, OT, OB, dy, reg, per, up, mr; } VbBand;
+typedef struct { short y0, y1, ry0, ry1, sx0, sx1, B, OV, OT, OB, dy, reg, per, up, mr, st; } VbBand;
 /* rows [y0, y1) of the strip from the picture's rows [ry0, ry1) (others reflected into them), columns [sx0, sx1);
    blocks of B columns, OV of overlap, OT / OB rows of overlap with the band above / below, windows shifted up to dy rows, per: look
    for a horizontal period, up: rows above ry0 reflected into the first up rows only (the trunks: straight on up; -1:
    the row ry0 repeated), mr:
    the first mr columns the picture's last columns repeated with their own period (the quilt's first block then cut
-   into them) */
+   into them), st: VBB_STRICT, a window whose rows (shifted) leave [ry0, ry1) is not taken (no rows reflected);
+   VBB_TIGHT, the first block is the best match of the picture's columns at the edge (not one within 1/8 of it);
+   VBB_SOFT below */
+#define VBB_STRICT 1
+#define VBB_TIGHT 2
+#define VBB_SOFT 4                                       /* objects in the overlap rows (OT / OB) do not rule a window
+                                                            out: those texels are neither compared nor pasted */
 static const VbBand VB_BANDS[2][5] = {          /* (in the order they are made: the fence, then the back above it) */
     { { 108, 138, 108, 138, 0, 44, 9, 4, 0, 0, 0, VB_FENCE, 1, 0 },
       { 0, 108, 90, 110, 0, 44, 16, 6, 0, 6, 3, VB_BACK, 0, 6 },
@@ -1338,11 +1118,12 @@ static int vb_class(Rgb k)                               /* cream 0, pink / lila
     if (mx - mn < 40 && lum(k) > 70 && k.r >= k.b) return 0;
     return -1;
 }
+static const VbBox *vb_ex = VB_EXCL;                     /* the room's objects (gen_cb sets its own) */
 static int vb_excl(int x, int y)
 {
     if (x < 0 || x >= PW || y < 0 || y >= PH) return 1;
-    for (int i = 0; VB_EXCL[i].x1; i++)
-        if (x >= VB_EXCL[i].x0 && x < VB_EXCL[i].x1 && y >= VB_EXCL[i].y0 && y < VB_EXCL[i].y1) return 1;
+    for (int i = 0; vb_ex[i].x1; i++)
+        if (x >= vb_ex[i].x0 && x < vb_ex[i].x1 && y >= vb_ex[i].y0 && y < vb_ex[i].y1) return 1;
     return 0;
 }
 
@@ -1432,9 +1213,9 @@ static void vb_quilt(int side, const VbBand *b, int seed)
 {
     int W = b->B + b->OV, ytop = b->y0 - b->OT, ybot = b->y1 + b->OB, H = ybot - ytop, per = b->per ? vb_period(side, b) : 0;
     int pos = side ? PW : -1, nb = 0, used[3] = { -999, -999, -999 }, nd = 2 * b->dy + 1, ncand = (b->sx1 - b->sx0 - W + 1) * nd;
-    static int err[320 * 9], em[VB_MAXH][VB_MAXW], vcut[VB_MAXH], tcut[VB_MAXW], bcut[VB_MAXW];
+    static int err[320 * 32], em[VB_MAXH][VB_MAXW], vcut[VB_MAXH], tcut[VB_MAXW], bcut[VB_MAXW];
     static Rgb win[VB_MAXH][VB_MAXW];
-    if (H > VB_MAXH || W > VB_MAXW || ncand <= 0 || ncand > 320 * 9) return;
+    if (H > VB_MAXH || W > VB_MAXW || ncand <= 0 || ncand > 320 * 32) return;
     if (b->mr > 0) {                                     /* the trunk cut by the edge goes on: the picture's last k
                                                             columns repeated, k (mr/2+1 .. 2 mr) the shift at which
                                                             its last 3 columns best match 3 earlier ones (the stripes'
@@ -1456,10 +1237,14 @@ static void vb_quilt(int side, const VbBand *b, int seed)
     }
     while (side ? pos < vb_hi(side) : pos >= vb_lo(side)) {
         int t0 = side ? pos - b->OV : pos - b->B + 1;             /* the window's first picture column (target) */
-        int first = nb == 0 && !b->mr, mn = 1 << 30, pick = -1, nc = 0, k;
+        int first = nb == 0 && !b->mr, mn = 1 << 30, pick = -1, nc = 0, k, tol;
         for (int c = 0; c < ncand; c++) {
             int sx = b->sx0 + c / nd, dy = c % nd - b->dy, ok = 1, n = 0; long long e = 0;
-            for (int y = ytop; y < ybot && ok; y++) for (int j = 0; j < W; j++) if (vb_excl(sx + j, vb_srow(b, y + dy))) { ok = 0; break; }
+            if ((b->st & VBB_STRICT) && (ytop + dy < b->ry0 || ybot + dy > b->ry1)) ok = 0;
+            for (int y = ytop; y < ybot && ok; y++) {
+                if ((b->st & VBB_SOFT) && (y < b->y0 || y >= b->y1)) continue;
+                for (int j = 0; j < W; j++) if (vb_excl(sx + j, vb_srow(b, y + dy))) { ok = 0; break; }
+            }
             if (!ok) { err[c] = -1; continue; }
             for (int y = ytop; y < ybot; y++)
                 for (int j = 0; j < W; j++) {
@@ -1467,6 +1252,7 @@ static void vb_quilt(int side, const VbBand *b, int seed)
                     if (!ov && y >= b->y0 && y < b->y1) continue;
                     if (first && ov && (y < b->ry0 || y >= b->ry1)) continue;   /* (the picture's canopy above the back) */
                     if (!vb_get(side, t0 + j, y, &o)) continue;
+                    if ((b->st & VBB_SOFT) && vb_excl(sx + j, vb_srow(b, y + dy))) continue;
                     e += vb_d2(o, rgb15(pic[vb_srow(b, y + dy)][sx + j])); n++;
                 }
             e = n ? e * 64 / n : 0;
@@ -1482,9 +1268,10 @@ static void vb_quilt(int side, const VbBand *b, int seed)
             if (err[c] < mn) mn = err[c];
         }
         if (mn == 1 << 30) return;
-        for (int c = 0; c < ncand; c++) if (err[c] >= 0 && err[c] <= mn + mn / 8) nc++;
+        tol = first && (b->st & VBB_TIGHT) ? 0 : mn / 8;
+        for (int c = 0; c < ncand; c++) if (err[c] >= 0 && err[c] <= mn + tol) nc++;
         k = (int)(hash3(side * 64 + b->reg, nb, seed) % (u32)nc);
-        for (int c = 0; c < ncand && pick < 0; c++) if (err[c] >= 0 && err[c] <= mn + mn / 8 && k-- == 0) pick = c;
+        for (int c = 0; c < ncand && pick < 0; c++) if (err[c] >= 0 && err[c] <= mn + tol && k-- == 0) pick = c;
         {   int sx = b->sx0 + pick / nd, dy = pick % nd - b->dy, j0 = side ? 0 : b->B;
             for (int y = 0; y < H; y++) for (int j = 0; j < W; j++) win[y][j] = rgb15(pic[vb_srow(b, ytop + y + dy)][sx + j]);
             used[nb % 3] = sx;
@@ -1514,6 +1301,7 @@ static void vb_quilt(int side, const VbBand *b, int seed)
                     if (tx >= 0 && tx < PW) continue;                     /* never the picture */
                     if (y >= b->y0 && y < b->y1 && (side ? j <= vc : j >= vc)) continue;   /* the old block's side of the cut */
                     if (y < tcut[j] || y >= bcut[j]) continue;
+                    if ((b->st & VBB_SOFT) && vb_excl(sx + j, vb_srow(b, y + dy))) continue;
                     vb_put(side, tx, y, win[y - ytop][j], b->reg);
                 }
         }
@@ -1973,5 +1761,104 @@ static void gen_vb(int pad)
                 strip[(size_t)y * 2 * pad + (side ? pad + (X - 1) : pad - X)] = quant(c);
             }
     }
+    canvas_close();
+}
+
+/* ================================================================== AREA19 s1: the Dwarf Village in cherry blossom
+ * The same layout as AREA02 s1 (the same huts, fence, ledge, straw bank, ladder and jukebox), with the canopy a pink
+ * cherry-blossom mass over a grey rock band, a green ledge and green ground, and a front row of blurred blossom bushes
+ * cut by the frame's bottom.  Everything is a texture here, so every band is quilted from the user's own picture at
+ * run time with gen_vb's vb_quilt (blocks of the picture's texels on the same rows, chosen by the error of their
+ * overlap with the picture's columns at the edge and with the block before, pasted along minimum-error cuts; nothing
+ * mirrored, objects never copied):
+ *   - the fence first (as AREA02 s1: left x 0-43 rows 108-137, right x 186-255);
+ *   - the canopy's lower part with its fringe and the grey rocks under it (rows 60-107; left from x 0-43, right from
+ *     x 190-319), cut into the fence's top rows; then its upper part (rows 0-59, from x 0-43 and 192-319, the hut and
+ *     its chimney left out), cut into the lower part: the windows keep their rows (up to 3 rows of shift), so the
+ *     blossom's vertical structure (light flower clusters above, darker and greyer low, the fringe's brown rim on the
+ *     rocks at rows ~85-105) goes on as the picture has it next to each edge;
+ *   - the green ledge (rows 137/138-155 from rows 143-155: the log on the left, x 11-47 rows 139-142, left out), the
+ *     straw bank (156-180), the ground (181-189);
+ *   - the front blossom: its inside (rows 206-223, any column of the picture's front but the grass gap at x 204-231)
+ *     and then its top (rows 186-205, cut into the ground above and the inside below): windows of the picture's
+ *     front with up to 10 rows of shift (only rows of the picture, none reflected), so the scalloped outline of the
+ *     bushes against the grass is the picture's own, its blur too, and at the join it goes on at the height the edge
+ *     has it (the right edge's bush is high, rows ~189, the left one's low, rows ~200).
+ * Objects never copied (CB_EXCL): the hut and its chimney and pole, the log, the bucket, the barrel, the stones and
+ * their track, the stone pile, the ladder, the jukebox and its lever, and the grass gap between the front bushes. */
+static const VbBox CB_EXCL[] = {
+    { 44, 40, 192, 144 }, { 70, 12, 110, 52 }, { 2, 138, 53, 145 }, { 138, 126, 162, 150 }, { 32, 164, 60, 192 },
+    { 98, 181, 218, 198 }, { 226, 118, 258, 142 }, { 214, 133, 262, 190 }, { 252, 120, 268, 191 }, { 284, 115, 302, 118 }, { 276, 118, 310, 124 },
+    { 262, 124, 317, 191 }, { 252, 182, 316, 202 }, { 204, 196, 232, 224 }, { 0, 0, 0, 0 } };
+#define CB_S (VBB_STRICT | VBB_TIGHT)
+static const VbBand CB_BANDS[2][9] = {
+    { { 108, 138, 108, 138, 0, 44, 9, 5, 0, 0, 0, VB_FENCE, 1, 0, 9, VBB_TIGHT },
+      { 60, 108, 50, 124, 0, 44, 12, 6, 0, 6, 8, VB_BACK, 0, 0, 0, CB_S | VBB_SOFT },
+      { 0, 60, 0, 70, 0, 320, 16, 8, 0, 6, 3, VB_BACK, 0, 0, 0, CB_S },
+      { 145, 156, 145, 156, 0, 216, 16, 5, 0, 0, 0, VB_LEDGE, 0, 0, 0, VBB_TIGHT },
+      { 138, 145, 136, 148, 192, 214, 8, 4, 2, 3, 0, VB_LEDGE, 0, 0, 0, CB_S },
+      { 156, 181, 156, 181, 0, 216, 16, 5, 4, 0, 0, VB_BANK, 1, 0, 0, VBB_TIGHT },
+      { 181, 190, 181, 197, 0, 100, 16, 5, 4, 0, 1, VB_GROUND, 0, 0, 0, VBB_TIGHT },
+      { 206, PH, 206, PH, 0, 320, 16, 5, 0, 0, 0, VB_FRONTR, 0, 0, 0, CB_S },
+      { 186, 206, 182, PH, 0, 320, 16, 6, 3, 6, 10, VB_FRONTR, 0, 0, 0, CB_S } },
+    { { 108, 139, 108, 139, 186, 256, 12, 5, 0, 0, 0, VB_FENCE, 1, 0, 0, VBB_TIGHT },
+      { 60, 108, 50, 124, 190, 320, 16, 8, 0, 6, 8, VB_BACK, 0, 0, 0, CB_S | VBB_SOFT },
+      { 0, 60, 0, 70, 0, 320, 16, 8, 0, 6, 3, VB_BACK, 0, 0, 0, CB_S },
+      { 145, 156, 145, 156, 150, 216, 16, 5, 0, 0, 0, VB_LEDGE, 0, 0, 0, VBB_TIGHT },
+      { 139, 145, 136, 148, 192, 214, 8, 4, 2, 3, 0, VB_LEDGE, 0, 0, 0, CB_S },
+      { 156, 181, 156, 181, 150, 216, 16, 5, 4, 0, 0, VB_BANK, 1, 0, 0, VBB_TIGHT },
+      { 181, 190, 181, 197, 0, 262, 16, 5, 4, 0, 1, VB_GROUND, 0, 0, 0, VBB_TIGHT },
+      { 206, PH, 206, PH, 0, 320, 16, 5, 0, 0, 0, VB_FRONTR, 0, 0, 0, CB_S },
+      { 186, 206, 182, PH, 0, 320, 16, 6, 3, 6, 10, VB_FRONTR, 0, 0, 0, CB_S } } };
+/* the tone at the join, per row (rows [y0, y1), means over rows y +- 4 of them): the strip's columns 1-8 moved onto
+   the picture's columns 2-9 from the edge (full for 16 columns, gone at 64), and its first column onto the picture's
+   last one (easing out over 8 columns), so the join is neither a tone step nor a line (the picture's last columns are
+   often a little darker: the strip goes on from them and lightens as the picture does inwards) */
+static void cb_tone(int side, int y0, int y1)
+{
+    static int d[PH][2][3];
+    for (int y = y0; y < y1; y++) {
+        int s[4][3] = { { 0 } }, n[4] = { 0, 0, 0, 0 };     /* picture col 0, cols 2-9, strip col 1, cols 1-8 */
+        for (int yy = y - 4; yy <= y + 4; yy++) {
+            if (yy < y0 || yy >= y1) continue;
+            for (int i = 0; i < 10; i++) {
+                int x = side ? PW - 1 - i : i, g = i == 0 ? 0 : i == 1 ? -1 : 1; Rgb k;
+                if (g < 0 || vb_excl(x, yy)) continue;
+                k = rgb15(pic[yy][x]); s[g][0] += k.r; s[g][1] += k.g; s[g][2] += k.b; n[g]++;
+            }
+            for (int X = 1; X <= 8; X++) {
+                Rgb k = cv[(size_t)yy * vb_ow + X - 1];
+                for (int g = X == 1 ? 2 : 3; g <= 3; g++) { s[g][0] += k.r; s[g][1] += k.g; s[g][2] += k.b; n[g]++; }
+            }
+        }
+        for (int c = 0; c < 3; c++) {
+            d[y][0][c] = n[1] && n[3] ? s[1][c] / n[1] - s[3][c] / n[3] : 0;
+            d[y][1][c] = n[0] && n[2] ? s[0][c] / n[0] - s[2][c] / n[2] - d[y][0][c] : 0;
+        }
+    }
+    for (int y = y0; y < y1; y++)
+        for (int X = 1; X <= vb_ow; X++) {
+            Rgb *p = &cv[(size_t)y * vb_ow + X - 1];
+            int w2 = X <= 16 ? 256 : X >= 64 ? 0 : (64 - X) * 256 / 48, w1 = X <= 8 ? (9 - X) * 256 / 8 : 0;
+            p->r = clampi(p->r + (d[y][0][0] * w2 + d[y][1][0] * w1) / 256, 0, 255);
+            p->g = clampi(p->g + (d[y][0][1] * w2 + d[y][1][1] * w1) / 256, 0, 255);
+            p->b = clampi(p->b + (d[y][0][2] * w2 + d[y][1][2] * w1) / 256, 0, 255);
+        }
+}
+static void gen_cb(int pad)
+{
+    pal_make();
+    vb_ow = pad + 64;
+    if (!canvas_open(vb_ow)) return;
+    vb_ex = CB_EXCL;
+    for (int side = 0; side < 2; side++) {
+        canvas_clear(); cur_side = side;
+        for (int i = 0; i < 9; i++) vb_quilt(side, &CB_BANDS[side][i], 901 + 13 * i);
+        cb_tone(side, 0, 108); cb_tone(side, 206, PH);
+        for (int y = 0; y < PH; y++)
+            for (int X = 1; X <= pad; X++)
+                strip[(size_t)y * 2 * pad + (side ? pad + (X - 1) : pad - X)] = quant(cv[(size_t)y * vb_ow + X - 1]);
+    }
+    vb_ex = VB_EXCL;
     canvas_close();
 }

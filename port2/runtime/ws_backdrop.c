@@ -731,6 +731,7 @@ typedef struct {
 } Room;
 static const Room *room;                                 /* the room being drawn */
 static void build_redraw(int pad);
+static void gen_cb(int pad);
 #include "ws_backdrop_rooms.inc"
 #define PIECES_TOP4 { 128, 0, 224, 64, 32, 256, 0 }, { 128, 64, 224, 64, 32, 256, 32 }, { 128, 128, 224, 64, 32, 256, 64 }, \
                     { 128, 192, 224, 64, 32, 256, 96 }
@@ -742,7 +743,7 @@ static const Room ROOMS[] = {
     { 2, 5, 224, 1, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, build_redraw },            /* Small Strange Room */
     { 5, 1, 224, 1, { PIECES_TOP4, { 256, 0, 0, 64, 96, 256, 128 } }, OVER_A5, gen_a5 },    /* the house with the wall */
     { 5, 3, 224, 1, { PIECES_TOP4, { 256, 0, 0, 64, 96, 256, 128 } }, OVER_A5, gen_a5 },
-    { 19, 1, 224, 0, { PIECES_TOP4, { 256, 8, 96, 64, 96, 256, 128 } }, OVER_VILLAGE, gen_village, 2, 1, v_cherry },   /* Dwarf
+    { 19, 1, 224, 0, { PIECES_TOP4, { 256, 8, 96, 64, 96, 256, 128 } }, OVER_VILLAGE, gen_cb, 2, 1, v_cherry },   /* Dwarf
       Village in blossom: AREA19 s1 runs as area 2 s1 (GAME.area), told apart from AREA02 s1 by its picture */
     { 2, 1, 224, 1, { PIECES_TOP4, { 256, 8, 96, 64, 96, 256, 128 } }, OVER_VILLAGE, gen_vb, 0, 0, v_not_cherry },
 };
