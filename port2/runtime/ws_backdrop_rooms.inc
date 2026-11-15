@@ -1879,11 +1879,14 @@ static void vb_front(int side)
 /* a VBS_EDGE front sphere's silhouette in the strip, over what vb_front drew behind it: only its outline zone, on the
    arc that leaves the picture where its outline meets the join (centre (33, 251) r 50 in picture texels: through
    (-0.5, 213.9), tangent to the picture's outline there, which runs about 1.15 columns left per row from row 206;
-   near the bottom it curves 9 columns into the strip).  Inside: the picture's dark rim columns 0-3 of the same row,
-   ping-ponged outwards for their grain, a little darker towards the outline (as the picture's rims, darkest at the
-   silhouette); the outline anti-aliased over 1.5 texels; outside it a contact shade on the sphere behind (the cream
-   one), 0.72 at the outline fading out over 5 texels, as the picture's overlaps darken the rear sphere along the
-   front one's outline. */
+   near the bottom it curves 9 columns into the strip).  Inside: the sphere's own pink, not its dark brown flank
+   (x 0-15): its tone a + b * (normal . light) fitted on its visible pink texels (the light of the other spheres),
+   never below its darkest pink (the 5th percentile of those texels), and towards the outline eased down to that
+   darkest pink from the tone of its darkest pink band (the mean of its pink texels darker than the median) over 6
+   texels; the colour and grain of a pink texel of the same row (x 16-31, picked by position) moved along the front
+   pink ramp to that tone, keeping its offset from the fit.  The outline anti-aliased over 1.5 texels; outside it a
+   contact shade on the sphere behind (the cream one), 0.72 at the outline fading out over 5 texels, as the
+   picture's overlaps darken the rear sphere along the front one's outline. */
 #define VB_EDGE_X2 66
 #define VB_EDGE_Y2 502
 #define VB_EDGE_R2 100
@@ -1892,21 +1895,51 @@ static void vb_edge(int side)
     int R16 = VB_EDGE_R2 * 8, lo = vb_lo(side);
     if (side) return;
     for (int i = 0; i < VB_NPS; i++) {
+        long long n = 0, sd = 0, sdd = 0, sl = 0, sdl = 0, den; int hl[256], fa, fb, l5 = 0, lmed = 0, lband, k;
         if (VB_PS[i].side != side || !(VB_PS[i].fl & VBS_EDGE)) continue;
+        memset(hl, 0, sizeof hl);
+        for (int y = 0; y < PH; y++) for (int x = 16; x < PW; x++) {        /* the fit on its pink texels */
+            int d, l;
+            if (!vb_vis(i, x, y) || (d = vb_dot(VB_EDGE_X2, VB_EDGE_Y2, VB_EDGE_R2, x, y, VB_L)) == -9999) continue;
+            l = lum(rgb15(pic[y][x]));
+            n++; sd += d; sdd += (long long)d * d; sl += l; sdl += (long long)d * l; hl[clampi(l, 0, 255)]++;
+        }
+        if (n < 40) continue;
+        den = n * sdd - sd * sd;
+        fb = den > 0 ? clampi((int)((n * sdl - sd * sl) * 256 / den), 0, 200) : 0;
+        fa = (int)((sl * 256 - (long long)fb * sd) / (n * 256));
+        for (k = 0, l5 = 0; l5 < 255 && (k += hl[l5]) * 20 < n; l5++) continue;
+        for (k = 0, lmed = 0; lmed < 255 && (k += hl[lmed]) * 2 < n; lmed++) continue;
+        {   long long s0 = 0, c0 = 0; for (int l = 0; l < lmed; l++) { s0 += (long long)hl[l] * l; c0 += hl[l]; } lband = c0 ? (int)(s0 / c0) : l5; }
+#ifdef WS_BACKDROP_MAIN
+        if (getenv("WSB_INFO")) fprintf(stderr, "edge sphere %d: n %lld a %d b %d l5 %d band %d\n", i, n, fa, fb, l5, lband);
+#endif
         for (int y = (VB_EDGE_Y2 - VB_EDGE_R2) / 2; y < PH; y++)
             for (int wx = -1; wx >= lo; wx--) {
                 int dx = (wx * 2 + 1 - VB_EDGE_X2) * 8, dy = (y * 2 + 1 - VB_EDGE_Y2) * 8, d = isqrt_i(dx * dx + dy * dy) - R16;
                 int X = -wx, rr = vb_reg(side, wx, y), sphere = rr >= VB_SPH && rr < VB_BACK, a;
-                Rgb *p = vb_px(side, wx, y), bg, rim;
+                Rgb *p = vb_px(side, wx, y), bg;
                 if (!p || d >= 80) continue;
                 bg = *p;
                 if (sphere) bg = scale(bg, 256 - 72 * (80 - (d > 0 ? d : 0)) / 80);   /* (the contact shade) */
                 a = clampi((12 - d) * 256 / 24, 0, 256);                               /* (the outline's coverage) */
                 if (a > 0) {
-                    int k = (X - 1) % 8, col = k < 4 ? k : 7 - k, t = -d;
-                    rim = rgb15(pic[y][col]);
-                    if (t < 64) rim = scale(rim, 256 - 36 * (64 - (t > 0 ? t : 0)) / 64);
-                    bg = mix(bg, rim, a);
+                    int t = -d > 0 ? -d : 0, dot = vb_dot(VB_EDGE_X2, VB_EDGE_Y2, VB_EDGE_R2, wx, y, VB_L), tone, sx = -1, res = 0;
+                    u32 h = hash3(X, y, 907);
+                    tone = dot == -9999 ? l5 : fa + fb * dot / 256;
+                    if (tone < l5) tone = l5;
+                    if (t < 96) { int e = l5 + (lband - l5) * t / 96; if (tone > e) tone = e; }   /* (eased to its darkest pink) */
+                    else if (tone < lband) tone = lband;
+                    for (int j = 0; j < 16 && sx < 0; j++) {                                  /* a pink texel of the row */
+                        int x = 16 + (int)((h + (u32)j * 7) % 16);
+                        if (vb_vis(i, x, y)) sx = x;
+                    }
+                    if (sx >= 0) {
+                        int sdot = vb_dot(VB_EDGE_X2, VB_EDGE_Y2, VB_EDGE_R2, sx, y, VB_L), sl0 = lum(rgb15(pic[y][sx]));
+                        int st = sdot == -9999 ? sl0 : clampi(fa + fb * sdot / 256, l5, 255);
+                        res = clampi(sl0 - st, -16, 16);
+                        bg = mix(bg, vb_shift(&VB_rf[VB_PS[i].cls], rgb15(pic[y][sx]), clampi(tone + res, l5 - 4, 255) - sl0), a);
+                    } else bg = mix(bg, vb_at_lum(&VB_rf[VB_PS[i].cls], tone), a);
                 }
                 if (sphere || a > 0) *p = bg;
             }

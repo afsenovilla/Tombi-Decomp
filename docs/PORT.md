@@ -2984,12 +2984,16 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
       strip's first 4 columns, fading over the next 4: it read as a dark gap with a vertical fade on the cream).
       That straight join read as a cut, so (`vb_edge`) the pink sphere's silhouette now goes on into the strip as an
       outline zone only: the arc of centre (33, 251) r 50 (through the point where the picture's outline meets the
-      join, row 213.9, tangent to it there; 9 columns into the strip at the bottom row), inside it the picture's dark
-      rim columns 0-3 of the same row ping-ponged outwards, up to 14 % darker towards the outline; the outline blended
-      over 1.5 texels; outside it a contact shade on the cream sphere (x 0.72 at the outline, gone after 5 texels), as
-      the picture's own overlaps darken the rear sphere along a front sphere's outline.  Only frame x 39-52, rows
-      226-239 change.  Seam metric, left front rows 195-224: median join step 69.8 -> 16.0 (rows 216-223 now within
-      the picture's own step; the hand-over step is the new silhouette itself).
+      join, row 213.9, tangent to it there; 9 columns into the strip at the bottom row); the outline blended over 1.5
+      texels; outside it a contact shade on the cream sphere (x 0.72 at the outline, gone after 5 texels), as the
+      picture's own overlaps darken the rear sphere along a front sphere's outline.  Inside it the sphere's own pink
+      (the user: "half a sphere, pink: draw the missing part in pink"; a first fill with the picture's dark brown
+      flank, columns 0-3, read as a dark wedge): its tone fitted as a + b (normal . light) on its visible pink texels
+      (x >= 16; the light found for all the spheres), never below its darkest pink (5th percentile of those texels,
+      luminance 108), and towards the outline eased down to that darkest pink from the mean of its darker half (127)
+      over 6 texels; colour and grain from a pink texel of the same row (x 16-31, by position) moved along the front
+      pink ramp to that tone, keeping its offset from the fit.  The picture's own brown flank (x 0-15) stays as it is,
+      so the strip's pink meets it at the join.  Only frame x 43-52, rows 229-239 change.
     Seam metric (`tools/ws_seam.py IMG --pad 53 [--y0 16]`, per row: the step between the picture's last 4 columns
     and the strip's first 4 against the picture's own 90th-percentile step between neighbouring 4-column groups
     in that row; per band: tone, contrast, gradient energy and stripe period of the strip's first columns against
