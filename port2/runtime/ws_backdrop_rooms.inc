@@ -1815,7 +1815,7 @@ static const VbBox CB_EXCL[] = {
 #define CB_S (VBB_STRICT | VBB_TIGHT)
 static const VbBand CB_BANDS[2][9] = {
     { { 108, 138, 108, 138, 0, 44, 9, 5, 0, 0, 0, VB_FENCE, 1, 0, 9, VBB_TIGHT },
-      { 60, 108, 50, 124, 0, 44, 12, 6, 0, 6, 8, VB_BACK, 0, 0, 0, CB_S | VBB_SOFT | VBB_FEATHER },
+      { 60, 108, 50, 124, 0, 320, 12, 6, 0, 6, 8, VB_BACK, 0, 0, 0, CB_S | VBB_SOFT | VBB_FEATHER },
       { 0, 60, 0, 70, 0, 320, 16, 8, 0, 6, 3, VB_BACK, 0, 0, 0, CB_S | VBB_FEATHER },
       { 145, 156, 145, 156, 0, 216, 16, 5, 0, 0, 0, VB_LEDGE, 0, 0, 0, VBB_TIGHT },
       { 138, 145, 136, 148, 192, 214, 8, 4, 2, 3, 0, VB_LEDGE, 0, 0, 0, CB_S },
