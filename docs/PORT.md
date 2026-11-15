@@ -3085,9 +3085,30 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     left 87 / 100 / 100 / 88 % (before 87 / 67 / 38 / 100).  What it still fails is the hand-over / tone / contrast
     of the top rows, where the strip's rows cross the bushes' outline (grass on one side of a row, blossom on the
     other): the right edge's 20 picture columns there are all blossom (the bush in front of the jukebox), the strip
-    goes down into grass within ~15 columns.  Weak points: the left strip's bushes sit lower (tops ~209-213) than
-    the picture's left bushes (~197-205), a wide grass valley; at 21:9 the front repeats source stretches (few clean
+    goes down into grass within ~15 columns.  Weak point: at 21:9 the front repeats source stretches (few clean
     bush windows: the jukebox, the stone pile's hidden tops).
+    The left front, third pass (2026-11-15): the left strip's bushes sat lower (tops ~209-213) than the picture's
+    left bushes (~196-205), a wide grass valley with loose pink bits on it.  The outline score only asked the strip to
+    go on from the edge, and the edge is a valley (213 at picture columns 0-3), so every block stayed in it.  Now
+    (left side only; the right strip is byte-identical): (1) `vb_otgt`, a target outline per strip column for
+    `VBB_OUTL` bands (`cb_otgt`: the edge's own height for 4 columns, then up to 203 by column 14, then 201 +- 5, the
+    picture's left bushes), scored on the window's strip columns (squared rows beyond the tolerance, `VB_TGTW`), and
+    with a target the outline context skips a block's feathered outer column (grass-tinted, it read as grass and made
+    the next block think the outline fell 2 rows a column); (2) the left front band's windows shift up to 10 rows (6
+    before): the clean bush windows are few (picture x 0-95, 202-232; the stones and the jukebox hide the others), and
+    lower ones lifted reach the picture's height; (3) `cb_warp` bends 8 columns on the left (12 before), so the edge's
+    valley goes on ~6 columns and then rises; (4) `cb_clean` (rows 184 on, after the quilt): 8-connected blossom
+    pieces under 40 texels that do not reach the bottom row go back to the grass underlay (a copy of the canvas
+    before the front band) with their rim; grass enclosed by the bushes (a valley window lifted brings its grass in
+    the reflected bottom rows) is filled, holes of 8+ texels with a 2-texel rim of the bushes' grey edge, from the
+    blossom beside it (moved across by the hole's width, whole: per-column copies showed as streaks, copies from above
+    brought the bush's top rim in), what is left with the mean of its blossom neighbours, and the filled texels and
+    their 1-texel ring softened (3 x 3 mean, twice: a copied patch showed hard edges in the blurred bushes).  Left outline now (16:9,
+    outer to join): 205-209 for 20 columns, 196-202 for 20, the valley's flank, 213 for the last 6 and the picture's
+    first 4; at 21:9 / 32:9 the strip further out stays at 195-209 with a few shallow dips to ~213 (natural gaps).  ws_seam left (ground / fronttop / front / bottom): join median
+    20 / 10 / 9 / 7 (before 18 / 11 / 9 / 18), rows within the picture's step 87 / 100 / 100 / 100 % (before 87 /
+    100 / 100 / 88), fronttop and front now pass the texture checks (before: tone, contrast, hand-over); the bottom
+    rows are still ~10 levels darker than the picture's (190 / 200; before 186) and fail the tone check.
     Checked (headless): standalone strips at 16:9 and 21:9 (21:9 starts with the 16:9 strip's columns: 0
     texels differ), the game at 16:9 and 21:9, i386 = wasm2c frames; AREA02 s1 / s5 and AREA05 s1 / s3 strips
     byte-identical to the build before; not checked on the device.

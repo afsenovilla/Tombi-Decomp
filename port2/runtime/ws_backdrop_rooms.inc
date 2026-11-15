@@ -1131,6 +1131,10 @@ static int vb_class(Rgb k)                               /* cream 0, pink / lila
     return -1;
 }
 static const VbBox *vb_ex = VB_EXCL;                     /* the room's objects (gen_cb sets its own) */
+/* VBB_OUTL bands: an outline the strip's front should keep to, per strip column X (gen_cb's left side), or none:
+   returns the row and sets *tol (rows off it that cost nothing), -1 for no target */
+static int (*vb_otgt)(int side, int X, int *tol);
+#define VB_TGTW 200000
 static int vb_excl(int x, int y)
 {
     if (x < 0 || x >= PW || y < 0 || y >= PH) return 1;
@@ -1282,7 +1286,8 @@ static void vb_quilt(int side, const VbBand *b, int seed)
             for (int j = 0; j < VB_OCTX; j++) oht[j] = vb_hcol(side, oc0 + j);
             for (int k = 0; k < 4; k++) {
                 int h = oht[side ? VB_OCTX - 1 - k : k];
-                if (h < 0) continue;
+                if (h < 0 || (vb_otgt && h >= PH)) continue;   /* (with a target: a block's feathered outer
+                                                                  column, grass-tinted, is no outline) */
                 if (k < 2) { a += h; na++; } else { c += h; nc2++; }
             }
             if (na) oref = a / na;
@@ -1330,6 +1335,17 @@ static void vb_quilt(int side, const VbBand *b, int seed)
                     no++;
                 }
                 if (no) e += so / no * VB_OUTW;
+                so = 0; no = 0;
+                if (vb_otgt) for (int j = 0; j < W; j++) {     /* (the target outline over the window's strip
+                                                                  columns: squared rows beyond its tolerance) */
+                    int X = vb_X(side, t0 + j), hs = vb_hs[sx + j], tl, tg, d;
+                    if (X < 1 || hs < 0 || (tg = vb_otgt(side, X, &tl)) < 0) continue;
+                    d = hs - dy - tg; if (d < 0) d = -d;
+                    d -= tl; if (d > 12) d = 12;
+                    if (d > 0) so += (long long)d * d;
+                    no++;
+                }
+                if (no) e += so / no * VB_TGTW;
             }
             if (b->up < 0) {                              /* (its top row repeated upwards: windows whose columns go
                                                              straight on up, not a trunk's top or a haze's edge) */
@@ -1905,7 +1921,10 @@ static void gen_vb(int pad)
  *     columns, and its next 6 columns against the height and slope there), objects in the source's grass above the
  *     bushes (the stones, the barrel) holes that keep the underlay; then cb_warp bends the strip's first 12 columns
  *     so the outline starts where the picture's ends and goes on with its slope (the right edge's bush high, ~row
- *     189; the left edge's valley flat at ~213 and then up its other flank), and cb_ftone matches the tone per row
+ *     189; the left edge's valley flat at ~213 and then up its other flank; on the left over 8 columns only), the
+ *     left front keeps to a target outline (vb_otgt / cb_otgt: the edge's valley for a few columns, up to row ~203 by
+ *     column 14, then the picture's left bushes' height, ~196-206; windows there shifted up to 10 rows), cb_clean
+ *     drops loose blossom bits on its grass and fills grass enclosed by its bushes, and cb_ftone matches the tone per row
  *     and per kind (grass, blossom; R, G, B, so the pink, not only the lightness) over 20 columns, fading by 72,
  *     then the strip's first 2 columns onto the picture's last 2, fading over 12;
  *   - the blurred bands (canopy, front) have their cuts blended over 5 x 5 texels (VBB_FEATHER), and the canopy's tone
@@ -1930,7 +1949,7 @@ static const VbBand CB_BANDS[2][9] = {
       { 156, 181, 156, 181, 0, 216, 16, 5, 4, 0, 0, VB_BANK, 1, 0, 0, VBB_TIGHT },
       { 181, 190, 181, 197, 0, 100, 16, 5, 4, 0, 1, VB_GROUND, 0, 0, 0, VBB_TIGHT },
       { 191, PH, 188, 196, 60, 100, 16, 5, 1, 0, 0, VB_GROUND, 0, 0, 0, VBB_TIGHT },
-      { 186, PH, 186, PH, 0, 320, 16, 8, 3, 0, 6, VB_FRONTR, 0, 0, 0, CB_F } },
+      { 186, PH, 186, PH, 0, 320, 16, 8, 3, 0, 10, VB_FRONTR, 0, 0, 0, CB_F } },
     { { 108, 139, 108, 139, 186, 256, 12, 5, 0, 0, 0, VB_FENCE, 1, 0, 0, VBB_TIGHT },
       { 60, 108, 50, 124, 190, 320, 16, 8, 0, 6, 8, VB_BACK, 0, 0, 0, CB_S | VBB_SOFT | VBB_FEATHER | VBB_FAR },
       { 0, 60, 0, 70, 0, 320, 16, 8, 0, 6, 3, VB_BACK, 0, 0, 0, CB_S | VBB_FEATHER | VBB_FAR },
@@ -1980,16 +1999,17 @@ static void cb_tone(int side, int y0, int y1)
    the picture's 2 last known columns, the slope against the 2 before, at most 1 row a column), easing into the
    strip's own outline by column CB_WN: no notch or step in the outline on the join */
 #define CB_WN 12
+#define CB_WNL 8
 static void cb_warp(int side)
 {
-    int h[4], n = 0, hs[CB_WN + 1], col[PH];
+    int h[4], n = 0, hs[CB_WN + 1], col[PH], wn = side ? CB_WN : CB_WNL;
     for (int i = 0; i < 24 && n < 4; i++) { int v = vb_hcol(side, side ? PW - 1 - i : i); if (v >= 0) h[n++] = v; }
     if (n < 2) return;
     for (int X = 1; X <= CB_WN; X++) hs[X] = vb_hcol(side, side ? PW - 1 + X : -X);
     {   int e4 = (h[0] + h[1]) * 2, sl = n == 4 ? e4 - (h[2] + h[3]) * 2 : 0;   /* (x 4) */
         sl = sl > 8 ? 8 : sl < -8 ? -8 : sl;                                   /* (2 columns apart: 1 row a column) */
-        for (int X = 1; X <= CB_WN; X++) {
-            int t, sft, k = X * 256 / CB_WN, sm = k * k / 256 * (768 - 2 * k) / 256;   /* (smoothstep) */
+        for (int X = 1; X <= wn; X++) {
+            int t, sft, k = X * 256 / wn, sm = k * k / 256 * (768 - 2 * k) / 256;   /* (smoothstep) */
             if (hs[X] < 0 || hs[X] >= PH) continue;
             t = (e4 + sl * X / 2) / 4; t += (hs[X] - t) * sm / 256;
             sft = t - hs[X]; sft = sft > 6 ? 6 : sft < -6 ? -6 : sft;
@@ -2060,6 +2080,145 @@ static void cb_ftone(int side, int y0, int y1)
             p->b = clampi(p->b + d[y][0][2] * w / 256, 0, 255);
         }
 }
+/* the left strip's front outline: the picture's valley at the edge (its height there) for a few columns, up its
+   other flank by column 14, then the bush mass at the picture's height (its left bushes' tops, rows ~196-207) */
+static int cb_h0 = 213;
+static int cb_otgt(int side, int X, int *tol)
+{
+    if (side) return -1;
+    if (X <= 4) { *tol = 2; return cb_h0; }
+    if (X < 14) { *tol = 3; return cb_h0 + (203 - cb_h0) * (X - 4) / 10; }
+    *tol = 5; return 201;
+}
+/* the left front cleaned (rows CB_CY on, the canvas' whole width): blossom bits loose on the grass (8-connected
+   non-grass pieces under CB_BLOB texels that do not reach the bottom row) go back to the grass underlay (und, the
+   canvas before the front band), with their 1-texel rim; grass enclosed by the bushes (4-connected grass not
+   reaching row CB_CY: a valley window lifted shows its grass in the reflected bottom rows) is filled with the blossom
+   above it (the hole's height up, moved down whole), or the mean of its blossom neighbours */
+#define CB_CY 184
+#define CB_BLOB 40
+#define CB_RIM 8
+static void cb_clean(const Rgb *und)
+{
+    int w = vb_ow, h = PH - CB_CY, n = w * h, *st = (int *)malloc(sizeof(int) * (size_t)n), *cm = (int *)malloc(sizeof(int) * (size_t)n);
+    u8 *gr = (u8 *)malloc((size_t)n);
+    if (!st || !cm || !gr) { free(st); free(cm); free(gr); return; }
+#define CBP(i) cv[(size_t)((i) / w + CB_CY) * w + (i) % w]
+    for (int i = 0; i < n; i++) { gr[i] = (u8)vb_grass(CBP(i)); cm[i] = -1; }
+    for (int pass = 0; pass < 2; pass++)                 /* (0: blossom bits, 1: grass holes) */
+        for (int i0 = 0; i0 < n; i0++) {
+            int sp = 0, cnt = 0, edge = 0, kind = pass ? 1 : 0;
+            if (cm[i0] >= 0 || gr[i0] != kind) continue;
+            st[sp++] = i0; cm[i0] = i0;
+            while (sp) {                                 /* (flood fill; cm: the piece's first texel) */
+                int i = st[--sp], y = i / w, x = i % w;
+                cnt++;
+                if (pass ? y == 0 : y == h - 1) edge = 1;
+                for (int dy = -1; dy <= 1; dy++)
+                    for (int dx = -1; dx <= 1; dx++) {
+                        int yy = y + dy, xx = x + dx, j;
+                        if ((!dx && !dy) || (pass && dx && dy) || yy < 0 || yy >= h || xx < 0 || xx >= w) continue;
+                        j = yy * w + xx;
+                        if (cm[j] < 0 && gr[j] == kind) { cm[j] = i0; st[sp++] = j; }
+                    }
+            }
+            if (edge || (!pass && cnt >= CB_BLOB)) continue;
+            for (int i = 0; i < n; i++) {
+                if (cm[i] != i0) continue;
+                if (!pass) {                             /* (the bit and its rim: the underlay) */
+                    int y = i / w, x = i % w;
+                    for (int dy = -1; dy <= 1; dy++)
+                        for (int dx = -1; dx <= 1; dx++) {
+                            int yy = y + dy, xx = x + dx, j;
+                            if (yy < 0 || yy >= h || xx < 0 || xx >= w) continue;
+                            j = yy * w + xx;
+                            if (j == i || gr[j]) CBP(j) = und[(size_t)(yy + CB_CY) * w + xx];
+                        }
+                    gr[i] = 1; cm[i] = -1;
+                } else cm[i] = -2;                       /* (filled below) */
+            }
+            if (pass) {                                  /* the hole with its rim (2 texels of the bushes' grey
+                                                            edge round it, holes of CB_RIM texels on): the blossom
+                                                            its height above it, moved down whole (no per-column
+                                                            streaks) */
+                int y0 = h, y1 = -1;
+                for (int r = 0; r < 2 && cnt >= CB_RIM; r++) {
+                    for (int i = 0; i < n; i++) {
+                        int y = i / w, x = i % w;
+                        if (cm[i] != -2) continue;
+                        for (int dy = -1; dy <= 1; dy++)
+                            for (int dx = -1; dx <= 1; dx++) {
+                                int yy = y + dy, xx = x + dx, j;
+                                if (yy < 0 || yy >= h || xx < 0 || xx >= w) continue;
+                                j = yy * w + xx;
+                                if (!gr[j] && cm[j] > -2) cm[j] = -6;
+                            }
+                    }
+                    for (int i = 0; i < n; i++) if (cm[i] == -6) cm[i] = -2;
+                }
+                int x0 = w, x1 = -1;
+                for (int i = 0; i < n; i++)
+                    if (cm[i] == -2) {
+                        if (i / w < y0) y0 = i / w;
+                        if (i / w > y1) y1 = i / w;
+                        if (i % w < x0) x0 = i % w;
+                        if (i % w > x1) x1 = i % w;
+                    }
+                for (int i = 0; i < n; i++) {
+                    int sh = x0 - (x1 - x0 + 1) >= 0 ? -(x1 - x0 + 1) : x1 + (x1 - x0 + 1) < w ? x1 - x0 + 1 : 0;
+                    int j = sh ? i + sh : i - (y1 - y0 + 1) * w;
+                    if (cm[i] != -2 || j < 0 || gr[j] || cm[j] <= -2) continue;
+                    CBP(i) = CBP(j); cm[i] = -3;
+                }
+                for (int i = 0; i < n; i++) if (cm[i] == -2) cm[i] = -5;   /* (left for the mean) */
+            }
+        }
+    for (int i = 0; i < n; i++) if (cm[i] == -5) cm[i] = -2;
+    for (int it = 0, left = 1; it < 16 && left; it++) {  /* (what is left: its blossom neighbours' mean, peeled) */
+        left = 0;
+        for (int i = 0; i < n; i++) {
+            int y = i / w, x = i % w, s[3] = { 0, 0, 0 }, c = 0;
+            if (cm[i] != -2) continue;
+            for (int d = 0; d < 4; d++) {
+                int yy = y + (d == 0) - (d == 1), xx = x + (d == 2) - (d == 3), j;
+                if (yy < 0 || yy >= h || xx < 0 || xx >= w) continue;
+                j = yy * w + xx;
+                if (cm[j] == -2 || (gr[j] && cm[j] != -3)) continue;
+                s[0] += CBP(j).r; s[1] += CBP(j).g; s[2] += CBP(j).b; c++;
+            }
+            if (!c) { left = 1; continue; }
+            CBP(i).r = s[0] / c; CBP(i).g = s[1] / c; CBP(i).b = s[2] / c; cm[i] = -3;
+        }
+    }
+    {   Rgb *t = (Rgb *)malloc(sizeof(Rgb) * (size_t)n);    /* the fill and its edge softened (3 x 3, twice): a
+                                                               copied patch has hard edges in the blurred bushes */
+        for (int pass = 0; t && pass < 2; pass++) {
+            for (int i = 0; i < n; i++) t[i] = CBP(i);
+            for (int i = 0; i < n; i++) {
+                int y = i / w, x = i % w, s[3] = { 0, 0, 0 }, c = 0, near = cm[i] == -3;
+                if (gr[i] && cm[i] != -3) continue;
+                for (int dy = -1; dy <= 1 && !near; dy++)
+                    for (int dx = -1; dx <= 1; dx++) {
+                        int yy = y + dy, xx = x + dx;
+                        if (yy >= 0 && yy < h && xx >= 0 && xx < w && cm[yy * w + xx] == -3) near = 1;
+                    }
+                if (!near) continue;
+                for (int dy = -1; dy <= 1; dy++)
+                    for (int dx = -1; dx <= 1; dx++) {
+                        int yy = y + dy, xx = x + dx, j;
+                        if (yy < 0 || yy >= h || xx < 0 || xx >= w) continue;
+                        j = yy * w + xx;
+                        if (gr[j] && cm[j] != -3) continue;
+                        s[0] += t[j].r; s[1] += t[j].g; s[2] += t[j].b; c++;
+                    }
+                CBP(i).r = s[0] / c; CBP(i).g = s[1] / c; CBP(i).b = s[2] / c;
+            }
+        }
+        free(t);
+    }
+#undef CBP
+    free(st); free(cm); free(gr);
+}
 static void gen_cb(int pad)
 {
     pal_make();
@@ -2067,8 +2226,19 @@ static void gen_cb(int pad)
     if (!canvas_open(vb_ow)) return;
     vb_ex = CB_EXCL;
     for (int side = 0; side < 2; side++) {
+        Rgb *und = 0;
         canvas_clear(); cur_side = side;
-        for (int i = 0; i < 9; i++) vb_quilt(side, &CB_BANDS[side][i], 901 + 13 * i);
+        for (int i = 0; i < 9; i++) {
+            if (i == 8 && !side) {                       /* (the edge's height: the picture's first known column) */
+                for (int x = 0; x < 8; x++) { int v = vb_hcol(0, x); if (v >= 0 && v < PH) { cb_h0 = v; break; } }
+                vb_otgt = cb_otgt;
+            }
+            vb_quilt(side, &CB_BANDS[side][i], 901 + 13 * i);
+            vb_otgt = 0;
+            if (i == 7 && !side && (und = (Rgb *)malloc(sizeof(Rgb) * (size_t)vb_ow * PH)) != 0)
+                memcpy(und, cv, sizeof(Rgb) * (size_t)vb_ow * PH);
+        }
+        if (und) { cb_clean(und); free(und); und = 0; }
         cb_tone(side, 0, 108); cb_warp(side); cb_ftone(side, 181, PH);
         for (int y = 0; y < PH; y++)
             for (int X = 1; X <= pad; X++)
