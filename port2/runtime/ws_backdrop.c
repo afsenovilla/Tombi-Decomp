@@ -746,6 +746,8 @@ static const Room ROOMS[] = {
     { 19, 1, 224, 1, { PIECES_TOP4, { 256, 8, 96, 64, 96, 256, 128 } }, OVER_VILLAGE, gen_cb, 2, 1, v_cherry },   /* Dwarf
       Village in blossom: AREA19 s1 runs as area 2 s1 (GAME.area), told apart from AREA02 s1 by its picture */
     { 2, 1, 224, 1, { PIECES_TOP4, { 256, 8, 96, 64, 96, 256, 128 } }, OVER_VILLAGE, gen_vb, 0, 0, v_not_cherry },
+    { 11, 2, 224, 0, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 256, 64, 0, 88, 80, 24, 128 } }, gen_cv },   /* the cave with
+      the brick tower (the tower's foot and door drawn again over the player) */
 };
 #define NROOMS ((int)(sizeof ROOMS / sizeof ROOMS[0]))
 const char *port_ws_backdrop_rooms;                      /* --ws-backdrop-rooms A:S,A:S,... (decimal; "all") */

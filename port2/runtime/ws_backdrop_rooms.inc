@@ -1101,6 +1101,8 @@ typedef struct { short y0, y1, ry0, ry1, sx0, sx1, B, OV, OT, OB, dy, reg, per, 
                                                             vb_hcol) goes on: a window is also scored on how its
                                                             outline, shifted, meets the one already there over the
                                                             VB_OCTX columns up to its overlap's end */
+#define VBB_EDGEW 64                                     /* the overlap's columns next to the new block weigh more
+                                                            (a busy texture: the columns at the cut matter most) */
 #define VB_OCTX 20
 #define VB_OUTW 40000
 static const VbBand VB_BANDS[2][5] = {          /* (in the order they are made: the fence, then the back above it) */
@@ -1308,7 +1310,11 @@ static void vb_quilt(int side, const VbBand *b, int seed)
                     if (first && ov && (y < b->ry0 || y >= b->ry1)) continue;   /* (the picture's canopy above the back) */
                     if (!vb_get(side, t0 + j, y, &o)) continue;
                     if ((b->st & (VBB_SOFT | VBB_OUTL)) && vb_excl(sx + j, vb_srow(b, y + dy))) continue;
-                    e += vb_d2(o, rgb15(pic[vb_srow(b, y + dy)][sx + j])); n++;
+                    {   int wv = 1;                      /* (VBB_EDGEW: the overlap columns next to the new ones
+                                                            weigh 4, the 2 after them 2) */
+                        if ((b->st & VBB_EDGEW) && ov && y >= b->y0 && y < b->y1) { int dj = side ? b->OV - 1 - j : j - b->B; wv = dj < 2 ? 4 : dj < 4 ? 2 : 1; }
+                        e += (long long)vb_d2(o, rgb15(pic[vb_srow(b, y + dy)][sx + j])) * wv; n += wv;
+                    }
                 }
             e = n ? e * 64 / n : 0;
             if (b->st & VBB_OUTL) {                      /* (the outline: squared row offsets, the 8 columns next to
@@ -2240,6 +2246,104 @@ static void gen_cb(int pad)
         }
         if (und) { cb_clean(und); free(und); und = 0; }
         cb_tone(side, 0, 108); cb_warp(side); cb_ftone(side, 181, PH);
+        for (int y = 0; y < PH; y++)
+            for (int X = 1; X <= pad; X++)
+                strip[(size_t)y * 2 * pad + (side ? pad + (X - 1) : pad - X)] = quant(cv[(size_t)y * vb_ow + X - 1]);
+    }
+    vb_ex = VB_EXCL;
+    canvas_close();
+}
+
+/* ================================================================== AREA11 s2: the cave with the brick tower */
+enum { CV_CEIL = 1, CV_WALL, CV_FLOOR };
+static const VbBox CV_EXCL[] = {
+    { 26, 24, 124, 210 }, { 162, 22, 228, 70 }, { 204, 70, 268, 142 }, { 252, 90, 304, 152 }, { 0, 0, 0, 0 } };
+#define CV_Q (VBB_STRICT | VBB_TIGHT | VBB_FEATHER | VBB_FAR | VBB_EDGEW)
+#define CV_NB 8
+static const VbBand CV_BANDS[2][8] = {
+    { { 196, PH, 190, PH, 0, 200, 16, 6, 0, 0, 4, CV_FLOOR, 0, 0, 0, CV_Q },
+      { 168, 196, 162, 210, 0, 200, 16, 6, 0, 8, 4, CV_FLOOR, 0, 0, 0, CV_Q },
+      { 140, 168, 134, 182, 0, 320, 16, 6, 0, 8, 4, CV_WALL, 0, 0, 0, CV_Q },
+      { 112, 140, 106, 154, 0, 320, 16, 6, 0, 8, 4, CV_WALL, 0, 0, 0, CV_Q },
+      { 84, 112, 78, 126, 0, 320, 16, 6, 0, 8, 4, CV_WALL, 0, 0, 0, CV_Q },
+      { 56, 84, 50, 98, 0, 320, 16, 6, 0, 8, 4, CV_WALL, 0, 0, 0, CV_Q },
+      { 28, 56, 22, 70, 0, 320, 16, 6, 0, 8, 4, CV_WALL, 0, 0, 0, CV_Q },
+      { 0, 28, 0, 42, 0, 320, 16, 6, 0, 8, 4, CV_CEIL, 0, 0, 0, CV_Q } },
+    { { 196, PH, 190, PH, 200, 320, 16, 6, 0, 0, 4, CV_FLOOR, 0, 0, 0, CV_Q },
+      { 168, 196, 162, 210, 200, 320, 16, 6, 0, 8, 4, CV_FLOOR, 0, 0, 0, CV_Q },
+      { 140, 168, 134, 182, 0, 320, 16, 6, 0, 8, 4, CV_WALL, 0, 0, 0, CV_Q },
+      { 112, 140, 106, 154, 0, 320, 16, 6, 0, 8, 4, CV_WALL, 0, 0, 0, CV_Q },
+      { 84, 112, 78, 126, 0, 320, 16, 6, 0, 8, 4, CV_WALL, 0, 0, 0, CV_Q },
+      { 56, 84, 50, 98, 0, 320, 16, 6, 0, 8, 4, CV_WALL, 0, 0, 0, CV_Q },
+      { 28, 56, 22, 70, 0, 320, 16, 6, 0, 8, 4, CV_WALL, 0, 0, 0, CV_Q },
+      { 0, 28, 0, 42, 0, 320, 16, 6, 0, 8, 4, CV_CEIL, 0, 0, 0, CV_Q } } };
+/* the strip's light per row, three steps (means over rows y +- R): (1) its luminance (all its columns) mapped onto the
+   mean and spread of the picture's CV_TN columns next to the edge, the same map over the whole strip (the cave is
+   darker towards its sides: windows of the lit middle would come out too light); (2) its first 8 columns' mean moved
+   onto the picture's last 8 (R 4; fully up to column 8, gone at 40); (3) its first column onto the picture's last one
+   (R 1, three quarters of the step, easing out over 6 columns) */
+#define CV_TN 40
+#define CV_TR 16
+static void cv_tone(int side, int y0, int y1)
+{
+    static int mp[PH], dp[PH], ms[PH], ds[PH], jd[PH][2][3];
+    for (int y = y0; y < y1; y++) {
+        long long s[2] = { 0, 0 }, q[2] = { 0, 0 }; int n[2] = { 0, 0 };
+        for (int yy = y - CV_TR; yy <= y + CV_TR; yy++) {
+            if (yy < y0 || yy >= y1) continue;
+            for (int i = 0; i < CV_TN; i++) {
+                int x = side ? PW - 1 - i : i, l;
+                if (vb_excl(x, yy)) continue;
+                l = lum(rgb15(pic[yy][x])); s[0] += l; q[0] += l * l; n[0]++;
+            }
+            for (int X = 1; X <= vb_ow; X++) { int l = lum(cv[(size_t)yy * vb_ow + X - 1]); s[1] += l; q[1] += l * l; n[1]++; }
+        }
+        for (int k = 0; k < 2; k++) {
+            int m = n[k] ? (int)(s[k] * 16 / n[k]) : 0, d = n[k] ? isqrt_i((int)((q[k] * 256 - s[k] * s[k] * 256 / n[k]) / n[k])) : 0;
+            if (k) { ms[y] = m; ds[y] = d; } else { mp[y] = m; dp[y] = d; }
+        }
+    }
+    for (int y = y0; y < y1; y++) {
+        int k = ds[y] && dp[y] ? clampi(dp[y] * 256 / ds[y], 154, 358) : 256;
+        if (!ms[y] || !mp[y]) continue;
+        for (int X = 1; X <= vb_ow; X++) {
+            Rgb *p = &cv[(size_t)y * vb_ow + X - 1]; int l = lum(*p), l2 = clampi((mp[y] + (l * 16 - ms[y]) * k / 256) / 16, 1, 255);
+            *p = l ? scale(*p, clampi(l2 * 256 / l, 0, 1024)) : (Rgb){ l2, l2, l2 };
+        }
+    }
+    for (int st = 0; st < 2; st++) {
+        int R = st ? 1 : 4, N = st ? 1 : 8;
+        for (int y = y0; y < y1; y++) {
+            int s[2][3] = { { 0 } }, n[2] = { 0, 0 };
+            for (int yy = y - R; yy <= y + R; yy++) {
+                if (yy < y0 || yy >= y1) continue;
+                for (int i = 0; i < N; i++) {
+                    int x = side ? PW - 1 - i : i; Rgb a = cv[(size_t)yy * vb_ow + i];
+                    s[1][0] += a.r; s[1][1] += a.g; s[1][2] += a.b; n[1]++;
+                    if (vb_excl(x, yy)) continue;
+                    a = rgb15(pic[yy][x]); s[0][0] += a.r; s[0][1] += a.g; s[0][2] += a.b; n[0]++;
+                }
+            }
+            for (int c = 0; c < 3; c++) jd[y][st][c] = n[0] && n[1] ? (s[0][c] / n[0] - s[1][c] / n[1]) * (st ? 3 : 4) / 4 : 0;
+        }
+        for (int y = y0; y < y1; y++)
+            for (int X = 1; X <= (st ? 6 : 40); X++) {
+                Rgb *p = &cv[(size_t)y * vb_ow + X - 1]; int w = st ? (7 - X) * 256 / 6 : X <= 8 ? 256 : (40 - X) * 256 / 32;
+                p->r = clampi(p->r + jd[y][st][0] * w / 256, 0, 255); p->g = clampi(p->g + jd[y][st][1] * w / 256, 0, 255);
+                p->b = clampi(p->b + jd[y][st][2] * w / 256, 0, 255);
+            }
+    }
+}
+static void gen_cv(int pad)
+{
+    pal_make();
+    vb_ow = pad + 64;
+    if (!canvas_open(vb_ow)) return;
+    vb_ex = CV_EXCL;
+    for (int side = 0; side < 2; side++) {
+        canvas_clear(); cur_side = side;
+        for (int i = 0; i < CV_NB; i++) vb_quilt(side, &CV_BANDS[side][i], 1101 + 13 * i);
+        cv_tone(side, 0, PH);
         for (int y = 0; y < PH; y++)
             for (int X = 1; X <= pad; X++)
                 strip[(size_t)y * 2 * pad + (side ? pad + (X - 1) : pad - X)] = quant(cv[(size_t)y * vb_ow + X - 1]);
