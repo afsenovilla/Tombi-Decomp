@@ -1817,11 +1817,12 @@ static void gen_vb(int pad)
  *   - the green ledge: its lower rows (145-155, the grass and its dark lip) from x 0-215, its top (rows 136/137-144,
  *     where the left edge has the log, x 2-52) from the clean stretch between the hut's pole and the ladder (x 192-213),
  *     so its top edge under the fence is the picture's own; the straw bank (156-180), the ground (181-189);
- *   - the front blossom: its inside (rows 214-223, any column of the picture's front but the grass gap at x 204-231)
- *     and then its top (rows 186-213, cut into the ground above and the inside below): windows of the picture's
- *     front with up to 6 rows of shift (only rows of the picture, none reflected), so the scalloped outline of the
- *     bushes against the grass is the picture's own, its blur too, and at the join it goes on at the height the edge
- *     has it (the right edge's bush is high, rows ~189, the left edge is a grass valley down to row ~215);
+ *   - the front blossom: its inside (rows 218-223 left, 214-223 right, any column of the picture's front but the grass
+ *     gap at x 204-231) and then its top (rows 186-217 / 186-213, cut into the ground above and the inside below):
+ *     windows of the picture's front with up to 3 / 6 rows of shift (only rows of the picture, none reflected), so the
+ *     scalloped outline of the bushes against the grass is the picture's own, its blur too, and at the join it goes
+ *     on at the height the edge has it (the right edge's bush is high, rows ~189; the left edge is a grass valley down
+ *     to row ~213, so the left top band reaches lower);
  *   - the blurred bands (canopy, front) have their cuts blended over 5 x 5 texels (VBB_FEATHER), and their tone is
  *     matched at the join per row (cb_tone: the strip's first 8 columns onto the picture's columns 2-9, fading out by
  *     column 64; its first column onto the picture's last one, fading out over 8: the picture's edge columns are a
@@ -1841,8 +1842,8 @@ static const VbBand CB_BANDS[2][9] = {
       { 138, 145, 136, 148, 192, 214, 8, 4, 2, 3, 0, VB_LEDGE, 0, 0, 0, CB_S },
       { 156, 181, 156, 181, 0, 216, 16, 5, 4, 0, 0, VB_BANK, 1, 0, 0, VBB_TIGHT },
       { 181, 190, 181, 197, 0, 100, 16, 5, 4, 0, 1, VB_GROUND, 0, 0, 0, VBB_TIGHT },
-      { 214, PH, 214, PH, 0, 320, 16, 5, 0, 0, 0, VB_FRONTR, 0, 0, 0, CB_S | VBB_FEATHER | VBB_FAR },
-      { 186, 214, 182, PH, 0, 320, 16, 6, 3, 4, 6, VB_FRONTR, 0, 0, 0, CB_S | VBB_FEATHER | VBB_FAR } },
+      { 218, PH, 218, PH, 0, 320, 16, 5, 0, 0, 0, VB_FRONTR, 0, 0, 0, CB_S | VBB_FEATHER | VBB_FAR },
+      { 186, 218, 182, PH, 0, 320, 16, 6, 3, 3, 3, VB_FRONTR, 0, 0, 0, CB_S | VBB_FEATHER | VBB_FAR } },
     { { 108, 139, 108, 139, 186, 256, 12, 5, 0, 0, 0, VB_FENCE, 1, 0, 0, VBB_TIGHT },
       { 60, 108, 50, 124, 190, 320, 16, 8, 0, 6, 8, VB_BACK, 0, 0, 0, CB_S | VBB_SOFT | VBB_FEATHER | VBB_FAR },
       { 0, 60, 0, 70, 0, 320, 16, 8, 0, 6, 3, VB_BACK, 0, 0, 0, CB_S | VBB_FEATHER | VBB_FAR },
@@ -1896,7 +1897,7 @@ static void gen_cb(int pad)
     for (int side = 0; side < 2; side++) {
         canvas_clear(); cur_side = side;
         for (int i = 0; i < 9; i++) vb_quilt(side, &CB_BANDS[side][i], 901 + 13 * i);
-        cb_tone(side, 0, 108); cb_tone(side, 214, PH);
+        cb_tone(side, 0, 108); cb_tone(side, CB_BANDS[side][7].y0, PH);
         for (int y = 0; y < PH; y++)
             for (int X = 1; X <= pad; X++)
                 strip[(size_t)y * 2 * pad + (side ? pad + (X - 1) : pad - X)] = quant(cv[(size_t)y * vb_ow + X - 1]);

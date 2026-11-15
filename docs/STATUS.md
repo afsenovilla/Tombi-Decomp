@@ -33,9 +33,10 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
 ## In progress / open
 
 0. **Widescreen room strips, next (2026-11-15).** Approved and on by default: AREA02 s5, AREA05 s1/s3, AREA02 s1
-   (the bottom-left pink sphere left as the user accepted it "for now"). Next, in order: AREA19 s1 (Dwarf Village in
-   blossom; same method as AREA02 s1: run-time quilting of the picture's own bands + fitted-circle completion);
-   the Haunted Mansion 3D side rooms AREA04 s10/s11/s15/s19 (black past the model's outer wall; postponed by the
+   (the bottom-left pink sphere left as the user accepted it "for now"). AREA19 s1 (Dwarf Village in blossom) redone
+   2026-11-17 (`gen_cb`: every band quilted from the picture at run time, the front bushes' scalloped top included;
+   PORT.md has the numbers and the weak points), OFF by default until the user approves it (`--ws-backdrop-rooms
+   19:1`; to approve: `approved` = 1 in its ROOMS entry). Next: the Haunted Mansion 3D side rooms AREA04 s10/s11/s15/s19 (black past the model's outer wall; postponed by the
    user for token budget); then the other fixed-camera pictures (AREA17 s3/s4 hall, AREA18 s2, AREA10 s8, AREA09 s3,
    ...). User rules: show before|after first, never mirror, measure geometry/tones in the picture, no roots, match
    blur; use tools/ws_seam.py on the joins.
@@ -93,7 +94,7 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    a closer study of the picture: irregular limestone slabs, two-rail fence with posts every 33 columns, the short
    three-plank-looking object by each edge not continued; PORT.md has how; since approved and on by default), AREA19 s1
    (Dwarf Village in blossom; runs as area 2 s1, told apart by its picture: the first version, rejected by the user as
-   garbage, still to be redone like AREA02 s1) and AREA02 s1 (the village with the balloon trees: own generator `gen_vb`;
+   garbage, redone 2026-11-17 like AREA02 s1, `gen_cb`, still off until approved) and AREA02 s1 (the village with the balloon trees: own generator `gen_vb`;
    third version 2026-11-16 after the user's detailed review: textures quilted from the picture's own texels at run
    time, the edge spheres completed from fitted circles; 2026-11-17: the cut the user saw at the right join fixed (the
    lightest cream sphere there was cut by a new sphere in front of it; the lit one ran to a flat white dome), measured

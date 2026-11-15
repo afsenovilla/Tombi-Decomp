@@ -2854,7 +2854,7 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   `samp_edges`), a region map of the strip and `balance_regions()` (per region, the strip's columns 4-15 mapped onto
   the trimmed mean / spread of the picture's 32 columns next to the edge, or next to both edges for regions one edge
   is covered at: the village's jukebox), `emit()` (the join and the quantisation to the picture's colours), foliage
-  `blob()`, `sphere()`.  The rooms:
+  `blob()`.  The rooms:
   - AREA05 s1 / s3 (the same picture: the house with the dry-stone wall), a frontal scene, every band continued
     sideways from what the picture has in its last columns (rows: wood 0-70, front fence 71-102, the wall 103-185,
     path 186-~200, bushes ~200-223).  Redrawn 2026-11-14 after the user rejected the first version (regular clone
@@ -3016,11 +3016,51 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     lower left, the lump's diagonal edge), so their size beyond the join is a plausible guess, made round and hidden
     behind the spheres in front.  Checked (headless): 16:9 and 21:9 in the game, i386 = wasm2c frames, default flags identical to the build
     before for AREA02 s1 (off) and the approved rooms; not checked on the device.
-  - AREA19 s1 (the blossom village; it shares the layout, the pieces and the first generator, `gen_village`, with the
-    old AREA02 s1): the first version, rejected by the user, still to be redone the way AREA02 s1 was: canopy 0-~100
-    (blossom as value noise masses with small flower clusters on a jittered 8 x 7 grid, a ragged shaded lower edge),
-    the grey rock band behind, the fence 112-138 (posts 5-7 columns, two rails), the grass ledge 138-150, its lip,
-    the palisade 155-182 (4-column stakes), the ground, the front 195-223 (blossom mounds).
+  - AREA19 s1 (the blossom village, 2026-11-17, `gen_cb`; off by default, preview with `--ws-backdrop-rooms 19:1`):
+    redone the way AREA02 s1 was, after the user rejected the first procedural version (value-noise blossom, drawn
+    fence and palisade).  The picture has the same layout and objects as AREA02 s1 (huts, fence, ledge, straw bank,
+    ladder, jukebox) but everything left at the edges is a texture: a pink cherry-blossom canopy (light flower
+    clusters above, darker and greyer low) with a brown-rimmed fringe over a grey rock band (blocky towers by the left
+    edge, a ridge by the right one), a green ledge, green ground and a front row of blurred blossom bushes cut by the
+    frame's bottom.  So every band is quilted at run time from the user's own picture with `vb_quilt` (no spheres,
+    nothing drawn, nothing mirrored, the hut / chimney / pole / log / bucket / barrel / stones / stone pile / ladder /
+    jukebox and its lever never copied: `CB_EXCL`).  Bands (`CB_BANDS`, measured on the picture at 4-10x): the fence
+    (left x 0-43 rows 108-137, its first 9 columns the picture's own posts continued with their period so the post
+    cut by the edge goes on; right x 186-255 rows 108-138); the canopy's lower part with the fringe and the rocks
+    (rows 60-107, windows shifted up to 8 rows so the fringe goes on at the edge's height: ~row 98 at the left edge,
+    ~104 at the right; only rows of the picture, never reflected) and its upper part (rows 0-59, from x 0-43 and
+    192-319); the ledge in two bands, its lower rows (145-155, grass and dark lip) from x 0-215 and its top (rows
+    136-144, where the left edge has the log) from the clean stretch between the hut's pole and the ladder (x
+    192-213), so its edge under the fence is the picture's own (a first try reflected the lower rows upwards: a row
+    of dark dots repeating every block); the straw bank; the ground; the front in two bands, its inside (rows
+    218-223 on the left, 214-223 on the right) and then its top (rows 186-217 / 186-213, windows of the picture's
+    front shifted up to 3 / 6 rows) cut into the ground above and the inside below, so the bushes' scalloped outline against the grass is the picture's own, with its
+    blur, and goes on at the height the edge has it (the right edge's bush is high, ~row 189; the left edge is a grass
+    valley down to ~row 215).  New in `vb_quilt` (per-band flags in `VbBand.st`, all off for AREA02 s1, whose strips
+    stay byte-identical): `VBB_STRICT` (a window whose shifted rows leave the band's source rows is not taken: no
+    reflected rows), `VBB_TIGHT` (the first block is the best match of the picture's columns at the edge, not one
+    within 1/8 of it: on a stochastic texture the 1/8 pick showed a seam at the join), `VBB_SOFT` (objects in the
+    overlap rows do not rule a window out: the jukebox's top would have barred every rock window at x 242-310),
+    `VBB_FEATHER` (the cuts blended over 5 x 5 texels: in the blurred blossom a minimum-error cut between two smooth
+    textures still read as an edge), `VBB_FAR` (on a stochastic texture the window that goes on from the one before
+    has no overlap error at all, so the strips came out as runs of the picture's own columns, x 225-305 copied whole
+    into the right canopy and the picture's columns 0-30 three times into the left one: such windows and those
+    overlapping the last three are now taken only when nothing else fits, and windows within 96 columns of where they
+    go are penalised), and the object table as a pointer (`vb_ex`).  The blurred bands' tone is matched
+    at the join per row (`cb_tone`, means over rows +- 4: the strip's first 8 columns onto the picture's columns 2-9,
+    fading out by column 64, and its first column onto the picture's last one, fading over 8 columns: the picture's
+    edge columns are about 6 levels darker in the canopy and up to 40 in the left front valley, and the strip goes on
+    from them).  Seam metric (`tools/ws_seam.py`, bands canopy 0-60 / lowcan 60-90 / rock 90-108 / fence / ledge /
+    bank / ground / fronttop / front): every band's median join step is within the picture's own median step on both
+    sides; rows within the picture's step: right 95 / 87 / 94 / 76 / 95 / 92 / 56 / 75 / 83 %, left 97 / 100 / 95 /
+    100 / 94 / 92 / 87 / 67 / 69 % (the low ones: the right ground's 3 picture columns beside the jukebox's base are
+    its shadow; the front's top rows cross the bushes' outline, where a row is grass on one side and blossom on the
+    other).  Weak points, bluntly: at 21:9 and wider the left fence (44 source columns) repeats its post groups and
+    the left rock towers recur; the right front's inside is a little greyer-white than the picture's pink right by
+    the edge; the picture's own brown twig dots in its last columns (right edge, rows 54-83) read as a dotted line at
+    8x.  Checked (headless): standalone strips at 16:9 and 21:9 (21:9 starts with the 16:9 strip's columns: 0
+    texels differ), the game at 16:9 and 21:9, i386 = wasm2c frames; AREA02 s1 / s5 and AREA05 s1 / s3 strips
+    byte-identical to the build before; not checked on the device.
   - AREA17 s3 / s4 (the Iron Castle hall) is not redrawn yet: its side walls are not simply planes towards the
     camera.  Measured edges (left / right edge columns): the top rail of the side balustrade rises outwards (row 136
     at x 34, 131 at x 1), its lower rail stays at row 146-147 across, the walls' foot falls outwards (180 at x 25,
