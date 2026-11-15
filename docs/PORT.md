@@ -3036,7 +3036,8 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     218-223 on the left, 214-223 on the right) and then its top (rows 186-217 / 186-213, windows of the picture's
     front shifted up to 3 / 6 rows) cut into the ground above and the inside below, so the bushes' scalloped outline against the grass is the picture's own, with its
     blur, and goes on at the height the edge has it (the right edge's bush is high, ~row 189; the left edge is a grass
-    valley down to ~row 215).  New in `vb_quilt` (per-band flags in `VbBand.st`, all off for AREA02 s1, whose strips
+    valley down to ~row 213, whose other flank the strip goes on with: its first block is matched on 8 picture columns,
+    a first try on 6 ended the valley in a vertical bush edge on the join).  New in `vb_quilt` (per-band flags in `VbBand.st`, all off for AREA02 s1, whose strips
     stay byte-identical): `VBB_STRICT` (a window whose shifted rows leave the band's source rows is not taken: no
     reflected rows), `VBB_TIGHT` (the first block is the best match of the picture's columns at the edge, not one
     within 1/8 of it: on a stochastic texture the 1/8 pick showed a seam at the join), `VBB_SOFT` (objects in the

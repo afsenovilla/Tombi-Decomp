@@ -1817,22 +1817,24 @@ static void gen_vb(int pad)
  *   - the green ledge: its lower rows (145-155, the grass and its dark lip) from x 0-215, its top (rows 136/137-144,
  *     where the left edge has the log, x 2-52) from the clean stretch between the hut's pole and the ladder (x 192-213),
  *     so its top edge under the fence is the picture's own; the straw bank (156-180), the ground (181-189);
- *   - the front blossom: its inside (rows 218-223 left, 214-223 right, any column of the picture's front but the grass
- *     gap at x 204-231) and then its top (rows 186-217 / 186-213, cut into the ground above and the inside below):
+ *   - the front blossom: its inside (rows 218-223 left, 214-223 right, any column of the picture's front) and then its
+ *     top (rows 186-217 / 186-213, cut into the ground above and the inside below):
  *     windows of the picture's front with up to 3 / 6 rows of shift (only rows of the picture, none reflected), so the
  *     scalloped outline of the bushes against the grass is the picture's own, its blur too, and at the join it goes
  *     on at the height the edge has it (the right edge's bush is high, rows ~189; the left edge is a grass valley down
- *     to row ~213, so the left top band reaches lower);
+ *     to row ~213, so the left top band reaches lower, and its first block is matched on 8 picture columns, enough of
+ *     the valley's flank that the strip goes on with the other flank, not with a vertical bush edge at the join);
  *   - the blurred bands (canopy, front) have their cuts blended over 5 x 5 texels (VBB_FEATHER), and their tone is
  *     matched at the join per row (cb_tone: the strip's first 8 columns onto the picture's columns 2-9, fading out by
  *     column 64; its first column onto the picture's last one, fading out over 8: the picture's edge columns are a
  *     little darker, about 6 levels, and the strip goes on from them).
  * Objects never copied (CB_EXCL): the hut and its chimney and pole, the log, the bucket, the barrel, the stones and
- * their track, the stone pile, the ladder, the jukebox and its lever, and the grass gap between the front bushes. */
+ * their track, the stone pile, the ladder, the jukebox and its lever (and the front blossom under the jukebox, rows
+ * 182-201, whose top the jukebox hides: a flat top). */
 static const VbBox CB_EXCL[] = {
     { 44, 40, 192, 144 }, { 70, 12, 110, 52 }, { 2, 138, 53, 145 }, { 138, 126, 162, 150 }, { 32, 164, 60, 192 },
     { 98, 181, 218, 198 }, { 226, 118, 258, 142 }, { 214, 133, 262, 190 }, { 252, 120, 268, 191 }, { 284, 115, 302, 118 }, { 276, 118, 310, 124 },
-    { 262, 124, 317, 191 }, { 252, 182, 316, 202 }, { 204, 196, 232, 224 }, { 0, 0, 0, 0 } };
+    { 262, 124, 317, 191 }, { 252, 182, 316, 202 }, { 0, 0, 0, 0 } };
 #define CB_S (VBB_STRICT | VBB_TIGHT)
 static const VbBand CB_BANDS[2][9] = {
     { { 108, 138, 108, 138, 0, 44, 9, 5, 0, 0, 0, VB_FENCE, 1, 0, 9, VBB_TIGHT },
@@ -1843,7 +1845,7 @@ static const VbBand CB_BANDS[2][9] = {
       { 156, 181, 156, 181, 0, 216, 16, 5, 4, 0, 0, VB_BANK, 1, 0, 0, VBB_TIGHT },
       { 181, 190, 181, 197, 0, 100, 16, 5, 4, 0, 1, VB_GROUND, 0, 0, 0, VBB_TIGHT },
       { 218, PH, 218, PH, 0, 320, 16, 5, 0, 0, 0, VB_FRONTR, 0, 0, 0, CB_S | VBB_FEATHER | VBB_FAR },
-      { 186, 218, 182, PH, 0, 320, 16, 6, 3, 3, 3, VB_FRONTR, 0, 0, 0, CB_S | VBB_FEATHER | VBB_FAR } },
+      { 186, 218, 182, PH, 0, 320, 16, 8, 3, 3, 3, VB_FRONTR, 0, 0, 0, CB_S | VBB_FEATHER | VBB_FAR } },
     { { 108, 139, 108, 139, 186, 256, 12, 5, 0, 0, 0, VB_FENCE, 1, 0, 0, VBB_TIGHT },
       { 60, 108, 50, 124, 190, 320, 16, 8, 0, 6, 8, VB_BACK, 0, 0, 0, CB_S | VBB_SOFT | VBB_FEATHER | VBB_FAR },
       { 0, 60, 0, 70, 0, 320, 16, 8, 0, 6, 3, VB_BACK, 0, 0, 0, CB_S | VBB_FEATHER | VBB_FAR },
