@@ -3112,6 +3112,59 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     Checked (headless): standalone strips at 16:9 and 21:9 (21:9 starts with the 16:9 strip's columns: 0
     texels differ), the game at 16:9 and 21:9, i386 = wasm2c frames; AREA02 s1 / s5 and AREA05 s1 / s3 strips
     byte-identical to the build before; not checked on the device.
+  - AREA11 s2 (the cave with the brick tower, 2026-11-15, `gen_cv`; off by default, preview with
+    `--ws-backdrop-rooms 11:2`).  Drawn like the others: the 320 x 224 picture (left sprite page (128, 0), right
+    columns page (256, 0) u 0-63) plus a quad of the tower's foot and door drawn again over the player (page 256 u
+    64-151 v 0-79 -> picture (24, 128)).  Everything at the edges is rock: the ceiling and its light lip, the wall of
+    rock pillars, the mossy floor, and on the right the dark shadow band along the wall's foot (rows ~180-208).  Every
+    band is quilted from the user's picture (`CV_BANDS`: 28-row bands made bottom-up, each cut into the one below over
+    8 rows, windows from any clean column shifted up to 4 rows, the floor from x 0-199 on the left and from the shadow's
+    columns x 200-319 on the right, so the shadow band goes on; the tower and the three niches with their tan rims never
+    copied: `CV_EXCL`).  New flag `VBB_EDGEW`: the overlap columns next to the new block weigh 4 (the 2 after them 2):
+    on a busy texture the columns at the cut decide whether the join shows.  The 90-row bands of the first try showed
+    vertical seams at both joins (a window has to match the edge over all its rows); 28-row bands fixed that.  Light
+    (`cv_tone`): the strip's luminance per row (rows +- 16, all its columns) mapped onto the mean and spread of the
+    picture's 40 columns next to the edge (the cave darkens towards its sides; windows from the lit middle came out
+    far too light), then its first 8 columns' mean onto the picture's last 8 (fading by column 40), its first column
+    onto the picture's last one (3/4 of the step, fading over 6).  ws_seam (bands of 28 rows): right 7/8 pass (the
+    one failing is a tone check where the picture's last 16 columns are a dark cleft), left 6/8 (a tone / contrast check
+    and a stripe-period check; every join step is within the picture's own).  Weak points: at 21:9 and wider the
+    pillar rhythm of the blocks shows (a light pillar and a dark cleft per ~21 columns) and the ceiling's dark
+    underside runs on as a long horizontal band on the left (it does continue the picture's ledge).
+  - AREA09 s5 (the brick wall with the staircase, 2026-11-15, `gen_st`; off by default, preview with
+    `--ws-backdrop-rooms 9:5`).  The picture, plus the stair drawn again over the player as two quads (page 256 u 64-255
+    v 0-151 -> (0, 80), u 64-191 v 144-255 -> (192, 8)).  Measured: the rail's top row is yr(x) = 203.6 - 55 x / 90 at
+    every column (a 16-column vertical profile of the stair matched along it), the marble stringer from yr + 35 to its
+    lower edge at 73.3 - 0.013 x rows below the rail (the band widens slightly towards the bottom left), one step
+    (22.5, 13.75), so four steps are exactly (90, 55) (that shift has less error than (89 / 91, 54 / 56)).  The strips:
+    the wall quilted from the picture (28-row bands, windows of any clean column shifted up to 10 rows; the stair band
+    and 2 rows round it, and the sconces with the core of their glow, never copied: `vb_exf`, a new optional exclusion
+    function, and `ST_EXCL`), then relit: each copied texel times the light wanted where it lands over the light where
+    it came from (`vb_srcmap`, a new optional map of where each texel was copied from; the light: the wall's luminance
+    averaged over 17 x 17, stair and sconces out).  The light wanted: on the left, the edge's light per row with the
+    edge sconce's glow (flame (26, 120)) falling off as S^2 / (S^2 + r^2), S 30, towards the edge's 20th percentile; on
+    the right (mostly the wall in the stair's shadow, whose light runs in bands along the stair) the light of the edge
+    column where the texel's line parallel to the stair meets it.  The stair: the picture's own four steps further in
+    ((x + 90, y - 55) on the left, (x - 90, y + 55) on the right, eight steps where four leave x 8-300), rows below the
+    rail scaled by the band's width at both places, so rail, balusters, steps and the stringer's lower edge go on along
+    their own lines; its light per row of the cross-section matched at the edge.  Join: the wall's first 8 columns'
+    mean per row onto the picture's last 8, its first column onto the last one.  Fixed on the way: the right strip had
+    an orange line under the stringer (the edge light of the stair's rows was filled from above the rail; now from
+    below), ghost glows at 21:9 (glow cores now excluded).  ws_seam: left 8/8 bands pass; right 5/8 (the three failing
+    are the bands the diagonal stair crosses: the picture's last columns and the strip's first ones hold different
+    shares of stair and wall by design; the joins on the stair are exact copies).  Weak points: the marble's cracks
+    recur four steps apart in the strip (the copy); the stair copy comes from 90 columns in, lit a little differently
+    (matched per row at the edge only).
+  - AREA09 s4 (the rock wall with the stair down to the right) was tried with the same generator and dropped: the left
+    strip (the rock under the stair, windows translated along the stair) worked, but the right strip lies next to the
+    row of sconce mounds along the stair, whose windows came out as dark shadow fragments; matching on relit texels
+    fixed that but cost 8-20 s per room entry (the others take ~2 s).  Not attempted: AREA16 s4 (its picture is 672 rows,
+    drawn as three 256-row sprite sets shifted by the camera: the hook only takes a picture whose left sprite is at
+    frame row 16), AREA08 s1 / s3 (a 4 bpp layer of near trees and translucent light rays over the 8 bpp picture, CLUT
+    row 510: the rays converge on a point above the frame), AREA16 s5 (the bell tower: pillars cut by both edges).
+    Checked (headless, 2026-11-15): the two new rooms at 16:9 and 21:9 (standalone and in the game), 4:3 identical with
+    `--ws-backdrop on`, off by default (the clear colour), AREA02 s5 / s1, AREA05 s1 and AREA19 s1 strips byte-identical
+    to the build before (standalone, pads 53 and 140), i386 = wasm2c frames; not checked on the device.
   - AREA17 s3 / s4 (the Iron Castle hall) is not redrawn yet: its side walls are not simply planes towards the
     camera.  Measured edges (left / right edge columns): the top rail of the side balustrade rises outwards (row 136
     at x 34, 131 at x 1), its lower rail stays at row 146-147 across, the walls' foot falls outwards (180 at x 25,

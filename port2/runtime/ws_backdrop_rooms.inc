@@ -2260,7 +2260,12 @@ static void gen_cb(int pad)
     canvas_close();
 }
 
-/* ================================================================== AREA11 s2: the cave with the brick tower */
+/* ================================================================== AREA11 s2: the cave with the brick tower
+ * Everything by the edges is rock (the ceiling and its light lip, the wall of rock pillars, the mossy floor, on the
+ * right the dark shadow along the wall's foot), so every band is quilted from the user's picture (vb_quilt, 28-row
+ * bands made bottom-up, each cut into the one below; the floor from x 0-199 on the left and from the shadow's columns
+ * on the right, so the shadow band goes on; the tower and the three niches never copied), then cv_tone matches the
+ * light per row to the picture's columns next to the edge (the cave darkens towards its sides). */
 enum { CV_CEIL = 1, CV_WALL, CV_FLOOR };
 static const VbBox CV_EXCL[] = {
     { 26, 24, 124, 210 }, { 162, 22, 228, 70 }, { 204, 70, 268, 142 }, { 252, 90, 304, 152 }, { 0, 0, 0, 0 } };
