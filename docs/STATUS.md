@@ -41,7 +41,9 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    has the numbers and the weak points), OFF by default until the user approves it (`--ws-backdrop-rooms
    19:1`; to approve: `approved` = 1 in its ROOMS entry). Next: the Haunted Mansion 3D side rooms AREA04 s10/s11/s15/s19 (black past the model's outer wall; postponed by the
    user for token budget). The last fixed-camera picture, the AREA17 s3/s4 hall, has a preview since 2026-11-16
-   (`gen_hl`: side walls rectified with the camera's pitch, the panel unit repeated with its period; OFF by default,
+   (`gen_hl`: side walls rectified with the camera's pitch, the panel unit repeated with its period; the panels'
+   light modelled along each wall from the picture (`hl_light`, 2026-11-16: B's pane continues B's light, the panels
+   further out follow the trend, no gold glare repeated); OFF by default,
    `--ws-backdrop-rooms 17:3,17:4`; waiting for the user's verdict; PORT.md "More rooms
    with picture strips"). User rules: show before|after first, never mirror, measure geometry/tones in the picture, no roots, match
    blur; use tools/ws_seam.py on the joins.

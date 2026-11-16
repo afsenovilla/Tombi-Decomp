@@ -3352,11 +3352,35 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     +2.1 on row 128) cuts B's pane in its corner-side third on the upper rows and its bevel's start below.  The strip
     continues from exactly there: every texel is A's texel at the same offset in the unit (k + 30.9, + 61.8, ...: the
     same rectified row, read at its exact position, so every line, rounded corner and screw goes on), so at 16:9 it
-    shows the rest of B's pane, B's bar with its screws, then the next panel whole (rim, gold bevel, pane) and its bar
-    at the screen edge.  B keeps its own tones: on its pane's rows (28-124, held 2 rows into the frame and fading out
-    over 4 more, so the pane's top and foot edges keep their rows) A's texels are scaled per channel by B's pane over
-    A's pane (B read by the edge, 9-row mean; scaled, not offset, so the bar's bronze flare at the pane's foot stays
-    bronze), and the rest to B's edge texel is added, fading out over 3 columns (exact at the join).  Rejected
+    shows the rest of B's pane, B's bar with its screws, then the next panel whole (rim, bevel, pane) and its bar
+    at the screen edge.
+    The light (2026-11-16, `hl_light`; "falla en la iluminación": B's continued pane showed A's bright band by its bar
+    and A's streaks, and the panel further out A's gold glare and bright pane).  The walls are polished metal lit by
+    reflection, so each part's tone changes along the wall its own way; measured B against A at the same offset in the
+    unit (rectified, left / right wall): the pane x1.3 / x0.9 (B 177-208 / 100-140 by the edge, A's flat part 125-160 /
+    125-165; on the right B darkens downwards, 136 on row 40 to 107 on row 80, where A brightens 145 to 160), the
+    bevel x0.05 / x0.3 (B's is black / dark brown, A's gold rising from 90 by the pane to a glare of 197 by the rim),
+    the rim x0.8 / x0.85 (B 181-197, A 212-247), the frame's top member x1.2-1.4 / up to x2 (145-195 by the edge,
+    110-130 by the corner: brighter towards the camera), the cornice level (25-36 all along).  A's pane is no flat tone
+    either: +9 % by its bar (164 against 151 on row 60) and falling off into its inner shadow from k 27; B's lit pane
+    ends about 1.5 / 1 column later than A's (its falloff 180, 171, 147, 108, 59 at k -2..2 on row 60, left).  So
+    every panel texel is A's texel times a smooth light ratio (A's texture kept, its light replaced; integer, the same
+    on every build): B's light over A's, both box-smoothed within the part (+-1 column, +-2 rows; the parts: bar,
+    pane, the bevel's first 3 columns (the inner shadow), the rest of the bevel, rim) where B shows, held over the
+    part from there (from the nearest row measured at that offset, else along the row; the inner shadow scaled as B's
+    pane's level goes); on the pane B's level by the edge (its two brightest texels there, 9-row mean, held from the
+    nearest row once the edge is past the pane) held flat across the pane over A's linear light (fitted on A's flat
+    part, k 17.5-26.8), so A's bright side by its bar does not come back and its inner shadow does; the rim B's
+    brightest texels over A's; B's bar (never shown) the rim's ratio, at most 1; where B does not show, the frame's
+    gold on the pane's columns (the rounded corners, the bar's flare at the pane's foot) takes the bar's or the
+    bevel's ratio by how gold A's light is; each channel within -20 / +25 % of the luminance ratio; the pane's end and
+    the inner shadow meet smoothly (+-1 column), and B's pane's end is no brighter than its pane's level or its edge
+    texel (no line down the pane by the join).  The panels further out follow the trend damped: the ratio to the power
+    1.25 (C), then 1.375, a brightening held at B's (not on the inner shadow), never under 0.35 of A's light: C's bevel
+    is a dim bronze (35-60) instead of A's gold glare, its pane B's level, its rim B's.  The rest to B's edge texel is
+    added at the join, fading out over 3 columns (exact there).  Only the panels' rows change (rectified 13-129): the
+    cornice, the handrail, the slats, the base and the floor are byte-identical.  Before that, A's texels were scaled
+    per row by B's pane over A's pane only on B's pane and copied as they are further out.  Rejected
     versions: the third one took the unit as the window (B's dark bevel and lit pane, k -8..7) + A's bar, pane, bevel
     and rim, period 51, starting at the edge: right against the picture's half panel (B) it drew a whole new frame's rim
     and bevel instead of closing B first ("En el corte ya hay media ventana y has dibujado una entera pegada en lugar
