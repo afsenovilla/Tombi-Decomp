@@ -779,9 +779,9 @@ static const Room ROOMS[] = {
       { 256, 152, 0, 96, 96, 152, 0 }, { 256, 136, 104, 88, 24, 0, 199 } }, gen_bt },   /* the bell tower (the clapper, the
                                                             bell and the floor's near left part drawn again over the
                                                             player; ws_backdrop_belltower.inc) */
-    { 16, 3, 256, 0, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 256, 64, 0, 144, 144, 0, 80 }, { 256, 64, 144, 72, 96, 244, 128 } },
+    { 16, 3, 256, 1, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 256, 64, 0, 144, 144, 0, 80 }, { 256, 64, 144, 72, 96, 244, 128 } },
       gen_gr },                                          /* the gears room (ws_backdrop_gears.inc) */
-    { 16, 6, 256, 0, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 256, 64, 0, 144, 144, 0, 80 }, { 256, 64, 144, 72, 96, 244, 128 },
+    { 16, 6, 256, 1, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 256, 64, 0, 144, 144, 0, 80 }, { 256, 64, 144, 72, 96, 244, 128 },
       { 256, 184, 216, 64, 40, 252, 184 } }, gen_gr },
     { 6, 2, MM_H2, 1, { { 0 } }, { { 0 } }, gen_mm },   /* the mermaid on her rock: the sea is a loop of four pictures */
     { 6, 1, MM_H1, 1, { { 0 } }, { { 0 } }, gen_mm },   /* the Singing Rock beach: a 640-column picture moved by the
