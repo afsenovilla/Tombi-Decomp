@@ -32,6 +32,16 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
 
 ## In progress / open
 
+0a. **Widescreen exits (2026-11-17, docs/PORT.md "Widescreen exits", `runtime/ws_exits.c`).** Moved to the wide
+   edge, reviewed room by room with the user: AREA02 s1 (and the blossom village, which runs as 2:1), s5; AREA03 s1,
+   s5; AREA04 s2; AREA05 s1/s3 (+ right side opened, + wider notice-board talk box); AREA06 s1, s2 (+ right side; its
+   beach strips are the other agent's, still off by default); AREA18 s1 both sides. Kept at 4:3 by the user: door
+   exits (AREA00 s5, AREA01 s4, AREA03 s3, AREA09 s1, s3, AREA10 s3/s7 left) and the AREA09 s4/s5 stairs. Open: the
+   edge exits the headless sweep cannot reach after the debug select (dialogue/event holds or resets Tomba):
+   AREA01 s1, AREA03 s0/s2/s4, AREA09 s0, AREA10 s2, AREA10 s3/s7 right; they need a save near the room. The
+   top-down / tunnel exits (func_800270A0 with map coordinates) are not drawn by the collision view yet. Not tested
+   on the device. The headless sweep (place Tomba 70 units from the exit, walk out, compare 4:3/16:9/21:9/32:9) was a
+   scratch script: rewrite it from PORT.md if needed (it needs a CVLOG line in colview.c's tick, not committed).
 0. **Widescreen room strips, next (2026-11-15).** Approved and on by default: AREA02 s5, AREA05 s1/s3, AREA02 s1
    (the bottom-left pink sphere left as the user accepted it "for now"). AREA19 s1 (Dwarf Village in blossom) redone
    2026-11-17 (`gen_cb`: every band quilted from the picture at run time, the front bushes' scalloped top included;
