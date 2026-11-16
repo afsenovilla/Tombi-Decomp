@@ -3615,7 +3615,7 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     quads of page (256, 0) (u 64 v 0 144 x 144 at x 0, u 64 v 144 72 x 96 at x 244; s6 also u 184 v 216 64 x 40 at
     252, 184): at picture row 80 / 128 in s6 (on the picture's wheels) and 24 rows higher in s3 (rows 56 / 104), where
     the quads' wheels stand over the picture's and end at the quads' last row (200): the 4:3 picture of s3 already
-    shows a doubled rim and a cut at row 200 (checked on the debug select's default flags only).  The quads' wheels
+    shows a doubled rim and a cut at row 200 (checked on the debug select's default flags only; a slip of the PAL disc, since put right: the third version below).  The quads' wheels
     are another render of the picture's (44 % of their texels equal the picture's under them); the right quad lies 3
     columns left of the picture's wheel and ends 4 columns before the edge, so the picture's own wheel shows in the
     last 4 columns (a dark sliver in the cut tooth, the game's).  The renderer draws the quads over a texel less than
@@ -3721,6 +3721,73 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     the picture's dark first columns of the left corbel stay a soft upright band at the join; the right wheel's
     strip is still built from the left wheel's texels and the spokes' width is assumed; the floor is the first
     version's quilt (no tile line is carried into the strips: none reaches the edges clearly); s3 as before.
+    Third version (2026-11-16; the review sheets' "v4"), after the user's review of the second: "Yo diría que aún
+    puedes pulir más la sala de engranajes."  What changed:
+    - s3's wheel quads are where the picture's wheels are (the PAL disc's slip, put right in every mode: "The gears
+      room's wheels" under "NTSC picture" below), so s3 and s6 have the same picture and the generator's second wheel
+      layer (the quads' wheels 24 rows up, cut at row 200) is gone; `ROOMS` lists s3's pieces at s6's rows;
+    - the left corbel is closed 9 columns out, as the right one.  Measured: the corbels' tips are at columns 62 and
+      256, 97.6 and 96.4 columns from the room's axis (159.6, the floor joints' vanishing column): mirror places.
+      The right one's end is in reach (its lower edge meets its base 9 columns past the edge: 73 columns long), so
+      the left one, in the same plane across the room, ends 9.3 columns past the left edge (the same length), on
+      the side wall at the same depth.  The second version's root 75 columns out had no measure behind it and drew
+      a wedge across the whole strip.  Its face: in the picture the first 5 columns are darker than the rest (mean
+      luminance 128 against 165, a sharp upright step at column 5 on every row: the part next to the wall is in
+      shade), so the 9 columns to the root are that shaded part going on: the face's own texels of columns 5-13 at
+      the shaded columns' tone, rows scaled to the face's height there (`gr_lface`).  The second version eased from
+      the dark columns to the lit tone over 12 columns, which left the "soft upright band".  The wall next to each
+      root is shaded over 4 columns; no cast shadow is drawn (below);
+    - the floor is drawn in perspective (`gr_floor`; the quilt is gone).  Its joints are straight lines of the
+      picture: three fitted over 24-47 texels each (x = 457.3 - 1.877 y, 237.6 - 0.490 y, 14.6 + 0.912 y) meet at
+      (159.6, 158.8) within 0.5 texel, a fourth and a fifth (fainter) lie within a texel of the same fan, 1.395
+      columns apart per row under that point.  The slabs' grain is streaks across the room, so a floor texel's scale
+      depends on its row only.  A strip texel takes the picture's floor texel of its own row a whole number of slabs
+      towards the middle (a shear about the vanishing row, onto the one slab the picture shows whole, between the
+      joints of slopes -0.490 and 0.905): the slabs, their joints (the next lines of the fan, each coming with its
+      slab) and the grain go on at the picture's own scale, nothing magnified.  The floor is not a tiled texture
+      (sheared a slab on, its texels correlate 0.45 with themselves), so a strip slab is another slab's stone and
+      not a continuation texel for texel.  Each row's tone is the picture's floor next to that edge over the source
+      slab's (9 rows' means; the floor is darker towards the wall and a little towards the left);
+    - the side walls are laid from whole bricks (`gr_courses`).  The second version laid each course from that
+      course's clean stretches end to end (a course with one stretch repeated it; stretches met in mid brick).  Now
+      every course's clean columns are cut at its upright joints (the maxima of the course's column profile) and
+      the stretches from joint to joint (7-30 columns) form one pool for the whole wall (37 in this picture); a
+      strip course is bricks of the pool end to end, picked by a position hash (never one of the course's last two,
+      nor the one beside it in the course above), each brick's rows scaled to the course's.  The texels are taken
+      half as soft as bilinear (the picture's own side walls keep their mortar lines a texel wide) and the wall's
+      grain is given back at one texel a pixel (`gr_grain`: wall texels less their row's 5-texel mean, so no mortar
+      line in it).  The wall's light follows the wall's level lines (the rays) from the edge (`gr_wlight`) instead of
+      the screen's rows.  Gear shadows: none is added.  The edges' wall is lighter above the corbels (85) than
+      below (56-72) on both sides, which the light carries on; no shadow's outline is cut by an edge (the gears'
+      shadows fall on the back wall, left and down of each gear), so nothing in the picture says where one would
+      lie on the side walls;
+    - the wheels: turned texels are taken cubic (Catmull-Rom over the 4 x 4 around the point when all are lit
+      faces; the second version's bilinear plus a contrast term left swirls); the rims' outlines are one clean line
+      (a texel of the picture's dark outline within 3 texels of the band's edge is taken further into the face: the
+      left rim's underside had a comb of dark texels); the right rim is the left rim's texels 1.19 times as large
+      both ways (the right rim is 40 texels wide, the left 33.5: the nearer wheel; the second version stretched
+      them across the rim only, which drew the mottle out into streaks); the cut tooth's lit face takes only the
+      inside of the left tooth's face from its sixth column on (the tooth's outline texels and its darker edge
+      columns had left a dotted grey line 3 columns out);
+    - the first three strip columns lean on the picture's edge texel of their row where both are the same
+      material (110 / 180 / 230 of 256 the strip's), as in the first rooms.
+    Measured (5 x 5 high-pass deviation of the luminance, strip / picture next to it, s6): wall 5.2 / 6.2 left, 5.3 /
+    6.6 right (4.9 / 4.9 before); floor 8.1 / 7.5 left, 8.0 / 6.8 right (5.2 before on the left); wheels' lit faces
+    7.1 / 7.7 left, 7.3 / 8.4 right.
+    Checked (headless, 2026-11-16): s6 at 4:3 and with the default flags byte-identical to the build before; s3 at
+    4:3 shows one wheel set (the fix; `--picture ntsc` frames of both sections identical to the build before); the
+    16:9 frame's centre = the 4:3 frame and the 21:9 frame holds the 16:9 frame (0 texels, both sections); the
+    seventeen other rooms' 16:9 frames with `--ws-backdrop-rooms all` byte-identical to the build before (2:5 2:1
+    5:1 5:3 19:1 11:2 9:5 9:3 9:4 17:3 17:4 17:5 16:4 16:5 18:2 6:1 6:2); the game's strips = the standalone
+    generator's on the dumped picture (5-bit colours); OpenGL (xvfb) strips = software strips (0 texels); i386 =
+    wasm2c whole frames (4:3, 16:9, 21:9, both sections); 0.03 s per room entry at 16:9, 0.05 s at 21:9.  Not
+    checked on the device.  Weak points: the focal length (the bricks' length on the side walls) is still assumed;
+    the side walls are still a little softer than the picture's (5.2 against 6.2-6.6); a strip slab of the floor is
+    the picture's middle slab again (in a 16:9 strip its copies are 45-90 columns apart, not both in view; at 21:9
+    two neighbouring strip slabs are the same stone); the left corbel's end is inferred from the symmetry, not
+    seen; the right wheel's strip is still built from the left wheel's texels and the spokes' width is assumed;
+    the left rim's strip is the picture's rim 30 degrees on, a darker and more mottled stretch than the one at
+    the join (its tone is eased over 12 degrees, its mottle is not).
   - AREA16 s4 (the green tower, 2026-11-17, `gen_tw` / `tw_take` in `runtime/ws_backdrop_rooms2.inc`; off by default,
     preview with `--ws-backdrop-rooms 16:4`).  How the game draws it (`PORT_PRIMLOG`): one 672-row 8 bpp picture
     (CLUT (128, 511)) in three sets, each a 256-column sprite and the right 64 columns: rows 0-255 = page (128, 0) +
@@ -4596,6 +4663,23 @@ when `spawnObjectFromRecord` spawns from it and it still holds exactly those PAL
 elder's house (AREA00 section 3) are 10 px lower than in the USA run without it, within 1 px with it. AREA04
 sections 0/1 are left as they are (PAL reorders two records and adds three: content, not the screen). The player
 trace of the `tools/ntsc_check.py --port-script` run is identical with `--picture ntsc` and `--picture pal`.
+
+**The gears room's wheels (a PAL slip the other way; always on with the PAL picture).** AREA16 section 3 (the gears
+room before the repair) and section 6 (after it) draw the same picture, with its two blue cog wheels drawn again
+over the player as layer-3 type 0x46 objects (`drawObjectSpriteParts`: quads of page (256, 0)).  On the PAL disc
+section 3 shows them 24 rows above the picture's own wheels: doubled rims and a cut where the pieces end (row 200),
+standing still (800 frames logged with `PORT_PRIMLOG`: the two quads at frame rows 72 / 120 on every one, where
+section 6 has them at 96 / 144; nothing moves or animates them).  The placement records say why: the USA disc has
+the same y in both sections (`AREA16/D305.GAM` / `D604.GAM`: 0xD0, 0xD0, 0x96), the PAL disc moved section 6's and
+section 5's 24 lines down for its 256-line screen like every other room's (`D604.GAM`: 0xE8, 0xE8, 0xAE) and left
+section 3's at the USA values (`D304.GAM`: 0xD0, 0xD0, 0x96).  The picture itself is drawn 24 rows lower on PAL in
+both sections, so section 3's wheels miss it by exactly that.  With `--picture ntsc` (the USA layout) section 3
+was right all along.  The fix (`pal_apd_fix` in `port2/runtime/ntsc.c`, the same hook in `spawnObjectFromRecord`):
+with the PAL picture, a record of AREA16 holding exactly the eight words of one of those three gets section 6's y
+as the game spawns from it; nothing else is touched and `--picture ntsc` is as before.  It is a bug fix, so it is
+on in every mode (4:3 too) and has no switch.  Checked: section 3 at 4:3 shows one wheel set, on the picture's;
+section 6 and the seventeen other picture rooms byte-identical; `--picture ntsc` frames of both sections
+byte-identical to the build before; i386 = wasm2c.
 
 **Checked against the USA executable** (tools/psxemu running SCUS_942.36 from the USA disc, the same pad script as
 the port at `--hz 60`, frames aligned on Tombi's opening drop): the village opening frames are the same picture

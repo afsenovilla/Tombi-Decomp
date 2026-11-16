@@ -7,11 +7,11 @@
  * stone gears on the back wall, a sandstone corbel sticking out of each side wall, and two big blue cog wheels in
  * the foreground whose hubs are under the frame (the "blue beams" of the first note are their rims and spokes).  The
  * wheels are in the picture and are drawn again over the player as quads of page (256, 0) (u 64 v 0 144 x 144 the
- * left one, u 64 v 144 72 x 96 the right one, s6 also u 184 v 216 64 x 40): at their place in the picture in s6, 24
- * rows higher in s3 (the wheels have turned: s3 shows the quads' wheels over the picture's, cut at the quads' last
- * row, 200).  The right quad lies 3 columns left of the picture's wheel and ends 4 columns before the edge.
+ * left one, u 64 v 144 72 x 96 the right one, s6 also u 184 v 216 64 x 40), on the picture's wheels.  (The PAL disc
+ * places s3's quads 24 rows too high, a slip of its own that the port puts right: runtime/ntsc.c pal_apd_fix.)  The
+ * right quad lies 3 columns left of the picture's wheel and ends 4 columns before the edge.
  *
- * Measured (wheel coordinates = the picture's, s6):
+ * Measured (wheel coordinates = the picture's):
  *   - left wheel: its rim's outer edge is a circle, centre (-34, 291), radius 182 (the edge's 21 columns x 0-84 within
  *     1 row); unwrapped about that centre the rim is a straight band (inner edge 147.5 at 22-36 degrees from the
  *     vertical, 144 at 40, 142 from 44; outer 182 to 42 degrees, sagging to 174.5 at 52: the wheel is low-poly and
@@ -24,31 +24,35 @@
  *   - the corbels: left, top edge 47.5 + 0.09 x, lower edge 84.3 - 0.26 x (straight), 3 rows of underside; right, top
  *     edge row 55.5, the lit face's lower edge 96.5 at the edge falling 1 row a column over its last 12 columns, the
  *     dark underside below it down to a level base at row 105.5 (the wall under it): a short block, closed where
- *     the face reaches the base (gr_corbel); brick shows above and below both at the edges, so they stick out of
- *     the side walls and end on them;
- *   - the room is a box seen straight on: the floor's lines and the side walls' feet (row 186 at x 8 rising to 178
- *     at x 48 on the left, 0.2 rows a column) meet at (162, 155); the back wall is columns 47-273 and its courses
- *     are 6.8 rows apart (the row profile's autocorrelation: 0.6 at 7 rows, 0.55 at 14); the side walls' courses
- *     are the rays through them.
+ *     the face reaches the base, 9 columns out; their tips (columns 62 and 256) are mirror places about the room's
+ *     axis, so the left one ends 9 columns out as well (gr_corbel);
+ *   - the room is a box seen straight on: the side walls' feet (row 186 at x 8 rising to 178 at x 48 on the left,
+ *     0.2 rows a column) and courses meet at (162, 155), the floor's joints at (159.6, 158.8); the back wall is
+ *     columns 47-273 and its courses are 6.8 rows apart (the row profile's autocorrelation: 0.6 at 7 rows, 0.55 at
+ *     14); the side walls' courses are the rays through them.
  *
  * The strips, back to front:
- *   - the side walls, in perspective: the back wall's brick course by course along the rays (gr_side), its texels
- *     over their light (17 x 17 mean luminance of the wall texels) and lit as each row's first wall texels from the
- *     edge; the floor quilted (rq_quilt) from floor windows at most 10 rows off (its texture grows towards the
- *     viewer); the foot lines go on with their slope, anti-aliased;
- *   - the corbels: their faces go on between their measured edges, laid from clean pieces of both faces (gr_face):
- *     the left one to a root on the side wall 75 columns out (past 16:9), the right one closed 9 columns out; the
- *     left underside is the picture's own, slid along the lower edge, the right one the picture's tone by depth
- *     under the edge; their edges anti-aliased;
+ *   - the side walls, in perspective: whole bricks of the back wall laid joint to joint along each course's ray
+ *     (gr_courses, gr_side), their texels over their light (17 x 17 mean luminance of the wall texels), the picture's
+ *     grain given back at one texel a pixel (gr_grain), lit as the picture's wall at the edge along the wall's level
+ *     lines (gr_wlight); the foot lines go on with their slope, anti-aliased;
+ *   - the floor, in perspective: each strip texel is the picture's floor texel of its row a whole number of slabs
+ *     towards the middle (gr_floor: a shear about the joints' vanishing point), so the slabs, their joints and the
+ *     grain go on at the picture's own scale;
+ *   - the corbels: both closed 9 columns out on the side walls.  The left face goes on as its own shaded columns
+ *     (gr_lface), its underside the picture's slid along the lower edge; the right face is laid from clean pieces
+ *     of the faces (gr_face), its underside the picture's tone by depth under the edge; their edges anti-aliased;
  *   - the wheels, round: the left rim is the picture's rim next to the edge turned about the centre by the angle at
- *     which it matches itself best (gr_join, about 30 degrees: a facet period), its radii scaled by the band's edges
- *     there and here, its facet's tone at the join the picture's there, eased back over 12 degrees of arc; the teeth
- *     are the picture's a tooth period (44 degrees) on (the next one lands at -28 degrees, 95 columns out); the spokes
- *     are bars along the measured edge, textured with rim texels (the rim band laid straight) at the visible spoke's
- *     tone and contrast, their side face the picture's slid along the bar; the outlines anti-aliased (gr_cover); the right rim is the left wheel's rim turned onto it (its own clean rim is 12
- *     degrees long), at the right rim's tone; the cut tooth's lit face is the left tooth's turned onto it.
- *     s3: the wheel layer is drawn twice, at the picture's place and 24 rows higher down to row 200, as the game does.
- * No texel is mirrored: every map is a rotation, a slide or a radial scale. */
+ *     which it matches itself best (gr_join, about 30 degrees: three of its segments), its radii scaled by the
+ *     band's edges there and here, its facet's tone at the join the picture's there, eased back over 12 degrees of
+ *     arc; the teeth are the picture's a tooth period (44 degrees) on (the next one lands at -28 degrees, 95 columns
+ *     out); the spokes are bars along the measured edge, textured with rim texels (the rim band laid straight) at
+ *     the visible spoke's tone and contrast, their side face the picture's slid along the bar; the outlines
+ *     anti-aliased (gr_cover); the right rim is the left wheel's rim turned onto it (its own clean rim is 12 degrees
+ *     long), 1.19 times as large (the nearer wheel's rim is that much wider), at the right rim's tone; the cut
+ *     tooth's lit face is the inside of the left tooth's turned onto it.  Turned texels are taken cubic between the
+ *     picture's (gr_polar).
+ * No texel is mirrored: every map is a rotation, a slide, a shear or a scale. */
 
 static const short GR_SIN[91] = {
     0, 286, 572, 857, 1143, 1428, 1713, 1997, 2280, 2563, 2845, 3126, 3406, 3686, 3964, 4240, 4516, 4790, 5063, 5334,
@@ -103,37 +107,44 @@ static int gr_rnd(int v, int sh) { return fdiv(v + (1 << (sh - 1)), 1 << sh); }
 #define GR_SPW (18 * 16)
 #define GR_SPD 109
 #define GR_AXR (-(18 * 16 + 8))                          /* the right tooth's axis */
+#define GR_RSC 305                                       /* the right rim's width over the left rim's (x 256) */
 
-static int gr_dyo;                                       /* the quads' wheels: rows above the picture's (s3: -24) */
 static int gr_blue(Rgb k) { return k.b > k.r + 25 && k.b >= k.g; }
 /* a wheel texel of the quads' wheel at wheel coordinates (x, y): sx columns off (the right quad: -3) */
 static int gr_wtex(int x, int y, Rgb *o)
 {
-    y += gr_dyo;
     if (x < 0 || x >= PW || y < 0 || y >= PH) return 0;
     *o = rgb15(pic[y][x]);
     return pic_ov[y][x] || (gr_blue(*o) && lum(*o) < 60);     /* (the dark faces are the picture's only) */
 }
-/* (the texel at radius r16, angle a: between the four wheel texels around the point when they are all lit faces, so
-   a turned face keeps the picture's soft mottling and not a nearest-texel speckle; else the nearest texel) */
+static int gr_lit(int x, int y, Rgb *o) { return gr_wtex(x, y, o) && gr_blue(*o) && lum(*o) >= 60; }
+/* Catmull-Rom weights (x 256) of the four texels around a point f sixteenths past the second */
+static void gr_cr4(int f, int *w)
+{
+    int t = f * 16, t2 = t * t / 256, t3 = t2 * t / 256;
+    w[0] = (-t3 + 2 * t2 - t) / 2; w[1] = (3 * t3 - 5 * t2 + 512) / 2; w[2] = (-3 * t3 + 4 * t2 + t) / 2; w[3] = 256 - w[0] - w[1] - w[2];
+}
+/* (the texel at radius r16, angle a: a turned face keeps the picture's mottling when it is taken between the texels
+   around the point - cubic over the 4 x 4 around it when they are all lit faces (bilinear loses a fifth of the
+   mottle's contrast - measured, the 5 x 5 high-pass deviation 6.6 for the picture's 8.1 - and nearest gives a
+   speckle), bilinear over the 2 x 2 when only they are; else the nearest texel) */
+static int gr_pq;                                        /* how gr_polar took its last texel: 2 cubic, 1 bilinear, 0 nearest */
 static int gr_polar(int cx, int cy, int r16, int a, int sx, Rgb *o)
 {
     int xf = cx * 16 + gr_rnd(r16 * (gr_sinq(a) >> 2), 12) - 8, yf = cy * 16 - gr_rnd(r16 * (gr_cosq(a) >> 2), 12) - 8;     /* (x 16, from the texel centres) */
-    int x0 = fdiv(xf, 16), y0 = fdiv(yf, 16), fx = xf - x0 * 16, fy = yf - y0 * 16; Rgb k[4];
-    if (gr_wtex(x0 + sx, y0, &k[0]) && gr_wtex(x0 + 1 + sx, y0, &k[1]) && gr_wtex(x0 + sx, y0 + 1, &k[2]) && gr_wtex(x0 + 1 + sx, y0 + 1, &k[3])
-        && gr_blue(k[0]) && gr_blue(k[1]) && gr_blue(k[2]) && gr_blue(k[3]) && lum(k[0]) >= 60 && lum(k[1]) >= 60 && lum(k[2]) >= 60 && lum(k[3]) >= 60) {
-        Rgb f[4]; int m[3];
-        *o = mix(mix(k[0], k[1], fx * 16), mix(k[2], k[3], fx * 16), fy * 16);
-        /* (averaging takes a fifth off the mottle's contrast - measured, the 5 x 5 high-pass deviation 6.6 for the
-           picture's 8.1: given back against the face's tone 3 texels around) */
-        if (gr_wtex(x0 - 2 + sx, y0, &f[0]) && gr_wtex(x0 + 3 + sx, y0 + 1, &f[1]) && gr_wtex(x0 + sx, y0 - 2, &f[2]) && gr_wtex(x0 + 1 + sx, y0 + 3, &f[3])
-            && gr_blue(f[0]) && gr_blue(f[1]) && gr_blue(f[2]) && gr_blue(f[3]) && lum(f[0]) >= 60 && lum(f[1]) >= 60 && lum(f[2]) >= 60 && lum(f[3]) >= 60) {
-            m[0] = (f[0].r + f[1].r + f[2].r + f[3].r) / 4; m[1] = (f[0].g + f[1].g + f[2].g + f[3].g) / 4; m[2] = (f[0].b + f[1].b + f[2].b + f[3].b) / 4;
-            o->r = clampi(o->r + (o->r - m[0]) / 4, 0, 255); o->g = clampi(o->g + (o->g - m[1]) / 4, 0, 255); o->b = clampi(o->b + (o->b - m[2]) / 4, 0, 255);
-        }
-        return 1;
-    }
-    return gr_wtex(x0 + (fx >= 8) + sx, y0 + (fy >= 8), o);
+    int x0 = fdiv(xf, 16), y0 = fdiv(yf, 16), fx = xf - x0 * 16, fy = yf - y0 * 16, all = 1; Rgb k[4][4];
+    for (int j = 1; j < 3 && all; j++) for (int i = 1; i < 3 && all; i++) all = gr_lit(x0 - 1 + i + sx, y0 - 1 + j, &k[j][i]);
+    gr_pq = 0;
+    if (!all) return gr_wtex(x0 + (fx >= 8) + sx, y0 + (fy >= 8), o);
+    for (int j = 0; j < 4 && all; j++) for (int i = 0; i < 4 && all; i++) if (j < 1 || j > 2 || i < 1 || i > 2) all = gr_lit(x0 - 1 + i + sx, y0 - 1 + j, &k[j][i]);
+    if (all) {
+        int wx[4], wy[4], r = 0, g = 0, b = 0;
+        gr_cr4(fx, wx); gr_cr4(fy, wy);
+        for (int j = 0; j < 4; j++) for (int i = 0; i < 4; i++) { int w = wx[i] * wy[j]; r += k[j][i].r * w; g += k[j][i].g * w; b += k[j][i].b * w; }
+        o->r = clampi(gr_rnd(r, 16), 0, 255); o->g = clampi(gr_rnd(g, 16), 0, 255); o->b = clampi(gr_rnd(b, 16), 0, 255);
+        gr_pq = 2;
+    } else { gr_pq = 1; *o = mix(mix(k[1][1], k[1][2], fx * 16), mix(k[2][1], k[2][2], fx * 16), fy * 16); }
+    return 1;
 }
 static int gr_lin(int a, const short (*t)[2], int n)     /* piecewise linear over degrees */
 {
@@ -295,6 +306,13 @@ static int gr_wheel(int side, int x, int y, Rgb *o)
                 if (GR_LCX * 16384 + (rs >> 4) * gr_sinq(as) < 2 * 16384) continue;      /* (the source is off the picture) */
                 if (!(gr_polar(GR_LCX, GR_LCY, rs, as, 0, o) && gr_blue(*o)) && !(gr_polar(GR_LCX, GR_LCY, clampi(rs, in + 24, out - 24), as, 0, o) && gr_blue(*o)))
                     gr_rimtex(as * 16 / 89, (r - GR_LIN) * 255 / (GR_ROUT - GR_LIN), o);
+                /* (the band's edges are not quite gr_pin / gr_pout everywhere: a texel of the picture's dark outline
+                   within 3 texels of an edge is taken further into the face, so the strip's outline is one clean line) */
+                if (r >= GR_LIN && (r < GR_LIN + 48 || r > GR_ROUT - 48))
+                    for (int q = 1; q <= 4 && lum(*o) < 62; q++) {
+                        Rgb f;
+                        if (gr_polar(GR_LCX, GR_LCY, clampi(rs + (r < GR_LIN + 48 ? q * 16 : -q * 16), in + 24, out - 24), as, 0, &f) && gr_blue(f)) *o = f;
+                    }
                 /* at the join the facet's tone is the picture's there, eased back to its own over 12 degrees of arc */
                 w = k == 1 ? clampi(256 - (11 * 16 - a) * 256 / (12 * 16), 0, 256) : 0;
                 g[0] = g[1] = g[2] = 256 + (clampi(gr_rmj * 256 / gr_rmean(as), 190, 345) - 256) * w / 256;
@@ -322,15 +340,32 @@ static int gr_wheel(int side, int x, int y, Rgb *o)
         int dx = x - GR_RCX * 8, dy = y - GR_RCY * 8, r = gr_isqrt((dx * dx + dy * dy) << 2), a = gr_ang(dx, dy);
         if (r > GR_TOP + 32) return 0;
         if (r >= GR_RIN && r <= GR_ROUT + 8) {           /* the rim: the left wheel's, turned onto it */
-            int as = a + (a < -4 * 16 ? 46 * 16 + 5 : a < 16 * 16 ? 26 * 16 : 6 * 16), in = gr_pin(as) + 16, out = gr_pout(as);
-            if (!(gr_polar(GR_LCX, GR_LCY, in + (r - GR_RIN) * (out - in) / (GR_ROUT + 8 - GR_RIN), as, 0, o) && gr_blue(*o)))
+            /* (the right rim is 40 texels wide, the left one 33.5: the nearer wheel.  The left rim's 24 - 40.8 degrees
+               are laid on 20 degrees of it, 1.19 times as large along the rim as across it, from the outer edge in:
+               a first version stretched them across only, which drew the mottle out into streaks) */
+            int as = 24 * 16 + fmodi(a + 24 * 16, 20 * 16) * 256 / GR_RSC, in = gr_pin(as) + 16, out = gr_pout(as);
+            int rs = clampi(out - (GR_ROUT + 8 - r) * 256 / GR_RSC, in, out);
+            if (!(gr_polar(GR_LCX, GR_LCY, rs, as, 0, o) && gr_blue(*o)))
                 gr_rimtex(as * 16 / 89, (r - GR_RIN) * 255 / (GR_ROUT - GR_RIN), o);
+            if (r < GR_RIN + 48 || r > GR_ROUT - 40)
+                for (int q = 1; q <= 4 && lum(*o) < 62; q++) {
+                    Rgb f;
+                    if (gr_polar(GR_LCX, GR_LCY, clampi(rs + (r < GR_RIN + 48 ? q * 16 : -q * 16), in + 24, out - 24), as, 0, &f) && gr_blue(f)) *o = f;
+                }
             *o = gr_gain(*o, gr_gR); return 1;
         }
         if (r > GR_ROUT) {                               /* the tooth cut by the edge: its lit face */
             int al = gr_rnd((r >> 4) * (gr_sinq(a - GR_AXR) >> 2), 8);     /* columns off its axis (x 16) */
             if (r > GR_TOP - 8 || al < -12 * 16 || al > 14 * 16 + 5 - 3 * (r - GR_ROUT) / 16) return 0;
-            if (!(gr_polar(GR_LCX, GR_LCY, r, a + 32 * 16 + 8, 0, o) && gr_blue(*o) && lum(*o) > 80)) {
+            int ok = 0;
+            /* (the left tooth is cut by the picture's edge and its first columns there are darker: the source is taken
+               from its sixth column on, a little further round where it would fall before that) */
+            for (int q = 0; q < 8 && !ok; q++) {
+                int as = a + 32 * 16 + 8 + q * 24;
+                if (GR_LCX * 16384 + (r >> 4) * gr_sinq(as) < 6 * 16384) continue;
+                ok = gr_polar(GR_LCX, GR_LCY, r, as, 0, o) && gr_pq == 2;      /* (inside the face: none of its outline's texels) */
+            }
+            if (!ok) {
                 gr_rimtex(al / 16 + 20, (r - GR_ROUT) * 255 / (GR_TOP - GR_ROUT), o);
                 *o = gr_gain(*o, gr_gR); return 1;
             }
@@ -392,7 +427,6 @@ static int gr_le[PH];                                    /* the wall's light at 
 static u8 gr_flat[PH][PW];                               /* the wall's light is even around (no shadow edge) */
 static int gr_okw(int x, int y) { return gr_wallc(x, y) && gr_lf[y][x]; }
 static int gr_srcw(int x, int y) { return gr_okw(x, y) && gr_flat[y][x]; }
-static int gr_ctxf(int side, int x, int y, Rgb *c) { (void)side; if (!gr_floorc(x, y)) return 0; *c = gr_raw[y][x]; return 1; }
 static void gr_light(void)
 {
     static int S[PH + 1][PW + 1], C[PH + 1][PW + 1];
@@ -447,22 +481,60 @@ static void gr_edge(int side)                            /* gr_le: the light of 
         memcpy(gr_le, t, sizeof t);
     }
 }
-/* --- the side walls.  The room is a box seen straight on: the floor's tile lines and both side walls' feet meet at
-   (162, 155); the back wall is columns 47-273 (its foot row 178) and what the edges cut are the side walls.  Their
-   brick is the back wall's, the courses carried round the corners: measured, the left wall's mortar lines (columns
-   0-46) lie on the rays from that point through the back wall's (6.8 rows apart, rows 49 .. 172; the right wall's
-   within a row).  So a strip texel at dx columns from the vanishing point shows the back wall's brick of row
-   155 + (y - 155) xc / dx (xc: the corner's distance, 115 / 111) at GR_F (1 - xc / dx) columns along the wall
-   (GR_F: the picture's focal length, taken as 320: a 53 degree view), i.e. every course is a ray and the bricks grow
-   towards the viewer as the picture's own side walls' do.  The back wall is mostly hidden by the gears, so each
-   course has its own list of clean stretches (every row of the course a wall texel in even light), laid end to end
-   (a course without any takes the one two courses away: the same bond); the texels are taken over their light and
-   lit as the picture's wall at the edge. */
+/* --- the side walls.  The room is a box seen straight on: both side walls' feet and courses meet at (162, 155); the
+   back wall is columns 47-273 (its foot row 178) and what the edges cut are the side walls.  Their brick is the back
+   wall's, the courses carried round the corners: measured, the left wall's mortar lines (columns 0-46) lie on the
+   rays from that point through the back wall's (6.8 rows apart, rows 49 .. 172; the right wall's within a row).  So
+   a strip texel at dx columns from the vanishing point shows the back wall's brick of row 155 + (y - 155) xc / dx
+   (xc: the corner's distance, 115 / 111) at GR_F (1 - xc / dx) columns along the wall (GR_F: the picture's focal
+   length, taken as 320: a 53 degree view), i.e. every course is a ray and the bricks grow towards the viewer as the
+   picture's own side walls' do.
+   The brick: the back wall is mostly hidden by the gears, so its whole bricks are collected (gr_courses: per course
+   the columns whose every row is a wall texel in even light, cut at the upright joints = the maxima of the course's
+   column profile; a brick is the stretch from one joint to the next, 7 .. 30 columns) and every strip course is laid
+   from bricks of the whole pool, joint to joint, picked by a position hash (never one of the course's last two, nor
+   the one beside it in the course above), each brick's rows scaled to the course's.  The texels are taken over their
+   light (gr_alb).
+   The side walls are nearer than the back wall, so their texels are magnified (rows x 1.4 at the join, x 1.9 at
+   the 16:9 edge) and come out softer than the picture's own side walls, which keep the picture's grain (palette
+   noise at 1 texel).  The grain is given back at its own scale (gr_grain): the wall's texels less their row's
+   5-texel mean (no mortar line in it), one texel a strip pixel. */
 #define GR_VY (155 * 256)
 #define GR_F 320
 static const int GR_XC[2] = { 115, 111 };
 #define GR_NC 32
-static short gr_mr[GR_NC + 1], gr_bm[GR_NC][256], gr_bo[GR_NC]; static int gr_nc; static u8 gr_cr[PH];
+#define GR_NB 96
+static short gr_mr[GR_NC + 1], gr_bm[GR_NC][256]; static u8 gr_bd[GR_NC][256]; static int gr_nc; static u8 gr_cr[PH];
+static short gr_bk[GR_NB][3]; static int gr_nb;         /* the bricks: course, first column (its joint), columns */
+static void gr_bricks(int even)
+{
+    gr_nb = 0;
+    for (int c = 0; c < gr_nc; c++) {
+        int p[PW], h = gr_mr[c + 1] - gr_mr[c], lastj = -1; u8 ok[PW];
+        if (h < 5 || h > 9) continue;
+        for (int x = 0; x < PW; x++) {
+            int s = 0;
+            ok[x] = x >= 52 && x < 267;
+            for (int y = gr_mr[c]; ok[x] && y < gr_mr[c + 1]; y++) ok[x] = even ? gr_srcw(x, y) : gr_okw(x, y);
+            for (int y = gr_mr[c] + 2; ok[x] && y < gr_mr[c + 1] - 1; y++) s += lum(gr_alb[y][x]);
+            p[x] = ok[x] ? s * 16 / (h - 3) : 0;
+        }
+        for (int x = 56; x < 263; x++) {
+            int m = 0;
+            if (!ok[x]) { lastj = -1; continue; }
+            for (int d = -4; d <= 4 && m >= 0; d++) m = ok[x + d] ? m + p[x + d] : -1;
+            if (m < 0) continue;                         /* (a stretch's first and last 4 columns: no joint looked for) */
+            if (p[x] * 9 - m > 9 * 9 * 16 && p[x] >= p[x - 1] && p[x] > p[x + 1]) {      /* an upright joint */
+                if (lastj >= 0 && x - lastj >= 7 && x - lastj <= 30 && gr_nb < GR_NB) {
+                    int clean = 1;
+                    for (int i = lastj; i < x; i++) if (!ok[i]) clean = 0;
+                    if (clean) { gr_bk[gr_nb][0] = (short)c; gr_bk[gr_nb][1] = (short)lastj; gr_bk[gr_nb][2] = (short)(x - lastj); gr_nb++; }
+                }
+                lastj = x;
+            }
+        }
+    }
+}
 static void gr_courses(void)
 {
     int bw[PH], hp[PH], n = 0, first = -1, last = 0, m[GR_NC];
@@ -489,58 +561,144 @@ static void gr_courses(void)
     while (gr_nc < GR_NC && gr_mr[gr_nc - 1] + 7 < 178) { gr_mr[gr_nc] = (short)(gr_mr[gr_nc - 1] + 7); gr_nc++; }
     gr_mr[gr_nc] = 178;
     for (int y = 0, c = 0; y < PH; y++) { while (c + 1 < gr_nc && y >= gr_mr[c + 1]) c++; gr_cr[y] = (u8)c; }
-    for (int c = 0; c < gr_nc; c++) {                    /* the course's clean stretches */
-        int run = 0, tot = 0, pass2 = 0; gr_bm[c][0] = -1; gr_bo[c] = 0;
-        for (int pass = 0; pass < 2; pass++) {
-            int u = 0, start = (int)(hash3(c, 71, 5) % 200u);
-            for (int k = 0; k < 2 * 216 && u < 256; k++) {
-                int x = 52 + (start + k) % 216, ok = x < 267;
-                if (!((start + k) % 216)) run = 0;
-                for (int y = gr_mr[c]; ok && y < gr_mr[c + 1]; y++) ok = pass2 ? gr_okw(x, y) : gr_srcw(x, y);
-                if (!ok) { run = 0; continue; }
-                run++;
-                if (run < 8) continue;                   /* (a stretch's first 7 columns: left out, so no stub of a brick) */
-                if (!pass) tot++; else gr_bm[c][u++] = (short)x;
+    gr_bricks(1);
+    if (gr_nb < 24) gr_bricks(0);                        /* (too few in even light: any wall texel) */
+    for (int c = 0; c < gr_nc; c++) {                    /* the courses' bricks, end to end */
+        int u = -(int)(hash3(c, 7, 3) % 12u), last1 = -1, last2 = -1;
+        for (int i = 0; u < 256 && gr_nb; i++) {
+            int b = (int)(hash3(c, i, 911) % (u32)gr_nb), up = c ? gr_bd[c - 1][clampi(u + 4, 0, 255)] : 255, upx = c ? gr_bm[c - 1][clampi(u + 4, 0, 255)] : -1;
+            for (int t = 0; t < 8; t++) {
+                int same = b == last1 || b == last2 || (gr_bk[b][0] == up && upx >= gr_bk[b][1] && upx < gr_bk[b][1] + gr_bk[b][2]);
+                if (!same) break;
+                b = (b + 1 + (int)(hash3(c, i, 77 + t) % 5u)) % gr_nb;
             }
-            if (!pass && tot < 2 * 30 && !pass2) { pass2 = 1; pass = -1; tot = 0; run = 0; continue; }   /* (too little in even light: any wall texel) */
-            if (!pass && tot < 2 * 16) break;
-            if (pass) for (int i = u; i < 256; i++) gr_bm[c][i] = gr_bm[c][i - u];
-        }
-    }
-    for (int c = 0; c < gr_nc; c++) {
-        if (gr_bm[c][0] >= 0) continue;
-        for (int i = 2; i < 4 * GR_NC && !gr_bo[c]; i++) {  /* (the nearest: two, four .. courses off first, then the odd ones) */
-            int o = i < 2 * GR_NC ? (i / 2) * 2 : (i - 2 * GR_NC) / 2 * 2 + 1, d = c + (i & 1 ? o : -o);
-            if (d >= 0 && d < gr_nc && gr_bm[d][0] >= 0) gr_bo[c] = (short)(d - c);
+            for (int j = 0; j < gr_bk[b][2]; j++, u++) if (u >= 0 && u < 256) { gr_bm[c][u] = (short)(gr_bk[b][1] + j); gr_bd[c][u] = (u8)gr_bk[b][0]; }
+            last2 = last1; last1 = b;
         }
     }
 #ifdef WS_BACKDROP_MAIN
-    if (getenv("WSB_INFO") && getenv("WSB_INFO")[0] == '2') for (int c = 0; c < gr_nc; c++) fprintf(stderr, "course %d rows %d-%d from %d: columns %d %d %d ...\n", c, gr_mr[c], gr_mr[c + 1] - 1, gr_bo[c], gr_bm[c][0], gr_bm[c][40], gr_bm[c][80]);
+    if (getenv("WSB_INFO")) fprintf(stderr, "gears: %d courses, %d bricks\n", gr_nc, gr_nb);
 #endif
 }
-static Rgb gr_brick1(int u, int y)                       /* the back wall's brick over its light: column u along the wall, row y */
+static int gr_brow(int c, int d, int y)                  /* the row of course d for row y of course c */
 {
-    int c = gr_cr[y], d = c + gr_bo[c], yy; Rgb o = { 128, 100, 80 };
-    if (gr_bm[d][0] < 0) return o;
-    yy = clampi(gr_mr[d] + (y - gr_mr[c]), gr_mr[d], gr_mr[d + 1] - 1);
-    return gr_alb[yy][gr_bm[d][u & 255]];
+    int hc = gr_mr[c + 1] - gr_mr[c], hd = gr_mr[d + 1] - gr_mr[d];
+    return gr_mr[d] + clampi(((y - gr_mr[c]) * hd + hd / 2) / hc, 0, hd - 1);
+}
+static Rgb gr_brick1(int u, int y)                       /* the wall's brick over its light: column u along the wall, row y */
+{
+    int c = gr_cr[y], d; Rgb o = { 128, 100, 80 };
+    if (!gr_nb) return o;
+    d = gr_bd[c][u & 255];
+    return gr_alb[gr_brow(c, d, y)][gr_bm[c][u & 255]];
+}
+/* the wall's grain for strip column X, row y (v: its row on the back wall): a wall texel less its row's 5-texel mean,
+   over the light, x GR_GRAIN / 256; one texel a pixel along the row, the next row of the brick a pixel down */
+#define GR_GRAIN 150
+static void gr_grain(int X, int y, int v, int *d)
+{
+    int c = gr_cr[clampi(v, 0, 177)], g, dd, gx, gy, h; Rgb m = { 0, 0, 0 }, k;
+    d[0] = d[1] = d[2] = 0;
+    if (!gr_nb) return;
+    dd = gr_bd[c][(X + 37 * c) & 255]; h = gr_mr[dd + 1] - gr_mr[dd] - 1;
+    g = (X + 37 * c + 53 * fdiv(y + 5 * c, h)) & 255;
+    dd = gr_bd[c][g]; gx = gr_bm[c][g]; h = gr_mr[dd + 1] - gr_mr[dd] - 1;
+    gy = gr_mr[dd] + 1 + fmodi(y + 5 * c, h);
+    for (int i = -2; i <= 2; i++) {
+        if (!gr_okw(gx + i, gy)) return;
+        m.r += gr_alb[gy][gx + i].r; m.g += gr_alb[gy][gx + i].g; m.b += gr_alb[gy][gx + i].b;
+    }
+    k = gr_alb[gy][gx];
+    d[0] = (k.r * 5 - m.r) * GR_GRAIN / (5 * 256); d[1] = (k.g * 5 - m.g) * GR_GRAIN / (5 * 256); d[2] = (k.b * 5 - m.b) * GR_GRAIN / (5 * 256);
 }
 static Rgb gr_side(int side, int X, int y)               /* the side wall at strip column X, row y: over its light (x 128) */
 {
     int dx = side ? 157 * 256 + 128 + X * 256 : 162 * 256 - 128 + X * 256, k = GR_XC[side] * 256 * 256 / (dx >> 4) * 16;     /* xc / dx, x 65536 */
     int v = GR_VY + (int)(((long long)(y * 256 + 128 - GR_VY) * k) >> 16) - 128, u = (GR_F * (65536 - k)) >> 8;
-    int y0 = clampi(v >> 8, 0, 176), fy = v < 0 ? 0 : v & 255, u0 = u >> 8, fu = u & 255;
-    Rgb a = mix(gr_brick1(u0, y0), gr_brick1(u0 + 1, y0), fu), b = mix(gr_brick1(u0, y0 + 1), gr_brick1(u0 + 1, y0 + 1), fu);
-    return mix(a, b, fy);
+    int y0 = clampi(v >> 8, 0, 176), fy = v < 0 ? 0 : v & 255, u0 = u >> 8, fu = u & 255, d[3];
+    Rgb a, b;
+    fy = clampi(fy * 2 - 128, 0, 256); fu = clampi(fu * 2 - 128, 0, 256);     /* (half as soft as bilinear: the picture's own side walls keep their mortar lines a texel wide) */
+    a = mix(gr_brick1(u0, y0), gr_brick1(u0 + 1, y0), fu); b = mix(gr_brick1(u0, y0 + 1), gr_brick1(u0 + 1, y0 + 1), fu);
+    a = mix(a, b, fy);
+    gr_grain(X, y, (v + 128) >> 8, d);
+    a.r += d[0]; a.g += d[1]; a.b += d[2];
+    return a;
 }
-static const RqBand GR_BF = { 184, PH, 12, 12, 5, 4, 0, PW, 188, PH, 10 };
-#define GR_ROOTL 75                                      /* the left corbel's root: strip columns */
+/* the side wall's light at strip column X, row y: the picture's wall at the edge (gr_le), followed along the wall's
+   level lines (the rays), so a tone the edge cuts goes on in the wall's perspective and not across the screen */
+static int gr_wlight(int side, int X, int y)
+{
+    int d0 = side ? 158 : 162, r = 155 * 256 + 128 + (y * 256 + 128 - (155 * 256 + 128)) * d0 / (d0 + X) - 128;
+    int y0 = clampi(r >> 8, 0, PH - 2), f = r < 0 ? 0 : r & 255;
+    return gr_le[y0] * 16 + (gr_le[y0 + 1] - gr_le[y0]) * f / 16;
+}
+/* --- the floor: sandstone slabs running away from the viewer, their joints straight lines of the picture that meet
+   at (159.6, 158.8) (three of them fitted over 24-47 texels each: x = 237.6 - 0.490 y', 457.3 - 1.877 y', 14.6 +
+   0.912 y' with y' the row; a fourth and a fifth within a texel of the same fan), 1.395 columns apart per row under
+   that point.  The slabs' grain is streaks across the room, so a texel's scale depends on its row only: a strip texel
+   takes the picture's floor texel of its own row, n slabs towards the middle (a shear about the vanishing row:
+   x' = x - n 1.395 (y - 158.8)), n such that it lands on the one slab the picture shows whole (between the joints
+   of slopes -0.490 and 0.905).  So the strips' slabs have the picture's texels at their own scale, the joints go on
+   as the fan's next lines (the slab's left joint comes with it) and nothing is magnified or quilted.  The floor's
+   light changes with the row (darker towards the wall) and a little with the side: each row's tone is the picture's
+   floor next to that edge over the source slab's (9 rows' means). */
+#define GR_FVX 2554
+#define GR_FVY 2541
+#define GR_FJ0 (-502)                                    /* the whole slab's left joint: slope x 1024 */
+#define GR_FJP 1428                                      /* the joints' pitch */
+static int gr_fg[PH]; static Rgb gr_fm;                  /* the row's tone (x 256) for the side being made; the floor's mean colour */
+static int gr_fslab(int x, int y, int *sx)               /* the slab of (x, y); *sx: the column of the same point of the whole slab */
+{
+    int dy = y * 16 + 8 - GR_FVY, n;
+    if (dy < 16) dy = 16;
+    n = fdiv(fdiv((x * 16 + 8 - GR_FVX) * 1024, dy) - GR_FJ0 + 51, GR_FJP);      /* (51: the joint's own texels stay with the slab on its right) */
+    *sx = x - fdiv(n * GR_FJP * dy + 8192, 16384);
+    return n;
+}
+static void gr_ftone(int side)
+{
+    int le[PH], ls[PH], ne[PH], ns[PH], r = 0, g = 0, b = 0, n = 0;
+    for (int y = 0; y < PH; y++) {
+        le[y] = ls[y] = ne[y] = ns[y] = 0;
+        for (int x = 0; x < PW; x++) {
+            int sx, l;
+            if (!gr_floorc(x, y)) continue;
+            l = lum(gr_raw[y][x]);
+            if (side ? x >= 200 : x < 72) { le[y] += l; ne[y]++; }
+            if (!gr_fslab(x, y, &sx)) { ls[y] += l; ns[y]++; r += gr_raw[y][x].r; g += gr_raw[y][x].g; b += gr_raw[y][x].b; n++; }
+        }
+    }
+    gr_fm.r = n ? r / n : 200; gr_fm.g = n ? g / n : 150; gr_fm.b = n ? b / n : 100;
+    for (int y = 0; y < PH; y++) {
+        int a = 0, na = 0, s = 0, nsum = 0;
+        for (int d = -4; d <= 4; d++) if (y + d >= 0 && y + d < PH) { a += le[y + d]; na += ne[y + d]; s += ls[y + d]; nsum += ns[y + d]; }
+        gr_fg[y] = na >= 40 && nsum >= 40 ? clampi((a * 256 / na) / (s / nsum + 1), 216, 296) : 256;
+    }
+}
+static Rgb gr_floor(int x, int y)
+{
+    int sx; Rgb o;
+    if (y < 188) y = 188;
+    gr_fslab(x, y, &sx);
+    if (!gr_floorc(sx, y)) {                             /* (something lies on the slab there: the nearest floor texel of the row) */
+        int f = 0;
+        for (int d = 1; d <= 24 && !f; d++) { if (gr_floorc(sx + d, y)) { sx += d; f = 1; } else if (gr_floorc(sx - d, y)) { sx -= d; f = 1; } }
+        if (!f) return scale(gr_fm, gr_fg[y]);
+    }
+    o = scale(gr_raw[y][sx], gr_fg[y]);
+    o.r = clampi(o.r, 0, 255); o.g = clampi(o.g, 0, 255); o.b = clampi(o.b, 0, 255);
+    return o;
+}
+/* --- the corbels.  Their tips are at columns 62 and 256, mirror places about the room's axis (159.6, the floor
+   joints' vanishing column: 97.6 and 96.4 columns from it); the right one's end is in reach: its lit face's lower
+   edge comes down 1 row a column to a level base at row 105.5, which it meets 9 columns past the edge, so the block is
+   73 columns long and ends on the side wall there.  The left one's edges are straight to the picture's edge; the same
+   length (the same plane across the room) puts its end 9.3 columns past the left edge, on the side wall at the
+   depth of the right one's: both are closed 9 columns out and the walls go on past them. */
+#define GR_ROOTL 9                                       /* the left corbel's root: strip columns */
 #define GR_ROOTR 9                                       /* the right one's */
 /* the corbels at strip column X (1 ..), row y: how much of the texel is the lit face / the underside (0 .. 256; their
-   edges are drawn anti-aliased).  The right corbel is a short block: in the picture its dark underside ends on a level
-   base at row 105.5 (the wall goes on under it) and the lit face's lower edge comes down to it at 1 row a column (row
-   96.5 at the edge), so 9 columns past the edge the face reaches the base and the block is closed there, on the side
-   wall it sticks out of; the wall goes on past it. */
+   edges are drawn anti-aliased) */
 static void gr_corbel(int side, int X, int y, int *af, int *au)
 {
     int y16 = y * 16 + 8, top, bot, ub, a, b;
@@ -556,11 +714,32 @@ static void gr_corbel(int side, int X, int y, int *af, int *au)
     a = clampi(y16 - top + 8, 0, 16); b = clampi(bot - y16 + 8, 0, 16); *af = (a < b ? a : b) * 16;
     a = clampi(y16 - bot + 8, 0, 16); b = clampi(ub - y16 + 8, 0, 16); *au = (a < b ? a : b) * 16;
 }
-/* the corbels' lit faces: sandstone in soft upright bands.  Both faces together have up to eight clean 16 x 15 pieces
-   (found at run time: 16 x 15 windows of lit sandstone, apart from one another).  A strip face is laid from them 14 x 13 apart (2 texels of
-   overlap, cross-faded), each as its texels less its mean, on the tone of that corbel's face next to the edge
-   (columns 3-14 from it); a piece and its neighbours are never the same one, and every other use is the piece turned
-   half round (a rotation), so twice as many different pieces come before one repeats */
+/* the left corbel's face in the strip.  In the picture its first 5 columns are darker than the rest (mean luminance
+   128 against 165, a sharp upright step at column 5 on every row: the part next to the wall is in shade), so the 9
+   columns to the root are that shaded part going on: the face's own texels 14 columns in (columns 5-13, the nearest
+   that are not the picture's edge columns again), their rows scaled to the face's height there (upright streaks: a
+   row more or less does not show), at the shaded columns' tone (gr_lsh: per channel, shaded over lit, x 256) */
+static int gr_lsh[3];
+static void gr_lshade(void)
+{
+    GrSum a = { 0 }, b = { 0 };
+    for (int y = 52; y < 80; y++) for (int x = 0; x < 14; x++) if (!pic_ov[y][x] && lum(gr_raw[y][x]) >= 96) gr_add(x < 5 ? &a : &b, gr_raw[y][x]);
+    if (a.n < 40 || b.n < 80) { gr_lsh[0] = gr_lsh[1] = gr_lsh[2] = 256; return; }
+    gr_lsh[0] = clampi((a.r * 256 / a.n) / (b.r / b.n + 1), 160, 256);
+    gr_lsh[1] = clampi((a.g * 256 / a.n) / (b.g / b.n + 1), 160, 256);
+    gr_lsh[2] = clampi((a.b * 256 / a.n) / (b.b / b.n + 1), 160, 256);
+}
+static Rgb gr_lface(int X, int y)
+{
+    int sx = 14 - X, td = 760 - X * 23 / 16, bd = 1349 + X * 67 / 16, ts = 760 + (sx * 16 + 8) * 9 / 100 + 24, bs = 1349 - (sx * 16 + 8) * 26 / 100 - 24;
+    int ys = ts + (clampi(y * 16 + 8, td, bd) - td) * (bs - ts) / (bd - td);
+    return gr_gain(gr_raw[clampi(ys >> 4, 0, PH - 1)][sx], gr_lsh);
+}
+/* the right corbel's lit face: sandstone in soft upright bands.  The face has a few clean 16 x 15 pieces (found at
+   run time: windows of lit sandstone, apart from one another, of both faces).  The strip's face is laid from them
+   14 x 13 apart (2 texels of overlap, cross-faded), each as its texels less its mean, on the tone of the face next
+   to the edge (columns 3-14 from it); a piece and its neighbours are never the same one, and every other use is the
+   piece turned half round (a rotation), so twice as many different pieces come before one repeats */
 #define GR_NF 8
 static short gr_fp[GR_NF][2], gr_fd[GR_NF][15][16][3]; static int gr_nf; static Rgb gr_fb[2];
 static int gr_fpok(int x0, int y0)                       /* a clean piece: lit sandstone (a few darker grains may be in it) */
@@ -632,34 +811,21 @@ static Rgb gr_face(int side, int x, int y)
     o.r = clampi(gr_fb[side].r + d[0] / 9, 0, 255); o.g = clampi(gr_fb[side].g + d[1] / 9, 0, 255); o.b = clampi(gr_fb[side].b + d[2] / 9, 0, 255);
     return o;
 }
-/* the lit face's tone in the picture's 3 edge columns over its tone in the 12 after them (x 256): the left corbel is
-   darker in its first columns, so the strip starts as dark and eases to the face's tone over 12 columns */
-static int gr_cedge(int side)
+/* what a texel is made of: 1 a wheel's lit face, 2 brick, 3 sandstone (corbel or floor), 0 anything else */
+static int gr_kind(Rgb k)
 {
-    int a = 0, na = 0, b = 0, nb = 0;
-    for (int y = 44; y < 100; y++)
-        for (int i = 0; i < 15; i++) {
-            int x = side ? PW - 1 - i : i;
-            if (!gr_sandc(x, y) && !(i < 3 && gr_cbox(x, y) && !pic_ov[y][x] && lum(rgb15(pic[y][x])) > 100)) continue;
-            if (i < 3) { a += lum(rgb15(pic[y][x])); na++; } else { b += lum(rgb15(pic[y][x])); nb++; }
-        }
-    return na >= 20 && nb >= 40 ? clampi((a * 256 / na) / (b / nb + 1), 200, 280) : 256;
+    if (gr_blue(k)) return lum(k) >= 60;
+    if (k.r >= 136 && k.g >= 96 && k.r - k.b >= 40) return 3;
+    return k.r - k.b >= 24 && k.r - k.g >= 8 ? 2 : 0;
 }
 static int gr_foot16(int side, int X) { return side ? 187 * 16 + 13 + X * 16 / 5 : 187 * 16 + 10 + X * 16 / 5; }
 
 static void gen_gr(int pad)
 {
-    Rgb *lf; size_t n;
     pal_make();
-    vb_ow = pad + 64; n = (size_t)vb_ow * PH;
-    if (!canvas_open(vb_ow)) return;
-    rq_have = (u8 *)malloc(n); lf = (Rgb *)malloc(n * sizeof *lf);
-    if (!rq_have || !lf) { free(rq_have); free(lf); rq_have = 0; canvas_close(); return; }
-    gr_dyo = room->sec == 3 ? -24 : 0;
-    gr_light(); gr_tones(); gr_courses(); gr_faces();
-    rq_map = 0;
+    gr_light(); gr_tones(); gr_courses(); gr_faces(); gr_lshade();
     for (int side = 0; side < 2; side++) {
-        int ce = gr_cedge(side); Rgb us[16];
+        Rgb us[16];
         for (int d = 0; d < 16; d++) {                   /* the right corbel's underside by depth */
             int r = 0, g = 0, b = 0, n = 0;
             for (int x = PW - 10; x < PW; x++) {
@@ -669,44 +835,39 @@ static void gen_gr(int pad)
             }
             us[d].r = n ? r / n : 0; us[d].g = n ? g / n : 0; us[d].b = n ? b / n : 0;
         }
-        cur_side = side; gr_edge(side);
-        canvas_clear(); memset(rq_have, 0, n);
-        rq_src = gr_raw; rq_ctx = gr_ctxf; rq_ok = gr_floorc; rq_quilt(side, &GR_BF, 6111 + side);
-        memcpy(lf, cv, n * sizeof *lf);
+        cur_side = side; gr_edge(side); gr_ftone(side);
         for (int y = 0; y < PH; y++)
             for (int X = 1; X <= pad; X++) {
-                size_t i = (size_t)y * vb_ow + X - 1; int x = side ? PW - 1 + X : -X, af, au, got; Rgb c, w = { 0, 0, 0 };
+                int x = side ? PW - 1 + X : -X, af, au, got; Rgb c = { 0, 0, 0 }, w = { 0, 0, 0 };
                 gr_corbel(side, X, y, &af, &au);
                 got = clampi(gr_foot16(side, X) - y * 16, 0, 16);       /* (the wall's foot: anti-aliased) */
-                c = lf[i];
+                if (got < 16) c = gr_floor(x, y);
                 if (got) {
-                    int l = gr_le[y]; Rgb k = gr_side(side, X, y);
-                    k.r = clampi(k.r * l / 128, 0, 255); k.g = clampi(k.g * l / 128, 0, 255); k.b = clampi(k.b * l / 128, 0, 255);
+                    int l = gr_wlight(side, X, y); Rgb k = gr_side(side, X, y);
+                    k.r = clampi(k.r * l / (128 * 16), 0, 255); k.g = clampi(k.g * l / (128 * 16), 0, 255); k.b = clampi(k.b * l / (128 * 16), 0, 255);
                     c = got >= 16 ? k : mix(c, k, got * 16);
                 }
                 /* (the wall next to a corbel's root: in its shade) */
-                if (!side && X > GR_ROOTL && X <= GR_ROOTL + 6 && y >= 43 && y < 109) c = scale(c, 150 + (X - GR_ROOTL) * 16);
+                if (!side && X > GR_ROOTL && X <= GR_ROOTL + 4 && y >= 46 && y < 90) c = scale(c, 176 + (X - GR_ROOTL) * 16);
                 if (side && X > GR_ROOTR && X <= GR_ROOTR + 4 && y >= 54 && y < 107) c = scale(c, 176 + (X - GR_ROOTR) * 16);
                 if (au && side) {                        /* the right underside: the picture's tone at that depth under
                                                             the lower edge (its last 10 columns), a low noise over it */
                     int d = clampi(y - (96 + X), 0, 15);
                     if (us[d].r + us[d].g + us[d].b) c = mix(c, scale(us[d], 232 + noise(x, y, 5, 4, 91) * 48 / 255), au);
                 } else if (au) {                         /* the left one: the picture's, slid along the lower edge */
-                    int k = (X + 11) / 12 * 12, sx = x + k, sy = y - k * 67 / 256;
+                    int sx = x + 12, sy = y - 3;
                     if (sx >= 0 && sx < PW && sy >= 0 && sy < PH && !pic_ov[sy][sx]) c = mix(c, rgb15(pic[sy][sx]), au);
                 }
-                if (af) {
-                    Rgb f = gr_face(side, x, y);
-                    if (X <= 12) f = scale(f, ce + (256 - ce) * (X - 1) / 12);
-                    c = mix(c, f, af);
-                }
-                /* the wheels: the picture's (s3: under the quads' one), then the quads' one, down to its last row */
-                got = gr_cover(side, x, y, &w);
+                if (af) c = mix(c, side ? gr_face(side, x, y) : gr_lface(X, y), af);
+                got = gr_cover(side, x, y, &w);          /* the wheels */
                 if (got) c = mix(c, w, got * 16);
-                if (gr_dyo && y < 200 && (got = gr_cover(side, x + 3 * side, y - gr_dyo, &w)) != 0) c = mix(c, w, got * 16);
+                if (X <= 3) {                            /* the join: the first three columns lean on the picture's edge
+                                                            texel of their row where both are the same material */
+                    Rgb e = gr_raw[y][side ? PW - 1 : 0]; int k = gr_kind(e);
+                    c.r = clampi(c.r, 0, 255); c.g = clampi(c.g, 0, 255); c.b = clampi(c.b, 0, 255);
+                    if (k && k == gr_kind(c)) c = mix(e, c, X == 1 ? 110 : X == 2 ? 180 : 230);
+                }
                 strip[(size_t)y * 2 * pad + (side ? pad + (X - 1) : pad - X)] = quant(c);
             }
     }
-    free(rq_have); rq_have = 0; free(lf);
-    canvas_close();
 }

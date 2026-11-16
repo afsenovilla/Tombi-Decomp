@@ -16,10 +16,32 @@ static const struct { unsigned char area, slot; unsigned short rec; short pal[8]
 #include "ntsc_apd.inc"
 };
 
+/* The other way round, a slip of the PAL disc itself (always on with the PAL picture; docs/PORT.md "The gears room's
+   wheels"): AREA16 section 3 (the gears room before the repair) kept the USA disc's y for its three layer-3 type 0x46
+   pieces (the blue cog wheels drawn again over the player, and a third one not shown), while section 6 (the same
+   room, the same picture, after the repair) and section 5 have theirs 24 lines lower like every other room.  So
+   the PAL game draws section 3's wheels 24 rows above the picture's own: doubled rims and a cut where the pieces
+   end.  The three records (all eight PAL words each) get section 6's y as the game spawns from them. */
+static const struct { unsigned char area; short pal[8]; short y; } pal_apd_fix[] = {
+    { 16, { 0x0303, 0x0046, 0x0000, 0x0048, 0x00d0, 0, 0, 0 }, 0x00e8 },
+    { 16, { 0x0303, 0x0146, 0x0001, 0x011c, 0x00d0, 0, 0, 0 }, 0x00e8 },
+    { 16, { 0x0303, 0x0246, 0x0002, 0x0096, 0x0096, 0, 0, 0 }, 0x00ae },
+};
+
 void port_ntsc_apd_rec(void *rec) {
     short *r = (short *)rec;
     unsigned i;
-    if (!port_ntsc || !r) return;
+    if (!r) return;
+    if (!port_ntsc) {
+        for (i = 0; i < sizeof pal_apd_fix / sizeof pal_apd_fix[0]; i++)
+            if (pal_apd_fix[i].area == GAME[0] && !memcmp(r, pal_apd_fix[i].pal, 16)) {
+                r[4] = pal_apd_fix[i].y;
+                if (port_verbose > 1) port_printf("[port] area %d placement record (%d %d %d x %d) y %d -> %d (PAL slip)\n",
+                                                  GAME[0], r[0], r[1], r[2], r[3], pal_apd_fix[i].pal[4], r[4]);
+                return;
+            }
+        return;
+    }
     for (i = 0; i < sizeof ntsc_apd / sizeof ntsc_apd[0]; i++)
         if (ntsc_apd[i].area == GAME[0] && r[4] == ntsc_apd[i].pal[4] && !memcmp(r, ntsc_apd[i].pal, 16)) {
             r[4] = ntsc_apd[i].us_y;
