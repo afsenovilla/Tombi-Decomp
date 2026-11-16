@@ -40,7 +40,7 @@ extern const char *port_ws_room3d_rooms;  /* --ws-room3d-rooms A:S,A:S,... or al
 
 /* the rooms looked at (the debug select's numbers); approved: on by default once the user has seen the room */
 static const struct { u8 area, sec, approved; } ROOMS[] = {
-    {18, 1, 0},        /* the Y crossing */
+    {18, 1, 1},        /* the Y crossing */
 };
 static int room_enabled(int area, int sec)
 {
