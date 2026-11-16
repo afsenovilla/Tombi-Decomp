@@ -783,8 +783,8 @@ static const Room ROOMS[] = {
       gen_gr },                                          /* the gears room (ws_backdrop_gears.inc) */
     { 16, 6, 256, 0, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 256, 64, 0, 144, 144, 0, 80 }, { 256, 64, 144, 72, 96, 244, 128 },
       { 256, 184, 216, 64, 40, 252, 184 } }, gen_gr },
-    { 6, 2, MM_H2, 0, { { 0 } }, { { 0 } }, gen_mm },   /* the mermaid on her rock: the sea is a loop of four pictures */
-    { 6, 1, MM_H1, 0, { { 0 } }, { { 0 } }, gen_mm },   /* the Singing Rock beach: a 640-column picture moved by the
+    { 6, 2, MM_H2, 1, { { 0 } }, { { 0 } }, gen_mm },   /* the mermaid on her rock: the sea is a loop of four pictures */
+    { 6, 1, MM_H1, 1, { { 0 } }, { { 0 } }, gen_mm },   /* the Singing Rock beach: a 640-column picture moved by the
                                                             camera, its two ends (mm_take, ws_backdrop_mermaid.inc) */
 };
 #define NROOMS ((int)(sizeof ROOMS / sizeof ROOMS[0]))
