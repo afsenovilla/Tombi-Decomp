@@ -2826,7 +2826,8 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   runs byte-identical).  Search over the 96 debug-select rooms (2200 frames each, 16:9; the 30 with a static camera
   looked at): one more case, AREA17 s5 (the engine room, raft return NPCs, updateRaftReturnNpc): two NPCs wait at x
   ~340 / ~384 right of the picture and walk in after the room's "CLEAR!" event (~frame 2150 of the select run); their
-  walk is not in the overlay's NPC step (likely animation-driven), not fixed yet.  AREA05 s1 / s3: an NPC half inside
+  walk is not in the overlay's NPC step (likely animation-driven), not fixed yet.  (They are sprites, not part of
+  the picture: with the room's strips on they stand on the right strip's floor while they wait.)  AREA05 s1 / s3: an NPC half inside
   the 4:3 picture (x -14..18), not parked.  Only the select's default story flags were covered.
 - **Room picture strips** (`runtime/ws_backdrop.c`, `shims/gpu.c` `ws_backdrop`; on by default with `--widescreen`
   since the user approved it on 2026-11-14, `--ws-backdrop off` disables it): AREA02 s5's background is one pre-rendered 320x224 8 bpp picture (VRAM
@@ -3363,11 +3364,12 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     canopy (rows 0-45) taken at other rows.  Not delivered until that is solved.
   - Looked at in the same round (2026-11-16) and dropped, with the reason: AREA18 s2 (the witch's kitchen: rafters of
     a roof slope cut by both edges, a cupboard / shelf wall at the left and a bunch of grapes cut by the right edge:
-    every edge holds objects, nothing to continue without inventing them), AREA10 s8 (the wise man's room: its picture
+    every edge holds objects, nothing to continue without inventing them; since done by continuing each object on its
+    own lines, `gen_kt` below), AREA10 s8 (the wise man's room: its picture
     is a 256-column vignette with rounded black corners at frame column 32, not the hook's (0, 16) sprite), AREA11 s1
     (the cage scene: the hut's roof and its bracket cut by the left edge, the box's riveted door frame by the right
     one), AREA16 s3 / s6 (gears and blue beams cut by both edges), AREA17 s1 (a 384-row picture drawn from frame row
-    -144: not the hook's layout), AREA17 s5 (the engine room: pipes and machines cut by both edges), AREA18 s1 (the stone tower: a 3D scene that
+    -144: not the hook's layout), AREA17 s5 (the engine room: pipes and machines cut by both edges; since done, below: each cut pipe goes on along its own axis), AREA18 s1 (the stone tower: a 3D scene that
     already fills the wide frame), AREA09 s4 again
     (the sconces stand on rock mounds spaced (50, 30.5) along the stair, not a multiple of its four steps (90, 56):
     the right strip would need a new mound and sconce copied from the picture's, a visible duplicate one period from
@@ -3587,9 +3589,109 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     9:4, 17:3, 17:4 with `--ws-backdrop on`) identical to the build before, the OpenGL renderer's frames = the
     software one's (xvfb), standalone gcc x86-64 = gcc -m32 = clang, UBSan / ASan clean, i386 = wasm2c frames (16:9 and
     21:9, 176 frames each, the pan included); not checked on the device.
+  - AREA18 s2 (the witch's kitchen, 2026-11-16, `gen_kt` in `runtime/ws_backdrop_kitchen.inc`; off by default, preview
+    with `--ws-backdrop-rooms 18:2`).  Dropped in the first scan (below) because every edge holds objects; done now by
+    continuing each of them on its own measured lines.  The left part is drawn 256 x 256 (clipped by the frame), the
+    right 64 columns from page (256, 0); a 48 x 64 quad over the cauldron is animated and far from the edges.  An
+    attic seen from inside: the two rafters of the truss next to the camera cross the upper corners, a log runs out
+    through each top corner behind them, the cupboard's side stands under the left rafter, a bunch of grapes hangs
+    under the right one.  Measured (i = columns in from the edge, both sides alike): the rafters are parallel bands
+    (the lit band's edges fit rows 81.74 / 91.98 at the right edge with slopes 1.160 / 1.169 rows per column, 95.8
+    with 1.163 at the left one; its width stays 9.8-10.3 rows over 50 columns, so no vanishing point: a translation
+    along (6 columns, 7 rows)); the profile across a rafter averaged along that direction is the same next to the edge
+    and 20-32 columns in, from edge row 55 (left) / 51 (right) to the lit band's lower edge; the log's lower edge
+    (luminance 50) fits row 22.1 + 0.411 i / 12.1 + 0.432 i, a translation along (12, 5), with its shadow 14 rows under
+    it; between log and rafter the roof's underside is the grit seen between the beams at the top of the picture
+    (columns 122-158, rows 0-16: relative contrast 0.19 against 0.19 / 0.15 in the corners).  The floor has no
+    boards: an even grit with no direction in its structure tensor (coherence 0-0.5 at row 206), lighter in a pool
+    round the fire, 2-5 % darker every 8 columns towards the edges; so there is no plank line to continue, only the
+    grain's size per row.  The cupboard's side is a frontal panel of vertical grain (columns 0-47, three rungs at
+    columns 17-31, a lighter corner board at 40-47 and a dark edge at 48-49, its foot on row 181).  The grapes are one
+    10 x 10 disc lit top-left: the two cut by the edge are the whole one (columns 302-311, rows 97-105) moved by (9, 3)
+    and (9, 13), each missing only its rim column; the leaves above them end on the rafter's lower edge and the picture
+    shows no stem (the bunch hangs from the rafter).  The dark band at the right wall's foot (rows 158-181) and on the
+    floor beside it (rows 183-189) is the pot's shadow.
+    The strips (every texel the picture's own, nothing mirrored): a rafter texel is the picture's texel 6 k columns
+    in and 7 k rows up along its own line (k as large as the line's length in the picture allows: 42-54 columns, so the
+    16:9 strip repeats nothing; the rafter's first three rows and the right lit band from nearer the edge), a log
+    texel the one (12, 5) further in; each line keeps the tone it has at the edge (the mean of its texels there over
+    the mean round the source), so the grain and every edge continue as the same lines, the upper and lower edges at
+    their sub-row place (1/6 row).  Grit (roof, plaster, floor) is the picture's, taken in hashed cells from a clean
+    box (the floor from its own row, so the grain keeps its perspective size) over the box's local mean, at the tone
+    wanted there: the roof by its distance to the log and to the rafter as at the edge, the wall and the floor row by
+    row as at the edge (evened out over 7-9 rows further out so a streak of the edge does not run on), the pot's shadow
+    fading out over 22 columns, the floor falling off 0.35 % per column, at most 14 %.  The cupboard goes on for 6
+    columns of its own grain and closes with its corner board's texels (in their order, at the panel's tone there) and
+    its dark edge at column 16; nothing is put on it; beyond it the wall in the shade (the roof's grit at the panel's
+    tone) down to the same foot.  The bunch: the two cut grapes get their rim column, one more grape (the whole one
+    moved by (18, 9), touching both) closes the silhouette, the leaves go on under the rafter with its translation and
+    end on it; no stem is drawn, as none shows in the picture.  Wider pads: the same functions of the place (the
+    rafters run on to the frame's bottom at 109-112 columns, the roof outside them).
+    Checked (2026-11-16): 0.014 s at 16:9 (standalone); the standalone strips identical with gcc x86-64, gcc -m32 and
+    clang at 16:9 / 21:9 / 32:9; the 21:9 and 32:9 strips start with the 16:9 / 21:9 columns; in the game i386 = wasm2c
+    whole frames at 16:9, 21:9 and 4:3 (frame 1900); OpenGL (xvfb) strips = software; 4:3 identical to the build
+    before; with the default flags the room is unchanged (16:9 frame identical to the build before); the twelve other
+    rooms' 16:9 frames with `--ws-backdrop on` identical to the build before (2:5 2:1 5:1 5:3 19:1 11:2 9:5 9:3 9:4
+    17:3 17:4 16:4).  `tools/ws_seam.py` on the picture sheared along the rafter (its lines as rows): the rafter's
+    face passes on both sides (join 8 / 6 against the picture's own step 20 / 16), the lit band's tone and contrast
+    match (241.2 / 241.2, deviation 3.0 / 2.4 right; 207 / 211, 27.8 / 24.0 left; its stripe check fails on the
+    picture against itself too, the shear's rounding); the floor passes unsheared (join 14 / 9 against 32 / 25).
+    Weak points: the roof outside the rafters is one even grit (the picture shows only 20-odd rows of it per corner,
+    so no beam or purlin is invented there), plain at 21:9 and wider; what stands left of the cupboard is a guess
+    (a wall in the shade), as is where the cupboard ends (16 columns out); the bunch's new grape is the picture's
+    whole grape again, 18 columns from itself; not seen on the device.
   Checked (headless, 2026-11-14): at 16:9 and 21:9 in the four rooms; 4:3 runs identical with `--ws-backdrop on` and
   off; with the default flags the new rooms are identical to `--ws-backdrop off`, and AREA02 s5 is identical to the
   build before the table; i386 = wasm2c strips; not checked on the device.
+  - AREA17 s5 (the Iron Castle engine room, 2026-11-16, `gen_en` in `runtime/ws_backdrop_engine.inc`; off by default,
+    preview with `--ws-backdrop-rooms 17:5`).  Dropped at first ("pipes and machines cut by both edges").  How it is
+    drawn: the 256 + 64 column sprite pair (the hall's layout, 256 rows drawn) is only the room's box (back wall, side
+    walls, beams, floor, the furnace); boilers, pipes, wheel, gears, hoses and coal are 19 more raw quads (CLUT 128,511,
+    pages 128 / 256 / 384) drawn over it every frame, six of them animated by drawing other texels (steam, wheel,
+    gears, the grate's glow; all inside columns 71-256).  A quad of w pixels spans w - 1 texels, so `en_take()` (called
+    from `grab()` for this room only) puts the scene together as the renderer shows it (software: rounded half up;
+    OpenGL: truncated), keeps the box alone (`en_bk`) and the quad of each texel (`pic_ov`); equal to the software
+    frame's 4:3 columns outside the sprites and the animated quads.  The darkness before the power is on is a
+    subtractive rectangle over the whole frame, which the wide plane already extends: the strips darken with the
+    picture.  The two NPCs that wait right of the picture are sprites (they stand on the right strip's floor).
+    Measured: the side walls' lines (beam edges, moulding, the rail at row 148, the foot, the pipe under the right
+    beam) meet at (158, 155.6); the floor is iron plates, seams towards that point, 1.05 wide in f = (x - 158) / (y -
+    155.6), its light flat past |f| 0.75 on the left (74-82), falling on the right (90 at f 1 to 62 at f 3).  The
+    strips:
+    - walls and floor in perspective from the box alone (no pipe or boiler copied): a column dx from the vanishing
+      point shows the wall one step further along it (1 / dx' = 1 / dx + n c, a translation in the wall's plane; c =
+      0.0016 left, 0.000826 right), rows scaled about the horizon by dx / dx' (bilinear), so every line to the
+      vanishing point goes on exactly.  Left: the cut panel is closed by the wall's post (columns 3-13 of the strip)
+      and the next panel starts; right: the 20 clean columns by the edge (beam, the pipe under it, the riveted plate:
+      its bolt comes back once a block, a row of bolts along the wall).  A block's first columns are lit per row to
+      meet the column before (fading over 24).  Below the rail the picture's walls are hidden (a bracket; the
+      furnace's skirt, which ends at column 318): the one clean column goes on along the rays with the grain of the
+      wall 83 rows higher.  Floor: the same row one plate further in, times the measured light at the target over the
+      source;
+    - the hoses along the back wall's foot go on along the side wall's foot (the rays);
+    - left: the rust pipe (rows 91-125) and the grey pipe in front (145-182) reach the edge at the end of an elbow
+      (outline and highlight still 0.3 row a column, flattening), so they finish the turn (1.45 rows over 10 columns)
+      and run level off the outer edge with the cross-section they have at the edge; the big grey pipe at the top
+      (highlight at column 11, right limb at 24, as wide as the pipe beside it plus 4 columns) gets its left limb,
+      round, down to where the elbow's outline re-enters at row 58;
+    - right: the copper pipe is a three-piece elbow (upright, 46 degrees, 23 degrees) with a ring on each joint; the edge
+      cuts the second ring and all but a wedge of the third piece.  The ring's top face, rim and groove go on along
+      quarter ellipses to its end 8.5 columns out (where the groove meets the middle piece's lower outline, 167.5 -
+      1.05 X), each band with its texels at the edge, darkening to the end as the first ring does; the third piece
+      runs off along its upper outline (122 - 0.417 X), 38 rows high, with the middle piece's cross-section (its
+      texels between the rings averaged by distance from its upper outline; the third piece's own seven rows at the
+      edge agree with it within 8 levels);
+    - the runs carry the grain of an upright stretch of the same pipe (texels less their column and row means, 3-column
+      windows by a position hash).
+    Checks (headless, 2026-11-16): the 4:3 run and the default 16:9 run byte-identical to the build before; the 4:3
+    centre of the 16:9 frame unchanged; the other twelve rooms' 16:9 frames with `--ws-backdrop on` byte-identical
+    (2:5 2:1 5:1 5:3 19:1 11:2 9:5 9:3 9:4 17:3 17:4 16:4); 21:9 starts with the 16:9 columns (frame 2400, 0 texels
+    differ); OpenGL (xvfb) strips = the generator on the picture as OpenGL shows it; i386 = wasm2c whole frames at 16:9
+    and 21:9; 0.01 s per build.  Not checked on the device.  Weak points: the three long runs are plain (no ring or
+    bend is invented, so at 21:9 they are 120 columns of smooth pipe); the hidden end of the second ring has no bolt;
+    the walls' texels are magnified 1.3-1.9 x (softer than the picture's wall by the edge); the right wall repeats
+    its 20 columns (bolt and streaks) every block; the rust pipe keeps the shadowed section it has at the cut (no
+    highlight); only the debug select's default state was seen.
 - **Sub-screens** (Select screens Objetos / Eventos / Estado / Mapa, memory card, options, button config, screen
   adjust).  The Select screens (`subScreenDrawTabs`, D0SPSUB / D0SPSUB3, `#ifdef PORT2`) call `port_ws_layout(left cut,
   right cut, below)` each frame; while it is set, `shims/gpu.c` spreads the textured primitives of the frame

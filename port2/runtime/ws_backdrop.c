@@ -734,10 +734,13 @@ typedef struct {
     int (*is)(void);                                     /* rooms that share them: is the grabbed picture this one's? */
 } Room;
 static const Room *room;                                 /* the room being drawn */
+static u16 tex8(const u16 *vram, int tx, int u, int v, int cx, int cy);
 static void build_redraw(int pad);
 static void gen_cb(int pad);
 #include "ws_backdrop_rooms.inc"
 #include "ws_backdrop_rooms2.inc"
+#include "ws_backdrop_kitchen.inc"
+#include "ws_backdrop_engine.inc"
 #define PIECES_TOP4 { 128, 0, 224, 64, 32, 256, 0 }, { 128, 64, 224, 64, 32, 256, 32 }, { 128, 128, 224, 64, 32, 256, 64 }, \
                     { 128, 192, 224, 64, 32, 256, 96 }
 #define OVER_A5 { { 256, 0, 112, 56, 104, 0, 0 }, { 256, 56, 112, 200, 104, 56, 0 }, { 256, 144, 0, 64, 80, 256, 24 }, \
@@ -765,6 +768,10 @@ static const Room ROOMS[] = {
     { 17, 4, 256, 1, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, gen_hl },
     { 16, 4, TW_H, 1, { { 0 } }, { { 0 } }, gen_tw },   /* the green tower: a 672-row picture moved by the camera (its
                                                             pieces and hook: TW_P / tw_take, rooms2.inc) */
+    { 18, 2, 256, 1, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, gen_kt },   /* the witch's kitchen (256 rows drawn;
+                                                            ws_backdrop_kitchen.inc) */
+    { 17, 5, 256, 0, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, gen_en },   /* the Iron Castle engine room (preview;
+                                                            ws_backdrop_engine.inc) */
 };
 #define NROOMS ((int)(sizeof ROOMS / sizeof ROOMS[0]))
 const char *port_ws_backdrop_rooms;                      /* --ws-backdrop-rooms A:S,A:S,... (decimal; "all") */
@@ -798,6 +805,12 @@ static u16 tex8(const u16 *vram, int tx, int u, int v, int cx, int cy)
     u16 w = vram[(size_t)(v & 511) * 1024 + ((tx + u / 2) & 1023)];
     return vram[(size_t)(cy & 511) * 1024 + ((cx + (u & 1 ? w >> 8 : w & 255)) & 1023)];
 }
+#ifndef WS_BACKDROP_MAIN
+extern int port_gpu_is_gl(void);
+static int en_gl(void) { return port_gpu_is_gl(); }
+#else
+static int en_gl(void) { return shown_gl; }
+#endif
 static u32 grab(const u16 *vram, int cx, int cy)
 {
     u32 h = 2166136261u;
@@ -815,6 +828,7 @@ static u32 grab(const u16 *vram, int cx, int cy)
             if (c && p->y + y < PH && p->x + x < PW) { pic[p->y + y][p->x + x] = c; pic_ov[p->y + y][p->x + x] = 1; }
         }
     }
+    if (room->gen == gen_en) en_take(vram, cx, cy, en_gl());   /* (its scene: 19 more quads, as the renderer shows them) */
     for (int y = 0; y < PH; y++) for (int x = 0; x < PW; x++) h = (h ^ pic[y][x]) * 16777619u;
     return h;
 }
@@ -858,6 +872,7 @@ const u16 *port_ws_backdrop(const u16 *vram, int pad, int x, int y, int w, int h
                 if (f) {
                     for (int yy = 0; yy < PH; yy++) for (int xx = 0; xx < PW; xx++) { u8 b[2] = { (u8)pic[yy][xx], (u8)(pic[yy][xx] >> 8) }; fwrite(b, 1, 2, f); }
                     fwrite(pic_ov, 1, sizeof pic_ov, f);   /* then the over pieces' opaque texels, one byte each */
+                    if (room->gen == gen_en) fwrite(en_bk, 1, sizeof en_bk, f);   /* (and that room's back layer) */
                     fclose(f);
                 }
             }
@@ -877,6 +892,7 @@ int main(int argc, char **argv)
     if (!room || argc < 4 || !(f = fopen(argv[1], "rb"))) { fprintf(stderr, "usage: wsb [AREA:SECTION] PIC.raw PAD OUT.ppm [mirror]\n"); return 1; }
     for (int y = 0; y < PH; y++) for (int x = 0; x < PW; x++) { u8 b[2]; if (fread(b, 1, 2, f) != 2) return 1; pic[y][x] = (u16)(b[0] | b[1] << 8); }
     if (fread(pic_ov, 1, sizeof pic_ov, f) != sizeof pic_ov) memset(pic_ov, 0, sizeof pic_ov);   /* (older dumps: none) */
+    if (fread(en_bk, 1, sizeof en_bk, f) != sizeof en_bk) memset(en_bk, 0, sizeof en_bk);
     fclose(f);
     pad = atoi(argv[2]); enabled = argc > 4 ? 2 : 1;
     shown_gl = getenv("WSB_GL") != 0;                    /* as drawn by the OpenGL renderer (gen_th) */
