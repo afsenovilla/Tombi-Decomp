@@ -35,7 +35,7 @@ env:
   SDL2_VERSION: "2.30.11"
   # ccache for the NDK builds (game_libs.py's CMake and Gradle's externalNativeBuild inherit the environment)
   CCACHE_DIR: ${{ github.workspace }}/.ccache
-  CCACHE_MAXSIZE: 1G
+  CCACHE_MAXSIZE: 2G   # three games (PAL, USA, JP) x two ABIs: 1G was full and evicting
   CCACHE_COMPRESS: "1"
   CMAKE_C_COMPILER_LAUNCHER: ccache
   CMAKE_CXX_COMPILER_LAUNCHER: ccache
@@ -430,7 +430,8 @@ jobs:
 
       # Optional release signing; without the four secrets the APK stays debug-signed.  Never commit a keystore.
       - name: Save ccache
-        if: steps.fetch.outputs.ok == 'true'
+        # always(): a push that cancels this run (concurrency) still keeps what it compiled
+        if: always() && steps.fetch.outputs.ok == 'true'
         uses: actions/cache/save@v4
         with:
           path: .ccache
