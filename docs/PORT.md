@@ -3337,21 +3337,33 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     coordinates from the wall's own columns (k -9..40, the floor -9..28: the vases and the corner never), then read from
     the picture in one step through the quilt's source map (bilinear with the fractions sharpened x2 about the middle:
     the slats' and rails' gradient energy next to the join 92-96 % of the picture's; plain bilinear 75-80 %).  The
-    panels (rows 13-129) repeat the side wall's unit, which the picture shows whole between the edge and the corner
-    pilaster (rectified, both walls alike): the window (dark glass with a lit grey side, k -8..7), the bar with its two
-    screws (7..17), the grey pane (17..30) and the gold / copper frame's wide bevel up to its white rim (30..43).
-    Period 51 rectified columns (the window's outer end at the top rows' edge to the bevel's rim); outwards every texel
-    is its own unit texel one or more periods in, on the same rectified row (the frame's borders, the pane's bevels and
-    rounded corners keep their lines), so at 16:9 the strip shows the rest of the window, a whole frame, its pane and
-    the next bar with its screws cut by the screen edge, at 21:9 the next window too.  The window's texels the picture
-    does not show (left of the slanted edge on the lower rows, at most 9 columns) take, on the glass, the edge's colour
-    on their screen row (the lit side and the dark are bands upright on the screen, a reflection: copied along the
-    wall's rows they came out as a staircase), on the frame's rows the edge texel on the wall's line.  Every unit
-    texel is read at its exact position (clamped to the edge on the glass, so continuous), and the frame's rim meets
-    the next window blended over half a column: the second version rounded to rectified texels and switched between
-    the glass fill and the picture per texel, and the rim and the glass showed 1-texel steps (rejected in review).  (The first
-    version continued the edge's colour along the wall's lines over the whole strip: a plain grey slab with no frame or
-    screws, its lower 15 rows darkened by the window's reflection; rejected in review.)
+    panels (rows 13-129) are framed panels side by side along the wall; rectified, from the corner outwards, each is
+    its frame's rim and wide bevel (the side facing the camera: white rim, rounded corners), its pane, then its far
+    side, the bronze bar with the two screws (that side's bevel faces away from the camera, only the bar's top shows),
+    and the next panel's rim follows the bar at once.  The picture shows one panel whole by the corner (A) and the next
+    (B) cut by the edge: B's thin bright rim, its bevel (dark: the metal reflects another way there, though it is the
+    same bevel as A's gold one, mitred into the frame's top bevel the same way) and the first columns of its pane (lit
+    grey).  Measured on rows 40-100 (gradient peaks, rectified columns, left / right wall): A's bar 12.37..16.29 /
+    12.06..15.90 (its lit outer edge is B's rim), pane ..29.29 / ..29.52, the bevel's inner shadow ..31.9, bevel ..40.49
+    / ..39.92, rim ..43.27 / ..43.01; B's rim 10.58..12.36 / 10.24..12.06, its dark bevel from about 1 / 0.5 (the lit
+    pane's end is a soft reflection boundary, 0-2.3 depending on the row).  The rims' outer edges are 30.90 / 30.95
+    columns apart (the inner ones 29.8: B's bevel looks 2 columns narrower, the frame's relief seen from another angle),
+    so the period is 30.9 and the edge (k -7.3 on row 0, -5.2 on the pane's top row 28, -3.2 on row 60, 0 on row 100,
+    +2.1 on row 128) cuts B's pane in its corner-side third on the upper rows and its bevel's start below.  The strip
+    continues from exactly there: every texel is A's texel at the same offset in the unit (k + 30.9, + 61.8, ...: the
+    same rectified row, read at its exact position, so every line, rounded corner and screw goes on), so at 16:9 it
+    shows the rest of B's pane, B's bar with its screws, then the next panel whole (rim, gold bevel, pane) and its bar
+    at the screen edge.  B keeps its own tones: on its pane's rows (28-124, held 2 rows into the frame and fading out
+    over 4 more, so the pane's top and foot edges keep their rows) A's texels are scaled per channel by B's pane over
+    A's pane (B read by the edge, 9-row mean; scaled, not offset, so the bar's bronze flare at the pane's foot stays
+    bronze), and the rest to B's edge texel is added, fading out over 3 columns (exact at the join).  Rejected
+    versions: the third one took the unit as the window (B's dark bevel and lit pane, k -8..7) + A's bar, pane, bevel
+    and rim, period 51, starting at the edge: right against the picture's half panel (B) it drew a whole new frame's rim
+    and bevel instead of closing B first ("En el corte ya hay media ventana y has dibujado una entera pegada en lugar
+    de cerrar la que ya hay antes de empezar otra"; rejected in review).  The second rounded to rectified texels and
+    switched between a glass fill and the picture per texel: 1-texel steps on the rim and the glass (rejected).  The
+    first continued the edge's colour along the wall's lines over the whole strip: a plain grey slab with no frame or
+    screws (rejected).
     The handrail's lower edge (its shadow on the slats) is no line along the wall: it is all but level on the screen (row
     146.3, rising 0.03 a column inwards), so in rectified rows it drifts 2 rows along the wall and the quilt's windows
     from further in put it 0.9 row too high at the join; the windows' rows are moved so it lies on its own screen line
@@ -3364,15 +3376,16 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     pane:28-110;fbot:110-129;rail:129-148;slats:148-184;base:184-197;floor:197-224`): the handrail and floor pass;
     the others fail its texture checks because the picture's 16 edge columns hold other elements (the black band and
     the bar next to the pane, the steep cornice lines across 4-column groups) and the slats' period widens outwards
-    (perspective); in the panels' rows the line measure compares different elements (the strip's first columns are
-    the window's rest or the next frame's rim), so the 8x crops are the check there.  Weak points: the window's width
-    outwards is not visible (its outer end is taken where the picture's edge is at the top rows); the panels and slats
-    are the picture's own, so the strip repeats them (as the wall does); the leaning rims are smooth (read at their
-    exact position, sharpened bilinear).  0.02 s per room entry (pad 53, 266 alike).  Checked (headless): standalone
-    at pads 53, 101, 120 and 266 (a wider strip starts with the 16:9 one's columns: 0 texels differ), the game at 16:9
-    and 21:9 = the standalone, the OpenGL renderer's strips = the software one's, default flags (off) unchanged, the
-    other rooms untouched (only additions: the table's two entries and gen_hl), i386 = wasm2c frames (16:9, 21:9);
-    not checked on the device.
+    (perspective); in the panels' rows the line measure fits over picture columns 0-12, which hold B's pane's rounded
+    corner and soft edges, so the 8x crops and per-column half-level crossings are the check there (the pane's top on
+    the left wall: the picture's last columns 28.4-28.5, the strip's first 28.4).  Weak points: B's continuation is A's
+    pane at B's tone (B's own pane further out is not visible); its bevel is dark and the next panels' are gold (A's),
+    as the picture lights them; the frame's relief makes B's bevel 2 columns narrower than A's, the next panels are
+    A's size; the panels and slats are the picture's own, so the strip repeats them (as the wall does).  0.02 s per room entry (pad 53, 266 alike).  Checked (headless, this version): the
+    game at 16:9, 21:9 and 32:9 (a wider strip starts with the 16:9 one's columns: 0 texels differ), only panel-row
+    strip texels changed against the previous version (the cornice, handrail, slats, base and floor byte-identical),
+    the OpenGL renderer's strips = the software one's, 4:3 and default flags (off) unchanged, i386 = wasm2c frames
+    (16:9, 21:9); not checked on the device.
   Checked (headless, 2026-11-14): at 16:9 and 21:9 in the four rooms; 4:3 runs identical with `--ws-backdrop on` and
   off; with the default flags the new rooms are identical to `--ws-backdrop off`, and AREA02 s5 is identical to the
   build before the table; i386 = wasm2c strips; not checked on the device.
