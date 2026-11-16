@@ -1257,9 +1257,9 @@ static void vb_quilt(int side, const VbBand *b, int seed)
 {
     int W = b->B + b->OV, ytop = b->y0 - b->OT, ybot = b->y1 + b->OB, H = ybot - ytop, per = b->per ? vb_period(side, b) : 0;
     int pos = side ? PW : -1, nb = 0, used[3] = { -999, -999, -999 }, nd = 2 * b->dy + 1, ncand = (b->sx1 - b->sx0 - W + 1) * nd;
-    static int err[320 * 32], em[VB_MAXH][VB_MAXW], vcut[VB_MAXH], tcut[VB_MAXW], bcut[VB_MAXW];
+    static int err[320 * 128], em[VB_MAXH][VB_MAXW], vcut[VB_MAXH], tcut[VB_MAXW], bcut[VB_MAXW];
     static Rgb win[VB_MAXH][VB_MAXW]; static u8 pm[VB_MAXH][VB_MAXW];
-    if (H > VB_MAXH || W > VB_MAXW || ncand <= 0 || ncand > 320 * 32) return;
+    if (H > VB_MAXH || W > VB_MAXW || ncand <= 0 || ncand > 320 * 128) return;
     if (b->st & VBB_OUTL) for (int x = 0; x < PW; x++) vb_hs[x] = (short)vb_hcol(side, x);
     if (b->mr > 0) {                                     /* the trunk cut by the edge goes on: the picture's last k
                                                             columns repeated, k (mr/2+1 .. 2 mr) the shift at which
@@ -2550,6 +2550,205 @@ static void gen_st(int pad)
                 strip[(size_t)y * 2 * pad + (side ? pad + (X - 1) : pad - X)] = quant(cv[(size_t)y * vb_ow + X - 1]);
     }
     free(vb_srcmap); vb_srcmap = 0;
+    vb_ex = VB_EXCL; vb_exf = 0;
+    canvas_close();
+}
+
+/* ================================================================== AREA09 s3: the treasure hall (gen_th)
+ * A box room seen frontally: the back wall with the relief, two side walls running towards the camera, each with an
+ * arched door, a beam along its top, a recessed plaster panel, a wooden dado and the stone floor with the red carpet.
+ * Nothing past the 4:3 edges but more of those side walls (and a sliver of floor), nearer the camera.
+ * Measured on the picture: both side walls have their vanishing point at (159.625, 117.25) (the edge columns' row
+ * profiles matched against columns 58-68 / 252-262 along the lines through it, best fit on both sides).  A homothety
+ * about that point (screen) is a move along the depth (world): every element parallel to the depth axis (the beam,
+ * the recess's top, the dado's rails and panel, the floor's border and the carpet's edge) maps onto itself.  So the
+ * walls are rectified into depth / height coordinates where that move is a plain shift: column k of the rectified
+ * picture is the picture column at distance D(k) = de q^k from the vanishing point (de: the edge's distance, q =
+ * (de - 1) / de: one column per step at the edge), its row j the picture row vy + (j - vy) D(k) / de (j = the row at
+ * the edge).  There the strips are quilted outwards with vb_quilt (rows kept: the elements stay on their lines; the
+ * plaster's windows may move along the rows), the arches never copied, then mapped back: strip column X is at
+ * distance de + X, its rectified column k with D(-k) = de + X, its rows j = vy + (y - vy) de / (de + X); nearest
+ * texels both ways (the picture's own texels, no resampling blur).  The join: per row, the strip's first 8 rectified
+ * columns' mean moved onto the picture's last 8 (fading by 40), its first column onto the edge's (fading over 6). */
+#define TH_VX16 2554                                      /* the vanishing point (x 16) */
+#define TH_VY16 1876
+#define TH_NK 54                                          /* rectified columns of picture (inward) used */
+#define TH_NKP 34                                         /* ... in the plaster's rows (texels magnified less) */
+#define TH_PL0 38                                         /* the plaster's rows (nearest texels both ways) */
+#define TH_PL1 132
+static int th_plaster(int j) { return j >= TH_PL0 && j < TH_PL1; }
+#define TH_NO 400                                         /* rectified columns outwards (tables) */
+static u16 th_p0[PH][PW];                                 /* the picture (pic holds the rectified one meanwhile) */
+static u8 th_m[PH][PW];                                   /* rectified texel not to copy */
+static long long th_D[2][TH_NO + TH_NK + 1];              /* per wall, D(k), k = -TH_NO..TH_NK, in 2^-20 px */
+static const VbBox TH_EXCL[] = { { 15, 66, 58, 203 }, { 262, 66, 305, 203 }, { 0, 0, 0, 0 } };   /* the arches */
+static const VbBox TH_NONE[] = { { 0, 0, 0, 0 } };
+static int th_exf(int x, int y) { return th_m[y][x]; }
+static int th_de16(int side) { return side ? (PW - 1) * 16 - TH_VX16 : TH_VX16; }
+static void th_table(int side)
+{
+    long long de = (long long)th_de16(side), *D = th_D[side] + TH_NO;
+    D[0] = de << 16;
+    for (int k = 1; k <= TH_NK; k++) D[k] = D[k - 1] - D[k - 1] * 16 / de;
+    for (int k = 1; k <= TH_NO; k++) D[-k] = D[-k + 1] + D[-k + 1] * 16 / (de - 16);
+}
+static int th_bad(int x, int y)
+{
+    if (x < 0 || x >= PW || y < 0 || y >= PH) return 1;
+    for (int i = 0; TH_EXCL[i].x1; i++)
+        if (x >= TH_EXCL[i].x0 && x < TH_EXCL[i].x1 && y >= TH_EXCL[i].y0 && y < TH_EXCL[i].y1) return 1;
+    return 0;
+}
+/* bilinear: the texel at (xf, yf) (2^-20 px) of the picture, 0 when one of the four is out or excluded */
+static int th_bil(const u16 (*src)[PW], long long xf, long long yf, Rgb *o)
+{
+    int x0 = (int)(xf >> 20), y0 = (int)(yf >> 20), fx = (int)((xf >> 12) & 255), fy = (int)((yf >> 12) & 255);
+    Rgb a, b;
+    if (th_bad(x0, y0) || th_bad(x0 + (fx > 0), y0) || th_bad(x0, y0 + (fy > 0)) || th_bad(x0 + (fx > 0), y0 + (fy > 0))) return 0;
+    a = mix(rgb15(src[y0][x0]), rgb15(src[y0][x0 + (fx > 0)]), fx); b = mix(rgb15(src[y0 + (fy > 0)][x0]), rgb15(src[y0 + (fy > 0)][x0 + (fx > 0)]), fx);
+    *o = mix(a, b, fy); return 1;
+}
+static u16 th_15(Rgb c) { return (u16)(clampi((c.r + 4) >> 3, 0, 31) | clampi((c.g + 4) >> 3, 0, 31) << 5 | clampi((c.b + 4) >> 3, 0, 31) << 10); }
+/* the rectified picture for the strip on side `side`: its own wall at columns k (left) / 319 - k (right), k < TH_NK,
+   and the other wall's rectified columns beside them in the screen's order (more windows for the narrow plaster /
+   dado / floor stretches between the edge and the arch; never mirrored: a texel keeps its left / right neighbours) */
+#define TH_OTH 160                                        /* the other wall's columns: [160, 230) on the left, [90, 160)
+                                                            on the right */
+static void th_rectify(int side)
+{
+    for (int c = 0; c < PW; c++) {
+        int w = side, k = side ? PW - 1 - c : c;
+        if (!side && c >= TH_OTH && c < TH_OTH + TH_NK) { w = 1; k = TH_OTH + TH_NK - 1 - c; }
+        if (side && c >= PW - TH_OTH - TH_NK && c < PW - TH_OTH) { w = 0; k = c - (PW - TH_OTH - TH_NK); }
+        for (int j = 0; j < PH; j++) {
+            Rgb o; int ok = 0; long long *D = th_D[w] + TH_NO, de = th_de16(w);
+            if (k < (th_plaster(j) ? TH_NKP : TH_NK)) {
+                long long xf = ((long long)TH_VX16 << 16) + (w ? D[k] : -D[k]);
+                long long yf = ((long long)TH_VY16 << 16) + (long long)(j * 16 - TH_VY16) * D[k] / de;
+                if (th_plaster(j)) {                      /* (the plaster: nearest texels, its grain kept) */
+                    int xs = (int)((xf + (1 << 19)) >> 20), ys = (int)((yf + (1 << 19)) >> 20);
+                    ok = !th_bad(xs, ys);
+                    if (ok) o = rgb15(th_p0[ys][xs]);
+                } else ok = th_bil(th_p0, xf, yf, &o);
+            }
+            pic[j][c] = ok ? th_15(o) : 0;
+            th_m[j][c] = (u8)!ok;
+        }
+    }
+}
+#define TH_Q (VBB_STRICT | VBB_TIGHT | VBB_EDGEW | VBB_FAR)
+#define TH_NB 8
+static const VbBand TH_BANDS[TH_NB] = {                   /* the left side (the right one: columns mirrored) */
+    { 0, 40, 0, 40, 0, 214, 12, 5, 0, 0, 0, 1, 0, 0, 0, TH_Q },          /* the beam and the recess's top */
+    { 40, 64, 40, 132, 0, 214, 9, 4, 6, 0, 16, 2, 0, 0, 0, TH_Q },      /* the recess's plaster */
+    { 64, 88, 40, 132, 0, 214, 9, 4, 6, 0, 40, 2, 0, 0, 0, TH_Q },
+    { 88, 110, 40, 132, 0, 214, 9, 4, 6, 0, 56, 2, 0, 0, 0, TH_Q },
+    { 110, 132, 40, 132, 0, 214, 9, 4, 6, 0, 60, 2, 0, 0, 0, TH_Q },
+    { 132, 166, 128, 166, 0, 214, 6, 3, 4, 0, 0, 3, 0, 0, 0, TH_Q },    /* the dado: the ledge, the rail, the panel */
+    { 166, 203, 162, 203, 0, 214, 6, 3, 4, 0, 0, 3, 0, 0, 0, TH_Q },
+    { 203, PH, 200, PH, 0, 214, 6, 3, 3, 0, 0, 4, 0, 0, 0, TH_Q } };    /* the floor */
+static void th_join(int side)
+{
+    static int jd[PH][2][3];
+    for (int st = 0; st < 2; st++) {
+        int R = st ? 1 : 2, N = st ? 1 : 8;
+        for (int y = 0; y < PH; y++) {
+            int s[2][3] = { { 0 } }, n[2] = { 0, 0 };
+            for (int yy = y - R; yy <= y + R; yy++) {
+                if (yy < 0 || yy >= PH) continue;
+                for (int i = 0; i < N; i++) {
+                    int x = side ? PW - 1 - i : i; Rgb a;
+                    if (th_m[yy][x]) continue;
+                    a = cv[(size_t)yy * vb_ow + i]; s[1][0] += a.r; s[1][1] += a.g; s[1][2] += a.b; n[1]++;
+                    a = rgb15(pic[yy][x]); s[0][0] += a.r; s[0][1] += a.g; s[0][2] += a.b; n[0]++;
+                }
+            }
+            for (int c = 0; c < 3; c++) jd[y][st][c] = n[0] && n[1] ? (s[0][c] / n[0] - s[1][c] / n[1]) * (st ? 3 : 4) / 4 : 0;
+        }
+        for (int y = 0; y < PH; y++)
+            for (int X = 1; X <= (st ? 6 : 40) && X <= vb_ow; X++) {
+                Rgb *p = &cv[(size_t)y * vb_ow + X - 1]; int w = st ? (7 - X) * 256 / 6 : X <= 8 ? 256 : (40 - X) * 256 / 32;
+                p->r = clampi(p->r + jd[y][st][0] * w / 256, 0, 255); p->g = clampi(p->g + jd[y][st][1] * w / 256, 0, 255);
+                p->b = clampi(p->b + jd[y][st][2] * w / 256, 0, 255);
+            }
+    }
+}
+/* the plaster's light: its windows come from all over the recess, whose mottling is larger and stronger there than
+   next to the edge; the strip's local light (luminance over 7 x 7) is pulled towards the edge's light of its row (the
+   picture's 13 columns at the edge, rows +- 6), keeping 1/5 of its own variation; the grain stays */
+static void th_plaster_light(int side)
+{
+    static int M[PH][TH_NO + 2], T[PH];
+    for (int y = TH_PL0; y < TH_PL1; y++) {
+        int s = 0, n = 0;
+        for (int yy = y - 6; yy <= y + 6; yy++) {
+            if (!th_plaster(yy)) continue;
+            for (int i = 0; i < 13; i++) { int x = side ? PW - 1 - i : i; if (!th_m[yy][x]) { s += lum(rgb15(pic[yy][x])); n++; } }
+        }
+        T[y] = n ? s * 16 / n : 0;
+        for (int X = 1; X <= vb_ow; X++) {
+            int s2 = 0, n2 = 0;
+            for (int yy = y - 3; yy <= y + 3; yy++) {
+                if (!th_plaster(yy)) continue;
+                for (int XX = X - 3; XX <= X + 3; XX++) if (XX >= 1 && XX <= vb_ow) { s2 += lum(cv[(size_t)yy * vb_ow + XX - 1]); n2++; }
+            }
+            M[y][X] = n2 ? s2 * 16 / n2 : 0;
+        }
+    }
+    for (int y = TH_PL0; y < TH_PL1; y++)
+        for (int X = 1; X <= vb_ow; X++) {
+            int m = M[y][X], t;
+            if (!m || !T[y]) continue;
+            t = T[y] + (m - T[y]) / 5;
+            cv[(size_t)y * vb_ow + X - 1] = scale(cv[(size_t)y * vb_ow + X - 1], clampi(t * 256 / m, 160, 400));
+        }
+}
+static void gen_th(int pad)
+{
+    long long *D; int nk;
+    pal_make();
+    th_table(0); th_table(1); D = th_D[0] + TH_NO;
+    for (nk = 1; nk < TH_NO && D[-nk] < ((long long)th_de16(0) + 16 * (pad + 64)) << 16; nk++) ;
+    vb_ow = nk + 2;
+    if (!canvas_open(vb_ow)) return;
+    memcpy(th_p0, pic, sizeof pic);
+    vb_ex = TH_NONE; vb_exf = th_exf;
+    for (int side = 0; side < 2; side++) {
+        long long de = th_de16(side);
+        D = th_D[side] + TH_NO; th_rectify(side);
+        canvas_clear(); cur_side = side;
+        for (int i = 0; i < TH_NB; i++) {
+            VbBand b = TH_BANDS[i];
+            if (side) { short a = b.sx0; b.sx0 = (short)(PW - b.sx1); b.sx1 = (short)(PW - a); }
+            vb_quilt(side, &b, 1401 + 13 * i);
+        }
+        th_plaster_light(side);
+        th_join(side);
+        for (int X = 1; X <= pad; X++) {
+            long long d = (de + 16 * X) << 16; int k = 0, fk;
+            while (k < TH_NO - 1 && D[-k - 1] <= d) k++;
+            fk = (int)((d - D[-k]) * 256 / (D[-k - 1] - D[-k]));      /* rectified column k + fk / 256 */
+            for (int y = 0; y < PH; y++) {
+                long long jf = ((long long)TH_VY16 << 16) + (long long)(y * 16 - TH_VY16) * (de << 16) / (de + 16 * X);
+                int j = clampi((int)(jf >> 20), 0, PH - 2), fj = (int)((jf >> 12) & 255);
+                Rgb c[2];
+                if (th_plaster(j) && th_plaster(j + 1)) {      /* (nearest) */
+                    int kk = clampi(k + (fk >= 128), 0, vb_ow), jj = j + (fj >= 128);
+                    strip[(size_t)y * 2 * pad + (side ? pad + (X - 1) : pad - X)] =
+                        quant(kk ? cv[(size_t)jj * vb_ow + kk - 1] : rgb15(pic[jj][side ? PW - 1 : 0]));
+                    continue;
+                }
+                for (int u = 0; u < 2; u++) {
+                    int kk = clampi(k + u, 0, vb_ow);
+                    Rgb a = kk ? cv[(size_t)j * vb_ow + kk - 1] : rgb15(pic[j][side ? PW - 1 : 0]);
+                    Rgb b = kk ? cv[(size_t)(j + 1) * vb_ow + kk - 1] : rgb15(pic[j + 1][side ? PW - 1 : 0]);
+                    c[u] = mix(a, b, fj);
+                }
+                strip[(size_t)y * 2 * pad + (side ? pad + (X - 1) : pad - X)] = quant(mix(c[0], c[1], fk));
+            }
+        }
+    }
+    memcpy(pic, th_p0, sizeof pic);
     vb_ex = VB_EXCL; vb_exf = 0;
     canvas_close();
 }
