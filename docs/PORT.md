@@ -3155,6 +3155,56 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     shares of stair and wall by design; the joins on the stair are exact copies).  Weak points: the marble's cracks
     recur four steps apart in the strip (the copy); the stair copy comes from 90 columns in, lit a little differently
     (matched per row at the edge only).
+  - AREA09 s3 (the treasure hall, 2026-11-16, `gen_th`; off by default, preview with `--ws-backdrop-rooms 9:3`).  A box
+    room seen frontally: the back wall with the relief and the chandelier, and two side walls running towards the
+    camera, each with an arched door (drawn again over the player as two quads: page 256 u 64-103 / 104-143 v 0-135 ->
+    picture (0, 72) / (280, 72)), a beam along the top, a recessed plaster panel (the grey line under the beam is the
+    recess's top), a wooden dado (a light ledge, a rail, a panel with a gold inlay, a base) and the floor's grey border
+    with the red carpet.  Past the 4:3 edges there is only more of those side walls, nearer the camera.  Measured: both
+    side walls vanish at (159.625, 117.25) (the row profiles of the edge columns matched against columns 58-68 /
+    252-262 along the lines through the point, best fit on each side separately: (159.5, 117.25) and (159.75,
+    117.25)).  A homothety about the vanishing point (on the screen) is a move along the depth (in the room): it maps
+    every element parallel to the depth axis onto itself (the beam, the recess's top, the dado's rails and panel, the
+    floor's border, the carpet's edge).  So the walls are rectified: column k of the rectified picture is the picture
+    column at distance D(k) = de q^k from the vanishing point (de the edge's distance, q = (de - 1) / de, so one
+    column per step at the edge; integer tables), its row j the picture row vy + (j - vy) D(k) / de (j is the row at
+    the edge).  In those coordinates every element of the wall is a horizontal band and the move along the depth a
+    plain shift, so `vb_quilt` continues the walls outwards as in the frontal rooms (rows kept on the beam, dado and
+    floor bands; the plaster's windows may move along the rows, 24-row bands), the arches never copied, and the strip
+    is mapped back: strip column X is at distance de + X (rectified column k with D(-k) = de + X), its rows j = vy +
+    (y - vy) de / (de + X).  Bilinear both ways, except in the plaster's rows (nearest texels both ways: bilinear
+    halved its fine grain).  Between the edge and the arch there are only 14 clean columns of plaster and dado, so the
+    windows also come from the other side wall's rectified columns, laid next to the wall's own in the screen's order
+    (a texel keeps its left / right neighbours: not mirrored); the plaster's windows only from the 34 rectified
+    columns nearest the edge (further in, the texels are magnified 1.5x or more).  Light: the plaster's local light
+    (7 x 7) pulled towards the edge's light of its row, keeping 1/5 of its variation (the recess's mottling is larger
+    in the middle of the wall, and the windows came out blotchy); then per row the strip's first 8 rectified columns'
+    mean onto the picture's last 8 (fading by 40) and its first column onto the edge's (fading over 6).  0.2 s per
+    room entry (pad 53; 0.4 s at 32:9).  The panel cut by the edge goes on to the end of the strip without a new
+    frame and the recess without its near end: the picture does not show where they end (with the arch read as a
+    semicircle the camera is wide-angle, f ~ 134 texels, and a panel as long as the back wall's would end ~260
+    columns past the edge).  ws_seam (`beam:0-40;plA:46-88:310;plB:88-128:310;ledge:132-152;panel:152-203`): every
+    join step within the picture's own (rows within it 85-100 %); the floor band (203-224) shows join steps on its
+    first and last rows, where the dado's foot and the carpet's edge cross the join on a slant (the 8x crops show
+    them going on).  Weak points: the plaster further out reads a little greyer and more mottled than right at the
+    edge (it comes from the middle of the recess); the dado panel's vertical grain repeats every 6-9 columns (14
+    source columns per wall); at 32:9 the outer plaster is magnified ~2x.  Checked (headless): standalone at pads 53,
+    120 and 266 (a wider strip starts with the 16:9 one's columns: 0 texels differ), the game at 16:9 and 21:9,
+    default flags (off) unchanged, the other rooms' strips byte-identical to the build before (pads 53 and 140; the
+    only shared change is `vb_quilt`'s candidate buffer, 320 x 32 -> 320 x 128, which only lets larger bands run),
+    i386 = wasm2c frames; not checked on the device.
+  - Looked at in the same round (2026-11-16) and dropped, with the reason: AREA18 s2 (the witch's kitchen: rafters of
+    a roof slope cut by both edges, a cupboard / shelf wall at the left and a bunch of grapes cut by the right edge:
+    every edge holds objects, nothing to continue without inventing them), AREA10 s8 (the wise man's room: its picture
+    is a 256-column vignette with rounded black corners at frame column 32, not the hook's (0, 16) sprite), AREA11 s1
+    (the cage scene: the hut's roof and its bracket cut by the left edge, the box's riveted door frame by the right
+    one), AREA16 s3 / s6 (gears and blue beams cut by both edges), AREA17 s1 (a 384-row picture drawn from frame row
+    -144: not the hook's layout), AREA17 s5 (the engine room: pipes and machines cut by both edges), AREA18 s1 (the stone tower: a 3D scene that
+    already fills the wide frame), AREA09 s4 again
+    (the sconces stand on rock mounds spaced (50, 30.5) along the stair, not a multiple of its four steps (90, 56):
+    the right strip would need a new mound and sconce copied from the picture's, a visible duplicate one period from
+    the original).  The re-scan of the 96 debug-select rooms at 16:9 found no other fixed-camera picture rooms than
+    the ones listed here.
   - AREA09 s4 (the rock wall with the stair down to the right) was tried with the same generator and dropped: the left
     strip (the rock under the stair, windows translated along the stair) worked, but the right strip lies next to the
     row of sconce mounds along the stair, whose windows came out as dark shadow fragments; matching on relit texels

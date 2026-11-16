@@ -40,8 +40,8 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    to the picture's bush height with a target outline, loose pink bits dropped and enclosed grass filled; PORT.md
    has the numbers and the weak points), OFF by default until the user approves it (`--ws-backdrop-rooms
    19:1`; to approve: `approved` = 1 in its ROOMS entry). Next: the Haunted Mansion 3D side rooms AREA04 s10/s11/s15/s19 (black past the model's outer wall; postponed by the
-   user for token budget); then the other fixed-camera pictures (AREA17 s3/s4 hall, AREA18 s2, AREA10 s8, AREA09 s3,
-   ...). User rules: show before|after first, never mirror, measure geometry/tones in the picture, no roots, match
+   user for token budget); then the last fixed-camera picture left, the AREA17 s3/s4 hall (its side walls are probably
+   oblique: `gen_th`'s rectification needs one vanishing point per wall). User rules: show before|after first, never mirror, measure geometry/tones in the picture, no roots, match
    blur; use tools/ws_seam.py on the joins.
    2026-11-15, two more rooms as previews, OFF by default, waiting for the user's verdict (`--ws-backdrop-rooms
    11:2,9:5`; docs/PORT.md "More rooms with picture strips"): AREA11 s2 (the cave with the brick tower, `gen_cv`: the
@@ -52,6 +52,12 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    needs took 8-20 s), AREA16 s4 (a 672-row picture scrolled vertically: the hook only takes a picture at frame row
    16), AREA08 s1 / s3 (a 4 bpp layer of near trees and translucent light rays over the 8 bpp picture: the rays converge
    and would need geometric continuation), AREA16 s5 (architecture: pillars cut by both edges).
+   2026-11-16, one more preview, OFF by default (`--ws-backdrop-rooms 9:3`): AREA09 s3 (the treasure hall, `gen_th`):
+   the side walls rectified about their vanishing point (159.625, 117.25), where a move along the depth is a plain
+   shift, quilted there with `vb_quilt` and mapped back (beam, recess, dado and floor go on along their perspective
+   lines).  Looked at in the same round and dropped (PORT.md lists the reasons): AREA18 s2, AREA10 s8, AREA11 s1,
+   AREA16 s3 / s6, AREA17 s1, AREA17 s5, AREA18 s1, AREA09 s4 (again).  To approve AREA09 s3: `approved` = 1 in its
+   ROOMS entry.
 
 -2. **WIP (owner's request): restore the Funga Chief's cut event** on the Funga stage (`--cut-content=funga`, AREA10 s2,
    chief already walking there: runtime/funga.c).  What survives (docs/CUT_CONTENT.md "Jungle (AREA10)", "Funga Chief"):
