@@ -51,8 +51,8 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    `gen_st`: the wall quilted and relit, the stair continued exactly with its own steps, four steps = (90, 55)).
    Looked at and dropped for now: AREA09 s4 (rock wall, stair down to the right: the band of sconce mounds along the
    stair at the right edge cannot be quilted at a run-time cost like the others' ~2 s; the light-aware matching it
-   needs took 8-20 s), AREA16 s4 (a 672-row picture scrolled vertically: the hook only takes a picture at frame row
-   16), AREA08 s1 / s3 (a 4 bpp layer of near trees and translucent light rays over the 8 bpp picture: the rays converge
+   needs took 8-20 s), AREA16 s4 (a 672-row picture scrolled vertically: the hook only took a picture at frame row
+   16; since done, below), AREA08 s1 / s3 (a 4 bpp layer of near trees and translucent light rays over the 8 bpp picture: the rays converge
    and would need geometric continuation), AREA16 s5 (architecture: pillars cut by both edges).
    2026-11-16, one more preview, OFF by default (`--ws-backdrop-rooms 9:3`): AREA09 s3 (the treasure hall, `gen_th`):
    the side walls rectified about their vanishing point (159.625, 117.25), where a move along the depth is a plain
@@ -69,6 +69,12 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    picture as shown (`th_shown`).  Rail and stringer within ~0.5 row across both joins.  To approve: `approved` = 1 in
    its ROOMS entry.  AREA08 s1 / s3 (the lake) looked at again and not delivered: layers and ray geometry measured
    (PORT.md), but the near leaves cut by both edges have no clean source to go on with yet.
+   2026-11-17, AREA16 s4 (the green tower) as a preview, OFF by default (`--ws-backdrop-rooms 16:4`; `gen_tw` /
+   `tw_take` in `runtime/ws_backdrop_rooms2.inc`): the 672-row picture is put together from its three sprite sets and
+   the strips follow the camera's height (the pan up the tower when Tombi enters the door included; gpu.c's hook
+   takes a row offset, 0 for the other rooms); sky per row from the edge, clouds and crowns quilted on a target label
+   map (round outlines continuing the edge's cloud and crown), the trees' foot and the grass as slices of the edges'
+   clean columns.  ~0.2 s per room entry at 16:9.  To approve: `approved` = 1 in its ROOMS entry.
 
 -2. **WIP (owner's request): restore the Funga Chief's cut event** on the Funga stage (`--cut-content=funga`, AREA10 s2,
    chief already walking there: runtime/funga.c).  What survives (docs/CUT_CONTENT.md "Jungle (AREA10)", "Funga Chief"):

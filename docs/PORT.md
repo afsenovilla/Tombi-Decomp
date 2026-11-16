@@ -3309,7 +3309,7 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     fixed that but cost 8-20 s per room entry (the others take ~2 s); since done (above: matching on the texels over
     their light, 0.3 s).  Not attempted: AREA16 s4 (its picture is 672 rows,
     drawn as three 256-row sprite sets shifted by the camera: the hook only takes a picture whose left sprite is at
-    frame row 16), AREA08 s1 / s3 (a 4 bpp layer of near trees and translucent light rays over the 8 bpp picture, CLUT
+    frame row 16; since done, below), AREA08 s1 / s3 (a 4 bpp layer of near trees and translucent light rays over the 8 bpp picture, CLUT
     row 510: the rays converge on a point above the frame; looked at again, above), AREA16 s5 (the bell tower: pillars cut by both edges).
     Checked (headless, 2026-11-15): the two new rooms at 16:9 and 21:9 (standalone and in the game), 4:3 identical with
     `--ws-backdrop on`, off by default (the clear colour), AREA02 s5 / s1, AREA05 s1 and AREA19 s1 strips byte-identical
@@ -3386,6 +3386,72 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     strip texels changed against the previous version (the cornice, handrail, slats, base and floor byte-identical),
     the OpenGL renderer's strips = the software one's, 4:3 and default flags (off) unchanged, i386 = wasm2c frames
     (16:9, 21:9); not checked on the device.
+  - AREA16 s4 (the green tower, 2026-11-17, `gen_tw` / `tw_take` in `runtime/ws_backdrop_rooms2.inc`; off by default,
+    preview with `--ws-backdrop-rooms 16:4`).  How the game draws it (`PORT_PRIMLOG`): one 672-row 8 bpp picture
+    (CLUT (128, 511)) in three sets, each a 256-column sprite and the right 64 columns: rows 0-255 = page (128, 0) +
+    page (512, 0) u 0-63, rows 256-511 = page (256, 0) + page (512, 0) u 64-127, rows 512-671 = page (384, 0) rows
+    0-159 + page (384, 0) u 0-63 / 64-127 rows 160-239 (80 rows each).  All three sets are drawn every frame, shifted
+    by the camera: the set k's left sprite at frame row T + 256 k, T the picture's top row on the frame.  In the room
+    the camera rests at the bottom (T = -432: picture rows 448-671 on frame rows 16-239); when Tombi walks into the
+    door it pans up the whole tower at 2 rows a frame to the clock (T = 8, overshooting to 6), back down a little,
+    and the bell room (s5) follows.  The hook: `port_ws_backdrop` takes, before the usual (0, 16) test, any 256-wide
+    sprite at x 0 of pages 128 / 256 / 384 with that CLUT when the room is 16:4 (an entry with h = TW_H, 672, in
+    ROOMS; the usual loop never matches it), `tw_take` grabs the picture once per frame (the 7 pieces, `TW_P`; a hash
+    against the last one, and the sky in both top corners as a signature), builds the 672-row strips when the picture
+    changed and hands back the rows for frame rows 16-239; `shims/gpu.c` adds `port_ws_backdrop_dy` (0 for every other
+    room) to the destination row, so the strips are written where the picture's rows are on the frame.  Checked
+    against the standalone strips at 18 camera heights of the pan (T -432 .. 8) at 16:9 and 21:9: equal within the
+    frame dump's colour rounding (7) at every one.  `PORT_WS_BACKDROP_DUMP` writes the 672-row picture; the standalone
+    build takes it (`wsb 16:4 PIC.raw PAD OUT.ppm`).
+    The picture, measured: sky (a vertical gradient, 96,128,224 at the top to 128,144,224 at row 336, one 5-bit step
+    darker on the left; near-flat 8 bpp with a 2-colour dither) down to the clouds; cumulus at both edges (left: top
+    361 at x 0, its peak at x 3-8, row 360; right: falling outwards, 398-402 at x 304-319, the dome's top at x 264,
+    row 351); deciduous trees cut by both edges (left: the back tree's crown at the edge, top 440 at x 0 rising
+    outwards about 1.2 rows a column (440, 441, 443, 445 at x 0-3); right: the tall tree's tip at x 310-319, top 415
+    at x 314, 420 at x 319); the trees' foot at row ~640 (the foliage's drooping tips, a light strip of grass, then a
+    grey band at rows ~642-649 behind the trunks' bases at x 12-50 / 256-301), grass to row 671 with olive specks and,
+    at the right edge, the tree's shadow from row ~663.  The tower (x ~72-248), the bushes, the path and the trunks'
+    bases are never a source (`TW_EX`).
+    The strips: the picture's texels are labelled (sky / cloud / foliage / ground, by colour, majority over 5 x 5);
+    the strip has a target label map from two outlines per side, the clouds' top and the crowns' top, each a chain of
+    round lumps (circle tops): the first lump through the picture's outline at the edge (its row and slope there:
+    left cloud centre X -5 top 360 radius 26, left crown X 31 top 426 radius 40 (the back tree's dome, so the crown
+    rises from 440 at the join and closes again), right cloud X -34 top 389 radius 60, right crown X -5 top 415 radius
+    24), the next ones outwards by position hashes (clouds radius 16-34 tops 344-379, crowns 30-50 tops 418-457; none
+    reaching into the join), slopes limited to 1.5 rows a column for the clouds and 2.5 for the crowns so no lump has
+    a sheer side; under the crowns foliage to the foot (row 641), the ground below.  Sky above the clouds' highest
+    top - 24: per row a texel of the 12 edge columns (hash), among their sky texels within one tone step of the row's
+    middle (the haze over the clouds' rims came out as specks otherwise), rows the clouds fill at the edge taking the
+    nearest row of open sky.  Clouds and crowns: a new 2-D quilter on the tall picture (`tw_quilt`, 14 x 14 blocks,
+    8 columns / 6 rows of overlap, windows at most 48 rows off, from both edges' clean parts): cost = the overlap's
+    colour error (a checkerboard of it) + 60000 x the share of the window's texels whose label is not the target's
+    (subsampled 2 x 2: the label weight has to outweigh the colour error, at 4000 the crowns did not follow the
+    target), windows next to their own source (48 columns, 48 rows) or the last four used penalised, picked among
+    those within 1/8 of the best by a hash, pasted along minimum-error cuts.  The foot (rows 626-650) and the grass
+    (646-671): slices 2-8 columns wide of the edges' clean columns (x 1-12 / 302-319 for the foot, 1-47 / 273-319 for
+    the grass), on the same rows, each in its own order (never mirrored), the next slice the one whose neighbouring
+    column matches the strip's last column (the grass on 6-row means: on single texels the olive specks lined up in a
+    row), cross-faded over 4 rows into what is above.  Then the foliage's luminance mean and spread per row (+-16)
+    matched to the picture's 32 edge columns (spread x 0.8-1.5), the join (per row and class, the first 6 columns'
+    mean onto the picture's last 6, fading over 24), and on sky / cloud the first column's difference to the edge
+    column fading over 8 (the clouds' soft shading, a line otherwise); the sky texels the quilt brought from other
+    rows are the row's sky again (a window 40 rows off was a shade off: a visible box).  Every pixel quantised to the
+    picture's colours.  A structure depends on where it is: the analytic sky's last row comes from the outlines over
+    512 columns, not the strip's width, so 21:9 / 32:9 strips start with the 16:9 columns (0 texels differ at pads
+    101, 120, 267).  Generation (standalone, x86-64, the whole picture analysed and both 672-row strips): 0.19-0.23 s at 16:9, 0.29-0.35 s at 21:9, 0.54-0.66 s at 32:9 (the earlier, unpruned matcher took 0.8 s at 16:9).
+    Measured (ws_seam over two 224-row windows: the bottom view and rows 330-553; join | picture's step, texture
+    mean / contrast / gradient picture vs strip): left cloud 4 | 14 (192 / 195, 22.5 / 27.0, 2.2 / 3.3), crown 28 |
+    58 (97 / 90, 46 / 38), low foliage, foot 10 | 37, grass 11 | 13: all pass; right cloud 2 | 4 (167 / 169, 40 / 30),
+    crown 38 | 61 (91 / 85, 53 / 45), low foliage pass, foot 24 | 29 (fails the 80 % rule at 79 %), grass 9 | 11.
+    8x crops of every band's join show no line.  Weak points: the right edge's tall-tree tip stands alone at the join
+    (as in the picture), the crown next to it starts lower; the foot's drooping tips come from 30 clean columns, so
+    they repeat in short runs (no period); the outer crowns are quilted foliage within round outlines (no trunks: the
+    trunks are not visible at the edges either); at 32:9 the outer columns are more crowns and cloud lumps of the same
+    kind.  Checked (headless): the game at 16:9 and 21:9 = the standalone at every camera height of the pan, 4:3 frames
+    identical with `--ws-backdrop-rooms 16:4` and the default flags unchanged at 16:9 (the room is not approved), the
+    other rooms' frames (2:5, 2:1, 5:1, 5:3, 19:1, 11:2, 9:5, 9:3, 9:4, 17:3, 17:4 with `--ws-backdrop on`) identical
+    to the build before, the OpenGL renderer's frames = the software one's (xvfb), standalone gcc x86-64 = gcc -m32 =
+    clang, UBSan / ASan clean, i386 = wasm2c frames; not checked on the device.
   Checked (headless, 2026-11-14): at 16:9 and 21:9 in the four rooms; 4:3 runs identical with `--ws-backdrop on` and
   off; with the default flags the new rooms are identical to `--ws-backdrop off`, and AREA02 s5 is identical to the
   build before the table; i386 = wasm2c strips; not checked on the device.
