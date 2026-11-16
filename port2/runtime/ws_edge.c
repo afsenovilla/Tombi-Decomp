@@ -149,18 +149,9 @@ typedef struct { u8 t[40]; } TR;          /* a triangle packet: flat 32 bytes, s
    room: its big apple tree planted where the path ends on the left, so the way is visibly closed. */
 static const struct { u8 area, section, end; s16 x0, x1, y1, z0, z1; u16 tp[2], clut; s16 dx, dy, dz, pad0, pad1; s16 tx, tz, slope; } PROPS[] = {
     /* (clut: 0 = any; pad0..pad1: the strip widths, in px, it is used for)
-       32:9: the whole tree, far enough out that its round crown stops at the pig house;
-       16:9 / 21:9: the strip is narrower than the crown, so only the trunk and its fork, under the tree line carried
-       on (21:9: a second one further out and back) */
-    /* a stand of trunks in the foreground (in front of the path, on the front slope), at their own size: the apple
-       tree's forked trunk (7eca) and the trunk of the tree by the thatched hut (7f0a) */
-    {0, 0, 0, 300, 380, -50,  50,  60, {0x12, 0x12}, 0x7eca,  -388,   5, -105,   1, 999},
-    {0, 0, 0, 815, 870, -30,  80,  86, {0x12, 0x12}, 0x7f0a,  -926, -16, -108,   1, 999},
-    {0, 0, 0, 300, 380, -50,  50,  60, {0x12, 0x12}, 0x7eca,  -463,  34, -125,   1, 999},
-    {0, 0, 0, 815, 870, -30,  80,  86, {0x12, 0x12}, 0x7f0a, -1011, -16, -123,  90, 999},
-    {0, 0, 0, 300, 380, -50,  50,  60, {0x12, 0x12}, 0x7eca,  -570,   2,  -75,  90, 999},
-    /* 21:9 and wider: a trunk further out and back, under the tree line carried on; 32:9: the whole tree too */
-    {0, 0, 0, 300, 380, -50,  50,  60, {0x12, 0x12}, 0x7eca,  -620,  18,  110,  90, 999},
+       32:9: the whole tree, far enough out that its round crown stops at the pig house.
+       (the stand of foreground trunks, the apple tree's 7eca and the hut tree's 7f0a, was dropped 2026-11-17: seen from
+       the back lane they were trunks standing in mid-air; the fence below closes the way on its own) */
     {0, 0, 0, 150, 520, -50, -10, 200, {0x12, 0x0d}, 0,       -760,   8,   40, 200, 999},
     /* the fence (page 0xe, its level stretch x 96..192 at z 45): carried on to the left behind the pig house, and
        turned (tx, tz: x and z change per 256 units along the source x, from dx, dz at x0; slope: y change per 256

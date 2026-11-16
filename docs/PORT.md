@@ -2744,9 +2744,9 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   **Props** (`PROPS`): a prop of the room stood again past its end: the model's polygons inside a box, on the given
   texture pages (and palette, when given), are copied into the end's sector moved by (dx, dy, dz), per range of strip
   widths.  The first room's big apple tree is round and 344 units wide, more than a 16:9 or 21:9 strip without
-  hanging over the pig house, so there only its trunk and fork (4 polygons) stand under the tree line carried on, one
-  beside the house and at 21:9 a second one further out and back; at 32:9 the whole tree (59 polygons) stands far
-  enough out that its crown stops at the house.  (A box that cut the tree in depth left a flat dark crown: the front
+  hanging over the pig house; at 32:9 the whole tree (59 polygons) stands far enough out that its crown stops at the
+  house.  (16:9 / 21:9 had a stand of bare trunks there, the apple tree's and the hut tree's, dropped 2026-11-17 at
+  the user's request: seen from the back lane they were trunks standing in mid-air; the fence closes the way.)  (A box that cut the tree in depth left a flat dark crown: the front
   leaf clusters start at z -3.)
 - **3D room walls** (`runtime/ws_room3d.c`, called from `port_ws_area_model_link`; the approved rooms by default;
   `--ws-room3d on` = every room of its table, `--ws-room3d-rooms 4:10,4:11,...` = exactly those, `--ws-room3d off`;
