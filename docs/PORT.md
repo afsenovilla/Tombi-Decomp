@@ -4024,7 +4024,7 @@ on the sprites. Without the flag nothing runs.
 
 Room exits: the side-view exit triggers are hard-coded tests in the area overlays (`tryStartItemInteraction(o, 1|2,
 N)` in `updateAreaScroll` and friends, comparing the player's H / Y / D at scratchpad 0x168 / 0x16C / 0x170); there is
-no exit data on the disc. `tools/data/colview_exits.json` lists the 163 boxes read from the C (area, sections, exit,
+no exit data on the disc. `tools/colview_exits.json` lists the 163 boxes read from the C (area, sections, exit,
 H / Y / D ranges, `null` = unbounded, extra condition text, source line); `python3 tools/colview_exits.py` turns it
 into `port2/runtime/colview_exits.inc` (`--check` tells if it is stale). The view draws the finite edges of the
 current section's boxes in orange with an "EXIT n" label ("EXIT n?" and a pale colour when the exit has extra
