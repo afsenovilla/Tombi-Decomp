@@ -978,6 +978,7 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--ws-backdrop-rooms") && v) { extern const char *port_ws_backdrop_rooms; port_ws_backdrop_rooms = argv[++i]; }   /* exactly these rooms: A:S,A:S,... (decimal) or all */
         else if (!strcmp(a, "--ws-room3d") && v) { extern int port_ws_room3d_on; const char *m = argv[++i]; port_ws_room3d_on = !strcmp(m, "on") ? 3 : !strcmp(m, "off") ? 0 : 1; }   /* runtime/ws_room3d.c: default = the approved rooms, on = every room of its table */
         else if (!strcmp(a, "--ws-room3d-rooms") && v) { extern const char *port_ws_room3d_rooms; port_ws_room3d_rooms = argv[++i]; }   /* exactly these rooms: A:S,A:S,... (decimal) or all */
+        else if (!strcmp(a, "--ws-exits") && v) { extern int port_ws_exits; port_ws_exits = strcmp(argv[++i], "off") != 0; }   /* runtime/ws_exits.c */
         else if (!strcmp(a, "--ws-edge") && v) { extern int port_ws_edge; const char *m = argv[++i]; port_ws_edge = !strcmp(m, "off") ? 0 : !strcmp(m, "all") ? 2 : 1; }   /* runtime/ws_edge.c */
         else if (!strcmp(a, "--hud-bottom")) { extern int port_hud_bottom; port_hud_bottom = 1; }   /* runtime/panel_hud.c */
         else if (!strcmp(a, "--second-screen")) { extern int port_panel_on, port_panel_window; port_panel_on = port_panel_window = 1; }   /* runtime/panel.c */

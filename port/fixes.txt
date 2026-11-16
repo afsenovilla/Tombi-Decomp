@@ -1075,3 +1075,20 @@ src/d0spsub2/memCardDrawFileLocation.c | memCardDrawString(5, 0); | { extern int
 src/d0spsub2/memCardDrawString.c | void memCardDrawString(int pri, int mode) | extern int port_mc_prop_on, port_mc_last_x, port_mc_left; extern int port_mc_advance(int tpage, int clut, int u, int v, int w, int h, int c); void memCardDrawString(int pri, int mode)
 src/d0spsub2/memCardDrawString.c | { int t = g.w; x += t; } | { int t = g.w; if (port_mc_prop_on) { port_mc_last_x = (short)x; t = port_mc_advance(MEMCARD_DRAW_PARAMS.w, MEMCARD_DRAW_PARAMS.attr, g.u, g.v, g.w, g.h, (short)c); s->x0 = x - port_mc_left; } x += t; }
 src/d0spsub2/memCardDrawString.c | s->x0 = x - 0xB; | s->x0 = port_mc_prop_on ? port_mc_last_x + 8 - 0xB : x - 0xB;
+#
+# Widescreen exits (runtime/ws_exits.c, docs/PORT.md "Widescreen exits"): in the rooms whose exit sits at the 4:3 screen
+# edge, the exit fires at the wide frame's edge instead (tryStartItemInteraction holds it until Tomba is past the moved
+# boundary of tools/colview_exits.json "ws"), on that side Tomba may walk PORT_WSL / PORT_WSR (the pad, 0 elsewhere) further past the
+# camera than the 4:3 clamps allow, and past a column he always walks over on 4:3 before an edge exit (camera limit +- 0x80;
+# the exits sit at +- 0x88..0x91) the WHM repeats that column (getCollisionPlaneAt returned nothing past minX - 0xAA / maxX + 0xAA, so he fell short of the
+# exit; a stair or slope would have taken him out of the exit's Y range)
+src/tryStartItemInteraction.c | *p = 0; | if (port_ws_exit_hold(x, y)) return 0; *p = 0;
+src/cameraModeHandler6B.c | o->s2e + 150 | o->s2e + 150 + PORT_WSR
+src/cameraModeHandler6B.c | o->s2c - 150 | o->s2c - 150 - PORT_WSL
+src/cameraModeHandler6.c | (a = b - 0x90) | (a = b - 0x90 - PORT_WSL)
+src/cameraModeHandler6.c | (a = b + 0x90) | (a = b + 0x90 + PORT_WSR)
+src/updateCameraFollow.c | t = x - 0x90; | t = x - 0x90 - PORT_WSL;
+src/updateCameraFollow.c | t = x + 0x90; | t = x + 0x90 + PORT_WSR;
+src/cameraClampAroundTarget.c | t = x - 0x90; | t = x - 0x90 - PORT_WSL;
+src/cameraClampAroundTarget.c | t = x + 0x90; | t = x + 0x90 + PORT_WSR;
+src/getCollisionPlaneAt.c | if (x < CAMERA_SCROLL.minX - 0xaa || | if (PORT_WSM) { short lo_ = CAMERA_SCROLL.minX - 0x80, hi_ = CAMERA_SCROLL.maxX + 0x80; if ((*(int*)&GAME.selectedArea) != 0xe && lo_ < 0) lo_ = 0; if (x < lo_ && PORT_WSL) x = lo_; else if (x > hi_ && PORT_WSR) x = hi_; } if (x < CAMERA_SCROLL.minX - 0xaa ||

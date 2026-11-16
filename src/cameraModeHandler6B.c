@@ -12,13 +12,6 @@ extern Fix16 *PLAYER_H[];
 extern G PLAYER;
 extern signed char GAME_PLAYER_MODE[];
 extern Fix16 VIEW_CAMERA_Y_FIX;
-#ifdef PORT2
-/* widescreen: rooms whose exit the port moves out to the wide edge let Tomba walk there (runtime/ws_exits.c) */
-extern int port_ws_player_margin(void);
-#define PORT_WSM port_ws_player_margin()
-#else
-#define PORT_WSM 0
-#endif
 
 void cameraModeHandler6B(S *o)
 {
@@ -34,12 +27,12 @@ void cameraModeHandler6B(S *o)
     if (o->s2e < f->p.whole) {
         f->raw = o->s2e << 16;
         if (GAME_PLAYER_MODE[0] != 3) {
-            if (o->s2e + 150 + PORT_WSM < PLAYER_H[0]->p.whole) PLAYER_H[0]->p.whole = o->s2e + 150 + PORT_WSM;
+            if (o->s2e + 150 < PLAYER_H[0]->p.whole) PLAYER_H[0]->p.whole = o->s2e + 150;
         }
     } else if (f->p.whole < o->s2c) {
         f->raw = o->s2c << 16;
         if (GAME_PLAYER_MODE[0] != 3) {
-            if (PLAYER_H[0]->p.whole < o->s2c - 150 - PORT_WSM) PLAYER_H[0]->p.whole = o->s2c - 150 - PORT_WSM;
+            if (PLAYER_H[0]->p.whole < o->s2c - 150) PLAYER_H[0]->p.whole = o->s2c - 150;
         }
     }
     if (GAME_PLAYER_MODE[0] < 3) {

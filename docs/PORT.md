@@ -2667,16 +2667,27 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   the spear pigs' made one in AREA10 s0 start early and walk off before Tomba arrived (found by comparing runs), so
   activation windows are only widened where 4:3 + pad is not covered.  Gameplay positions, not screen tests: the
   jellyfish targets (AREA09), komaPigDropIn's "walked in" test, the rolling barrel's camera range.
-- **Widescreen exits** (`runtime/ws_exits.c`, 2026-11-16): in a few fixed-camera side-view rooms the exit sits at
-  the 4:3 screen edge, so on a wide frame Tomba left the room well inside the picture.  For the rooms listed in
-  `port_ws_exit_room` (AREA02 s5, the stone door room, exit on the right; AREA05 s1/s3, exit on the left) the port
-  moves three things out by the pad (there 1 unit = 1 column): the exit test (`src/x002`, `src/x005`
-  `updateAreaScroll`, under `PORT2`), the clamp that keeps Tomba within 150 units of the camera limits
-  (`cameraModeHandler6B`), and the WHM lookup (`getCollisionPlaneAt` returns nothing past `minX - 0xAA` / `maxX + 0xAA`,
-  or below 0, so he fell before reaching the exit: the edge column goes on outwards instead).  The exits keep their
-  4:3 distance to the frame edge.  The collision view draws the moved exits (`"ws"` in `tools/colview_exits.json`).
-  Verified headless at 4:3 (unchanged), 16:9, 21:9 and 32:9: Tomba walks on the floor to the wide edge and the exit
-  fires there.  Matching build unchanged (`PORT2` only).
+- **Widescreen exits** (`runtime/ws_exits.c`, `--ws-exits off` to compare; 2026-11-16): many side-view exits sit at
+  the 4:3 screen edge when the camera is at its limit, so on a wide frame Tomba left the room well inside the picture.
+  The exit tests are hard-coded in the area overlays; `tools/colview_exits.json` lists them (see "Collision view"),
+  and its `"ws": [a, b]` marks the exits the port moves out by the pad (h0 / h1 + a / b * pad, at most 120 = 21:9's
+  pad: wider, AREA00 s5 and AREA09 s0 went past what Tomba can reach).  In a room with such an exit, on that side only
+  (port/fixes.txt, all `PORT2`; the matching build is untouched):
+  - `tryStartItemInteraction` returns 0 (no exit) while Tomba is inside the 4:3 box but not inside the moved one
+    (`port_ws_exit_hold`), so the exit fires at the same distance from the wide edge as on 4:3;
+  - the camera clamps that keep him 150 (`cameraModeHandler6B`) / 0x90 (`cameraModeHandler6`, `updateCameraFollow`,
+    `cameraClampAroundTarget`) units from the camera limit / centre add `PORT_WSL` / `PORT_WSR` (the pad there, else 0);
+  - `getCollisionPlaneAt` repeats the column at camera limit -/+ 0x80 outwards (it returned nothing past -/+ 0xAA, so
+    he fell short of the exit; a stair would have taken him out of the exit's Y range).
+  In side view 1 unit is about 1 column at Tomba's depth (measured), so the pad in units is the pad in columns.
+  Moved (19 rooms, each checked by a headless sweep that puts Tomba 70 units from the exit and walks him out, at 4:3,
+  16:9, 21:9 and 32:9: same destination, on the floor): AREA00 s5 left; AREA01 s4 right; AREA02 s1 left, s5 right;
+  AREA03 s1, s3, s5 left; AREA04 s2 right; AREA05 s1, s3 left; AREA06 s1 right; AREA09 s1 right, s4 and s5 both
+  sides; AREA10 s3, s7 left; AREA18 s1 right.  Not moved: rooms narrower than the wide frame (black or rock past the
+  exit: AREA00 s3, AREA02 s2, s4, AREA04 s4-s18, AREA09 s2, AREA11 s1, AREA16 s2, s3, s5, s6, AREA17 s3-s5, AREA18 s2),
+  and the edge exits the sweep could not reach (Tomba held by an event or dialogue after the debug select: AREA00 s4,
+  AREA01 s1-s3, AREA03 s0, s2, s4, AREA04 s1, AREA06 s2, AREA09 s0, s3, AREA10 s2, s3/s7 right, AREA19 s1); an exit
+  moved out of Tomba's reach would trap him, so these wait for a check in play.
 - **HUD** (`drawHud`, fixes.txt): lives, vitality and weapon move left by pad, the AP counter right by pad (anchored to
   the wide frame's edges).  Other HUDs (race, item gauges, menus) stay at their 4:3 place, centred.
 

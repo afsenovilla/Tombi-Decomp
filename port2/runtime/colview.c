@@ -29,12 +29,8 @@ extern int port_gpu_overlay_fill(int x, int y, int w, int h, u16 c);
 extern void port_gpu_overlay_end(void);
 
 typedef struct { s16 x0, y0, x1, y1; u16 c; } Seg;
-/* the room exits: the position checks before each tryStartItemInteraction(o, 1, N) of the area code, as inclusive
-   ranges (colview_exits.inc, made by tools/colview_exits.py from the decompiled C); cond = other conditions too */
-typedef struct { u8 area, exit, cond; u32 secs; s16 h0, h1, y0, y1, d0, d1; signed char ws0, ws1; } Exit;
-static const Exit EXITS[] = {
-#include "colview_exits.inc"
-};
+/* the room exits (runtime/ws_exits.c: the position checks before each tryStartItemInteraction(o, 1, N) of the area code) */
+#include "ws_exits.h"
 typedef struct { s16 x, y; u8 exit, cond; } Lab;
 static Lab lab[2][64]; static int nlab[2];
 #define MAXSEG 4096
@@ -135,8 +131,8 @@ void port_colview_tick(void) {
     /* the exits of this room: their finite edges, at Tomba's depth (dim when his depth is outside the exit's) */
     {   int area = *(u16 *)PORT_M0(PORT_A_GAME), sec = *(u16 *)PORT_M0(PORT_A_GAME + 2), nl = 0;
         s32 Y = whole(pl + 0x14);
-        for (unsigned e = 0; e < sizeof EXITS / sizeof EXITS[0]; e++) {
-            const Exit *x = &EXITS[e];
+        for (int e = 0; e < port_exit_count; e++) {
+            const Exit *x = &port_exits[e];
             if (x->area != area || sec > 31 || !(x->secs >> sec & 1)) continue;
             int far = D < x->d0 || D > x->d1;
             u16 c = x->cond ? (far ? 0x2129 : 0x4E7F) : (far ? 0x0110 : 0x023F);
