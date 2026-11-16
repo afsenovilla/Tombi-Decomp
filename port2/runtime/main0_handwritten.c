@@ -612,6 +612,10 @@ void port_ws_area_model_link(void (*hook)(char *, int), char *list, int wmd, int
         extern void port_ws_floor3d_blocks(char *, const u8 *, int, int);
         port_ws_floor3d_blocks(list, (const u8 *)(unsigned long)(u32)wmd, game, *(volatile u16 *)port_ram_ptr(PORT_A_GAME + 2));
     }
+    if (port_ws_cull && game == 14) {  /* the Evil Pig battle rooms carried on past their model's ends (runtime/ws_pigs.c; off by default) */
+        extern void port_ws_pigs_blocks(char *, const u8 *, int, int);
+        port_ws_pigs_blocks(list, (const u8 *)(unsigned long)(u32)wmd, game, *(volatile u16 *)port_ram_ptr(PORT_A_GAME + 2));
+    }
     if (!port_ws_cull || !(game == 0 || game == 1 || game == 2 || game == 3 || game == 7 || game == 9 || game == 10)) return;
     static u32 tmp[0x5b + 4];
     extern int port_ws_dry;

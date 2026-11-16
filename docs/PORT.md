@@ -2861,6 +2861,48 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   reach the frame's edge); the path texture's own grassy left end shows once where the model ended (x -65 / 385:
   outside 16:9 except for a 5-column sliver, visible at 21:9) and again every 180 units at 32:9; the slope's last
   row (z -145..-195) is below the picture and is not extended.
+- **Evil Pig rooms** (`runtime/ws_pigs.c`, called from `port_ws_area_model_link`; previews, OFF by default;
+  `--ws-pigs on` = every room of its table, `--ws-pigs-rooms 14:0,14:2,...` = exactly those, `--ws-pigs off`;
+  2026-11-16): the Evil Pig battles are the eight rooms of AREA14 (overlay X014; debug select area E, sections 0-7:
+  the select drops Tomba straight into the pig's intro talk, Cross walks through its pages and the fight starts; the
+  section indexes `EVIL_PIG_ATTACK_HANDLERS`: 0 PhoenixMountain, 1 BaccusVillage, 2 TrickVillage, 3 LavaCaves,
+  4 FlowerForest, 5 DeepJungle, 6 HauntedMansion, 7 the real Evil Pig).  Each is one WMD block, the whole room, drawn
+  through an unrotated scrolling camera (H 544, screen x = 160 + 544 (x - cx) / (z + 544), cx / cy inside
+  CAMERA_SCROLL minX..maxX / minY..maxY; s7's is pitched).  Surveyed by flying Tomba (`--sweep-x`, `--sweep-fly`) to
+  both camera limits at every height, with `PORT_WSCLEAR=7C1F` (research, `shims/gpu.c`: the wide copy is cleared with
+  that colour, so the pixels no primitive covers can be counted in the dumps): with the camera at a limit the wide
+  frame looks past the model's end.  Uncovered strip pixels at 16:9 / 21:9, worst frame: s0 3914 / 17003 (black
+  pieces between the rocks, both ends), s2 11106 / 26114 (a whole flat dark-blue strip, both ends), s5 1275 / 7996
+  (the stone pillar that closes each end stops 5-15 columns short), s3 0 / 7028 and s6 0 / 12356 (only 21:9 and wider
+  look past their ends); s1 none; s4 and s7 only their sky, which is the clear colour by design (the gradient and
+  cloud cards span the frame).  Cause: missing geometry, not a cull: `PORT_WSXTRA=300` gives the same counts in every
+  frame of the sweep.
+  Method (the header of the file has every rule): per side, the model's end is its free polygon edges (edges of one
+  drawn polygon; NCLIP-culled polygons do not count) at most 48 units inside the 4:3 frame's edge with nothing of the
+  model drawn just outside them; from each the surface goes on outwards along x at the edge's depth as columns of
+  facets (first line = the edge's own vertices, the others moved by a hash; column = the median reach of the end's
+  polygons); a straight upright line of free edges is a cut wall and goes on whatever is behind it; an upright
+  rectangle (a pillar block, a backdrop card) goes on as itself, same width and texture rectangle, so period and
+  phase hold; other facets take the texture rectangle of an end polygon about a column wide (texel size kept, never
+  mirrored, no see-through texels: the palette is read from VRAM) and gouraud colours of the end's vertices near
+  them; run ends get a 96-unit skirt; the caves (s0, s2, s3, s6) get a rock wall of the same facets behind
+  everything for the gaps left.  Every new vertex lies outside the 4:3 frustum of the camera at its limit, so
+  nothing a 4:3 frame can show changes, and the gaps the game itself has (black between the rocks of s0, between
+  the lava curtains of s3, under the floor's front edge of s2 with the camera at its lowest) stay as they are, also
+  where they cross into the strip.  One extra block of 20-250 facets per side in the model's format (FT3 / FT4 /
+  GT3 / GT4), rebuilt when the model's bytes, the strip width or the camera range change.
+  Checked (software, the sweep: 833 frames per aspect; a played fight: Cross through the talk, then left / right
+  with jumps, 245-392 frames): uncovered strip pixels with the camera at a limit 0 in s3, s5, s6 and at s2's right
+  end at 16:9, 21:9 and 32:9; left: at most 249 in s0 and 346 in s2, only with the camera at its lowest, where the
+  gap runs on from the 4:3 picture (the room's own); the 4:3 centre of every 16:9 and 21:9 frame identical on / off
+  (magenta clear and normal); 4:3 runs identical on / off; default (no flag) = `--ws-pigs off` = the build before
+  this (the main checkout's binary); i386 = wasm2c whole frames in the played fights at 16:9 and 21:9 (the five rooms, both limits reached);
+  OpenGL (xvfb, 16:9, the five rooms flown to both limits): 0 uncovered strip pixels at the limits.  Gameplay is
+  untouched (drawing only; the pig still picks teleport points on the 4:3 screen).  To approve a room: `approved`
+  = 1 in its ROOMS entry.  Weak points: the continued rock is the end's own facets again, so at 21:9 / 32:9 the same
+  texture rectangles show several times and some facets are stretched (s6's right end, s2's left wall); s5's
+  pillar repeats its outermost block, vine included; at 32:9 the columns' regular pitch shows; a 4:3 gap that
+  crosses the frame's edge ends on a straight line there when the camera rests at the limit.
 - **Top-down map** (`runtime/ws_topdown.c`, fixes.txt hooks at the end of `topdownDrawMapLayers` /
   `overheadDrawMapLayers` and their USA / JP versions): the overhead background is the room's map picture (8 bpp TIM
   in RAM, scratch 0x1F800394) of which the game uploads a 384x288 window (12x9 tiles of 32 px, USA / JP 384x256) into

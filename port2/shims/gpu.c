@@ -406,6 +406,9 @@ static void ws_mirror_write(int x, int y, int w, int h) {
 /* a GP0 02 / isbg / ClearImage fill that covers a whole display buffer clears the wide copy too */
 static void ws_fill(int x, int y, int w, int h, u16 c) {
     if (!port_widescreen || w < 320 || h < 200) return;
+    {   /* research: PORT_WSCLEAR=7C1F (15-bit colour, hex) clears the wide copy with that colour instead, so what no
+           primitive covers shows in the frame dumps (how the rooms whose model ends inside the wide frame were found) */
+        static int wc = -2; if (wc == -2) { const char *e = getenv("PORT_WSCLEAR"); wc = e ? (int)strtol(e, 0, 16) : -1; } if (wc >= 0) c = (u16)wc; }
     for (int ax = x; ax + 320 <= x + w && ax + 320 <= 1024; ax += 320)
     {   if (hfr_rec) hfr_fill(ws_base(ax), y, 320 + 2 * port_widescreen, h, c, 1);
         if (be->ws_fill) be->ws_fill(ws_base(ax), y, 320 + 2 * port_widescreen, h, c); else
