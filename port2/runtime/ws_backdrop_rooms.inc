@@ -2891,3 +2891,230 @@ static void gen_th(int pad)
     vb_ex = VB_EXCL; vb_exf = 0;
     canvas_close();
 }
+
+
+/* ================================================================== AREA17 s3 / s4: the Iron Castle hall (gen_hl)
+ * (docs/PORT.md "More rooms with picture strips")  A hall seen from inside, the camera pitched up: the back wall
+ * frontal (the windows, the shield panel, the balustrade), and two side walls running towards the camera past the
+ * corner pilasters, each with the same panel (a gold / copper frame, a narrow pane, a bolted bar, then the wide pane
+ * cut by the edge), the cornice above, the balustrade (handrail, slats, base) below, the tiled floor.
+ * Measured on the picture: the camera is a pinhole pitched up (every vertical edge, the back wall's bars and frame,
+ * the pilasters, the side panels' bars and frames, meets at (153.04, -1921.1); fitted on 8 edges, each slope within
+ * 0.003), the horizon at row 155.5 (where each side wall's handrail top and foot meet), the left wall's lines along it
+ * vanish at column 161, the right wall's at 160 (rectified rows: the cornice, the frame, the handrail, the base and
+ * the foot level within 0.2 row per 10 columns).
+ * So each side wall is rectified exactly: a point's rectified row j is the row where its line to the wall's vanishing
+ * point meets the edge column (a homothety about it: the wall's lines are rows), its rectified column k its position
+ * along the wall (the vertical through it, a line through (153.04, -1921.1), met with the line of row 100: k affine
+ * in 1 / distance to the vanishing point), in picture columns at the edge (scaled by HL_KS: the slats' period, 13.25,
+ * is 13 rectified columns).  In those coordinates the frame, the handrail, the slats and the base are a rectangle
+ * pattern: verticals are columns, the wall's lines rows, the slats periodic.  The strips are quilted there with
+ * vb_quilt (rows kept, the slats on their period) and read back from the picture in one step through the quilt's
+ * source map (as gen_th).  The edge column is not a rectified column (the verticals lean): a rectified column at
+ * the bottom shows 9 columns more of the edge than at the top, so the rectified picture starts at HL_KMIN (the edge
+ * at the top) and the texels between there and the edge on the lower rows are the band's own texels one period /
+ * shift further in (the gap).  The wide pane (rows 28-112) is plain grey: the strip's pane is the edge's colour on
+ * the same rectified row (its light and the frame's bevels go on along the wall's lines).  The vases are never
+ * copied. */
+#define HL_HY (155 * 256 + 128)                           /* the horizon, 1/256 row */
+static const int HL_HX[2] = { 161 * 256, 159 * 256 };     /* each wall's vanishing point (side-local column, 1/256) */
+#define HL_VX 39178                                       /* the verticals' vanishing point (screen, 1/256 texel) */
+#define HL_VY (-491802)
+#define HL_JR (100 * 256)                                 /* the reference row of the along-wall coordinate */
+#define HL_KS 251                                         /* rectified column = geometric column x 251 / 256 */
+#define HL_KMIN (-9)                                      /* the first rectified column (the edge at the top) */
+#define HL_NK 52                                          /* rectified columns of the wall: HL_KMIN .. */
+#define HL_PA0 13                                         /* the frame and the wide pane: rectified rows [PA0, PA1) */
+#define HL_PA1 129
+#define HL_NO 300                                         /* canvas columns at most */
+typedef struct { short j0, j1, ka, kb, kc, kd, gap; } HlBand;   /* rows [j0, j1): source columns [ka, kb) and [kc, kd)
+                                                            (rectified), the gap filled from `gap` columns further in */
+static const HlBand HL_BANDS[] = {
+    { 0, 13, HL_KMIN, 41, 0, 0, 13 },                     /* the cornice */
+    { HL_PA0, HL_PA1, 0, 0, 0, 0, 13 },                   /* the frame and the wide pane (not quilted) */
+    { 129, 184, HL_KMIN, 40, 0, 0, 13 },                  /* the handrail and the slats (one band: hl_rbot) */
+    { 184, 197, HL_KMIN, 40, 0, 0, 13 },                  /* the base */
+    { 197, PH, HL_KMIN, 28, 0, 0, 18 } };                 /* the floor */
+#define HL_NB ((int)(sizeof HL_BANDS / sizeof HL_BANDS[0]))
+#define HL_QF (VBB_STRICT | VBB_TIGHT | VBB_EDGEW)
+static const VbBand HL_VB[HL_NB] = {                      /* (left side; the right one: columns mirrored) */
+    { 0, 13, 0, 13, 0, 56, 8, 3, 0, 0, 0, 1, 0, 0, 0, HL_QF },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 129, 184, 129, 184, 0, 56, 13, 4, 0, 0, 0, 1, 1, 0, 0, HL_QF },
+    { 184, 197, 184, 197, 0, 56, 10, 4, 0, 0, 0, 1, 0, 0, 0, HL_QF },
+    { 197, PH, 197, PH, 0, 56, 10, 4, 0, 0, 0, 1, 0, 0, 0, HL_QF } };
+static const VbBox HL_VASE[] = { { 26, 146, 56, 204 }, { 264, 146, 294, 204 }, { 0, 0, 0, 0 } };   /* (screen) */
+static u16 hl_p0[PH][PW];                                 /* the picture (pic holds the rectified one meanwhile) */
+static u8 hl_m[PH][PW];                                   /* rectified texel not to copy */
+static int hl_gsrc[PH][PW];                               /* a rectified texel's source texel (itself, or for a gap
+                                                            texel the one further in), j * PW + c; -1: none */
+static int hl_vx(int s) { return s ? 319 * 256 - HL_VX : HL_VX; }
+/* the picture point (side-local, 1/256) of the wall's point at geometric column k, rectified row j (1/256) */
+static void hl_pt(int s, long long k, long long j, long long *xo, long long *yo)
+{
+    long long hx = HL_HX[s], hy = HL_HY, vx = hl_vx(s), vy = HL_VY;
+    long long xr = k * hx / (hx + k), yr = hy + (HL_JR - hy) * (hx - xr) / hx;   /* on the reference line */
+    long long cn = vx - xr, cd = vy - yr, mn = j - hy;
+    long long y = (hy * hx * cd + mn * ((hx - xr) * cd + yr * cn)) / (hx * cd + mn * cn);
+    *yo = y; *xo = xr + (y - yr) * cn / cd;
+}
+/* the inverse: geometric column k and rectified row j (1/256) of the side-local point (x, y) (1/256) */
+static void hl_kj(int s, long long x, long long y, long long *ko, long long *jo)
+{
+    long long hx = HL_HX[s], hy = HL_HY, vx = hl_vx(s), vy = HL_VY, xr;
+    *jo = hy + (y - hy) * hx / (hx - x);
+    xr = hx * (x * (vy - y) + (vx - x) * (HL_JR - y)) / (hx * (vy - y) + (vx - x) * (HL_JR - hy));
+    *ko = hx * xr / (hx - xr);
+}
+static int hl_band(int j) { for (int i = 0; i < HL_NB; i++) if (j >= HL_BANDS[i].j0 && j < HL_BANDS[i].j1) return i; return -1; }
+/* rectified column of side s's rectified picture column c and back (oriented like vb_quilt's picture: the right side
+   mirrored) */
+static int hl_k(int s, int c) { return (s ? PW - 1 - c : c) + HL_KMIN; }
+static int hl_c(int s, int k) { return s ? PW - 1 - (k - HL_KMIN) : k - HL_KMIN; }
+/* bilinear: the picture (screen) at (x, y) (1/256), 0 when a tap is out or on a vase */
+static int hl_mode;                                      /* the read: 2 = bilinear with the fractions sharpened (x2 about the middle) */
+static int hl_bil(long long x, long long y, Rgb *o)
+{
+    int x0 = (int)(x >> 8), y0 = (int)(y >> 8), fx = (int)(x & 255), fy = (int)(y & 255), x1 = x0 + (fx > 0), y1 = y0 + (fy > 0);
+    Rgb a, b;
+    if (x < 0 || y < 0 || x1 >= PW || y1 >= PH) return 0;
+    for (int i = 0; HL_VASE[i].x1; i++)
+        if (x1 >= HL_VASE[i].x0 && x0 < HL_VASE[i].x1 && y1 >= HL_VASE[i].y0 && y0 < HL_VASE[i].y1) return 0;
+    if (hl_mode == 1) fx = fx >= 128 ? 256 : 0;
+    if (hl_mode == 2) { fx = clampi((fx - 64) * 2, 0, 256); fy = clampi((fy - 64) * 2, 0, 256); }
+    if (hl_mode == 3) fx = clampi((fx - 64) * 2, 0, 256);
+    a = mix(rgb15(hl_p0[y0][x0]), rgb15(hl_p0[y0][x1]), fx); b = mix(rgb15(hl_p0[y1][x0]), rgb15(hl_p0[y1][x1]), fx);
+    *o = mix(a, b, fy); return 1;
+}
+/* the picture at side s's rectified (k, j) (rectified column and row, 1/256) */
+static int hl_at(int s, long long k, long long j, Rgb *o)
+{
+    long long x, y;
+    hl_pt(s, k * 256 / HL_KS, j, &x, &y);
+    return hl_bil(s ? 319 * 256 - x : x, y, o);
+}
+static void hl_rectify(int s)
+{
+    for (int j = 0; j < PH; j++)
+        for (int c = 0; c < PW; c++) {
+            int k = hl_k(s, c), b = hl_band(j), ok; Rgb o;
+            const HlBand *hb = &HL_BANDS[b];
+            pic[j][c] = 0; hl_m[j][c] = 1; hl_gsrc[j][c] = -1;
+            if (k < HL_KMIN || k >= HL_KMIN + HL_NK) continue;
+            ok = hl_at(s, (long long)k * 256, (long long)j * 256, &o);
+            if (ok) { pic[j][c] = th_15(o); hl_gsrc[j][c] = j * PW + c; }
+            if (ok && ((k >= hb->ka && k < hb->kb) || (k >= hb->kc && k < hb->kd))) hl_m[j][c] = 0;
+        }
+    /* the gap: the rectified texels left of the picture's edge (lower rows), from `gap` columns further in */
+    for (int j = 0; j < PH; j++) {
+        int b = hl_band(j);
+        for (int k = HL_KMIN + HL_NK - 1; k >= HL_KMIN; k--) {
+            int c = hl_c(s, k), k2 = k + HL_BANDS[b].gap, c2;
+            long long x, y;
+            if (hl_gsrc[j][c] >= 0 || k2 >= HL_KMIN + HL_NK) continue;
+            hl_pt(s, (long long)k * 256 * 256 / HL_KS, (long long)j * 256, &x, &y);
+            if (x >= 0) continue;                         /* (only outside the picture) */
+            c2 = hl_c(s, k2);
+            if (hl_gsrc[j][c2] < 0) continue;
+            pic[j][c] = pic[j][c2]; hl_gsrc[j][c] = hl_gsrc[j][c2]; hl_m[j][c] = hl_m[j][c2];
+        }
+    }
+}
+static int hl_exf(int x, int y) { return hl_m[y][x]; }
+/* the handrail's lower edge (its shadow on the slats) is no line along the wall: it is all but level on the screen
+   (left: row 146.28 at the edge, rising 0.032 a column inwards; right: 146.35, 0.029; the handrail's top and the
+   other lines of the wall go to the vanishing point), so in rectified rows it drifts from 146.3 at the edge to 144.3
+   at the corner, and the strip's edge was 0.9 row higher than the line's continuation.  The quilt's windows come from
+   all along the wall (the handrail and the slats are one band, so a window holds both): their rows are moved so the
+   edge lies where the screen line puts it, at the source column and at the strip texel (fully at HL_RB1, fading to
+   none at HL_RB0 above and HL_RB2 down the slats; at most row 150) */
+#define HL_RB0 138
+#define HL_RB1 146
+#define HL_RB2 166                                        /* (back to the wall's rows on the slats) */
+static const int HL_RBY[2] = { 37448, 37466 }, HL_RBM[2] = { 130, 117 };   /* the edge's row at the edge column (1/256), and
+                                                            its slope (1/4096 row a column) */
+static long long hl_rbot(int s, long long kg)             /* its rectified row (1/256) at geometric column kg (1/256) */
+{
+    long long x, y, hx = HL_HX[s], yl;
+    hl_pt(s, kg, (long long)HL_RBY[s], &x, &y);
+    yl = HL_RBY[s] + x * HL_RBM[s] / 4096;
+    return HL_HY + (yl - HL_HY) * hx / (hx - x);
+}
+/* the strip texel of side s at strip column X, row y: the quilt's source, read from the picture in one step */
+static int hl_src(int s, long long kg, long long jq, Rgb *o)
+{
+    long long kq = kg * HL_KS / 256; int kr, jr, ox, oy, src;
+    {   int b = hl_band(clampi((int)(jq >> 8), 0, PH - 1));   /* (the nearest row of the band) */
+        jr = clampi((int)((jq + 128) >> 8), HL_BANDS[b].j0, HL_BANDS[b].j1 - 1); }
+    kr = fdiv((int)kq + 128, 256);
+    ox = (int)(kq - (long long)kr * 256); oy = (int)(jq - (long long)jr * 256);
+    if (kr >= HL_KMIN) { int c = hl_c(s, kr); if (c < 0 || c >= PW) return 0; src = hl_gsrc[jr][c]; }
+    else {
+        int Xc = HL_KMIN - kr;
+        if (Xc > vb_ow) return 0;
+        src = vb_srcmap[(size_t)jr * vb_ow + Xc - 1];
+        if (src >= 0) src = hl_gsrc[src / PW][src % PW];
+    }
+    if (src < 0) return 0;
+    if (jq > HL_RB0 * 256 && jq < HL_RB2 * 256) {        /* the handrail's lower edge: the source rows moved so it
+                                                            lies on its own line (hl_rbot) at the source and here */
+        int w = jq < HL_RB1 * 256 ? (int)((jq - HL_RB0 * 256) / (HL_RB1 - HL_RB0)) : (int)((HL_RB2 * 256 - jq) / (HL_RB2 - HL_RB1));
+        long long et = hl_rbot(s, kg), es = hl_rbot(s, (long long)hl_k(s, src % PW) * 65536 / HL_KS);
+        if (et > 150 * 256) et = 150 * 256;
+        oy += (int)((es - et) * w / 256);
+    }
+    return hl_at(s, (long long)hl_k(s, src % PW) * 256 + ox, (long long)(src / PW) * 256 + oy, o)
+        || hl_at(s, (long long)hl_k(s, src % PW) * 256, (long long)(src / PW) * 256, o);   /* (by an edge of the
+                                                            source: the texel itself) */
+}
+static u16 hl_raw[PH][PW];
+static void gen_hl(int pad)
+{
+    long long kg, jq;
+    pal_make();
+    hl_kj(0, (long long)-(pad + 32) * 256, (long long)HL_HY, &kg, &jq);
+    vb_ow = clampi((int)(-kg * HL_KS / 256 / 256) + HL_KMIN + 4, 8, HL_NO);
+    if (!canvas_open(vb_ow)) return;
+    vb_srcmap = (int *)malloc(sizeof(int) * (size_t)vb_ow * PH);
+    if (!vb_srcmap) { canvas_close(); return; }
+    memcpy(hl_raw, pic, sizeof pic); memcpy(hl_p0, pic, sizeof pic);
+    vb_ex = TH_NONE; vb_exf = hl_exf;
+    for (int side = 0; side < 2; side++) {
+        hl_rectify(side);
+        canvas_clear(); cur_side = side;
+        for (int i = 0; i < vb_ow * PH; i++) vb_srcmap[i] = -1;
+        for (int i = 0; i < HL_NB; i++) {
+            VbBand b = HL_VB[i];
+            if (b.y1 <= b.y0) continue;
+            if (side) { short a = b.sx0; b.sx0 = (short)(PW - b.sx1); b.sx1 = (short)(PW - a); }
+            vb_quilt(side, &b, 1701 + 13 * i);
+        }
+        hl_mode = 2;                                      /* (crisper: the slats' and rails' edges as in the picture) */
+#ifdef WS_BACKDROP_MAIN
+        if (getenv("WSB_HLMODE")) hl_mode = atoi(getenv("WSB_HLMODE"));
+#endif
+        for (int X = 1; X <= pad; X++)
+            for (int y = 0; y < PH; y++) {
+                Rgb o = { 0, 0, 0 };
+                hl_kj(side, (long long)-X * 256, (long long)y * 256, &kg, &jq);
+                if (jq >= HL_PA0 * 256 && jq < HL_PA1 * 256) {   /* the frame and the pane: the edge's colour on
+                                                                    its line (the edge column and the next) */
+                    Rgb a0, a1; long long y1 = HL_HY + (jq - HL_HY) * (HL_HX[side] - 256) / HL_HX[side];
+                    hl_bil(side ? (PW - 1) * 256 : 0, jq, &a0);
+                    if (!hl_bil(side ? (PW - 2) * 256 : 256, y1, &a1)) a1 = a0;
+                    o = mix(a0, a1, 128);
+                } else if (!hl_src(side, kg, jq, &o)) {
+                    o = rgb15(hl_p0[y][side ? PW - 1 : 0]);
+#ifdef WS_BACKDROP_MAIN
+                    if (getenv("WSB_INFO")) fprintf(stderr, "side %d X %d y %d: no source (k %lld j %lld)\n", side, X, y, kg * HL_KS / 65536, jq >> 8);
+#endif
+                }
+                strip[(size_t)y * 2 * pad + (side ? pad + (X - 1) : pad - X)] = quant(o);
+            }
+        hl_mode = 0;
+    }
+    memcpy(pic, hl_raw, sizeof pic);
+    free(vb_srcmap); vb_srcmap = 0;
+    vb_ex = VB_EXCL; vb_exf = 0;
+    canvas_close();
+}

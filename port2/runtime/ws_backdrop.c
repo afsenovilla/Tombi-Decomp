@@ -761,6 +761,8 @@ static const Room ROOMS[] = {
     { 9, 4, 224, 1, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 256, 64, 0, 192, 152, 0, 8 }, { 256, 64, 144, 128, 112, 192, 120 } },
       gen_rw },                                          /* the rock wall with the stair down to the right (the stair
                                                             drawn again over the player as two quads; rooms2.inc) */
+    { 17, 3, 256, 0, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, gen_hl },   /* the Iron Castle hall (256 rows drawn) */
+    { 17, 4, 256, 0, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, gen_hl },
 };
 #define NROOMS ((int)(sizeof ROOMS / sizeof ROOMS[0]))
 const char *port_ws_backdrop_rooms;                      /* --ws-backdrop-rooms A:S,A:S,... (decimal; "all") */
