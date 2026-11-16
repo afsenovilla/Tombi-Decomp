@@ -57,7 +57,9 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    shift, quilted there with `vb_quilt` and mapped back (beam, recess, dado and floor go on along their perspective
    lines).  Looked at in the same round and dropped (PORT.md lists the reasons): AREA18 s2, AREA10 s8, AREA11 s1,
    AREA16 s3 / s6, AREA17 s1, AREA17 s5, AREA18 s1, AREA09 s4 (again).  To approve AREA09 s3: `approved` = 1 in its
-   ROOMS entry.
+   ROOMS entry.  The lower wall's cut at both joins fixed (the strips are rectified from the picture as the renderer
+   shows it under the arches' stretched quads, and the other wall's texels registered to this wall's rows): every
+   sloped line within 0.3 row of its continuation (PORT.md); waiting for the user's look.
 
 -2. **WIP (owner's request): restore the Funga Chief's cut event** on the Funga stage (`--cut-content=funga`, AREA10 s2,
    chief already walking there: runtime/funga.c).  What survives (docs/CUT_CONTENT.md "Jungle (AREA10)", "Funga Chief"):

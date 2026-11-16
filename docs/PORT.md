@@ -3202,6 +3202,29 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     default flags (off) unchanged, the other rooms' strips byte-identical to the build before (pads 53 and 140; the
     only shared change is `vb_quilt`'s candidate buffer, 320 x 32 -> 320 x 128, which only lets larger bands run),
     i386 = wasm2c frames; not checked on the device.
+    The cut at both joins of the lower wall (the user, after the one-step read: "it's the same as before"): every
+    sloped line of the sill, rail, inlay and dado foot was about 1 row higher in the strip than its continuation (the
+    edge rows fitted over picture columns 0-12, the strip's measured per column).  Two causes.  (1) The picture is not
+    what is on the screen there: the arches are drawn again over the player as two quads of 40 x 136 pixels whose
+    texture spans 39 x 135 texels (u 64-103 / 104-143, v 0-135), so the quad shows a slightly shrunk copy: the software
+    renderer (texel at the pixel rounded half up) shows the edge columns one row lower from row 141 and the right
+    quad one column further left from column 301, the OpenGL renderer (truncating like the PS1, half-pixel shift)
+    from row 77 / its pixel 2.  `grab` now also records the over pieces' opaque texels (`pic_ov`, appended to the
+    `PORT_WS_BACKDROP_DUMP` file; the standalone reads it when there, `WSB_GL=1` for the OpenGL model), and `gen_th`
+    first rebuilds the picture as shown (`th_shown`, the active renderer from `port_gpu_is_gl`; matches the frames
+    texel for texel in the edge columns, both renderers) and rectifies that.  (2) The two walls are not drawn alike:
+    in the rectified rows the right wall's lines lie 0.3-0.6 row higher than the left's, and the quilt takes runs of
+    the other wall's texels, each run half a row off.  `th_register` measures it at run time (per row from the sill
+    down: the shift, at 1/16 row, of the right wall's luminance profile down its 13 edge columns that best matches
+    the left's over +-4 rows, kept on edges, interpolated between, smoothed over 5 rows: -0.41 at the sill's top, -0.31
+    at its foot, -0.38 at the rail, -0.5 at the inlay and lower rail, -0.56 at the dado's foot), and the other wall's
+    texels are read that much lower / higher.  Steps at the join (strip columns 1-4 against the line's continuation,
+    rows; left / right): before sill foot -1.27 / -0.59, ledge shadow -0.99 / -0.66, rail top -1.23 / -0.88, rail foot
+    -1.09 / -0.55, inlay foot -0.81 / -0.77, lower rail top -0.99 / -0.60, lower rail foot -0.86 / -0.37, dado foot
+    -0.73 / -0.13; after every line within +-0.3 row on both sides with the software renderer and within +-0.4 with
+    OpenGL (sill top, a soft edge, +0.17 / -0.21), and no run of the strip off by more than the line's own pixel
+    staircase (+-0.25-0.5); beam, recess line and plaster unchanged (within 0.2).  At OpenGL internal resolution > 1
+    the HD picture's quads are a continuous stretch; the strips use the 1x model (within a fraction of a row).
   - Looked at in the same round (2026-11-16) and dropped, with the reason: AREA18 s2 (the witch's kitchen: rafters of
     a roof slope cut by both edges, a cupboard / shelf wall at the left and a bunch of grapes cut by the right edge:
     every edge holds objects, nothing to continue without inventing them), AREA10 s8 (the wise man's room: its picture

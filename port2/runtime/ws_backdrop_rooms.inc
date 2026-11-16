@@ -2571,7 +2571,11 @@ static void gen_st(int pad)
  * plaster: nearest texels both ways (its grain kept); below it (sill, dado, floor) the quilt's source texel is read
  * from the picture in one step (th_back: resampled once, the slats and lines as crisp as the picture's, no softer
  * band past the join).  The join: per row, the strip's first 8 rectified
- * columns' mean moved onto the picture's last 8 (fading by 40), its first column onto the edge's (fading over 6). */
+ * columns' mean moved onto the picture's last 8 (fading by 40), its first column onto the edge's (fading over 6).
+ * Everything is read from the picture as it is on the screen (th_shown: the arches' quads show the edge columns 1 row
+ * lower from row 141, the right one 1 column further left too), and the other wall's texels from its row with the same
+ * line (th_register: the right wall's lines lie 0.3-0.6 row higher): every sloped line of the lower wall goes on
+ * across both joins within 0.3 row. */
 #define TH_VX16 2554                                      /* the vanishing point (x 16) */
 #define TH_VY16 1876
 #define TH_NK 54                                          /* rectified columns of picture (inward) used */
@@ -2580,9 +2584,12 @@ static void gen_st(int pad)
 #define TH_PL1 132
 static int th_plaster(int j) { return j >= TH_PL0 && j < TH_PL1; }
 #define TH_NO 400                                         /* rectified columns outwards (tables) */
-static u16 th_p0[PH][PW];                                 /* the picture (pic holds the rectified one meanwhile) */
+static u16 th_p0[PH][PW];                                 /* the picture as shown (th_shown; pic holds the rectified
+                                                            one meanwhile) */
 static u8 th_m[PH][PW];                                   /* rectified texel not to copy */
 static long long th_D[2][TH_NO + TH_NK + 1];              /* per wall, D(k), k = -TH_NO..TH_NK, in 2^-20 px */
+static int th_dj[2][PH];                                  /* side's rectified picture: the other wall's texels read
+                                                            this much lower (1/256 row; th_register) */
 static const VbBox TH_EXCL[] = { { 15, 66, 58, 203 }, { 262, 66, 305, 203 }, { 0, 0, 0, 0 } };   /* the arches */
 static const VbBox TH_NONE[] = { { 0, 0, 0, 0 } };
 static int th_exf(int x, int y) { return th_m[y][x]; }
@@ -2627,6 +2634,8 @@ static void th_rectify(int side)
             if (k < (th_plaster(j) ? TH_NKP : TH_NK)) {
                 long long xf = ((long long)TH_VX16 << 16) + (w ? D[k] : -D[k]);
                 long long yf = ((long long)TH_VY16 << 16) + (long long)(j * 16 - TH_VY16) * D[k] / de;
+                if (w != side && th_dj[side][j])          /* (the other wall: its row with the same line) */
+                    yf = ((long long)TH_VY16 << 16) + ((((long long)j * 256 + th_dj[side][j]) * 16 - ((long long)TH_VY16 << 8)) * D[k] / de >> 8);
                 if (th_plaster(j)) {                      /* (the plaster: nearest texels, its grain kept) */
                     int xs = (int)((xf + (1 << 19)) >> 20), ys = (int)((yf + (1 << 19)) >> 20);
                     ok = !th_bad(xs, ys);
@@ -2640,14 +2649,14 @@ static void th_rectify(int side)
 }
 /* rectified column c of side `side`'s rectified picture: its wall's picture column (x, 2^-20 px) and D / de (as D
    in 2^-20 px and de x 16); 0 when it holds no rectified column of a wall */
-static int th_col(int side, int c, long long *x, long long *Dk, long long *de)
+static int th_col(int side, int c, long long *x, long long *Dk, long long *de, int *wo)
 {
     int w = side, k = side ? PW - 1 - c : c;
     if (c < 0 || c >= PW) return 0;
     if (!side && c >= TH_OTH && c < TH_OTH + TH_NK) { w = 1; k = TH_OTH + TH_NK - 1 - c; }
     if (side && c >= PW - TH_OTH - TH_NK && c < PW - TH_OTH) { w = 0; k = c - (PW - TH_OTH - TH_NK); }
     if (k < 0 || k >= TH_NK) return 0;
-    *Dk = th_D[w][TH_NO + k]; *de = th_de16(w);
+    *Dk = th_D[w][TH_NO + k]; *de = th_de16(w); *wo = w;
     *x = ((long long)TH_VX16 << 16) + (w ? *Dk : -*Dk);
     return 1;
 }
@@ -2657,8 +2666,9 @@ static int th_col(int side, int c, long long *x, long long *Dk, long long *de)
    every column); 0 when the column holds no wall or a texel is out */
 static int th_back(int side, int cf, int rf, Rgb *o)
 {
-    long long x, Dk, de, yf; int c = (cf + 128) >> 8;
-    if (!th_col(side, c, &x, &Dk, &de)) return 0;
+    long long x, Dk, de, yf; int c = (cf + 128) >> 8, w;
+    if (!th_col(side, c, &x, &Dk, &de, &w)) return 0;
+    if (w != side) rf += th_dj[side][clampi((rf + 128) >> 8, 0, PH - 1)];
     yf = ((long long)TH_VY16 << 16) + (((long long)rf * 16 - ((long long)TH_VY16 << 8)) * Dk / de >> 8);
     return th_bil(th_p0, x, yf, o);
 }
@@ -2729,6 +2739,88 @@ static void th_plaster_light(int side)
             cv[(size_t)y * vb_ow + X - 1] = scale(cv[(size_t)y * vb_ow + X - 1], clampi(t * 256 / m, 160, 400));
         }
 }
+/* the picture as it is on the screen: the arches are drawn again over the player as two quads of 40 x 136 pixels whose
+   texture spans 39 x 135 texels (u 64-103 / 104-143, v 0-135), and the renderer takes the texel at the pixel's
+   position rounded (half up), texel x * 39 / 40 at pixel x: from the quad's pixel 21 (columns 301-319 on the right) one
+   column further left, from its row 69 (rows 141-207) one row higher (the left wall's sill, rail, inlay and dado foot
+   at the edge 1 row lower than in the picture; the opaque texels only, the picture under a transparent one unmoved).
+   The walls are rectified from this, so the strips continue what is on the screen (rectified from the picture, every
+   sloped line of the lower wall had a step of about 1 row at both joins).  The OpenGL renderer truncates like the PS1
+   (texel floor((x + 1/64) * 39 / 40 + 1/64), shader and half-pixel shift of shims/gpu_gl.c): one column further left
+   from the quad's pixel 2, one row higher from its row 5 (rows 77-207); at internal resolution > 1 the same model
+   (the HD picture's edges within a fraction of a row of it) */
+static void th_shown(void)
+{
+    for (int i = 0; i < 6; i++) {
+        const Piece *p = &room->over[i];
+        for (int r = 0; r < p->h; r++)
+            for (int x = 0; x < p->w; x++) {
+                int sx = p->x + (shown_gl ? (64 * x * (p->w - 1) + 2 * p->w - 1) / (64 * p->w) : (2 * x * (p->w - 1) + p->w) / (2 * p->w));
+                int sy = p->y + (shown_gl ? (64 * r * (p->h - 1) + 2 * p->h - 1) / (64 * p->h) : (2 * r * (p->h - 1) + p->h) / (2 * p->h));
+                if (p->y + r < PH && p->x + x < PW && pic_ov[sy][sx]) th_p0[p->y + r][p->x + x] = pic[sy][sx];
+            }
+    }
+}
+/* the two walls are not drawn quite alike: below the plaster the right wall's lines lie 0.3-0.6 row higher (in the
+   rectified rows, the row at the edge) than the left wall's, and the strip's quilt takes windows from both walls, so
+   a run of the other wall's texels put every sloped line half a row off its continuation (a step where the run
+   begins and ends).  Measured per row on the rectified picture as it is on the screen: the luminance profile down the
+   edge's 13 rectified columns (the arches start at the 15th) of each wall, at 1/16 row; for every row from the sill
+   down (TH_RG0..TH_RG1) the shift of the right wall's profile (-1.5..1.5 rows, 1/16) that best matches the left's
+   over rows +-4 (least squares), kept where the left's profile changes enough over them (an edge), the rows between
+   interpolated, then smoothed over 5 rows (measured: -0.41 at the sill's top, -0.31 at its foot and the ledge's
+   shadow, -0.38 at the rail, -0.5 at the inlay and the lower rail, -0.56 at the dado's foot, the floor keeps -0.5).
+   The other wall's texels are read that much lower (th_rectify, th_back) */
+#define TH_RG0 132
+#define TH_RG1 208
+#define TH_RGB (TH_RG0 - 8)                               /* the profiles' first row */
+#define TH_RGN (TH_RG1 - TH_RG0 + 16)
+static int th_prof(int w, int j16)                        /* the sum over the edge's 13 rectified columns of wall w of
+                                                            the luminance at row j16 / 16; -1 when a texel is missing */
+{
+    long long *D = th_D[w] + TH_NO, de = th_de16(w); int s = 0; Rgb o;
+    for (int k = 0; k < 13; k++) {
+        long long xf = ((long long)TH_VX16 << 16) + (w ? D[k] : -D[k]);
+        long long yf = ((long long)TH_VY16 << 16) + (((long long)j16 * 256 - ((long long)TH_VY16 << 8)) * D[k] / de >> 8);
+        if (!th_bil(th_p0, xf, yf, &o)) return -1;
+        s += lum(o);
+    }
+    return s;
+}
+static void th_register(void)
+{
+    static int P[2][TH_RGN * 16], d[PH], ok[PH];
+    for (int w = 0; w < 2; w++)
+        for (int i = 0; i < TH_RGN * 16; i++) P[w][i] = th_prof(w, TH_RGB * 16 + i);
+    for (int j = TH_RG0; j < TH_RG1; j++) {
+        long long best = -1; int bt = 0, g = 0;
+        for (int jj = j - 4; jj < j + 4; jj++) g += abs(P[0][(jj + 1 - TH_RGB) * 16] - P[0][(jj - TH_RGB) * 16]);
+        for (int t = -24; t <= 24; t++) {
+            long long e = 0; int bad = 0;
+            for (int jj = j - 4; jj <= j + 4 && !bad; jj++) {
+                int a = P[0][(jj - TH_RGB) * 16], b = P[1][(jj - TH_RGB) * 16 + t];
+                if (a < 0 || b < 0) bad = 1; else e += (long long)(a - b) * (a - b);
+            }
+            if (!bad && (best < 0 || e < best)) { best = e; bt = t; }
+        }
+        ok[j] = best >= 0 && g >= 25 * 13; d[j] = bt * 16;
+    }
+    for (int j = TH_RG0; j < TH_RG1; j++) {                /* rows without an edge: between the nearest ones */
+        int a = j, b = j;
+        if (ok[j]) continue;
+        while (a >= TH_RG0 && !ok[a]) a--;
+        while (b < TH_RG1 && !ok[b]) b++;
+        if (a >= TH_RG0 && b < TH_RG1) d[j] = d[a] + (d[b] - d[a]) * (j - a) / (b - a);
+        else d[j] = a >= TH_RG0 ? d[a] : b < TH_RG1 ? d[b] : 0;
+    }
+    for (int j = 0; j < PH; j++) {
+        int s = 0;
+        if (j < TH_RG0) { th_dj[0][j] = th_dj[1][j] = 0; continue; }
+        for (int jj = j - 2; jj <= j + 2; jj++) s += d[clampi(jj, TH_RG0, TH_RG1 - 1)];
+        th_dj[0][j] = s / 5; th_dj[1][j] = -(s / 5);
+    }
+}
+static u16 th_raw[PH][PW];                                /* the picture, given back to pic at the end */
 static void gen_th(int pad)
 {
     long long *D; int nk; Rgb *cv0;
@@ -2739,7 +2831,7 @@ static void gen_th(int pad)
     if (!canvas_open(vb_ow)) return;
     vb_srcmap = (int *)malloc(sizeof(int) * (size_t)vb_ow * PH); cv0 = (Rgb *)malloc(sizeof(Rgb) * (size_t)vb_ow * PH);
     if (!vb_srcmap || !cv0) { free(vb_srcmap); free(cv0); vb_srcmap = 0; canvas_close(); return; }
-    memcpy(th_p0, pic, sizeof pic);
+    memcpy(th_raw, pic, sizeof pic); memcpy(th_p0, pic, sizeof pic); th_shown(); th_register();
     vb_ex = TH_NONE; vb_exf = th_exf;
     for (int side = 0; side < 2; side++) {
         long long de = th_de16(side);
@@ -2794,7 +2886,7 @@ static void gen_th(int pad)
             }
         }
     }
-    memcpy(pic, th_p0, sizeof pic);
+    memcpy(pic, th_raw, sizeof pic);
     free(vb_srcmap); vb_srcmap = 0; free(cv0);
     vb_ex = VB_EXCL; vb_exf = 0;
     canvas_close();

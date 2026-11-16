@@ -49,7 +49,8 @@
  * on with new content (no repeat).  The same code gives the same strips on i386, x86-64 and the wasm2c build.
  *
  * Standalone check / iteration (WS_BACKDROP_MAIN): PORT_WS_BACKDROP_DUMP=FILE writes the picture (raw, 320x224
- * little-endian 15-bit colours) during a run; then
+ * little-endian 15-bit colours, then 320x224 bytes: 1 where a piece drawn again over the player is opaque) during a
+ * run; then
  *   cc -O2 -DWS_BACKDROP_MAIN port2/runtime/ws_backdrop.c -o /tmp/wsb && /tmp/wsb FILE PAD OUT.ppm
  * writes the picture with both strips. */
 #include <stdio.h>
@@ -65,6 +66,9 @@ typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32;
 #define PH 224
 
 static u16 pic[PH][PW];                 /* the picture as 15-bit colours */
+static u8 pic_ov[PH][PW];               /* 1: an opaque texel of a piece drawn again over the player (Room.over) */
+static int shown_gl;                    /* the OpenGL renderer draws the frames (it samples a stretched quad's texture
+                                           otherwise than the software one: gen_th's th_shown) */
 static u16 *strip; static int strip_pad; static u32 strip_sum;
 int port_ws_backdrop_on = 1;            /* 1: the approved rooms (default); --ws-backdrop off = 0, mirror = 2, on = 3 (main.c) */
 static int enabled = -1;                /* 0 off, 1 the approved rooms, 2 mirror (AREA02 s5), 3 every room */
@@ -795,11 +799,12 @@ static u32 grab(const u16 *vram, int cx, int cy)
         for (int y = 0; y < p->h; y++) for (int x = 0; x < p->w; x++)
             if (p->y + y < PH && p->x + x < PW) pic[p->y + y][p->x + x] = tex8(vram, p->tx, p->u + x, p->v + y, cx, cy);
     }
+    memset(pic_ov, 0, sizeof pic_ov);
     for (int i = 0; i < 6; i++) {
         const Piece *p = &room->over[i];
         for (int y = 0; y < p->h; y++) for (int x = 0; x < p->w; x++) {
             u16 c = tex8(vram, p->tx, p->u + x, p->v + y, cx, cy);
-            if (c && p->y + y < PH && p->x + x < PW) pic[p->y + y][p->x + x] = c;
+            if (c && p->y + y < PH && p->x + x < PW) { pic[p->y + y][p->x + x] = c; pic_ov[p->y + y][p->x + x] = 1; }
         }
     }
     for (int y = 0; y < PH; y++) for (int x = 0; x < PW; x++) h = (h ^ pic[y][x]) * 16777619u;
@@ -810,6 +815,7 @@ static u32 grab(const u16 *vram, int cx, int cy)
 /* sprite (cmd 0x64/0x65) at screen (x, y) of w x h texels from (u, v), page (tx, ty, depth), CLUT (cx, cy):
    the strip buffer when it is the left part of a listed room's picture (left strip at columns 0..pad-1, right strip
    at pad..2pad-1, PH rows, *rows set to PH), else 0 */
+extern int port_gpu_is_gl(void);                          /* shims/gpu.c */
 const u16 *port_ws_backdrop(const u16 *vram, int pad, int x, int y, int w, int h, int u, int v, int tx, int ty,
                             int depth, int cx, int cy, int *rows)
 {
@@ -827,12 +833,13 @@ const u16 *port_ws_backdrop(const u16 *vram, int pad, int x, int y, int w, int h
         }
         if (!r || !room_enabled(r)) return 0;
         room = r;
-        if (!strip || strip_pad != pad || s != strip_sum) {
-            strip_sum = s; build(pad);
+        if (!strip || strip_pad != pad || s != strip_sum || shown_gl != port_gpu_is_gl()) {
+            strip_sum = s; shown_gl = port_gpu_is_gl(); build(pad);
             {   const char *e = getenv("PORT_WS_BACKDROP_DUMP");      /* research: the picture, raw 15-bit LE */
                 FILE *f = e ? fopen(e, "wb") : 0;
                 if (f) {
                     for (int yy = 0; yy < PH; yy++) for (int xx = 0; xx < PW; xx++) { u8 b[2] = { (u8)pic[yy][xx], (u8)(pic[yy][xx] >> 8) }; fwrite(b, 1, 2, f); }
+                    fwrite(pic_ov, 1, sizeof pic_ov, f);   /* then the over pieces' opaque texels, one byte each */
                     fclose(f);
                 }
             }
@@ -850,8 +857,10 @@ int main(int argc, char **argv)
     for (int i = 0; i < NROOMS; i++) if (ROOMS[i].area == a && ROOMS[i].sec == sc) { room = &ROOMS[i]; break; }
     if (!room || argc < 4 || !(f = fopen(argv[1], "rb"))) { fprintf(stderr, "usage: wsb [AREA:SECTION] PIC.raw PAD OUT.ppm [mirror]\n"); return 1; }
     for (int y = 0; y < PH; y++) for (int x = 0; x < PW; x++) { u8 b[2]; if (fread(b, 1, 2, f) != 2) return 1; pic[y][x] = (u16)(b[0] | b[1] << 8); }
+    if (fread(pic_ov, 1, sizeof pic_ov, f) != sizeof pic_ov) memset(pic_ov, 0, sizeof pic_ov);   /* (older dumps: none) */
     fclose(f);
     pad = atoi(argv[2]); enabled = argc > 4 ? 2 : 1;
+    shown_gl = getenv("WSB_GL") != 0;                    /* as drawn by the OpenGL renderer (gen_th) */
     build(pad);
     if (getenv("WSB_INFO")) fprintf(stderr, "side_k %d %d floor_fit L %d-%d R %d-%d\n", side_k[0], side_k[1], floor_fit[0][0], floor_fit[0][1], floor_fit[1][0], floor_fit[1][1]);
     if (!strip || !(f = fopen(argv[3], "wb"))) return 1;

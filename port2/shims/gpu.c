@@ -64,6 +64,8 @@ void port_gpu_start(void) {
     }
     port_printf("[gpu] renderer: %s\n", port_gpu_be->name);
 }
+int port_gpu_is_gl(void) { return port_gpu_be == &port_gpu_gl; }   /* runtime/ws_backdrop.c (how a stretched quad
+                                                                     samples its texture) */
 void port_hfr_report(void);
 void port_gpu_stop(void) { port_hfr_report(); if (gpu_started && port_gpu_be->stop) port_gpu_be->stop(); }
 #define be port_gpu_be
