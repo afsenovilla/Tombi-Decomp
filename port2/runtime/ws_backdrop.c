@@ -718,7 +718,7 @@ static void build_redraw(int pad)
    pre-rendered 320 x 224 8 bpp picture with CLUT (128, 511): its left 256 columns are page (128, 0) rows 0-223, drawn as
    one sprite at frame (0, 16) (256 x 224, or 256 x 256 clipped by the frame); the right 64 columns come from page
    (256, 0) or are pieced together from 64 x 32 leftovers (the Iron Castle hall, AREA17 s3 / s4, draws its left part
-   256 x 256 and its right one from page (256, 0): not redrawn yet, see docs/PORT.md), and some rooms draw parts of the scene as further unscaled
+   256 x 256 and its right one from page (256, 0); gen_hl takes its 224 rows like the others'), and some rooms draw parts of the scene as further unscaled
    quads over it (the roof and tree tops of AREA05, the hut and the front blossoms of the Dwarf Village).  The table
    holds where those pieces are (coordinates only); grab() puts the room's picture together from VRAM with them, so
    the redraw samples what the player sees.  area / sec name the room (the debug select's numbers; --ws-backdrop-rooms

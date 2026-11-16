@@ -40,8 +40,9 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    to the picture's bush height with a target outline, loose pink bits dropped and enclosed grass filled; PORT.md
    has the numbers and the weak points), OFF by default until the user approves it (`--ws-backdrop-rooms
    19:1`; to approve: `approved` = 1 in its ROOMS entry). Next: the Haunted Mansion 3D side rooms AREA04 s10/s11/s15/s19 (black past the model's outer wall; postponed by the
-   user for token budget); then the last fixed-camera picture left, the AREA17 s3/s4 hall (its side walls are probably
-   oblique: `gen_th`'s rectification needs one vanishing point per wall). User rules: show before|after first, never mirror, measure geometry/tones in the picture, no roots, match
+   user for token budget). The last fixed-camera picture, the AREA17 s3/s4 hall, has a preview since 2026-11-16
+   (`gen_hl`, OFF by default, `--ws-backdrop-rooms 17:3,17:4`; waiting for the user's verdict; PORT.md "More rooms
+   with picture strips"). User rules: show before|after first, never mirror, measure geometry/tones in the picture, no roots, match
    blur; use tools/ws_seam.py on the joins.
    2026-11-15, two more rooms as previews, OFF by default, waiting for the user's verdict (`--ws-backdrop-rooms
    11:2,9:5`; docs/PORT.md "More rooms with picture strips"): AREA11 s2 (the cave with the brick tower, `gen_cv`: the
@@ -127,8 +128,8 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    lightest cream sphere there was cut by a new sphere in front of it; the lit one ran to a flat white dome), measured
    with `tools/ws_seam.py`; waiting for the user's verdict).  Preview: `--ws-backdrop on` (every room) or `--ws-backdrop-rooms
    5:1,5:3,19:1,2:1` (only those); AREA02 s5 stays on by default.  To approve a room: set `approved` to 1 in its
-   `ROOMS` entry.  Not done: AREA17 s3 / s4 (Iron Castle hall): its side walls look oblique (the measured lines do not
-   meet in one vanishing point; numbers in PORT.md), needs a geometry fit first.  Checked headless (16:9 / 21:9, 4:3
+   `ROOMS` entry.  AREA17 s3 / s4 (Iron Castle hall, 2026-11-16): preview `gen_hl`, OFF by default (the walls were
+   not oblique: the camera is pitched up; numbers in PORT.md).  Checked headless (16:9 / 21:9, 4:3
    identical, defaults identical, i386 = wasm2c); not on the device.
 
 0. **Widescreen AREA02 s5, Small Strange Room (2026-11-14)**: user report: Baron visible at 16:9 waiting right of

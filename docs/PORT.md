@@ -3314,12 +3314,52 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     Checked (headless, 2026-11-15): the two new rooms at 16:9 and 21:9 (standalone and in the game), 4:3 identical with
     `--ws-backdrop on`, off by default (the clear colour), AREA02 s5 / s1, AREA05 s1 and AREA19 s1 strips byte-identical
     to the build before (standalone, pads 53 and 140), i386 = wasm2c frames; not checked on the device.
-  - AREA17 s3 / s4 (the Iron Castle hall) is not redrawn yet: its side walls are not simply planes towards the
-    camera.  Measured edges (left / right edge columns): the top rail of the side balustrade rises outwards (row 136
-    at x 34, 131 at x 1), its lower rail stays at row 146-147 across, the walls' foot falls outwards (180 at x 25,
-    186 at x 1) and the cornice rises steeply (47 at x 34, 30 at x 5): with a horizon near row 146 those slopes put
-    the vanishing point at x ~100 / ~160 / ~200, so the walls are probably oblique (an octagonal hall with angled
-    corner walls) and need a proper fit before the strips can continue them.
+  - AREA17 s3 / s4 (the Iron Castle hall, 2026-11-16, `gen_hl`; off by default, preview with `--ws-backdrop-rooms
+    17:3,17:4`; both sections show the same picture, so the same strips).  The left part is drawn 256 x 256 (clipped
+    by the frame), the right 64 columns from page (256, 0); no piece is drawn again over the player (the vases are part
+    of the picture).  A box hall: the back wall frontal (windows, the shield panel, the balustrade) and two side walls
+    running towards the camera past the corner pilasters, each with a panel (a gold / copper frame, a narrow pane, a
+    bolted bar, then a wide pane cut by the edge), the cornice above, the balustrade (handrail, slats, base) below and
+    the tiled floor.  The earlier note ("the walls are oblique") was wrong: the camera is pitched up.  Measured: every
+    vertical edge (the back wall's bars and frame, both pilasters, the side panels' bars and frames; 8 edges tracked to
+    0.1 texel) meets at (153.04, -1921.1), each slope within 0.003 of the fit; the horizon at row 155.5 (where each
+    side wall's handrail top and foot meet); the side walls' lines vanish at column 161 (left) / 160 (right, mirrored
+    159) on it: the rectified cornice, frame, handrail top, base and foot level within 0.2 row per 10 columns (the
+    walls run straight to the camera, like the treasure hall's).  So each side wall is rectified exactly: rectified row
+    j = where the point's line to the wall's vanishing point meets the edge column (rows are the wall's lines), rectified
+    column k = its position along the wall (the vertical through it, a line through the verticals' vanishing point,
+    met with the line of row 100: affine in 1 / distance to the vanishing point), scaled so the slats' period (13.25)
+    is 13 columns.  There the panel's frame and bar, the slats and the rails are an upright rectangle pattern.  The edge
+    column is not a rectified column (the verticals lean 0.07 texel a row there): the rectified picture starts at k = -9
+    (the edge at the top) and the texels between there and the edge on the lower rows are the band's own texels 13 (the
+    floor 18) columns further in.  The strips: the cornice (rows 0-13), the handrail with the slats (129-184, one band:
+    the slats on their period), the base (184-197) and the floor (197-224) quilted with `vb_quilt` in rectified
+    coordinates from the wall's own columns (k -9..40, the floor -9..28: the vases and the corner never), then read from
+    the picture in one step through the quilt's source map (bilinear with the fractions sharpened x2 about the middle:
+    the slats' and rails' gradient energy next to the join 92-96 % of the picture's; plain bilinear 75-80 %).  The
+    frame and the wide pane (rows 13-129) are the edge's colour on the same rectified row (the edge column and the next,
+    along the line): the pane is plain grey brushed metal, its bevels, the frame's bands and the black line under it
+    go on along the wall's lines; nothing of the pane's far end is visible, so no bar or frame is added (the side
+    panels are narrower than the back wall's: their proportions do not tell where the next bar would be).  The
+    handrail's lower edge (its shadow on the slats) is no line along the wall: it is all but level on the screen (row
+    146.3, rising 0.03 a column inwards), so in rectified rows it drifts 2 rows along the wall and the quilt's windows
+    from further in put it 0.9 row too high at the join; the windows' rows are moved so it lies on its own screen line
+    at the source column and at the strip texel (fully at row 146, fading to none at 138 and 166).  Join steps (strip
+    columns 1-4 against each line's continuation fitted over picture columns 0-12, rows; left / right): cornice -0.27
+    (right: a soft line, within its noise), frame top -0.20, handrail top -0.17 / -0.07, handrail's lower edge -0.00 /
+    +0.40 (before the fix -0.94 / -0.81), base top -0.24 / -0.13, base foot -0.34 / -0.29, foot -0.49 / -0.08; the
+    8x crops show every line going on.  Tone per rectified band next to the join (strip columns 1-12 against the
+    picture's 0-11): handrail and slats +-5, base +-5, floor within 6.  ws_seam (`cornice:0-13;frame:13-28;
+    pane:28-110;fbot:110-129;rail:129-148;slats:148-184;base:184-197;floor:197-224`): the handrail and floor pass;
+    the others fail its texture checks because the picture's 16 edge columns hold other elements (the black band and
+    the bar next to the pane, the steep cornice lines across 4-column groups) and the slats' period widens outwards
+    (perspective).  Weak points: the wide pane is a plain grey slab (the picture shows only 3 columns of it); its lower
+    15 rows darken towards the black reflection the edge columns hold; the slats are the picture's own, so the strip
+    repeats them (as the balustrade does).  0.02 s per room entry (pad 53, 266 alike).  Checked (headless): standalone
+    at pads 53, 101, 120 and 266 (a wider strip starts with the 16:9 one's columns: 0 texels differ), the game at 16:9
+    and 21:9 = the standalone, the OpenGL renderer's strips = the software one's, default flags (off) unchanged, the
+    other rooms untouched (only additions: the table's two entries and gen_hl), i386 = wasm2c frames (16:9, 21:9);
+    not checked on the device.
   Checked (headless, 2026-11-14): at 16:9 and 21:9 in the four rooms; 4:3 runs identical with `--ws-backdrop on` and
   off; with the default flags the new rooms are identical to `--ws-backdrop off`, and AREA02 s5 is identical to the
   build before the table; i386 = wasm2c strips; not checked on the device.
