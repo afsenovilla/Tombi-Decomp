@@ -2710,6 +2710,46 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   beside the house and at 21:9 a second one further out and back; at 32:9 the whole tree (59 polygons) stands far
   enough out that its crown stops at the house.  (A box that cut the tree in depth left a flat dark crown: the front
   leaf clusters start at z -3.)
+- **3D room walls** (`runtime/ws_room3d.c`, called from `port_ws_area_model_link`; previews, OFF by default;
+  `--ws-room3d on` = every room of its table, `--ws-room3d-rooms 4:10,4:11,...` = exactly those, `--ws-room3d off`;
+  2026-11-17): the Haunted Mansion's side rooms AREA04 s10, s11, s15 and s19 (debug select sections A, B, F, 13) are
+  real 3D: one WMD block each (table count 1, the list holds that one block; s19 is s10's model with every polygon
+  gouraud and tinted, s11's model holds two rooms one above the other, y -1170..-810 purple and -330..30 green),
+  drawn by `drawAreaModelList` / `drawModelUnlit` through an unrotated camera (VIEW_CAMERA identity, T = (-160, ty,
+  544), H 544, OFX 160: screen x = 160 + 544 (x - 160) / (z + 544); ty 95 / 932 / 124 / 116).  Cause of the black
+  sides: missing geometry, not a cull.  The stone wall facing the viewer ends on both sides in a straight vertical
+  line of free polygon edges just past the 4:3 frame: x -45 / 375 at z 45 in s10 and s19 (screen x -29 / 359: 24 and
+  14 black columns at 16:9), x 0 / 344 at z -45 in s11 (-14 / 361: 39 and 12), x 0 / 360 at z -45 in s15 (-14 / 378:
+  39 and none at 16:9, 106 / 62 at 21:9).  Evidence: `PORT_WSXTRA=300` (culls 300 columns wider) draws the very
+  same primitives (PORT_PRIMLOG line counts 203 / 175 / 196 / 215 with and without, frames identical), the model
+  drawers' screen tests are already `PORT_WSX`, and the parsed model's x range is exactly those lines; nothing else
+  (floor, ledge, objects) reaches the sides: the wall covers the whole height there.
+  Method: per side, the wall's end is the line x carrying the most free front-facing vertical edges (edges of one
+  polygon only, both vertices at that x, the polygon inwards; s11's door and grille boxes at x 1 / 346 lose to the
+  wall's 760 units of edge).  From every edge the wall goes on outwards in its own plane as columns of facets (48
+  units wide; the first line is the edge's own vertices, so no crack; the other vertices moved by a hash of row
+  height and column, up to +-12 along x and a quarter of the shorter neighbouring row, at most 16, along y; a cell
+  is a quad or two triangles), far enough to cover the frame at the wall's depth (16:9: 1-2 columns, 21:9: 2-3,
+  32:9: 6).  Colours: the model's own flat per-polygon colours (the wall is faceted by colour, FT / equal-coloured
+  GT): the facet next to an edge takes the colour of the polygon it continues, so the join is one more facet line
+  and not a change of tone; the others the colour of an edge polygon at most two edges up or down the same run (each
+  side and each of s11's two rooms keeps its own light: s10's right is darker than its left in the model).  Texture:
+  the wall's page and palette (tpage 0xF, CLUT 0x784F), each facet its own piece of the stone tile (the UV box of
+  the polygons using them, u 0-62 v 120-174, read from the model), unrotated or turned a quarter, 9 texels per 16
+  units (measured median 0.51-0.57 texels per unit).  The block is in the model's format (FT3 / FT4 / GT3 / GT4
+  groups, the kind of the polygon the colour comes from) and is added to the area list, so the game's drawer, GTE,
+  NCLIP (winding copied from the edge's polygon), culls and ordering table draw it.  Rebuilt when the model's bytes,
+  the strip width or the camera change (FNV key per frame).  Integers only, every random value a hash of the
+  position in its own statement; a wider strip starts with the narrower one's columns.  Nothing mirrored, no object
+  invented.  Checked (software, frames 100-2000 of the select run): default (flag off) 16:9 frames and 4:3 frames
+  with the flag on byte-identical to before; with it on the 4:3 centre of every 16:9 frame identical, no black pixel
+  left in the strips; AREA04 s0 and s12 identical on / off; 21:9 and 32:9 covered; OpenGL (xvfb) covered, its 4:3
+  centre identical on / off (GL and software differ by the usual texture rounding, in the strips as in the centre);
+  i386 = wasm2c whole frames (`build/wasm/tombi2w`: the four rooms at 16:9 and 21:9, 20 frames each, s10 at 32:9);
+  walking out of s11 / s15 into the next room fine; s11's lower room only seen with a debug camera (ty forced to
+  92).  To approve a room: `approved` = 1 in its ROOMS entry.  Weak points: the join is a straight vertical facet
+  line (the model's own edge, outside 4:3); the new facets lie in one plane (the model's vertices wander +-8 in z,
+  invisible with flat colours); at 32:9 the 6 columns show the grid's regular pitch a little.
 - **Top-down map** (`runtime/ws_topdown.c`, fixes.txt hooks at the end of `topdownDrawMapLayers` /
   `overheadDrawMapLayers` and their USA / JP versions): the overhead background is the room's map picture (8 bpp TIM
   in RAM, scratch 0x1F800394) of which the game uploads a 384x288 window (12x9 tiles of 32 px, USA / JP 384x256) into

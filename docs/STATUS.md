@@ -81,6 +81,12 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    the picture's trunk texels (core and foot, moved, never mirrored).  ~0.3-0.4 s per room entry at 16:9.  To
    approve: `approved` = 1 in its ROOMS entry.
 
+   2026-11-17, **3D rooms** (Haunted Mansion side rooms AREA04 s10 / s11 / s15 / s19): the black sides at 16:9 were
+   missing geometry (the room model's front wall ends just past 4:3; no cull involved).  `runtime/ws_room3d.c`
+   carries the wall on as extra facets in the model's own format, colours, texture tile and plane (PORT.md "3D room
+   walls").  Preview, OFF by default: `--ws-room3d on` or `--ws-room3d-rooms 4:10,4:11,4:15,4:19`; waiting for the
+   user's verdict per room (`approved` in its ROOMS).  Not in the launcher / Android options yet.
+
 -2. **WIP (owner's request): restore the Funga Chief's cut event** on the Funga stage (`--cut-content=funga`, AREA10 s2,
    chief already walking there: runtime/funga.c).  What survives (docs/CUT_CONTENT.md "Jungle (AREA10)", "Funga Chief"):
    the judgement dialogue MFNT100S group 2 dx 11-18 (PAL #222-#229: "It's you! Our friend!...", "If I had a **Funga
