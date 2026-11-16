@@ -2746,7 +2746,7 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   beside the house and at 21:9 a second one further out and back; at 32:9 the whole tree (59 polygons) stands far
   enough out that its crown stops at the house.  (A box that cut the tree in depth left a flat dark crown: the front
   leaf clusters start at z -3.)
-- **3D room walls** (`runtime/ws_room3d.c`, called from `port_ws_area_model_link`; previews, OFF by default;
+- **3D room walls** (`runtime/ws_room3d.c`, called from `port_ws_area_model_link`; the approved rooms by default;
   `--ws-room3d on` = every room of its table, `--ws-room3d-rooms 4:10,4:11,...` = exactly those, `--ws-room3d off`;
   2026-11-17): the Haunted Mansion's side rooms AREA04 s10, s11, s15 and s19 (debug select sections A, B, F, 13) are
   real 3D: one WMD block each (table count 1, the list holds that one block; s19 is s10's model with every polygon
@@ -2786,6 +2786,45 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   92).  To approve a room: `approved` = 1 in its ROOMS entry.  Weak points: the join is a straight vertical facet
   line (the model's own edge, outside 4:3); the new facets lie in one plane (the model's vertices wander +-8 in z,
   invisible with flat colours); at 32:9 the 6 columns show the grid's regular pitch a little.
+  **The other twelve rooms** (2026-11-16; in `ROOMS` with `approved` = 0: previews, seen with `--ws-room3d on` or
+  `--ws-room3d-rooms 4:5,4:17,4:18,...`): s4 Sunny Room, s5 / s17 / s18 the thief's rooms (s15's model in three
+  tints), s6 Swimming Room, s7 Keyhole Room, s8 Hiding Room, s9 Room of Tribulation, s12 Trap Room, s13 Trick Room,
+  s14 Sun Torch Stand, s16 Shadow Room (s4's model).  All sixteen rooms s4-s19 have the same structure (table count 1,
+  one listed block, a front wall that ends on both sides in a vertical line of free edges: x 0 / 360 in s5, s17, s18,
+  -41 / 360 in s4 and s16, 0 / 700 in s6, 0 / 640 in s7 and s13, -5 / 355 in s8, 0 / 464 in s9, 0 / 680 in s12,
+  -45 / 375 in s14), but their cameras scroll (CAMERA_SCROLL minX..maxX 160..177 up to 160..530; s7, s8, s13 also in
+  Y), so the missing wall shows at the camera limits: a whole black strip on the left at the left limit (39 columns
+  at 16:9) and 16-43 black columns on the right at the right limit; s4's are white (its clear colour is white: 16
+  columns at the right limit, no cull); s14 9-11 columns on the left.  The same code does them; what it gained:
+  (1) the columns are counted for the camera of each frame (the block is rebuilt when the camera X changes; a wider
+  need starts with the same columns, so nothing jumps while scrolling);  (2) a camera turned about Y: the rooms'
+  camera turns a few degrees now and then (seen in s14 and s7 after the player stops past the camera limit:
+  VIEW_CAMERA m00 4081-4095, m02 +-69..351) and the code used to give up on any rotation (strips black for those
+  frames, in the four approved rooms as well); now a pure Y rotation (m00, m22 >= 3900) is taken and the columns are
+  counted by projecting the outer line with the frame's matrix;  (3) s13's left end is not one wall: the front wall
+  from y -520 to -187 at z -45, then the room's back wall (z 45-47, another palette) down to y -11, then a cut
+  corner (a free slanting edge to (71, 60): a black triangle in the 4:3 picture too, bottom left at the lowest
+  camera).  Edges one under the other count as one run only when they meet at the same depth (24 units), so each
+  part goes on at its own depth with its own colours and row lines; a facet takes the page / palette / tile of the
+  polygon its colour is from when that differs from the wall's; the line is carried on to the model's bottom along
+  the cut corner and the corner itself is closed with one facet of the polygon that owns the slanting edge (the only
+  thing drawn inside the 4:3 columns, and only at 16:9 or wider).  Checked (software, i386): the debug select run
+  plus a flight to both camera limits of every AREA04 section 0-19 (`tools/ws_survey.py`-style sweep, 20 frames
+  apart; s7, s8, s13 at three heights): no strip column of one flat colour left at 16:9 or 21:9; default-flag
+  16:9 / 21:9 frames of s10, s11, s15, s19 and 4:3 frames of the twelve (with the flag) byte-identical to before;
+  i386 = wasm2c on whole frames (354 frames at 16:9, all twenty sections and both limits; 74 at 21:9); OpenGL
+  (xvfb) covers the strips in s5 and s13 at the spawn view.  Weak points: the join line as above; s13's low left
+  corner is new wall where the game had a hole; the lower room of s11 and other story states were not visited; a
+  rebuild per frame while the camera scrolls (parse + edge search, about a million integer steps).
+- **Haunted Mansion exterior backdrop** (AREA04 s0-s3; fixes.txt `updateStormBackdrop`, `drawCategory7Objects`;
+  with `--widescreen`, no flag; 2026-11-16): the trees and lake behind the mansion are eight 64-wide sprite columns
+  on a 512-column cycle (`updateStormBackdrop` `place`: x = (column - scroll + rotY) mod 512; the column at 384..448
+  is skipped, x > 448 wraps to x - 512), so they cover s - 64 .. s + 384 for s = 0..63: at 16:9 up to 53 columns of
+  the purple clear colour in the left strip (17 at s0's spawn) and a few on the right, more at 21:9.  With
+  widescreen no column is skipped, each is registered with its period (`port_ws_backdrop_period`, as AREA01 /
+  AREA09) and the kind-4 drawer (`FUN_8011e778`, drawArea4Kind4Sprites) goes through `port_ws_cat7`, which draws a
+  column again 512 to the left / right where that lands on the wide frame.  4:3 untouched; no flat column left in
+  the sweeps of s0-s3 at 16:9 and 21:9.
 - **3D room floors** (`runtime/ws_floor3d.c`, called from `port_ws_area_model_link` for GAME 18; preview, OFF by
   default; enabled by the same flags as the walls above: `--ws-room3d-rooms 18:1`, or `--ws-room3d on`; 2026-11-16):
   AREA18 s1, the Y crossing (debug select AREA 12 hex, section 1), is real 3D like the Mansion side rooms: one WMD
@@ -3865,27 +3904,65 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     - the hoses along the back wall's foot go on along the side wall's foot (the rays);
     - left: the rust pipe (rows 91-125) and the grey pipe in front (145-182) reach the edge at the end of an elbow
       (outline and highlight still 0.3 row a column, flattening), so they finish the turn (1.45 rows over 10 columns)
-      and run level off the outer edge with the cross-section they have at the edge; the big grey pipe at the top
+      and run level with the cross-section they have at the edge, then turn up (below); the big grey pipe at the top
       (highlight at column 11, right limb at 24, as wide as the pipe beside it plus 4 columns) gets its left limb,
       round, down to where the elbow's outline re-enters at row 58;
     - right: the copper pipe is a three-piece elbow (upright, 46 degrees, 23 degrees) with a ring on each joint; the edge
       cuts the second ring and all but a wedge of the third piece.  The ring's top face, rim and groove go on along
       quarter ellipses to its end 8.5 columns out (where the groove meets the middle piece's lower outline, 167.5 -
       1.05 X), each band with its texels at the edge, darkening to the end as the first ring does; the third piece
-      runs off along its upper outline (122 - 0.417 X), 38 rows high, with the middle piece's cross-section (its
+      goes on along its upper outline (122 - 0.417 X), 38 rows high, with the middle piece's cross-section (its
       texels between the rings averaged by distance from its upper outline; the third piece's own seven rows at the
-      edge agree with it within 8 levels);
+      edge agree with it within 8 levels), then turns back up (below);
     - the runs carry the grain of an upright stretch of the same pipe (texels less their column and row means, 3-column
       windows by a position hash).
-    Checks (headless, 2026-11-16): the 4:3 run and the default 16:9 run byte-identical to the build before; the 4:3
-    centre of the 16:9 frame unchanged; the other twelve rooms' 16:9 frames with `--ws-backdrop on` byte-identical
-    (2:5 2:1 5:1 5:3 19:1 11:2 9:5 9:3 9:4 17:3 17:4 16:4); 21:9 starts with the 16:9 columns (frame 2400, 0 texels
-    differ); OpenGL (xvfb) strips = the generator on the picture as OpenGL shows it; i386 = wasm2c whole frames at 16:9
-    and 21:9; 0.01 s per build.  Not checked on the device.  Weak points: the three long runs are plain (no ring or
-    bend is invented, so at 21:9 they are 120 columns of smooth pipe); the hidden end of the second ring has no bolt;
-    the walls' texels are magnified 1.3-1.9 x (softer than the picture's wall by the edge); the right wall repeats
-    its 20 columns (bolt and streaks) every block; the rust pipe keeps the shadowed section it has at the cut (no
-    highlight); only the debug select's default state was seen.
+    The first version (2026-11-16, commit 1173b8c) ran the three cut pipes level (the copper one at its 23 degrees)
+    off the strip's outer edge, 53 columns of plain pipe at 16:9 and 120 at 21:9, with nothing on them.  Rejected by
+    the user: "La sala de las tuberías se prolonga de una forma poco natural y aburrida."  Second version (same day):
+    the runs become plumbing built from the picture's own parts, by translation only (never mirrored or turned).
+    What makes that possible: a straight piece of pipe is shaded by its axis' direction alone and a ring by its
+    plane's, whichever way the pipe bends, so a turn "back" (the picture's bend turned half round) is made of the
+    same pieces in the same orientations, each one moved, not flipped.  The picture's own vocabulary is the offset
+    the big grey pipe makes at the top left (down, across, down); each cut pipe now makes one and leaves through the
+    top of the frame, as the picture's pipes leave through its top and bottom:
+    - the rust pipe: 13 columns of run, a quarter turn as tight as its elbow in the picture (that elbow's outer
+      outline is a circle of radius 33-34 about the inner corner (4, 127), i.e. no inner radius), then upright, 32
+      columns wide as its stretch under the flange (the run is 35 rows high: the turn is that ellipse).  A texel of
+      the turn takes the run's section at the edge and the upright section (columns 7-38, rows 141-146), each at its
+      distance from the inner corner, weighed by where its normal points (|nx| : |ny|); the upright stretch keeps
+      the picture's left and right.  Its flange is the picture's (columns 1-45, rows 133-140, the two bolts and the
+      rounded ends, texel for texel), 7 rows from the turn as in the picture.  All of it is inside the 16:9 strip
+      (columns 7-51);
+    - the grey pipe: the same turn after 62 columns, 38 wide, with the upright grey pipe's section (columns 30-50,
+      rows 88-107).  At 16:9 it is a run under the rust pipe; the turn shows from 18:9 on.  Its joints are the grey
+      pipes' (a light line across, a paler texel before and a darker one after: the contrast measured on the upright
+      pipe's joint at rows 111-113, x 1.1 / 1.22 / 0.94): every 28 columns on the run (the big pipe has its joint 21
+      rows from its bend and is 29 wide; this one is 38), two on the upright stretch;
+    - the copper pipe: measured, the bend is upright (39 wide, leaning 3 columns in 38 rows) - ring 1 (centre 291.5,
+      164) - a 46 degree piece 40 thick - ring 2 (centre 309, 146) - the 23 degree piece.  It goes on with ring 2
+      again 32 columns on and 13 rows up (the first place where all of the ring is in the strip; the third piece
+      between the rings is then as long as the middle piece's long side, 26-28), a 46 degree piece through the two
+      ring centres with the middle piece's section, ring 1 again 67 columns on and 49 rows up, and upright through
+      the top (strip columns 23-61, the first piece's section and its mottle in 12-row stretches, two layers half a
+      stretch apart).  The rings are the picture's texels between their digitised outlines (ring 2's last 8 columns
+      are the strip's own end of it), bolts included; the pieces change under the rings' middle lines.  At 16:9 the
+      strip's outer edge cuts the upright piece (31 of its 39 columns show), as the picture's left edge cuts the big
+      grey pipe.
+    Checks (headless, 2026-11-16, second version): the 4:3 run and the default 16:9 run byte-identical to the build
+    before; the 4:3 centre of the 16:9 frame unchanged; the first 6 columns left of the picture unchanged, and the
+    right join's columns but for the ring copy's tip (2 texels in the first column); the other thirteen rooms' 16:9
+    frames with `--ws-backdrop on` byte-identical (2:5 2:1 5:1 5:3 19:1 11:2 9:5 9:3 9:4 17:3 17:4 16:4 18:2); 21:9
+    starts with the 16:9 columns (frame 2400, 0 texels differ); the game's strips = the standalone generator's on
+    the dumped picture; OpenGL (xvfb) strips = the generator on the picture as OpenGL shows it; i386 = wasm2c whole
+    frames at 16:9 and 21:9; gcc -m32 / gcc x86-64 / clang give the same strips; 0.01-0.03 s per build; the dark
+    state (before the power is on) darkens the strips with the picture.  Not checked on the device.  Weak points:
+    the upright stretches are a section plus grain, not texels (the copper one is the plainest: 100 rows by 39
+    columns, cut by the 16:9 edge); the grey run is still 53 columns long at 16:9 (two joints on it); the turns are
+    smooth (the rust elbow's seam and patch in the picture are not repeated); four copper rings sit close together
+    (27-35 apart, the picture's spacing); the rings' ends at the lower right are blunt and dark and the second
+    ring's hidden end has no bolt (twice now); the walls are as before (texels magnified 1.3-1.9 x, the right wall
+    repeats its 20 columns with the bolt every block; the pipes now cover most of them at 16:9); sprites that stand
+    in the strips are drawn over the strips' pipes; only the debug select's default state was seen.
 - **Sub-screens** (Select screens Objetos / Eventos / Estado / Mapa, memory card, options, button config, screen
   adjust).  The Select screens (`subScreenDrawTabs`, D0SPSUB / D0SPSUB3, `#ifdef PORT2`) call `port_ws_layout(left cut,
   right cut, below)` each frame; while it is set, `shims/gpu.c` spreads the textured primitives of the frame

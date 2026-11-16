@@ -477,6 +477,14 @@ src/x010/updateParallaxBackdropSprite.c | if (o->a.p.whole - 0x40 < 0x141 && o->
 # and AREA00's far sky / sea strip (two 232-column sprites from world x 1400, scrolled at 1/8) starts at the room's left
 # end: its two first sprites repeat to the left (period 464) over the wide frame's left strip
 src/updateA00FarBackdropWest.c | *(unsigned char *)&o->visible = 1; | *(unsigned char *)&o->visible = 1; if (port_ws_cull && x < 3300) { extern int port_ws_backdrop_period(void *, int); port_ws_backdrop_period(o, -464); }
+# and the Haunted Mansion's exterior backdrop (AREA04 s0-s3, updateStormBackdrop: eight 64-wide columns of trees and
+# lake on a 512-column cycle, the one at 384..448 skipped, so they cover s - 64 .. s + 384 for s = 0..63: up to 53
+# columns of clear colour in the left strip at 16:9): every column is listed and repeats one period left and right
+src/x004/updateStormBackdrop.c | if (x >= 0x180 && x <= 0x1c0) { | if (x >= 0x180 && x <= 0x1c0 && !port_ws_cull) {
+src/x004/updateStormBackdrop.c | o->visible = 1; | o->visible = 1; if (port_ws_cull) port_ws_backdrop_period(o, 512);
+src/x004/func_8011C894_scus94236.c | if (x >= 0x180 && x <= 0x1c0) { | if (x >= 0x180 && x <= 0x1c0 && !port_ws_cull) {
+src/x004/func_8011C894_scus94236.c | o->visible = 1; | o->visible = 1; if (port_ws_cull) port_ws_backdrop_period(o, 512);
+src/drawCategory7Objects.c | FUN_8011e778(o); | { extern void port_ws_cat7(TObj *, void (*)(TObj *)); port_ws_cat7(o, FUN_8011e778); }
 #
 # --title-bg (widescreen, runtime/titlebg.c): mark the ordering-table node the title background / logo sprites go into
 src/o0ptsub0/titleLogoDraw.c |     addTilePrim(&r, 0, 0, 1); |     { extern unsigned long *CURRENT_OT; extern void port_title_bg_mark(void *); port_title_bg_mark(CURRENT_OT + 1); } addTilePrim(&r, 0, 0, 1);

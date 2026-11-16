@@ -27,8 +27,18 @@
  *   - the hoses on the floor (rows 184-195 left, 183-192 right): on along the side wall's foot, i.e. the rays;
  *   - left, the rust pipe (rows 91-125) and the grey pipe in front of it (145-182): both reach the edge at the end
  *     of an elbow (their upper outline and highlight still fall 0.3 row a column there, less every column), so they
- *     finish the turn (1.45 rows over 10 columns) and run level off the strip's outer edge with the cross-section
- *     they have at the edge;
+ *     finish the turn (1.45 rows over 10 columns) and run level with the cross-section they have at the edge.  Not
+ *     for long (the first version ran them off the outer edge, 53 to 120 columns of plain pipe: "la sala de las
+ *     tuberías se prolonga de una forma poco natural y aburrida"): each makes the offset the big grey pipe makes in
+ *     the picture (down, across, down) and goes up through the top.  The rust pipe after 13 columns: a quarter turn
+ *     as tight as its elbow in the picture (outer outline: a circle of the pipe's width about the inner corner),
+ *     then upright, 32 columns wide as its stretch under the flange, with that flange (the picture's texels, bolts
+ *     and all) 7 rows from the turn as in the picture.  The grey pipe after 62 columns (so past the 16:9 strip, where
+ *     it is a run under the rust pipe), with the joints the grey pipes have (a light line across: every 28 columns
+ *     on the run, as 21 rows on the 29 wide pipe; two on the upright stretch).  A turn's texel takes the run's
+ *     section and the upright stretch's section (from the picture: rust columns 7-38 under the flange, grey columns
+ *     30-50 of the upright pipe beside it), each at its distance from the inner corner, weighed by where its normal
+ *     points; never a mirror: the upright stretch keeps the picture's left and right;
  *   - left, the big grey pipe at the top (its highlight at column 11, 13 columns from its right limb as on the pipe
  *     beside it, the left limb 4 columns past the edge): the limb is closed, round, down to where the elbow's outline
  *     comes back into the picture at row 58;
@@ -36,9 +46,11 @@
  *     cuts the second ring and all but a wedge of the third piece.  The ring's rim, groove and top face go on along
  *     quarter ellipses to its end 8.5 columns out, where the groove meets the middle piece's lower outline (167.5 -
  *     1.05 X), each band with the texels it has at the edge, darkening to the end as the first ring's does.  The
- *     third piece runs off the outer edge along its measured upper outline (122 - 0.417 X) with the middle piece's
- *     cross-section (its texels between the rings averaged by their distance from its upper outline: the third
- *     piece's own seven rows at the edge match it within 8 levels), 38 rows high;
+ *     third piece goes on along its measured upper outline (122 - 0.417 X) with the middle piece's cross-section
+ *     (its texels between the rings averaged by their distance from its upper outline: the third piece's own seven
+ *     rows at the edge match it within 8 levels), 38 rows high, and then turns back up the way it came (see EN_T):
+ *     a copy of the second ring 32 columns on (the first place where all of it is in the strip), a 46 degree piece,
+ *     a copy of the first ring, and upright through the top (39 columns, the first piece's section and mottle);
  *   - the runs carry the grain of an upright stretch of the same pipe (its texels less their column and row means).
  * Integers only; a column depends on its place alone (the canvas is 32 columns wider than the strip), so wider
  * strips start with the 16:9 columns.  0.01 s at 16:9. */
@@ -248,30 +260,55 @@ static void en_bprof(void)
 }
 #define EN_CTOP(X) (122 * 256 - 107 * (X))               /* C's upper outline (1/256 row) */
 #define EN_CH (38 * 256)                                 /* its height down the column */
+/* the copper pipe's way on: after the picture's vertical - ring - 46 degrees - ring - 23 degrees, the same turn back
+   (23 degrees - ring - 46 degrees - ring - upright), i.e. an offset, as the big grey pipe makes at the top left.  A
+   straight piece looks the same whichever way the pipe bends (its shading is its axis' direction's) and so does a ring
+   (its plane's), so the pieces are the picture's by translation: the second ring's copy EN_T[0] from it, the first
+   ring's EN_T[1].  en_jn(): a texel's rows below the middle line of ring copy k (so above it: < 0) */
+static const int EN_T[2][2] = { { 32, -13 }, { 67, -49 } };
+static int en_lerpx(const int *xs, const int *ys, int n, int x256)   /* as en_lerp, the end pieces going on */
+{
+    int i = 0;
+    while (i < n - 2 && x256 > xs[i + 1] * 256) i++;
+    return ys[i] + (int)((long long)(ys[i + 1] - ys[i]) * (x256 - xs[i] * 256) / ((xs[i + 1] - xs[i]) * 256));
+}
+static int en_jn(int k, int X, int y)
+{
+    static const int J2X[] = { 288, 304, 315, 320, 326, 330 }, J2Y[] = { 33664, 34304, 35328, 35968, 37888, 39168 };
+    static const int J1X[] = { 260, 275, 285, 290, 296, 301, 306, 310, 314 }, J1Y[] = { 39552, 39552, 39552, 39936, 40704, 41600, 42624, 43776, 44928 };
+    int xs = PW * 256 - 128 + (X - EN_T[k][0]) * 256, ys = (y - EN_T[k][1]) * 256 + 128;
+    return ys - (k ? en_lerpx(J1X, J1Y, 9, xs) : en_lerpx(J2X, J2Y, 6, xs));
+}
 static void en_crun(int X)
 {
     int top = EN_CTOP(X);
     for (int y = 0; y < PH; y++) {
         int v = y * 256 + 128 - top, a = clampi(v + 128, 0, 256), b = clampi(EN_CH - v + 128, 0, 256), t, f;
         if (b < a) a = b;
-        if (a <= 0) continue;
+        if (a <= 0 || en_jn(0, X, y) < 0) continue;      /* (it ends under the ring's copy) */
         t = 8 * 256 + clampi(v, 0, EN_CH) * 236 / 256; f = t & 255; t >>= 8;
         en_over(X, y, en_grained(mix(en_bp[clampi(t, 0, 63)], en_bp[clampi(t + 1, 0, 63)], f), 2, X, clampi(v, 0, EN_CH - 1), EN_CH), a);
     }
 }
 #define EN_XT (8 * 256 + 128)                            /* the ring's end: columns past the edge, row */
 #define EN_YT (159 * 256 + 128)
+static int en_ring_geo(int X, int *ytf, int *yrim, int *yg, int *ylow)
+{
+    int x = X * 256 - 128, q;
+    if (x >= EN_XT) return 0;
+    q = 256 - isqrt_i((int)(((long long)EN_XT * EN_XT - (long long)x * x) * 256 / ((long long)EN_XT * EN_XT / 256)));   /* 1 - sqrt(1 - (x / XT)^2), x 256 */
+    *ytf = 128 * 256 + 128 + (EN_YT - 128 * 256 - 128) * q / 256;
+    *yrim = 137 * 256 + 128 + 141 * x / 256 * (EN_XT - x) / EN_XT + (EN_YT - 137 * 256 - 128) * q / 256;
+    *yg = 151 * 256 + x; *ylow = 167 * 256 + 128 - 269 * x / 256;
+    if (*yg > *ylow) *yg = *ylow;
+    if (*yrim > *yg) *yrim = *yg;
+    if (*ytf > *yrim) *ytf = *yrim;
+    return 1;
+}
 static void en_ring(int X)
 {
-    int x = X * 256 - 128, q, ytf, yrim, yg, ylow;
-    if (x >= EN_XT) return;
-    q = 256 - isqrt_i((int)(((long long)EN_XT * EN_XT - (long long)x * x) * 256 / ((long long)EN_XT * EN_XT / 256)));   /* 1 - sqrt(1 - (x / XT)^2), x 256 */
-    ytf = 128 * 256 + 128 + (EN_YT - 128 * 256 - 128) * q / 256;
-    yrim = 137 * 256 + 128 + 141 * x / 256 * (EN_XT - x) / EN_XT + (EN_YT - 137 * 256 - 128) * q / 256;
-    yg = 151 * 256 + x; ylow = 167 * 256 + 128 - 269 * x / 256;
-    if (yg > ylow) yg = ylow;
-    if (yrim > yg) yrim = yg;
-    if (ytf > yrim) ytf = yrim;
+    int x = X * 256 - 128, ytf, yrim, yg, ylow;
+    if (!en_ring_geo(X, &ytf, &yrim, &yg, &ylow)) return;
     for (int y = 120; y < 175; y++) {
         int yc = y * 256 + 128, ys, a = 256; Rgb c;
         if (yc < ytf - 128 || yc > ylow + 128) continue;
@@ -282,6 +319,133 @@ static void en_ring(int X)
         c = en_bil(pic, en_edge(1), ys);
         if (x > 4 * 256) c = scale(c, 256 - 170 * (x - 4 * 256) / (EN_XT - 4 * 256));
         en_over(X, y, c, a);
+    }
+}
+/* --- the pipes' turns and fittings: the picture's own parts
+   An upright stretch's cross-section, limb to limb from the left (columns [x0, x1) over rows [y0, y1)) */
+static Rgb en_vp[3][64];
+static void en_vprof(int g, int x0, int x1, int y0, int y1)
+{
+    for (int k = 0; k < 64; k++) {
+        int xs = x0 * 256 + 128 + (x1 - x0 - 1) * 256 * k / 63, m[3] = { 0, 0, 0 };
+        for (int y = y0; y < y1; y++) { Rgb c = en_bil(pic, xs, y * 256 + 128); m[0] += c.r; m[1] += c.g; m[2] += c.b; }
+        en_vp[g][k].r = m[0] / (y1 - y0); en_vp[g][k].g = m[1] / (y1 - y0); en_vp[g][k].b = m[2] / (y1 - y0);
+    }
+}
+static Rgb en_vat(int g, int v, int D)                   /* v of D from the left limb (1/256) */
+{
+    int t = clampi((int)((long long)v * 63 * 256 / D), 0, 63 * 256 - 1);
+    return mix(en_vp[g][t >> 8], en_vp[g][(t >> 8) + 1], t & 255);
+}
+/* a left run (en_run's r0, r1, d) that turns up after strip column xc: a quarter turn about the end of its upper
+   outline (as tight as the picture's elbows: the rust pipe's outer outline is a circle about its inner corner), then
+   upright, w columns wide, to the top.  A texel of the turn has the run's section and the upright section, each at
+   its distance from the corner, weighed by where its normal points (up / sideways). */
+static void en_rise(int X, int xc, int r0, int r1, int d, int w, int g)
+{
+    int D = (r1 - r0) * 256, dx = ((X - xc) * 256 - 128) * (r1 - r0) / w, yt = r0 * 256 - d;
+    if (dx < 0 || dx > D + 128) return;
+    for (int y = 0; y < PH; y++) {
+        int dy = y * 256 + 128 - yt, v, t; Rgb c;
+        if (dy > D + 256) break;
+        if (dy <= 0) { v = dx; c = en_vat(g, D - v, D); t = xc + 28 - dy / 256; }
+        else {
+            v = isqrt_i(dx * dx + dy * dy); if (v > D + 128) continue;
+            c = mix(en_bil(pic, en_edge(0), clampi(r0 * 256 + v, r0 * 256 + 128, r1 * 256 - 128)), en_vat(g, D - v, D), dx * 256 / (dx + dy));
+            t = xc + dx * 28 / (dx + dy);
+        }
+        en_over(X, y, en_grained(c, g, t, clampi(v, 0, D - 1), D), clampi(D - v + 128, 0, 256));
+    }
+}
+/* the rust pipe's flange (picture columns 1-45, rows 133-140, around the pipe's columns 7-38), on its upright stretch
+   in the strip: its texels, column for column (xo: the strip column of picture column 0, yo: rows up) */
+static void en_flange(int X, int xo, int yo)
+{
+    int sx = xo - X;
+    if (sx < 1 || sx > 45) return;
+    for (int sy = 133; sy <= 140; sy++) {
+        int e = sx < 7 ? 7 - sx : sx > 38 ? sx - 38 : 0;  /* (the ends: rounded, no top line) */
+        if (e && (sy == 133 || (e >= 5 && (sy < 135 || sy > 139)) || (e >= 6 && sx < 7 && (sy < 136 || sy > 138)) || (e >= 7 && (sy < 136 || sy > 138)))) continue;
+        en_over(X, sy - yo, rgb15(pic[sy][sx]), 256);
+    }
+}
+/* a joint, as the grey pipes have: a light line across, a paler texel before it and a darker one after (the upright
+   pipe's at rows 111-113, columns 33-47, over the rows around: the measured contrast) */
+static int en_jk[3];
+static void en_joint_k(void)
+{
+    int m[3] = { 0, 0, 0 }, b = 0;
+    for (int x = 33; x < 48; x++) {
+        for (int k = 0; k < 3; k++) m[k] += lum(rgb15(pic[111 + k][x]));
+        b += lum(rgb15(pic[108][x])) + lum(rgb15(pic[109][x])) + lum(rgb15(pic[115][x])) + lum(rgb15(pic[116][x]));
+    }
+    for (int k = 0; k < 3; k++) en_jk[k] = clampi(m[k] * 1024 / (b > 0 ? b : 1), 200, 340);
+}
+static void en_joint(int X, int y, int k) { Rgb *p = px_at(X, y); if (p) *p = scale(*p, en_jk[k]); }
+/* the copper pipe's pieces after the second ring's copy: the 46 degree piece (the middle piece's cross-section, 40
+   texels, about the line through the ring copies' centres) and the upright one (the first piece's, columns 260-299) */
+#define EN_BX ((PW + 21) * 256)                          /* the piece's centre line: through here (1/256) */
+#define EN_BY (133 * 256)
+#define EN_AX ((PW + 22) * 256 + 128)                    /* the upright piece's left limb */
+#define EN_AW (39 * 256)
+/* (the upright piece's mottle: its grain in longer stretches, two layers half a stretch apart, each fading out
+   towards its ends, so nothing repeats in step) */
+static Rgb en_mottled(Rgb c, int g, int t, int v, int H)
+{
+    const EnG *q = &EN_G[g]; int m[3] = { 0, 0, 0 };
+    for (int l = 0; l < 2; l++) {
+        int tt = t + l * 6, blk = fdiv(tt, 12), ph = fmodi(tt, 12), j = (int)((hash3(blk, g, 921 + l) >> 8) % (u32)q->h);
+        int i = clampi((int)((long long)v * q->w / (H > 0 ? H : 1)) + (int)((hash3(blk, g, 931 + l) >> 8) % 7u) - 3, 0, q->w - 1);
+        int f = ph < 6 ? ph * 2 + 1 : (11 - ph) * 2 + 1;  /* 1 .. 11 .. 1: the two layers' sum is 12 */
+        j = (j + ph) % q->h;
+        for (int k = 0; k < 3; k++) m[k] += en_res[g][j][i][k] * f;
+    }
+    c.r = clampi(c.r + m[0] / 160, 0, 255); c.g = clampi(c.g + m[1] / 160, 0, 255); c.b = clampi(c.b + m[2] / 160, 0, 255);
+    return c;
+}
+static void en_cturn(int X)
+{
+    int xe = PW * 256 - 128 + X * 256;
+    for (int y = 0; y < PH; y++) {
+        int ye = y * 256 + 128, j0 = en_jn(0, X, y), j1, w, a, b; Rgb c;
+        if (j0 >= 0) continue;
+        j1 = en_jn(1, X, y);
+        if (j1 >= 0) {
+            w = ((xe - EN_BX) * 184 + (ye - EN_BY) * 179) / 256 + 20 * 256;
+            a = clampi(w + 128, 0, 256); b = clampi(40 * 256 - w + 128, 0, 256); if (b < a) a = b;
+            if (a <= 0) continue;
+            w = clampi(w, 0, 40 * 256 - 1);
+            b = 8 * 256 + w * 7 / 8; c = mix(en_bp[b >> 8], en_bp[(b >> 8) + 1], b & 255);
+            en_over(X, y, en_grained(c, 2, ((xe - EN_BX) * 179 - (ye - EN_BY) * 184) >> 16, w, 40 * 256), a);
+        } else {
+            w = xe - EN_AX;
+            a = clampi(w + 128, 0, 256); b = clampi(EN_AW - w + 128, 0, 256); if (b < a) a = b;
+            if (a <= 0) continue;
+            w = clampi(w, 0, EN_AW - 1);
+            en_over(X, y, en_mottled(en_vat(2, w, EN_AW), 2, -y, w, EN_AW), a);
+        }
+    }
+}
+/* a ring's copy: the picture's texels between its upper and lower outline (the second ring's last columns are the
+   strip's own, en_ring) */
+static void en_ringcopy(int k, int X)
+{
+    static const int T1X[] = { 266, 270, 285, 290, 296, 301, 306, 310, 314 }, T1Y[] = { 38656, 38221, 38349, 38656, 39040, 39680, 40448, 41344, 42496 };
+    static const int B1X[] = { 266, 268, 271, 275, 283, 288, 294, 300, 305, 308, 311, 314 }, B1Y[] = { 39936, 41088, 41600, 40832, 40704, 41344, 42240, 43264, 44288, 45312, 46592, 46592 };
+    static const int T2X[] = { 288, 291, 304, 320 }, T2Y[] = { 33280, 32845, 33152, 32896 };
+    static const int B2X[] = { 288, 289, 292, 303, 307, 311, 315, 319, 320 }, B2Y[] = { 34048, 35200, 35456, 35200, 35789, 36480, 37376, 38528, 38912 };
+    int sx = PW - 1 + X - EN_T[k][0], top, bot, a, b;
+    if (k) { if (sx < 266 || sx > 313) return; top = en_lerp(T1X, T1Y, 9, sx * 256 + 128); bot = en_lerp(B1X, B1Y, 12, sx * 256 + 128); }
+    else if (sx < 288) return;
+    else if (sx < PW) { top = en_lerp(T2X, T2Y, 4, sx * 256 + 128); bot = en_lerp(B2X, B2Y, 9, sx * 256 + 128); }
+    else { int rim, low; if (!en_ring_geo(sx - PW + 1, &top, &rim, &bot, &low)) return; bot += 384; if (bot > low) bot = low; }
+    for (int sy = top / 256 - 1; sy <= bot / 256 + 1; sy++) {
+        Rgb c;
+        a = clampi(sy * 256 + 256 - top, 0, 256); b = clampi(bot - sy * 256, 0, 256); if (b < a) a = b;
+        if (a <= 0 || sy < 0 || sy >= PH) continue;
+        if (sx < PW) { if (pic_ov[sy][sx] != 14 && pic_ov[sy][sx] != 15) continue; c = rgb15(pic[sy][sx]); }
+        else c = *px_at(sx - PW + 1, sy);
+        en_over(X, sy + EN_T[k][1], c, a);
     }
 }
 /* the walls' blocks: where a block starts (the join, and every EN_C further along the wall) its texels are lit to
@@ -311,10 +475,13 @@ static void en_seams(int s, int pad)
         }
     }
 }
+#define EN_RX 13                                         /* the rust pipe turns up after this strip column */
+#define EN_GX 62                                         /* the grey pipe */
 static void gen_en(int pad)
 {
     if (!canvas_open(pad + 32)) return;                  /* (a margin: a column never depends on the strip's width) */
-    en_bprof(); en_flight(); en_grain();
+    en_bprof(); en_flight(); en_grain(); en_joint_k();
+    en_vprof(0, 7, 39, 141, 147); en_vprof(1, 30, 51, 88, 108); en_vprof(2, 260, 300, 204, 224);
     for (int side = 0; side < 2; side++) {
         canvas_clear(); cur_side = side;
         for (int X = 1; X <= cw; X++) {
@@ -324,8 +491,20 @@ static void gen_en(int pad)
         en_seams(side, cw - 2);
         for (int X = 1; X <= pad; X++) {
             en_hoses(side, X);
-            if (!side) { en_run(0, X, 91, 126, en_ease(X), 0); en_run(0, X, 145, 183, en_ease(X), 1); en_limb(X); }
-            else { en_crun(X); en_ring(X); }
+            if (!side) {
+                if (X <= EN_RX) en_run(0, X, 91, 126, en_ease(X), 0); else en_rise(X, EN_RX, 91, 126, en_ease(X), 32, 0);
+                en_flange(X, EN_RX + 39, 59);
+                if (X <= EN_GX) en_run(0, X, 145, 183, en_ease(X), 1); else en_rise(X, EN_GX, 145, 183, en_ease(X), 38, 1);
+                for (int k = 0; k < 3; k++) {            /* (its joints: 28 columns apart on the run, i.e. 21 rows on the 29 wide pipe) */
+                    if (X == 21 + k || X == 49 + k) for (int y = 144; y < 182; y++) en_joint(X, y, k);
+                    if (X > EN_GX && X <= EN_GX + 38) { en_joint(X, 106 - k, k); en_joint(X, 38 - k, k); }
+                }
+                en_limb(X);
+            } else { en_crun(X); en_ring(X); }
+        }
+        if (side) {
+            for (int X = 1; X <= pad; X++) en_cturn(X);
+            for (int X = 1; X <= pad; X++) { en_ringcopy(0, X); en_ringcopy(1, X); }
         }
         for (int y = 0; y < PH; y++)
             for (int X = 1; X <= pad; X++)

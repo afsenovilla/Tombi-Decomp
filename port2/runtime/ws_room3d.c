@@ -1,12 +1,13 @@
 /* --widescreen: the front wall of the 3D side rooms carried on sideways (docs/PORT.md "Widescreen", "3D room walls").
  *
- * The Haunted Mansion's side rooms (AREA04 s10, s11, s15, s19) are one small WMD model each, drawn by the area list
- * (drawAreaModelList / drawModelUnlit) through a fixed, unrotated camera: a faceted stone wall facing the viewer with
- * the room let into it.  The wall is as wide as the 4:3 picture needs and no wider: it ends on both sides in a
- * straight vertical line of free polygon edges a few columns past the 4:3 frame (measured: screen x -29 / 359 in s10
- * and s19, -14 / 361 in s11, -14 / 378 in s15), so a wide frame showed the clear colour beyond it.  Nothing is
- * culled there (the culls are already wide, and a reference with PORT_WSXTRA=300 draws the same primitives): the
- * geometry does not exist.
+ * The Haunted Mansion's rooms (AREA04 s4 ... s19) are one small WMD model each, drawn by the area list
+ * (drawAreaModelList / drawModelUnlit) through a camera that looks straight at them (fixed in s10, s11, s15, s19;
+ * scrolling between two limits in the others; now and then it turns a few degrees about Y, seen in s7 and s14): a
+ * faceted stone wall facing the viewer with the room let into it.  The wall is as wide as the 4:3 picture needs and
+ * no wider: it ends on both sides in a straight vertical line of free polygon edges a few columns past the 4:3 frame
+ * (measured: screen x -29 / 359 in s10 and s19, -14 / 361 in s11, -14 / 378 in s15), so a wide frame showed the
+ * clear colour beyond it.  Nothing is culled there (the culls are already wide, and a reference with
+ * PORT_WSXTRA=300 draws the same primitives): the geometry does not exist.
  *
  * This builds, per frame key (the model's bytes, the strip width and the camera), one extra block in the model's own
  * format and adds it to the game's draw list, so the game's drawer, GTE, culls and ordering table draw it.  Per side:
@@ -20,7 +21,14 @@
  *     keeps its own light (the model is darker on one side);
  *   - every facet is textured like the model's: its own piece of the wall's stone tile (the UV box the polygons of
  *     that page and palette use), unrotated or turned a quarter, at the model's texel density (9 texels per 16 units;
- *     measured median 0.51-0.57).
+ *     measured median 0.51-0.57); a facet whose colour comes from a polygon of another page or palette (s13's back
+ *     wall) takes that polygon's stone;
+ *   - where the end line changes depth (s13, left: the front wall above, the room's back wall 90 units behind it
+ *     below) each part goes on at its own depth and takes its colours from its own part only; where the line stops
+ *     short of the model's height at a cut corner (a free slanting edge from the line's end to the model's bottom:
+ *     a hole in the 4:3 picture too) the line is carried on to that height and the corner is closed with one facet;
+ *   - the columns: as many as the frame's edge needs at the wall's depth for the camera of the frame (with a turned
+ *     camera, until the outer line projects past the frame's edge).
  * Nothing is mirrored and nothing is drawn that the wall does not consist of already.  Integers only; every random
  * value is a hash of the position, taken in its own statement, so i386 and wasm2c build the same block and a wider
  * strip starts with the columns of a narrower one.
@@ -46,6 +54,19 @@ static const struct { u8 area, sec, approved; } ROOMS[] = {
     {4, 11, 1},        /* the two rooms with the side doors (one model, one above the other) */
     {4, 15, 1},        /* the fireplace room */
     {4, 19, 1},        /* the teal room (s10's model, tinted) */
+    /* the other twelve (2026-11-16; their cameras scroll between two limits): not approved yet */
+    {4, 4, 0},         /* Sunny Room (white clear colour: 16 white columns at the right limit) */
+    {4, 5, 0},         /* Thief's Room One (s15's model, orange) */
+    {4, 6, 0},         /* Swimming Room */
+    {4, 7, 0},         /* Keyhole Room (tall) */
+    {4, 8, 0},         /* Hiding Room (tall) */
+    {4, 9, 0},         /* Room of Tribulation */
+    {4, 12, 0},        /* Trap Room */
+    {4, 13, 0},        /* Trick Room (tall; its left end is the front wall above and the back wall below, with a cut corner) */
+    {4, 14, 0},        /* Sun Torch Stand */
+    {4, 16, 0},        /* Shadow Room (s4's model) */
+    {4, 17, 0},        /* Thief's Room Two (s15's model, pink) */
+    {4, 18, 0},        /* Thief's Room Three (s15's model, green) */
 };
 static int room_enabled(int area, int sec)
 {
@@ -175,6 +196,13 @@ static int find_end(int side, Seg *out, int *xs)
 
 typedef struct { s16 x, y, z; } P3;
 
+/* two edges, one under the other, of the same wall: they meet, at the same depth (s13's left end is the front wall
+   above and the room's back wall, 90 units behind, below) */
+static int same_run(const Seg *a, const Seg *b)
+{
+    int dz = a->z1 - b->z0;
+    return a->y1 == b->y0 && dz > -24 && dz < 24;
+}
 /* how far a row line may move: a quarter of the shorter row next to it, 0 at a line only one edge ends on */
 static int row_amp(const Seg *sg, int ns, int y)
 {
@@ -184,6 +212,7 @@ static int row_amp(const Seg *sg, int ns, int y)
         if (sg[i].y0 == y) dn = sg[i].y1 - sg[i].y0;
     }
     if (!up || !dn) return 0;
+    for (int i = 0; i + 1 < ns; i++) if (sg[i].y1 == y && sg[i + 1].y0 == y && !same_run(&sg[i], &sg[i + 1])) return 0;
     int a = (up < dn ? up : dn) / 4;
     return a > JY ? JY : a;
 }
@@ -204,15 +233,30 @@ static P3 grid(int xs, int side, int y, int z, int j, int amp)
 static int near_seg(const Seg *sg, int ns, int k, u32 h)
 {
     int lo = k, hi = k;
-    while (lo > 0 && sg[lo - 1].y1 == sg[lo].y0) lo--;
-    while (hi < ns - 1 && sg[hi + 1].y0 == sg[hi].y1) hi++;
+    while (lo > 0 && same_run(&sg[lo - 1], &sg[lo])) lo--;
+    while (hi < ns - 1 && same_run(&sg[hi], &sg[hi + 1])) hi++;
     int i = k + (int)(h % 5u) - 2;
     return i < lo ? lo : i > hi ? hi : i;
 }
 
 /* one facet: nv vertices (a quad in strip order), the colour and kind of polygon src, its own piece of the tile */
+static int tile_of(const Poly *tex, int *tile)
+{
+    tile[0] = 255; tile[1] = 0; tile[2] = 255; tile[3] = 0;
+    for (int i = 0; i < np; i++) {
+        if (ps[i].tpage != tex->tpage || ps[i].clut != tex->clut) continue;
+        for (int j = 0; j < ps[i].nv; j++) {
+            int u = ps[i].v[j].u, v = ps[i].v[j].v;
+            tile[0] = u < tile[0] ? u : tile[0]; tile[1] = u > tile[1] ? u : tile[1];
+            tile[2] = v < tile[2] ? v : tile[2]; tile[3] = v > tile[3] ? v : tile[3];
+        }
+    }
+    return tile[1] - tile[0] >= 16 && tile[3] - tile[2] >= 16;
+}
 static void facet(const P3 *v, int nv, const Poly *src, const Poly *tex, const int *tile, int ref, u32 seed)
 {
+    int own_tile[4];
+    if ((src->tpage != tex->tpage || src->clut != tex->clut) && tile_of(src, own_tile)) { tex = src; tile = own_tile; }   /* the stone of the polygon the colour is from */
     P3 q[4]; int x0 = 32767, x1 = -32768, y0 = 32767, y1 = -32768;
     for (int i = 0; i < nv; i++) {
         q[i] = v[i];
@@ -252,28 +296,88 @@ static void facet(const P3 *v, int nv, const Poly *src, const Poly *tex, const i
     }
 }
 
-static void build_side(int side, int tx, int tz, int h, int half)
+/* a cut corner: the end line stops short of the model's top or bottom (end -1 / 1) and a free slanting edge of a
+   front-facing polygon goes from there inwards to that height (s13's back wall, bottom left: a hole in the 4:3
+   picture too).  The line is carried on to the model's height (one more edge, out[ns]) and c[] is the corner. */
+static int cut_corner(int side, int end, int xs, Seg *sg, int ns, P3 *c)
+{
+    int ext = end < 0 ? 32767 : -32768;
+    for (int i = 0; i < np; i++) for (int j = 0; j < ps[i].nv; j++)
+        if (!(ps[i].cmd & 2)) ext = end < 0 ? (ps[i].v[j].y < ext ? ps[i].v[j].y : ext) : (ps[i].v[j].y > ext ? ps[i].v[j].y : ext);
+    int ya = end < 0 ? sg[0].y0 : sg[ns - 1].y1, za = end < 0 ? sg[0].z0 : sg[ns - 1].z1;
+    if ((ext - ya) * end < 8 || ns >= MAXS) return 0;
+    for (int i = 0; i < np; i++) {
+        const Poly *p = &ps[i];
+        if (p->cmd & 2) continue;
+        const u8 *ring = p->nv == 4 ? RING4 : RING3;
+        s32 ax = p->v[1].x - p->v[0].x, ay = p->v[1].y - p->v[0].y, az = p->v[1].z - p->v[0].z;
+        s32 bx = p->v[2].x - p->v[0].x, by = p->v[2].y - p->v[0].y, bz = p->v[2].z - p->v[0].z;
+        s32 nx = ay * bz - az * by, ny = az * bx - ax * bz, nz = ax * by - ay * bx;
+        nx = nx < 0 ? -nx : nx; ny = ny < 0 ? -ny : ny; nz = nz < 0 ? -nz : nz;
+        if (nz < nx || nz < ny) continue;
+        for (int e = 0; e < p->nv; e++) {
+            const Vx *a = &p->v[ring[e]], *b = &p->v[ring[(e + 1) % p->nv]]; int used = 0;
+            if (b->x == xs && b->y == ya) { const Vx *t = a; a = b; b = t; }
+            if (a->x != xs || a->y != ya || a->z != za || b->y != ext || (b->x - xs) * side >= 0) continue;
+            for (int k = 0; k < np && !used; k++) {
+                const Poly *q = &ps[k];
+                if (q != p && !(q->cmd & 2) && has_vertex(q, a) && has_vertex(q, b)) used = 1;
+            }
+            if (used) continue;
+            Seg *n = &sg[ns];
+            if (end < 0) { for (int k = ns; k > 0; k--) sg[k] = sg[k - 1]; n = &sg[0]; n->y0 = b->y; n->z0 = b->z; n->y1 = a->y; n->z1 = a->z; }
+            else { n->y0 = a->y; n->z0 = a->z; n->y1 = b->y; n->z1 = b->z; }
+            n->poly = i;
+            c[0].x = a->x; c[0].y = a->y; c[0].z = a->z; c[1].x = b->x; c[1].y = b->y; c[1].z = b->z;
+            c[2].x = (s16)xs; c[2].y = b->y; c[2].z = b->z;
+            return 1;
+        }
+    }
+    return 0;
+}
+
+static void build_side(int side, int tx, int tz, int h, int half, const s16 *m)
 {
     Seg sg[MAXS]; int xs, ns = find_end(side, sg, &xs);
     if (ns < 2) return;
-    int zmax = -32768, tile[4] = {255, 0, 255, 0};
+    P3 corner[2][3]; int ncorner = 0, corner_poly[2];
+    for (int end = -1; end <= 1; end += 2)
+        if (cut_corner(side, end, xs, sg, ns, corner[ncorner])) { corner_poly[ncorner++] = sg[end < 0 ? 0 : ns].poly; ns++; }
+    int zmax = -32768, tile[4];
     const Poly *tex = &ps[sg[0].poly];
     for (int i = 0; i < ns; i++) { zmax = sg[i].z0 > zmax ? sg[i].z0 : zmax; zmax = sg[i].z1 > zmax ? sg[i].z1 : zmax; }
-    for (int i = 0; i < np; i++) {
-        if (ps[i].tpage != tex->tpage || ps[i].clut != tex->clut) continue;
-        for (int j = 0; j < ps[i].nv; j++) {
-            int u = ps[i].v[j].u, v = ps[i].v[j].v;
-            tile[0] = u < tile[0] ? u : tile[0]; tile[1] = u > tile[1] ? u : tile[1];
-            tile[2] = v < tile[2] ? v : tile[2]; tile[3] = v > tile[3] ? v : tile[3];
-        }
-    }
-    if (tile[1] - tile[0] < 16 || tile[3] - tile[2] < 16 || zmax + tz < 64) return;
+    if (!tile_of(tex, tile) || zmax + tz < 64) return;
     /* the frame's edge at the wall's depth, from the camera's axis; the wall's end, from the same */
-    int need = (half + 2) * (zmax + tz) / h + 2 - (xs + tx) * side;
-    if (need <= 0) return;
-    int ncol = (need + JX + COLW - 1) / COLW;
-    if (ncol > MAXCOL) ncol = MAXCOL;
+    int need = (half + 2) * (zmax + tz) / h + 2 - (xs + tx) * side, ncol;
+    if (!m) {
+        if (need <= 0) return;
+        ncol = (need + JX + COLW - 1) / COLW;
+        if (ncol > MAXCOL) ncol = MAXCOL;
+    } else {
+        /* a camera turned about Y: the columns it takes until the outer line (less its jitter) is past the frame's
+           edge at both depths of the end; none when the end itself is */
+        int zmin = zmax;
+        for (int i = 0; i < ns; i++) { zmin = sg[i].z0 < zmin ? sg[i].z0 : zmin; zmin = sg[i].z1 < zmin ? sg[i].z1 : zmin; }
+        for (ncol = 0; ncol <= MAXCOL; ncol++) {
+            int x = xs + side * (ncol ? ncol * COLW - JX : -2), past = 1;
+            for (int k = 0; k < 2; k++) {
+                int z = k ? zmax : zmin;
+                s32 cx = (m[0] * x + m[2] * z) / 4096 + tx, cz = (m[6] * x + m[8] * z) / 4096 + tz;
+                if (cz < 64) return;
+                if (cx * side * h < (half + 2) * cz) past = 0;
+            }
+            if (past) break;
+        }
+        if (!ncol) return;
+        if (ncol > MAXCOL) ncol = MAXCOL;
+        need = ncol * COLW - JX;
+    }
     int before = n3 + n4 + g3 + g4;
+    for (int k = 0; k < ncorner; k++) {
+        const Poly *own = &ps[corner_poly[k]];
+        s32 ref = (s32)(own->v[1].x - own->v[0].x) * (own->v[2].y - own->v[0].y) - (s32)(own->v[1].y - own->v[0].y) * (own->v[2].x - own->v[0].x);
+        facet(corner[k], 3, own, tex, tile, ref, hsh((u32)(corner[k][0].y + 4096), 5, (u32)(side + 2)));
+    }
     for (int k = 0; k < ns; k++) {
         const Seg *s = &sg[k]; const Poly *own = &ps[s->poly];
         s32 ref = (s32)(own->v[1].x - own->v[0].x) * (own->v[2].y - own->v[0].y) - (s32)(own->v[1].y - own->v[0].y) * (own->v[2].x - own->v[0].x);
@@ -314,7 +418,9 @@ void port_ws_room3d_blocks(char *list, const u8 *tbl, int area, int section)
     /* the camera: VIEW_CAMERA (scratchpad 0xC0, MATRIX: m[3][3] s16, t[3] s32 at +0x14) must be unrotated */
     const u8 *c = (const u8 *)PORT_SPAD(0xC0);
     s16 m[9]; s32 t[3]; memcpy(m, c, 18); memcpy(t, c + 0x14, 12);
-    for (int i = 0; i < 9; i++) if (m[i] != ((i % 4) ? 0 : 4096)) return;
+    int turned = 0;
+    for (int i = 0; i < 9; i++) if (m[i] != ((i % 4) ? 0 : 4096)) turned = 1;
+    if (turned && (m[1] || m[3] || m[5] || m[7] || m[4] != 4096 || m[0] < 3900 || m[8] < 3900)) return;   /* s14: up to a few degrees about Y */
     int h = (int)(u16)port_gte_cfc2(26), ofx = (int)((s32)port_gte_cfc2(24) >> 16);
     if (h < 64 || h > 4096) h = 544;
     if (ofx < 0 || ofx > 320) ofx = 160;
@@ -323,11 +429,12 @@ void port_ws_room3d_blocks(char *list, const u8 *tbl, int area, int section)
     u32 key = 2166136261u;
     for (int i = 0; i < size; i++) key = (key ^ b[i]) * 16777619u;
     key = hsh(key, (u32)port_ws_cull, (u32)t[0]); key = hsh(key, (u32)t[2], (u32)(h * 512 + ofx));
+    if (turned) key = hsh(key, (u32)(u16)m[0], (u32)(u16)m[2]);
     if (!have_key || key != cur_key) {
         have_key = 1; cur_key = key;
         n3 = n4 = g3 = g4 = 0;
-        build_side(-1, t[0], t[2], h, ofx + port_ws_cull);
-        build_side(1, t[0], t[2], h, 320 - ofx + port_ws_cull);
+        build_side(-1, t[0], t[2], h, ofx + port_ws_cull, turned ? m : 0);
+        build_side(1, t[0], t[2], h, 320 - ofx + port_ws_cull, turned ? m : 0);
         u8 *d = blk; u32 n;
         n = (u32)n3; memcpy(d, &n, 4); d += 4; memcpy(d, ft3, (size_t)n3 * 32); d += n3 * 32;
         n = (u32)n4; memcpy(d, &n, 4); d += 4; memcpy(d, ft4, (size_t)n4 * 40); d += n4 * 40;
