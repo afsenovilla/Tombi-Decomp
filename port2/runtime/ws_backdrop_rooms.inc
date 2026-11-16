@@ -3064,8 +3064,9 @@ static int hl_src(int s, long long kg, long long jq, Rgb *o)
         oy += (int)((es - et) * w / 256);
     }
     return hl_at(s, (long long)hl_k(s, src % PW) * 256 + ox, (long long)(src / PW) * 256 + oy, o)
+        || hl_at(s, (long long)hl_k(s, src % PW) * 256, (long long)(src / PW) * 256 + oy, o)
         || hl_at(s, (long long)hl_k(s, src % PW) * 256, (long long)(src / PW) * 256, o);   /* (by an edge of the
-                                                            source: the texel itself) */
+                                                            source: its column, or the texel itself) */
 }
 static u16 hl_raw[PH][PW];
 static void gen_hl(int pad)
