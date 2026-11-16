@@ -2786,6 +2786,40 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   92).  To approve a room: `approved` = 1 in its ROOMS entry.  Weak points: the join is a straight vertical facet
   line (the model's own edge, outside 4:3); the new facets lie in one plane (the model's vertices wander +-8 in z,
   invisible with flat colours); at 32:9 the 6 columns show the grid's regular pitch a little.
+- **3D room floors** (`runtime/ws_floor3d.c`, called from `port_ws_area_model_link` for GAME 18; preview, OFF by
+  default; enabled by the same flags as the walls above: `--ws-room3d-rooms 18:1`, or `--ws-room3d on`; 2026-11-16):
+  AREA18 s1, the Y crossing (debug select AREA 12 hex, section 1), is real 3D like the Mansion side rooms: one WMD
+  block (245 polygons: 1 FT3, 58 GT3, 186 GT4, texture page 0xF), the same unrotated camera (T = (-160, 120, 544),
+  H 544).  Cause of the sky beside the walls and under the floor at 16:9: missing geometry, not a cull
+  (`PORT_WSXTRA=300 PORT_WSBLK=600` gives the very same frame; the model drawers' tests are already `PORT_WSX`).  The
+  model is as wide as 4:3 needs: the two stone walls run from the tower (z 340) towards the viewer and end at
+  x -65 / 385, z 135 (screen x -20 / 340: 33 sky columns per side at 16:9); the floor's rows end in free edges that
+  run in depth: the path band and the dark grass behind it at x -65 / 385 (screen -85 at the band's front edge, -44 at
+  z 55), the grass slope in front at x 3 / 317 (z -55..-95, screen -15..-30) and x 25 / 295 (z -95..-145).
+  Method, read from the model per side: (1) the wall's end is the (x, z) carrying the most free vertical edges of
+  quads running back and inwards (6 per side: the four brick rows, the foot row and the layer lying on it); each of
+  them goes on towards the viewer along its own two edges (direction, the slope of the wall's top, the rows) with its
+  texture starting again as at the model's own joint between the two wall segments, and the colours of its end; it
+  stops at the near end of the floor polygon the wall ends on (z 55: the path passes in front of the wall).  (2) A
+  floor row is a free edge at one x, polygon inwards, both ends outside the 4:3 picture; it goes on outwards as cells
+  of the edge polygon's width with the edge's own heights and vertex colours at each depth, textured by the edge
+  polygon's own mapping moved one period inwards: the period is how far the model goes on with that very mapping
+  (the path: 180 units = four cells, so the path texture is laid again as a whole; the grass: one cell, repeated as
+  the model repeats it).  (3) The row the wall now stands on is filled up to the wall's line only (one triangle).
+  16:9 adds 13 polygons per side, 21:9 23.  The block is in the model's format (GT3 / GT4, the model's CLUT, page and
+  command bits, winding from the camera-space sign of the source polygon) and is added to the area list; rebuilt when
+  the model's bytes, the strip width or the camera change.  Integers only, no random values; nothing mirrored (the
+  right arm of the path is the game's own mapping of that side), no object invented, only the model's texture pieces
+  and colours.  Everything new lies outwards of edges that are outside the 4:3 picture.  Checked (software, select
+  run with a walk left and right, frames 1400-2500): 4:3 with the flag on and the default 16:9 / 21:9 frames
+  byte-identical to before; with it on the 4:3 centre of every 16:9 / 21:9 frame identical to the default one, no sky
+  pixel left under the floor line in the 16:9 strips (2103 before); OpenGL (xvfb) the same, its 4:3 centre identical
+  on / off; AREA04 s10 / s15 and AREA18 s2 identical.  To approve: `approved` = 1 in ROOMS of ws_floor3d.c.
+  Weak points: at 21:9 and wider the walls end at z 55 (screen x -60 / 380), so beside them there is sky above the
+  path, which runs on to the frame's edge with the grass in front of it (the walls would have to cross the path to
+  reach the frame's edge); the path texture's own grassy left end shows once where the model ended (x -65 / 385:
+  outside 16:9 except for a 5-column sliver, visible at 21:9) and again every 180 units at 32:9; the slope's last
+  row (z -145..-195) is below the picture and is not extended.
 - **Top-down map** (`runtime/ws_topdown.c`, fixes.txt hooks at the end of `topdownDrawMapLayers` /
   `overheadDrawMapLayers` and their USA / JP versions): the overhead background is the room's map picture (8 bpp TIM
   in RAM, scratch 0x1F800394) of which the game uploads a 384x288 window (12x9 tiles of 32 px, USA / JP 384x256) into
@@ -3375,8 +3409,9 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     is a 256-column vignette with rounded black corners at frame column 32, not the hook's (0, 16) sprite), AREA11 s1
     (the cage scene: the hut's roof and its bracket cut by the left edge, the box's riveted door frame by the right
     one), AREA16 s3 / s6 (gears and blue beams cut by both edges), AREA17 s1 (a 384-row picture drawn from frame row
-    -144: not the hook's layout), AREA17 s5 (the engine room: pipes and machines cut by both edges; since done, below: each cut pipe goes on along its own axis), AREA18 s1 (the stone tower: a 3D scene that
-    already fills the wide frame), AREA09 s4 again
+    -144: not the hook's layout), AREA17 s5 (the engine room: pipes and machines cut by both edges; since done
+    below), AREA18 s1 (the Y crossing: not a picture; its walls and floor end just past 4:3: "3D room floors"
+    above), AREA09 s4 again
     (the sconces stand on rock mounds spaced (50, 30.5) along the stair, not a multiple of its four steps (90, 56):
     the right strip would need a new mound and sconce copied from the picture's, a visible duplicate one period from
     the original; since done without copying any mound or sconce, above).  The re-scan of the 96 debug-select rooms at 16:9 found no other fixed-camera picture rooms than
@@ -3388,7 +3423,8 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     their light, 0.3 s).  Not attempted: AREA16 s4 (its picture is 672 rows,
     drawn as three 256-row sprite sets shifted by the camera: the hook only takes a picture whose left sprite is at
     frame row 16; since done, below), AREA08 s1 / s3 (a 4 bpp layer of near trees and translucent light rays over the 8 bpp picture, CLUT
-    row 510: the rays converge on a point above the frame; looked at again, above), AREA16 s5 (the bell tower: pillars cut by both edges).
+    row 510: the rays converge on a point above the frame; looked at again, above), AREA16 s5 (the bell tower: pillars cut by both edges;
+    since done, below).
     Checked (headless, 2026-11-15): the two new rooms at 16:9 and 21:9 (standalone and in the game), 4:3 identical with
     `--ws-backdrop on`, off by default (the clear colour), AREA02 s5 / s1, AREA05 s1 and AREA19 s1 strips byte-identical
     to the build before (standalone, pads 53 and 140), i386 = wasm2c frames; not checked on the device.
@@ -3646,6 +3682,98 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     so no beam or purlin is invented there), plain at 21:9 and wider; what stands left of the cupboard is a guess
     (a wall in the shade), as is where the cupboard ends (16 columns out); the bunch's new grape is the picture's
     whole grape again, 18 columns from itself; not seen on the device.
+  - AREA16 s5 (the bell tower, 2026-11-16, `gen_bt` in `runtime/ws_backdrop_belltower.inc`; off by default, preview
+    with `--ws-backdrop-rooms 16:5`).  How the game draws it (`PORT_PRIMLOG`, 600 frames walking and jumping round the
+    floor): unlike s4's, the picture does not move with the camera: one 256-row sprite of page (128, 0) at frame
+    (0, 16) and the right 64 columns from page (256, 0) u 0-63 at (256, 16), every frame at the same place (rows 0-223
+    show), so the usual hook takes it (ROOMS h = 256, as the Iron Castle hall).  Four unscaled-size quads of page
+    (256, 0) are drawn again over the player: the clapper (48 x 80 from (72, 96) at picture (136, 0)), the bell (88 x
+    96 from (64, 0) at (64, 0) and 96 x 96 from (152, 0) at (152, 0)) and the floor's near left part with the hole the
+    left chain goes into (88 x 24 from (136, 104) at (0, 199)); only the last one touches an edge (rows 207-222 at
+    column 0, the floor in shade).  Their UVs span one texel less than their size, so the frame shows them stretched
+    by less than a texel (24 / 23 rows): the strips read the unstretched picture, as the other rooms' do.
+    The picture, measured: a round tower seen from inside, the camera looking up a little.  Each edge cuts a square
+    pillar that stands square to the view: its shaded inner face (24 columns, foreshortened) and, at the edge, the
+    sunlit face that looks at the camera (cream at the left, luminance 221-243; burnt out to plain white 248 at the
+    right): 12 columns of it at row 0, 5 at row 110, none from row 186.  The edge between the two faces is x = 11.9 -
+    0.068 y (left) and 306.8 + 0.066 y (right) on rows 0-113 (fits within 0.25 column), the inner faces' far outlines
+    37.0 - 0.054 y and 282.1 + 0.055 y: the verticals meet at about (160, -2200), the scene is symmetric about column
+    159.4, and the inner face's far edge is at 0.834 of its near edge's distance to that column, so the pillar is 0.20
+    of its distance deep.  The horizon is row 147: the capital's lines stand at rows 115.5 / 128 / 132 on the side
+    pillars' lit faces and at 128 / 135.5 / 138 on the back pillars (the same lines 1.67 times further away), and the
+    land's far edge is there.  Verticals and horizon give a focal length of 250-300 columns, so the lit face, as wide
+    as the pillar is deep, is 56 +- 6 columns: its far edge is 44.0 + 0.0924 y columns out from the edge texel on both
+    sides, inside a 16:9 strip down to row 97.  (A second estimate, the back pillars' two faces of 20 and 30 columns
+    at 1.67 times the distance, gives 53-60.)  The capital's lines are level on the lit face and on the same rows at
+    both sides (the face is parallel to the picture), so every row goes on with its own tone.  Under row 136 the lit
+    face's edge bends outwards (the foot's curved corner): 0.10 columns a row at row 160, 0.28 at row 184, where it
+    leaves the picture.  The floor is a disc: its far rim fits the ellipse centre (159, 216.1), half axes 168 x 32.4
+    (the rim's rows at columns 0-319 within half a row), which ends 9 columns into the left strip and 8 into the
+    right one.  The six-pillar ring that fits the four pillars' places would put its front pair inside the picture;
+    they are not there, so nothing stands beyond the side pillars but the open view.  Neither chain is cut by an
+    edge, and the bell is in the middle: the strips hold neither.
+    The strips (per texel, the same at every width): inside the ellipse the floor (the texel of the three edge
+    columns that lies on the same concentric ellipse, on the far rim's side, so the rim's dark ring and its light
+    line go round the disc's end); else under the lit face's lower edge (from row 184 its last slope and bend:
+    `bt_low256`) the shaded face; else, inside the
+    far edge (`bt_far256`), the lit face; beyond it the open view.  Both edges of the lit face are drawn with a
+    column's coverage (mixed, then the nearest of the picture's colours).  The lit face is lit stone: its light times the picture's own
+    marble.  The light (`bt_face`, `bt_light`): per row the clean texels next to the edge (the run brighter than the
+    mean of the edge texel and the darkest of 14 columns, less the two next to the boundary), their mean and spread; a
+    strip row's light is the mean over +-2 rows of the rows that are the same tone within the row's own spread (3-14
+    luminance steps), so a row's noise does not become a stripe and the capital's lines (rows 115-116, 128, 132) stay
+    lines.  Away from the edge (over 8 columns) the foot's light band (rows 150-171, 243 at the edge) is held to 236,
+    and under it (from row 173 at the left, where columns 0-2 show darker texels, 144-196) the light is the shaft's
+    (rows 96-110, 226): those edge texels fade out as a shade in the corner.  The right face is burnt out at the edge
+    (plain white, 7 columns): its light is a hot spot 14 steps over the clip at the edge that falls, over 18 columns
+    (smoothstep), to the light the same face has on the left pillar (never over the right edge's own row tone, so the
+    lines keep theirs); the stone shows again from about 6 columns out.  The stone (`bt_stone`, `bt_tex_block`): the
+    marble of the side pillars' inner faces (not the mouldings' rows 111-141, not the left corner's dark groove), as
+    texture over its own light (a texel's luminance over the mean of the 9 x 9 stone texels round it), laid twice as
+    wide (those faces are foreshortened to 24 columns for the 56 the lit face has), quilted over the face in 10 x 10
+    blocks (3 texels of overlap, cross-faded; the window that fits the blocks there, a used window and its
+    neighbours penalised, one of the best by a hash; never mirrored) and lit again.  At the join the texture has the
+    contrast the picture's lit columns have (the lit face's spread over its light against the stone's, about a
+    quarter), rising over 12 columns to 0.45 of the shaded faces'.  The colour: that luminance (steps of 4) on the
+    face's own colours (per step its most frequent one, the mean colour of the picture's stone of that luminance
+    where it has none; the white face takes the cream one's below 240); in the first two columns, and on the white
+    face's lines, the row's own texel when one is within 4 steps.  The shaded face under the lower edge is the same
+    quilted stone in the light its three edge columns have per row.  (The first version drew the lit faces as their
+    row tone plus noise: the white one came out a plain white block and the cream one a flat slab with a darker flat
+    block and a line under row 173; the user: "El campanario está bien, pero en la parte dibujada a la derecha
+    abajo tiene una textura rara, distinta al resto de la pared", then corrected to the bottom left.)
+    The far edge widens as the
+    inner face's outline does, x 1.25 for the nearer face: the capital's shelf (+5 / +6 columns on rows 114-134) and
+    the foot (+8 at row 135 to +19 at row 178, then 0.9 a row); all of that lies outside a 16:9 strip.  The open view
+    (`bt_block`): the picture's own views between the pillars (`bt_mask`: blue, green or the clouds' white texels,
+    outside the floor, not next to any other, so the pillars' and chains' mixed outlines stay out), quilted in 14 x
+    18 blocks on a fixed grid (4 columns and 2 rows of overlap), a block always from the same rows of the picture
+    (the sky's gradient, the clouds' base and the horizon keep their rows), from the nearest rows above only where the
+    picture shows nothing of those rows (under row 176), the window that fits the blocks already there (one of those
+    within 1/8 of the best, by a hash; a window within 14 columns of the last one used on those rows is penalised),
+    joined along the cut of least error through the overlap's columns; never mirrored (the left strip's blocks are
+    laid in the picture's own direction).  At 16:9 that is only sky: a wedge 9 columns wide at row 0 that closes at
+    row 97; at 21:9 the pillars stand whole with their shelves and feet and the land runs on behind them.
+    Checked (headless): the game's 16:9 and 21:9 strips = the standalone's (52 frames each, 5-bit colours: 0 texels
+    differ but where the player jumps over the right strip's first 9 columns) and every 21:9 frame holds the 16:9
+    one; the standalone's pads 53 / 120 / 267 start with the same columns (0 differ); 4:3 frames
+    identical with `--ws-backdrop-rooms 16:5` (23 frames) and the default flags unchanged at 16:9 (the room is not
+    approved; 23 frames) against the build before; the other rooms' strips (2:5, 2:1, 5:1, 5:3, 19:1, 11:2, 9:5,
+    9:3, 9:4, 17:3, 17:4, 16:4, pads 53 and 120, standalone on their dumped pictures) identical to the generators
+    before; the OpenGL renderer's strips = the software one's (xvfb; the frames differ only inside the picture, where
+    it draws the four stretched quads); i386 = wasm2c frames (16:9 and 21:9, 55 frames each, walking and jumping
+    to both edges); standalone gcc x86-64 = gcc -m32 = clang (pads 1, 20, 53, 120, 267), UBSan / ASan clean.  Generation (standalone, both strips): 0.15 s at 16:9, 0.23 s at
+    21:9, 0.33 s at 32:9.  `tools/ws_seam.py`: the join step is 4-6 (left) and 0 (right) on rows 0-172, under the
+    picture's own step on every row; its texture bands do not apply here (the picture's columns next to the edge hold
+    the edge between the two faces).  Not checked on the device.
+    Weak points: the lit face's width rests on the focal length (56 +- 6 columns: the sky wedge could be 3-15
+    columns wide at the top); how far the right face's burnt-out spot reaches (18 columns) and the light beyond it
+    (the left face's) are a model, the picture shows only the 7 white columns; the stone's contrast away from the
+    join (0.45 of the shaded faces') is a choice between the overexposed edge columns' and the shaded stone's; under
+    row 173 the left face takes the shaft's light although its edge columns are darker there; the lower edge's bend
+    is extrapolated 40 rows; wider strips: the sky
+    repeats loosely (few windows of the same rows), the clouds are the picture's three views again and the fields
+    under row 176 are the last rows of land repeated downwards.
   Checked (headless, 2026-11-14): at 16:9 and 21:9 in the four rooms; 4:3 runs identical with `--ws-backdrop on` and
   off; with the default flags the new rooms are identical to `--ws-backdrop off`, and AREA02 s5 is identical to the
   build before the table; i386 = wasm2c strips; not checked on the device.

@@ -741,6 +741,7 @@ static void gen_cb(int pad);
 #include "ws_backdrop_rooms2.inc"
 #include "ws_backdrop_kitchen.inc"
 #include "ws_backdrop_engine.inc"
+#include "ws_backdrop_belltower.inc"
 #define PIECES_TOP4 { 128, 0, 224, 64, 32, 256, 0 }, { 128, 64, 224, 64, 32, 256, 32 }, { 128, 128, 224, 64, 32, 256, 64 }, \
                     { 128, 192, 224, 64, 32, 256, 96 }
 #define OVER_A5 { { 256, 0, 112, 56, 104, 0, 0 }, { 256, 56, 112, 200, 104, 56, 0 }, { 256, 144, 0, 64, 80, 256, 24 }, \
@@ -772,6 +773,10 @@ static const Room ROOMS[] = {
                                                             ws_backdrop_kitchen.inc) */
     { 17, 5, 256, 0, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, gen_en },   /* the Iron Castle engine room (preview;
                                                             ws_backdrop_engine.inc) */
+    { 16, 5, 256, 1, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 256, 72, 96, 48, 80, 136, 0 }, { 256, 64, 0, 88, 96, 64, 0 },
+      { 256, 152, 0, 96, 96, 152, 0 }, { 256, 136, 104, 88, 24, 0, 199 } }, gen_bt },   /* the bell tower (the clapper, the
+                                                            bell and the floor's near left part drawn again over the
+                                                            player; ws_backdrop_belltower.inc) */
 };
 #define NROOMS ((int)(sizeof ROOMS / sizeof ROOMS[0]))
 const char *port_ws_backdrop_rooms;                      /* --ws-backdrop-rooms A:S,A:S,... (decimal; "all") */
