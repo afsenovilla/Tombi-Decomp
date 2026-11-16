@@ -60,11 +60,11 @@ const char *port_ws_pigs_rooms;          /* --ws-pigs-rooms A:S,A:S,... (decimal
 /* the rooms that need it (the debug select's numbers; sections 1, 4 and 7 show nothing missing); approved: on by
    default once the user has seen the room; curtain: a cave, a rock wall behind everything for the gaps left */
 static const struct { u8 area, sec, approved, curtain; } ROOMS[] = {
-    {14, 0, 0, 1},     /* the grey rock cave with the windmill (the storm pig; evilPigAttackPhoenixMountain) */
-    {14, 2, 0, 1},     /* the blue cave with the columns (evilPigAttackTrickVillage) */
-    {14, 3, 0, 1},     /* the lava cave (evilPigAttackLavaCaves): only 21:9 and wider look past its ends */
-    {14, 5, 0, 0},     /* the flower room between two stone pillars (evilPigAttackDeepJungle) */
-    {14, 6, 0, 1},     /* the grey cave with the marble slabs (evilPigAttackHauntedMansion): 21:9 and wider */
+    {14, 0, 1, 1},     /* the grey rock cave with the windmill (the storm pig; evilPigAttackPhoenixMountain) */
+    {14, 2, 1, 1},     /* the blue cave with the columns (evilPigAttackTrickVillage) */
+    {14, 3, 1, 1},     /* the lava cave (evilPigAttackLavaCaves): only 21:9 and wider look past its ends */
+    {14, 5, 1, 0},     /* the flower room between two stone pillars (evilPigAttackDeepJungle) */
+    {14, 6, 1, 1},     /* the grey cave with the marble slabs (evilPigAttackHauntedMansion): 21:9 and wider */
 };
 static int room_curtain;
 static int room_enabled(int area, int sec)
