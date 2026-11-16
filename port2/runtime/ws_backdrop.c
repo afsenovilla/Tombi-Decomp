@@ -768,7 +768,7 @@ static const Room ROOMS[] = {
     { 17, 4, 256, 1, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, gen_hl },
     { 16, 4, TW_H, 1, { { 0 } }, { { 0 } }, gen_tw },   /* the green tower: a 672-row picture moved by the camera (its
                                                             pieces and hook: TW_P / tw_take, rooms2.inc) */
-    { 18, 2, 256, 0, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, gen_kt },   /* the witch's kitchen (256 rows drawn;
+    { 18, 2, 256, 1, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, gen_kt },   /* the witch's kitchen (256 rows drawn;
                                                             ws_backdrop_kitchen.inc) */
     { 17, 5, 256, 0, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, gen_en },   /* the Iron Castle engine room (preview;
                                                             ws_backdrop_engine.inc) */
