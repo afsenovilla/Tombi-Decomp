@@ -338,3 +338,495 @@ static void gen_rw(int pad)
     free(rq_have); rq_have = 0;
     canvas_close();
 }
+
+/* ================================================================== AREA16 s4: the green tower (gen_tw)
+ * The picture is 672 rows (TW_H): three sets of sprites, each a 256-column part and a 64-column one, with CLUT
+ * (128, 511): rows 0-255 from pages (128, 0) and (512, 0) u 0-63, rows 256-511 from pages (256, 0) and (512, 0)
+ * u 64-127, rows 512-671 from page (384, 0) rows 0-159 and, for the right 64 columns, (384, 0) u 0-63 / 64-127 rows
+ * 160-239 (80 rows each).  The game draws all three sets every frame, shifted by the camera's height (the set's left
+ * sprite at frame row T + 256 k, T the picture's top row on the frame); tw_take() fills the frame rows 16-239 of the
+ * strips from a 672-row strip made once per picture. */
+#define TW_H 672
+static u16 tw_pic[TW_H][PW];
+static const Piece TW_P[7] = { { 128, 0, 0, 256, 256, 0, 0 }, { 512, 0, 0, 64, 256, 256, 0 }, { 256, 0, 0, 256, 256, 0, 256 },
+    { 512, 64, 0, 64, 256, 256, 256 }, { 384, 0, 0, 256, 160, 0, 512 }, { 384, 0, 160, 64, 80, 256, 512 },
+    { 384, 64, 160, 64, 80, 256, 592 } };
+static u16 *tw_strip; static int tw_pad; static u32 tw_sum;
+static u16 tex8(const u16 *vram, int tx, int u, int v, int cx, int cy);
+static void gen_tw(int pad) { (void)pad; }              /* (the table's gen: tw_build makes the strips) */
+static void tw_build(int pad);
+static u32 tw_grab(const u16 *vram, int cx, int cy)
+{
+    u32 h = 2166136261u;
+    for (int i = 0; i < 7; i++) {
+        const Piece *p = &TW_P[i];
+        for (int y = 0; y < p->h; y++) for (int x = 0; x < p->w; x++) tw_pic[p->y + y][p->x + x] = tex8(vram, p->tx, p->u + x, p->v + y, cx, cy);
+    }
+    for (int y = 0; y < TW_H; y++) for (int x = 0; x < PW; x++) h = (h ^ tw_pic[y][x]) * 16777619u;
+    return h;
+}
+#ifndef WS_BACKDROP_MAIN
+int port_ws_backdrop_dy;                                 /* shims/gpu.c: the strips' first row against the sprite's */
+extern int port_frame;
+/* the sprite of set k (page 128 / 256 / 384) at frame row fy: the strips' rows for frame rows 16-239 */
+static const u16 *tw_take(const u16 *vram, int pad, int fy, int tx, int *rows)
+{
+    static int last = -1;
+    int T = fy - 256 * (tx / 128 - 1), f0 = T > 16 ? T : 16, f1 = T + TW_H < 240 ? T + TW_H : 240;
+    if (last != port_frame || !tw_strip || tw_pad != pad) {
+        u32 s = tw_grab(vram, 128, 511);
+        last = port_frame;
+        {   Rgb a = rgb15(tw_pic[8][2]), b = rgb15(tw_pic[8][317]);   /* (the sky in both top corners: this picture) */
+            if (a.b < a.r + 64 || b.b < b.r + 64) { free(tw_strip); tw_strip = 0; return 0; }
+        }
+        if (!tw_strip || tw_pad != pad || s != tw_sum) {
+            tw_sum = s; tw_build(pad);
+            {   const char *e = getenv("PORT_WS_BACKDROP_DUMP");      /* research: the picture, raw 15-bit LE, 672 rows */
+                FILE *f = e ? fopen(e, "wb") : 0;
+                if (f) {
+                    for (int yy = 0; yy < TW_H; yy++) for (int xx = 0; xx < PW; xx++) { u8 b[2] = { (u8)tw_pic[yy][xx], (u8)(tw_pic[yy][xx] >> 8) }; fwrite(b, 1, 2, f); }
+                    fclose(f);
+                }
+            }
+        }
+    }
+    if (!tw_strip || f1 <= f0) return 0;
+    port_ws_backdrop_dy = f0 - fy; *rows = f1 - f0;
+    return tw_strip + (size_t)(f0 - T) * 2 * pad;
+}
+#endif
+/* --- the generator.  Labels of the picture's texels (smoothed over 5 x 5): sky, cloud, foliage, ground (foliage-
+   coloured texels from TW_G0 down); the tower, its bushes, path and the trees' feet are no source (TW_EX). */
+enum { TL_OTHER, TL_SKY, TL_CLOUD, TL_FOL, TL_GROUND };
+#define TW_Y0 288                                        /* the quilted part's sources: rows from here */
+#define TW_G0 641                                        /* the grass from this row (the trees' foot at both edges) */
+static const short TW_EX[][4] = { { 72, 248, 0, TW_H }, { 48, 272, 618, TW_H }, { 12, 50, 634, 654 }, { 256, 301, 634, 654 } };   /* x0 x1 y0 y1 */
+static u8 tw_lab[TW_H][PW];
+static Rgb tw_rgb[TW_H][PW];
+static int tw_bad[TW_H + 1][PW + 1];                     /* integral image of the texels that are no source */
+static int tw_cls(Rgb k, int y)
+{
+    if (k.b >= k.g + 48 && k.b >= k.r + 64) return TL_SKY;
+    if (k.b >= k.r && k.b >= k.g && k.r >= 150) return TL_CLOUD;
+    if (k.g > k.r && k.g >= k.b) return y >= TW_G0 ? TL_GROUND : TL_FOL;
+    return TL_OTHER;
+}
+static void tw_analyse(void)
+{
+    static int cnt[5][TW_H + 1][PW + 1];                 /* integral images per label */
+    for (int y = 0; y < TW_H; y++) for (int x = 0; x < PW; x++) tw_rgb[y][x] = rgb15(tw_pic[y][x]);
+    memset(cnt, 0, sizeof cnt);
+    for (int y = 0; y < TW_H; y++)
+        for (int x = 0; x < PW; x++) {
+            int l = tw_cls(tw_rgb[y][x], y);
+            for (int k = 0; k < 5; k++) cnt[k][y + 1][x + 1] = cnt[k][y][x + 1] + cnt[k][y + 1][x] - cnt[k][y][x] + (k == l);
+        }
+    for (int y = 0; y < TW_H; y++)
+        for (int x = 0; x < PW; x++) {
+            int x0 = x - 2 < 0 ? 0 : x - 2, x1 = x + 3 > PW ? PW : x + 3, y0 = y - 2 < 0 ? 0 : y - 2, y1 = y + 3 > TW_H ? TW_H : y + 3, best = 0, bn = -1;
+            for (int k = 0; k < 5; k++) {
+                int n = cnt[k][y1][x1] - cnt[k][y0][x1] - cnt[k][y1][x0] + cnt[k][y0][x0];
+                if (n > bn) { bn = n; best = k; }
+            }
+            tw_lab[y][x] = (u8)best;
+        }
+    for (int y = 0; y < TW_H; y++)
+        for (int x = 0; x < PW; x++) {
+            int bad = y < TW_Y0 || tw_lab[y][x] == TL_OTHER;
+            for (int i = 0; i < (int)(sizeof TW_EX / sizeof TW_EX[0]) && !bad; i++)
+                bad = x >= TW_EX[i][0] && x < TW_EX[i][1] && y >= TW_EX[i][2] && y < TW_EX[i][3];
+            tw_bad[y + 1][x + 1] = tw_bad[y][x + 1] + tw_bad[y + 1][x] - tw_bad[y][x] + bad;
+        }
+}
+static int tw_okwin(int sx, int sy, int w, int h)
+{
+    if (sx < 0 || sy < 0 || sx + w > PW || sy + h > TW_H) return 0;
+    return tw_bad[sy + h][sx + w] - tw_bad[sy][sx + w] - tw_bad[sy + h][sx] + tw_bad[sy][sx] == 0;
+}
+
+/* --- the outlines in the strips: the clouds' top and the crowns' top as chains of round lumps, the first one
+   through the picture's outline at the edge (its row and slope there), the next ones outwards by position hashes */
+typedef struct { short c, t, r; } TwLump;                /* centre column X, top row, radius */
+#define TW_NL 24
+static TwLump tw_lumps[2][2][TW_NL];                     /* [side][0 cloud, 1 crowns] */
+static const short TW_FIRST[2][2][3] = {                 /* the first lumps (X centre, top, radius), measured */
+    { { -5, 360, 26 }, { 31, 426, 40 } },                /* left: the cloud peaks at x 4; the back tree's crown
+                                                            rises outwards (440 at x 0, 1.2 rows a column) */
+    { { -34, 389, 60 }, { -5, 415, 24 } } };              /* right: the cloud falls outwards (400 at x 319, 0.7 a
+                                                            column); the tall tree's tip at x 314 */
+static void tw_outline_make(int side)
+{
+    for (int k = 0; k < 2; k++) {
+        TwLump *L = tw_lumps[side][k];
+        L[0].c = TW_FIRST[side][k][0]; L[0].t = TW_FIRST[side][k][1]; L[0].r = TW_FIRST[side][k][2];
+        for (int i = 1; i < TW_NL; i++) {
+            u32 h = hash3(side * 31 + k, i, 7151);
+            int r = k ? 30 + (int)(h % 21) : 16 + (int)(h % 19);           /* crowns 30-50, cloud lumps 16-34 */
+            int gap = (L[i - 1].r + r) * (k ? 11 : 10) / 16;               /* (overlapping: a notch between them) */
+            L[i].r = (short)r; L[i].c = (short)(L[i - 1].c + gap);
+            if (L[i].c < r + 10) L[i].c = (short)(r + 10);              /* (none reaches into the join) */
+            L[i].t = (short)(k ? 418 + (int)((h >> 8) % 40) : 344 + (int)((h >> 8) % 36));
+        }
+    }
+}
+static int tw_lump_row(int side, int k, int X)
+{
+    int best = TW_H;
+    for (int i = 0; i < TW_NL; i++) {
+        const TwLump *l = &tw_lumps[side][k][i]; int d = X - l->c, y;
+        if (d * d >= l->r * l->r) continue;
+        y = l->t + l->r - isqrt_i(l->r * l->r - d * d);
+        if (y < best) best = y;
+    }
+    return best;
+}
+/* the outlines per column, their slope limited (clouds 1.5 rows a column, crowns 2.5: no sheer side where a lump
+   meets a lower one), x 2 */
+#define TW_OLW 512
+static short tw_ol[2][TW_OLW];
+static void tw_outline_cols(int side)
+{
+    for (int k = 0; k < 2; k++) {
+        int s = k ? 5 : 3;
+        for (int X = 0; X < TW_OLW; X++) tw_ol[k][X] = (short)(2 * tw_lump_row(side, k, X));
+        for (int X = 1; X < TW_OLW; X++) if (tw_ol[k][X] < tw_ol[k][X - 1] - s) tw_ol[k][X] = (short)(tw_ol[k][X - 1] - s);
+        for (int X = TW_OLW - 2; X >= 0; X--) if (tw_ol[k][X] < tw_ol[k][X + 1] - s) tw_ol[k][X] = (short)(tw_ol[k][X + 1] - s);
+    }
+}
+static int tw_outline(int side, int k, int X) { (void)side; return tw_ol[k][clampi(X, 0, TW_OLW - 1)] / 2; }   /* the top row
+                                                            of clouds (k 0) / crowns (k 1) at strip column X */
+static int tw_target(int side, int X, int y)
+{
+    int ct = tw_outline(side, 0, X), ft = tw_outline(side, 1, X);
+    if (ct > ft - 6) ct = ft - 6;
+    return y < ct ? TL_SKY : y < ft ? TL_CLOUD : y < TW_G0 ? TL_FOL : TL_GROUND;
+}
+
+/* --- the canvas of one side: tw_cv (X = 1..tw_cw outwards) */
+static Rgb *tw_cv; static u8 *tw_have; static int tw_cw;
+static int tw_X(int side, int wx) { return side ? wx - (PW - 1) : -wx; }
+static int tw_get(int side, int wx, int y, Rgb *c)
+{
+    int X;
+    if (y < 0 || y >= TW_H) return 0;
+    if (wx >= 0 && wx < PW) { *c = tw_rgb[y][wx]; return 1; }
+    X = tw_X(side, wx);
+    if (X < 1 || X > tw_cw || !tw_have[(size_t)y * tw_cw + X - 1]) return 0;
+    *c = tw_cv[(size_t)y * tw_cw + X - 1]; return 1;
+}
+/* the sky over the clouds: per row, a texel of the 12 columns at the edge picked by a position hash, among their sky
+   texels within one step of the row's middle tone (the haze a cloud's rim leaves in the sky came out as specks); a
+   row the clouds fill at the edge takes the nearest row of open sky */
+static void tw_sky(int side, int X, int y, Rgb *o)
+{
+    for (int dy = 0; dy < TW_H; dy++)
+        for (int sg = -1; sg <= 1; sg += 2) {
+            int yy = y + dy * sg, n = 0, x0 = side ? PW - 12 : 0, k, l[12], med, lo = 255, hi = 0;
+            if (yy < 0 || yy >= TW_H) continue;
+            for (int x = x0; x < x0 + 12; x++) if (tw_lab[yy][x] == TL_SKY) { l[n++] = lum(tw_rgb[yy][x]); }
+            if (n < 11) continue;
+            for (int i = 0; i < n; i++) { if (l[i] < lo) lo = l[i]; if (l[i] > hi) hi = l[i]; }
+            med = lo;                                    /* (the tone at least half the texels reach) */
+            for (int t = lo; t <= hi; t++) { int c = 0; for (int i = 0; i < n; i++) c += l[i] <= t; if (c * 2 >= n) { med = t; break; } }
+            n = 0;
+            for (int x = x0; x < x0 + 12; x++) { int d = lum(tw_rgb[yy][x]) - med; if (tw_lab[yy][x] == TL_SKY && d <= 10 && d >= -10) n++; }
+            k = (int)(hash3(side * 4099 + X, y, 3307) % (u32)n);
+            for (int x = x0; x < x0 + 12; x++) {
+                int d = lum(tw_rgb[yy][x]) - med;
+                if (tw_lab[yy][x] == TL_SKY && d <= 10 && d >= -10 && k-- == 0) { *o = tw_rgb[yy][x]; return; }
+            }
+        }
+    o->r = 128; o->g = 152; o->b = 224;
+}
+#define TW_LW 60000                                       /* the cost of a texel of another label */
+typedef struct { short y0, y1, BW, BH, OV, OT, dy, near; } TwBand;
+static void tw_quilt(int side, const TwBand *b, int seed)
+{
+    int W = b->BW + b->OV, nbk = 0, used[4] = { -1, -1, -1, -1 };
+    static int em[VB_MAXH][VB_MAXW], ev[VB_MAXH][VB_MAXW], path[VB_MAXH], tcut[VB_MAXW];
+    static int cand[PW * 64], errs[PW * 64];
+    static u8 tl[VB_MAXH][VB_MAXW], hv[VB_MAXH][VB_MAXW]; static Rgb ctx[VB_MAXH][VB_MAXW];
+    for (int X0 = 1; X0 <= tw_cw; X0 += b->BW)
+        for (int yb = b->y0; yb < b->y1; yb += b->BH) {
+            int H = b->BH + b->OT, ytop = yb - b->OT, bh = yb + b->BH > b->y1 ? b->y1 - yb : b->BH;
+            int wx0 = side ? PW - 1 + X0 - b->OV : -(X0 + b->BW - 1), mn = 1 << 30, nc = 0, ncand = 0, pick = -1, k, need = 0;
+            for (int y = 0; y < H; y++)
+                for (int j = 0; j < W; j++) {
+                    int X = tw_X(side, wx0 + j), yy = ytop + y;
+                    tl[y][j] = (u8)(X >= 1 && yy >= 0 && yy < TW_H ? tw_target(side, X, yy) : 0);
+                    if (y >= b->OT && X >= 1 && X <= tw_cw && yy < TW_H && !tw_have[(size_t)yy * tw_cw + X - 1]) need = 1;
+                }
+            if (!need) { nbk++; continue; }
+            for (int sy = ytop - b->dy; sy <= ytop + b->dy; sy += 2)
+                for (int sx = 0; sx + W <= PW; sx += 2)
+                    if (ncand < PW * 64 && tw_okwin(sx, sy, W, H)) cand[ncand++] = sy * PW + sx;
+            if (!ncand) { nbk++; continue; }
+            {   int n = 0, nl = 0;                       /* the context (texels already there) of the overlap */
+                for (int y = 0; y < H; y++)
+                    for (int j = 0; j < W; j++) {
+                        int ov = side ? j < b->OV : j >= b->BW;
+                        hv[y][j] = (u8)((ov || y < b->OT) && tw_get(side, wx0 + j, ytop + y, &ctx[y][j]));
+                        if ((y + j) & 1) hv[y][j] = 0;   /* (a checkerboard of it) */
+                        n += hv[y][j]; nl += tl[y][j] && !((y | j) & 1);
+                    }
+                for (int c = 0; c < ncand; c++) {
+                    int sx = cand[c] % PW, sy = cand[c] / PW, ml = 0, lim = mn < (1 << 28) ? mn + mn / 8 : 1 << 29;
+                    long long e = 0, el;
+                    for (int y = 0; y < H; y += 2) for (int j = 0; j < W; j += 2) if (tl[y][j]) ml += tl[y][j] != tw_lab[sy + y][sx + j];
+                    el = nl ? (long long)ml * TW_LW * 64 / nl : 0;
+                    for (int y = 0; y < H && el + (n ? e * 64 / n : 0) <= lim; y++)
+                        for (int j = 0; j < W; j++) if (hv[y][j]) e += vb_d2(ctx[y][j], tw_rgb[sy + y][sx + j]);
+                    e = (n ? e * 64 / n : 0) + el;
+                    if (e > lim) { errs[c] = 1 << 29; continue; }
+                    {   int d = sx - wx0, dv = sy - ytop; if (d < 0) d = -d; if (dv < 0) dv = -dv;
+                        if (d < b->near && dv < 48) e += e / 2 + 4000;        /* (no copy next to its source) */
+                        for (int u = 0; u < 4; u++) {
+                            int dx = sx - used[u] % PW, dz = sy - used[u] / PW; if (dx < 0) dx = -dx; if (dz < 0) dz = -dz;
+                            if (used[u] >= 0 && dx < W && dz < H) e += e / 2 + 4000;
+                        }
+                    }
+                    errs[c] = (int)(e > (1 << 29) ? (1 << 29) : e);
+                    if (errs[c] < mn) mn = errs[c];
+                }
+            }
+            for (int c = 0; c < ncand; c++) if (errs[c] <= mn + mn / 8) nc++;
+            k = (int)(hash3(side * 977 + nbk, X0, seed) % (u32)nc);
+            for (int c = 0; c < ncand && pick < 0; c++) if (errs[c] <= mn + mn / 8 && k-- == 0) pick = c;
+            {   int sx = cand[pick] % PW, sy = cand[pick] / PW, j0 = side ? 0 : b->BW, vc[VB_MAXH];
+                used[nbk % 4] = cand[pick];
+                for (int y = 0; y < H; y++) for (int j = 0; j < W; j++) { Rgb o; em[y][j] = tw_get(side, wx0 + j, ytop + y, &o) ? vb_d2(o, tw_rgb[sy + y][sx + j]) : 0; }
+                for (int y = 0; y < H; y++) for (int j = 0; j < b->OV; j++) ev[y][j] = em[y][j0 + j];
+                vb_cutpath(ev, H, b->OV, 1, path);
+                for (int y = 0; y < H; y++) vc[y] = j0 + path[y];
+                for (int j = 0; j < W; j++) tcut[j] = 0;
+                if (b->OT > 0) vb_cutpath(em, b->OT, W, 0, tcut);
+                for (int y = 0; y < b->OT + bh; y++)
+                    for (int j = 0; j < W; j++) {
+                        int tx = wx0 + j, yy = ytop + y, X = tw_X(side, tx); Rgb o;
+                        if ((tx >= 0 && tx < PW) || yy < 0 || yy >= TW_H || X < 1 || X > tw_cw) continue;
+                        if ((side ? j < vc[y] : j > vc[y]) && tw_get(side, tx, yy, &o)) continue;
+                        if (y < tcut[j] && tw_get(side, tx, yy, &o)) continue;
+                        tw_cv[(size_t)yy * tw_cw + X - 1] = tw_rgb[sy + y][sx + j]; tw_have[(size_t)yy * tw_cw + X - 1] = 1;
+                    }
+            }
+            nbk++;
+        }
+}
+/* the trees' foot, the grey band and the grass under them (rows y0..y1): slices 2-5 columns wide of the clean columns
+   at both edges (pool: no trunk, bush or path there), the same rows, each in its own left-to-right order; the next
+   slice the one whose column before it matches the strip's last column best (among those within 1/4 of the best, not
+   the last 3), so the foliage tips, the band's shading and the trees' shadow on the grass stay whole and nothing
+   repeats at a period; cross-faded over 4 rows into what is above.  Two passes: the foot (TW_S0..TW_S1, the columns
+   beside the trunks) and the grass (from TW_S1 - 4, wider pools) */
+#define TW_S0 626
+#define TW_S1 650
+static const short TW_SP[2][2][2] = { { { 1, 12 }, { 302, 319 } }, { { 1, 47 }, { 273, 319 } } };   /* source columns
+                                                            (a slice's column before it too) */
+static void tw_slices(int side, int y0, int y1, const short pool[2][2], int gr, int seed)
+{
+    int X = 1, last[3] = { -1, -1, -1 }, nsl = 0;
+    static int cs[PW], ce[PW];
+    while (X <= tw_cw) {
+        int w = (gr == 1 && side ? 4 : 2) + (int)(hash3(side, X, seed) % (gr == 1 && side ? 5u : 4u)), best = 1 << 30, n = 0, k, pick = -1;
+        for (int r = 0; r < 2; r++)
+            for (int s0 = pool[r][0]; s0 <= pool[r][1]; s0++) {
+                int sb = side ? s0 - 1 : s0 + 1, e = 0;    /* the column before the slice's first one */
+                int se = side ? s0 + w - 1 : s0 - w + 1;
+                if (se < pool[r][0] || se > pool[r][1] || sb < 0 || sb >= PW) continue;
+                for (int ya = y0; ya < y1; ya += gr) {      /* (gr rows averaged: the grass's specks no guide) */
+                    Rgb a = { 0, 0, 0 }, c = { 0, 0, 0 }; int m = 0;
+                    for (int y = ya; y < ya + gr && y < y1; y++, m++) {
+                        Rgb o = { 0, 0, 0 }; tw_get(side, side ? PW - 1 + X - 1 : -(X - 1), y, &o);
+                        a.r += o.r; a.g += o.g; a.b += o.b; c.r += tw_rgb[y][sb].r; c.g += tw_rgb[y][sb].g; c.b += tw_rgb[y][sb].b;
+                    }
+                    a.r /= m; a.g /= m; a.b /= m; c.r /= m; c.g /= m; c.b /= m;
+                    e += vb_d2(a, c) * m;
+                }
+                if (s0 == last[0] || s0 == last[1] || s0 == last[2]) e += e / 2 + 20000;
+                cs[n] = s0; ce[n] = e; n++;
+                if (e < best) best = e;
+            }
+        if (!n) break;
+        { int m = 0, tol = 4; for (int i = 0; i < n; i++) m += ce[i] <= best + best / tol;
+          k = (int)(hash3(side, X, seed + 66) % (u32)m);
+          for (int i = 0; i < n && pick < 0; i++) if (ce[i] <= best + best / tol && k-- == 0) pick = cs[i]; }
+        last[nsl % 3] = pick; nsl++;
+        for (int i = 0; i < w && X <= tw_cw; i++, X++)
+            for (int y = y0; y < y1; y++) {
+                size_t q = (size_t)y * tw_cw + X - 1; Rgb c = tw_rgb[y][side ? pick + i : pick - i];
+                if (y < y0 + 4 && tw_have[q]) c = mix(tw_cv[q], c, (y - y0 + 1) * 256 / 5);
+                tw_cv[q] = c; tw_have[q] = 1;
+            }
+    }
+}
+/* the foliage's light per row (rows y +- 16): the luminance mean and spread of the strip's foliage texels (its first
+   40 columns) onto the picture's (its 32 columns next to the edge), the spread at most x 0.8 .. x 1.5, over the whole
+   strip */
+static int tw_leafy(Rgb k, int y) { int c = tw_cls(k, y); return y < TW_G0 && c != TL_SKY && c != TL_CLOUD; }   /* (the lit leaves too) */
+static void tw_contrast(int side)
+{
+    static int mp[TW_H], ms[TW_H], k256[TW_H];
+    for (int y = 0; y < TW_H; y++) {
+        long long s[2] = { 0, 0 }, q[2] = { 0, 0 }; int n[2] = { 0, 0 };
+        mp[y] = -1;
+        for (int yy = y - 16; yy <= y + 16; yy++) {
+            if (yy < 0 || yy >= TW_H) continue;
+            for (int i = 0; i < 40; i++) {
+                Rgb a = tw_rgb[yy][side ? PW - 1 - i : i], b = tw_cv[(size_t)yy * tw_cw + i]; int l;
+                if (i < 32 && tw_leafy(a, yy)) { l = lum(a); s[0] += l; q[0] += l * l; n[0]++; }
+                if (tw_leafy(b, yy)) { l = lum(b); s[1] += l; q[1] += l * l; n[1]++; }
+            }
+        }
+        if (n[0] < 64 || n[1] < 64) continue;
+        mp[y] = (int)(s[0] / n[0]); ms[y] = (int)(s[1] / n[1]); k256[y] = 256;
+        {   long long v0 = q[0] / n[0] - (long long)mp[y] * mp[y], v1 = q[1] / n[1] - (long long)ms[y] * ms[y];
+            if (v0 > 0 && v1 > 0) k256[y] = clampi(isqrt_i((int)(v0 * 65536 / v1)), 205, 384); }
+    }
+    for (int y = 0; y < TW_H; y++) {
+        if (mp[y] < 0) continue;
+        for (int X = 1; X <= tw_cw; X++) {
+            Rgb *p = &tw_cv[(size_t)y * tw_cw + X - 1]; int l = lum(*p), t;
+            if (l <= 0 || !tw_leafy(*p, y)) continue;
+            t = clampi(mp[y] + (l - ms[y]) * k256[y] / 256, 1, 255);
+            p->r = clampi(p->r * t / l, 0, 255); p->g = clampi(p->g * t / l, 0, 255); p->b = clampi(p->b * t / l, 0, 255);
+        }
+    }
+}
+/* the join: per row and label (the texel's own class), the mean colour of the strip's first 6 columns onto the
+   picture's last 6 (rows y +- 3), fading out over 24 columns */
+static void tw_join(int side)
+{
+    static int d[TW_H][5][3];
+    for (int y = 0; y < TW_H; y++) {
+        int sp[5][3], ss[5][3], np[5], ns[5];
+        memset(sp, 0, sizeof sp); memset(ss, 0, sizeof ss); memset(np, 0, sizeof np); memset(ns, 0, sizeof ns);
+        for (int yy = y - 3; yy <= y + 3; yy++) {
+            if (yy < 0 || yy >= TW_H) continue;
+            for (int i = 0; i < 6; i++) {
+                Rgb a = tw_rgb[yy][side ? PW - 1 - i : i], b = tw_cv[(size_t)yy * tw_cw + i];
+                int ka = tw_cls(a, yy), kb = tw_cls(b, yy);
+                sp[ka][0] += a.r; sp[ka][1] += a.g; sp[ka][2] += a.b; np[ka]++;
+                ss[kb][0] += b.r; ss[kb][1] += b.g; ss[kb][2] += b.b; ns[kb]++;
+            }
+        }
+        for (int k = 0; k < 5; k++)
+            for (int c = 0; c < 3; c++) d[y][k][c] = np[k] >= 4 && ns[k] >= 4 ? sp[k][c] / np[k] - ss[k][c] / ns[k] : 0;
+    }
+    for (int y = 0; y < TW_H; y++)
+        for (int X = 1; X <= 24 && X <= tw_cw; X++) {
+            Rgb *p = &tw_cv[(size_t)y * tw_cw + X - 1]; int k = tw_cls(*p, y), w = X <= 4 ? 256 : (24 - X) * 256 / 20;
+            p->r = clampi(p->r + d[y][k][0] * w / 256, 0, 255); p->g = clampi(p->g + d[y][k][1] * w / 256, 0, 255);
+            p->b = clampi(p->b + d[y][k][2] * w / 256, 0, 255);
+        }
+}
+/* the soft parts at the join: the sky's texels the quilt brought from other rows are the sky of their own row (its
+   gradient: a window from 40 rows off was a shade off, a visible box), and on sky and cloud texels the first column's
+   difference to the picture's edge column (per row, rows y +- 2) fades out over 8 columns, so the clouds' soft shading
+   goes on without a line */
+static void tw_soft(int side)
+{
+    static int d[TW_H][3];
+    for (int y = 0; y < TW_H; y++)
+        for (int X = 1; X <= tw_cw; X++) {
+            Rgb *p = &tw_cv[(size_t)y * tw_cw + X - 1];
+            int k = tw_cls(*p, y), ns = 0;                /* (sky all round: not a cloud's rim; or a lone
+                                                            light texel of a cloud's rim in the open sky) */
+            if (k != TL_SKY && k != TL_CLOUD) continue;
+            for (int dy = -1; dy <= 1; dy++)
+                for (int dx = -1; dx <= 1; dx++) {
+                    int yy = y + dy, xx = X + dx;
+                    if ((dx || dy) && (yy < 0 || yy >= TW_H || xx < 1 || xx > tw_cw || tw_cls(tw_cv[(size_t)yy * tw_cw + xx - 1], yy) == TL_SKY)) ns++;
+                }
+            if (ns == 8 || (k == TL_CLOUD && ns >= 7)) tw_sky(side, X, y, p);
+        }
+    for (int y = 0; y < TW_H; y++) {
+        int s[3] = { 0, 0, 0 }, n = 0;
+        for (int yy = y - 2; yy <= y + 2; yy++) {
+            Rgb a, b; int ka, kb;
+            if (yy < 0 || yy >= TW_H) continue;
+            a = tw_rgb[yy][side ? PW - 1 : 0]; b = tw_cv[(size_t)yy * tw_cw]; ka = tw_cls(a, yy); kb = tw_cls(b, yy);
+            if ((ka != TL_SKY && ka != TL_CLOUD) || (kb != TL_SKY && kb != TL_CLOUD)) continue;
+            s[0] += a.r - b.r; s[1] += a.g - b.g; s[2] += a.b - b.b; n++;
+        }
+        for (int c = 0; c < 3; c++) d[y][c] = n >= 3 ? s[c] / n : 0;
+    }
+    for (int y = 0; y < TW_H; y++)
+        for (int X = 1; X <= 8 && X <= tw_cw; X++) {
+            Rgb *p = &tw_cv[(size_t)y * tw_cw + X - 1]; int k = tw_cls(*p, y), w = (9 - X) * 256 / 8;
+            if (k != TL_SKY && k != TL_CLOUD) continue;
+            p->r = clampi(p->r + d[y][0] * w / 256, 0, 255); p->g = clampi(p->g + d[y][1] * w / 256, 0, 255);
+            p->b = clampi(p->b + d[y][2] * w / 256, 0, 255);
+        }
+}
+static void tw_pal(void)
+{
+    static u8 seen[32768];
+    memset(seen, 0, sizeof seen); memset(qhave, 0, sizeof qhave); npal = 0;
+    for (int y = 0; y < TW_H; y++) for (int x = 0; x < PW; x++) {
+        u16 c = tw_pic[y][x] & 0x7FFF;
+        if (!seen[c] && npal < 256 && c) { seen[c] = 1; pal[npal++] = tw_pic[y][x]; }
+    }
+}
+static void tw_build(int pad)
+{
+    free(tw_strip); tw_strip = calloc((size_t)2 * pad * TW_H, 2); tw_pad = pad;
+    if (!tw_strip) return;
+    tw_cw = pad + 32;
+    tw_cv = (Rgb *)malloc(sizeof(Rgb) * (size_t)tw_cw * TW_H); tw_have = (u8 *)malloc((size_t)tw_cw * TW_H);
+    if (!tw_cv || !tw_have) { free(tw_cv); free(tw_have); tw_cv = 0; tw_have = 0; return; }
+    tw_pal(); tw_analyse();
+    for (int side = 0; side < 2; side++) {
+        int ytop = TW_H;
+        memset(tw_have, 0, (size_t)tw_cw * TW_H);
+        tw_outline_make(side); tw_outline_cols(side);
+        for (int X = 1; X < TW_OLW; X++) { int c = tw_outline(side, 0, X); if (c < ytop) ytop = c; }   /* (not the strip's width: a wider one starts the same) */
+        ytop -= 24;
+        for (int y = 0; y < ytop + 8; y++)                   /* the sky (the quilt's first rows overlap it) */
+            for (int X = 1; X <= tw_cw; X++) {
+                tw_sky(side, X, y, &tw_cv[(size_t)y * tw_cw + X - 1]);
+                if (y < ytop) tw_have[(size_t)y * tw_cw + X - 1] = 1;
+            }
+        {   TwBand a = { (short)ytop, TW_S0 + 4, 14, 14, 8, 6, 48, 48 };
+            tw_quilt(side, &a, 8101 + side);
+            tw_slices(side, TW_S0, TW_S1, TW_SP[0], 1, 9311);
+            tw_slices(side, TW_S1 - 4, TW_H, TW_SP[1], 6, 9411);
+        }
+        tw_contrast(side);
+        tw_join(side);
+        tw_soft(side);
+#ifdef WS_BACKDROP_MAIN
+        if (getenv("WSB_TL"))                            /* research: the target labels, blended */
+            for (int y = 0; y < TW_H; y++)
+                for (int X = 1; X <= tw_cw; X++) {
+                    static const Rgb LC[5] = { { 0, 0, 0 }, { 0, 0, 255 }, { 255, 255, 255 }, { 0, 255, 0 }, { 255, 255, 0 } };
+                    Rgb *p = &tw_cv[(size_t)y * tw_cw + X - 1]; *p = mix(*p, LC[tw_target(side, X, y)], 96);
+                }
+#endif
+        for (int y = 0; y < TW_H; y++)
+            for (int X = 1; X <= pad; X++)
+                tw_strip[(size_t)y * 2 * pad + (side ? pad + (X - 1) : pad - X)] = quant(tw_cv[(size_t)y * tw_cw + X - 1]);
+    }
+    free(tw_cv); free(tw_have); tw_cv = 0; tw_have = 0;
+}
+#ifdef WS_BACKDROP_MAIN
+/* standalone: wsb 16:4 PIC.raw PAD OUT.ppm (PIC.raw: 320 x 672 15-bit LE, PORT_WS_BACKDROP_DUMP) */
+static int tw_main(int argc, char **argv)
+{
+    FILE *f; int pad;
+    if (argc < 4 || !(f = fopen(argv[1], "rb"))) { fprintf(stderr, "usage: wsb 16:4 PIC.raw PAD OUT.ppm\n"); return 1; }
+    for (int y = 0; y < TW_H; y++) for (int x = 0; x < PW; x++) { u8 b[2]; if (fread(b, 1, 2, f) != 2) return 1; tw_pic[y][x] = (u16)(b[0] | b[1] << 8); }
+    fclose(f);
+    pad = atoi(argv[2]);
+    tw_build(pad);
+    if (!tw_strip || !(f = fopen(argv[3], "wb"))) return 1;
+    fprintf(f, "P6 %d %d 255\n", PW + 2 * pad, TW_H);
+    for (int y = 0; y < TW_H; y++)
+        for (int x = 0; x < PW + 2 * pad; x++) {
+            u16 c = x < pad ? tw_strip[(size_t)y * 2 * pad + x] : x >= pad + PW ? tw_strip[(size_t)y * 2 * pad + x - PW] : tw_pic[y][x - pad];
+            u8 rgb[3] = { (u8)(r5(c) << 3), (u8)(g5(c) << 3), (u8)(b5(c) << 3) }; fwrite(rgb, 1, 3, f);
+        }
+    fclose(f);
+    { u32 h = 2166136261u; for (size_t i = 0; i < (size_t)2 * pad * TW_H; i++) h = (h ^ tw_strip[i]) * 16777619u; printf("strip hash %08x\n", h); }
+    return 0;
+}
+#endif

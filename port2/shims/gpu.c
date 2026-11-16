@@ -911,6 +911,7 @@ static void ws_backdrop(const Vtx *a, int w, int h, int u, int v, const GpuTex *
     extern const unsigned short *port_ws_backdrop(const unsigned short *, int, int, int, int, int, int, int, int, int, int, int, int, int *);
     int P = port_widescreen, fx = a->x - gs.ox - ws_dx, fy = a->y - gs.oy, bx = ws_base(ws_ax), y = a->y;
     const unsigned short *s = port_ws_backdrop(&vram[0][0], P, fx, fy, w, h, u, v, t->tx, t->ty, t->depth, t->cx, t->cy, &h);   /* h: the strips' rows */
+    { extern int port_ws_backdrop_dy; y += port_ws_backdrop_dy; }   /* (a picture taller than the frame: its rows on it) */
     if (!s || y < 0 || y + h > 512 || bx + 320 + 2 * P > WS_STRIDE) return;
     for (int j = 0; j < h; j++) {
         memcpy(&wvram[y + j][bx], s + (size_t)j * 2 * P, (size_t)P * 2);

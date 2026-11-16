@@ -763,6 +763,8 @@ static const Room ROOMS[] = {
                                                             drawn again over the player as two quads; rooms2.inc) */
     { 17, 3, 256, 0, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, gen_hl },   /* the Iron Castle hall (256 rows drawn) */
     { 17, 4, 256, 0, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, gen_hl },
+    { 16, 4, TW_H, 0, { { 0 } }, { { 0 } }, gen_tw },   /* the green tower: a 672-row picture moved by the camera (its
+                                                            pieces and hook: TW_P / tw_take, rooms2.inc) */
 };
 #define NROOMS ((int)(sizeof ROOMS / sizeof ROOMS[0]))
 const char *port_ws_backdrop_rooms;                      /* --ws-backdrop-rooms A:S,A:S,... (decimal; "all") */
@@ -827,6 +829,16 @@ const u16 *port_ws_backdrop(const u16 *vram, int pad, int x, int y, int w, int h
 {
     const Room *r = 0;
     if (enabled < 0) { const char *e = getenv("PORT_WS_BACKDROP"); enabled = e && *e >= '1' && *e <= '3' ? *e - '0' : port_ws_backdrop_on; }
+    port_ws_backdrop_dy = 0;
+    if (enabled && pad > 0 && x == 0 && w == 256 && !u && !v && !ty && depth == 1 && cx == 128 && cy == 511
+        && (tx == 128 || tx == 256 || tx == 384)) {     /* a tall picture's set (AREA16 s4: tw_take) */
+        u8 *g = port_ram_ptr(PORT_A_GAME); int a = *(u16 *)(g + 0), sc = *(u16 *)(g + 2);
+        for (int i = 0; i < NROOMS; i++)
+            if (ROOMS[i].h == TW_H && ROOMS[i].area == a && ROOMS[i].sec == sc) {
+                if (!room_enabled(&ROOMS[i])) return 0;
+                room = &ROOMS[i]; return tw_take(vram, pad, y, tx, rows);
+            }
+    }
     if (!enabled || pad <= 0 || x != 0 || y != 16 || w != 256 || u || v || tx != 128 || ty || depth != 1
         || cx != 128 || cy != 511) return 0;
     {
@@ -861,6 +873,7 @@ int main(int argc, char **argv)
     int a = 2, sc = 5;
     if (argc > 1 && sscanf(argv[1], "%d:%d", &a, &sc) == 2) { argc--; argv++; }   /* the room, default 2:5 */
     for (int i = 0; i < NROOMS; i++) if (ROOMS[i].area == a && ROOMS[i].sec == sc) { room = &ROOMS[i]; break; }
+    if (room && room->h == TW_H) return tw_main(argc, argv);   /* (a 672-row picture: rooms2.inc) */
     if (!room || argc < 4 || !(f = fopen(argv[1], "rb"))) { fprintf(stderr, "usage: wsb [AREA:SECTION] PIC.raw PAD OUT.ppm [mirror]\n"); return 1; }
     for (int y = 0; y < PH; y++) for (int x = 0; x < PW; x++) { u8 b[2]; if (fread(b, 1, 2, f) != 2) return 1; pic[y][x] = (u16)(b[0] | b[1] << 8); }
     if (fread(pic_ov, 1, sizeof pic_ov, f) != sizeof pic_ov) memset(pic_ov, 0, sizeof pic_ov);   /* (older dumps: none) */
