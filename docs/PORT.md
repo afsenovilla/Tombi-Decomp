@@ -2667,6 +2667,16 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   the spear pigs' made one in AREA10 s0 start early and walk off before Tomba arrived (found by comparing runs), so
   activation windows are only widened where 4:3 + pad is not covered.  Gameplay positions, not screen tests: the
   jellyfish targets (AREA09), komaPigDropIn's "walked in" test, the rolling barrel's camera range.
+- **Widescreen exits** (`runtime/ws_exits.c`, 2026-11-16): in a few fixed-camera side-view rooms the exit sits at
+  the 4:3 screen edge, so on a wide frame Tomba left the room well inside the picture.  For the rooms listed in
+  `port_ws_exit_room` (AREA02 s5, the stone door room, exit on the right; AREA05 s1/s3, exit on the left) the port
+  moves three things out by the pad (there 1 unit = 1 column): the exit test (`src/x002`, `src/x005`
+  `updateAreaScroll`, under `PORT2`), the clamp that keeps Tomba within 150 units of the camera limits
+  (`cameraModeHandler6B`), and the WHM lookup (`getCollisionPlaneAt` returns nothing past `minX - 0xAA` / `maxX + 0xAA`,
+  or below 0, so he fell before reaching the exit: the edge column goes on outwards instead).  The exits keep their
+  4:3 distance to the frame edge.  The collision view draws the moved exits (`"ws"` in `tools/colview_exits.json`).
+  Verified headless at 4:3 (unchanged), 16:9, 21:9 and 32:9: Tomba walks on the floor to the wide edge and the exit
+  fires there.  Matching build unchanged (`PORT2` only).
 - **HUD** (`drawHud`, fixes.txt): lives, vitality and weapon move left by pad, the AP counter right by pad (anchored to
   the wide frame's edges).  Other HUDs (race, item gauges, menus) stay at their 4:3 place, centred.
 
