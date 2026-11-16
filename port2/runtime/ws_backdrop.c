@@ -763,7 +763,7 @@ static const Room ROOMS[] = {
                                                             drawn again over the player as two quads; rooms2.inc) */
     { 17, 3, 256, 0, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, gen_hl },   /* the Iron Castle hall (256 rows drawn) */
     { 17, 4, 256, 0, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, gen_hl },
-    { 16, 4, TW_H, 0, { { 0 } }, { { 0 } }, gen_tw },   /* the green tower: a 672-row picture moved by the camera (its
+    { 16, 4, TW_H, 1, { { 0 } }, { { 0 } }, gen_tw },   /* the green tower: a 672-row picture moved by the camera (its
                                                             pieces and hook: TW_P / tw_take, rooms2.inc) */
 };
 #define NROOMS ((int)(sizeof ROOMS / sizeof ROOMS[0]))
