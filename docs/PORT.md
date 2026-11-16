@@ -3337,11 +3337,19 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     coordinates from the wall's own columns (k -9..40, the floor -9..28: the vases and the corner never), then read from
     the picture in one step through the quilt's source map (bilinear with the fractions sharpened x2 about the middle:
     the slats' and rails' gradient energy next to the join 92-96 % of the picture's; plain bilinear 75-80 %).  The
-    frame and the wide pane (rows 13-129) are the edge's colour on the same rectified row (the edge column and the next,
-    along the line): the pane is plain grey brushed metal, its bevels, the frame's bands and the black line under it
-    go on along the wall's lines; nothing of the pane's far end is visible, so no bar or frame is added (the side
-    panels are narrower than the back wall's: their proportions do not tell where the next bar would be).  The
-    handrail's lower edge (its shadow on the slats) is no line along the wall: it is all but level on the screen (row
+    panels (rows 13-129) repeat the side wall's unit, which the picture shows whole between the edge and the corner
+    pilaster (rectified, both walls alike): the window (dark glass with a lit grey side, k -8..7), the bar with its two
+    screws (7..17), the grey pane (17..30) and the gold / copper frame's wide bevel up to its white rim (30..43).
+    Period 51 rectified columns (the window's outer end at the top rows' edge to the bevel's rim); outwards every texel
+    is its own unit texel one or more periods in, on the same rectified row (the frame's borders, the pane's bevels and
+    rounded corners keep their lines), so at 16:9 the strip shows the rest of the window, a whole frame, its pane and
+    the next bar with its screws cut by the screen edge, at 21:9 the next window too.  The window's texels the picture
+    does not show (left of the slanted edge on the lower rows, at most 9 columns) take, on the glass, the edge's colour
+    on their screen row (the lit side and the dark are bands upright on the screen, a reflection: copied along the
+    wall's rows they came out as a staircase), on the frame's rows the edge texel on the wall's line.  (The first
+    version continued the edge's colour along the wall's lines over the whole strip: a plain grey slab with no frame or
+    screws, its lower 15 rows darkened by the window's reflection; rejected in review.)
+    The handrail's lower edge (its shadow on the slats) is no line along the wall: it is all but level on the screen (row
     146.3, rising 0.03 a column inwards), so in rectified rows it drifts 2 rows along the wall and the quilt's windows
     from further in put it 0.9 row too high at the join; the windows' rows are moved so it lies on its own screen line
     at the source column and at the strip texel (fully at row 146, fading to none at 138 and 166).  Join steps (strip
@@ -3353,9 +3361,11 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     pane:28-110;fbot:110-129;rail:129-148;slats:148-184;base:184-197;floor:197-224`): the handrail and floor pass;
     the others fail its texture checks because the picture's 16 edge columns hold other elements (the black band and
     the bar next to the pane, the steep cornice lines across 4-column groups) and the slats' period widens outwards
-    (perspective).  Weak points: the wide pane is a plain grey slab (the picture shows only 3 columns of it); its lower
-    15 rows darken towards the black reflection the edge columns hold; the slats are the picture's own, so the strip
-    repeats them (as the balustrade does).  0.02 s per room entry (pad 53, 266 alike).  Checked (headless): standalone
+    (perspective); in the panels' rows the line measure compares different elements (the strip's first columns are
+    the window's rest or the next frame's rim), so the 8x crops are the check there.  Weak points: the window's width
+    outwards is not visible (its outer end is taken where the picture's edge is at the top rows); the panels and slats
+    are the picture's own, so the strip repeats them (as the wall does); the leaning rims alias in steps of 1 texel
+    every ~14 rows, like the picture's own.  0.02 s per room entry (pad 53, 266 alike).  Checked (headless): standalone
     at pads 53, 101, 120 and 266 (a wider strip starts with the 16:9 one's columns: 0 texels differ), the game at 16:9
     and 21:9 = the standalone, the OpenGL renderer's strips = the software one's, default flags (off) unchanged, the
     other rooms untouched (only additions: the table's two entries and gen_hl), i386 = wasm2c frames (16:9, 21:9);

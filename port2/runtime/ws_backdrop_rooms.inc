@@ -2913,9 +2913,8 @@ static void gen_th(int pad)
  * source map (as gen_th).  The edge column is not a rectified column (the verticals lean): a rectified column at
  * the bottom shows 9 columns more of the edge than at the top, so the rectified picture starts at HL_KMIN (the edge
  * at the top) and the texels between there and the edge on the lower rows are the band's own texels one period /
- * shift further in (the gap).  The wide pane (rows 28-112) is plain grey: the strip's pane is the edge's colour on
- * the same rectified row (its light and the frame's bevels go on along the wall's lines).  The vases are never
- * copied. */
+ * shift further in (the gap).  The panels (rows 13-129) repeat the wall's unit (window, screwed bar, pane, frame)
+ * with its period (hl_unit).  The vases are never copied. */
 #define HL_HY (155 * 256 + 128)                           /* the horizon, 1/256 row */
 static const int HL_HX[2] = { 161 * 256, 159 * 256 };     /* each wall's vanishing point (side-local column, 1/256) */
 #define HL_VX 39178                                       /* the verticals' vanishing point (screen, 1/256 texel) */
@@ -2924,14 +2923,14 @@ static const int HL_HX[2] = { 161 * 256, 159 * 256 };     /* each wall's vanishi
 #define HL_KS 251                                         /* rectified column = geometric column x 251 / 256 */
 #define HL_KMIN (-9)                                      /* the first rectified column (the edge at the top) */
 #define HL_NK 52                                          /* rectified columns of the wall: HL_KMIN .. */
-#define HL_PA0 13                                         /* the frame and the wide pane: rectified rows [PA0, PA1) */
+#define HL_PA0 13                                         /* the panels: rectified rows [PA0, PA1) */
 #define HL_PA1 129
 #define HL_NO 300                                         /* canvas columns at most */
 typedef struct { short j0, j1, ka, kb, kc, kd, gap; } HlBand;   /* rows [j0, j1): source columns [ka, kb) and [kc, kd)
                                                             (rectified), the gap filled from `gap` columns further in */
 static const HlBand HL_BANDS[] = {
     { 0, 13, HL_KMIN, 41, 0, 0, 13 },                     /* the cornice */
-    { HL_PA0, HL_PA1, 0, 0, 0, 0, 13 },                   /* the frame and the wide pane (not quilted) */
+    { HL_PA0, HL_PA1, 0, 0, 0, 0, 13 },                   /* the panels (hl_unit, not quilted) */
     { 129, 184, HL_KMIN, 40, 0, 0, 13 },                  /* the handrail and the slats (one band: hl_rbot) */
     { 184, 197, HL_KMIN, 40, 0, 0, 13 },                  /* the base */
     { 197, PH, HL_KMIN, 28, 0, 0, 18 } };                 /* the floor */
@@ -3068,6 +3067,52 @@ static int hl_src(int s, long long kg, long long jq, Rgb *o)
         || hl_at(s, (long long)hl_k(s, src % PW) * 256, (long long)(src / PW) * 256, o);   /* (by an edge of the
                                                             source: its column, or the texel itself) */
 }
+/* the side wall's panels (rows HL_PA0..HL_PA1): a repeating unit, seen whole between the edge and the corner: the
+   window (dark glass, lit grey at its outer side; k HL_KU0..7), the bar with the two screws (7..17), the grey pane
+   (17..30) and the frame's wide bevel (30..43, up to its white rim).  Outwards the unit repeats with its period
+   HL_UP (the window's outer end at the top rows' edge to the bevel's rim), each texel its own unit texel (same
+   rectified row, so every line goes on); the window's texels the picture does not show (left of the slanted edge on
+   the lower rows, at most 9 columns) take, on the glass, the edge's colour on their screen row (the glass's lit side
+   and its dark are bands upright on the screen: a reflection, not on the wall), on the frame's rows the edge's texel
+   on the wall's line. */
+#define HL_KU0 (-8)
+#define HL_UP 51
+#define HL_GL0 28                                         /* the window's glass: rectified rows [GL0, GL1) */
+#define HL_GL1 113
+static int hl_tsrc[PH][HL_UP];                            /* the unit texel's source: j * 1024 + k + 512, or -1 */
+static void hl_unit_make(int s)
+{
+    for (int j = 0; j < PH; j++) for (int u = 0; u < HL_UP; u++) hl_tsrc[j][u] = -1;
+    for (int j = HL_PA0; j < HL_PA1; j++)
+        for (int u = 0; u < HL_UP; u++) { Rgb o; if (hl_at(s, (long long)(HL_KU0 + u) * 256, (long long)j * 256, &o)) hl_tsrc[j][u] = j * 1024 + HL_KU0 + u + 512; }
+    for (int j = HL_PA0; j < HL_PA1; j++)
+        for (int u = HL_UP - 1; u >= 0; u--) {
+            if (hl_tsrc[j][u] != -1) continue;
+            if (j >= HL_GL0 && j < HL_GL1) hl_tsrc[j][u] = -2;   /* (the glass: the edge column on its screen row) */
+            else if (u + 1 < HL_UP) hl_tsrc[j][u] = hl_tsrc[j][u + 1];   /* (the frame: along the wall's line) */
+        }
+}
+static int hl_unit(int s, long long kg, long long jq, Rgb *o)
+{
+    long long kq = kg * HL_KS / 256, P = (long long)HL_UP * 256; int kr, jr, ox, oy, t;
+    if (kq < HL_KU0 * 256) kq += (HL_KU0 * 256 - kq + P - 1) / P * P;
+    jr = clampi((int)((jq + 128) >> 8), HL_PA0, HL_PA1 - 1); kr = fdiv((int)kq + 128, 256);
+    ox = (int)(kq - (long long)kr * 256); oy = (int)(jq - (long long)jr * 256);
+    if (kr >= HL_KU0 + HL_UP) { kr -= HL_UP; }
+    t = hl_tsrc[jr][clampi(kr - HL_KU0, 0, HL_UP - 1)];
+    if (t == -2) {                                        /* (the window's glass left of the edge: its light is a
+                                                            band upright on the screen, so the edge's colour on the
+                                                            texel's screen row) */
+        long long x, y; Rgb a0, a1;
+        hl_pt(s, ((long long)kr * 256 + ox) * 256 / HL_KS, (long long)jr * 256 + oy, &x, &y);
+        if (!hl_bil(s ? (PW - 1) * 256 : 0, y, &a0)) return 0;
+        if (!hl_bil(s ? (PW - 2) * 256 : 256, y, &a1)) a1 = a0;
+        *o = mix(a0, a1, 96); return 1;
+    }
+    if (t < 0) return 0;
+    return hl_at(s, (long long)(t % 1024 - 512) * 256 + ox, (long long)(t / 1024) * 256 + oy, o)
+        || hl_at(s, (long long)(t % 1024 - 512) * 256, (long long)(t / 1024) * 256, o);
+}
 static u16 hl_raw[PH][PW];
 static void gen_hl(int pad)
 {
@@ -3090,6 +3135,7 @@ static void gen_hl(int pad)
             if (side) { short a = b.sx0; b.sx0 = (short)(PW - b.sx1); b.sx1 = (short)(PW - a); }
             vb_quilt(side, &b, 1701 + 13 * i);
         }
+        hl_unit_make(side);
         hl_mode = 2;                                      /* (crisper: the slats' and rails' edges as in the picture) */
 #ifdef WS_BACKDROP_MAIN
         if (getenv("WSB_HLMODE")) hl_mode = atoi(getenv("WSB_HLMODE"));
@@ -3098,12 +3144,8 @@ static void gen_hl(int pad)
             for (int y = 0; y < PH; y++) {
                 Rgb o = { 0, 0, 0 };
                 hl_kj(side, (long long)-X * 256, (long long)y * 256, &kg, &jq);
-                if (jq >= HL_PA0 * 256 && jq < HL_PA1 * 256) {   /* the frame and the pane: the edge's colour on
-                                                                    its line (the edge column and the next) */
-                    Rgb a0, a1; long long y1 = HL_HY + (jq - HL_HY) * (HL_HX[side] - 256) / HL_HX[side];
-                    hl_bil(side ? (PW - 1) * 256 : 0, jq, &a0);
-                    if (!hl_bil(side ? (PW - 2) * 256 : 256, y1, &a1)) a1 = a0;
-                    o = mix(a0, a1, 128);
+                if (jq >= HL_PA0 * 256 && jq < HL_PA1 * 256) {   /* the panels: the unit, repeated */
+                    if (!hl_unit(side, kg, jq, &o)) o = rgb15(hl_p0[y][side ? PW - 1 : 0]);
                 } else if (!hl_src(side, kg, jq, &o)) {
                     o = rgb15(hl_p0[y][side ? PW - 1 : 0]);
 #ifdef WS_BACKDROP_MAIN
