@@ -202,10 +202,16 @@ static int rw_want(int side, int X, int y)
    (+3/16 row: the rail's top measured at the join) linear between the two nearest rows, so the rail and the stringer's
    edges land within 0.25 row of their continuation (nearest texels: up to 0.5 off).  Right: nearest texels (the
    picture there is the stretched quad as shown; interpolated, the rail came out 0.7 row thicker at the join) */
+#define RW_RAIL (7 * 16)                                 /* the rail's rows under its top */
 static int rw_src(int x16, int t, int xs16, Rgb *o)
 {
     int ts = t > 0 ? (int)((long long)t * rw_h16(xs16) / rw_h16(x16)) : t, xs = fdiv(xs16, 16), yc, ys, f = 0;
-    if (xs16 > x16) { yc = rw_yr16(xs * 16 + 8) + ts - 5; ys = fdiv(yc, 16); f = yc - ys * 16; }
+    if (xs16 > x16) {
+        yc = rw_yr16(xs * 16 + 8) + ts - 5;
+        if (t < RW_RAIL) ys = fdiv(yc + 8, 16);           /* (the rail: nearest rows; blended, its 1-row highlight
+                                                            came out dimmer than the picture's at the join) */
+        else { ys = fdiv(yc, 16); f = yc - ys * 16; }
+    }
     else ys = fdiv(rw_yr16(xs16) + ts, 16);
     if (xs < 0 || xs >= PW || ys < 0 || ys >= PH) return 0;
     *o = rgb15(pic[ys][xs]);

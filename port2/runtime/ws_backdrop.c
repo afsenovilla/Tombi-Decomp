@@ -758,7 +758,7 @@ static const Room ROOMS[] = {
                                                             over the player as two quads) */
     { 9, 3, 224, 1, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 256, 64, 0, 40, 136, 0, 72 }, { 256, 104, 0, 40, 136, 280, 72 } },
       gen_th },                                          /* the treasure hall (the arches drawn again over the player) */
-    { 9, 4, 224, 0, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 256, 64, 0, 192, 152, 0, 8 }, { 256, 64, 144, 128, 112, 192, 120 } },
+    { 9, 4, 224, 1, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 256, 64, 0, 192, 152, 0, 8 }, { 256, 64, 144, 128, 112, 192, 120 } },
       gen_rw },                                          /* the rock wall with the stair down to the right (the stair
                                                             drawn again over the player as two quads; rooms2.inc) */
 };
