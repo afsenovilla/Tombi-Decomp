@@ -132,7 +132,8 @@ static int bt_light(int s, int X, int y)                  /* the face's light at
             band (the edge columns' darker texels there fade out), the band itself not burnt out */
         return X < 8 ? b + (t - b) * (8 - X) / 8 : b;
     }
-    if (bt_last[0] < 0) return t;
+    if (bt_last[0] < 0 || t >= 240 * 16) return t >= 240 * 16 ? t + 14 * 16 : t;   /* (the user's call: the face's
+        burnt-out white, as the picture shows it at the edge, carries on across the strip) */
     b = bt_under(0, y) ? bt_shaft[0] : bt_tone[0][y] > BT_CAP ? BT_CAP : bt_tone[0][y];   /* the light the same face has at the left */
     if (b > t) b = t;
     if (X >= BT_HOT) return b;
@@ -285,7 +286,8 @@ static u16 bt_face_col(int s, int X, int y)
     int l, r, g, t;
     if (bt_last[s] < 0) return bt_e(s, 0, y);              /* (no lit face in this picture: the edge texel) */
     r = bt_t[(size_t)y * bt_ow + X]; if (!r) r = 256;
-    g = X >= 13 ? BT_GAIN : bt_g0 + (BT_GAIN - bt_g0) * (X - 1) / 12;
+    g = s && bt_tone[1][y] >= 240 * 16 ? bt_g0 : X >= 13 ? BT_GAIN : bt_g0 + (BT_GAIN - bt_g0) * (X - 1) / 12;   /* (the
+        white face keeps the contrast its edge columns have) */
     t = bt_light(s, X, y) / 16;
     l = t * (65536 + (r - 256) * g) / 65536;
     if (l > 243 && t < 240) l = 243;                       /* (no burnt-out specks where the face is not) */
