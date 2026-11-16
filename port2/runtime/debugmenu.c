@@ -207,6 +207,7 @@ void port_debug_pad(u16 *buttons) {
 void port_debug_tick(void) {
     extern void addItemToInventory(int, int, int), setEventStarted(int, int, int), setEventComplete(int, int);
     int a = action, arg = action_arg; char b[48];
+    { extern void port_colview_tick(void); port_colview_tick(); }   /* --show-collision (runtime/colview.c) */
     if (!port_debug_menu || a == A_NONE) return;
     action = A_NONE;
     if (!in_gameplay()) { say("NOT IN GAMEPLAY"); return; }

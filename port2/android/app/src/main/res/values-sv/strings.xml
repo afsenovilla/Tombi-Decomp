@@ -31,6 +31,7 @@
     <string name="wings_missing">%1$s: files not found on the disc: %2$s</string>
     <string name="wings_7z">%1$s: the .7z holds no disc image (a .7z of loose files is not supported: use the image or a .zip)</string>
     <string name="opt_debug">Felsökningsmeny</string>
+    <string name="opt_showcoll">Visa kollisioner</string>
     <string name="opt_secondscreen">Andra skärmen: karta och status</string>
     <string name="opt_hudbottom">HUD på den nedre skärmen</string>
     <string name="opt_renderer">Rendering</string>

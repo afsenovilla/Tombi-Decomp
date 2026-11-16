@@ -6,7 +6,7 @@ Update this file whenever something lands or a task is decided. Newest first.
 
 v0.5.6 (2026-11-14): Spanish CARGANDO redrawn at the logo's own pixel size and centred like NOW LOADING (version 1 kept
 in tools/gfx_es/cargando.py); widescreen AREA02 s5 side-wall strips on by default; Baron's walk-in fixed at every width;
-panel items usable in the underground tunnels; AREA05 / Dwarf Village strip previews (off by default). Earlier: v0.5.5
+panel items usable in the underground tunnels; AREA05 s1/s3 and Dwarf Village s1 strips redrawn (on by default). Earlier: v0.5.5
 (widescreen pop-in fixes), v0.5.4 (top-down maps, first room's left end, update check), ... v0.3.1 (66a8281).
 
 Release number: `VERSION` (repo root) is the version the Android launcher shows (build.gradle versionName) and the

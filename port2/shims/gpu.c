@@ -1155,6 +1155,7 @@ extern int port_hz;
 #include "hfr.inc"
 
 void port_gpu_vblank(void) {
+    { extern int port_show_collision; extern void port_colview_draw(void); if (port_show_collision) port_colview_draw(); }
     { extern int port_debug_menu; extern void port_debug_draw(void); if (port_debug_menu) port_debug_draw(); }
     { extern int port_panel_on; extern void port_panel_vblank(void); if (port_panel_on) port_panel_vblank(); }
     if (port_hfr_fps && !h_init && port_window && port_hfr_fps != -2 && hfr_rate() <= port_hz + 2) {

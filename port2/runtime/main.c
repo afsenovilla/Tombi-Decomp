@@ -1011,6 +1011,7 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--civ-line") && v) port_civ_line = atoi(argv[++i]);
         else if (!strcmp(a, "--civ-maps") && v) { port_civ_maps_dir = argv[++i]; port_printf("[port] --civ-maps %s\n", port_civ_maps_dir); }
         else if (!strcmp(a, "--civ-collision")) port_civ_collision = 1;
+        else if (!strcmp(a, "--show-collision")) { extern int port_show_collision; port_show_collision = 1; }
         else if (!strcmp(a, "--civ-spawn") && v) { port_civ_spawn_set = sscanf(argv[++i], "%d,%d", &port_civ_spawn_x, &port_civ_spawn_y) == 2; }
         else if (!strcmp(a, "--lang") && v) { port_lang = atoi(argv[++i]); if (port_lang < 0 || port_lang > 8) return usage(argv[0]); }
         else if (!strcmp(a, "--frames") && v) port_max_frames = atoi(argv[++i]);

@@ -3883,6 +3883,25 @@ build/port2/tombi2 --headless --skip-movies --frames 5800 --poke 900:1F8001B4:1 
     --pad-script 1000:start,1300:circle:3 --log-anim-force 2:21 --log-anim jelly.txt
 ```
 
+### Collision view: `--show-collision` (port only, opt-in)
+
+`port2/runtime/colview.c` draws the collision data over the game (launchers: *Mods* "Show collision" on the PC, the
+*App* page on Android). In the game loop (`port_colview_tick`, called from `port_debug_tick`) it reads, for every path
+position within 240 units of Tomba, the WHM column of his depth plane through the game's own `getCollisionPlaneAt`
+(docs/FORMATS.md "WHM") and the boxes (`+0x6C..0x72`, as `boxesOverlapFlipAware` uses them) of the 200 objects of
+layers 2-5 (`OBJECT_POOL`, `PORT_A_OBJECT_POOL` of `port_version.h`) and of Tomba. Each point is projected as
+`drawObjectSprite` projects a sprite: the camera matrix at scratchpad 0xC0 (`VIEW_CAMERA`), the GTE's screen distance
+and offset (control registers 26, 24, 25), path / depth mapped to x / z through the object's `+0x40` pointer (swapped
+sections included). The vblank (`port_colview_draw`, shims/gpu.c) draws the segments with the debug overlay's fills,
+clipped to the displayed picture (the fills go straight into VRAM: an unclipped one wrote into texture pages).
+
+Colours: floors green, ceilings blue, walls pushing left red / right magenta, filled blocks yellow (their top edge),
+other boundaries grey; boxes: Tomba white, layer 2 (enemies, NPCs) red, 3 orange, 4 (mechanisms, platforms) cyan,
+5 (items) yellow. Only Tomba's plane is drawn (the other planes would sit off their scenery in the perspective). The
+top-down sections (towns, CLM cell maps) have no WHM: only their boxes show. Verified headless (PAL) in AREA00 s1,
+AREA01 s0/s2, AREA03 s1, AREA04 s0, AREA09 s0, AREA10 s0: the lines sit on the scenery's floors / walls and the boxes
+on the sprites. Without the flag nothing runs.
+
 ### Debug menu: `--debug-menu` (port only, opt-in)
 
 An in-game debug menu for testing (`port2/runtime/debugmenu.c`). Off by default; `--debug-menu` turns it on

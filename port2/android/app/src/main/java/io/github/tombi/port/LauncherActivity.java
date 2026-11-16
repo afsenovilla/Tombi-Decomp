@@ -581,6 +581,7 @@ public class LauncherActivity extends Activity {
             a.add("--wings-pre9"); a.add(wingsDir(1).getAbsolutePath());
         }
         if (flag("debugmenu", false)) a.add("--debug-menu");
+        if (flag("showcoll", false)) a.add("--show-collision");
         // the panel only with the option on AND a secondary display present now (off: no Presentation, no HUD move)
         boolean panel = secondScreenOn() && hasSecondDisplay();
         if (panel) a.add("--second-screen");
@@ -617,6 +618,7 @@ public class LauncherActivity extends Activity {
         if (flag("showfps", false)) a.add("--show-fps");
         a.add("--fit");
         if (flag("debugmenu", false)) a.add("--debug-menu");
+        if (flag("showcoll", false)) a.add("--show-collision");
         cheatArgs(a);
         return a.toArray(new String[0]);
     }
@@ -1542,6 +1544,7 @@ public class LauncherActivity extends Activity {
                     prefs.edit().putInt("uilang", (uiLangIdx() + d + UI_LANGS.length) % UI_LANGS.length).apply();
                     applyUiLang(); } }));
                 items.add(toggle(R.string.opt_debug, "debugmenu"));
+                items.add(toggle(R.string.opt_showcoll, "showcoll"));
                 Item cu = new Item(getString(R.string.opt_checkupd), null);
                 cu.check = prefs.getBoolean("checkupdates", true) ? 1 : 0;
                 cu.adj = new Adjust() { public void by(int d) { prefs.edit().putBoolean("checkupdates", !prefs.getBoolean("checkupdates", true)).apply(); } };
