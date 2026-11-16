@@ -55,18 +55,18 @@ static const struct { u8 area, sec, approved; } ROOMS[] = {
     {4, 15, 1},        /* the fireplace room */
     {4, 19, 1},        /* the teal room (s10's model, tinted) */
     /* the other twelve (2026-11-16; their cameras scroll between two limits): not approved yet */
-    {4, 4, 0},         /* Sunny Room (white clear colour: 16 white columns at the right limit) */
-    {4, 5, 0},         /* Thief's Room One (s15's model, orange) */
-    {4, 6, 0},         /* Swimming Room */
-    {4, 7, 0},         /* Keyhole Room (tall) */
-    {4, 8, 0},         /* Hiding Room (tall) */
-    {4, 9, 0},         /* Room of Tribulation */
-    {4, 12, 0},        /* Trap Room */
-    {4, 13, 0},        /* Trick Room (tall; its left end is the front wall above and the back wall below, with a cut corner) */
-    {4, 14, 0},        /* Sun Torch Stand */
-    {4, 16, 0},        /* Shadow Room (s4's model) */
-    {4, 17, 0},        /* Thief's Room Two (s15's model, pink) */
-    {4, 18, 0},        /* Thief's Room Three (s15's model, green) */
+    {4, 4, 1},         /* Sunny Room (white clear colour: 16 white columns at the right limit) */
+    {4, 5, 1},         /* Thief's Room One (s15's model, orange) */
+    {4, 6, 1},         /* Swimming Room */
+    {4, 7, 1},         /* Keyhole Room (tall) */
+    {4, 8, 1},         /* Hiding Room (tall) */
+    {4, 9, 1},         /* Room of Tribulation */
+    {4, 12, 1},        /* Trap Room */
+    {4, 13, 1},        /* Trick Room (tall; its left end is the front wall above and the back wall below, with a cut corner) */
+    {4, 14, 1},        /* Sun Torch Stand */
+    {4, 16, 1},        /* Shadow Room (s4's model) */
+    {4, 17, 1},        /* Thief's Room Two (s15's model, pink) */
+    {4, 18, 1},        /* Thief's Room Three (s15's model, green) */
 };
 static int room_enabled(int area, int sec)
 {
