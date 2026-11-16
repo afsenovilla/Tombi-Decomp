@@ -4,10 +4,12 @@ Update this file whenever something lands or a task is decided. Newest first.
 
 ## Last release
 
-v0.5.6 (2026-11-14): Spanish CARGANDO redrawn at the logo's own pixel size and centred like NOW LOADING (version 1 kept
-in tools/gfx_es/cargando.py); widescreen AREA02 s5 side-wall strips on by default; Baron's walk-in fixed at every width;
-panel items usable in the underground tunnels; AREA05 s1/s3 and Dwarf Village s1 strips redrawn (on by default). Earlier: v0.5.5
-(widescreen pop-in fixes), v0.5.4 (top-down maps, first room's left end, update check), ... v0.3.1 (66a8281).
+v0.5.9 (2026-11-17): same content as v0.5.8, published again because v0.5.8 went out with VERSION still at 0.5.7
+(the Android launcher showed 0.5.7). v0.5.8: widescreen exits moved to the wide edge in the rooms reviewed with the
+user (docs/PORT.md "Widescreen exits"), AREA05 notice board talk box widened, the first room's added foreground
+trunks dropped, the collision view (with exits), the other agent's widescreen strips of the day. Earlier: v0.5.7
+(Dwarf Village strips), v0.5.6 (CARGANDO redraw, AREA02 s5 strips), v0.5.5 (widescreen pop-in fixes), ... v0.3.1.
+Bump VERSION before every release.
 
 Release number: `VERSION` (repo root) is the version the Android launcher shows (build.gradle versionName) and the
 default of release.yml; bump it before each release (it used to show 0.1.<CI run number>).
