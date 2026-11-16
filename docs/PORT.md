@@ -3358,7 +3358,8 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     canopy (rows 0-45) taken at other rows.  Not delivered until that is solved.
   - Looked at in the same round (2026-11-16) and dropped, with the reason: AREA18 s2 (the witch's kitchen: rafters of
     a roof slope cut by both edges, a cupboard / shelf wall at the left and a bunch of grapes cut by the right edge:
-    every edge holds objects, nothing to continue without inventing them), AREA10 s8 (the wise man's room: its picture
+    every edge holds objects, nothing to continue without inventing them; since done by continuing each object on its
+    own lines, `gen_kt` below), AREA10 s8 (the wise man's room: its picture
     is a 256-column vignette with rounded black corners at frame column 32, not the hook's (0, 16) sprite), AREA11 s1
     (the cage scene: the hut's roof and its bracket cut by the left edge, the box's riveted door frame by the right
     one), AREA16 s3 / s6 (gears and blue beams cut by both edges), AREA17 s1 (a 384-row picture drawn from frame row
@@ -3582,6 +3583,57 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     9:4, 17:3, 17:4 with `--ws-backdrop on`) identical to the build before, the OpenGL renderer's frames = the
     software one's (xvfb), standalone gcc x86-64 = gcc -m32 = clang, UBSan / ASan clean, i386 = wasm2c frames (16:9 and
     21:9, 176 frames each, the pan included); not checked on the device.
+  - AREA18 s2 (the witch's kitchen, 2026-11-16, `gen_kt` in `runtime/ws_backdrop_kitchen.inc`; off by default, preview
+    with `--ws-backdrop-rooms 18:2`).  Dropped in the first scan (below) because every edge holds objects; done now by
+    continuing each of them on its own measured lines.  The left part is drawn 256 x 256 (clipped by the frame), the
+    right 64 columns from page (256, 0); a 48 x 64 quad over the cauldron is animated and far from the edges.  An
+    attic seen from inside: the two rafters of the truss next to the camera cross the upper corners, a log runs out
+    through each top corner behind them, the cupboard's side stands under the left rafter, a bunch of grapes hangs
+    under the right one.  Measured (i = columns in from the edge, both sides alike): the rafters are parallel bands
+    (the lit band's edges fit rows 81.74 / 91.98 at the right edge with slopes 1.160 / 1.169 rows per column, 95.8
+    with 1.163 at the left one; its width stays 9.8-10.3 rows over 50 columns, so no vanishing point: a translation
+    along (6 columns, 7 rows)); the profile across a rafter averaged along that direction is the same next to the edge
+    and 20-32 columns in, from edge row 55 (left) / 51 (right) to the lit band's lower edge; the log's lower edge
+    (luminance 50) fits row 22.1 + 0.411 i / 12.1 + 0.432 i, a translation along (12, 5), with its shadow 14 rows under
+    it; between log and rafter the roof's underside is the grit seen between the beams at the top of the picture
+    (columns 122-158, rows 0-16: relative contrast 0.19 against 0.19 / 0.15 in the corners).  The floor has no
+    boards: an even grit with no direction in its structure tensor (coherence 0-0.5 at row 206), lighter in a pool
+    round the fire, 2-5 % darker every 8 columns towards the edges; so there is no plank line to continue, only the
+    grain's size per row.  The cupboard's side is a frontal panel of vertical grain (columns 0-47, three rungs at
+    columns 17-31, a lighter corner board at 40-47 and a dark edge at 48-49, its foot on row 181).  The grapes are one
+    10 x 10 disc lit top-left: the two cut by the edge are the whole one (columns 302-311, rows 97-105) moved by (9, 3)
+    and (9, 13), each missing only its rim column; the leaves above them end on the rafter's lower edge and the picture
+    shows no stem (the bunch hangs from the rafter).  The dark band at the right wall's foot (rows 158-181) and on the
+    floor beside it (rows 183-189) is the pot's shadow.
+    The strips (every texel the picture's own, nothing mirrored): a rafter texel is the picture's texel 6 k columns
+    in and 7 k rows up along its own line (k as large as the line's length in the picture allows: 42-54 columns, so the
+    16:9 strip repeats nothing; the rafter's first three rows and the right lit band from nearer the edge), a log
+    texel the one (12, 5) further in; each line keeps the tone it has at the edge (the mean of its texels there over
+    the mean round the source), so the grain and every edge continue as the same lines, the upper and lower edges at
+    their sub-row place (1/6 row).  Grit (roof, plaster, floor) is the picture's, taken in hashed cells from a clean
+    box (the floor from its own row, so the grain keeps its perspective size) over the box's local mean, at the tone
+    wanted there: the roof by its distance to the log and to the rafter as at the edge, the wall and the floor row by
+    row as at the edge (evened out over 7-9 rows further out so a streak of the edge does not run on), the pot's shadow
+    fading out over 22 columns, the floor falling off 0.35 % per column, at most 14 %.  The cupboard goes on for 6
+    columns of its own grain and closes with its corner board's texels (in their order, at the panel's tone there) and
+    its dark edge at column 16; nothing is put on it; beyond it the wall in the shade (the roof's grit at the panel's
+    tone) down to the same foot.  The bunch: the two cut grapes get their rim column, one more grape (the whole one
+    moved by (18, 9), touching both) closes the silhouette, the leaves go on under the rafter with its translation and
+    end on it; no stem is drawn, as none shows in the picture.  Wider pads: the same functions of the place (the
+    rafters run on to the frame's bottom at 109-112 columns, the roof outside them).
+    Checked (2026-11-16): 0.014 s at 16:9 (standalone); the standalone strips identical with gcc x86-64, gcc -m32 and
+    clang at 16:9 / 21:9 / 32:9; the 21:9 and 32:9 strips start with the 16:9 / 21:9 columns; in the game i386 = wasm2c
+    whole frames at 16:9, 21:9 and 4:3 (frame 1900); OpenGL (xvfb) strips = software; 4:3 identical to the build
+    before; with the default flags the room is unchanged (16:9 frame identical to the build before); the twelve other
+    rooms' 16:9 frames with `--ws-backdrop on` identical to the build before (2:5 2:1 5:1 5:3 19:1 11:2 9:5 9:3 9:4
+    17:3 17:4 16:4).  `tools/ws_seam.py` on the picture sheared along the rafter (its lines as rows): the rafter's
+    face passes on both sides (join 8 / 6 against the picture's own step 20 / 16), the lit band's tone and contrast
+    match (241.2 / 241.2, deviation 3.0 / 2.4 right; 207 / 211, 27.8 / 24.0 left; its stripe check fails on the
+    picture against itself too, the shear's rounding); the floor passes unsheared (join 14 / 9 against 32 / 25).
+    Weak points: the roof outside the rafters is one even grit (the picture shows only 20-odd rows of it per corner,
+    so no beam or purlin is invented there), plain at 21:9 and wider; what stands left of the cupboard is a guess
+    (a wall in the shade), as is where the cupboard ends (16 columns out); the bunch's new grape is the picture's
+    whole grape again, 18 columns from itself; not seen on the device.
   Checked (headless, 2026-11-14): at 16:9 and 21:9 in the four rooms; 4:3 runs identical with `--ws-backdrop on` and
   off; with the default flags the new rooms are identical to `--ws-backdrop off`, and AREA02 s5 is identical to the
   build before the table; i386 = wasm2c strips; not checked on the device.
