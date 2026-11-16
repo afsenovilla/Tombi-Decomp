@@ -3668,6 +3668,59 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     at 1x-2x); the right wheel's strip is built from the left wheel's texels; s3's strips repeat the picture's own
     doubled wheels and its cut at row 200; past 21:9 the right wheel goes on as a plain rim (no further tooth or
     spoke: the left wheel's next ones are drawn).
+    Second version (2026-11-16), after the user's review: "En la sala de los engranajes aún hay que pulir mucho el
+    aspecto, y el bloque color crema del que cuelga la cadena a la derecha no debería prolongarse así, no tiene
+    sentido porque en 4:3 se ve que se corta por la base."  What changed:
+    - the right corbel is a short block and is closed.  In the picture its lit face's lower edge falls 1 row a column
+      (row 96.5 at the edge) and the dark underside below it ends on a level base at row 105.5, with wall under it
+      (columns 308-319: the base line, then dark brick).  The first version read the falling edge as a brace and ran
+      it on at 45 degrees through the whole strip.  Now the face goes on 9 columns, to where its lower edge reaches
+      the base; there the block ends on the side wall it sticks out of (a vertical root, rows 55.5-105.5, the wall
+      next to it shaded over 4 columns) and the wall goes on past it.  The left corbel was checked the same way: its
+      two edges are straight to the picture's edge and nothing of its end is in the picture, so it keeps its root 75
+      columns out (past 16:9; an assumption, as before);
+    - the walls are the side walls, in perspective (`gr_side`).  The earlier note ("no brick period") was wrong: the
+      back wall's row profile (mean luminance of the wall texels of columns 60-264, less its 9-row mean) has an
+      autocorrelation of 0.59 / 0.64 at 7 rows and 0.53 / 0.61 at 14 (two windows), with mortar lines at rows 49 55 62
+      68 75 81 88 95 101 109 115 122 129 136 143 150 157 164 172 (6.8 apart).  The floor's tile lines meet at (162,
+      155) and so do the side walls' feet (0.2 rows a column; the corners at columns 47 and 273, foot row 178).
+      Mapped back along the rays from that point, the left wall's visible texels (columns 0-46, rows 100-186) have
+      their mortar lines at the back wall's phase (rows mod 7 = 3-4, both), the right wall's within a row: the
+      courses run round the corners.  So a strip texel at dx columns from the vanishing point shows the back wall's
+      brick of row 155 + (y - 155) xc / dx, at 320 (1 - xc / dx) columns along the wall (xc = 115 / 111; 320: the
+      focal length, assumed, a 53 degree view): the courses are rays (at the top of the 16:9 strip they fall 0.7-1
+      row a column, as the picture's own brick does at its top corners) and the bricks grow towards the viewer (rows
+      x 1.4 at the join, x 1.9 at the 16:9 edge).  The mortar rows are found at run time (the profile's maxima); each
+      course has its own list of clean stretches of the back wall (every row of the course a wall texel in even
+      light, or any wall texel when there are fewer than 30 columns of those; a stretch's first 7 columns left out),
+      laid end to end; a course without any takes the nearest one an even number of courses away.  Texels over
+      their light, lit as each row's first wall texels from the edge, as before; bilinear;
+    - the corbels' faces are laid from clean pieces of both faces (`gr_face`: 16 x 15 windows of lit sandstone found
+      at run time, 5 in this picture, 14 x 13 apart with 2 texels of cross-fade, each column of pieces starting at
+      its own row, every other use turned half round), each as its texels less its mean on the face's tone next to
+      the edge.  The first version's quilt of 8 x 8 blocks under a value noise gave blotches without the stone's
+      upright bands (larger blocks repeat one window: there are too few);
+    - the corbels' edges and the walls' feet are anti-aliased (the left underside was a 12-column sawtooth);
+    - the wheels' turned texels are taken between the four texels around the point when all four are lit faces
+      (`gr_polar`; nearest before: a turned face came out as a speckle), with a quarter of their difference from the
+      face 3 texels around given back.  The 5 x 5 high-pass deviation of the lit blue faces, s6: left strip 7.2
+      (picture 8.1), right strip 8.6 (picture 8.4).
+    Measured (5 x 5 high-pass deviation of the luminance, strip / picture next to it): corbel faces 9.8 / 9.5 left,
+    8.5 / 9.5 right; wall 5.1 / 6.5 left, 4.9 / 6.7 right (the side walls' texels are magnified 1.4-1.9 x in rows);
+    floor 5.4 / 7.2 left, 7.3 / 7.2 right (unchanged).
+    Checked (headless, 2026-11-16): 4:3 with the flag and the default 16:9 run byte-identical to the build before
+    (both sections); the 16:9 frame's centre = the 4:3 frame; the 21:9 frame holds the 16:9 frame (0 texels); the
+    sixteen other rooms' 16:9 frames with `--ws-backdrop-rooms all` byte-identical to the build before (2:5 2:1 5:1
+    5:3 19:1 11:2 9:5 9:3 9:4 17:3 17:4 16:4 16:5 18:2 6:1 6:2); the game's strips = the standalone generator's on
+    the dumped picture (5-bit colours); OpenGL (xvfb) strips = software strips; i386 = wasm2c whole frames (4:3, 16:9,
+    21:9); gcc x86-64 / gcc -m32 / -O0 / the undefined-behaviour and address sanitizers give the same strips, no
+    report; 0.05 s per room entry at 16:9, 0.08 s at 21:9.  Not checked on the device.  Weak points: the focal
+    length (the bricks' length on the side walls) is assumed; a course with one short clean stretch repeats it along
+    the wall (40 columns); the side walls' light is the edge's row for row (no ray of its own, the gears' shadows do
+    not go on); the left corbel's root is still an assumption and at 21:9 the two corbels end 75 and 9 columns out;
+    the picture's dark first columns of the left corbel stay a soft upright band at the join; the right wheel's
+    strip is still built from the left wheel's texels and the spokes' width is assumed; the floor is the first
+    version's quilt (no tile line is carried into the strips: none reaches the edges clearly); s3 as before.
   - AREA16 s4 (the green tower, 2026-11-17, `gen_tw` / `tw_take` in `runtime/ws_backdrop_rooms2.inc`; off by default,
     preview with `--ws-backdrop-rooms 16:4`).  How the game draws it (`PORT_PRIMLOG`): one 672-row 8 bpp picture
     (CLUT (128, 511)) in three sets, each a 256-column sprite and the right 64 columns: rows 0-255 = page (128, 0) +
@@ -4072,6 +4125,47 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     ring's hidden end has no bolt (twice now); the walls are as before (texels magnified 1.3-1.9 x, the right wall
     repeats its 20 columns with the bolt every block; the pipes now cover most of them at 16:9); sprites that stand
     in the strips are drawn over the strips' pipes; only the debug select's default state was seen.
+    Third version (2026-11-16), after the user's review: "La sala de máquinas, aunque la trayectoria de las tuberías
+    tiene muchísimo más sentido, hay que pulir el aspecto de las mismas."  The routes stay; what changed is how the
+    new pipe looks:
+    - texture: every new stretch is its section plus the picture's own painted mottle, texel for texel (`en_grain`,
+      `en_grained`).  A tape per pipe is its clean upright stretches end to end, each texel less its stretch's
+      shading (the column's and row's means): rust 20 wide (columns 5-24 by the floor, rows 208-223, and the stretch
+      under the flange, rows 141-149, twice), grey 19 wide (the big pipe above and under its joint, the upright pipe
+      over the rust elbow, the pipe by the floor: 71 rows), copper 38 wide (the upright piece, rows 188-223).  Along
+      the pipe the tape's rows, across it the tape's columns, no scaling (so the picture's density); a pipe wider
+      than the tape takes a second lane half a tape on; every other tile is the tape turned half round (a rotation);
+      tiles overlap by 4 texels, cross-faded.  The second version took the same residue through 3-column windows by
+      a position hash at 0.3 (grey, rust) / 0.6 (copper) of its strength: streaks across the pipe, no blotches.  The
+      rust pipe's elbow is smoother than its stretch under the flange in the picture, so the run and the turn carry
+      0.6 of the mottle and the upright stretch past the flange all of it;
+    - the rust pipe's seam: in the picture its elbow starts at a seam (a light line across the pipe, an arc, column
+      21 at mid height, with a rivet either side).  The strip's turn now starts at one too: the picture's seam turned
+      half round (it bows the other way, as a turn the other way does), every texel as its luminance over the pipe's
+      either side of it (`en_seam`), rows 96-115;
+    - the copper rings: the second ring, cut by the edge, goes on with the first ring's own end (`en_ring`).  Both
+      are the same fitting; the second is cut where its rim's lower line falls 1 row a column, which the first ring
+      does at column 300, and there the two agree (the rim's upper line at row 138 for 137.5, the groove at 152 for
+      151).  So the first ring's texels from column 301 on, 19 columns right and 17 rows up, are the second ring's
+      next 15 columns: the rim, its second bolt (4-7 columns past the edge), the groove and the dark end round the
+      pipe.  The second ring's top face (rows 128.5-137.5 at the edge; the first ring shows almost none) closes
+      along a quarter ellipse over 7 columns.  Before, the bands were the edge's texels stretched along quarter
+      ellipses to a point, darkened to a third: a dark claw without a bolt.  The ring's copy 32 columns on takes the
+      same end (three complete rings with two bolts each at 16:9, the fourth cut by the strip's edge);
+    - the grey run keeps its two joints (the grey pipes' own joints are such lines; the rings with bolts in the
+      picture sit on elbows) and now has the grey pipes' mottle.
+    Checked (headless, 2026-11-16): 4:3 with the flag and the default 16:9 run byte-identical to the build before,
+    power on and before it; the 16:9 frame's centre = the 4:3 frame; the 21:9 frame holds the 16:9 frame (0
+    texels); the sixteen other rooms' 16:9 frames with `--ws-backdrop-rooms all` byte-identical (the gears room's
+    list above); the game's strips = the standalone generator's on the dumped picture; OpenGL (xvfb): drawn, its
+    strips differ from the software ones as before (the scene is put together as each renderer shows it); i386 =
+    wasm2c whole frames (4:3, 16:9, 21:9, both states); gcc x86-64 / gcc -m32 give the same strips; 0.01 s per room
+    entry.  Not checked on the device.  Weak points: the sections under the mottle are still a mean section per
+    pipe (a highlight does not wander along a new stretch as it does on the picture's long pipes); the rust tape is
+    short (34 rows: nothing else of that pipe is clean), so the upright rust stretch is the same speckle five times
+    over, turned; the turns have no seam at their far end and the grey turn (18:9 on) none at all; the seam is laid
+    as a luminance ratio, not as texels; four copper rings still sit close together; the grey run is still 53
+    columns long at 16:9; walls and sprites as before.
 - **Sub-screens** (Select screens Objetos / Eventos / Estado / Mapa, memory card, options, button config, screen
   adjust).  The Select screens (`subScreenDrawTabs`, D0SPSUB / D0SPSUB3, `#ifdef PORT2`) call `port_ws_layout(left cut,
   right cut, below)` each frame; while it is set, `shims/gpu.c` spreads the textured primitives of the frame
