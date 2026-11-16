@@ -8,7 +8,7 @@
  * shims/gpu.c calls port_ws_backdrop when it meets the left sprite of the picture while the wide plane is on and fills
  * the strips of the wide copy before the game draws the picture itself, so everything the game draws on top (drums,
  * actors, boxes) stays on top.  Identity without --widescreen and in every other room (the sprite signature and the
- * room are both checked).  The approved rooms are on by default with --widescreen (AREA02 s5 since 2026-11-14, AREA05 s1/s3, AREA02 s1 and AREA19 s1 since 2026-11-15, AREA11 s2 and AREA09 s5 since 2026-11-16);
+ * room are both checked).  The approved rooms are on by default with --widescreen (AREA02 s5 since 2026-11-14, AREA05 s1/s3, AREA02 s1 and AREA19 s1 since 2026-11-15, AREA11 s2, AREA09 s5 and AREA09 s3 since 2026-11-16);
  * `--ws-backdrop off` disables them, `--ws-backdrop on` takes every room of the table (the previews too),
  * `--ws-backdrop-rooms A:S,...` exactly those rooms, `--ws-backdrop mirror` AREA02 s5's first preview (the picture
  * mirrored at its edge); also PORT_WS_BACKDROP=1 (approved) / 2 (mirror) / 3 (every room) (not in the wasm2c build,
@@ -755,7 +755,7 @@ static const Room ROOMS[] = {
     { 9, 5, 224, 1, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 256, 64, 0, 192, 152, 0, 80 }, { 256, 64, 144, 128, 112, 192, 8 } },
       gen_st },                                          /* the brick wall with the staircase (the stair drawn again
                                                             over the player as two quads) */
-    { 9, 3, 224, 0, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 256, 64, 0, 40, 136, 0, 72 }, { 256, 104, 0, 40, 136, 280, 72 } },
+    { 9, 3, 224, 1, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 256, 64, 0, 40, 136, 0, 72 }, { 256, 104, 0, 40, 136, 280, 72 } },
       gen_th },                                          /* the treasure hall (the arches drawn again over the player) */
 };
 #define NROOMS ((int)(sizeof ROOMS / sizeof ROOMS[0]))
