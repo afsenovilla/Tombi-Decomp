@@ -3172,8 +3172,17 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     plain shift, so `vb_quilt` continues the walls outwards as in the frontal rooms (rows kept on the beam, dado and
     floor bands; the plaster's windows may move along the rows, 24-row bands), the arches never copied, and the strip
     is mapped back: strip column X is at distance de + X (rectified column k with D(-k) = de + X), its rows j = vy +
-    (y - vy) de / (de + X).  Bilinear both ways, except in the plaster's rows (nearest texels both ways: bilinear
-    halved its fine grain).  Between the edge and the arch there are only 14 clean columns of plaster and dado, so the
+    (y - vy) de / (de + X).  In the plaster's rows nearest texels both ways (bilinear halved its fine grain).  Below
+    the plaster (the sill, the dado, the floor) the strip is not read from the quilted canvas but straight from the
+    picture, in one step: the canvas texel nearest the strip texel gives the quilt's source (`vb_srcmap`, a rectified
+    texel), the fractional offset is carried over, and that rectified position is mapped to the picture: the nearest
+    rectified column (the wall's vertical lines, the slats and the panel frame, stay one texel wide) and linear along
+    it (a line along the depth is the same rectified row in every column, so it keeps its slope), plus the join's
+    tone correction (canvas after / before `th_join`).  The first version resampled twice (bilinear into the
+    rectified picture, bilinear back), so the lower wall softened at the join: the slats' contrast halved, the
+    inlay and the rail's highlight went wider and fainter, and the first strip columns showed as a faint vertical
+    line through the rail and the panel (the user's marked regions next to both arches; ws_seam gradient energy on
+    the panel rows: picture 7.2, strip 5.7 before, 7.2 / 6.7 after).  Between the edge and the arch there are only 14 clean columns of plaster and dado, so the
     windows also come from the other side wall's rectified columns, laid next to the wall's own in the screen's order
     (a texel keeps its left / right neighbours: not mirrored); the plaster's windows only from the 34 rectified
     columns nearest the edge (further in, the texels are magnified 1.5x or more).  Light: the plaster's local light

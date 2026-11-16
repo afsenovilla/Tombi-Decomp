@@ -2567,8 +2567,10 @@ static void gen_st(int pad)
  * (de - 1) / de: one column per step at the edge), its row j the picture row vy + (j - vy) D(k) / de (j = the row at
  * the edge).  There the strips are quilted outwards with vb_quilt (rows kept: the elements stay on their lines; the
  * plaster's windows may move along the rows), the arches never copied, then mapped back: strip column X is at
- * distance de + X, its rectified column k with D(-k) = de + X, its rows j = vy + (y - vy) de / (de + X); nearest
- * texels both ways (the picture's own texels, no resampling blur).  The join: per row, the strip's first 8 rectified
+ * distance de + X, its rectified column k with D(-k) = de + X, its rows j = vy + (y - vy) de / (de + X).  The
+ * plaster: nearest texels both ways (its grain kept); below it (sill, dado, floor) the quilt's source texel is read
+ * from the picture in one step (th_back: resampled once, the slats and lines as crisp as the picture's, no softer
+ * band past the join).  The join: per row, the strip's first 8 rectified
  * columns' mean moved onto the picture's last 8 (fading by 40), its first column onto the edge's (fading over 6). */
 #define TH_VX16 2554                                      /* the vanishing point (x 16) */
 #define TH_VY16 1876
@@ -2635,6 +2637,30 @@ static void th_rectify(int side)
             th_m[j][c] = (u8)!ok;
         }
     }
+}
+/* rectified column c of side `side`'s rectified picture: its wall's picture column (x, 2^-20 px) and D / de (as D
+   in 2^-20 px and de x 16); 0 when it holds no rectified column of a wall */
+static int th_col(int side, int c, long long *x, long long *Dk, long long *de)
+{
+    int w = side, k = side ? PW - 1 - c : c;
+    if (c < 0 || c >= PW) return 0;
+    if (!side && c >= TH_OTH && c < TH_OTH + TH_NK) { w = 1; k = TH_OTH + TH_NK - 1 - c; }
+    if (side && c >= PW - TH_OTH - TH_NK && c < PW - TH_OTH) { w = 0; k = c - (PW - TH_OTH - TH_NK); }
+    if (k < 0 || k >= TH_NK) return 0;
+    *Dk = th_D[w][TH_NO + k]; *de = th_de16(w);
+    *x = ((long long)TH_VX16 << 16) + (w ? *Dk : -*Dk);
+    return 1;
+}
+/* the picture's texel at the rectified position (column cf, row rf; 1/256 texel) of side `side` in one step (no
+   rectified texel in between): the nearest column (the wall's vertical lines, the slats and the panel's frame, stay
+   one texel wide), linear along it (a line along the depth keeps its slope: its row is the same rectified row in
+   every column); 0 when the column holds no wall or a texel is out */
+static int th_back(int side, int cf, int rf, Rgb *o)
+{
+    long long x, Dk, de, yf; int c = (cf + 128) >> 8;
+    if (!th_col(side, c, &x, &Dk, &de)) return 0;
+    yf = ((long long)TH_VY16 << 16) + (((long long)rf * 16 - ((long long)TH_VY16 << 8)) * Dk / de >> 8);
+    return th_bil(th_p0, x, yf, o);
 }
 #define TH_Q (VBB_STRICT | VBB_TIGHT | VBB_EDGEW | VBB_FAR)
 #define TH_NB 8
@@ -2705,24 +2731,28 @@ static void th_plaster_light(int side)
 }
 static void gen_th(int pad)
 {
-    long long *D; int nk;
+    long long *D; int nk; Rgb *cv0;
     pal_make();
     th_table(0); th_table(1); D = th_D[0] + TH_NO;
     for (nk = 1; nk < TH_NO && D[-nk] < ((long long)th_de16(0) + 16 * (pad + 64)) << 16; nk++) ;
     vb_ow = nk + 2;
     if (!canvas_open(vb_ow)) return;
+    vb_srcmap = (int *)malloc(sizeof(int) * (size_t)vb_ow * PH); cv0 = (Rgb *)malloc(sizeof(Rgb) * (size_t)vb_ow * PH);
+    if (!vb_srcmap || !cv0) { free(vb_srcmap); free(cv0); vb_srcmap = 0; canvas_close(); return; }
     memcpy(th_p0, pic, sizeof pic);
     vb_ex = TH_NONE; vb_exf = th_exf;
     for (int side = 0; side < 2; side++) {
         long long de = th_de16(side);
         D = th_D[side] + TH_NO; th_rectify(side);
         canvas_clear(); cur_side = side;
+        for (int i = 0; i < vb_ow * PH; i++) vb_srcmap[i] = -1;
         for (int i = 0; i < TH_NB; i++) {
             VbBand b = TH_BANDS[i];
             if (side) { short a = b.sx0; b.sx0 = (short)(PW - b.sx1); b.sx1 = (short)(PW - a); }
             vb_quilt(side, &b, 1401 + 13 * i);
         }
         th_plaster_light(side);
+        for (size_t i = 0; i < (size_t)vb_ow * PH; i++) cv0[i] = cv[i];
         th_join(side);
         for (int X = 1; X <= pad; X++) {
             long long d = (de + 16 * X) << 16; int k = 0, fk;
@@ -2738,6 +2768,22 @@ static void gen_th(int pad)
                         quant(kk ? cv[(size_t)jj * vb_ow + kk - 1] : rgb15(pic[jj][side ? PW - 1 : 0]));
                     continue;
                 }
+                {   /* the dado and the floor: the quilt's source texel in one step from the picture (bilinear
+                       once: the slats, rails and the inlay as crisp as the picture's), plus the join's correction */
+                    int kr = k + (fk >= 128), jr = j + (fj >= 128), ox = k * 256 + fk - kr * 256, oy = j * 256 + fj - jr * 256, s;
+                    Rgb o;
+                    if (kr <= vb_ow && jr < PH) {
+                        s = kr ? vb_srcmap[(size_t)jr * vb_ow + kr - 1] : jr * PW + (side ? PW - 1 : 0);
+                        if (s >= 0 && th_back(side, (s % PW) * 256 + (side ? ox : -ox), (s / PW) * 256 + oy, &o)) {
+                            if (kr) {
+                                Rgb a = cv[(size_t)jr * vb_ow + kr - 1], b = cv0[(size_t)jr * vb_ow + kr - 1];
+                                o.r += a.r - b.r; o.g += a.g - b.g; o.b += a.b - b.b;
+                            }
+                            strip[(size_t)y * 2 * pad + (side ? pad + (X - 1) : pad - X)] = quant(o);
+                            continue;
+                        }
+                    }
+                }
                 for (int u = 0; u < 2; u++) {
                     int kk = clampi(k + u, 0, vb_ow);
                     Rgb a = kk ? cv[(size_t)j * vb_ow + kk - 1] : rgb15(pic[j][side ? PW - 1 : 0]);
@@ -2749,6 +2795,7 @@ static void gen_th(int pad)
         }
     }
     memcpy(pic, th_p0, sizeof pic);
+    free(vb_srcmap); vb_srcmap = 0; free(cv0);
     vb_ex = VB_EXCL; vb_exf = 0;
     canvas_close();
 }
