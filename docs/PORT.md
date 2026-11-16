@@ -2686,12 +2686,14 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   8 (fixes.txt), it was hard to stand in.
   Walk limits are decided room by room, apart from the exits: a wide frame does not always mean wider limits.  The
   `WALK` table of `ws_exits.c` opens a side without a moved exit (the clamps and the WHM column as above): AREA05 s1/s3
-  right (the square goes on; its 4:3 WHM wall at H 321 is past the repeated column, so it goes too).  Checked: Tomba
+  right (the square goes on; its 4:3 WHM wall at H 321 is past the repeated column, so it goes too); AREA06 s2 right.  Checked: Tomba
   stops at H 310 on 4:3, 363 on 16:9, 430 on 21:9, on the floor.
   Moved (each checked by a headless sweep that puts Tomba 70 units from the exit and walks him out, at 4:3, 16:9, 21:9
   and 32:9: same destination, on the floor; and reviewed room by room on renders): AREA02 s1 left (both lanes; the
   flowered village, AREA19 on the disc, runs as area 2 section 1 and so has it too), s5 right; AREA03 s1, s5 left;
-  AREA04 s2 right; AREA05 s1, s3 left; AREA06 s1 right; AREA18 s1 both sides (the left one once flag 0x8009CDED is
+  AREA04 s2 right; AREA05 s1, s3 left; AREA06 s1 right, s2 left (and its right side opened in `WALK`: the other
+  agent's beach strips, ws_backdrop_mermaid.inc; not walk-tested: after the debug select the mermaid's dialogue never
+  closes, so only the collision view was checked: floor to both wide edges); AREA18 s1 both sides (the left one once flag 0x8009CDED is
   set, as on 4:3).  Kept at 4:3 after review:
   - exits through a door, which stays where it is however wide the room gets: AREA00 s5, AREA01 s4, AREA03 s3,
     AREA09 s1, AREA10 s3 / s7 (left);

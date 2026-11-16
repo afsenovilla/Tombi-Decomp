@@ -30,6 +30,7 @@ static int room(int *area, int *sec)
    does not always mean wider limits).  sides: 1 = left, 2 = right */
 static const struct { unsigned char area; unsigned int secs; unsigned char sides; } WALK[] = {
     { 5, 1u << 1 | 1u << 3, 2 },     /* AREA05 s1/s3 (one room, two states): the square goes on to the right */
+    { 6, 1u << 2, 2 },               /* AREA06 s2, the Mermaid's Singing Rock: the beach goes on (ws_backdrop_mermaid.inc) */
 };
 
 /* the pad when Tomba may walk past the 4:3 limit on that side (right: 1 / left: 0; -1: either): a moved exit there, or
