@@ -26,7 +26,14 @@ static int room(int *area, int *sec)
     return *sec < 32;
 }
 
-/* the pad when this room has an exit the port moves out on that side (right: 1 / left: 0; -1: either), else 0 */
+/* Room sides opened up to the wide edge without a moved exit there (decided room by room, from renders: a wide frame
+   does not always mean wider limits).  sides: 1 = left, 2 = right */
+static const struct { unsigned char area; unsigned int secs; unsigned char sides; } WALK[] = {
+    { 5, 1u << 1 | 1u << 3, 2 },     /* AREA05 s1/s3 (one room, two states): the square goes on to the right */
+};
+
+/* the pad when Tomba may walk past the 4:3 limit on that side (right: 1 / left: 0; -1: either): a moved exit there, or
+   WALK; else 0 */
 int port_ws_side_margin(int right)
 {
     static int last_area = -1, last_sec = -1, sides = 0;
@@ -40,6 +47,8 @@ int port_ws_side_margin(int right)
             if (x->ws0 > 0 || x->ws1 > 0) sides |= 2;
             if (x->ws0 < 0 || x->ws1 < 0) sides |= 1;
         }
+        for (unsigned i = 0; i < sizeof WALK / sizeof WALK[0]; i++)
+            if (WALK[i].area == area && (WALK[i].secs >> sec & 1)) sides |= WALK[i].sides;
     }
     if (!(sides & (right < 0 ? 3 : right ? 2 : 1))) return 0;
     return port_ws_cull < WS_EXIT_MAX ? port_ws_cull : WS_EXIT_MAX;

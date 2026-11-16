@@ -2680,6 +2680,10 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   - `getCollisionPlaneAt` repeats the column at camera limit -/+ 0x80 outwards (it returned nothing past -/+ 0xAA, so
     he fell short of the exit; a stair would have taken him out of the exit's Y range).
   In side view 1 unit is about 1 column at Tomba's depth (measured), so the pad in units is the pad in columns.
+  Walk limits are decided room by room, apart from the exits: a wide frame does not always mean wider limits.  The
+  `WALK` table of `ws_exits.c` opens a side without a moved exit (the clamps and the WHM column as above): AREA05 s1/s3
+  right (the square goes on; its 4:3 WHM wall at H 321 is past the repeated column, so it goes too).  Checked: Tomba
+  stops at H 310 on 4:3, 363 on 16:9, 430 on 21:9, on the floor.
   Moved (19 rooms, each checked by a headless sweep that puts Tomba 70 units from the exit and walks him out, at 4:3,
   16:9, 21:9 and 32:9: same destination, on the floor): AREA00 s5 left; AREA01 s4 right; AREA02 s1 left, s5 right;
   AREA03 s1, s3, s5 left; AREA04 s2 right; AREA05 s1, s3 left; AREA06 s1 right; AREA09 s1 right, s4 and s5 both
