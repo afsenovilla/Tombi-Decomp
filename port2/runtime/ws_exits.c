@@ -55,6 +55,36 @@ int port_ws_side_margin(int right)
 }
 int port_ws_player_margin(void) { return port_ws_side_margin(-1); }
 
+/* getCollisionPlaneAt (fixes.txt): past the opened edge the column of the edge pixel x goes on.  Repeated as it is,
+   its sloped pieces and walls came back every 8 units (a sawtooth floor, a wall every column): the copy keeps the
+   floors, ceilings and filled blocks, each flat at its height at x, and drops the walls. */
+int port_ws_whm_rep;
+static unsigned short ring[16][1 + 32 * 4]; static int ri;
+int port_ws_whm_is_copy(const void *p) { return (const char *)p >= (const char *)ring && (const char *)p < (const char *)(ring + 16); }
+char *port_ws_whm_col(char *col, int x)
+{
+    const unsigned short *s = (const unsigned short *)col;
+    int cnt = s[0], n = 0;
+    if (!port_ws_whm_rep || cnt <= 0 || cnt > 32) return col;
+    port_ws_whm_rep = 0;
+    unsigned short *q = ring[ri++ & 15];
+    for (int i = 0; i < cnt; i++) {
+        const unsigned short *r = s + 1 + 4 * i;
+        unsigned short f = r[0]; short h = (short)r[1], k = (short)r[2];
+        if (!(f & 0x10) && !(f & 3)) continue;             /* a wall (or other boundary): not carried on */
+        if (!(f & 0x10) && k) {                            /* a slope: its height at x (probeFloorPlaneAt's formula) */
+            int lo = r[3] & 15, nn = r[3] >> 4 & 15, m = x & 7, mc = m < lo ? lo : m > lo + nn ? lo + nn : m;
+            if (!nn) continue;
+            if (mc == lo + nn) mc--;                       /* (the formula wraps at lo + nn) */
+            h = (short)(h + k * ((x - m + mc - lo) % nn) / nn); k = 0;
+        }
+        unsigned short *o = q + 1 + 4 * n++;
+        o[0] = f; o[1] = (unsigned short)h; o[2] = (unsigned short)k; o[3] = r[3];
+    }
+    q[0] = (unsigned short)n;
+    return (char *)q;
+}
+
 static int in(int v, int a, int b) { return v >= a && v <= b; }
 
 /* tryStartItemInteraction(o, mode, exit): 1 = not yet (Tomba is in the 4:3 box of a moved exit, not in the moved one) */

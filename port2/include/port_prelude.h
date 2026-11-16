@@ -35,6 +35,7 @@ extern int port_ws_side_margin(int right);   /* widescreen exit rooms (runtime/w
 #define PORT_WSL port_ws_side_margin(0)
 #define PORT_WSR port_ws_side_margin(1)
 #define PORT_WSM port_ws_side_margin(-1)
+extern int port_ws_whm_rep; extern char *port_ws_whm_col(char *col, int x);   /* runtime/ws_exits.c: getCollisionPlaneAt past the edge */
 extern int port_ws_exit_hold(int mode, int exit);   /* runtime/ws_exits.c: an edge exit fires at the wide frame's edge */
 extern int port_funga_lane_flip;  /* runtime/funga.c; used by the playerStepLaneJump hooks, whose signature line differs per version */
 extern int port_ws_backdrop_period(void *, int);   /* --widescreen: repeat a wrapping backdrop column (port2 main0_handwritten.c) */

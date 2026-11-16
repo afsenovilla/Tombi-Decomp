@@ -2677,16 +2677,22 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     (`port_ws_exit_hold`), so the exit fires at the same distance from the wide edge as on 4:3;
   - the camera clamps that keep him 150 (`cameraModeHandler6B`) / 0x90 (`cameraModeHandler6`, `updateCameraFollow`,
     `cameraClampAroundTarget`) units from the camera limit / centre add `PORT_WSL` / `PORT_WSR` (the pad there, else 0);
-  - `getCollisionPlaneAt` repeats the column at camera limit -/+ 0x80 outwards (it returned nothing past -/+ 0xAA, so
-    he fell short of the exit; a stair would have taken him out of the exit's Y range).
+  - `getCollisionPlaneAt` carries the column at camera limit -/+ 0x80 on outwards (it returned nothing past -/+ 0xAA, so
+    he fell short of the exit): `port_ws_whm_col` gives a copy with the floors, ceilings and filled blocks flat at their
+    height at that edge pixel and without the walls (repeated as it was, a sloped piece and a wall came back every 8
+    units: a sawtooth floor in AREA03 s1/s5).  The collision view draws that copy too (it is not in game RAM).
   In side view 1 unit is about 1 column at Tomba's depth (measured), so the pad in units is the pad in columns.
+  Also for AREA05 s1/s3: the notice board at the back (L4 type 0x1A subtype 0x13) takes a 32-unit talk box instead of
+  8 (fixes.txt), it was hard to stand in.
   Walk limits are decided room by room, apart from the exits: a wide frame does not always mean wider limits.  The
   `WALK` table of `ws_exits.c` opens a side without a moved exit (the clamps and the WHM column as above): AREA05 s1/s3
   right (the square goes on; its 4:3 WHM wall at H 321 is past the repeated column, so it goes too).  Checked: Tomba
   stops at H 310 on 4:3, 363 on 16:9, 430 on 21:9, on the floor.
   Moved (each checked by a headless sweep that puts Tomba 70 units from the exit and walks him out, at 4:3, 16:9, 21:9
-  and 32:9: same destination, on the floor; and reviewed room by room on renders): AREA02 s1 left, s5 right; AREA03 s1,
-  s5 left; AREA04 s2 right; AREA05 s1, s3 left; AREA06 s1 right; AREA18 s1 right.  Kept at 4:3 after review:
+  and 32:9: same destination, on the floor; and reviewed room by room on renders): AREA02 s1 left (both lanes; the
+  flowered village, AREA19 on the disc, runs as area 2 section 1 and so has it too), s5 right; AREA03 s1, s5 left;
+  AREA04 s2 right; AREA05 s1, s3 left; AREA06 s1 right; AREA18 s1 both sides (the left one once flag 0x8009CDED is
+  set, as on 4:3).  Kept at 4:3 after review:
   - exits through a door, which stays where it is however wide the room gets: AREA00 s5, AREA01 s4, AREA03 s3,
     AREA09 s1, AREA10 s3 / s7 (left);
   - the AREA09 s4 / s5 stairs: the stair leaves the frame at the top or bottom edge about where the 4:3 edge was, so

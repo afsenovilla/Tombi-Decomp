@@ -24,6 +24,7 @@ int port_show_collision;
 #define CV_POOL_SZ 0xD4
 
 extern char *getCollisionPlaneAt(short x, short y) __attribute__((weak));   /* weak: a version whose port names it otherwise draws only the boxes */
+extern int port_ws_whm_is_copy(const void *p);   /* ws_exits.c: a WHM column copied past an opened edge */
 extern unsigned long port_gte_cfc2(int r);
 extern int port_gpu_overlay_fill(int x, int y, int w, int h, u16 c);
 extern void port_gpu_overlay_end(void);
@@ -95,14 +96,14 @@ void port_colview_tick(void) {
     /* the WHM boundaries of Tomba's plane, path column by path column */
     for (s32 x = H - 420; getCollisionPlaneAt && x <= H + 420; x++) {
         const u8 *col = (const u8 *)getCollisionPlaneAt((short)x, (short)D);
-        if (!col || !port_is_ram_ptr((void *)col)) continue;
+        if (!col || (!port_is_ram_ptr((void *)col) && !port_ws_whm_is_copy(col))) continue;   /* (or the copy past an opened edge: ws_exits.c) */
         int cnt = *(const u16 *)col;
         if (cnt <= 0 || cnt > 32) continue;
         for (int i = 0; i < cnt; i++) {
             const u8 *r = col + 2 + 8 * i;
             u16 attr = *(const u16 *)r; s16 by = *(const s16 *)(r + 2), dy = *(const s16 *)(r + 4);
             int st = r[6] & 15, wd = r[6] >> 4, in = x & 7;
-            if (in < st || in > st + wd) continue;
+            if (dy && (attr & 3) && !(attr & 0x10) && (!wd || in < st || in > st + wd)) continue;   /* a flat floor / ceiling covers the column (probeFloorPlaneAt) */
             int y0 = wd ? by + dy * (in - st) / wd : by, y1 = wd ? by + dy * (in + 1 - st) / wd : by + dy;
             if (attr & 0x10) {            /* filled block: its top edge (the surface) */
                 add3(s, &n, hx, x, by, x + 1, by, D, C_BLOCK);
