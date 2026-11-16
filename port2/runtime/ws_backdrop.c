@@ -737,6 +737,7 @@ static const Room *room;                                 /* the room being drawn
 static void build_redraw(int pad);
 static void gen_cb(int pad);
 #include "ws_backdrop_rooms.inc"
+#include "ws_backdrop_rooms2.inc"
 #define PIECES_TOP4 { 128, 0, 224, 64, 32, 256, 0 }, { 128, 64, 224, 64, 32, 256, 32 }, { 128, 128, 224, 64, 32, 256, 64 }, \
                     { 128, 192, 224, 64, 32, 256, 96 }
 #define OVER_A5 { { 256, 0, 112, 56, 104, 0, 0 }, { 256, 56, 112, 200, 104, 56, 0 }, { 256, 144, 0, 64, 80, 256, 24 }, \
@@ -757,6 +758,9 @@ static const Room ROOMS[] = {
                                                             over the player as two quads) */
     { 9, 3, 224, 1, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 256, 64, 0, 40, 136, 0, 72 }, { 256, 104, 0, 40, 136, 280, 72 } },
       gen_th },                                          /* the treasure hall (the arches drawn again over the player) */
+    { 9, 4, 224, 0, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 256, 64, 0, 192, 152, 0, 8 }, { 256, 64, 144, 128, 112, 192, 120 } },
+      gen_rw },                                          /* the rock wall with the stair down to the right (the stair
+                                                            drawn again over the player as two quads; rooms2.inc) */
 };
 #define NROOMS ((int)(sizeof ROOMS / sizeof ROOMS[0]))
 const char *port_ws_backdrop_rooms;                      /* --ws-backdrop-rooms A:S,A:S,... (decimal; "all") */
