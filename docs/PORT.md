@@ -3271,7 +3271,9 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     strip: 0 texels differ).  With the OpenGL renderer (xvfb, `--window --renderer gl`) the right join measures the same; on the left
     the quad's own truncation (one row up from its row 5, one column left from its pixel 2) puts a 1-row kink in the
     picture's rail inside its first columns, so the line fit there is no reference; at 8x the rail goes on without a
-    visible step.  Weak points: the stringer's copies are 1-3 steps away, so its cracks recur every ~20 columns
+    visible step.  Checked (headless): 16:9 and 21:9 in the game, i386 = wasm2c frames (identical), 4:3 identical with
+    `--ws-backdrop on`, the default (off) identical to `--ws-backdrop off`, AREA09 s5 / s3 and AREA11 s2 strips
+    byte-identical to the build before (pads 53 and 140); not checked on the device.  Weak points: the stringer's copies are 1-3 steps away, so its cracks recur every ~20 columns
     (softened where k changes); the right strip's wall is evenly lit (no further sconces) and a little greyer than
     the glow-warmed wall at the edge; the treads under the rail are copied with the rail's step, so at the strip's
     outer end they sit up to a texel off their own perspective.
