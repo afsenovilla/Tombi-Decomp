@@ -31,7 +31,7 @@ extern void port_gpu_overlay_end(void);
 typedef struct { s16 x0, y0, x1, y1; u16 c; } Seg;
 /* the room exits: the position checks before each tryStartItemInteraction(o, 1, N) of the area code, as inclusive
    ranges (colview_exits.inc, made by tools/colview_exits.py from the decompiled C); cond = other conditions too */
-typedef struct { u8 area, exit, cond; u32 secs; s16 h0, h1, y0, y1, d0, d1; } Exit;
+typedef struct { u8 area, exit, cond; u32 secs; s16 h0, h1, y0, y1, d0, d1; signed char ws0, ws1; } Exit;
 static const Exit EXITS[] = {
 #include "colview_exits.inc"
 };
@@ -140,15 +140,17 @@ void port_colview_tick(void) {
             if (x->area != area || sec > 31 || !(x->secs >> sec & 1)) continue;
             int far = D < x->d0 || D > x->d1;
             u16 c = x->cond ? (far ? 0x2129 : 0x4E7F) : (far ? 0x0110 : 0x023F);
-            s32 h0 = x->h0 < H - 400 ? H - 400 : x->h0, h1 = x->h1 > H + 400 ? H + 400 : x->h1;
+            extern int port_ws_player_margin(void);   /* exits the port moves out (tools/colview_exits.py "ws") */
+            s32 xh0 = x->h0 + x->ws0 * port_ws_player_margin(), xh1 = x->h1 + x->ws1 * port_ws_player_margin();
+            s32 h0 = xh0 < H - 400 ? H - 400 : xh0, h1 = xh1 > H + 400 ? H + 400 : xh1;
             s32 y0 = x->y0 < Y - 320 ? Y - 320 : x->y0, y1 = x->y1 > Y + 240 ? Y + 240 : x->y1;
             if (h0 > h1 || y0 > y1) continue;
-            if (x->h0 == h0) add3(s, &n, hx, h0, y0, h0, y1, D, c);
-            if (x->h1 == h1) add3(s, &n, hx, h1 + 1, y0, h1 + 1, y1, D, c);
+            if (xh0 == h0) add3(s, &n, hx, h0, y0, h0, y1, D, c);
+            if (xh1 == h1) add3(s, &n, hx, h1 + 1, y0, h1 + 1, y1, D, c);
             if (x->y0 == y0) add3(s, &n, hx, h0, y0, h1 + 1, y0, D, c);
             if (x->y1 == y1) add3(s, &n, hx, h0, y1, h1 + 1, y1, D, c);
             int lx, ly;
-            if (nl < 64 && proj_hd(hx, x->h0 == h0 ? h0 + 2 : x->h1 == h1 ? h1 - 40 : (h0 + h1) / 2, x->y0 == y0 ? y0 + 4 : y1 - 12, D, &lx, &ly)) {
+            if (nl < 64 && proj_hd(hx, xh0 == h0 ? h0 + 2 : xh1 == h1 ? h1 - 40 : (h0 + h1) / 2, x->y0 == y0 ? y0 + 4 : y1 - 12, D, &lx, &ly)) {
                 Lab *q = &lab[w][nl++]; q->x = (s16)lx; q->y = (s16)ly; q->exit = x->exit; q->cond = x->cond;
             }
         }

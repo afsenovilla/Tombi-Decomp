@@ -14,6 +14,9 @@ extern XY *D_8007B46C;
 extern unsigned char *D_8007B55C[];
 extern char *WHM_DATA[];
 #define M960 D_8009C960h
+#ifdef PORT2
+extern int port_ws_player_margin(void);
+#endif
 
 char *getCollisionPlaneAt(short x, short y)
 {
@@ -22,6 +25,13 @@ char *getCollisionPlaneAt(short x, short y)
     short r, c;
     unsigned char lim;
 
+#ifdef PORT2
+    if (port_ws_player_margin()) {   /* widescreen exit rooms (runtime/ws_exits.c): the edge column goes on outwards */
+        short lo = CAMERA_SCROLL.minX - 0xaa, hi = CAMERA_SCROLL.maxX + 0xaa;
+        if ((*(int*)&GAME.selectedArea) != 0xe && lo < 0) lo = 0;
+        if (x < lo) x = lo; else if (x > hi) x = hi;
+    }
+#endif
     if (x < CAMERA_SCROLL.minX - 0xaa || CAMERA_SCROLL.maxX + 0xaa < x || ((*(int*)&GAME.selectedArea) != 0xe && x < 0))
         return D_8007B5DC;
     if (M960 == 0 && GAME.selectedSection != 3) {
