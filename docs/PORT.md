@@ -2775,6 +2775,40 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   92).  To approve a room: `approved` = 1 in its ROOMS entry.  Weak points: the join is a straight vertical facet
   line (the model's own edge, outside 4:3); the new facets lie in one plane (the model's vertices wander +-8 in z,
   invisible with flat colours); at 32:9 the 6 columns show the grid's regular pitch a little.
+- **3D room floors** (`runtime/ws_floor3d.c`, called from `port_ws_area_model_link` for GAME 18; preview, OFF by
+  default; enabled by the same flags as the walls above: `--ws-room3d-rooms 18:1`, or `--ws-room3d on`; 2026-11-16):
+  AREA18 s1, the Y crossing (debug select AREA 12 hex, section 1), is real 3D like the Mansion side rooms: one WMD
+  block (245 polygons: 1 FT3, 58 GT3, 186 GT4, texture page 0xF), the same unrotated camera (T = (-160, 120, 544),
+  H 544).  Cause of the sky beside the walls and under the floor at 16:9: missing geometry, not a cull
+  (`PORT_WSXTRA=300 PORT_WSBLK=600` gives the very same frame; the model drawers' tests are already `PORT_WSX`).  The
+  model is as wide as 4:3 needs: the two stone walls run from the tower (z 340) towards the viewer and end at
+  x -65 / 385, z 135 (screen x -20 / 340: 33 sky columns per side at 16:9); the floor's rows end in free edges that
+  run in depth: the path band and the dark grass behind it at x -65 / 385 (screen -85 at the band's front edge, -44 at
+  z 55), the grass slope in front at x 3 / 317 (z -55..-95, screen -15..-30) and x 25 / 295 (z -95..-145).
+  Method, read from the model per side: (1) the wall's end is the (x, z) carrying the most free vertical edges of
+  quads running back and inwards (6 per side: the four brick rows, the foot row and the layer lying on it); each of
+  them goes on towards the viewer along its own two edges (direction, the slope of the wall's top, the rows) with its
+  texture starting again as at the model's own joint between the two wall segments, and the colours of its end; it
+  stops at the near end of the floor polygon the wall ends on (z 55: the path passes in front of the wall).  (2) A
+  floor row is a free edge at one x, polygon inwards, both ends outside the 4:3 picture; it goes on outwards as cells
+  of the edge polygon's width with the edge's own heights and vertex colours at each depth, textured by the edge
+  polygon's own mapping moved one period inwards: the period is how far the model goes on with that very mapping
+  (the path: 180 units = four cells, so the path texture is laid again as a whole; the grass: one cell, repeated as
+  the model repeats it).  (3) The row the wall now stands on is filled up to the wall's line only (one triangle).
+  16:9 adds 13 polygons per side, 21:9 23.  The block is in the model's format (GT3 / GT4, the model's CLUT, page and
+  command bits, winding from the camera-space sign of the source polygon) and is added to the area list; rebuilt when
+  the model's bytes, the strip width or the camera change.  Integers only, no random values; nothing mirrored (the
+  right arm of the path is the game's own mapping of that side), no object invented, only the model's texture pieces
+  and colours.  Everything new lies outwards of edges that are outside the 4:3 picture.  Checked (software, select
+  run with a walk left and right, frames 1400-2500): 4:3 with the flag on and the default 16:9 / 21:9 frames
+  byte-identical to before; with it on the 4:3 centre of every 16:9 / 21:9 frame identical to the default one, no sky
+  pixel left under the floor line in the 16:9 strips (2103 before); OpenGL (xvfb) the same, its 4:3 centre identical
+  on / off; AREA04 s10 / s15 and AREA18 s2 identical.  To approve: `approved` = 1 in ROOMS of ws_floor3d.c.
+  Weak points: at 21:9 and wider the walls end at z 55 (screen x -60 / 380), so beside them there is sky above the
+  path, which runs on to the frame's edge with the grass in front of it (the walls would have to cross the path to
+  reach the frame's edge); the path texture's own grassy left end shows once where the model ended (x -65 / 385:
+  outside 16:9 except for a 5-column sliver, visible at 21:9) and again every 180 units at 32:9; the slope's last
+  row (z -145..-195) is below the picture and is not extended.
 - **Top-down map** (`runtime/ws_topdown.c`, fixes.txt hooks at the end of `topdownDrawMapLayers` /
   `overheadDrawMapLayers` and their USA / JP versions): the overhead background is the room's map picture (8 bpp TIM
   in RAM, scratch 0x1F800394) of which the game uploads a 384x288 window (12x9 tiles of 32 px, USA / JP 384x256) into
@@ -3364,8 +3398,9 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     is a 256-column vignette with rounded black corners at frame column 32, not the hook's (0, 16) sprite), AREA11 s1
     (the cage scene: the hut's roof and its bracket cut by the left edge, the box's riveted door frame by the right
     one), AREA16 s3 / s6 (gears and blue beams cut by both edges), AREA17 s1 (a 384-row picture drawn from frame row
-    -144: not the hook's layout), AREA17 s5 (the engine room: pipes and machines cut by both edges; since done, below: each cut pipe goes on along its own axis), AREA18 s1 (the stone tower: a 3D scene that
-    already fills the wide frame), AREA09 s4 again
+    -144: not the hook's layout), AREA17 s5 (the engine room: pipes and machines cut by both edges; since done
+    below), AREA18 s1 (the Y crossing: not a picture; its walls and floor end just past 4:3: "3D room floors"
+    above), AREA09 s4 again
     (the sconces stand on rock mounds spaced (50, 30.5) along the stair, not a multiple of its four steps (90, 56):
     the right strip would need a new mound and sconce copied from the picture's, a visible duplicate one period from
     the original; since done without copying any mound or sconce, above).  The re-scan of the 96 debug-select rooms at 16:9 found no other fixed-camera picture rooms than
