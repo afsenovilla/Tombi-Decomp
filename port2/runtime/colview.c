@@ -11,6 +11,7 @@
  * 0x1F8000C0, then RTPS with the GTE's own screen distance and offset); port_colview_draw draws them in the vblank with
  * the debug overlay's fills.  Nothing runs without the flag. */
 #include <string.h>
+#include <stdio.h>
 #include "port_runtime.h"
 
 typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32; typedef short s16; typedef int s32;
@@ -28,6 +29,14 @@ extern int port_gpu_overlay_fill(int x, int y, int w, int h, u16 c);
 extern void port_gpu_overlay_end(void);
 
 typedef struct { s16 x0, y0, x1, y1; u16 c; } Seg;
+/* the room exits: the position checks before each tryStartItemInteraction(o, 1, N) of the area code, as inclusive
+   ranges (colview_exits.inc, made by tools/colview_exits.py from the decompiled C); cond = other conditions too */
+typedef struct { u8 area, exit, cond; u32 secs; s16 h0, h1, y0, y1, d0, d1; } Exit;
+static const Exit EXITS[] = {
+#include "colview_exits.inc"
+};
+typedef struct { s16 x, y; u8 exit, cond; } Lab;
+static Lab lab[2][64]; static int nlab[2];
 #define MAXSEG 4096
 static Seg seg[2][MAXSEG]; static int nseg[2], cur;   /* double buffer: the tick fills one while the vblank draws the other */
 static volatile int ready = -1;
@@ -88,7 +97,7 @@ void port_colview_tick(void) {
     int hx = (u8 *)ph == pl + 0x10;
     s32 H = *ph >> 16, D = *pd >> 16;
     /* the WHM boundaries of Tomba's plane, path column by path column */
-    for (s32 x = H - 240; getCollisionPlaneAt && x <= H + 240; x++) {
+    for (s32 x = H - 420; getCollisionPlaneAt && x <= H + 420; x++) {
         const u8 *col = (const u8 *)getCollisionPlaneAt((short)x, (short)D);
         if (!col || !port_is_ram_ptr((void *)col)) continue;
         int cnt = *(const u16 *)col;
@@ -122,6 +131,28 @@ void port_colview_tick(void) {
         s32 x0 = h - l, x1 = x0 + b1, t = y - b2, bt = t + b3;
         add3(s, &n, ohx, x0, t, x1, t, d, c); add3(s, &n, ohx, x0, bt, x1, bt, d, c);
         add3(s, &n, ohx, x0, t, x0, bt, d, c); add3(s, &n, ohx, x1, t, x1, bt, d, c);
+    }
+    /* the exits of this room: their finite edges, at Tomba's depth (dim when his depth is outside the exit's) */
+    {   int area = *(u16 *)PORT_M0(PORT_A_GAME), sec = *(u16 *)PORT_M0(PORT_A_GAME + 2), nl = 0;
+        s32 Y = whole(pl + 0x14);
+        for (unsigned e = 0; e < sizeof EXITS / sizeof EXITS[0]; e++) {
+            const Exit *x = &EXITS[e];
+            if (x->area != area || sec > 31 || !(x->secs >> sec & 1)) continue;
+            int far = D < x->d0 || D > x->d1;
+            u16 c = x->cond ? (far ? 0x2129 : 0x4E7F) : (far ? 0x0110 : 0x023F);
+            s32 h0 = x->h0 < H - 400 ? H - 400 : x->h0, h1 = x->h1 > H + 400 ? H + 400 : x->h1;
+            s32 y0 = x->y0 < Y - 320 ? Y - 320 : x->y0, y1 = x->y1 > Y + 240 ? Y + 240 : x->y1;
+            if (h0 > h1 || y0 > y1) continue;
+            if (x->h0 == h0) add3(s, &n, hx, h0, y0, h0, y1, D, c);
+            if (x->h1 == h1) add3(s, &n, hx, h1 + 1, y0, h1 + 1, y1, D, c);
+            if (x->y0 == y0) add3(s, &n, hx, h0, y0, h1 + 1, y0, D, c);
+            if (x->y1 == y1) add3(s, &n, hx, h0, y1, h1 + 1, y1, D, c);
+            int lx, ly;
+            if (nl < 64 && proj_hd(hx, x->h0 == h0 ? h0 + 2 : x->h1 == h1 ? h1 - 40 : (h0 + h1) / 2, x->y0 == y0 ? y0 + 4 : y1 - 12, D, &lx, &ly)) {
+                Lab *q = &lab[w][nl++]; q->x = (s16)lx; q->y = (s16)ly; q->exit = x->exit; q->cond = x->cond;
+            }
+        }
+        nlab[w] = nl;
     }
     nseg[w] = n; ready = w; cur = w;
 }
@@ -160,5 +191,13 @@ void port_colview_draw(void) {
     if (!port_gpu_overlay_fill(0, 0, 0, 0, 0)) return;
     disp_h = port_gpu_display_h();
     for (int i = 0; i < nseg[r]; i++) { Seg *q = &seg[r][i]; line(q->x0, q->y0, q->x1, q->y1, q->c); }
+    {   extern void port_debug_text(int x, int y, const char *s, u16 col); char b[16];
+        int xl = -port_widescreen, xr = 320 + port_widescreen - 48;
+        for (int i = 0; i < nlab[r]; i++) {
+            Lab *q = &lab[r][i]; int x = q->x < xl ? xl : q->x > xr ? xr : q->x, y = q->y < 0 ? 0 : q->y > disp_h - 8 ? disp_h - 8 : q->y;
+            snprintf(b, sizeof b, q->cond ? "EXIT %d?" : "EXIT %d", q->exit);
+            port_debug_text(x, y, b, q->cond ? 0x4E7F : 0x023F);
+        }
+    }
     port_gpu_overlay_end();
 }

@@ -4007,7 +4007,7 @@ build/port2/tombi2 --headless --skip-movies --frames 5800 --poke 900:1F8001B4:1 
 
 `port2/runtime/colview.c` draws the collision data over the game (launchers: *Mods* "Show collision" on the PC, the
 *App* page on Android). In the game loop (`port_colview_tick`, called from `port_debug_tick`) it reads, for every path
-position within 240 units of Tomba, the WHM column of his depth plane through the game's own `getCollisionPlaneAt`
+position within 420 units of Tomba, the WHM column of his depth plane through the game's own `getCollisionPlaneAt`
 (docs/FORMATS.md "WHM") and the boxes (`+0x6C..0x72`, as `boxesOverlapFlipAware` uses them) of the 200 objects of
 layers 2-5 (`OBJECT_POOL`, `PORT_A_OBJECT_POOL` of `port_version.h`) and of Tomba. Each point is projected as
 `drawObjectSprite` projects a sprite: the camera matrix at scratchpad 0xC0 (`VIEW_CAMERA`), the GTE's screen distance
@@ -4021,6 +4021,17 @@ other boundaries grey; boxes: Tomba white, layer 2 (enemies, NPCs) red, 3 orange
 top-down sections (towns, CLM cell maps) have no WHM: only their boxes show. Verified headless (PAL) in AREA00 s1,
 AREA01 s0/s2, AREA03 s1, AREA04 s0, AREA09 s0, AREA10 s0: the lines sit on the scenery's floors / walls and the boxes
 on the sprites. Without the flag nothing runs.
+
+Room exits: the side-view exit triggers are hard-coded tests in the area overlays (`tryStartItemInteraction(o, 1|2,
+N)` in `updateAreaScroll` and friends, comparing the player's H / Y / D at scratchpad 0x168 / 0x16C / 0x170); there is
+no exit data on the disc. `tools/data/colview_exits.json` lists the 163 boxes read from the C (area, sections, exit,
+H / Y / D ranges, `null` = unbounded, extra condition text, source line); `python3 tools/colview_exits.py` turns it
+into `port2/runtime/colview_exits.inc` (`--check` tells if it is stale). The view draws the finite edges of the
+current section's boxes in orange with an "EXIT n" label ("EXIT n?" and a pale colour when the exit has extra
+conditions: Up pressed, a flag, a purified area...; dimmed when Tomba's depth is outside the box's D range). This is
+meant to see where an exit fires against the 16:9 frame. The top-down / tunnel exits (`func_800270A0`, map
+coordinates) are not drawn yet. Verified headless (PAL) at 4:3 and 16:9 in AREA00 s0, AREA01 s0, AREA02 s5, AREA03 s0,
+AREA05 s1, AREA09 s2.
 
 ### Debug menu: `--debug-menu` (port only, opt-in)
 
