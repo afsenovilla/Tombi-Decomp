@@ -3454,7 +3454,8 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     (the sconces stand on rock mounds spaced (50, 30.5) along the stair, not a multiple of its four steps (90, 56):
     the right strip would need a new mound and sconce copied from the picture's, a visible duplicate one period from
     the original; since done without copying any mound or sconce, above).  The re-scan of the 96 debug-select rooms at 16:9 found no other fixed-camera picture rooms than
-    the ones listed here.
+    the ones listed here.  (It missed AREA06 s2, a fixed picture with flat clear-blue strips, and the scrolling
+    pictures such as AREA06 s1: tools/ws_survey.py lists them; AREA06 s1 / s2 since done, below.)
   - AREA09 s4 (the rock wall with the stair down to the right) was tried with the same generator and dropped: the left
     strip (the rock under the stair, windows translated along the stair) worked, but the right strip lies next to the
     row of sconce mounds along the stair, whose windows came out as dark shadow fragments; matching on relit texels
@@ -3873,6 +3874,70 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     is extrapolated 40 rows; wider strips: the sky
     repeats loosely (few windows of the same rows), the clouds are the picture's three views again and the fields
     under row 176 are the last rows of land repeated downwards.
+  - AREA06 s2 and s1, the Mermaid's Singing Rock (2026-11-16, `runtime/ws_backdrop_mermaid.inc`; off by default,
+    preview with `--ws-backdrop-rooms 6:1,6:2`).  Neither was in the first scan (flat clear blue, 6394ff, in the
+    strips, which reads as sky on one frame; tools/ws_survey.py found them).  Both are outside the table's layout, so
+    they have their own grab (`mm_take`, called from `port_ws_backdrop` like the green tower's `tw_take`; the `ROOMS`
+    rows only carry the room and the approval).
+    **s2 (the mermaid on her rock)** is a fixed 320 x 224 picture of the usual layout (CLUT (128, 511), page (128, 0)
+    + 64 columns of page (256, 0)), but the game draws quads of the same pages over it (`drawArea6SpriteQuad`, objects
+    of type 74): two cloud objects (six pieces; one piece runs from frame column -64 to 128, so the game itself
+    carries that cloud 64 columns into the left strip) and three wave objects that show a loop of four pictures of the
+    sea (phases 1 2 3 4 3 2, 35 / 15 / 20 / 30 / 20 / 15 vblanks; phase 4 is the picture itself; the quads cover the
+    sea from column 0 to 317, opaque where the texel is not 0).  The sea's tone changes with the phase by place, so a
+    strip made from one phase shows a block next to the others: the strips are made once per phase (four pictures:
+    the base picture with that phase's quads, `MM2_Q`), all with the same source texels, and the phase shown is read
+    each frame from the wave objects (the first quad of their current frame, `mm2_phase`; it agrees with the
+    primitives drawn on every frame of 1880-1990).  Measured: the horizon is the dark line on row 134, level; at the
+    left edge the sea ends on the sand on row 185 (the shore is level there and falls to the right: row 186 at column
+    20, 190 at 70, 200 at 120, the same in every phase), the rock mound in the corner runs from row 204 at column 40
+    to row 214 at the edge (10 rows in 40 columns) with a lit rim of 3 rows; at the right edge the cloud is closed
+    (it ends at column 316), the small rock's tail is cut on rows 171-175 (its ridge falls 5 rows in 8 columns, its
+    waterline is row 176 with two rows of foam), the flat rock in the corner on rows 213-223 (its top level); the
+    sky's streaks are arcs round (145, -62) at the left edge (a circle through (0, 33), (50, 83), (167, 110); 0.75 to
+    1.5 rows per column at the edge) and about level at the right one.
+    **s1 (the beach)** is a 640 x 224 picture, CLUT (128, 510), three sprites from pages (576, 0), (704, 0) and
+    (832, 0) at frame row 16, moved by the camera: its left edge is at frame column -2 at the room's left end, its
+    right edge at column 320 at the right end (318 units).  Only its two ends need content: `mm_take` keeps the 640
+    columns and the two extensions (made once) and fills the frame's strips from them for the sprite's column each
+    frame (nothing when the picture covers the wide frame).  Measured: sky to row 151, the sea to row 179, sand below,
+    all level at the left end; the right end is the arch's pillar from row 0 to its foot: strata rising to the right
+    at 0.4 rows per column down to the bulge's lower edge (row 159 at the edge, falling 0.14 rows per column to the
+    right), a smooth neck, the foot from row 180 (level) to its underside (row 205, falling 0.21 per column).
+    The strips (every texel the picture's own plus a tone, nothing mirrored): a band (sky, sea, sand) is its tone
+    plus its detail.  The tone is the band's mean at the edge per row (a box of 21 x 3-5 of the band's own texels),
+    carried outwards level: its own row's at the join, the mean of up to 17 rows 40 columns out, so a streak or a
+    foam line the edge cuts fades out instead of running on.  The detail is a picture texel of the same row (so the
+    waves keep their size per row) minus the mean round it, from a clean window of the picture translated, never
+    mirrored (s2's sand and its sea under row 185, which the picture has no clean row of, from a box); next to the
+    join the detail is the edge's own, cross-faded into the copied one over 4-14 columns; in s2's left sky it is
+    carried along the measured arcs for 20 columns and nothing is copied (the picture's streaks elsewhere run
+    another way).  s2's cut rocks are closed with their own texels moved along their outline: the mound (40 columns,
+    10 rows) until it leaves the frame's bottom, the small rock's tail (8, 5) down to its waterline and its foam, the
+    flat rock level for 30 columns and then down through the bottom.  s1's pillar is closed with its own rock: next
+    to the join the edge's texels carried on along the strata (5 columns, 2 rows), then the rock 56 columns in (its
+    rows moved so that the bulge's edge and the foot's lines go on as measured), the two cut along the cheapest path
+    down the rows within 14 columns (a seam that wanders; cross-faded in the smooth neck); inside an outline drawn
+    here (`MM1_OL`: the picture has no source for that shape; a shoulder from the top, 46 columns at its widest, a
+    foot of 50), darker towards the far side as the arch's other leg is; beyond it the sky, sea and sand are the
+    picture's columns 8 on (its far end, never in the same frame); the sand under the foot is the arch's own sand at
+    the edge's tone.  Every colour is then the nearest of the picture's CLUT.
+    Checked (2026-11-16, headless): 16:9 and 21:9 at both rooms (s1 at both ends and every 4th frame of the fly to
+    the right end: only clear-colour texels change, none is left); the 21:9 frames hold the 16:9 ones; 4:3 identical
+    to the build before; with the default flags both rooms are unchanged (16:9 frames identical to the build
+    before); the twelve other rooms' 16:9 frames with `--ws-backdrop on` identical to the build before (2:5 2:1 5:1
+    5:3 19:1 11:2 9:5 9:3 9:4 17:3 17:4 16:4); OpenGL (xvfb) strips = software (the frames differ only where the game
+    draws its own stretched quads); i386 = wasm2c whole frames; made in 0.007 s (s1) / 0.04 s (s2, four phases) at
+    16:9, 0.014 / 0.09 s at 21:9, 0.03 / 0.21 s at 32:9 (PC).  `tools/ws_seam.py`: s2 left passes in the three bands (sky, sea, sand), s1 left
+    in the three; s2 right: every join passes, the texture checks fail where the picture fails against itself too
+    (the text box, the foam); s1 right: the rock and the sand pass, the neck's join passes but it is lighter further
+    out, the foot's join passes (the stripe check fails).
+    Weak points: the pillar's far outline is a guess (the picture never shows it); its rock is the pillar's own 56
+    columns in again; s2's left sky away from the join is smooth (tone only), plainer than the picture's; in three
+    of the four phases the picture's own columns 318-319 are not covered by the wave quads (the game's), so two
+    still columns stand between the moving sea and the moving strip; the mound's flank repeats once per 40 columns
+    (twice at 21:9); wider than 21:9 the copied windows wrap (a seam at 140-190 columns); the phase is read from the
+    object pool (type 74, subtypes 2-4): another game version would need its own check; not seen on the device.
   Checked (headless, 2026-11-14): at 16:9 and 21:9 in the four rooms; 4:3 runs identical with `--ws-backdrop on` and
   off; with the default flags the new rooms are identical to `--ws-backdrop off`, and AREA02 s5 is identical to the
   build before the table; i386 = wasm2c strips; not checked on the device.
