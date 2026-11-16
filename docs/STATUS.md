@@ -60,6 +60,13 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    ROOMS entry.  The lower wall's cut at both joins fixed (the strips are rectified from the picture as the renderer
    shows it under the arches' stretched quads, and the other wall's texels registered to this wall's rows): every
    sloped line within 0.3 row of its continuation (PORT.md); waiting for the user's look.
+   2026-11-16, AREA09 s4 (rock wall, stair down to the right) redone as a preview, OFF by default
+   (`--ws-backdrop-rooms 9:4`; `gen_rw` in the new `runtime/ws_backdrop_rooms2.inc`): the wall quilted on texels over
+   their light (new 2-D quilter `rq_quilt`, 0.3 s) and relit, no mound or sconce copied (the mound cut by the right
+   edge closes), the stair continued by its own step per side (it is in perspective: 20.4 / 24.5 columns), from the
+   picture as shown (`th_shown`).  Rail and stringer within ~0.5 row across both joins.  To approve: `approved` = 1 in
+   its ROOMS entry.  AREA08 s1 / s3 (the lake) looked at again and not delivered: layers and ray geometry measured
+   (PORT.md), but the near leaves cut by both edges have no clean source to go on with yet.
 
 -2. **WIP (owner's request): restore the Funga Chief's cut event** on the Funga stage (`--cut-content=funga`, AREA10 s2,
    chief already walking there: runtime/funga.c).  What survives (docs/CUT_CONTENT.md "Jungle (AREA10)", "Funga Chief"):

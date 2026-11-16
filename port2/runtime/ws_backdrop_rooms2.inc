@@ -195,11 +195,19 @@ static int rw_want(int side, int X, int y)
 }
 /* the stair's texel for strip column X of side `side`, row y, from k steps further in: x and the rows under the rail
    scaled by the band's widths (x 16 arithmetic) */
+/* left: the source column is the texel the shifted position falls in, the row taken at that column's own rail line
+   (+3/16 row: the rail's top measured at the join) linear between the two nearest rows, so the rail and the stringer's
+   edges land within 0.25 row of their continuation (nearest texels: up to 0.5 off).  Right: nearest texels (the
+   picture there is the stretched quad as shown; interpolated, the rail came out 0.7 row thicker at the join) */
 static int rw_src(int x16, int t, int xs16, Rgb *o)
 {
-    int ts = t > 0 ? (int)((long long)t * rw_h16(xs16) / rw_h16(x16)) : t, xs = xs16 >> 4, ys = fdiv(rw_yr16(xs16) + ts, 16);
+    int ts = t > 0 ? (int)((long long)t * rw_h16(xs16) / rw_h16(x16)) : t, xs = fdiv(xs16, 16), yc, ys, f = 0;
+    if (xs16 > x16) { yc = rw_yr16(xs * 16 + 8) + ts - 5; ys = fdiv(yc, 16); f = yc - ys * 16; }
+    else ys = fdiv(rw_yr16(xs16) + ts, 16);
     if (xs < 0 || xs >= PW || ys < 0 || ys >= PH) return 0;
-    *o = rgb15(pic[ys][xs]); return 1;
+    *o = rgb15(pic[ys][xs]);
+    if (f && ys + 1 < PH) *o = mix(*o, rgb15(pic[ys + 1][xs]), f * 16);
+    return 1;
 }
 #define RW_FACE (34 * 16)                                /* the stringer's face: rows under the rail from here */
 #define RW_XF (6 * 16)                                   /* where k changes, the face's copies cross-faded over this */
@@ -246,6 +254,40 @@ static void rw_join(int side)                            /* the wall at the join
             }
     }
 }
+/* the wall's contrast per row (rows y +- 16): the spread of the strip's luminance (its first 40 columns) onto the
+   picture's (its 32 columns next to the edge), stair and sconces out, at most x 0.8 .. x 1.6 */
+static void rw_contrast(int side)
+{
+    static int k256[PH];
+    for (int y = 0; y < PH; y++) {
+        long long s[2] = { 0, 0 }, q[2] = { 0, 0 }; int n[2] = { 0, 0 };
+        for (int yy = y - 16; yy <= y + 16; yy++) {
+            if (yy < 0 || yy >= PH) continue;
+            for (int i = 0; i < 40; i++) {
+                int x = side ? PW - 1 - i : i, l;
+                if (i < 32 && !rw_band(x, yy) && !rw_sconce(x, yy)) { l = lum(rgb15(pic[yy][x])); s[0] += l; q[0] += l * l; n[0]++; }
+                if (!rw_band(side ? PW + i : -1 - i, yy)) { l = lum(cv[(size_t)yy * vb_ow + i]); s[1] += l; q[1] += l * l; n[1]++; }
+            }
+        }
+        k256[y] = 256;
+        if (n[0] > 64 && n[1] > 64) {
+            long long v0 = q[0] / n[0] - (s[0] / n[0]) * (s[0] / n[0]), v1 = q[1] / n[1] - (s[1] / n[1]) * (s[1] / n[1]);
+            if (v0 > 0 && v1 > 0) k256[y] = clampi(isqrt_i((int)(v0 * 65536 / v1)), 205, 410);
+        }
+    }
+    for (int y = 0; y < PH; y++) {
+        int m = 0, c = 0;
+        for (int X = 1; X <= 40; X++) if (!rw_band(side ? PW - 1 + X : -X, y)) { m += lum(cv[(size_t)y * vb_ow + X - 1]); c++; }
+        if (!c) continue;
+        m /= c;
+        for (int X = 1; X <= vb_ow; X++) {
+            Rgb *p = &cv[(size_t)y * vb_ow + X - 1]; int l = lum(*p), t;
+            if (l <= 0) continue;
+            t = m + (l - m) * k256[y] / 256; if (t < 0) t = 0;
+            p->r = clampi(p->r * t / l, 0, 255); p->g = clampi(p->g * t / l, 0, 255); p->b = clampi(p->b * t / l, 0, 255);
+        }
+    }
+}
 static u16 rw_raw[PH][PW];                               /* the picture, given back to pic at the end */
 static const RqBand RW_BR ={ 0, PH, 16, 28, 6, 6, 0, PW, 0, PH, -1 };
 static const RqBand RW_BL = { 0, PH, 16, 28, 6, 6, 0, PW, 0, PH, -1 };
@@ -275,6 +317,7 @@ static void gen_rw(int pad)
                 Rgb *p = &cv[(size_t)y * vb_ow + X - 1]; int l = rw_want(side, X, y);
                 p->r = clampi(p->r * l / 128, 0, 255); p->g = clampi(p->g * l / 128, 0, 255); p->b = clampi(p->b * l / 128, 0, 255);
             }
+        rw_contrast(side);
         rw_join(side);
         for (int y = 0; y < PH; y++)                     /* the stair */
             for (int X = 1; X <= vb_ow; X++) { Rgb o; if (rw_stair(side, X, y, &o)) cv[(size_t)y * vb_ow + X - 1] = o; }

@@ -3225,6 +3225,62 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     OpenGL (sill top, a soft edge, +0.17 / -0.21), and no run of the strip off by more than the line's own pixel
     staircase (+-0.25-0.5); beam, recess line and plaster unchanged (within 0.2).  At OpenGL internal resolution > 1
     the HD picture's quads are a continuous stretch; the strips use the 1x model (within a fraction of a row).
+  - AREA09 s4 (the rock wall with the stair down to the right, 2026-11-16, `gen_rw` in `runtime/ws_backdrop_rooms2.inc`;
+    off by default, preview with `--ws-backdrop-rooms 9:4`).  Dropped twice before (below); redone with fresh eyes.
+    The picture, plus the stair drawn again over the player as two quads (page 256 u 64-255 v 0-151 -> (0, 8), u
+    64-191 v 144-255 -> (192, 120)).  A rock wall lit by five sconces, each on a rock mound, the mounds in a row along
+    the stair one every (50, 30.5); the stair (rail, balusters, red treads, the marble stringer) from the top left to
+    the bottom right, in perspective (the balusters 19.5 columns apart at the left edge, 25 at the right one, the
+    stringer widening): the rail's top row yr(x) = 9.6 + 0.6167 x, the stringer's lower edge 71.6 + 0.032 x rows under
+    it (column profiles); one step along the rail (20.4, 12.6) at the left edge, (24.5, 15.1) at the right one (2-D
+    matches of the stair band against itself, per side: a single projective step for the whole stair left the treads,
+    which lie deeper than the rail, misaligned).  The strips:
+    - the wall: a new 2-D quilter (`rq_quilt`: block columns from the join outwards, each top to bottom; windows from
+      a candidate list on a grid of 2, overlap error against the picture's edge columns or the canvas, minimum-error
+      cuts both ways, never mirrored; windows near where they go or near the last four used penalised; 0.3 s for both
+      strips) run on the texels over their light (the wall's luminance averaged over 17 x 17, stair and sconces out),
+      so a window from a sconce's glow and one from the shade join by their texture, not their light, then lit with the
+      light wanted where it lands (the slow part of the first try, relit matching, is now one division per texel).  On
+      the right the windows come only from the wall more than 52 rows over the rail with the sconces and their glow's
+      core (radius 22) out: no mound or sconce is copied, so the strip has none and the mound row ends with the
+      picture's last mound; the light wanted is the edge column's light of the row with the last sconce's glow
+      (flame (283, 125)) falling off as S^2 / (S^2 + r^2), S 30, and in the rows of the mound cut by the edge (138 down)
+      eased over 24 columns to the wall's light over it, so that mound closes.  On the left the windows come from the
+      rock under the stringer, lit as the edge column where the texel's line parallel to the stair meets it (the
+      shadow under the stringer runs along it);
+    - the stair: the picture's own stair k steps further in (the fewest that land 3 columns inside), its rows under the
+      rail scaled by the band's widths there and here (the stringer's lower edge goes on along its own line); on the
+      stringer's face (34 rows under the rail on) the copies k and k + 1 are cross-faded over the 6 columns before k
+      changes (the marble's shading is not periodic: hard seams every step before);
+    - the picture as shown: the stair's quads span one texel less than their pixels (191 / 127 texels over 192 / 128
+      columns), so on the screen the right edge's stair is up to a column / row off the picture; the strips are made from
+      the picture as the active renderer shows it (`th_shown`, gen_th's model; checked: the frame's picture matches it
+      in every edge column);
+    - the join: per row the wall's first 8 columns' mean RGB onto the picture's last 8 (fading by 40), its first column
+      onto the picture's last one (fading over 6).
+    Steps of the sloped lines across the joins (strip columns 1-8 against the line fitted on the picture's columns
+    1-14, from the game frame): left rail top -0.53..+0.08 row (mean -0.24), stringer's lower edge -0.07..+0.26;
+    right rail top -0.37..+0.01, rail bottom -0.04..+0.49.  ws_seam (right, bands 0-40 / 40-80 / 80-120 / 100-140 /
+    140-180): every join step within the picture's own, all pass; the bands the stair crosses (180-224 right, 0-80
+    left) differ by design (stair against wall shares).  Width-independent (pad 120 starts with the pad 53 strip: 0
+    texels differ).  Weak points: the stringer's copies are 1-3 steps away, so its cracks recur every ~20 columns
+    (softened where k changes); the right strip's wall is evenly lit (no further sconces) and a little greyer than
+    the glow-warmed wall at the edge; the treads under the rail are copied with the rail's step, so at the strip's
+    outer end they sit up to a texel off their own perspective.
+  - AREA08 s1 / s3 (the lake, the same picture; looked at again 2026-11-16, not delivered).  How it is drawn (from
+    `--dump-draws`): the water first (two quads of page 256, u 64-255 v 0-119 -> picture (0, 104), u 64-191 v 120-239
+    -> (192, 104)), then the picture's two sprites over it (page 128 and page 256 u 0-63, texel colour 0 clear: the
+    trees' feet, the pier and the near leaves stand in the water), then the light rays: a 4 bpp layer (pages 384 /
+    448, CLUT (128, 510), 14 grey levels) drawn semi-transparent with B + F (checked against the frame).  `grab()` as
+    it is would put the water over the trees' feet.  The rays come from one point above the frame, C = (30.25,
+    -15.25) (fitted: the luminance gradient across the layer's rays is perpendicular to the line from C, residual 2 %;
+    the left and the right rays fit the same point), and the glow round the source is round about G = (12, -44)
+    (tone 25 to 50 texels from G, 0 from ~125).  A prototype (rays continued along their lines from C with their own
+    fade, the glow by its radial profile, added B + F; the picture quilted in three bands) showed what is still
+    missing: the near leaves (a big foreground spray at the left edge, rows 60-190; light-green leaves and the crown at
+    the right edge, rows 0-140 and 175-215) are cut by both edges, and the picture has no clean leaf windows to go on
+    with them without copying the same leaves next to themselves; the right edge's crown needs foliage from the top
+    canopy (rows 0-45) taken at other rows.  Not delivered until that is solved.
   - Looked at in the same round (2026-11-16) and dropped, with the reason: AREA18 s2 (the witch's kitchen: rafters of
     a roof slope cut by both edges, a cupboard / shelf wall at the left and a bunch of grapes cut by the right edge:
     every edge holds objects, nothing to continue without inventing them), AREA10 s8 (the wise man's room: its picture
@@ -3235,15 +3291,16 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     already fills the wide frame), AREA09 s4 again
     (the sconces stand on rock mounds spaced (50, 30.5) along the stair, not a multiple of its four steps (90, 56):
     the right strip would need a new mound and sconce copied from the picture's, a visible duplicate one period from
-    the original).  The re-scan of the 96 debug-select rooms at 16:9 found no other fixed-camera picture rooms than
+    the original; since done without copying any mound or sconce, above).  The re-scan of the 96 debug-select rooms at 16:9 found no other fixed-camera picture rooms than
     the ones listed here.
   - AREA09 s4 (the rock wall with the stair down to the right) was tried with the same generator and dropped: the left
     strip (the rock under the stair, windows translated along the stair) worked, but the right strip lies next to the
     row of sconce mounds along the stair, whose windows came out as dark shadow fragments; matching on relit texels
-    fixed that but cost 8-20 s per room entry (the others take ~2 s).  Not attempted: AREA16 s4 (its picture is 672 rows,
+    fixed that but cost 8-20 s per room entry (the others take ~2 s); since done (above: matching on the texels over
+    their light, 0.3 s).  Not attempted: AREA16 s4 (its picture is 672 rows,
     drawn as three 256-row sprite sets shifted by the camera: the hook only takes a picture whose left sprite is at
     frame row 16), AREA08 s1 / s3 (a 4 bpp layer of near trees and translucent light rays over the 8 bpp picture, CLUT
-    row 510: the rays converge on a point above the frame), AREA16 s5 (the bell tower: pillars cut by both edges).
+    row 510: the rays converge on a point above the frame; looked at again, above), AREA16 s5 (the bell tower: pillars cut by both edges).
     Checked (headless, 2026-11-15): the two new rooms at 16:9 and 21:9 (standalone and in the game), 4:3 identical with
     `--ws-backdrop on`, off by default (the clear colour), AREA02 s5 / s1, AREA05 s1 and AREA19 s1 strips byte-identical
     to the build before (standalone, pads 53 and 140), i386 = wasm2c frames; not checked on the device.
