@@ -56,7 +56,7 @@ static int proj_hd(int hx, s32 h, s32 y, s32 d, int *sx, int *sy) {
 }
 static void add(Seg *s, int *n, int x0, int y0, int x1, int y1, u16 c) {
     if (*n >= MAXSEG) return;
-    if ((x0 < -64 && x1 < -64) || (x0 > 640 && x1 > 640) || (y0 < -64 && y1 < -64) || (y0 > 400 && y1 > 400)) return;
+    if ((x0 < -400 && x1 < -400) || (x0 > 720 && x1 > 720) || (y0 < -64 && y1 < -64) || (y0 > 520 && y1 > 520)) return;
     Seg *q = &s[(*n)++]; q->x0 = (s16)x0; q->y0 = (s16)y0; q->x1 = (s16)x1; q->y1 = (s16)y1; q->c = c;
 }
 static void add3(Seg *s, int *n, int hx, s32 h0, s32 y0, s32 h1, s32 y1, s32 d, u16 c) {
@@ -129,12 +129,14 @@ void port_colview_tick(void) {
 /* every fill is clipped to the displayed picture: shims/gpu.c writes the overlay straight into VRAM, so a fill outside it
    would land in the texture pages */
 extern int port_widescreen;
+extern int port_gpu_display_h(void);
+static int disp_h = 240;
 static void put(int x, int y, int w, int h, u16 c) {
     int x0 = -port_widescreen, x1 = 320 + port_widescreen;
     if (x < x0) { w -= x0 - x; x = x0; }
     if (x + w > x1) w = x1 - x;
     if (y < 0) { h += y; y = 0; }
-    if (y + h > 240) h = 240 - y;
+    if (y + h > disp_h) h = disp_h - y;
     if (w > 0 && h > 0) port_gpu_overlay_fill(x, y, w, h, c);
 }
 static void line(int x0, int y0, int x1, int y1, u16 c) {
@@ -156,6 +158,7 @@ void port_colview_draw(void) {
     int r = ready;
     if (!port_show_collision || r < 0) return;
     if (!port_gpu_overlay_fill(0, 0, 0, 0, 0)) return;
+    disp_h = port_gpu_display_h();
     for (int i = 0; i < nseg[r]; i++) { Seg *q = &seg[r][i]; line(q->x0, q->y0, q->x1, q->y1, q->c); }
     port_gpu_overlay_end();
 }

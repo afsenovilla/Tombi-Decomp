@@ -1120,6 +1120,8 @@ int port_gpu_overlay_fill(int x, int y, int w, int h, u16 c) {
     return 1;
 }
 void port_gpu_overlay_end(void) { if (be->list_end) be->list_end(); }
+/* the displayed picture's height (runtime/colview.c clips its fills to it): 240 NTSC, 256 PAL */
+int port_gpu_display_h(void) { RECT *d = (RECT *)cur_dispenv; int h = d->h > 0 ? d->h : 240; return h > 512 ? 512 : h; }
 static void path_for(char *buf, const char *kind) { snprintf(buf, 512, "%s/%s%06d.png", port_dump_dir, kind, port_frame); }
 /* the window present of the displayed frame (port_gpu_vblank; --fps: every present, interpolated or not) */
 static void present_window(void) {
