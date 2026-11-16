@@ -2821,7 +2821,8 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   runs byte-identical).  Search over the 96 debug-select rooms (2200 frames each, 16:9; the 30 with a static camera
   looked at): one more case, AREA17 s5 (the engine room, raft return NPCs, updateRaftReturnNpc): two NPCs wait at x
   ~340 / ~384 right of the picture and walk in after the room's "CLEAR!" event (~frame 2150 of the select run); their
-  walk is not in the overlay's NPC step (likely animation-driven), not fixed yet.  AREA05 s1 / s3: an NPC half inside
+  walk is not in the overlay's NPC step (likely animation-driven), not fixed yet.  (They are sprites, not part of
+  the picture: with the room's strips on they stand on the right strip's floor while they wait.)  AREA05 s1 / s3: an NPC half inside
   the 4:3 picture (x -14..18), not parked.  Only the select's default story flags were covered.
 - **Room picture strips** (`runtime/ws_backdrop.c`, `shims/gpu.c` `ws_backdrop`; on by default with `--widescreen`
   since the user approved it on 2026-11-14, `--ws-backdrop off` disables it): AREA02 s5's background is one pre-rendered 320x224 8 bpp picture (VRAM
@@ -3363,7 +3364,7 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     is a 256-column vignette with rounded black corners at frame column 32, not the hook's (0, 16) sprite), AREA11 s1
     (the cage scene: the hut's roof and its bracket cut by the left edge, the box's riveted door frame by the right
     one), AREA16 s3 / s6 (gears and blue beams cut by both edges), AREA17 s1 (a 384-row picture drawn from frame row
-    -144: not the hook's layout), AREA17 s5 (the engine room: pipes and machines cut by both edges), AREA18 s1 (the stone tower: a 3D scene that
+    -144: not the hook's layout), AREA17 s5 (the engine room: pipes and machines cut by both edges; since done, below: each cut pipe goes on along its own axis), AREA18 s1 (the stone tower: a 3D scene that
     already fills the wide frame), AREA09 s4 again
     (the sconces stand on rock mounds spaced (50, 30.5) along the stair, not a multiple of its four steps (90, 56):
     the right strip would need a new mound and sconce copied from the picture's, a visible duplicate one period from
@@ -3637,6 +3638,55 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   Checked (headless, 2026-11-14): at 16:9 and 21:9 in the four rooms; 4:3 runs identical with `--ws-backdrop on` and
   off; with the default flags the new rooms are identical to `--ws-backdrop off`, and AREA02 s5 is identical to the
   build before the table; i386 = wasm2c strips; not checked on the device.
+  - AREA17 s5 (the Iron Castle engine room, 2026-11-16, `gen_en` in `runtime/ws_backdrop_engine.inc`; off by default,
+    preview with `--ws-backdrop-rooms 17:5`).  Dropped at first ("pipes and machines cut by both edges").  How it is
+    drawn: the 256 + 64 column sprite pair (the hall's layout, 256 rows drawn) is only the room's box (back wall, side
+    walls, beams, floor, the furnace); boilers, pipes, wheel, gears, hoses and coal are 19 more raw quads (CLUT 128,511,
+    pages 128 / 256 / 384) drawn over it every frame, six of them animated by drawing other texels (steam, wheel,
+    gears, the grate's glow; all inside columns 71-256).  A quad of w pixels spans w - 1 texels, so `en_take()` (called
+    from `grab()` for this room only) puts the scene together as the renderer shows it (software: rounded half up;
+    OpenGL: truncated), keeps the box alone (`en_bk`) and the quad of each texel (`pic_ov`); equal to the software
+    frame's 4:3 columns outside the sprites and the animated quads.  The darkness before the power is on is a
+    subtractive rectangle over the whole frame, which the wide plane already extends: the strips darken with the
+    picture.  The two NPCs that wait right of the picture are sprites (they stand on the right strip's floor).
+    Measured: the side walls' lines (beam edges, moulding, the rail at row 148, the foot, the pipe under the right
+    beam) meet at (158, 155.6); the floor is iron plates, seams towards that point, 1.05 wide in f = (x - 158) / (y -
+    155.6), its light flat past |f| 0.75 on the left (74-82), falling on the right (90 at f 1 to 62 at f 3).  The
+    strips:
+    - walls and floor in perspective from the box alone (no pipe or boiler copied): a column dx from the vanishing
+      point shows the wall one step further along it (1 / dx' = 1 / dx + n c, a translation in the wall's plane; c =
+      0.0016 left, 0.000826 right), rows scaled about the horizon by dx / dx' (bilinear), so every line to the
+      vanishing point goes on exactly.  Left: the cut panel is closed by the wall's post (columns 3-13 of the strip)
+      and the next panel starts; right: the 20 clean columns by the edge (beam, the pipe under it, the riveted plate:
+      its bolt comes back once a block, a row of bolts along the wall).  A block's first columns are lit per row to
+      meet the column before (fading over 24).  Below the rail the picture's walls are hidden (a bracket; the
+      furnace's skirt, which ends at column 318): the one clean column goes on along the rays with the grain of the
+      wall 83 rows higher.  Floor: the same row one plate further in, times the measured light at the target over the
+      source;
+    - the hoses along the back wall's foot go on along the side wall's foot (the rays);
+    - left: the rust pipe (rows 91-125) and the grey pipe in front (145-182) reach the edge at the end of an elbow
+      (outline and highlight still 0.3 row a column, flattening), so they finish the turn (1.45 rows over 10 columns)
+      and run level off the outer edge with the cross-section they have at the edge; the big grey pipe at the top
+      (highlight at column 11, right limb at 24, as wide as the pipe beside it plus 4 columns) gets its left limb,
+      round, down to where the elbow's outline re-enters at row 58;
+    - right: the copper pipe is a three-piece elbow (upright, 46 degrees, 23 degrees) with a ring on each joint; the edge
+      cuts the second ring and all but a wedge of the third piece.  The ring's top face, rim and groove go on along
+      quarter ellipses to its end 8.5 columns out (where the groove meets the middle piece's lower outline, 167.5 -
+      1.05 X), each band with its texels at the edge, darkening to the end as the first ring does; the third piece
+      runs off along its upper outline (122 - 0.417 X), 38 rows high, with the middle piece's cross-section (its
+      texels between the rings averaged by distance from its upper outline; the third piece's own seven rows at the
+      edge agree with it within 8 levels);
+    - the runs carry the grain of an upright stretch of the same pipe (texels less their column and row means, 3-column
+      windows by a position hash).
+    Checks (headless, 2026-11-16): the 4:3 run and the default 16:9 run byte-identical to the build before; the 4:3
+    centre of the 16:9 frame unchanged; the other twelve rooms' 16:9 frames with `--ws-backdrop on` byte-identical
+    (2:5 2:1 5:1 5:3 19:1 11:2 9:5 9:3 9:4 17:3 17:4 16:4); 21:9 starts with the 16:9 columns (frame 2400, 0 texels
+    differ); OpenGL (xvfb) strips = the generator on the picture as OpenGL shows it; i386 = wasm2c whole frames at 16:9
+    and 21:9; 0.01 s per build.  Not checked on the device.  Weak points: the three long runs are plain (no ring or
+    bend is invented, so at 21:9 they are 120 columns of smooth pipe); the hidden end of the second ring has no bolt;
+    the walls' texels are magnified 1.3-1.9 x (softer than the picture's wall by the edge); the right wall repeats
+    its 20 columns (bolt and streaks) every block; the rust pipe keeps the shadowed section it has at the cut (no
+    highlight); only the debug select's default state was seen.
 - **Sub-screens** (Select screens Objetos / Eventos / Estado / Mapa, memory card, options, button config, screen
   adjust).  The Select screens (`subScreenDrawTabs`, D0SPSUB / D0SPSUB3, `#ifdef PORT2`) call `port_ws_layout(left cut,
   right cut, below)` each frame; while it is set, `shims/gpu.c` spreads the textured primitives of the frame
