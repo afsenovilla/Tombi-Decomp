@@ -773,7 +773,7 @@ static const Room ROOMS[] = {
                                                             ws_backdrop_kitchen.inc) */
     { 17, 5, 256, 0, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, gen_en },   /* the Iron Castle engine room (preview;
                                                             ws_backdrop_engine.inc) */
-    { 16, 5, 256, 0, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 256, 72, 96, 48, 80, 136, 0 }, { 256, 64, 0, 88, 96, 64, 0 },
+    { 16, 5, 256, 1, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 256, 72, 96, 48, 80, 136, 0 }, { 256, 64, 0, 88, 96, 64, 0 },
       { 256, 152, 0, 96, 96, 152, 0 }, { 256, 136, 104, 88, 24, 0, 199 } }, gen_bt },   /* the bell tower (the clapper, the
                                                             bell and the floor's near left part drawn again over the
                                                             player; ws_backdrop_belltower.inc) */
