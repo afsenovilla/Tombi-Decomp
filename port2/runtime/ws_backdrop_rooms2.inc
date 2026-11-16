@@ -109,12 +109,15 @@ static void rq_quilt(int side, const RqBand *b, int seed)
  *     sconce's glow falling off (flame (283, 125)), and in the mound cut by the edge (its rows at the edge) eased
  *     over 24 columns to the wall's light over it, so that mound closes.  On the left the windows come from the
  *     rock under the stringer, lit as the edge column where the texel's line parallel to the stair meets it (the
- *     shadow under the stringer runs along it);
+ *     shadow under the stringer runs along it); then its contrast per row matched to the picture's next to the edge
+ *     (rw_contrast);
  *   - the stair: the picture's own stair k steps further in (k the fewest that land 3 columns inside), its rows below
  *     the rail scaled by the band's widths there and here, so rail, balusters, treads and the stringer's edges go on
- *     along their lines;
+ *     along their lines (the stringer's face cross-faded where k changes; rw_src);
  *   - the join: per row, the wall's first 8 columns' mean onto the picture's last 8 (fading by 40) and its first column
- *     onto the picture's last one (fading over 6). */
+ *     onto the picture's last one (fading over 6).
+ * All of it from the picture as the renderer shows it: the stair's quads span a texel less than their pixels, so the
+ * right edge's stair is up to a column / row off the picture there (th_shown, gen_th's model). */
 static int rw_yr16(int x16) { return 154 + fdiv(x16 * 9867, 16000); }   /* the rail's top row (x 16) at
                                                             column x16 / 16 */
 static int rw_h16(int x16) { return 1146 + fdiv(x16 * 32, 1000); }   /* the band's height (x 16) */

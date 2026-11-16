@@ -3237,8 +3237,7 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     which lie deeper than the rail, misaligned).  The strips:
     - the wall: a new 2-D quilter (`rq_quilt`: block columns from the join outwards, each top to bottom; windows from
       a candidate list on a grid of 2, overlap error against the picture's edge columns or the canvas, minimum-error
-      cuts both ways, never mirrored; windows near where they go or near the last four used penalised; 0.3 s for both
-      strips) run on the texels over their light (the wall's luminance averaged over 17 x 17, stair and sconces out),
+      cuts both ways, never mirrored; windows near where they go or near the last four used penalised) run on the texels over their light (the wall's luminance averaged over 17 x 17, stair and sconces out),
       so a window from a sconce's glow and one from the shade join by their texture, not their light, then lit with the
       light wanted where it lands (the slow part of the first try, relit matching, is now one division per texel).  On
       the right the windows come only from the wall more than 52 rows over the rail with the sconces and their glow's
@@ -3247,11 +3246,16 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
       (flame (283, 125)) falling off as S^2 / (S^2 + r^2), S 30, and in the rows of the mound cut by the edge (138 down)
       eased over 24 columns to the wall's light over it, so that mound closes.  On the left the windows come from the
       rock under the stringer, lit as the edge column where the texel's line parallel to the stair meets it (the
-      shadow under the stringer runs along it);
+      shadow under the stringer runs along it); then per row (rows +- 16) the wall's luminance spread (its first 40
+      columns) onto the picture's 32 columns next to the edge (x 0.8 .. 1.6: the left rock came out flatter);
     - the stair: the picture's own stair k steps further in (the fewest that land 3 columns inside), its rows under the
       rail scaled by the band's widths there and here (the stringer's lower edge goes on along its own line); on the
       stringer's face (34 rows under the rail on) the copies k and k + 1 are cross-faded over the 6 columns before k
-      changes (the marble's shading is not periodic: hard seams every step before);
+      changes (the marble's shading is not periodic: hard seams every step before); on the left the source row is
+      taken at the source column's own rail line, linear between the two nearest rows (+3/16 row, measured at the
+      join), so the rail and the stringer's edges land within 0.25 row (nearest texels: up to 0.5 off); on the right
+      nearest texels (there the picture is the stretched quad as shown, and interpolated rows made the rail 0.7 row
+      thicker at the join);
     - the picture as shown: the stair's quads span one texel less than their pixels (191 / 127 texels over 192 / 128
       columns), so on the screen the right edge's stair is up to a column / row off the picture; the strips are made from
       the picture as the active renderer shows it (`th_shown`, gen_th's model; checked: the frame's picture matches it
@@ -3259,11 +3263,15 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     - the join: per row the wall's first 8 columns' mean RGB onto the picture's last 8 (fading by 40), its first column
       onto the picture's last one (fading over 6).
     Steps of the sloped lines across the joins (strip columns 1-8 against the line fitted on the picture's columns
-    1-14, from the game frame): left rail top -0.53..+0.08 row (mean -0.24), stringer's lower edge -0.07..+0.26;
-    right rail top -0.37..+0.01, rail bottom -0.04..+0.49.  ws_seam (right, bands 0-40 / 40-80 / 80-120 / 100-140 /
-    140-180): every join step within the picture's own, all pass; the bands the stair crosses (180-224 right, 0-80
-    left) differ by design (stair against wall shares).  Width-independent (pad 120 starts with the pad 53 strip: 0
-    texels differ).  Weak points: the stringer's copies are 1-3 steps away, so its cracks recur every ~20 columns
+    1-14, from the game frame, software renderer): left rail top -0.12..+0.25 row, stringer's lower edge -0.05..+0.26;
+    right rail top -0.37..-0.02, rail bottom +0.24..+0.49 (columns 1-6; 7-8 cross a baluster).  ws_seam (right, bands
+    0-40 / 40-80 / 80-120 / 100-140 / 140-180; left 12-80 / 90-130 / 130-170 / 170-224): every join step within the
+    picture's own, all pass; the right bands the stair crosses (180-224) differ by design (stair against wall shares).
+    0.5 s per room entry at 16:9 (both strips; 0.9 s at 32:9).  Width-independent (pad 120 starts with the pad 53
+    strip: 0 texels differ).  With the OpenGL renderer (xvfb, `--window --renderer gl`) the right join measures the same; on the left
+    the quad's own truncation (one row up from its row 5, one column left from its pixel 2) puts a 1-row kink in the
+    picture's rail inside its first columns, so the line fit there is no reference; at 8x the rail goes on without a
+    visible step.  Weak points: the stringer's copies are 1-3 steps away, so its cracks recur every ~20 columns
     (softened where k changes); the right strip's wall is evenly lit (no further sconces) and a little greyer than
     the glow-warmed wall at the edge; the treads under the rail are copied with the rail's step, so at the strip's
     outer end they sit up to a texel off their own perspective.
