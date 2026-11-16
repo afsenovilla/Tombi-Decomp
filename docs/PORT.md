@@ -3346,7 +3346,10 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     the next bar with its screws cut by the screen edge, at 21:9 the next window too.  The window's texels the picture
     does not show (left of the slanted edge on the lower rows, at most 9 columns) take, on the glass, the edge's colour
     on their screen row (the lit side and the dark are bands upright on the screen, a reflection: copied along the
-    wall's rows they came out as a staircase), on the frame's rows the edge texel on the wall's line.  (The first
+    wall's rows they came out as a staircase), on the frame's rows the edge texel on the wall's line.  Every unit
+    texel is read at its exact position (clamped to the edge on the glass, so continuous), and the frame's rim meets
+    the next window blended over half a column: the second version rounded to rectified texels and switched between
+    the glass fill and the picture per texel, and the rim and the glass showed 1-texel steps (rejected in review).  (The first
     version continued the edge's colour along the wall's lines over the whole strip: a plain grey slab with no frame or
     screws, its lower 15 rows darkened by the window's reflection; rejected in review.)
     The handrail's lower edge (its shadow on the slats) is no line along the wall: it is all but level on the screen (row
@@ -3364,8 +3367,8 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     (perspective); in the panels' rows the line measure compares different elements (the strip's first columns are
     the window's rest or the next frame's rim), so the 8x crops are the check there.  Weak points: the window's width
     outwards is not visible (its outer end is taken where the picture's edge is at the top rows); the panels and slats
-    are the picture's own, so the strip repeats them (as the wall does); the leaning rims alias in steps of 1 texel
-    every ~14 rows, like the picture's own.  0.02 s per room entry (pad 53, 266 alike).  Checked (headless): standalone
+    are the picture's own, so the strip repeats them (as the wall does); the leaning rims are smooth (read at their
+    exact position, sharpened bilinear).  0.02 s per room entry (pad 53, 266 alike).  Checked (headless): standalone
     at pads 53, 101, 120 and 266 (a wider strip starts with the 16:9 one's columns: 0 texels differ), the game at 16:9
     and 21:9 = the standalone, the OpenGL renderer's strips = the software one's, default flags (off) unchanged, the
     other rooms untouched (only additions: the table's two entries and gen_hl), i386 = wasm2c frames (16:9, 21:9);

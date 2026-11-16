@@ -3074,44 +3074,40 @@ static int hl_src(int s, long long kg, long long jq, Rgb *o)
    rectified row, so every line goes on); the window's texels the picture does not show (left of the slanted edge on
    the lower rows, at most 9 columns) take, on the glass, the edge's colour on their screen row (the glass's lit side
    and its dark are bands upright on the screen: a reflection, not on the wall), on the frame's rows the edge's texel
-   on the wall's line. */
+   on the wall's line (hl_uv).  Every unit texel is read at its exact position (no rounding to a rectified texel, so
+   no stepped edges). */
 #define HL_KU0 (-8)
 #define HL_UP 51
 #define HL_GL0 28                                         /* the window's glass: rectified rows [GL0, GL1) */
 #define HL_GL1 113
-static int hl_tsrc[PH][HL_UP];                            /* the unit texel's source: j * 1024 + k + 512, or -1 */
-static void hl_unit_make(int s)
+/* the unit at rectified column kc and row jq (1/256): the picture where it shows the texel; the window's glass it
+   does not show takes the picture's edge column on the texel's screen row (clamped to the edge: continuous, so the
+   lit side and the dark band stay smooth bands upright on the screen); the frame's rows the nearest texel the
+   picture shows on the wall's line */
+static int hl_uv(int s, long long kc, long long jq, Rgb *o)
 {
-    for (int j = 0; j < PH; j++) for (int u = 0; u < HL_UP; u++) hl_tsrc[j][u] = -1;
-    for (int j = HL_PA0; j < HL_PA1; j++)
-        for (int u = 0; u < HL_UP; u++) { Rgb o; if (hl_at(s, (long long)(HL_KU0 + u) * 256, (long long)j * 256, &o)) hl_tsrc[j][u] = j * 1024 + HL_KU0 + u + 512; }
-    for (int j = HL_PA0; j < HL_PA1; j++)
-        for (int u = HL_UP - 1; u >= 0; u--) {
-            if (hl_tsrc[j][u] != -1) continue;
-            if (j >= HL_GL0 && j < HL_GL1) hl_tsrc[j][u] = -2;   /* (the glass: the edge column on its screen row) */
-            else if (u + 1 < HL_UP) hl_tsrc[j][u] = hl_tsrc[j][u + 1];   /* (the frame: along the wall's line) */
-        }
+    long long x, y;
+    if (hl_at(s, kc, jq, o)) return 1;
+    hl_pt(s, kc * 256 / HL_KS, jq, &x, &y);
+    if (jq >= HL_GL0 * 256 && jq < HL_GL1 * 256 && kc < 7 * 256) return hl_bil(s ? (PW - 1) * 256 : 0, y, o);
+    for (int i = 1; i <= 48; i++) if (hl_at(s, kc + i * 64, jq, o)) return 1;
+    return 0;
 }
 static int hl_unit(int s, long long kg, long long jq, Rgb *o)
 {
-    long long kq = kg * HL_KS / 256, P = (long long)HL_UP * 256; int kr, jr, ox, oy, t;
+    long long kq = kg * HL_KS / 256, P = (long long)HL_UP * 256, kend = (long long)(HL_KU0 + HL_UP) * 256;
     if (kq < HL_KU0 * 256) kq += (HL_KU0 * 256 - kq + P - 1) / P * P;
-    jr = clampi((int)((jq + 128) >> 8), HL_PA0, HL_PA1 - 1); kr = fdiv((int)kq + 128, 256);
-    ox = (int)(kq - (long long)kr * 256); oy = (int)(jq - (long long)jr * 256);
-    if (kr >= HL_KU0 + HL_UP) { kr -= HL_UP; }
-    t = hl_tsrc[jr][clampi(kr - HL_KU0, 0, HL_UP - 1)];
-    if (t == -2) {                                        /* (the window's glass left of the edge: its light is a
-                                                            band upright on the screen, so the edge's colour on the
-                                                            texel's screen row) */
-        long long x, y; Rgb a0, a1;
-        hl_pt(s, ((long long)kr * 256 + ox) * 256 / HL_KS, (long long)jr * 256 + oy, &x, &y);
-        if (!hl_bil(s ? (PW - 1) * 256 : 0, y, &a0)) return 0;
-        if (!hl_bil(s ? (PW - 2) * 256 : 256, y, &a1)) a1 = a0;
-        *o = mix(a0, a1, 96); return 1;
+    if (kq >= kend) kq -= P;
+    if (jq < HL_PA0 * 256) jq = HL_PA0 * 256;
+    if (jq > HL_PA1 * 256 - 1) jq = HL_PA1 * 256 - 1;
+    if (kq > kend - 128) {                                /* (the frame's outer rim meets the next window: blended
+                                                            over half a column, no stepped edge) */
+        Rgb a, b; int f = (int)((kq - (kend - 128)) * 2);
+        if (!hl_uv(s, kq, jq, &a)) return hl_uv(s, kq - P, jq, o);
+        if (!hl_uv(s, kq - P, jq, &b)) { *o = a; return 1; }
+        *o = mix(a, b, f); return 1;
     }
-    if (t < 0) return 0;
-    return hl_at(s, (long long)(t % 1024 - 512) * 256 + ox, (long long)(t / 1024) * 256 + oy, o)
-        || hl_at(s, (long long)(t % 1024 - 512) * 256, (long long)(t / 1024) * 256, o);
+    return hl_uv(s, kq, jq, o);
 }
 static u16 hl_raw[PH][PW];
 static void gen_hl(int pad)
@@ -3135,7 +3131,6 @@ static void gen_hl(int pad)
             if (side) { short a = b.sx0; b.sx0 = (short)(PW - b.sx1); b.sx1 = (short)(PW - a); }
             vb_quilt(side, &b, 1701 + 13 * i);
         }
-        hl_unit_make(side);
         hl_mode = 2;                                      /* (crisper: the slats' and rails' edges as in the picture) */
 #ifdef WS_BACKDROP_MAIN
         if (getenv("WSB_HLMODE")) hl_mode = atoi(getenv("WSB_HLMODE"));
