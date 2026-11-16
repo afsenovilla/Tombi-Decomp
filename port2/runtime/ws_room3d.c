@@ -42,10 +42,10 @@ const char *port_ws_room3d_rooms;        /* --ws-room3d-rooms A:S,A:S,... (decim
 
 /* the rooms looked at (the debug select's numbers); approved: on by default once the user has seen the room */
 static const struct { u8 area, sec, approved; } ROOMS[] = {
-    {4, 10, 0},        /* Haunted Mansion, pink stone room with the pedestal */
-    {4, 11, 0},        /* the two rooms with the side doors (one model, one above the other) */
-    {4, 15, 0},        /* the fireplace room */
-    {4, 19, 0},        /* the teal room (s10's model, tinted) */
+    {4, 10, 1},        /* Haunted Mansion, pink stone room with the pedestal */
+    {4, 11, 1},        /* the two rooms with the side doors (one model, one above the other) */
+    {4, 15, 1},        /* the fireplace room */
+    {4, 19, 1},        /* the teal room (s10's model, tinted) */
 };
 static int room_enabled(int area, int sec)
 {
