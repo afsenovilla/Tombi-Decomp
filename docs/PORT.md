@@ -3408,7 +3408,7 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     own lines, `gen_kt` below), AREA10 s8 (the wise man's room: its picture
     is a 256-column vignette with rounded black corners at frame column 32, not the hook's (0, 16) sprite), AREA11 s1
     (the cage scene: the hut's roof and its bracket cut by the left edge, the box's riveted door frame by the right
-    one), AREA16 s3 / s6 (gears and blue beams cut by both edges), AREA17 s1 (a 384-row picture drawn from frame row
+    one), AREA16 s3 / s6 (gears and blue beams cut by both edges; since done, below: the "beams" are two cog wheels), AREA17 s1 (a 384-row picture drawn from frame row
     -144: not the hook's layout), AREA17 s5 (the engine room: pipes and machines cut by both edges; since done
     below), AREA18 s1 (the Y crossing: not a picture; its walls and floor end just past 4:3: "3D room floors"
     above), AREA09 s4 again
@@ -3524,6 +3524,66 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     strip texels changed against the previous version (the cornice, handrail, slats, base and floor byte-identical),
     the OpenGL renderer's strips = the software one's, 4:3 and default flags (off) unchanged, i386 = wasm2c frames
     (16:9, 21:9); not checked on the device.
+  - AREA16 s3 / s6 (the gears room, 2026-11-16, `gen_gr` in `runtime/ws_backdrop_gears.inc`; off by default, preview
+    with `--ws-backdrop-rooms 16:3,16:6`).  Both sections draw the same picture (pages (128, 0) / (256, 0) u 0-63, 256
+    rows drawn; VRAM compared: identical).  What differs is the foreground: the two big blue shapes at the lower edges
+    are cog wheels (rim, teeth, spokes; their hubs under the frame), in the picture and drawn again over the player as
+    quads of page (256, 0) (u 64 v 0 144 x 144 at x 0, u 64 v 144 72 x 96 at x 244; s6 also u 184 v 216 64 x 40 at
+    252, 184): at picture row 80 / 128 in s6 (on the picture's wheels) and 24 rows higher in s3 (rows 56 / 104), where
+    the quads' wheels stand over the picture's and end at the quads' last row (200): the 4:3 picture of s3 already
+    shows a doubled rim and a cut at row 200 (checked on the debug select's default flags only).  The quads' wheels
+    are another render of the picture's (44 % of their texels equal the picture's under them); the right quad lies 3
+    columns left of the picture's wheel and ends 4 columns before the edge, so the picture's own wheel shows in the
+    last 4 columns (a dark sliver in the cut tooth, the game's).  The renderer draws the quads over a texel less than
+    their pixels (as in the treasure hall); the generator reads the texels unmoved (at most 1 off), so its strips do
+    not depend on the renderer.
+    Measured: the left wheel's rim is a circle about (-34, 291), outer radius 182 (the 21 edge columns x 0-84 within
+    1 row), the band unwrapped about it straight: inner edge 147.5 at 22-36 degrees from the vertical, 144 at 40, 142
+    from 44, outer 182 to 42 degrees sagging to 174.5 at 52 (low-poly and in perspective); a tooth every 44 degrees
+    (lit faces at 12-19 and 56-63 degrees, to radius 212, the side face towards the picture's centre), a spoke under
+    each (a bar: the lit face's right edge is x = 11.5 - 0.458 (y - 161), the side face 7 columns right of it, its
+    left edge off the picture: 18 wide assumed).  The right wheel: centre (389, 337) with the same radius (the edge at
+    x 277-310), inner edge 142.5, the tooth cut by the edge with its side face at -24 .. -22 degrees (axis -18.5): the
+    left wheel's arrangement the other way round.  The corbels (the sandstone arms): left top edge 47.5 + 0.09 x,
+    lower edge 84.3 - 0.26 x, straight, 3 rows of underside; right top edge 55.5, lower edge 1 row a column over its
+    last 12 columns (95 at the edge), 15 rows of dark underside; brick above and below both at the edges, so they
+    stick out of the side walls.  The big grey gear at the top right is cut by a brick face at x 311 (not by the edge);
+    the gear at the top left ends inside the picture.  The left wall's foot runs from (8, 186) to (48, 178) (a side
+    wall, 0.2 rows a column).  No brick period: the wall's autocorrelation has no peak over 0.15 outside one row
+    (irregular bricks, two wall planes), so the wall is quilted on overlap and not laid on a lattice.
+    The strips, back to front: wall (`rq_quilt` on the texels over their light, sources with an even light only, so
+    no gear shadow is copied; lit as the row's first wall texels from the edge) and floor (windows at most 10 rows
+    off), the foot lines going on with their slope; the corbels' faces between their measured edges, quilted from
+    both corbels' lit texels with a low value noise over the repeats: the left one to a root on the side wall 75
+    columns out (past 16:9), starting at the tone of the picture's darker edge columns, its underside the picture's
+    slid along the lower edge; the right one's brace runs on at its 45 degrees behind the wheel (a root 24 columns out
+    read as a chopped wedge and was dropped), its underside the picture's tone by depth under the edge; the wheels: the
+    left rim is the picture's rim next to the edge turned about the centre by the angle at which it matches itself
+    best (`gr_join`: 17-34 degrees searched, 30.5 found, a facet period), its radii scaled by the band's edges there
+    and here; the rim is low-poly, its facets' mean luminance runs from 69 to 101 over 3 degrees, so at the join the
+    turned facet takes the picture's tone there and eases back to its own over 12 degrees of arc (a first version
+    turned the rim a whole tooth period: a facet of another tone met the picture along the join, a vertical seam); the
+    teeth are the picture's a tooth period on (the next tooth and spoke land at -28 degrees, 95 columns out: 21:9
+    only); the spokes are bars along the measured edge textured with rim texels laid straight, at the visible spoke's
+    mean colour and with its contrast (the spoke's face is smoother than the rim's: mean deviation 7.8 against 13),
+    darker under the rim as in the picture, their side face the picture's slid along the bar; the right rim is the
+    left wheel's rim turned onto it (its own clean rim is 12 degrees long) at the right rim's tone, the cut tooth's
+    lit face the left tooth's turned onto it, its spoke the left one's the other way round.  The wheels' outlines are
+    anti-aliased (`gr_cover`: 4 x 4 samples where a pixel's corners and centre disagree, the texel unblurred).  Every
+    map is a rotation, a slide or a radial scale (no mirror).  s3: the wheel layer is drawn twice, at the picture's
+    place and 24 rows higher down to row 200, as the picture shows it.
+    Checked (headless, 2026-11-16): the game's strips = the standalone ones (`wsb 16:6 PIC.raw 53 OUT.ppm`) at 16:9
+    and 21:9, both sections; a 21:9 frame holds the 16:9 frame (0 texels differ); 4:3 with the flag = without; default
+    flags = the build before (not approved); the 12 other rooms' strips identical to the commit before (the standalone
+    generators on each room's dumped picture, pads 53 and 120; whole frames against the build before for the first
+    version); i386 = wasm2c whole frames (16:9, 21:9, 4:3); OpenGL strips = software strips; the standalone strips
+    identical with gcc x86-64, gcc -m32 and clang, and a 32:9 strip starts with the 21:9 one; 0.06 s per room entry at
+    16:9, 0.1 s at 21:9; not checked on the device.  Weak points: the left corbel's root, the right brace's length and the spokes' width are assumptions (nothing of
+    them is in the picture); the wall is quilted without a lattice (see above) and without the side walls'
+    perspective; the sandstone has few sources (about 2700 texels), so its quilt repeats (the noise hides most of it
+    at 1x-2x); the right wheel's strip is built from the left wheel's texels; s3's strips repeat the picture's own
+    doubled wheels and its cut at row 200; past 21:9 the right wheel goes on as a plain rim (no further tooth or
+    spoke: the left wheel's next ones are drawn).
   - AREA16 s4 (the green tower, 2026-11-17, `gen_tw` / `tw_take` in `runtime/ws_backdrop_rooms2.inc`; off by default,
     preview with `--ws-backdrop-rooms 16:4`).  How the game draws it (`PORT_PRIMLOG`): one 672-row 8 bpp picture
     (CLUT (128, 511)) in three sets, each a 256-column sprite and the right 64 columns: rows 0-255 = page (128, 0) +
