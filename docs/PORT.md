@@ -3436,46 +3436,87 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     grey band at rows ~642-649 behind the trunks' bases at x 12-50 / 256-301), grass to row 671 with olive specks and,
     at the right edge, the tree's shadow from row ~663.  The tower (x ~72-248), the bushes, the path and the trunks'
     bases are never a source (`TW_EX`).
+    The trees, measured (the foliage's top per column, its flanks per row, the trunks' dark texels): left, the back
+    tree is the one cut by the edge (its top 442-443 at x 0-2, 446-447 at x 4-10, then falling inwards: 450 at x 10,
+    462 at 13, 474 at 23, sparse leaf tips with sky between), in front of it the front tree (trunk axis x 33; its top a
+    dome at rows 484-488 over x 24-50; its right flank 503 at x 62, 520 at 70, 533 at 76, 547 at 84, 564 at 96, i.e.
+    W (2t - t^2) with W 62, dm 100); right, the tall tree cut by the edge (a narrow spire: tip x 314 row 414, 419 at
+    x 318; its left flank 421 at x 310, 455-460 at x 302-308, 484 at x 300: W 26, dm 170) and the front tree (trunk axis
+    x 284, dome 484-488 over x 266-300; its left flank 506 at x 250, 526 at 246, 550 at 240, 568 at 232).  Both front
+    crowns hang to the grey band (row 641); their trunks show as a dark core 7-10 columns wide between the leaves
+    (rows ~576-634: left x 29-38, right x 276-291), then 5 rows of light leaf tips, then a dark brown foot on the grey
+    band (rows 641-648: left x 16-52, right x 258-302).  The crowns' light (9 x 9 means of the foliage's luminance over
+    eighths of the crown's height and fifths of its width): the top eighth 110-140, the next 80-130, the lower half in
+    shade 50-70, the bottom eighth 60-74, the side towards the tower 10-30 lighter in the upper half (`TW_LIGHT`).
     The strips: the picture's texels are labelled (sky / cloud / foliage / ground, by colour, majority over 5 x 5);
-    the strip has a target label map from two outlines per side, the clouds' top and the crowns' top, each a chain of
-    round lumps (circle tops): the first lump through the picture's outline at the edge (its row and slope there:
-    left cloud centre X -5 top 360 radius 26, left crown X 31 top 426 radius 40 (the back tree's dome, so the crown
-    rises from 440 at the join and closes again), right cloud X -34 top 389 radius 60, right crown X -5 top 415 radius
-    24), the next ones outwards by position hashes (clouds radius 16-34 tops 344-379, crowns 30-50 tops 418-457; none
-    reaching into the join), slopes limited to 1.5 rows a column for the clouds and 2.5 for the crowns so no lump has
-    a sheer side; under the crowns foliage to the foot (row 641), the ground below.  Sky above the clouds' highest
-    top - 24: per row a texel of the 12 edge columns (hash), among their sky texels within one tone step of the row's
-    middle (the haze over the clouds' rims came out as specks otherwise), rows the clouds fill at the edge taking the
-    nearest row of open sky.  Clouds and crowns: a new 2-D quilter on the tall picture (`tw_quilt`, 14 x 14 blocks,
-    8 columns / 6 rows of overlap, windows at most 48 rows off, from both edges' clean parts): cost = the overlap's
-    colour error (a checkerboard of it) + 60000 x the share of the window's texels whose label is not the target's
-    (subsampled 2 x 2: the label weight has to outweigh the colour error, at 4000 the crowns did not follow the
-    target), windows next to their own source (48 columns, 48 rows) or the last four used penalised, picked among
-    those within 1/8 of the best by a hash, pasted along minimum-error cuts.  The foot (rows 626-650) and the grass
-    (646-671): slices 2-8 columns wide of the edges' clean columns (x 1-12 / 302-319 for the foot, 1-47 / 273-319 for
-    the grass), on the same rows, each in its own order (never mirrored), the next slice the one whose neighbouring
-    column matches the strip's last column (the grass on 6-row means: on single texels the olive specks lined up in a
-    row), cross-faded over 4 rows into what is above.  Then the foliage's luminance mean and spread per row (+-16)
-    matched to the picture's 32 edge columns (spread x 0.8-1.5), the join (per row and class, the first 6 columns'
-    mean onto the picture's last 6, fading over 24), and on sky / cloud the first column's difference to the edge
-    column fading over 8 (the clouds' soft shading, a line otherwise); the sky texels the quilt brought from other
-    rows are the row's sky again (a window 40 rows off was a shade off: a visible box).  Every pixel quantised to the
-    picture's colours.  A structure depends on where it is: the analytic sky's last row comes from the outlines over
-    512 columns, not the strip's width, so 21:9 / 32:9 strips start with the 16:9 columns (0 texels differ at pads
-    101, 120, 267).  Generation (standalone, x86-64, the whole picture analysed and both 672-row strips): 0.19-0.23 s at 16:9, 0.29-0.35 s at 21:9, 0.54-0.66 s at 32:9 (the earlier, unpruned matcher took 0.8 s at 16:9).
-    Measured (ws_seam over two 224-row windows: the bottom view and rows 330-553; join | picture's step, texture
-    mean / contrast / gradient picture vs strip): left cloud 4 | 14 (192 / 195, 22.5 / 27.0, 2.2 / 3.3), crown 28 |
-    58 (97 / 90, 46 / 38), low foliage, foot 10 | 37, grass 11 | 13: all pass; right cloud 2 | 4 (167 / 169, 40 / 30),
-    crown 38 | 61 (91 / 85, 53 / 45), low foliage pass, foot 24 | 29 (fails the 80 % rule at 79 %), grass 9 | 11.
-    8x crops of every band's join show no line.  Weak points: the right edge's tall-tree tip stands alone at the join
-    (as in the picture), the crown next to it starts lower; the foot's drooping tips come from 30 clean columns, so
-    they repeat in short runs (no period); the outer crowns are quilted foliage within round outlines (no trunks: the
-    trunks are not visible at the edges either); at 32:9 the outer columns are more crowns and cloud lumps of the same
-    kind.  Checked (headless): the game at 16:9 and 21:9 = the standalone at every camera height of the pan, 4:3 frames
-    identical with `--ws-backdrop-rooms 16:4` and the default flags unchanged at 16:9 (the room is not approved), the
-    other rooms' frames (2:5, 2:1, 5:1, 5:3, 19:1, 11:2, 9:5, 9:3, 9:4, 17:3, 17:4 with `--ws-backdrop on`) identical
-    to the build before, the OpenGL renderer's frames = the software one's (xvfb), standalone gcc x86-64 = gcc -m32 =
-    clang, UBSan / ASan clean, i386 = wasm2c frames; not checked on the device.
+    the strip has a target per texel: sky above the clouds' top, cloud under it, foliage inside a tree's crown, the
+    ground from row 641 (644 where no crown stands, the horizon).  The clouds' top is a chain of round lumps (circle
+    tops; the first through the picture's outline at the edge: left centre X -5 top 360 radius 26, right X -34 top 389
+    radius 60; the next ones outwards by position hashes, radius 16-34, tops 344-379, slopes limited to 1.5 rows a
+    column).  The trees (`TW_T`, back to front, X the strip column of the trunk's axis): left, the back tree completed
+    (X 8, tip row 428, W 34, dm 140: its point and its outer half in the strip, its flank meeting the picture's at x 0
+    on row 443), one more tree (X 60, tip 482, W 34, dm 112: shorter, its tip 54 rows lower, so a V of sky 30+ rows
+    deep separates the two tips), and the picture's front tree's outer half (X -37, tip 484, W 38) in front of both;
+    right, the tall tree completed (X 0, tip 412, W 26, dm 170: the spire's other half), one more tree (X 42, tip 466,
+    W 33, dm 122: broader, a longer point; the V between it and the spire 56 rows deep), and the picture's front tree
+    (X -35, tip 484, W 58).  A crown's half-width d rows under its tip is W (2t - t^2), t = d / dm (a point at the tip,
+    2W / dm columns a row), from the widest row narrowing by a third to the foot at row 641 (the foliage hangs to the
+    ground as in the picture), plus 14 lumps of 6-11 rows a flank (-3..+6 columns, by hashes, none in the 14 rows at
+    the tip: the picture's outlines are steps of leaf clumps); a texel belongs to the front-most crown that holds it.
+    Every foliage texel has a target light from `TW_LIGHT` at its place in its crown (rows in eighths, columns from the
+    outer flank to the inner one, bilinear).  Sky above the clouds' highest top - 24: per row a texel of the 12 edge
+    columns (hash), among their sky texels within one tone step of the row's middle, rows the clouds fill at the edge
+    taking the nearest row of open sky.  Clouds and crowns: the 2-D quilter (`tw_quilt`, 14 x 14 blocks, 8 columns / 6
+    rows of overlap, from both edges' clean parts; rows to 532 from windows at most 48 rows off, below from 160 rows
+    off, where the low clouds of the open sky have no source near their own rows): cost = the overlap's colour error
+    (a checkerboard of it) + 200000 x the share of the window's texels whose label is not the target's + 6 x the mean
+    squared difference between the window's foliage light (`tw_gs`, 9 x 9 mean luminance of the picture's foliage) and
+    the target light (subsampled 2 x 2; at the earlier 60000 the crowns spread over the V between the tips), windows
+    next to their own source or the last four used penalised, picked among those within 1/8 of the best by a hash,
+    pasted along minimum-error cuts.  The tall tree's spire is narrower than a window in its first 48 rows: there the
+    crown's texels inside the outline are the picture's own leaves of the same row 7-9 columns towards the axis (moved,
+    not mirrored; `tw_flank`).  The foot (rows 626-650) and the grass (646-671): slices 2-8 columns wide of the edges'
+    clean columns, as before (never mirrored, the next slice the one whose neighbouring column matches), where no crown
+    stands only from row 644 (the clouds come down to the grey band: the horizon).  The trunks (`tw_trunk`): the
+    picture's trunk texels at the same rows, so the same perspective and scale, moved and never mirrored, only where no
+    crown in front of the tree's own is: the dark core (rows 580-634: the source's dark or brown texels within 2-5
+    columns of its axis, the first 10 rows thinning in by a hash; the leaves in front of it stay the crown's) and the
+    foot (rows 641-648: per row the source's dark run through the axis, gaps of up to 2 grass texels bridged, at most
+    9-22 columns either side).  The left back tree takes the right picture tree's trunk (x 284), the further left tree
+    and the further right tree the left one's (x 33), so no trunk sits next to its own source.  Then the foliage's
+    luminance mean and spread per row matched to the picture's 32 edge columns, now fading out over the first 32
+    columns (over the whole strip it flattened the crowns' own light), the join (per row and class, the first 6
+    columns' mean onto the picture's last 6, fading over 24), the clouds up to the leaves (a run of at most 10 sky
+    texels next to leaves where the target is cloud takes the cloud texels beyond it, shifted by its length: the
+    quilt's windows brought the sky round the picture's crowns, a blue rim along every flank), on sky / cloud the first
+    column's difference to the edge column fading over 8, and the sky texels the quilt brought from other rows are the
+    row's sky again.  Every pixel quantised to the picture's colours.  A structure depends on where it is (trees, lumps
+    and the quilt's blocks by position, the analytic sky's last row from the outline over 512 columns), so 21:9 / 32:9
+    strips start with the 16:9 columns (0 texels differ at pads 101, 120 and 267); at 21:9 the further trees show whole, at
+    32:9 open sky with low clouds down to the grey band beyond them.  Generation (standalone, the whole picture analysed
+    and both 672-row strips): 0.30-0.41 s at 16:9 (x86-64 and gcc -m32), 0.36-0.46 s at 21:9, 0.65-0.85 s at 32:9.
+    Measured (ws_seam over two 224-row windows: rows 330-553 and the bottom view; join | picture's step, texture mean /
+    contrast picture vs strip): left cloud 4 | 14 (202 / 208, 15 / 13), crown tops 32 | 70 (117 / 104, 53 / 49), crown
+    32 | 78 (99 / 91, 42 / 37), low foliage 18 | 55 (59 / 60), foot 12 | 41, grass 11 | 16: all pass; right cloud 2 |
+    25 (173 / 174, 40 / 29), crown tops 43 | 101 (107 / 112, 60 / 61), crown 37 | 94 (93 / 98, 55 / 54), low foliage
+    22 | 50 (67 / 64), grass 9 | 13: pass; right foot 23 | 43 fails the 80 % rule at 75 % (79 % before; the same
+    slices).  2x crops of the joins at three camera heights show no line.  Weak points: the further trees' outer
+    flanks are steep in their lower third (the crowns hang to the ground); the spire's first 6 rows end at the join
+    (narrower than 3 columns there); at 32:9 the low clouds over the open ground come from few source windows and
+    repeat loosely.
+    Rejected version (2026-11-17, the first one): the crowns' top as a chain of round lumps outwards from the edge
+    (radius 30-50, tops 418-457), quilted foliage under it down to the foot: "La torre no está bien. Has multiplicado
+    las copas de los árboles y has multiplicado los propios árboles enteros, pero ni les has puesto tronco ni has
+    hecho que los árboles terminen en punta. Entonces queda antinatural. Hazlo bien. Fíjate en el árbol de al lado y
+    hazlo bien." (a wall of crown lumps, no trunks, no tops narrowing to a point).  Now the tree cut by each edge is
+    completed to its own point, at most one more tree stands beyond it, each crown tapers to a point and the trees
+    stand on trunks made of the picture's trunk texels.
+    Checked (headless): the game at 16:9 = the standalone at 71 camera heights of the pan (picture top rows 8-448: 0
+    texels differ) and at 21:9 (pad 120) at 25, 4:3 frames identical with `--ws-backdrop-rooms 16:4` and to the build before, the default flags
+    unchanged at 16:9 (the room is not approved), the other rooms' frames (2:5, 2:1, 5:1, 5:3, 19:1, 11:2, 9:5, 9:3,
+    9:4, 17:3, 17:4 with `--ws-backdrop on`) identical to the build before, the OpenGL renderer's frames = the
+    software one's (xvfb), standalone gcc x86-64 = gcc -m32 = clang, UBSan / ASan clean, i386 = wasm2c frames (16:9 and
+    21:9, 176 frames each, the pan included); not checked on the device.
   Checked (headless, 2026-11-14): at 16:9 and 21:9 in the four rooms; 4:3 runs identical with `--ws-backdrop on` and
   off; with the default flags the new rooms are identical to `--ws-backdrop off`, and AREA02 s5 is identical to the
   build before the table; i386 = wasm2c strips; not checked on the device.

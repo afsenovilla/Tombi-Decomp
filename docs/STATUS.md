@@ -74,9 +74,12 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    2026-11-17, AREA16 s4 (the green tower) as a preview, OFF by default (`--ws-backdrop-rooms 16:4`; `gen_tw` /
    `tw_take` in `runtime/ws_backdrop_rooms2.inc`): the 672-row picture is put together from its three sprite sets and
    the strips follow the camera's height (the pan up the tower when Tombi enters the door included; gpu.c's hook
-   takes a row offset, 0 for the other rooms); sky per row from the edge, clouds and crowns quilted on a target label
-   map (round outlines continuing the edge's cloud and crown), the trees' foot and the grass as slices of the edges'
-   clean columns.  ~0.2 s per room entry at 16:9.  To approve: `approved` = 1 in its ROOMS entry.
+   takes a row offset, 0 for the other rooms); sky per row from the edge, clouds quilted, the trees' foot and the
+   grass as slices of the edges' clean columns.  The trees redone after the user rejected the first version (a wall of
+   crown lumps with no trunks or points): per side the tree cut by the edge completed to its own point, one more tree
+   beyond it, crowns W (2t - t^2) with leaf-clump lumps quilted with the picture's crown light as a guide, trunks from
+   the picture's trunk texels (core and foot, moved, never mirrored).  ~0.3-0.4 s per room entry at 16:9.  To
+   approve: `approved` = 1 in its ROOMS entry.
 
 -2. **WIP (owner's request): restore the Funga Chief's cut event** on the Funga stage (`--cut-content=funga`, AREA10 s2,
    chief already walking there: runtime/funga.c).  What survives (docs/CUT_CONTENT.md "Jungle (AREA10)", "Funga Chief"):
