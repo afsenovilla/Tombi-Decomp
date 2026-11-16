@@ -2720,6 +2720,46 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   beside the house and at 21:9 a second one further out and back; at 32:9 the whole tree (59 polygons) stands far
   enough out that its crown stops at the house.  (A box that cut the tree in depth left a flat dark crown: the front
   leaf clusters start at z -3.)
+- **3D room walls** (`runtime/ws_room3d.c`, called from `port_ws_area_model_link`; previews, OFF by default;
+  `--ws-room3d on` = every room of its table, `--ws-room3d-rooms 4:10,4:11,...` = exactly those, `--ws-room3d off`;
+  2026-11-17): the Haunted Mansion's side rooms AREA04 s10, s11, s15 and s19 (debug select sections A, B, F, 13) are
+  real 3D: one WMD block each (table count 1, the list holds that one block; s19 is s10's model with every polygon
+  gouraud and tinted, s11's model holds two rooms one above the other, y -1170..-810 purple and -330..30 green),
+  drawn by `drawAreaModelList` / `drawModelUnlit` through an unrotated camera (VIEW_CAMERA identity, T = (-160, ty,
+  544), H 544, OFX 160: screen x = 160 + 544 (x - 160) / (z + 544); ty 95 / 932 / 124 / 116).  Cause of the black
+  sides: missing geometry, not a cull.  The stone wall facing the viewer ends on both sides in a straight vertical
+  line of free polygon edges just past the 4:3 frame: x -45 / 375 at z 45 in s10 and s19 (screen x -29 / 359: 24 and
+  14 black columns at 16:9), x 0 / 344 at z -45 in s11 (-14 / 361: 39 and 12), x 0 / 360 at z -45 in s15 (-14 / 378:
+  39 and none at 16:9, 106 / 62 at 21:9).  Evidence: `PORT_WSXTRA=300` (culls 300 columns wider) draws the very
+  same primitives (PORT_PRIMLOG line counts 203 / 175 / 196 / 215 with and without, frames identical), the model
+  drawers' screen tests are already `PORT_WSX`, and the parsed model's x range is exactly those lines; nothing else
+  (floor, ledge, objects) reaches the sides: the wall covers the whole height there.
+  Method: per side, the wall's end is the line x carrying the most free front-facing vertical edges (edges of one
+  polygon only, both vertices at that x, the polygon inwards; s11's door and grille boxes at x 1 / 346 lose to the
+  wall's 760 units of edge).  From every edge the wall goes on outwards in its own plane as columns of facets (48
+  units wide; the first line is the edge's own vertices, so no crack; the other vertices moved by a hash of row
+  height and column, up to +-12 along x and a quarter of the shorter neighbouring row, at most 16, along y; a cell
+  is a quad or two triangles), far enough to cover the frame at the wall's depth (16:9: 1-2 columns, 21:9: 2-3,
+  32:9: 6).  Colours: the model's own flat per-polygon colours (the wall is faceted by colour, FT / equal-coloured
+  GT): the facet next to an edge takes the colour of the polygon it continues, so the join is one more facet line
+  and not a change of tone; the others the colour of an edge polygon at most two edges up or down the same run (each
+  side and each of s11's two rooms keeps its own light: s10's right is darker than its left in the model).  Texture:
+  the wall's page and palette (tpage 0xF, CLUT 0x784F), each facet its own piece of the stone tile (the UV box of
+  the polygons using them, u 0-62 v 120-174, read from the model), unrotated or turned a quarter, 9 texels per 16
+  units (measured median 0.51-0.57 texels per unit).  The block is in the model's format (FT3 / FT4 / GT3 / GT4
+  groups, the kind of the polygon the colour comes from) and is added to the area list, so the game's drawer, GTE,
+  NCLIP (winding copied from the edge's polygon), culls and ordering table draw it.  Rebuilt when the model's bytes,
+  the strip width or the camera change (FNV key per frame).  Integers only, every random value a hash of the
+  position in its own statement; a wider strip starts with the narrower one's columns.  Nothing mirrored, no object
+  invented.  Checked (software, frames 100-2000 of the select run): default (flag off) 16:9 frames and 4:3 frames
+  with the flag on byte-identical to before; with it on the 4:3 centre of every 16:9 frame identical, no black pixel
+  left in the strips; AREA04 s0 and s12 identical on / off; 21:9 and 32:9 covered; OpenGL (xvfb) covered, its 4:3
+  centre identical on / off (GL and software differ by the usual texture rounding, in the strips as in the centre);
+  i386 = wasm2c whole frames (`build/wasm/tombi2w`: the four rooms at 16:9 and 21:9, 20 frames each, s10 at 32:9);
+  walking out of s11 / s15 into the next room fine; s11's lower room only seen with a debug camera (ty forced to
+  92).  To approve a room: `approved` = 1 in its ROOMS entry.  Weak points: the join is a straight vertical facet
+  line (the model's own edge, outside 4:3); the new facets lie in one plane (the model's vertices wander +-8 in z,
+  invisible with flat colours); at 32:9 the 6 columns show the grid's regular pitch a little.
 - **Top-down map** (`runtime/ws_topdown.c`, fixes.txt hooks at the end of `topdownDrawMapLayers` /
   `overheadDrawMapLayers` and their USA / JP versions): the overhead background is the room's map picture (8 bpp TIM
   in RAM, scratch 0x1F800394) of which the game uploads a 384x288 window (12x9 tiles of 32 px, USA / JP 384x256) into
@@ -3319,7 +3359,7 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     fixed that but cost 8-20 s per room entry (the others take ~2 s); since done (above: matching on the texels over
     their light, 0.3 s).  Not attempted: AREA16 s4 (its picture is 672 rows,
     drawn as three 256-row sprite sets shifted by the camera: the hook only takes a picture whose left sprite is at
-    frame row 16), AREA08 s1 / s3 (a 4 bpp layer of near trees and translucent light rays over the 8 bpp picture, CLUT
+    frame row 16; since done, below), AREA08 s1 / s3 (a 4 bpp layer of near trees and translucent light rays over the 8 bpp picture, CLUT
     row 510: the rays converge on a point above the frame; looked at again, above), AREA16 s5 (the bell tower: pillars cut by both edges).
     Checked (headless, 2026-11-15): the two new rooms at 16:9 and 21:9 (standalone and in the game), 4:3 identical with
     `--ws-backdrop on`, off by default (the clear colour), AREA02 s5 / s1, AREA05 s1 and AREA19 s1 strips byte-identical
@@ -3347,21 +3387,57 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     coordinates from the wall's own columns (k -9..40, the floor -9..28: the vases and the corner never), then read from
     the picture in one step through the quilt's source map (bilinear with the fractions sharpened x2 about the middle:
     the slats' and rails' gradient energy next to the join 92-96 % of the picture's; plain bilinear 75-80 %).  The
-    panels (rows 13-129) repeat the side wall's unit, which the picture shows whole between the edge and the corner
-    pilaster (rectified, both walls alike): the window (dark glass with a lit grey side, k -8..7), the bar with its two
-    screws (7..17), the grey pane (17..30) and the gold / copper frame's wide bevel up to its white rim (30..43).
-    Period 51 rectified columns (the window's outer end at the top rows' edge to the bevel's rim); outwards every texel
-    is its own unit texel one or more periods in, on the same rectified row (the frame's borders, the pane's bevels and
-    rounded corners keep their lines), so at 16:9 the strip shows the rest of the window, a whole frame, its pane and
-    the next bar with its screws cut by the screen edge, at 21:9 the next window too.  The window's texels the picture
-    does not show (left of the slanted edge on the lower rows, at most 9 columns) take, on the glass, the edge's colour
-    on their screen row (the lit side and the dark are bands upright on the screen, a reflection: copied along the
-    wall's rows they came out as a staircase), on the frame's rows the edge texel on the wall's line.  Every unit
-    texel is read at its exact position (clamped to the edge on the glass, so continuous), and the frame's rim meets
-    the next window blended over half a column: the second version rounded to rectified texels and switched between
-    the glass fill and the picture per texel, and the rim and the glass showed 1-texel steps (rejected in review).  (The first
-    version continued the edge's colour along the wall's lines over the whole strip: a plain grey slab with no frame or
-    screws, its lower 15 rows darkened by the window's reflection; rejected in review.)
+    panels (rows 13-129) are framed panels side by side along the wall; rectified, from the corner outwards, each is
+    its frame's rim and wide bevel (the side facing the camera: white rim, rounded corners), its pane, then its far
+    side, the bronze bar with the two screws (that side's bevel faces away from the camera, only the bar's top shows),
+    and the next panel's rim follows the bar at once.  The picture shows one panel whole by the corner (A) and the next
+    (B) cut by the edge: B's thin bright rim, its bevel (dark: the metal reflects another way there, though it is the
+    same bevel as A's gold one, mitred into the frame's top bevel the same way) and the first columns of its pane (lit
+    grey).  Measured on rows 40-100 (gradient peaks, rectified columns, left / right wall): A's bar 12.37..16.29 /
+    12.06..15.90 (its lit outer edge is B's rim), pane ..29.29 / ..29.52, the bevel's inner shadow ..31.9, bevel ..40.49
+    / ..39.92, rim ..43.27 / ..43.01; B's rim 10.58..12.36 / 10.24..12.06, its dark bevel from about 1 / 0.5 (the lit
+    pane's end is a soft reflection boundary, 0-2.3 depending on the row).  The rims' outer edges are 30.90 / 30.95
+    columns apart (the inner ones 29.8: B's bevel looks 2 columns narrower, the frame's relief seen from another angle),
+    so the period is 30.9 and the edge (k -7.3 on row 0, -5.2 on the pane's top row 28, -3.2 on row 60, 0 on row 100,
+    +2.1 on row 128) cuts B's pane in its corner-side third on the upper rows and its bevel's start below.  The strip
+    continues from exactly there: every texel is A's texel at the same offset in the unit (k + 30.9, + 61.8, ...: the
+    same rectified row, read at its exact position, so every line, rounded corner and screw goes on), so at 16:9 it
+    shows the rest of B's pane, B's bar with its screws, then the next panel whole (rim, bevel, pane) and its bar
+    at the screen edge.
+    The light (2026-11-16, `hl_light`; "falla en la iluminación": B's continued pane showed A's bright band by its bar
+    and A's streaks, and the panel further out A's gold glare and bright pane).  The walls are polished metal lit by
+    reflection, so each part's tone changes along the wall its own way; measured B against A at the same offset in the
+    unit (rectified, left / right wall): the pane x1.3 / x0.9 (B 177-208 / 100-140 by the edge, A's flat part 125-160 /
+    125-165; on the right B darkens downwards, 136 on row 40 to 107 on row 80, where A brightens 145 to 160), the
+    bevel x0.05 / x0.3 (B's is black / dark brown, A's gold rising from 90 by the pane to a glare of 197 by the rim),
+    the rim x0.8 / x0.85 (B 181-197, A 212-247), the frame's top member x1.2-1.4 / up to x2 (145-195 by the edge,
+    110-130 by the corner: brighter towards the camera), the cornice level (25-36 all along).  A's pane is no flat tone
+    either: +9 % by its bar (164 against 151 on row 60) and falling off into its inner shadow from k 27; B's lit pane
+    ends about 1.5 / 1 column later than A's (its falloff 180, 171, 147, 108, 59 at k -2..2 on row 60, left).  So
+    every panel texel is A's texel times a smooth light ratio (A's texture kept, its light replaced; integer, the same
+    on every build): B's light over A's, both box-smoothed within the part (+-1 column, +-2 rows; the parts: bar,
+    pane, the bevel's first 3 columns (the inner shadow), the rest of the bevel, rim) where B shows, held over the
+    part from there (from the nearest row measured at that offset, else along the row; the inner shadow scaled as B's
+    pane's level goes); on the pane B's level by the edge (its two brightest texels there, 9-row mean, held from the
+    nearest row once the edge is past the pane) held flat across the pane over A's linear light (fitted on A's flat
+    part, k 17.5-26.8), so A's bright side by its bar does not come back and its inner shadow does; the rim B's
+    brightest texels over A's; B's bar (never shown) the rim's ratio, at most 1; where B does not show, the frame's
+    gold on the pane's columns (the rounded corners, the bar's flare at the pane's foot) takes the bar's or the
+    bevel's ratio by how gold A's light is; each channel within -20 / +25 % of the luminance ratio; the pane's end and
+    the inner shadow meet smoothly (+-1 column), and B's pane's end is no brighter than its pane's level or its edge
+    texel (no line down the pane by the join).  The panels further out follow the trend damped: the ratio to the power
+    1.25 (C), then 1.375, a brightening held at B's (not on the inner shadow), never under 0.35 of A's light: C's bevel
+    is a dim bronze (35-60) instead of A's gold glare, its pane B's level, its rim B's.  The rest to B's edge texel is
+    added at the join, fading out over 3 columns (exact there).  Only the panels' rows change (rectified 13-129): the
+    cornice, the handrail, the slats, the base and the floor are byte-identical.  Before that, A's texels were scaled
+    per row by B's pane over A's pane only on B's pane and copied as they are further out.  Rejected
+    versions: the third one took the unit as the window (B's dark bevel and lit pane, k -8..7) + A's bar, pane, bevel
+    and rim, period 51, starting at the edge: right against the picture's half panel (B) it drew a whole new frame's rim
+    and bevel instead of closing B first ("En el corte ya hay media ventana y has dibujado una entera pegada en lugar
+    de cerrar la que ya hay antes de empezar otra"; rejected in review).  The second rounded to rectified texels and
+    switched between a glass fill and the picture per texel: 1-texel steps on the rim and the glass (rejected).  The
+    first continued the edge's colour along the wall's lines over the whole strip: a plain grey slab with no frame or
+    screws (rejected).
     The handrail's lower edge (its shadow on the slats) is no line along the wall: it is all but level on the screen (row
     146.3, rising 0.03 a column inwards), so in rectified rows it drifts 2 rows along the wall and the quilt's windows
     from further in put it 0.9 row too high at the join; the windows' rows are moved so it lies on its own screen line
@@ -3374,15 +3450,123 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     pane:28-110;fbot:110-129;rail:129-148;slats:148-184;base:184-197;floor:197-224`): the handrail and floor pass;
     the others fail its texture checks because the picture's 16 edge columns hold other elements (the black band and
     the bar next to the pane, the steep cornice lines across 4-column groups) and the slats' period widens outwards
-    (perspective); in the panels' rows the line measure compares different elements (the strip's first columns are
-    the window's rest or the next frame's rim), so the 8x crops are the check there.  Weak points: the window's width
-    outwards is not visible (its outer end is taken where the picture's edge is at the top rows); the panels and slats
-    are the picture's own, so the strip repeats them (as the wall does); the leaning rims are smooth (read at their
-    exact position, sharpened bilinear).  0.02 s per room entry (pad 53, 266 alike).  Checked (headless): standalone
-    at pads 53, 101, 120 and 266 (a wider strip starts with the 16:9 one's columns: 0 texels differ), the game at 16:9
-    and 21:9 = the standalone, the OpenGL renderer's strips = the software one's, default flags (off) unchanged, the
-    other rooms untouched (only additions: the table's two entries and gen_hl), i386 = wasm2c frames (16:9, 21:9);
-    not checked on the device.
+    (perspective); in the panels' rows the line measure fits over picture columns 0-12, which hold B's pane's rounded
+    corner and soft edges, so the 8x crops and per-column half-level crossings are the check there (the pane's top on
+    the left wall: the picture's last columns 28.4-28.5, the strip's first 28.4).  Weak points: B's continuation is A's
+    pane at B's tone (B's own pane further out is not visible); its bevel is dark and the next panels' are gold (A's),
+    as the picture lights them; the frame's relief makes B's bevel 2 columns narrower than A's, the next panels are
+    A's size; the panels and slats are the picture's own, so the strip repeats them (as the wall does).  0.02 s per room entry (pad 53, 266 alike).  Checked (headless, this version): the
+    game at 16:9, 21:9 and 32:9 (a wider strip starts with the 16:9 one's columns: 0 texels differ), only panel-row
+    strip texels changed against the previous version (the cornice, handrail, slats, base and floor byte-identical),
+    the OpenGL renderer's strips = the software one's, 4:3 and default flags (off) unchanged, i386 = wasm2c frames
+    (16:9, 21:9); not checked on the device.
+  - AREA16 s4 (the green tower, 2026-11-17, `gen_tw` / `tw_take` in `runtime/ws_backdrop_rooms2.inc`; off by default,
+    preview with `--ws-backdrop-rooms 16:4`).  How the game draws it (`PORT_PRIMLOG`): one 672-row 8 bpp picture
+    (CLUT (128, 511)) in three sets, each a 256-column sprite and the right 64 columns: rows 0-255 = page (128, 0) +
+    page (512, 0) u 0-63, rows 256-511 = page (256, 0) + page (512, 0) u 64-127, rows 512-671 = page (384, 0) rows
+    0-159 + page (384, 0) u 0-63 / 64-127 rows 160-239 (80 rows each).  All three sets are drawn every frame, shifted
+    by the camera: the set k's left sprite at frame row T + 256 k, T the picture's top row on the frame.  In the room
+    the camera rests at the bottom (T = -432: picture rows 448-671 on frame rows 16-239); when Tombi walks into the
+    door it pans up the whole tower at 2 rows a frame to the clock (T = 8, overshooting to 6), back down a little,
+    and the bell room (s5) follows.  The hook: `port_ws_backdrop` takes, before the usual (0, 16) test, any 256-wide
+    sprite at x 0 of pages 128 / 256 / 384 with that CLUT when the room is 16:4 (an entry with h = TW_H, 672, in
+    ROOMS; the usual loop never matches it), `tw_take` grabs the picture once per frame (the 7 pieces, `TW_P`; a hash
+    against the last one, and the sky in both top corners as a signature), builds the 672-row strips when the picture
+    changed and hands back the rows for frame rows 16-239; `shims/gpu.c` adds `port_ws_backdrop_dy` (0 for every other
+    room) to the destination row, so the strips are written where the picture's rows are on the frame.  Checked
+    against the standalone strips at 18 camera heights of the pan (T -432 .. 8) at 16:9 and 21:9: equal within the
+    frame dump's colour rounding (7) at every one.  `PORT_WS_BACKDROP_DUMP` writes the 672-row picture; the standalone
+    build takes it (`wsb 16:4 PIC.raw PAD OUT.ppm`).
+    The picture, measured: sky (a vertical gradient, 96,128,224 at the top to 128,144,224 at row 336, one 5-bit step
+    darker on the left; near-flat 8 bpp with a 2-colour dither) down to the clouds; cumulus at both edges (left: top
+    361 at x 0, its peak at x 3-8, row 360; right: falling outwards, 398-402 at x 304-319, the dome's top at x 264,
+    row 351); deciduous trees cut by both edges (left: the back tree's crown at the edge, top 440 at x 0 rising
+    outwards about 1.2 rows a column (440, 441, 443, 445 at x 0-3); right: the tall tree's tip at x 310-319, top 415
+    at x 314, 420 at x 319); the trees' foot at row ~640 (the foliage's drooping tips, a light strip of grass, then a
+    grey band at rows ~642-649 behind the trunks' bases at x 12-50 / 256-301), grass to row 671 with olive specks and,
+    at the right edge, the tree's shadow from row ~663.  The tower (x ~72-248), the bushes, the path and the trunks'
+    bases are never a source (`TW_EX`).
+    The trees, measured (the foliage's top per column, its flanks per row, the trunks' dark texels): left, the back
+    tree is the one cut by the edge (its top 442-443 at x 0-2, 446-447 at x 4-10, then falling inwards: 450 at x 10,
+    462 at 13, 474 at 23, sparse leaf tips with sky between), in front of it the front tree (trunk axis x 33; its top a
+    dome at rows 484-488 over x 24-50; its right flank 503 at x 62, 520 at 70, 533 at 76, 547 at 84, 564 at 96, i.e.
+    W (2t - t^2) with W 62, dm 100); right, the tall tree cut by the edge (a narrow spire: tip x 314 row 414, 419 at
+    x 318; its left flank 421 at x 310, 455-460 at x 302-308, 484 at x 300: W 26, dm 170) and the front tree (trunk axis
+    x 284, dome 484-488 over x 266-300; its left flank 506 at x 250, 526 at 246, 550 at 240, 568 at 232).  Both front
+    crowns hang to the grey band (row 641); their trunks show as a dark core 7-10 columns wide between the leaves
+    (rows ~576-634: left x 29-38, right x 276-291), then 5 rows of light leaf tips, then a dark brown foot on the grey
+    band (rows 641-648: left x 16-52, right x 258-302).  The crowns' light (9 x 9 means of the foliage's luminance over
+    eighths of the crown's height and fifths of its width): the top eighth 110-140, the next 80-130, the lower half in
+    shade 50-70, the bottom eighth 60-74, the side towards the tower 10-30 lighter in the upper half (`TW_LIGHT`).
+    The strips: the picture's texels are labelled (sky / cloud / foliage / ground, by colour, majority over 5 x 5);
+    the strip has a target per texel: sky above the clouds' top, cloud under it, foliage inside a tree's crown, the
+    ground from row 641 (644 where no crown stands, the horizon).  The clouds' top is a chain of round lumps (circle
+    tops; the first through the picture's outline at the edge: left centre X -5 top 360 radius 26, right X -34 top 389
+    radius 60; the next ones outwards by position hashes, radius 16-34, tops 344-379, slopes limited to 1.5 rows a
+    column).  The trees (`TW_T`, back to front, X the strip column of the trunk's axis): left, the back tree completed
+    (X 8, tip row 428, W 34, dm 140: its point and its outer half in the strip, its flank meeting the picture's at x 0
+    on row 443), one more tree (X 60, tip 482, W 34, dm 112: shorter, its tip 54 rows lower, so a V of sky 30+ rows
+    deep separates the two tips), and the picture's front tree's outer half (X -37, tip 484, W 38) in front of both;
+    right, the tall tree completed (X 0, tip 412, W 26, dm 170: the spire's other half), one more tree (X 42, tip 466,
+    W 33, dm 122: broader, a longer point; the V between it and the spire 56 rows deep), and the picture's front tree
+    (X -35, tip 484, W 58).  A crown's half-width d rows under its tip is W (2t - t^2), t = d / dm (a point at the tip,
+    2W / dm columns a row), from the widest row narrowing by a third to the foot at row 641 (the foliage hangs to the
+    ground as in the picture), plus 14 lumps of 6-11 rows a flank (-3..+6 columns, by hashes, none in the 14 rows at
+    the tip: the picture's outlines are steps of leaf clumps); a texel belongs to the front-most crown that holds it.
+    Every foliage texel has a target light from `TW_LIGHT` at its place in its crown (rows in eighths, columns from the
+    outer flank to the inner one, bilinear).  Sky above the clouds' highest top - 24: per row a texel of the 12 edge
+    columns (hash), among their sky texels within one tone step of the row's middle, rows the clouds fill at the edge
+    taking the nearest row of open sky.  Clouds and crowns: the 2-D quilter (`tw_quilt`, 14 x 14 blocks, 8 columns / 6
+    rows of overlap, from both edges' clean parts; rows to 532 from windows at most 48 rows off, below from 160 rows
+    off, where the low clouds of the open sky have no source near their own rows): cost = the overlap's colour error
+    (a checkerboard of it) + 200000 x the share of the window's texels whose label is not the target's + 6 x the mean
+    squared difference between the window's foliage light (`tw_gs`, 9 x 9 mean luminance of the picture's foliage) and
+    the target light (subsampled 2 x 2; at the earlier 60000 the crowns spread over the V between the tips), windows
+    next to their own source or the last four used penalised, picked among those within 1/8 of the best by a hash,
+    pasted along minimum-error cuts.  The tall tree's spire is narrower than a window in its first 48 rows: there the
+    crown's texels inside the outline are the picture's own leaves of the same row 7-9 columns towards the axis (moved,
+    not mirrored; `tw_flank`).  The foot (rows 626-650) and the grass (646-671): slices 2-8 columns wide of the edges'
+    clean columns, as before (never mirrored, the next slice the one whose neighbouring column matches), where no crown
+    stands only from row 644 (the clouds come down to the grey band: the horizon).  The trunks (`tw_trunk`): the
+    picture's trunk texels at the same rows, so the same perspective and scale, moved and never mirrored, only where no
+    crown in front of the tree's own is: the dark core (rows 580-634: the source's dark or brown texels within 2-5
+    columns of its axis, the first 10 rows thinning in by a hash; the leaves in front of it stay the crown's) and the
+    foot (rows 641-648: per row the source's dark run through the axis, gaps of up to 2 grass texels bridged, at most
+    9-22 columns either side).  The left back tree takes the right picture tree's trunk (x 284), the further left tree
+    and the further right tree the left one's (x 33), so no trunk sits next to its own source.  Then the foliage's
+    luminance mean and spread per row matched to the picture's 32 edge columns, now fading out over the first 32
+    columns (over the whole strip it flattened the crowns' own light), the join (per row and class, the first 6
+    columns' mean onto the picture's last 6, fading over 24), the clouds up to the leaves (a run of at most 10 sky
+    texels next to leaves where the target is cloud takes the cloud texels beyond it, shifted by its length: the
+    quilt's windows brought the sky round the picture's crowns, a blue rim along every flank), on sky / cloud the first
+    column's difference to the edge column fading over 8, and the sky texels the quilt brought from other rows are the
+    row's sky again.  Every pixel quantised to the picture's colours.  A structure depends on where it is (trees, lumps
+    and the quilt's blocks by position, the analytic sky's last row from the outline over 512 columns), so 21:9 / 32:9
+    strips start with the 16:9 columns (0 texels differ at pads 101, 120 and 267); at 21:9 the further trees show whole, at
+    32:9 open sky with low clouds down to the grey band beyond them.  Generation (standalone, the whole picture analysed
+    and both 672-row strips): 0.30-0.41 s at 16:9 (x86-64 and gcc -m32), 0.36-0.46 s at 21:9, 0.65-0.85 s at 32:9.
+    Measured (ws_seam over two 224-row windows: rows 330-553 and the bottom view; join | picture's step, texture mean /
+    contrast picture vs strip): left cloud 4 | 14 (202 / 208, 15 / 13), crown tops 32 | 70 (117 / 104, 53 / 49), crown
+    32 | 78 (99 / 91, 42 / 37), low foliage 18 | 55 (59 / 60), foot 12 | 41, grass 11 | 16: all pass; right cloud 2 |
+    25 (173 / 174, 40 / 29), crown tops 43 | 101 (107 / 112, 60 / 61), crown 37 | 94 (93 / 98, 55 / 54), low foliage
+    22 | 50 (67 / 64), grass 9 | 13: pass; right foot 23 | 43 fails the 80 % rule at 75 % (79 % before; the same
+    slices).  2x crops of the joins at three camera heights show no line.  Weak points: the further trees' outer
+    flanks are steep in their lower third (the crowns hang to the ground); the spire's first 6 rows end at the join
+    (narrower than 3 columns there); at 32:9 the low clouds over the open ground come from few source windows and
+    repeat loosely.
+    Rejected version (2026-11-17, the first one): the crowns' top as a chain of round lumps outwards from the edge
+    (radius 30-50, tops 418-457), quilted foliage under it down to the foot: "La torre no está bien. Has multiplicado
+    las copas de los árboles y has multiplicado los propios árboles enteros, pero ni les has puesto tronco ni has
+    hecho que los árboles terminen en punta. Entonces queda antinatural. Hazlo bien. Fíjate en el árbol de al lado y
+    hazlo bien." (a wall of crown lumps, no trunks, no tops narrowing to a point).  Now the tree cut by each edge is
+    completed to its own point, at most one more tree stands beyond it, each crown tapers to a point and the trees
+    stand on trunks made of the picture's trunk texels.
+    Checked (headless): the game at 16:9 = the standalone at 71 camera heights of the pan (picture top rows 8-448: 0
+    texels differ) and at 21:9 (pad 120) at 25, 4:3 frames identical with `--ws-backdrop-rooms 16:4` and to the build before, the default flags
+    unchanged at 16:9 (the room is not approved), the other rooms' frames (2:5, 2:1, 5:1, 5:3, 19:1, 11:2, 9:5, 9:3,
+    9:4, 17:3, 17:4 with `--ws-backdrop on`) identical to the build before, the OpenGL renderer's frames = the
+    software one's (xvfb), standalone gcc x86-64 = gcc -m32 = clang, UBSan / ASan clean, i386 = wasm2c frames (16:9 and
+    21:9, 176 frames each, the pan included); not checked on the device.
   Checked (headless, 2026-11-14): at 16:9 and 21:9 in the four rooms; 4:3 runs identical with `--ws-backdrop on` and
   off; with the default flags the new rooms are identical to `--ws-backdrop off`, and AREA02 s5 is identical to the
   build before the table; i386 = wasm2c strips; not checked on the device.

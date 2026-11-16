@@ -41,7 +41,9 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    has the numbers and the weak points), OFF by default until the user approves it (`--ws-backdrop-rooms
    19:1`; to approve: `approved` = 1 in its ROOMS entry). Next: the Haunted Mansion 3D side rooms AREA04 s10/s11/s15/s19 (black past the model's outer wall; postponed by the
    user for token budget). The last fixed-camera picture, the AREA17 s3/s4 hall, has a preview since 2026-11-16
-   (`gen_hl`: side walls rectified with the camera's pitch, the panel unit repeated with its period; OFF by default,
+   (`gen_hl`: side walls rectified with the camera's pitch, the panel unit repeated with its period; the panels'
+   light modelled along each wall from the picture (`hl_light`, 2026-11-16: B's pane continues B's light, the panels
+   further out follow the trend, no gold glare repeated); OFF by default,
    `--ws-backdrop-rooms 17:3,17:4`; waiting for the user's verdict; PORT.md "More rooms
    with picture strips"). User rules: show before|after first, never mirror, measure geometry/tones in the picture, no roots, match
    blur; use tools/ws_seam.py on the joins.
@@ -51,8 +53,8 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    `gen_st`: the wall quilted and relit, the stair continued exactly with its own steps, four steps = (90, 55)).
    Looked at and dropped for now: AREA09 s4 (rock wall, stair down to the right: the band of sconce mounds along the
    stair at the right edge cannot be quilted at a run-time cost like the others' ~2 s; the light-aware matching it
-   needs took 8-20 s), AREA16 s4 (a 672-row picture scrolled vertically: the hook only takes a picture at frame row
-   16), AREA08 s1 / s3 (a 4 bpp layer of near trees and translucent light rays over the 8 bpp picture: the rays converge
+   needs took 8-20 s), AREA16 s4 (a 672-row picture scrolled vertically: the hook only took a picture at frame row
+   16; since done, below), AREA08 s1 / s3 (a 4 bpp layer of near trees and translucent light rays over the 8 bpp picture: the rays converge
    and would need geometric continuation), AREA16 s5 (architecture: pillars cut by both edges).
    2026-11-16, one more preview, OFF by default (`--ws-backdrop-rooms 9:3`): AREA09 s3 (the treasure hall, `gen_th`):
    the side walls rectified about their vanishing point (159.625, 117.25), where a move along the depth is a plain
@@ -69,6 +71,21 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    picture as shown (`th_shown`).  Rail and stringer within ~0.5 row across both joins.  To approve: `approved` = 1 in
    its ROOMS entry.  AREA08 s1 / s3 (the lake) looked at again and not delivered: layers and ray geometry measured
    (PORT.md), but the near leaves cut by both edges have no clean source to go on with yet.
+   2026-11-17, AREA16 s4 (the green tower) as a preview, OFF by default (`--ws-backdrop-rooms 16:4`; `gen_tw` /
+   `tw_take` in `runtime/ws_backdrop_rooms2.inc`): the 672-row picture is put together from its three sprite sets and
+   the strips follow the camera's height (the pan up the tower when Tombi enters the door included; gpu.c's hook
+   takes a row offset, 0 for the other rooms); sky per row from the edge, clouds quilted, the trees' foot and the
+   grass as slices of the edges' clean columns.  The trees redone after the user rejected the first version (a wall of
+   crown lumps with no trunks or points): per side the tree cut by the edge completed to its own point, one more tree
+   beyond it, crowns W (2t - t^2) with leaf-clump lumps quilted with the picture's crown light as a guide, trunks from
+   the picture's trunk texels (core and foot, moved, never mirrored).  ~0.3-0.4 s per room entry at 16:9.  To
+   approve: `approved` = 1 in its ROOMS entry.
+
+   2026-11-17, **3D rooms** (Haunted Mansion side rooms AREA04 s10 / s11 / s15 / s19): the black sides at 16:9 were
+   missing geometry (the room model's front wall ends just past 4:3; no cull involved).  `runtime/ws_room3d.c`
+   carries the wall on as extra facets in the model's own format, colours, texture tile and plane (PORT.md "3D room
+   walls").  Preview, OFF by default: `--ws-room3d on` or `--ws-room3d-rooms 4:10,4:11,4:15,4:19`; waiting for the
+   user's verdict per room (`approved` in its ROOMS).  Not in the launcher / Android options yet.
 
 -2. **WIP (owner's request): restore the Funga Chief's cut event** on the Funga stage (`--cut-content=funga`, AREA10 s2,
    chief already walking there: runtime/funga.c).  What survives (docs/CUT_CONTENT.md "Jungle (AREA10)", "Funga Chief"):

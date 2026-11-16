@@ -2913,8 +2913,8 @@ static void gen_th(int pad)
  * source map (as gen_th).  The edge column is not a rectified column (the verticals lean): a rectified column at
  * the bottom shows 9 columns more of the edge than at the top, so the rectified picture starts at HL_KMIN (the edge
  * at the top) and the texels between there and the edge on the lower rows are the band's own texels one period /
- * shift further in (the gap).  The panels (rows 13-129) repeat the wall's unit (window, screwed bar, pane, frame)
- * with its period (hl_unit).  The vases are never copied. */
+ * shift further in (the gap).  The panels (rows 13-129): the strip first closes the panel the edge cuts, then
+ * repeats the wall's panel (rim, bevel, pane, screwed bar) with its period (hl_unit).  The vases are never copied. */
 #define HL_HY (155 * 256 + 128)                           /* the horizon, 1/256 row */
 static const int HL_HX[2] = { 161 * 256, 159 * 256 };     /* each wall's vanishing point (side-local column, 1/256) */
 #define HL_VX 39178                                       /* the verticals' vanishing point (screen, 1/256 texel) */
@@ -3067,47 +3067,348 @@ static int hl_src(int s, long long kg, long long jq, Rgb *o)
         || hl_at(s, (long long)hl_k(s, src % PW) * 256, (long long)(src / PW) * 256, o);   /* (by an edge of the
                                                             source: its column, or the texel itself) */
 }
-/* the side wall's panels (rows HL_PA0..HL_PA1): a repeating unit, seen whole between the edge and the corner: the
-   window (dark glass, lit grey at its outer side; k HL_KU0..7), the bar with the two screws (7..17), the grey pane
-   (17..30) and the frame's wide bevel (30..43, up to its white rim).  Outwards the unit repeats with its period
-   HL_UP (the window's outer end at the top rows' edge to the bevel's rim), each texel its own unit texel (same
-   rectified row, so every line goes on); the window's texels the picture does not show (left of the slanted edge on
-   the lower rows, at most 9 columns) take, on the glass, the edge's colour on their screen row (the glass's lit side
-   and its dark are bands upright on the screen: a reflection, not on the wall), on the frame's rows the edge's texel
-   on the wall's line (hl_uv).  Every unit texel is read at its exact position (no rounding to a rectified texel, so
-   no stepped edges). */
-#define HL_KU0 (-8)
-#define HL_UP 51
-#define HL_GL0 28                                         /* the window's glass: rectified rows [GL0, GL1) */
-#define HL_GL1 113
-/* the unit at rectified column kc and row jq (1/256): the picture where it shows the texel; the window's glass it
-   does not show takes the picture's edge column on the texel's screen row (clamped to the edge: continuous, so the
-   lit side and the dark band stay smooth bands upright on the screen); the frame's rows the nearest texel the
-   picture shows on the wall's line */
+/* the side wall's panels (rows HL_PA0..HL_PA1): framed panels side by side along the wall, each (rectified, from the
+   corner outwards) the frame's rim and wide bevel (the side facing the camera; white rim, rounded corners), the pane,
+   then the frame's far side, the bronze bar with the two screws (its bevel faces away from the camera, so only its
+   top shows); the next panel's rim follows the bar at once.  The picture shows one panel whole by the corner (A) and
+   the next one (B) cut by the edge: B's rim, its bevel (dark there: the metal reflects differently) and the start of
+   its pane (lit grey).  The rims are 30.9 rectified columns apart on both walls, so the strip first closes B (the rest
+   of its pane, then its bar with the screws) and only then starts the next panel, every texel A's texel at the same
+   offset in the unit (whole periods in, the same rectified row: every line and rounded corner goes on), read at its
+   exact position.  Measured (rectified columns, left / right wall): A's bar 12.37..16.29 / 12.06..15.90, pane
+   ..29.29 / ..29.52, inner shadow and bevel ..40.49 / ..39.92, rim ..43.27 / ..43.01; B's rim 10.58..12.36 / 10.24..
+   12.06, bevel from about 1 / 0.5; the edge cuts B's pane on the rows above the pane's lower third (at k -5.3 on the
+   pane's top row) and its bevel's lit side below.
+   The light (hl_light; docs/PORT.md has the measurements): the walls are polished metal lit by reflection, so each
+   part's tone changes along the wall its own way, and A's pane is brighter by its bar.  Each panel's texel is A's
+   texel times a smooth light ratio (A's texture kept, its light replaced): B's light over A's, both smoothed within
+   the part (+-1 column, +-2 rows) where B shows and held over the part from there; on the pane B's level by the edge
+   held flat across the pane over A's linear light (A's bright side by its bar does not come back; its inner shadow
+   does).  B's bar never shows: it takes the rim's ratio.  The panels further out follow the trend damped (the ratio's
+   power 1.25, then 1.375), a brightening one held at B's, and never darker than 0.3 of A's mean light on the part.
+   At the join the rest to B's edge texel is added, fading out over 3 columns (exact there). */
+#define HL_PN0 28                                         /* the pane's rows [PN0, PN1) (the frame above and below) */
+#define HL_PN1 125
+static const int HL_UE[2] = { 11077, 11011 };             /* the unit's end: the rim's outer edge (rectified, 1/256) */
+static const int HL_UPER[2] = { 7910, 7923 };             /* the period (30.90 / 30.95 rectified columns) */
+static const int HL_UBAR[2] = { 4170, 4070 };             /* the bar's end (the pane's start) */
+static const int HL_UPE[2] = { 7498, 7557 };              /* the pane's end (the inner shadow's and bevel's start) */
+static const int HL_URIM[2] = { 10365, 10220 };           /* the rim's start */
+#define HL_FADE (3 * 256)                                 /* the edge offset's fade outwards */
+#define HL_US 64                                          /* the light's grid: a quarter column */
+#define HL_NU 128                                         /* (P / HL_US + 2 samples from the unit's start) */
+#define HL_NJ (HL_PA1 - HL_PA0)
+#define HL_FLO 90                                         /* the panels further out: at least 0.35 of A's light */
+#define HL_SHW 768                                        /* the bevel's first 3 columns: its inner shadow (B's lit
+                                                            pane reaches about 2 columns further than A's there) */
+static int hl_ke[PH];                                     /* the edge's rectified column on rectified row j (1/256) */
+static int hl_eb[PH][3], hl_ea[PH][3];                    /* B's and A's texel at the edge */
+static int hl_ta[HL_NJ][HL_NU][3], hl_tb[HL_NJ][HL_NU][3], hl_la[HL_NJ][HL_NU][3];
+static unsigned char hl_vb[HL_NJ][HL_NU], hl_ms[HL_NJ][HL_NU], hl_md[HL_NJ][HL_NU];   /* B shows; measured; measured
+                                                            directly (not held) */
+static short hl_rho[3][HL_NJ][HL_NU][3];                  /* the light ratio (x 256): B, C, the panels after C */
+static int hl_lvl[HL_NJ][3];                              /* B's pane's level (its rows) */
+static int hl_avg(int s, long long k0, long long j, int n, int step, int *rgb)   /* mean of n texels along the row */
+{
+    int got = 0; Rgb o; rgb[0] = rgb[1] = rgb[2] = 0;
+    for (int i = 0; i < n; i++)
+        if (hl_at(s, k0 + (long long)i * step, j, &o)) { rgb[0] += o.r; rgb[1] += o.g; rgb[2] += o.b; got++; }
+    if (!got) return 0;
+    for (int c = 0; c < 3; c++) rgb[c] = rgb[c] / got;
+    return 1;
+}
+/* the unit at rectified column kc and row jq (1/256): the picture (A is always on it) */
 static int hl_uv(int s, long long kc, long long jq, Rgb *o)
 {
-    long long x, y;
     if (hl_at(s, kc, jq, o)) return 1;
-    hl_pt(s, kc * 256 / HL_KS, jq, &x, &y);
-    if (jq >= HL_GL0 * 256 && jq < HL_GL1 * 256 && kc < 7 * 256) return hl_bil(s ? (PW - 1) * 256 : 0, y, o);
     for (int i = 1; i <= 48; i++) if (hl_at(s, kc + i * 64, jq, o)) return 1;
     return 0;
 }
+static int hl_seg(int s, int u)                           /* the part at unit offset u: 0 bar, 1 pane, 2 the inner
+                                                            shadow, 3 bevel, 4 rim */
+{
+    return u < HL_UBAR[s] ? 0 : u < HL_UPE[s] ? 1 : u < HL_UPE[s] + HL_SHW ? 2 : u < HL_URIM[s] ? 3 : 4;
+}
+static int hl_rcls(int j) { return j < HL_PN0 ? 0 : j < HL_PN1 ? 1 : 2; }   /* the frame above, the pane's rows, below */
+static void hl_light(int s)
+{
+    int P = HL_UPER[s], u0 = HL_UE[s] - P, nu = P / HL_US + 2, lo[5], hi[5], mg[5];
+    static int q[HL_NJ][3], qs[HL_NJ][3], qv[HL_NJ], fa[HL_NJ][3], fb[HL_NJ][3];
+    static unsigned char rowok[HL_NJ];
+    static short tmp[6][HL_NU][3];
+    if (nu > HL_NU) nu = HL_NU;
+    for (int j = HL_PA0; j < HL_PA1; j++) {
+        int lo2 = -40 * 256, hi2 = 40 * 256;
+        while (hi2 - lo2 > 1) {                           /* the edge: hl_pt's column crosses 0 */
+            int m = (lo2 + hi2) / 2; long long x, y;
+            hl_pt(s, (long long)m * 256 / HL_KS, (long long)j * 256, &x, &y);
+            if (x < 0) lo2 = m; else hi2 = m;
+        }
+        hl_ke[j] = hi2;
+        if (!hl_avg(s, hi2 + 26, (long long)j * 256, 3, 64, hl_eb[j]) || !hl_avg(s, hi2 + 26 + P, (long long)j * 256, 3, 64, hl_ea[j]))
+            for (int c = 0; c < 3; c++) hl_eb[j][c] = hl_ea[j][c] = 0;
+        for (int i = 0; i < nu; i++) {                    /* A's and B's texels on the grid */
+            int u = u0 + i * HL_US, r = j - HL_PA0; Rgb o;
+            if (!hl_uv(s, u, (long long)j * 256, &o)) o.r = o.g = o.b = 0;
+            hl_ta[r][i][0] = o.r; hl_ta[r][i][1] = o.g; hl_ta[r][i][2] = o.b;
+            hl_vb[r][i] = (unsigned char)(u - P >= hl_ke[j] + 32 && hl_at(s, u - P, (long long)j * 256, &o));
+            hl_tb[r][i][0] = hl_vb[r][i] ? o.r : 0; hl_tb[r][i][1] = hl_vb[r][i] ? o.g : 0; hl_tb[r][i][2] = hl_vb[r][i] ? o.b : 0;
+        }
+    }
+    for (int g = 0; g < 5; g++) { lo[g] = nu; hi[g] = -1; }   /* each part's samples [lo, hi] and margin */
+    for (int i = 0; i < nu; i++) { int g = hl_seg(s, u0 + i * HL_US); if (i < lo[g]) lo[g] = i; hi[g] = i; }
+    for (int g = 0; g < 5; g++) mg[g] = g == 2 ? 1 : clampi((hi[g] - lo[g]) / 2, 0, 5);
+    /* the smoothed lights (+-4 samples within the part, +-2 rows within the row's class): A's everywhere, B's where it
+       shows (half the window at least, off the part's ends), and their ratio there */
+    for (int r = 0; r < HL_NJ; r++)
+        for (int i = 0; i < nu; i++) {
+            int g = hl_seg(s, u0 + i * HL_US), sa[3] = { 0, 0, 0 }, sb[3] = { 0, 0, 0 }, na = 0, nb = 0;
+            for (int r2 = r - 2; r2 <= r + 2; r2++) {
+                if (r2 < 0 || r2 >= HL_NJ || hl_rcls(r2 + HL_PA0) != hl_rcls(r + HL_PA0)) continue;
+                for (int i2 = i - 4; i2 <= i + 4; i2++) {
+                    if (i2 < lo[g] || i2 > hi[g]) continue;
+                    for (int c = 0; c < 3; c++) sa[c] += hl_ta[r2][i2][c];
+                    na++;
+                    if (hl_vb[r2][i2]) { for (int c = 0; c < 3; c++) sb[c] += hl_tb[r2][i2][c]; nb++; }
+                }
+            }
+            hl_ms[r][i] = (unsigned char)(nb * 2 >= na && nb > 0 && i - lo[g] >= mg[g] && hi[g] - i >= mg[g]);
+            for (int c = 0; c < 3; c++) {
+                hl_la[r][i][c] = na ? sa[c] / na : 0;
+                hl_rho[0][r][i][c] = (short)(hl_ms[r][i] ? clampi((sb[c] / nb + 8) * 256 / (hl_la[r][i][c] + 8), 8, 1024) : 256);
+            }
+        }
+    /* the pane (its rows): B's level by the edge (the mean of its two brightest texels there, where the edge is on
+       the pane) over A's linear light (fitted on the pane's flat part), held flat across the pane; on the rows where
+       the edge is past the pane, B's level over A's held from the nearest row; smoothed over 9 rows */
+    {
+        int f0 = (HL_UBAR[s] + 320 - u0 + HL_US - 1) / HL_US, f1 = (HL_UPE[s] - 640 - u0) / HL_US, mid = (f0 + f1) / 2;
+        for (int r = HL_PN0 - HL_PA0; r < HL_PN1 - HL_PA0; r++) {
+            int ue = hl_ke[r + HL_PA0] + P, b1 = -1, b2 = -1, l1 = -1, l2 = -1;
+            for (int c = 0; c < 3; c++) {                 /* (least squares over the row and the 2 above and below) */
+                long long sx = 0, sy = 0, sxx = 0, sxy = 0, n = 0, den, b;
+                for (int r2 = r - 2; r2 <= r + 2; r2++) {
+                    if (r2 < HL_PN0 - HL_PA0 || r2 >= HL_PN1 - HL_PA0) continue;
+                    for (int i = f0; i <= f1; i++) { long long x = i - f0, y = hl_ta[r2][i][c]; sx += x; sy += y; sxx += x * x; sxy += x * y; n++; }
+                }
+                den = n * sxx - sx * sx; b = den ? (n * sxy - sx * sy) * 256 / den : 0;
+                fb[r][c] = (int)b; fa[r][c] = (int)((sy * 256 - b * sx) / n / 256);
+            }
+            for (int i = 0; i < nu; i++) {                /* B's two brightest texels on the pane by the edge */
+                int u = u0 + i * HL_US, l;
+                if (!hl_vb[r][i] || u < ue + 64 || u > HL_UPE[s] + 256) continue;
+                l = hl_tb[r][i][0] * 2 + hl_tb[r][i][1] * 5 + hl_tb[r][i][2];
+                if (l > l1) { b2 = b1; l2 = l1; b1 = i; l1 = l; } else if (l > l2) { b2 = i; l2 = l; }
+            }
+            qv[r] = ue <= HL_UPE[s] && b2 >= 0;
+            if (qv[r]) for (int c = 0; c < 3; c++) {
+                int lb = (hl_tb[r][b1][c] + hl_tb[r][b2][c]) / 2, la = fa[r][c] + fb[r][c] * (mid - f0) / 256;
+                q[r][c] = clampi((lb + 8) * 256 / (la + 8), 8, 1024);
+            }
+        }
+        for (int r = HL_PN0 - HL_PA0; r < HL_PN1 - HL_PA0; r++) {
+            int best = -1;
+            if (qv[r]) continue;
+            for (int d = 1; d < HL_NJ && best < 0; d++) {
+                if (r - d >= HL_PN0 - HL_PA0 && qv[r - d]) best = r - d;
+                else if (r + d < HL_PN1 - HL_PA0 && qv[r + d]) best = r + d;
+            }
+            for (int c = 0; c < 3; c++) q[r][c] = best >= 0 ? q[best][c] : 256;
+        }
+        for (int r = HL_PN0 - HL_PA0; r < HL_PN1 - HL_PA0; r++)
+            for (int c = 0; c < 3; c++) {
+                int sum = 0, n = 0;
+                for (int r2 = r - 4; r2 <= r + 4; r2++) if (r2 >= HL_PN0 - HL_PA0 && r2 < HL_PN1 - HL_PA0) { sum += q[r2][c]; n++; }
+                qs[r][c] = sum / n;
+            }
+    }
+    memcpy(hl_md, hl_ms, sizeof hl_md);
+    /* held over each part from where it was measured: from the nearest row of the same class measured there (the
+       light of a part varies little down the wall), else along the row (the nearest measured sample), else from the
+       nearest row of the same class that has one */
+    for (int r = 0; r < HL_NJ; r++)
+        for (int i = 0; i < nu; i++) {
+            int best = -1;
+            if (hl_ms[r][i]) continue;
+            for (int d = 1; d < HL_NJ && best < 0; d++) {
+                if (r - d >= 0 && hl_ms[r - d][i] && hl_rcls(r - d + HL_PA0) == hl_rcls(r + HL_PA0)) best = r - d;
+                else if (r + d < HL_NJ && hl_ms[r + d][i] && hl_rcls(r + d + HL_PA0) == hl_rcls(r + HL_PA0)) best = r + d;
+            }
+            if (best < 0) continue;
+            for (int c = 0; c < 3; c++)                   /* (the inner shadow's: as B's pane's level goes) */
+                hl_rho[0][r][i][c] = (short)(i >= lo[2] && i <= hi[2] && hl_rcls(r + HL_PA0) == 1 ?
+                    clampi(hl_rho[0][best][i][c] * qs[r][c] / (qs[best][c] > 8 ? qs[best][c] : 8), 8, 1024) : hl_rho[0][best][i][c]);
+            hl_vb[r][i] |= 2;
+        }
+    for (int r = 0; r < HL_NJ; r++) for (int i = 0; i < nu; i++) if (hl_vb[r][i] & 2) { hl_ms[r][i] = 1; hl_vb[r][i] &= 1; }
+    for (int g = 1; g < 5; g++) {
+        for (int r = 0; r < HL_NJ; r++) {
+            int any = 0;
+            for (int i = lo[g]; i <= hi[g]; i++) any |= hl_ms[r][i];
+            rowok[r] = (unsigned char)any;
+            if (!any) continue;
+            for (int i = lo[g]; i <= hi[g]; i++) {
+                int best = -1;
+                if (hl_ms[r][i]) continue;
+                for (int d = 1; d <= hi[g] - lo[g] && best < 0; d++) {
+                    if (i + d <= hi[g] && hl_ms[r][i + d]) best = i + d;
+                    else if (i - d >= lo[g] && hl_ms[r][i - d]) best = i - d;
+                }
+                for (int c = 0; c < 3; c++) hl_rho[0][r][i][c] = hl_rho[0][r][best][c];
+            }
+        }
+        for (int r = 0; r < HL_NJ; r++) {
+            int best = -1;
+            if (rowok[r]) continue;
+            for (int d = 1; d < HL_NJ && best < 0; d++) {
+                if (r + d < HL_NJ && rowok[r + d] && hl_rcls(r + d + HL_PA0) == hl_rcls(r + HL_PA0)) best = r + d;
+                else if (r - d >= 0 && rowok[r - d] && hl_rcls(r - d + HL_PA0) == hl_rcls(r + HL_PA0)) best = r - d;
+            }
+            if (best >= 0) for (int i = lo[g]; i <= hi[g]; i++) memcpy(hl_rho[0][r][i], hl_rho[0][best][i], sizeof hl_rho[0][r][i]);
+        }
+    }
+    {   /* the pane's ratio: B's level (qs over A's light at the middle) over A's light, flat */
+        int f0 = (HL_UBAR[s] + 320 - u0 + HL_US - 1) / HL_US, f1 = (HL_UPE[s] - 640 - u0) / HL_US, mid = (f0 + f1) / 2;
+        for (int r = HL_PN0 - HL_PA0; r < HL_PN1 - HL_PA0; r++)
+            for (int c = 0; c < 3; c++) {
+                int la = fa[r][c] + fb[r][c] * (mid - f0) / 256;
+                hl_lvl[r][c] = qs[r][c] * la / 256;
+                for (int i = lo[1]; i <= hi[1]; i++) {
+                    int x = clampi(i, f0, f1) - f0, l = fa[r][c] + fb[r][c] * x / 256;
+                    hl_rho[0][r][i][c] = (short)clampi(qs[r][c] * (la + 8) / (l > 8 ? l + 8 : 16), 8, 1024);
+                }
+            }
+        /* the pane's top and foot edges: its ratio and the frame's mixed over 6 rows (no row of an edge alone) */
+        for (int e = 0; e < 2; e++) {
+            int jb = (e ? HL_PN1 : HL_PN0) - HL_PA0;
+            for (int t = 0; t < 6; t++)
+                for (int i = lo[1]; i <= hi[1]; i++)
+                    for (int c = 0; c < 3; c++) {
+                        int a = hl_rho[0][jb - 1][i][c], b = hl_rho[0][jb][i][c];
+                        tmp[t][i][c] = (short)(a + (b - a) * (2 * t + 1) / 12);
+                    }
+            for (int t = 0; t < 6; t++)
+                if (jb - 3 + t >= 0 && jb - 3 + t < HL_NJ) memcpy(hl_rho[0][jb - 3 + t][lo[1]], tmp[t][lo[1]], sizeof(short) * 3 * (size_t)(hi[1] - lo[1] + 1));
+        }
+    }
+    /* the rim (a thin bright line, B's narrower): B's two brightest texels on it over A's, smoothed over 5 rows and
+       held flat across it; B's bar never shows: the rim's ratio too (front faces both), at most A's light */
+    for (int r = 0; r < HL_NJ; r++) {
+        int ba[2] = { -1, -1 }, bb[2] = { -1, -1 }, la[2] = { -1, -1 }, lb[2] = { -1, -1 };
+        for (int i = lo[4] - 4; i <= hi[4]; i++) {
+            int l = hl_ta[r][i][0] * 2 + hl_ta[r][i][1] * 5 + hl_ta[r][i][2];
+            if (i >= lo[4]) { if (l > la[0]) { ba[1] = ba[0]; la[1] = la[0]; ba[0] = i; la[0] = l; } else if (l > la[1]) { ba[1] = i; la[1] = l; } }
+            if (!hl_vb[r][i]) continue;
+            l = hl_tb[r][i][0] * 2 + hl_tb[r][i][1] * 5 + hl_tb[r][i][2];
+            if (l > lb[0]) { bb[1] = bb[0]; lb[1] = lb[0]; bb[0] = i; lb[0] = l; } else if (l > lb[1]) { bb[1] = i; lb[1] = l; }
+        }
+        for (int c = 0; c < 3; c++)
+            q[r][c] = bb[1] < 0 ? 256 : clampi((hl_tb[r][bb[0]][c] + hl_tb[r][bb[1]][c] + 16) * 256 / (hl_ta[r][ba[0]][c] + hl_ta[r][ba[1]][c] + 16), 8, 1024);
+    }
+    for (int r = 0; r < HL_NJ; r++)
+        for (int c = 0; c < 3; c++) {
+            int sum = 0, n = 0;
+            for (int r2 = r - 2; r2 <= r + 2; r2++) if (r2 >= 0 && r2 < HL_NJ) { sum += q[r2][c]; n++; }
+            for (int i = lo[4]; i <= hi[4]; i++) hl_rho[0][r][i][c] = (short)(sum / n);
+            for (int i = lo[0]; i <= hi[0]; i++) hl_rho[0][r][i][c] = (short)(sum / n < 256 ? sum / n : 256);
+        }
+    /* the frame's gold where B does not show on the pane's and the inner shadow's columns (the rounded corners by
+       the pane's top and foot, the bar's flare): the frame's ratio there (the bar's by the bar, the bevel's by the
+       bevel), not the pane's, by how gold A's light is (red over blue) */
+    for (int r = HL_PN0 - HL_PA0; r < HL_PN1 - HL_PA0; r++) {
+        short fbar[3], fbev[3];
+        memcpy(fbar, hl_rho[0][r][lo[0]], sizeof fbar); memcpy(fbev, hl_rho[0][r][lo[3] + mg[3]], sizeof fbev);
+        for (int i = lo[1]; i <= hi[2]; i++) {
+            int w = clampi((hl_la[r][i][0] - hl_la[r][i][2] - 25) * 256 / 50, 0, 256);
+            const short *f = i < (lo[1] + hi[1]) / 2 ? fbar : fbev;
+            if (hl_md[r][i] || !w) continue;
+            for (int c = 0; c < 3; c++) hl_rho[0][r][i][c] = (short)(hl_rho[0][r][i][c] + (f[c] - hl_rho[0][r][i][c]) * w / 256);
+        }
+    }
+    /* the pane's end and the inner shadow are measured two ways (B's level, B over A): their ratios meet smoothly
+       (+-1 column about the pane's end; a step there would draw a line down B's pane by the join) */
+    for (int r = 0; r < HL_NJ; r++) {
+        short sm[16][3];
+        int a0 = lo[2] - 6, a1 = lo[2] + 5;
+        for (int i = a0; i <= a1; i++)
+            for (int c = 0; c < 3; c++) {
+                int sum = 0;
+                for (int i2 = i - 4; i2 <= i + 4; i2++) sum += hl_rho[0][r][i2][c];
+                sm[i - a0][c] = (short)(sum / 9);
+            }
+        for (int i = a0; i <= a1; i++) memcpy(hl_rho[0][r][i], sm[i - a0], sizeof sm[0]);
+    }
+    /* the tint: each channel's ratio within -20 / +25 % of the luminance's (a ratio measured on one hue and held
+       over another, B's brown bevel over A's bluish inner shadow, would tint it) */
+    for (int r = 0; r < HL_NJ; r++)
+        for (int i = 0; i < nu; i++) {
+            short *p = hl_rho[0][r][i];
+            int pl = (p[0] * 2 + p[1] * 5 + p[2]) / 8;
+            for (int c = 0; c < 3; c++) p[c] = (short)clampi(p[c], pl * 205 / 256, pl * 320 / 256);
+        }
+    /* the panels further out: the trend damped (power 1.25, then 1.375; a brightening held, but not on the inner
+       shadow: B's lit pane reaching over it is B's own relief), at least HL_FLO of A's light */
+    for (int r = 0; r < HL_NJ; r++)
+        for (int i = 0; i < nu; i++)
+            for (int c = 0; c < 3; c++) {
+                int p = i >= lo[2] && i <= hi[2] && hl_rho[0][r][i][c] > 256 ? 256 : hl_rho[0][r][i][c], p4 = isqrt_i(isqrt_i(p * 256) * 256), p8 = isqrt_i(p4 * 256);
+                int pc = p >= 256 ? p : p * p4 / 256, pd = p >= 256 ? p : p * p4 / 256 * p8 / 256;
+                hl_rho[1][r][i][c] = (short)clampi(pc, HL_FLO, 1024);
+                hl_rho[2][r][i][c] = (short)clampi(pd, HL_FLO, 1024);
+            }
+#ifdef WS_BACKDROP_MAIN
+    if (getenv("WSB_HLDBG")) for (int r = 0; r < HL_NJ; r += 2) {
+        fprintf(stderr, "s%d j%3d:", s, r + HL_PA0);
+        for (int i = 0; i < nu; i += 2) fprintf(stderr, "%c%3d", hl_md[r][i] ? '*' : ' ', (hl_rho[0][r][i][0] * 2 + hl_rho[0][r][i][1] * 5 + hl_rho[0][r][i][2]) * 100 / 8 / 256);
+        fprintf(stderr, "\n");
+    }
+#endif
+}
+/* the light ratio of panel n (1: B) at unit offset u, rectified row jq (1/256), channel c */
+static int hl_rh(int s, int n, long long u, long long jq, int c)
+{
+    int t = n >= 3 ? 2 : n - 1, x = (int)(u - (HL_UE[s] - HL_UPER[s])), i = clampi(x / HL_US, 0, HL_NU - 2);
+    int fx = clampi(x - i * HL_US, 0, HL_US) * 256 / HL_US;
+    int y = (int)jq - HL_PA0 * 256, r = clampi(y >> 8, 0, HL_NJ - 1), r1 = r + 1 < HL_NJ ? r + 1 : r, fy = clampi(y - r * 256, 0, 256);
+    int a = hl_rho[t][r][i][c] + (hl_rho[t][r][i + 1][c] - hl_rho[t][r][i][c]) * fx / 256;
+    int b = hl_rho[t][r1][i][c] + (hl_rho[t][r1][i + 1][c] - hl_rho[t][r1][i][c]) * fx / 256;
+    return a + (b - a) * fy / 256;
+}
 static int hl_unit(int s, long long kg, long long jq, Rgb *o)
 {
-    long long kq = kg * HL_KS / 256, P = (long long)HL_UP * 256, kend = (long long)(HL_KU0 + HL_UP) * 256;
-    if (kq < HL_KU0 * 256) kq += (HL_KU0 * 256 - kq + P - 1) / P * P;
-    if (kq >= kend) kq -= P;
+    long long kq = kg * HL_KS / 256, P = HL_UPER[s], kend = HL_UE[s], kk;
+    int n = 0, v[3];
     if (jq < HL_PA0 * 256) jq = HL_PA0 * 256;
     if (jq > HL_PA1 * 256 - 1) jq = HL_PA1 * 256 - 1;
-    if (kq > kend - 128) {                                /* (the frame's outer rim meets the next window: blended
-                                                            over half a column, no stepped edge) */
-        Rgb a, b; int f = (int)((kq - (kend - 128)) * 2);
-        if (!hl_uv(s, kq, jq, &a)) return hl_uv(s, kq - P, jq, o);
-        if (!hl_uv(s, kq - P, jq, &b)) { *o = a; return 1; }
-        *o = mix(a, b, f); return 1;
+    kk = kq;
+    while (kk < kend - P) { kk += P; n++; }
+    if (kk > kend - 128) {                                /* (a rim meets the next bar: blended over half a column) */
+        Rgb a, b; int f = (int)((kk - (kend - 128)) * 2);
+        if (!hl_uv(s, kk, jq, &a)) return hl_uv(s, kk - P, jq, o);
+        if (!hl_uv(s, kk - P, jq, &b)) *o = a; else *o = mix(a, b, f);
+    } else if (!hl_uv(s, kk, jq, o)) return 0;
+    if (n < 1) return 1;
+    v[0] = o->r; v[1] = o->g; v[2] = o->b;
+    for (int c = 0; c < 3; c++) v[c] = v[c] * hl_rh(s, n, kk, jq, c) / 256;
+    if (n == 1) {                                         /* B: the rest to its edge texel, fading out */
+        int j0 = (int)(jq >> 8), fj = (int)(jq & 255), j1 = j0 + 1 < HL_PA1 ? j0 + 1 : j0;
+        int ke = hl_ke[j0] + (hl_ke[j1] - hl_ke[j0]) * fj / 256;
+        int w = clampi((int)((kk - (ke + P) + HL_FADE) * 256 / HL_FADE), 0, 256);
+        for (int c = 0; c < 3; c++) {
+            int eb = hl_eb[j0][c] + (hl_eb[j1][c] - hl_eb[j0][c]) * fj / 256;
+            int ea = (hl_ea[j0][c] + (hl_ea[j1][c] - hl_ea[j0][c]) * fj / 256) * hl_rh(s, 1, ke + P, jq, c) / 256;
+            v[c] += (eb - ea) * w / 256;
+            if (j0 >= HL_PN0 && j0 < HL_PN1 && kk >= HL_UPE[s] - 384 && kk < HL_UPE[s] + HL_SHW) {   /* (B's pane's end:
+                                                            no brighter than its pane or its edge texel; B's lit pane
+                                                            ends later than A's, so A's texels there meet B's ratio of
+                                                            the inner shadow while still lit) */
+                int cap = hl_lvl[j0 - HL_PA0][c] > eb ? hl_lvl[j0 - HL_PA0][c] : eb;
+                if (v[c] > cap) v[c] = cap;
+            }
+        }
     }
-    return hl_uv(s, kq, jq, o);
+    o->r = clampi(v[0], 0, 255); o->g = clampi(v[1], 0, 255); o->b = clampi(v[2], 0, 255);
+    return 1;
 }
 static u16 hl_raw[PH][PW];
 static void gen_hl(int pad)
@@ -3135,6 +3436,7 @@ static void gen_hl(int pad)
 #ifdef WS_BACKDROP_MAIN
         if (getenv("WSB_HLMODE")) hl_mode = atoi(getenv("WSB_HLMODE"));
 #endif
+        hl_light(side);
         for (int X = 1; X <= pad; X++)
             for (int y = 0; y < PH; y++) {
                 Rgb o = { 0, 0, 0 };
