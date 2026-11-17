@@ -406,6 +406,10 @@ static void ws_mirror_write(int x, int y, int w, int h) {
 /* a GP0 02 / isbg / ClearImage fill that covers a whole display buffer clears the wide copy too */
 static void ws_fill(int x, int y, int w, int h, u16 c) {
     if (!port_widescreen || w < 320 || h < 200) return;
+    {   /* the Million-Year-Old Man's room (AREA02 s4) clears to grey 424242, unseen on 4:3 (the picture covers it);
+           its vignette's corners are black, so the wide strips are cleared black (the user's call) */
+        const u8 *g = (const u8 *)port_ram_ptr(PORT_A_GAME);
+        if (*(const u16 *)g == 2 && *(const u16 *)(g + 2) == 4) c = 0; }
     {   /* research: PORT_WSCLEAR=7C1F (15-bit colour, hex) clears the wide copy with that colour instead, so what no
            primitive covers shows in the frame dumps (how the rooms whose model ends inside the wide frame were found) */
         static int wc = -2; if (wc == -2) { const char *e = getenv("PORT_WSCLEAR"); wc = e ? (int)strtol(e, 0, 16) : -1; } if (wc >= 0) c = (u16)wc; }
