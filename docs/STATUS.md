@@ -66,7 +66,7 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    AREA17 s1 (Iron Castle entrance: a 384-row picture drawn from frame row -144). **Valid as they are, decided by the
    user 2026-11-17 (black strips, do not list or propose again)**: AREA00 s3 (100 Year Old Man's Hut), AREA13 s1 (Pig
    Island Cave, the same picture), AREA10 s8 (10000 Year Old Man), all vignettes with black corners; AREA02 s4 the
-   same. AREA09 s6 (Leaf Slider, 3D) and AREA16 s5's white right strip (approved) need nothing. The survey only
+   same; AREA09 s6 (Leaf Slider, 3D: the user sees nothing to do). AREA16 s5's white right strip is approved. The survey only
    finds flat strips, not weak joins in rooms already done.
 0. **Widescreen room strips, next (2026-11-15).** Approved and on by default: AREA02 s5, AREA05 s1/s3, AREA02 s1
    (the bottom-left pink sphere left as the user accepted it "for now"). AREA19 s1 (Dwarf Village in blossom) redone
