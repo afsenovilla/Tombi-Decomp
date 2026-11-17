@@ -180,23 +180,6 @@ jobs:
             build/wasm/wabt-src/wasm2c
           key: wabt-1.0.36-ubuntu-24.04-v1
 
-      - name: wasm2c build of the game (arm64-v8a sources)
-        if: steps.fetch.outputs.ok == 'true'
-        run: |
-          python3 port2/wasm/build.py -j "$(nproc)" --until w2c
-          ls -l build/wasm/tombi2.wasm build/wasm/w2c
-          echo "PORT2_W2C_DIR=$PWD/build/wasm/w2c" >> "$GITHUB_ENV"
-
-      - name: Save wasm2c (WABT)
-        if: steps.fetch.outputs.ok == 'true' && steps.wabt.outputs.cache-hit != 'true'
-        continue-on-error: true
-        uses: actions/cache/save@v4
-        with:
-          path: |
-            build/wasm/wabt-build/wasm2c
-            build/wasm/wabt-src/wasm2c
-          key: wabt-1.0.36-ubuntu-24.04-v1
-
       - name: SDL2 source (pinned release)
         if: steps.fetch.outputs.ok == 'true'
         run: |
@@ -205,10 +188,6 @@ jobs:
           tar xzf "$RUNNER_TEMP/sdlsrc/sdl.tar.gz" -C "$RUNNER_TEMP/sdlsrc"
           echo "SDL2_SOURCE=$RUNNER_TEMP/sdlsrc/SDL2-${SDL2_VERSION}" >> "$GITHUB_ENV"
 
-      # The USA release (SCUS-94236) as a second game library, libtombi_usa.so for both ABIs (docs/PORT_VERSIONS_PLAN.md
-      # U2, port2/android/game_libs.py): only with the GAME_FILES_URL_USA secret; without it the APK has the PAL game
-      # only (the launcher then lists a USA disc as recognised but not in this build).  The generator takes the USA
-      # addresses from its own matching build and the USA disc's files (game_usa/fs), as the PAL one does from game/.
       - name: Restore ccache
         if: steps.fetch.outputs.ok == 'true'
         uses: actions/cache/restore@v4
@@ -238,51 +217,6 @@ jobs:
             !build/scus94236/full/tmp
           key: fullusa-${{ steps.key.outputs.fullusa }}
 
-      - name: USA game library (libtombi_usa.so, both ABIs)
-        id: usa
-        if: steps.fetch.outputs.ok == 'true'
-        env:
-          GAME_FILES_URL_USA: ${{ secrets.GAME_FILES_URL_USA }}
-        run: |
-          if [ -z "$GAME_FILES_URL_USA" ]; then
-            echo "::notice::GAME_FILES_URL_USA secret not set; the APK has the PAL game only."
-            echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0
-          fi
-          if [ "${{ steps.usalibs.outputs.cache-hit }}" = "true" ]; then
-            echo "USA libraries restored from the cache (usalibs-${{ steps.key.outputs.usalibs }})"
-            ls -l port2/android/app/src/main/jniLibs/*/
-            echo "ok=true" >> "$GITHUB_OUTPUT"; exit 0
-          fi
-          bash tools/disc_fetch.sh USA
-          echo "81cbc79f0230aeb4252e058039f47ac95a777f5a  game_usa/fs/SCUS_942.36" | sha1sum -c -
-          if [ "${{ steps.fullusa.outputs.cache-hit }}" = "true" ]; then find build/scus94236/full -type f -exec touch {} +
-          else python3 tools/build_full.py --version usa -j "$(nproc)"; fi
-          ccache -z || true
-          python3 port2/android/game_libs.py --version usa --sdl2 "$SDL2_SOURCE" --ndk "$ANDROID_NDK_LATEST_HOME" -j "$(nproc)"
-          ccache -s || true
-          ls -l port2/android/app/src/main/jniLibs/*/
-          rm -f game_usa/disc.bin
-          echo "ok=true" >> "$GITHUB_OUTPUT"
-
-      - name: Save USA matching build
-        if: steps.usa.outputs.ok == 'true' && steps.usalibs.outputs.cache-hit != 'true' && steps.fullusa.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
-        with:
-          path: |
-            build/scus94236/full
-            !build/scus94236/full/tmp
-          key: fullusa-${{ steps.key.outputs.fullusa }}
-
-      - name: Save the USA game libraries
-        if: steps.usa.outputs.ok == 'true' && steps.usalibs.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
-        with:
-          path: |
-            port2/android/app/src/main/jniLibs/*/libtombi_usa.so
-            build/android-usa/*/libtombi_usa.debug.so
-          key: usalibs-${{ steps.key.outputs.usalibs }}
-
-      # The finished JP libraries of the same sources (cache hit = the whole step below is skipped)
       - name: Restore the JP game libraries
         id: jplibs
         if: steps.fetch.outputs.ok == 'true'
@@ -303,50 +237,70 @@ jobs:
             !build/slps01144/full/tmp
           key: fulljp-${{ steps.key.outputs.fulljp }}
 
-      - name: JP game library (libtombi_jp.so, both ABIs)
-        id: jp
+      # The USA (SCUS-94236) and JP (SLPS-01144) releases as more game libraries, libtombi_usa.so / libtombi_jp.so for
+      # both ABIs (docs/PORT_VERSIONS_PLAN.md U2 / J1, port2/android/game_libs.py), each only with its disc secret.  The
+      # generator takes each version's addresses from its own matching build and disc files (game_usa/fs, game_jp/fs).
+      # They are built in the background (two versions x two ABIs at once) while the PAL wasm2c step and a first Gradle
+      # pass run: much of each chain is single-threaded (gen2, the one-module clang -O2, wasm2c, CMake configure), so
+      # they overlap well on the runner's 4 cores.  "Wait for the USA / JP game libraries" collects them.
+      - name: Start the USA / JP game libraries (background)
         if: steps.fetch.outputs.ok == 'true'
         env:
+          GAME_FILES_URL_USA: ${{ secrets.GAME_FILES_URL_USA }}
           GAME_FILES_URL_JP: ${{ secrets.GAME_FILES_URL_JP }}
         run: |
-          if [ -z "$GAME_FILES_URL_JP" ]; then
-            echo "::notice::GAME_FILES_URL_JP secret not set; the APK has no JP game library."
-            echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0
-          fi
-          if [ "${{ steps.jplibs.outputs.cache-hit }}" = "true" ]; then
-            echo "JP libraries restored from the cache (jplibs-${{ steps.key.outputs.jplibs }})"
-            ls -l port2/android/app/src/main/jniLibs/*/
-            echo "ok=true" >> "$GITHUB_OUTPUT"; exit 0
-          fi
-          bash tools/disc_fetch.sh JP
-          mkdir -p game_jp/SYSTEM; cp game_jp/fs/SLPS_011.44 game_jp/; cp game_jp/fs/SYSTEM/*.BIN game_jp/SYSTEM/   # the flat tree of tools/versions.py
-          echo "07d577698ad31ec1a69b9d7b80a7c3f90b650888  game_jp/SLPS_011.44" | sha1sum -c -
-          if [ "${{ steps.fulljp.outputs.cache-hit }}" = "true" ]; then find build/slps01144/full -type f -exec touch {} +
-          else python3 tools/build_full.py --version jp -j "$(nproc)"; fi
+          T="$RUNNER_TEMP/libs"; mkdir -p "$T"
+          chain() {   # ver DISC libs-hit full-hit full-dir: disc, matching build, then both ABIs at once
+            local v=$1 disc=$2 libhit=$3 fullhit=$4 full=$5
+            if [ "$libhit" = "true" ]; then echo "$v libraries restored from the cache"; return 0; fi
+            bash tools/disc_fetch.sh "$disc"
+            if [ "$v" = usa ]; then
+              echo "81cbc79f0230aeb4252e058039f47ac95a777f5a  game_usa/fs/SCUS_942.36" | sha1sum -c -
+            else
+              mkdir -p game_jp/SYSTEM; cp game_jp/fs/SLPS_011.44 game_jp/; cp game_jp/fs/SYSTEM/*.BIN game_jp/SYSTEM/   # the flat tree of tools/versions.py
+              echo "07d577698ad31ec1a69b9d7b80a7c3f90b650888  game_jp/SLPS_011.44" | sha1sum -c -
+            fi
+            if [ "$fullhit" = "true" ]; then find "$full" -type f -exec touch {} +
+            else python3 tools/build_full.py --version "$v" -j "$(nproc)"; fi
+            # the cached WABT of the PAL step (build.py builds its own into each --out when missing)
+            if [ -x build/wasm/wabt-build/wasm2c ]; then
+              mkdir -p "build/wasm-$v/wabt-build" "build/wasm-$v/wabt-src"
+              cp build/wasm/wabt-build/wasm2c "build/wasm-$v/wabt-build/"; cp -r build/wasm/wabt-src/wasm2c "build/wasm-$v/wabt-src/"
+            fi
+            python3 port2/android/game_libs.py --version "$v" --abi armeabi-v7a --sdl2 "$SDL2_SOURCE" --ndk "$ANDROID_NDK_LATEST_HOME" -j "$(nproc)" > "$T/$v-armeabi-v7a.log" 2>&1 &
+            local p=$!
+            python3 port2/android/game_libs.py --version "$v" --abi arm64-v8a --sdl2 "$SDL2_SOURCE" --ndk "$ANDROID_NDK_LATEST_HOME" -j "$(nproc)"
+            local r=0; wait $p || r=$?
+            echo "--- armeabi-v7a:"; cat "$T/$v-armeabi-v7a.log"
+            rm -f "game_$v/disc.bin"
+            return $r
+          }
           ccache -z || true
-          python3 port2/android/game_libs.py --version jp --sdl2 "$SDL2_SOURCE" --ndk "$ANDROID_NDK_LATEST_HOME" -j "$(nproc)"
-          ccache -s || true
-          ls -l port2/android/app/src/main/jniLibs/*/
-          rm -f game_jp/disc.bin
-          echo "ok=true" >> "$GITHUB_OUTPUT"
+          if [ -n "$GAME_FILES_URL_USA" ]; then
+            touch "$T/usa.started"
+            ( ( set -e; chain usa USA "${{ steps.usalibs.outputs.cache-hit }}" "${{ steps.fullusa.outputs.cache-hit }}" build/scus94236/full ) > "$T/usa.log" 2>&1; echo $? > "$T/usa.rc" ) </dev/null >/dev/null 2>&1 &   # (no fd of the step kept open: the step ends at once)
+          else echo "::notice::GAME_FILES_URL_USA secret not set; the APK has no USA game library."; fi
+          if [ -n "$GAME_FILES_URL_JP" ]; then
+            touch "$T/jp.started"
+            ( ( set -e; chain jp JP "${{ steps.jplibs.outputs.cache-hit }}" "${{ steps.fulljp.outputs.cache-hit }}" build/slps01144/full ) > "$T/jp.log" 2>&1; echo $? > "$T/jp.rc" ) </dev/null >/dev/null 2>&1 &
+          else echo "::notice::GAME_FILES_URL_JP secret not set; the APK has no JP game library."; fi
 
-      - name: Save JP matching build
-        if: steps.jp.outputs.ok == 'true' && steps.jplibs.outputs.cache-hit != 'true' && steps.fulljp.outputs.cache-hit != 'true'
+      - name: wasm2c build of the game (arm64-v8a sources)
+        if: steps.fetch.outputs.ok == 'true'
+        run: |
+          python3 port2/wasm/build.py -j "$(nproc)" --until w2c
+          ls -l build/wasm/tombi2.wasm build/wasm/w2c
+          echo "PORT2_W2C_DIR=$PWD/build/wasm/w2c" >> "$GITHUB_ENV"
+
+      - name: Save wasm2c (WABT)
+        if: steps.fetch.outputs.ok == 'true' && steps.wabt.outputs.cache-hit != 'true'
+        continue-on-error: true
         uses: actions/cache/save@v4
         with:
           path: |
-            build/slps01144/full
-            !build/slps01144/full/tmp
-          key: fulljp-${{ steps.key.outputs.fulljp }}
-
-      - name: Save the JP game libraries
-        if: steps.jp.outputs.ok == 'true' && steps.jplibs.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
-        with:
-          path: |
-            port2/android/app/src/main/jniLibs/*/libtombi_jp.so
-            build/android-jp/*/libtombi_jp.debug.so
-          key: jplibs-${{ steps.key.outputs.jplibs }}
+            build/wasm/wabt-build/wasm2c
+            build/wasm/wabt-src/wasm2c
+          key: wabt-1.0.36-ubuntu-24.04-v1
 
       - uses: actions/setup-java@v4
         if: steps.fetch.outputs.ok == 'true'
@@ -379,6 +333,68 @@ jobs:
           cp patches/*.tombipatch.json patches/*.tpatch "$D/"
           ls -l "$D"
 
+      # A first Gradle pass while the USA / JP libraries build: it compiles the PAL libraries of both ABIs (externalNativeBuild).
+      # Its APK is thrown away; "Build the APK" runs Gradle again once every library is there (the native parts are then
+      # up to date, only the packaging runs).
+      - name: PAL libraries (first Gradle pass, alongside the USA / JP builds)
+        if: steps.fetch.outputs.ok == 'true'
+        run: |
+          export PORT2_PYTHON="$(command -v python3)"
+          gradle -p port2/android assembleDebug --no-daemon --stacktrace -Psdl2Source="$SDL2_SOURCE"
+
+      - name: Wait for the USA / JP game libraries
+        id: libs
+        if: steps.fetch.outputs.ok == 'true'
+        run: |
+          T="$RUNNER_TEMP/libs"; fail=0
+          for v in usa jp; do
+            if [ ! -f "$T/$v.started" ]; then echo "$v=false" >> "$GITHUB_OUTPUT"; continue; fi
+            while [ ! -f "$T/$v.rc" ]; do sleep 5; done
+            echo "::group::$v game library log"; cat "$T/$v.log"; echo "::endgroup::"
+            if [ "$(cat "$T/$v.rc")" != 0 ]; then echo "::error::the $v game library failed (log above)"; fail=1
+            else echo "$v=true" >> "$GITHUB_OUTPUT"; fi
+          done
+          ccache -s || true
+          ls -l port2/android/app/src/main/jniLibs/*/
+          exit $fail
+
+      - name: Save USA matching build
+        if: steps.libs.outputs.usa == 'true' && steps.usalibs.outputs.cache-hit != 'true' && steps.fullusa.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            build/scus94236/full
+            !build/scus94236/full/tmp
+          key: fullusa-${{ steps.key.outputs.fullusa }}
+
+      - name: Save the USA game libraries
+        if: steps.libs.outputs.usa == 'true' && steps.usalibs.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            port2/android/app/src/main/jniLibs/*/libtombi_usa.so
+            build/android-usa/*/libtombi_usa.debug.so
+          key: usalibs-${{ steps.key.outputs.usalibs }}
+
+      # The finished JP libraries of the same sources (cache hit = the whole step below is skipped)
+      - name: Save JP matching build
+        if: steps.libs.outputs.jp == 'true' && steps.jplibs.outputs.cache-hit != 'true' && steps.fulljp.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            build/slps01144/full
+            !build/slps01144/full/tmp
+          key: fulljp-${{ steps.key.outputs.fulljp }}
+
+      - name: Save the JP game libraries
+        if: steps.libs.outputs.jp == 'true' && steps.jplibs.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            port2/android/app/src/main/jniLibs/*/libtombi_jp.so
+            build/android-jp/*/libtombi_jp.debug.so
+          key: jplibs-${{ steps.key.outputs.jplibs }}
+
       - name: Build the APK (debug-signed)
         if: steps.fetch.outputs.ok == 'true'
         run: |
@@ -391,8 +407,8 @@ jobs:
           unzip -l "$APK" | grep -E "\.so$"
           # both ABIs, all four libraries each (a 64-bit-only device loads only lib/arm64-v8a)
           LIBS="libtombi.so libmain.so libSDL2.so libtombidisc.so"
-          [ "${{ steps.usa.outputs.ok }}" = "true" ] && LIBS="$LIBS libtombi_usa.so"   # the USA game library (game_libs.py)
-          [ "${{ steps.jp.outputs.ok }}" = "true" ] && LIBS="$LIBS libtombi_jp.so"     # the JP game library
+          [ "${{ steps.libs.outputs.usa }}" = "true" ] && LIBS="$LIBS libtombi_usa.so"   # the USA game library (game_libs.py)
+          [ "${{ steps.libs.outputs.jp }}" = "true" ] && LIBS="$LIBS libtombi_jp.so"     # the JP game library
           for abi in armeabi-v7a arm64-v8a; do for l in $LIBS; do
             unzip -l "$APK" | grep -q " lib/$abi/$l\$" || { echo "::error::the APK has no lib/$abi/$l"; exit 1; }
           done; done
