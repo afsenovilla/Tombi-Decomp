@@ -49,6 +49,17 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    top-down / tunnel exits (func_800270A0 with map coordinates) are not drawn by the collision view yet. Not tested
    on the device. Re-check after a change with `python3 tools/ws_exit_sweep.py` (places Tomba 70 units from each
    moved exit and walks him out at 4:3/16:9/21:9/32:9; needs `PORT_CVLOG`, built into the collision view).
+0b. **Widescreen strips: what is left (2026-11-17, hand-over from the other agent).** Every room of the tables
+   (`ws_backdrop.c`, `ws_room3d.c`, `ws_floor3d.c`, `ws_trick.c`, `ws_edge.c`, `ws_topdown_gen.inc`) is approved and on
+   by default; no preview is waiting (the items below that say "off by default / waiting" are history). A fresh
+   `tools/ws_survey.py rooms` + `sweep` at 16:9 over the 96 rooms lists these with flat strips next to a non-flat
+   picture: **still to do**: AREA08 s1 / s3 (Baccus Pier: grey clear-colour strips; layers and ray geometry in
+   PORT.md, the near leaves cut by both edges are the open problem), AREA11 s1 (Lumberjack Factory, the cage scene),
+   AREA17 s1 (Iron Castle entrance: a 384-row picture drawn from frame row -144). **Valid as they are, decided by the
+   user 2026-11-17 (black strips, do not list or propose again)**: AREA00 s3 (100 Year Old Man's Hut), AREA13 s1 (Pig
+   Island Cave, the same picture), AREA10 s8 (10000 Year Old Man), all vignettes with black corners; AREA02 s4 the
+   same. AREA09 s6 (Leaf Slider, 3D) and AREA16 s5's white right strip (approved) need nothing. The survey only
+   finds flat strips, not weak joins in rooms already done.
 0. **Widescreen room strips, next (2026-11-15).** Approved and on by default: AREA02 s5, AREA05 s1/s3, AREA02 s1
    (the bottom-left pink sphere left as the user accepted it "for now"). AREA19 s1 (Dwarf Village in blossom) redone
    2026-11-17 (`gen_cb`: every band quilted from the picture at run time, the front bushes' scalloped top included;
