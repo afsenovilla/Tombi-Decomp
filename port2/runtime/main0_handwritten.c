@@ -650,6 +650,10 @@ full:
         extern void port_ws_edge_blocks(char *, const u8 *, int, int);
         port_ws_edge_blocks(list, (const u8 *)(unsigned long)(u32)wmd, game, sec);
     }
+    if (game == 10) {   /* Trick Village's left end: the wall, the grass blocks and the water carried on (runtime/ws_trick.c; off by default) */
+        extern void port_ws_trick_blocks(char *, const u8 *, int, int);
+        port_ws_trick_blocks(list, (const u8 *)(unsigned long)(u32)wmd, game, sec);
+    }
 }
 
 /* --widescreen: the wrapping parallax backdrop of AREA01 / AREA09 (updateParallaxBackdropSprite subtype 1: 64-wide

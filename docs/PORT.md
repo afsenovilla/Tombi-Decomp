@@ -2705,7 +2705,7 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   closes, so only the collision view was checked: floor to both wide edges); AREA18 s1 both sides (the left one once flag 0x8009CDED is
   set, as on 4:3).  Kept at 4:3 after review:
   - exits through a door, which stays where it is however wide the room gets: AREA00 s5, AREA01 s4, AREA03 s3,
-    AREA09 s1, AREA10 s3 / s7 (left);
+    AREA09 s1, AREA10 s3 / s7 (left; the wall the door is in ended just past 4:3: "Trick Village's left end" below);
   - the AREA09 s4 / s5 stairs: the stair leaves the frame at the top or bottom edge about where the 4:3 edge was, so
     following its slope out to the wide edge took Tomba off the picture before the exit (tried: the repeated WHM column
     carried the slope on and the exits' Y tests were lowered; it worked, but he left the frame upwards);
@@ -2912,6 +2912,59 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   texture rectangles show several times and some facets are stretched (s6's right end, s2's left wall); s5's
   pillar repeats its outermost block, vine included; at 32:9 the columns' regular pitch shows; a 4:3 gap that
   crosses the frame's edge ends on a straight line there when the camera rests at the limit.
+- **Trick Village's left end** (`runtime/ws_trick.c`, called from `port_ws_area_model_link` for GAME 10 after the
+  extra block runs; preview, OFF by default; `--ws-trick on` = every room of its table, `--ws-trick-rooms 10:3,10:7`
+  = exactly those, `--ws-trick off`; 2026-11-17): AREA10 s3 (the cursed village: night, flooded) and s7 (the purified
+  one), debug select area A sections 3 and 7.  One WMD model of 150 blocks (3633 / 3024 polygons), drawn through an
+  unrotated scrolling camera (T = (-cx, -cy, 544), H 544; CAMERA_SCROLL minX..maxX 118..1860, minY..maxY -1200..-120).
+  With the camera at its left limit a 16:9 frame showed 30 columns of sky (black in s3) beside the pink wall and the
+  grass blocks under it, the whole height of the room (uncovered left-strip pixels, `PORT_WSCLEAR=7C1F`: 5493 at
+  16:9, 16841 at 21:9, both sections).  Cause: missing geometry, not a cull and not an object window:
+  `PORT_WSXTRA=300 PORT_WSBLK=600` draws the very same frame, and the parsed model ends there.  What the picture
+  shows as a big pink round tower is not a cylinder in the model: it is the level's left wall with the door in it (the
+  left exit "through a door" above).  Its side runs in depth (z -45..585) with a cove profile (x 22 at y -1160 down to
+  0 at y -1016) under a flat top at y -1160, the grey stone "ribs" are the door's frame (jambs at z -45..-35 and
+  35..45, a recess to x -33 between them), and the face towards the viewer (z -45) is five rows of one quad each, 50
+  units wide, their left edge following the same profile (x -28, -34, -41, -46, -50, -50): with the camera at 118 the
+  4:3 frame's edge is at x -29 there, so the face is exactly as wide as 4:3 needs.  Under it the wall of grass blocks
+  (z -45, one quad of x -50..0 per row, 18 rows down to y -54), the stone at the bottom (z -75), and in front the
+  see-through water sheets (z -85, x -50..5; from y -960 in s3, from -144 in s7) with their surface: all end on the
+  line x -50 (screen x -23 at z -45, -39 at z -85).  Nothing round is cut, so nothing is closed round: the level ends
+  in this wall, and the wall goes on.
+  Method (the file's header has every rule), read from the model each time, no coordinates in the code: a free edge
+  (of one polygon only) on the left of a polygon whose plane holds the x direction, both ends outside the 4:3 frustum
+  of the camera at its left limit and at least one inside the wide one, is swept to the left in the polygon's plane
+  with its heights, depths, vertex colours, command bits (the water stays see-through), page and palette.  The
+  texture goes on with the polygon's own mapping (texels per unit from its edges along x: 0.96 the pink wall, 1.25
+  the grass blocks, 0.56 the water) inside the tile that material uses (the union of the U ranges of its polygons
+  that share a texel column: 184..253 pink, 144..207 grass, 192..255 water), and at the tile's end it does what the
+  model does in that very row: the polygons following the edge's polygon inwards in its plane show whether the tile
+  starts again (the water, every 109 units; 13 of the 18 grass rows) or is laid flipped (the other 5 grass rows, the
+  top one among them, and the bottom stone: the model itself lays those tiles alternately flipped, as the 4:3 picture
+  shows).  The pink face has no polygon beside it in its plane: its tile starts again, never flipped, from the column
+  of the tile's far half that goes best with its first one (3 x 3 texels each side, squared differences over the
+  rows; here the tile's own last column, 253).  A piece ends where a vertex reaches the tile's end, so the pieces do
+  not depend on the strip's width.  Polygons whose texture rectangle holds see-through texels are left alone (the
+  tree crown card at z -74, which covers the frame's top to screen x -165: a crown ends where it ends).  One block
+  of FT4 / GT4 packets (37 quads in s7 at 16:9, 52 in s3 with the water, 78 at 21:9), rebuilt when the model, the strip width or
+  the camera's limit change, added to the list while the camera is within two frame widths of the limit.  Integers
+  only, no random values.
+  Checked (software, i386; the debug select, then a flight to the left limit with the camera at y -1100, -1092 and -1048, and in s7 a
+  walk off the ledge for the lower camera): uncovered left-strip pixels at the limit 0 at 16:9 and 21:9 in both sections; the
+  4:3 centre of every 16:9 / 21:9 frame identical on / off (36 frames per section and aspect on the way to the
+  limit, 49 of the lower walk); 4:3 runs with the flag on and the default 16:9 frames byte-identical to the build
+  before this; AREA10 s1, s2, s5, AREA00 s0 and AREA09 s0 identical on / off; a 21:9 frame starts with exactly the
+  16:9 columns and a 32:9 one with the 21:9 ones (rows clear of the HUD); OpenGL (xvfb, 16:9) covers the strip, its
+  4:3 centre identical on / off; i386 = wasm2c whole frames (`build/wasm/tombi2w`: 36 frames per section at 16:9 and at 21:9, the 49 of the
+  lower walk).  To approve a room: `approved` = 1 in ROOMS
+  of ws_trick.c.  Weak points: the pink tile is not seamless when it starts again (its blotches touch its right
+  edge and not its left), so the join at x -50 (7 columns inside the 16:9 strip) cuts two pale blotches on a
+  straight line, faint at 1x and 2x, and at 21:9 / 32:9 the tile shows again every 72 units (the model's own way
+  with this texture, flipped tiles, joins without a line but is a mirror); the grass rows that start again show the
+  tile's own seam every 50 units, as the model does further right; at 32:9 the crown card ends at screen x -165 and
+  left of it the wall's top edge (y -1160, its dark top row) stands against the sky; the camera's lower range in s3
+  (under water) and its top (-1200) were not reached headless: the rows there are built by the same rule but were
+  not seen; s3's lower rows were only seen from the ledge (the water's surface strip).
 - **Top-down map** (`runtime/ws_topdown.c`, fixes.txt hooks at the end of `topdownDrawMapLayers` /
   `overheadDrawMapLayers` and their USA / JP versions): the overhead background is the room's map picture (8 bpp TIM
   in RAM, scratch 0x1F800394) of which the game uploads a 384x288 window (12x9 tiles of 32 px, USA / JP 384x256) into
