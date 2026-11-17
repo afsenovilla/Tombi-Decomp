@@ -788,7 +788,7 @@ static const Room ROOMS[] = {
     { 6, 2, MM_H2, 1, { { 0 } }, { { 0 } }, gen_mm },   /* the mermaid on her rock: the sea is a loop of four pictures */
     { 6, 1, MM_H1, 1, { { 0 } }, { { 0 } }, gen_mm },   /* the Singing Rock beach: a 640-column picture moved by the
                                                             camera, its two ends (mm_take, ws_backdrop_mermaid.inc) */
-    { 17, 2, IM_H, 0, { { 0 } }, { { 0 } }, gen_im },   /* the Iron Castle main room: a 640-column picture moved by the
+    { 17, 2, IM_H, 1, { { 0 } }, { { 0 } }, gen_im },   /* the Iron Castle main room: a 640-column picture moved by the
                                                             camera, its two ends (im_take, ws_backdrop_ironmain.inc) */
     { 9, 2, CK_HM, 1, { { 0 } }, { { 0 } }, gen_ck },   /* the grandfather clock room: a 480 x 288 picture moved by the
                                                             camera, its two ends (ck_take, ws_backdrop_clock.inc; preview) */
