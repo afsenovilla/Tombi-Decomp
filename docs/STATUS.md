@@ -32,10 +32,14 @@ Update this file whenever something lands or a task is decided. Newest first.
     (`--poke-every 1:1F800176:VAL:2`, x = 1024 - VAL), not in the scene itself. Weak: at 21:9 / 32:9 with both
     strips laid, rows 0-19 of the left strip are one blue step off the game's clear colour (it would need the clear
     colour from `ws_fill`); at 32:9 a seam 128 columns left of the picture where the island's mosaic starts.
-  - Open: the Forest of 100 Flowers' right entrance (AREA01 s1), the stone house with the cave door: the sky shows
-    past the house's right end on a wide frame (a room end to carry on, `runtime/ws_edge.c`; `--ws-edge all` is the
-    first thing to try). The user's tip: leave the Dwarf Village by its left side to arrive there. The brick
-    staircase's dash is still to compare with the original game.
+  - **Forest of 100 Flowers, right entrance (AREA01 s1), the stone house with the cave door**: the rock wall goes on
+    to the right on a wide frame, with the platform and the fence under it (`ROOMS` `props_only` + `PROPS` rows in
+    `runtime/ws_edge.c`, docs/PORT.md "Room ends"; the rock is part of the area model). 4:3 identical, the exit to
+    the Dwarf Village as before (PC, i386, soft renderer). Reached headless by leaving AREA02 s0 to the left
+    (`--pad-script 1000:start,1300:circle:3,1700:left:500` from the debug select 2:0). Weak: the stone pattern
+    repeats every 216 units; at 32:9 a crease between the copies shows against the sky.
+  - Open: the brick staircase's dash (AREA09 s5) is still to compare with the original game; it needs a save with
+    the dash.
 
 ## Parked (2026-11-17): new pictures for the cut Civilization towns
 

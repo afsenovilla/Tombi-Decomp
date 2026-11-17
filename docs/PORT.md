@@ -2804,6 +2804,16 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   house.  (16:9 / 21:9 had a stand of bare trunks there, the apple tree's and the hut tree's, dropped 2026-11-17 at
   the user's request: seen from the back lane they were trunks standing in mid-air; the fence closes the way.)  (A box that cut the tree in depth left a flat dark crown: the front
   leaf clusters start at z -3.)
+  **Forest of 100 Flowers, right entrance (AREA01 s1), right end** (2026-11-17; `ROOMS` flag `props_only`: nothing is
+  extruded, only `PROPS`): the "stone house" with the cave door to the Dwarf Village is a hollow rock of the room's
+  own model (page 0xe, palettes 780b front / 784b back, 91 polygons, x 4050..4305, front wall at z 45) on a straw
+  platform that ends with the model at x 4347.  At 4:3 the frame ends on the rock's front; a wide frame showed its
+  right side and the sky.  The whole rock is stood again 216 units to the right (432 too from 21:9 on), front flush
+  with front, so the wall goes on; over the dark stone the door stands in, each copy gets the wall quad left of it
+  (a copy has no door).  The planks and both fence rows are repeated every 64 units, the straw front every 43, and
+  the planks' back row once more under the copies' wall (the wall's foot stands 2 units above the planks and the sky
+  showed through).  At a right end a `PROPS` box is in world x.  In the wide frame the last 3 columns of the 4:3
+  centre change (the rock's side face is now covered); 4:3 runs are untouched; the exit at H 4251 is the same.
 - **3D room walls** (`runtime/ws_room3d.c`, called from `port_ws_area_model_link`; the approved rooms by default;
   `--ws-room3d on` = every room of its table, `--ws-room3d-rooms 4:10,4:11,...` = exactly those, `--ws-room3d off`;
   2026-11-17): the Haunted Mansion's side rooms AREA04 s10, s11, s15 and s19 (debug select sections A, B, F, 13) are
