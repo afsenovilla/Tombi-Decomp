@@ -4512,13 +4512,46 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     left end and the left strip identical to the build before; 21:9 holds 16:9; strips = the standalone generator
     in software and OpenGL; i386 = wasm2c).  Not changed: the left strip has the same loss on its cut panel's upper
     inlay line ((142, 74, 17) to (127, 70, 40)), left as it is on the user's word.
+    **Fourth version, the right join's real fault** (same day; the user on the third: "De hecho no lo has corregido,
+    está igual").  The third version's "within 0.1 rows" was measured between the strip and the *picture*, and the
+    frame does not show the picture there.  `PORT_PRIMLOG`: on every frame the game draws a quad of 32 x 128 pixels
+    over the picture's columns 448-479, rows 160-287 (texture page (256, 0), texels 224-255 x 0-127: a copy of the
+    wall past the door, cut out along the wall's foot, in front of Tombi), and its texture coordinates span 31 x 127
+    texels over 32 x 128 pixels, so the rasteriser shows in its right half the picture's column before and in its
+    lower half the row above: from row 225 (frame row 177, just over the chair rail's top) the frame has row 224
+    twice and then every row one lower, from column 465 every column one further out; the picture's column 479 is
+    never seen.  The strip went on from the picture underneath, so at the join every line under the rail stepped by
+    one row less its slope: measured by registration (each column laid on the template of the picture's last 14
+    columns along the ray, 1/16 row steps), rail top -0.80 rows, the shadow under it -0.70, upper / lower inlay
+    -0.70 / -0.64, groove -0.61, skirting highlight -0.67, wall foot -0.41; cornice 0.00 / +0.02 (over the copy),
+    and the left end, which has no such copy at its edge, +0.09 at most.  The fix (`ck_wall`): the right strip goes
+    on from what is seen: under the ray through row 224 at the edge, its wall is the model's one row up and one
+    column back (its first column is the picture's last, which the frame never shows), down to the foot's ray,
+    where the copy is cut; under that the wall's foot and the floor in their place, as in the frame (the copy's
+    cut leaves the foot's lower edge a hard stair; the strip's is now the same).  After: rail top +0.12, shadow
+    +0.08, inlays +0.03 / +0.05, groove -0.02, skirting highlight -0.03, wall foot +0.09, each under the
+    picture's own column-to-column change (0.12 to 0.38); luma along frame row 179: 110 118 123 137 | 140 149 156
+    167 178 (was | 112 112 123 128 137).  Two more things, both ends: the rays' profile spreads each texel over
+    half a row each way instead of 0.75 (the wall foot's dark line is the picture's (24, 8, 0) again, it was
+    (41, 16, 8)), and the third version's hue gate and inlay speckle are on for the left wall too (its upper inlay
+    line (145, 77, 22) for the picture's (146, 79, 19), was (133, 73, 39); the foot's grey no longer takes the
+    skirting's brown: 20 levels of blue).  The OpenGL renderer maps the copy otherwise (one row lower from frame
+    row 116 instead of 177: plaster only), the same from the rail down, and the join measures the same there
+    (0.09 rows at most).  Weak points: the strip depends on the game drawing that copy (it did on all 1600 logged
+    frames, walking the room's length, and until the picture's edge leaves the 16:9 frame); should the game ever
+    leave it out, the right join would step by a row again; the camera-up case was not run.
     Checked (2026-11-17, headless): 16:9 at both ends; the game's strips = the generator's run on its own over the
     dumped picture (`PORT_WS_BACKDROP_DUMP`; 0 texels, software and OpenGL under xvfb, both
     ends); the 21:9 frames hold the 16:9 ones (0 texels; the 32:9 strips hold
     the 21:9 ones); 4:3 identical to the build before; with the default flags the room's 16:9 frames are identical
     to the build before; the other rooms' 16:9 frames with `--ws-backdrop on` identical to the build before (2:5
     2:1 5:1 5:3 19:1 11:2 9:5 9:3 9:4 17:3 17:4 16:4); i386 = wasm2c whole frames (4:3, 16:9 and 21:9 at both
-    ends); made in about 50 ms at 16:9 and 21:9, 85 ms at 32:9 (most of it the two 21 x 21 means).  Not checked in
+    ends); made in about 50 ms at 16:9 and 21:9, 85 ms at 32:9 (most of it the two 21 x 21 means).  The fourth
+    version, the same list again: 4:3 and the default flags' 16:9 identical to the build before at both ends (0
+    texels), the 16:9 frames differ only in the strips' columns, the 21:9 frames hold the 16:9 ones and those the
+    4:3 one, the 12 other rooms identical, the game's strips = the standalone generator's (also built for 64 bits),
+    i386 = wasm2c whole frames (4:3, 16:9, 21:9, both ends), the OpenGL frames' strips = the software ones, the
+    generator's time unchanged; the registration above at both ends, software and OpenGL.  Not checked in
     the game with the camera up (the lunettes and the arch were only looked at in the standalone picture), and
     `tools/ws_seam.py` still does not apply (it compares rows, which the sloped mouldings cross).  Weak points: the
     wainscot's wood is the strips' least like the picture (column-to-column step half the picture's at both

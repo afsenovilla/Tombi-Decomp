@@ -28,8 +28,12 @@
  *     first 8 columns (ck_profile / ck_ray: a profile at quarter rows, so the cornice, the plaster's frame lines,
  *     the chair rail, the wainscot's inlay and the skirting leave the picture where they are, to a fraction of a
  *     row, and as sharp as they are there; no tone to correct at the join);
- *     on the right wall the profile also keeps each line's hue, and the panel's inlay lines take the speckle of
- *     the picture's own texels on their ray (third version: the lower line had lost its orange at the join);
+ *     the profile also keeps each line's hue, and the panels' inlay lines take the speckle of the picture's own
+ *     texels on their ray (third version, the right wall: the lower line had lost its orange at the join; both
+ *     walls since the fourth);
+ *   - the right strip goes on from what the frame shows there, which is not the picture but the game's copy of the
+ *     wall past the door drawn over it, one row lower from the chair rail down (fourth version, ck_wall: the strip
+ *     went on from the picture underneath and every line under the rail stepped 0.6 to 0.8 rows at the join);
  *   - on that, the picture's own texture texel for texel: the plaster's grain in patches (ck_grain), the wood's
  *     streaks of the cornice, rail, wainscot and skirting column by column along the ray (ck_streak);
  *   - the left wainscot's stiles are the wall one period deeper (ck_deep: the picture seen through the perspective
@@ -138,7 +142,9 @@ static int ck_deep_n(int d2)                             /* the fewest periods t
 /* What runs along the rays (cornice, the plaster's frame lines, chair rail; on the right wall everything down to the
    floor): the side's own tone per ray, from the picture's first CK_PN columns, at quarter rows of the edge column
    (the columns cross a ray at different heights, so together they sample it finer than one column does: the
-   strip's lines come out as sharp as the picture's, and where they are in the picture to a fraction of a row). */
+   strip's lines come out as sharp as the picture's, and where they are in the picture to a fraction of a row;
+   each texel is spread over half a row each way, 0.75 until the fourth version, which left the wall foot's dark
+   line a shade paler than the picture's). */
 #define CK_PN 8
 #define CK_PB (CK_H * 4 + 8)
 static Rgb ck_pr[CK_PB]; static short ck_pl[CK_PB];
@@ -153,7 +159,7 @@ static void ck_profile(void)
         b0 = (int)(p >> 16); f = (int)(p >> 8) & 255;
         for (int k = -2; k <= 3; k++) {
             int b = b0 + k, w = k * 256 - f;
-            w = 768 - (w < 0 ? -w : w);
+            w = 512 - (w < 0 ? -w : w);
             if (b < 0 || b >= CK_PB || w <= 0) continue;
             acc[b][0] += c.r * w; acc[b][1] += c.g * w; acc[b][2] += c.b * w; acc[b][3] += w;
         }
@@ -172,7 +178,7 @@ static void ck_profile(void)
             for (int k = -n0; k <= n0; k++) {
                 int bb = clampi(b + k, 0, CK_PB - 1), dl = lum(raw[bb]) - l0, dc = raw[bb].r - raw[bb].b - raw[b].r + raw[b].b;
                 if (dl > t || dl < -t) continue;
-                if (ck_side && (dc > 2 * t || dc < -2 * t)) continue;    /* (the right wall: nor across a hue: the inlay's orange has the skirting's luma) */
+                if (dc > 2 * t || dc < -2 * t) continue;    /* (nor across a hue: the inlay's orange has the skirting's luma) */
                 r += raw[bb].r; g += raw[bb].g; bl += raw[bb].b; n++;
             }
             ck_pr[b].r = r / n; ck_pr[b].g = g / n; ck_pr[b].b = bl / n; ck_pl[b] = (short)lum(ck_pr[b]);
@@ -288,7 +294,7 @@ static Rgb ck_ray(int X, int d2, int y16, int v16)
     else if (v16 < CK_V(320)) { g = ck_streak(X, v16, 0, 41, 18); w = ck_flat(p, 5, 6, 14) * 5 / 8; }   /* the wainscot's wood */
     else if (v16 < CK_VFL) { g = ck_streak(X, v16, 0, 35, 32); w = ck_flat(p, 5, 6, 14) / 2; }      /* the skirting */
     o.r += g.r * w / 256; o.g += g.g * w / 256; o.b += g.b * w / 256;
-    if (ck_side && v16 > CK_V(200) && v16 < CK_V(334)) {     /* the right panel's inlay: its own texels' speckle along the line */
+    if (v16 > CK_V(200) && v16 < CK_V(334)) {            /* the panels' inlay: its own texels' speckle along the line */
         int m = CK_PN - 1 - (X - 1) % CK_PN, wo = clampi((o.r - o.b - 96) * 16, 0, 256);
         if (wo) {
             Rgb t = ck_bil(m << 16, (int)(CK_VY16 + (((ck_i64)v16 * (479 - 2 * m)) >> 1))), q = ck_pget(p);
@@ -297,11 +303,12 @@ static Rgb ck_ray(int X, int d2, int y16, int v16)
     }
     return o;
 }
-/* the side wall and the floor X columns out of the picture's edge on row y16 (no vault) */
-static Rgb ck_wall(int X, int y16)
+/* the side wall and the floor X columns out of the picture's edge on row y16 (no vault); X = 0: the picture's last column */
+static Rgb ck_wall0(int X, int y16)
 {
     int d2 = 479 + 2 * X, v16 = (int)ck_fdiv((ck_i64)(y16 - CK_VY16) * 2, d2), n = ck_deep_n(d2), pw = ck_pw(d2, v16);
     Rgb c = { 0, 0, 0 };
+    if (!X) return ck_bil(0, y16);
     if (pw < 256) {
         int k = 1;
         c = ck_deep(d2, y16, n);
@@ -318,6 +325,26 @@ static Rgb ck_wall(int X, int y16)
         c = mix(c, f, clampi(w, 0, 256));
     }
     return c;
+}
+/* What the frame shows at the right join is not the picture: the game lays a copy of the wall past the door over it
+   (a quad of 32 x 128 pixels at the picture's columns 448-479, rows 160-287, in front of Tombi; its texels are the
+   picture's, cut out along the wall's foot: the floor is not in it), and the quad's texture coordinates span
+   31 x 127 texels, so its right half shows the picture's column before and its lower half the row above: from row
+   225 down the frame has row 224 twice and then every row one lower, from column 465 on every column one further
+   out (column 479 is never seen).  The right strip goes on from what is seen: under the ray through row 224 at
+   the edge the wall is one row lower and one column later (its first column is the picture's last), down to the
+   foot's ray, where the copy is cut; under that, the wall and the floor in their place, as in the frame. */
+#define CK_OVY 224                                        /* the copy's last row in its place */
+static Rgb ck_wall(int X, int y16)
+{
+    if (ck_side) {
+        int cut = (int)(CK_VY16 + ck_fdiv((ck_i64)((CK_OVY << 16) - CK_VY16) * (479 + 2 * X), 479));
+        if (y16 > cut) {
+            int ys = y16 - 65536 > cut ? y16 - 65536 : cut;
+            if ((int)ck_fdiv((ck_i64)(ys - CK_VY16) * 2, 477 + 2 * X) <= CK_VFL) return ck_wall0(X - 1, ys);
+        }
+    }
+    return ck_wall0(X, y16);
 }
 static Rgb ck_cv_px(const Rgb *cv, int pad, int X, int y) { return cv[(size_t)clampi(y, 0, CK_H - 1) * pad + clampi(X, 1, pad) - 1]; }
 static void ck_gen(int pad)
