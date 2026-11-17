@@ -1227,6 +1227,45 @@ Not in the flyover and unused by the current map: the lift machinery (`crank_whe
 (824, 150) on, and `crank_lever`, three frames from (826, 128)), the two `sign_rail` panels, `ring_post_w / e`,
 `notch_wall_e`. Two thin strips ((792, 212, 32, 4) and (864, 124, 32, 4)) were not identified.
 
+### Prop pivots: the convention of a working town, and Iron Town's props against the flyover (2026-11-17)
+
+The cut towns' scenery sprite tables (kind 0x3D) are lost, so which cut-out a prop draws and its offset from the
+placement point are not known. The Hidden Village (AREA19 s2, NPC set 0x11) works the same way and has its table, so
+its offsets show the convention. Per prop: the box of its first frame's parts around the placement point (part
+`dx, dy`, `w, h`; SPR_DATA[13], anim scripts at 0x801038CC):
+
+| prop | kind | size | dx | dy | reading |
+|---|---|---|---|---|---|
+| 0, 1, 2 (rooms 3, 2, 1) | 2 | 88-96 x 96-104 | -48/-56 .. 32/40 | -32/-40 .. 64/72 | a house's cover: the point is inside it, above its middle |
+| 3 | 0 | 72 x 48 | -40 .. 32 | -40 .. 8 | upright: the point is at its foot |
+| 4 | 1 | 40 x 40 | -24 .. 16 | -40 .. 0 | foot |
+| 5 | 0 | 24 x 32 | -16 .. 8 | -24 .. 8 | foot |
+| 6 | 0 | 120 x 120 | -64 .. 56 | -64 .. 56 | flat on the ground: centred |
+| 7 | 0 | 112 x 80 | -48 .. 64 | -64 .. 16 | foot |
+| 8 | 1 | 200 x 88 | -96 .. 104 | -96 .. -8 | foot (wide piece) |
+| 9, 10 | 1 | 120 x 160, 80 x 192 | -64 .. 56, -24 .. 56 | -96 .. 64, -112 .. 80 | tall pieces: the point is 64-80 above the bottom |
+| 11, 12, 13 | 1 | 40-64 x 88-120 | -14 .. 26, -32 .. 24, -16 .. 48 | -84 .. 4, -80 .. 8, -120 .. 0 | foot |
+
+So: offsets are multiples of 8 for most parts; the point is horizontally within about 16 px of the drawing's middle;
+vertically it is the object's foot (the Y-sort line) for upright things, the middle for flat ones and for house
+covers. It is not one fixed corner.
+
+Iron Town's props read against the flyover with that convention (mosaic coordinates, read off the frame by eye,
+about 5 px; piece names as in the table above):
+
+| prop (world) | mosaic | what stands there | likely piece | fit |
+|---|---|---|---|---|
+| 5 (125, 487), 6 (349, 487) | (57, 411), (281, 411) | the fence either side of the gate (rows 395-432) | `fence_a` / `fence_b` | x at the segment's middle; y 20 above its foot |
+| 13 (263, 457) | (195, 381) | the round gate (columns 105-205, rows 345-440) | the gate's right panel | 40 right of the gate's middle: the gate is drawn in two panels |
+| 18 (143, 283), 19 (295, 283) | (75, 207), (227, 207) | the low walls with the oval notch (rows 195-215) | `notch_wall_w` / `notch_wall_e` | middle, at the foot |
+| 8 (103, 340), 9 (344, 343) | (35, 264), (276, 267) | the cylinder balustrade (west), the railing (east) | `pillars_row` (west); east not on the page | x at the middle; y at the top |
+| 11 (148, 137), 12 (297, 127) | (80, 61), (229, 51) | the wall blocks with a ring and chain | `ring_post_w` / `ring_post_e` | middle, at the foot of the top face |
+| 20 (226, 211) | (158, 135) | the dome | `dome_roof_a / b` | x at the middle; y near the top (a cover, like the rooms) |
+| 21 (48, 219), 22 (404, 211) | (-20, 143), (336, 135) | outside the frame: the court's side corners | `corner_post_1 / 2` | from the walls' geometry, not seen |
+| 7 (-33, 432), 10 (473, 428) | (-101, 356), (405, 352) | outside the frame: the foot of H5 / H2 | unknown (a door piece?) | not seen |
+
+Not matched: props 14-17 (anims 16, 17, 13 is the gate), the room covers 0-4, and the two rail rows (anim 23).
+
 ## Folkin's rough notes — verification
 
 Folkin (TCRF) left rough notes on the Civilization towns. Each claim was checked against the decompiled code and the
