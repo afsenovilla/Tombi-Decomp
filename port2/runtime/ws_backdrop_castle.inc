@@ -37,8 +37,8 @@ static u8 ic_k[IC_H][PW];                                 /* 1 grass, 2 copper, 
 static int ic_l[IC_H][PW];
 static int ic_sky[IC_H][3], ic_grow[IC_H][3], ic_g0, ic_g1, ic_cr[256][3];
 static const int IC_GT[2] = { 346, 353 }, IC_T0[2] = { 264, 254 };
-#define IC_LW 38                                          /* a plate's width on the ground (columns) */
-static const int IC_LO[2] = { 14, 6 };                    /* the plates' phase per side */
+#define IC_LW 15                                          /* the plates' edges: columns apart */
+static const int IC_LO[2] = { 12, 1 };                    /* the first edge's foot in each strip (column) */
 static const int IC_PL[2] = { 289, 279 };                 /* the front plate's upper edge at the picture's edges (rows) */
 
 static int ic_icmp(const void *a, const void *b) { return *(const int *)a - *(const int *)b; }
@@ -219,19 +219,22 @@ static void ic_gen(u16 *ext, int pad)
                 int tone = pd[d] - j * 10 / 80 + (noise(j + side * 333, y, 2, 2, 21) - 128) * 6 / 128
                            + (noise(j + side * 333, y, 10, 34, 22) - 128) * 8 / 128 - (y - top < 2 ? 25 : 0);
                 (void)v;
-                {   /* curved plates, as the skirt has on the picture (the user, 2026-11-17: "in the 4:3 part it is made
-                       of curved pieces: let us try that"): their edges are the dome's meridians, bowed; across a plate
-                       (t: 0 at the edge under the plate nearer the door, 256 at its own outer edge) the shade the
-                       inner plate casts, the lit middle, the dark turn of its edge; rivets along the inner edge */
-                    int q = (160 + j) * 576 / (y + 230) + (y - 300) * (y - 300) / 200 + IC_LO[side];
-                    int li = fdiv(q, IC_LW), t = fmodi(q, IC_LW) * 256 / IC_LW, f = j < 10 ? j : 10, ry;
-                    int m = t < 16 ? -70 : t < 70 ? -45 + (t - 16) * 55 / 54 : t < 170 ? 10 + (t - 70) * 30 / 100
-                          : t < 235 ? 40 - (t - 170) * 50 / 65 : -10 - (t - 235) * 50 / 21;
-                    m += (int)(hash3(li, side, 31) % 17) - 8;
+                {   /* The skirt's plates, as on the picture (the user drew two of their edges on each side, 2026-11-17:
+                       "maybe a similar pattern can be generated"): each plate's outer edge is an S: from its foot it
+                       leans in, steps back out at a kink two thirds up and then sweeps in towards the castle (IC_SX:
+                       columns inwards by frame row, read off those lines); the edges stand 14-15 columns apart.  On the
+                       castle's side of an edge the plate is lit up to a bright rim; outside it lies its shadow. */
+                    static const short SY[] = { 60, 90, 100, 110, 125, 140, 155, 182, 250 }, SXv[] = { 58, 25, 13, 8, 10, 13, 7, 0, 0 };
+                    int r = y - 144, c = 0, u, t, f = j < 8 ? j : 8, m;
+                    for (int k = 0; k < 8; k++)
+                        if (r <= SY[k + 1] || k == 7) { int rr = clampi(r, SY[k], SY[k + 1]); c = SXv[k] + (SXv[k + 1] - SXv[k]) * (rr - SY[k]) / (SY[k + 1] - SY[k]); break; }
+                    if (r < SY[0]) c = SXv[0];
+                    u = (j + c - IC_LO[side]) * 256 / IC_LW;
+                    t = fmodi(u, 256);
+                    m = t < 20 ? -60 + t : t < 200 ? -40 + (t - 20) * 75 / 180 : t < 244 ? 35 + (t - 200) * 25 / 44 : 75 - (t - 244) * 9;
+                    m += (int)(hash3(fdiv(u, 256), side, 31) % 13) - 6;
                     if (side) m = m * 5 / 8;
-                    ry = fmodi(y + (int)(hash3(li, side, 37) % 26), 26);
-                    if (t >= 30 && t < 44 && ry < 2 && y - top > 6) m = ry ? -55 : 60;
-                    tone += m * f / 10;
+                    tone += m * f / 8;
                 }
                 if (j < 12 && ic_k[y][ex] == 2)            /* (from the edge texel's own tone: the picture's last columns can be darker than the 24's mean) */
                     tone = (ic_l[y][ex] * (12 - j) + tone * j) / 12;
