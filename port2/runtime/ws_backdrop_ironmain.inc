@@ -22,21 +22,37 @@
  * 53-71: the first version put one of those after the window, and the user's verdict was "El pilar remachado no
  * está bien, continúa con ventanas.")
  *
+ * More measured for the third version: the cornice's face has ONE joint on that wall (3.31 periods from the corner,
+ * column 13, a rivet on each side of it on the right end), not one per hole; the window's members lean, their tops
+ * towards the corner, 0.0046 periods per row of height (pane and mullion edges: 0.16 periods, 2 columns, over the
+ * window), and are seen from the near side: after the corner a brown face (to 0.76 periods), that member's lit side
+ * (to 1.3), a pane, the mullion's face (2.3 to 2.8) and its dark side (to 3.3), the second pane, which is whole at the
+ * picture's edge (4.28: as wide as the first at mid height, and no member in the last column); the rail (heights 5.5
+ * to 13) is red-brown near the corner and grey-brown from 2.5 periods on, at one lightness.
+ *
  * The extensions, every texel the picture's own (bilinear, then the nearest colour of the picture's CLUT), nothing
  * mirrored; each end from its own texels:
- *   - a point of the end wall, its foot's shadow and the floor is the picture's point k periods further along the
- *     wall at the same height (im_shift: a translation in 1 / u, rows scaled about the horizon), k the smallest that
- *     lands in the picture: holes, cornice, rail, balusters, baseboard and the floor's lines go on at their period,
- *     phase and perspective, all along the wall;
+ *   - a point of the parapet, the rail, the balusters, the baseboard, its shadow and the floor is the picture's point
+ *     k periods further along the wall at the same height (im_shift: a translation in 1 / u, rows scaled about the
+ *     horizon), k the smallest that lands in the picture: holes, balusters and the floor's lines go on at their
+ *     period, phase and perspective, all along the wall.  The parapet's last quarter of each period crosses over to
+ *     the next one's texels (no seam per period);
  *   - the parapet's top line stays at its crest's height (level along the wall: a line through the vanishing point),
  *     the gold under it stretched from the source column's own top line; over it the dark ceiling;
- *   - the window is closed: one more column of pane, then its near member (the mullion's gold face), 5 columns out
- *     (u2 = 650);
- *   - then the same window again and again, abutting (IM_BQ, the bay: from the corner to that near member's end,
- *     4.62 periods of the wall): the dark casing (one post between two windows), the gold member, the pane, the
- *     mullion and the pane from the picture's columns 50 to 0, then the same closure, in the wall's perspective (a
- *     translation in 1 / u by whole bays), the texels as they are: the light along the wall is the picture's.
- *     The 16:9 strip ends in the second window's mullion.
+ *   - the cornice's face (heights 78.4 to 91) is one band with no joint (im_cornice): the picture's two clean
+ *     stretches of it, before the joint (2.2 to 3.08 periods) and after it (3.55 to the edge), one after the other,
+ *     crossed over 0.1 periods, the far one's light levelled to the block at the picture's edge (a line fitted to
+ *     the face's light along the wall);
+ *   - the window (im_window): its second pane goes on (the picture's last column) to the window's near edge, a line
+ *     with the members' lean (IM_WE, IM_WS: 4.40 periods from the corner at height 45; 0.02 periods past the picture's
+ *     edge at the pane's top, 0.25 at its foot), laid by each pixel's coverage; from that line the next window, one
+ *     bay on (IM_WB, 4.08 periods): its far member's brown face is the post between the two (0.44 periods wide, its
+ *     two edges leaning alike), then its lit side, the pane, the mullion, the pane, as the picture has them from
+ *     its column 50 to 0 (a translation in 1 / u by whole bays: every member's lean, width and edges are the
+ *     picture's own, at the wall's perspective), and the same closure again.  The 16:9 strip ends in the second
+ *     window's mullion;
+ *   - the rail keeps its texels (the wall's period) and goes back to its colour near the corner over 1.5 periods
+ *     (per channel: the mean of the columns 32-47 over the mean of the columns 1-12, 5 % lighter than the edge).
  * Integers only; a texel depends on its place, not on the strip's width (a wider strip starts with the same
  * columns).
  *
@@ -54,14 +70,26 @@ static u16 *im_ext;                                      /* the two extensions: 
 #define IM_PQ 4872211LL                                   /* the side wall's period (holes, balusters) */
 #define IM_T0 IM_TQ(640)                                  /* the picture's edge */
 #define IM_TC IM_TQ(536)                                  /* the room's corner (column 52) */
-#define IM_TW IM_TQ(650)                                  /* the window's near end: the next one's casing starts */
-#define IM_BQ (IM_TC - IM_TW)                             /* a window bay: the windows abut */
+#define IM_PE (IM_TC - IM_T0)                             /* the picture's edge, from the corner (4.276 periods) */
+#define IM_WE 21437728LL                                  /* the window's near edge at height 45: 4.40 periods from the corner */
+#define IM_WS 22412                                       /* its lean, as every member's: 0.0046 periods per row of height */
+#define IM_WB 19878621LL                                  /* a window bay: 4.08 periods (one post between two windows) */
+#define IM_WQ0 (IM_TC - IM_TQ(539))                       /* a window's texels: from the picture's column 50 ... */
+#define IM_WQ1 (IM_TC - IM_TQ(639))                       /* ... to its last one */
+#define IM_CB (IM_PQ * 22 / 10)                           /* the cornice's texels: from 2.2 periods after the corner ... */
+#define IM_CLB (IM_PQ * 78 / 100)                         /* ... 0.78 periods; then from 3.65 on (its one joint is at 3.31, */
+#define IM_CLA (IM_PQ * 52 / 100)                         /*     a rivet on each side of it), 0.52 periods */
+#define IM_CW (IM_PQ / 10)                                /* the two stretches cross over 0.1 periods */
 #define IM_HG (104 * 256)                                 /* wall heights (x 256): over the holes */
 #define IM_HCB 20070                                      /* the cornice's lower edge (78.4) */
+#define IM_HCT (91 * 256)                                 /* its upper edge */
+#define IM_HRB 1408                                       /* the rail's lower edge (5.5) */
 #define IM_HRT 3328                                       /* the rail's upper edge (13) */
 #define IM_HFL (-6349)                                    /* the wall's foot (-24.8) */
 static Rgb *im_cv; static int im_cw;                     /* the canvas: [side][y][X - 1] */
 static int im_es[24], im_E;                              /* the parapet's top edge per column (texel coordinate x 256); its crest */
+static int im_ca, im_cb, im_cr;                          /* the cornice's light per column (x 256): a + b x; at the picture's edge */
+static int im_rg[3];                                     /* the rail: its colour near the corner over the edge's (x 256) */
 static u16 im_qc[32768]; static u8 im_qh[32768];
 static int im_fl8(int v) { return v >= 0 ? v >> 8 : -((-v + 255) >> 8); }
 static Rgb im_tx(int side, int xn, int y)                /* a texel: column xn from the end inwards; xn < 0: the canvas */
@@ -95,14 +123,43 @@ static u16 im_quant(Rgb c)
     }
     return im_qc[k];
 }
+/* the mean colour of the wall's band between two heights on the picture's column x (x 256) */
+static void im_band(int side, int x, int h0, int h1, int *o)
+{
+    int y0 = (86564 - h1 * (639 - 2 * x) + 535) / 536, y1 = (86564 - h0 * (639 - 2 * x)) / 536, n = 0;
+    o[0] = o[1] = o[2] = 0;
+    for (int y = y0; y <= y1; y++, n++) { Rgb c = im_tx(side, x, y); o[0] += c.r; o[1] += c.g; o[2] += c.b; }
+    for (int i = 0; i < 3; i++) o[i] = o[i] * 256 / (n ? n : 1);
+}
 static void im_measure(int side)
 {
+    long long sx = 0, sy = 0, sxx = 0, sxy = 0;
+    int t[3] = { 0, 0, 0 }, e[3] = { 0, 0, 0 }, c[3], yt, ye;
     for (int x = 0; x < 24; x++) {
         int y = 1;
         while (y < 100 && lum(im_tx(side, x, y)) < 96) y++;
         im_es[x] = y * 256 - 128 - clampi(lum(im_tx(side, x, y - 1)) * 256 / lum(im_tx(side, x, y)), 0, 256);
     }
     im_E = (int)((long long)(IM_YH - im_es[0]) * 536 / 639);
+    /* the cornice's face (heights 81 to 88): its light along the wall, a line fitted over the columns 15-29 (the joint
+       is on 13-14), and its level on the block at the picture's edge */
+    for (int x = 15; x <= 29; x++) {
+        int l;
+        im_band(side, x, 81, 88, c); l = (c[0] * 77 + c[1] * 150 + c[2] * 29) >> 8;
+        sx += x; sy += l; sxx += x * x; sxy += (long long)x * l;
+    }
+    im_cb = (int)((15 * sxy - sx * sy) / (15 * sxx - sx * sx)); im_ca = (int)((sy - im_cb * sx) / 15);
+    im_cr = 0;
+    for (int x = 1; x <= 10; x++) { im_band(side, x, 81, 88, c); im_cr += (c[0] * 77 + c[1] * 150 + c[2] * 29) >> 8; }
+    im_cr /= 10;
+    /* the rail (heights 7 to 12): its colour near the corner (columns 32-47) and at the picture's edge (1-12) */
+    for (int x = 1; x <= 47; x++) {
+        if (x > 12 && x < 32) continue;
+        im_band(side, x, 7, 12, c);
+        for (int i = 0; i < 3; i++) { if (x <= 12) e[i] += c[i] >> 4; else t[i] += c[i] >> 4; }
+    }
+    yt = (t[0] * 77 + t[1] * 150 + t[2] * 29) >> 8; ye = ((e[0] * 77 + e[1] * 150 + e[2] * 29) >> 8) * 7 / 5;   /* (16 columns, 12; 5 % lighter) */
+    for (int i = 0; i < 3; i++) im_rg[i] = clampi((int)((long long)t[i] * 3 / 4 * ye * 256 / ((long long)(e[i] ? e[i] : 1) * (yt ? yt : 1))), 128, 512);
 }
 /* the source of the wall's point at depth t + s, same height, of the pixel (u2, y): texel coordinates x 256 */
 static void im_shift(int u2, int y, long long s, int *xs, int *ys)
@@ -111,6 +168,73 @@ static void im_shift(int u2, int y, long long s, int *xs, int *ys)
     *xs = 320 * 256 - 128 - us;
     *ys = IM_YH + (int)((long long)(2 * y - 323) * us / u2);
 }
+static Rgb im_mix(Rgb a, Rgb b, int w)                   /* a to b, w of 256 */
+{
+    Rgb o;
+    o.r = (a.r * (256 - w) + b.r * w + 128) >> 8; o.g = (a.g * (256 - w) + b.g * w + 128) >> 8; o.b = (a.b * (256 - w) + b.b * w + 128) >> 8;
+    return o;
+}
+static int im_smooth(int x) { x = clampi(x, 0, 256); return x * x * (768 - 2 * x) >> 16; }
+/* the wall's point s further along it, same height: parapet (up to its crest), rail, balusters, baseboard, floor */
+static Rgb im_wall(int side, int u2, int y, int h, long long s)
+{
+    int xs, ys;
+    im_shift(u2, y, s, &xs, &ys);
+    if (h > IM_HG) {                                     /* up to the crest, level from the edge on */
+        int us = 320 * 256 - 128 - xs, x0 = clampi(im_fl8(xs), 0, 22), fx = clampi(xs - x0 * 256, 0, 256);
+        int es = (im_es[x0] * (256 - fx) + im_es[x0 + 1] * fx) >> 8;
+        int yg = IM_YH - (int)((long long)IM_HG * us / 68608);
+        ys = yg - (int)((long long)(h - IM_HG) * (yg - es) / (im_E - IM_HG));
+        if (ys < 0) ys = 0;
+    }
+    return im_bil(side, xs, ys);
+}
+/* a window's point q from its corner (the picture's corner): the picture's; past its edge the pane goes on */
+static Rgb im_winq(int side, int u2, int y, long long q)
+{
+    int xs, ys;
+    if (q < IM_WQ0) q = IM_WQ0;                          /* (the corner's own two columns hold the back wall's plate) */
+    if (q > IM_WQ1) q = IM_WQ1;
+    im_shift(u2, y, IM_TC - q - IM_TQ(u2), &xs, &ys);
+    return im_bil(side, xs, ys);
+}
+/* the windows: the picture's one ends on a leaning line (its members lean: 0.0046 periods per row), the pane's last
+   column going on to it; from that line the next window's far post, one bay on.  The line is laid by coverage. */
+static Rgb im_window(int side, int u2, int y, int h, long long t)
+{
+    long long d = IM_TC - t, e = IM_WE - (long long)IM_WS * (h - 45 * 256) / 256;
+    long long j = (d - e + IM_WB / 2) / IM_WB, de = e + j * IM_WB;
+    long long lo = IM_TC - IM_TQ(u2 - 1), hi = IM_TC - IM_TQ(u2 + 1);
+    int a = clampi((int)((hi - de) * 256 / (hi - lo)), 0, 256);
+    Rgb c;
+    if (a < 256) c = im_winq(side, u2, y, d - j * IM_WB);
+    if (a > 0) { Rgb n = im_winq(side, u2, y, d - (j + 1) * IM_WB); c = a < 256 ? im_mix(c, n, a) : n; }
+    return c;
+}
+/* the cornice's face: one band, no joint.  The picture's two clean stretches of it (before its joint and after),
+   one after the other again and again, crossed over; the far one levelled to the block at the picture's edge */
+static Rgb im_cornq(int side, int u2, int y, long long q)
+{
+    int xs, ys; Rgb c;
+    im_shift(u2, y, IM_TC - q - IM_TQ(u2), &xs, &ys);
+    c = im_bil(side, xs, ys);
+    if (xs > 13 * 256) {
+        int g = im_ca + (int)((long long)im_cb * xs / 256);
+        g = clampi(im_cr * 256 / (g > 0 ? g : 1), 208, 400);
+        c.r = clampi(c.r * g >> 8, 0, 255); c.g = clampi(c.g * g >> 8, 0, 255); c.b = clampi(c.b * g >> 8, 0, 255);
+    }
+    return c;
+}
+static Rgb im_cornice(int side, int u2, int y, long long t)
+{
+    long long c = (IM_T0 - t) % (IM_CLB + IM_CLA + 2 * IM_CW);
+    if (c < IM_CLB) return im_cornq(side, u2, y, IM_CB + c);
+    if (c < IM_CLB + IM_CW)
+        return im_mix(im_cornq(side, u2, y, IM_CB + c), im_cornq(side, u2, y, IM_PQ * 355 / 100 + c - IM_CLB), im_smooth((int)((c - IM_CLB) * 256 / IM_CW)));
+    if (c < IM_CLB + IM_CW + IM_CLA) return im_cornq(side, u2, y, IM_PQ * 355 / 100 + c - IM_CLB);
+    return im_mix(im_cornq(side, u2, y, IM_PQ * 355 / 100 + c - IM_CLB), im_cornq(side, u2, y, IM_CB + c - (IM_CLB + IM_CLA + 2 * IM_CW)),
+                  im_smooth((int)((c - (IM_CLB + IM_CW + IM_CLA)) * 256 / IM_CW)));
+}
 static void im_gen_side(int side, int pad)
 {
     im_measure(side);
@@ -118,28 +242,23 @@ static void im_gen_side(int side, int pad)
         int u2 = 639 + 2 * X;
         long long t = IM_TQ(u2);
         for (int y = 0; y < PH; y++) {
-            int h = (323 - 2 * y) * 68608 / u2, xs, ys;
-            long long s;
-            if (h >= IM_HRT && h < IM_HCB) {             /* the windows: the picture's one, closed; then it again */
-                long long k = t < IM_TW ? (IM_TW - t - 1) / IM_BQ + 1 : 0, tw = t + k * IM_BQ;
-                s = k * IM_BQ;
-                if (tw >= IM_T0) ;                       /* the picture's part of it */
-                else if (tw >= IM_TQ(642)) s += IM_TQ(634) - IM_TQ(642);            /* one more column of pane */
-                else s += IM_TQ(591) - IM_TQ(642);                                  /* the near member: a gold face */
-                im_shift(u2, y, s, &xs, &ys);
-                if (xs > 50 * 256) xs = 50 * 256;        /* (its casing ends at the corner: not the back wall's plate) */
-            } else {                                     /* the wall's period: parapet, cornice, rail, balusters, floor */
-                s = ((IM_T0 - t) / IM_PQ + 1) * IM_PQ;
-                im_shift(u2, y, s, &xs, &ys);
-                if (h > IM_HG) {                         /* up to the crest, level from the edge on */
-                    int us = 320 * 256 - 128 - xs, x0 = clampi(im_fl8(xs), 0, 22), fx = clampi(xs - x0 * 256, 0, 256);
-                    int es = (im_es[x0] * (256 - fx) + im_es[x0 + 1] * fx) >> 8;
-                    int yg = IM_YH - (int)((long long)IM_HG * us / 68608);
-                    ys = yg - (int)((long long)(h - IM_HG) * (yg - es) / (im_E - IM_HG));
-                    if (ys < 0) ys = 0;
+            int h = (323 - 2 * y) * 68608 / u2;
+            Rgb c;
+            if (h >= IM_HRT && h < IM_HCB) c = im_window(side, u2, y, h, t);
+            else if (h >= IM_HCB && h < IM_HCT) c = im_cornice(side, u2, y, t);
+            else {                                       /* the wall's period: parapet, rail, balusters, floor */
+                long long k = (IM_T0 - t) / IM_PQ + 1, f = (IM_T0 - t) % IM_PQ;
+                c = im_wall(side, u2, y, h, k * IM_PQ);
+                if (h >= IM_HCT && f > IM_PQ - IM_PQ / 4)                           /* the parapet: no seam per period */
+                    c = im_mix(c, im_wall(side, u2, y, h, (k + 1) * IM_PQ), im_smooth((int)((f - (IM_PQ - IM_PQ / 4)) * 256 / (IM_PQ / 4))));
+                else if (h >= IM_HRB && h < IM_HRT) {    /* the rail: back to its colour near the corner */
+                    int w = im_smooth((int)((IM_T0 - t) * 256 / (IM_PQ * 3 / 2))) * clampi(h - IM_HRB, 0, 256) >> 8;
+                    c.r = clampi((int)((long long)c.r * (65536 + (im_rg[0] - 256) * w) >> 16), 0, 255);
+                    c.g = clampi((int)((long long)c.g * (65536 + (im_rg[1] - 256) * w) >> 16), 0, 255);
+                    c.b = clampi((int)((long long)c.b * (65536 + (im_rg[2] - 256) * w) >> 16), 0, 255);
                 }
             }
-            im_cv[((size_t)side * PH + y) * im_cw + X - 1] = im_bil(side, xs, ys);
+            im_cv[((size_t)side * PH + y) * im_cw + X - 1] = c;
         }
     }
 }
