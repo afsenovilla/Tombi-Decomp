@@ -824,6 +824,8 @@ src/drawHud.c | drawHudLives(o, 0x18 - port_ws_cull, 0xf0); | drawHudLives(o, 0x
 src/drawScreenFade.c | p->s1a = 0x100; | p->s1a = PORT_NTSC(0x100, 0xf0);
 src/printEventMessage.c | o->y.raw = 0xa00000; | o->y.raw = PORT_NTSC(0xa00000, 0x900000);
 src/drawLoadingSprites.c | FUN_80021478(0xc0, 0xa0, 0, 0, s); | FUN_80021478(0xc0, PORT_NTSC(0xa0, 0x80), 0, 0, s);
+# --widescreen: the NOW LOADING pig tiles (7 columns of 48) carried on to both sides of the wide frame, same checkerboard
+src/drawLoadingSprites.c | for (i = 0; i < 7; i++) { | for (i = -((port_ws_cull + 47) / 48); i < 7 + (port_ws_cull + 47) / 48; i++) {
 # Info message (item names...) bottom row y 212 -> 180 (USA printInfoMessage 0x80031124)
 src/printInfoMessage.c | F14 = (0xd4 - (3 - INFO_MESSAGE_SLOT) * 20) << 16; | F14 = (PORT_NTSC(0xd4, 0xb4) - (3 - INFO_MESSAGE_SLOT) * 20) << 16;
 # Cut-scene overlay sprites: no 24-line drop and no black bars at y 0 / 240 (USA drawLetterboxOverlay 0x8004E244)

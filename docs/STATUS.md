@@ -2,6 +2,12 @@
 
 Update this file whenever something lands or a task is decided. Newest first.
 
+## Since v0.6.0 (not released)
+
+- NOW LOADING screen in widescreen (2026-11-17): the pig tiles are drawn across the wide frame (`port/fixes.txt`,
+  `drawLoadingSprites`, columns added on both sides by `port_ws_cull`). Checked on the PC at 16:9 and 21:9 (headless,
+  soft renderer); not on the device, GL or the wasm2c build.
+
 ## Parked (2026-11-17): new pictures for the cut Civilization towns
 
 The user asked for the three town pictures (`tools/civ_rebuild.py`) to be redone; two approaches on Iron Town were
