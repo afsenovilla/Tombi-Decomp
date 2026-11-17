@@ -3062,44 +3062,63 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   419..425, rows 213..235 at fly -1450; s1 and s5), so the last 7 columns beside the step show the sky.  Nothing in
   the model covers the rock there: its card ends at x 5747 and nothing else stands at that depth or in front of it
   right of the tower (the tower's back wall ends at x 5553..5569).
-  (2) The left strip.  Measured first: the tower is a box, the strata wall at z 45 (a grid of columns 60..62 units
-  wide, each one tile: u 128..175 or 176..223, v 112..159, palettes 0x7D49 / 0x7D09, four kinds of row cycling down
-  the wall) with a flank going back to z 135 on its left; the corner is at x 5221..5228 from the top (y -2817) to y
-  -2558, there a rock arm stands out of it to the left (y -2580..-2510, to x 5086: the ledge with the treasure
-  chest), and under the arm the corner goes on at x 5202..5216 down to the straw path (y -2333).  With the camera at
-  its right limit the 4:3 frame's left edge is at x 5257 at that depth and the 16:9 one at 5199, so the strip shows
-  22 to 37 columns of sky beside the corner, above and under the arm.  **That edge is not a cut**: it is the
-  mountain's real silhouette, and a 4:3 frame shows it as soon as the camera is about 30 units left of its limit (the
-  camera's range is 3108..5430), so nothing can be added there that only the limit's wide frame sees.
-  What `far_wall()` does (ROOMS `far` = 1: a preview, only with `--ws-trick-rooms 3:1,3:5` or `--ws-trick on`; 2 =
-  with the room): the wall is made wider by exactly what the wide frame needs at the limit (16:9: 38 units, 21:9:
-  110), read from the model each time: the wall's line = the edges a wall polygon shares with a flank, past the 4:3
-  frame's far edge and inside the wide one (the plane with most of them: 11 edges here), plus the wall's edge
-  between two vertices of that line (across the arm's root); every edge is swept outwards in the wall's plane with
-  its heights, vertex colours, page and palette, the texture going on with the polygon's own mapping inside its tile
-  and starting again at the tile's end as the model does one column further in (bands level, same period and
-  phase; nothing mirrored); the flanks are put again at the new line (and a piece of the lower one under the arm);
-  under the line's lowest vertex the corner between the wall and the straw path's back edge is filled with the row
-  of tiles the model lays under a row of that kind higher up (0x7D49, u 176..223), 8 units under the path's edge.
-  The model's own polygons of that plane (the arm's front) stay on top: the block is the list's last.  27 quads at
-  16:9; a wider frame has a seam of pieces at the 16:9 and 21:9 distances.
-  Checked (software, i386; s1 and s5, flights to the right limit at fly -40 / -1250 / -1450 / -1700, 16 frames
-  each): at the limit the left strip is covered at every height (no pixel of the clear colour in it at the upper
-  ledge) and the 4:3 centre and the right strip are identical with and without the preview; 4:3 runs with
-  `--ws-trick on` identical to the build before; a 21:9 frame starts with exactly the 16:9 columns at the four
-  heights (HUD aside; 32:9 against 21:9: identical at fly -1700, 16 pixels at -1250, where the arm's tip gets a
-  corner of its own); Trick Village's left end (AREA10 s3, s7 at 16:9, s7 at 21:9), AREA03 s0 and AREA10 s1
-  identical to the build before with `--ws-trick on`; OpenGL (xvfb, 16:9) covers the strip; i386 = wasm2c whole
-  frames (16 per flight: s5 at 16:9, fly -1250 / -1450, and at 21:9, s1 at 16:9, fly -1450 / -40, s5 with the
-  default flags).  The room's left end
-  (camera x 3108) is 2100 units from the tower: it is never in the frame there (the flight at fly -40 shows other
-  pillars with their own silhouettes; the higher flights leave the room through its exit and show nothing of it).
-  Weak points, why it is a preview: **on the way to the limit the picture changes too**, also inside the 4:3 centre
-  of a wide frame (6 of 16 frames of every flight): the tower is 38 units wider, so the arm with the chest stands 38
-  units less out of it, and from the lower path a slab of strata (a straight flank, up to 30 columns) stands behind
-  the straw path's top where the model has sky.  At 21:9 it is 110 units and passes the path's end (x 5162), where
-  the foot follows the path's last direction into the open.  The sweep keeps each vertex's colour along x (the
-  model changes them from column to column).  The new flank under the arm takes the lower flank's first texel row.
+  (2) The left strip, a misreading, taken out again.  That round read "la parte de más a la izquierda" as the
+  tower's LEFT side and added `far_wall()` (ROOMS `far`, a preview): the strata wall made 38 units wider in the left
+  strip, its flanks and foot rebuilt.  The tower's left corner (x 5202..5228) is the mountain's real silhouette (a 4:3
+  frame shows it about 30 units before the camera's limit), so that changed the picture on the way too, and it was
+  not what the user meant.  `far_wall()` and its helpers are removed; the left strip shows the sky beside the corner
+  again, as the model has it.
+  **The strata wall carried on to the right** (2026-11-17; `wall()`, ROOMS `wall` = 1: a preview, OFF by default,
+  `--ws-trick-rooms 3:1,3:5` or `--ws-trick on`; 2 = with the room).  The user then drew it: a mock-up of the 16:9
+  view at the upper ledge in which the big layered wall with the cave door runs on to the right over the sky gap and
+  the whole strip, the small far rock behind it ("que debería ser tapada"); "la parte de más a la izquierda" was this
+  wall, left of the small rock, and they want it "bien hecho".
+  Measured in the model: the wall is a card at z 45 standing on the upper straw ledge's back edge (y -2464), a grid
+  of columns at x 5345 / 5407 / 5468 / 5529, each one tile (u 128..175 or 176..223 by rows, v 112..159, palettes
+  0x7D49 / 0x7D09 by rows; 47 texels in 61 or 62 units), and a last narrower column stretched so its tile ends on the
+  wall's end.  That end is a line of free edges, x 5569 at the top (y -2817) to 5553 (y -2604..-2544) and 5560 at
+  the foot: no flank and no top face there (unlike the left corner), the card just stops.  With the camera at its
+  right limit the 4:3 frame's edge is at x 5603 at that depth and the 16:9 one at 5661, so the wall ends 34 to 50
+  units INSIDE the 4:3 picture and the gap shows the sky and the far rock (z 290).  The straw along the wall's foot
+  (a cut-out strip, y -2476..-2466, over a strip of the wall's stone) ends at x 5560 too; the ledge's floor goes on
+  to 5608 and was already swept from there.
+  Method, read from the model each time: the wall's end = the free edges that do not run along x of the polygons of
+  one depth lying inwards of them, with an end inside the 4:3 frustum of the camera at its limit and at most 96
+  units from its edge (the depth that has most of them; a cut-out alone in its plane, the ladder, does not count; a
+  layer over the same quad is not a neighbour).  Each edge is swept outwards in the wall's plane to the wide frame's
+  edge, by the same code as the strips' sweep (`carry()`), with its heights, vertex colours, command bits, page and
+  palette, in whole tiles: from the edge's own U, at the texels per unit of the plane's polygons that hold a whole
+  tile (the median: 47 texels in 62 units), starting again at the tile's end as the model does one column further
+  in.  So every band is level and goes on in its row's own tile and palette, the tile lines are parallel to the
+  wall's end, and the vertex colours of the end go on (the darker row at y -2659 stays darker).  The straw strip
+  goes on the same way (the model lays it tile after tile).  The foot follows the floor: the floor's edge at the
+  wall's depth still drops 2 units between the wall's end and its own, so the foot's vertices go down by that, the
+  stone under the straw 2 more behind the floor (without it a 1-pixel line of the stone's grey showed along the
+  foot).  The model shows no top of this wall (none exists), so none is made: the top edge goes on level.  9 edges,
+  21 quads at 16:9 (34 at 21:9, 58 at 32:9), in the same block.  The far rock is behind the wall (z 290 against 45)
+  and is covered by the game's own ordering; Tomba and the characters on the ledge stand in front.
+  **This changes columns inside the 4:3 part of a wide frame** (the gap, 47 columns: x 326..372 of a 16:9 frame),
+  on purpose: the user asked for it.  Only with --widescreen: `port_ws_trick_blocks` returns at once without it.
+  Checked (software, i386; s5 and s1, the debug select, `--sweep-x 1500:8:5700 --sweep-fly` -40 / -1250 / -1450 /
+  -1700, 17 frames each; the flight ends over the upper ledge and Tomba drops onto it, so the last frames are the
+  upper ledge's view): plain 4:3 with `--ws-trick-rooms` byte-identical to the build before; the default 16:9 and
+  21:9 frames byte-identical to the build before (the preview is off); with the preview, the lower view (fly -40)
+  identical to the default, the others different only in columns 326..425, rows 0..158 (the wall); the drop from
+  above onto the ledge (35 frames, every camera height between the lower ledge and the upper one) and the walk back
+  down the straw slope (`--sweep-x 1500:8:5700,~150,4900`, 33 frames, the camera 0 to 400 units before its limit)
+  different only right of column 326 as well, the wall reaching the frame's edge in every one; Trick Village's left
+  end (AREA10 s3, s7 at 16:9, s7 at 21:9), AREA03 s0, AREA10 s1 with `--ws-trick on` and the mountain's left end
+  identical to the build before; s5 at 21:9 starts with exactly the 16:9 columns and 32:9 with the 21:9 ones (HUD
+  aside; s1's rain depends on the frame's width); OpenGL (xvfb, 16:9) draws the wall, on / off different only right
+  of column 326; i386 = wasm2c whole frames (`build/wasm/tombi2w`: 17 per flight, s5 at 16:9 and 21:9, s1 at 16:9, s5 with the default flags; the 33 of the walk back in s5; the 35 of the drop in s5 and s1).
+  Weak points: the new columns are the wall's own tile laid again, so at 21:9 / 32:9 the same 62 units show two to
+  five times side by side (the model's wall does the same every column); the first new tile starts at the old end,
+  not on the grid's next line, because the model stretched its last column; the row y -2517..-2474 has its tile
+  line 15 units further in than the other rows (its edge is at u 161..163, not at the tile's end); the vertex
+  colours of the end are kept along x (the model changes them from column to column); the wall's top was not seen
+  (the camera did not get above y -2690's view headless); the picture goes on but the collision does not; the LEFT
+  strip of the same views shows the sky beside the tower's corner (the mock-up, drawn over the earlier preview, has
+  wall there: that was far_wall's widening, see (2)); heights only seen by flying, the room was not played.
   Weak points: the copied columns repeat the last two exactly (same facets, 76 units further out: at 32:9 the pair
   shows three times); the first new column is narrower than the model's (33 units against 44: A is laid from the
   end's line to the copy of I); the straw fringe's swept strip is thinner than the model's ragged one for its first
