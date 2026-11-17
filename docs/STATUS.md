@@ -24,12 +24,9 @@ Update this file whenever something lands or a task is decided. Newest first.
   - **Baccus Village notice board (`--cut-content`)**: read from the ledge by the board, not from the ground under
     it (`port_cc_sign`: the sign at depth 117). Checked with Tomba placed on the ledge by position pokes (depth 90
     and 144: the text opens; on the ground: nothing); climbing up there in play not checked.
-  - **Iron Castle's entrance (AREA17 s1)**: the strips are v0.6.0's again, at the user's request (2026-11-17), after
-    five tries the same day (a cloud bank with lobes; a dome outline with cloud puffs; the first strips with the tone
-    following the front plate's edge and a filled thin chain; meridian plates; S-shaped plate edges read off his
-    marks). All are in git history (`0365f41` and before). What he asked for and is open again: the joins (skirt tone
-    jump at the plate line he drew), the thin left chain's copies are hollow, the left clouds do not connect, the
-    small towers' cones at both joins.
+  - **Iron Castle's entrance (AREA17 s1)**: the strips are v0.6.0's (the user's choice, 2026-11-17: the versions
+    tried that day were discarded, do not bring them back). Still open from his feedback: the joins, the thin left
+    chain's hollow copies, the left clouds.
   - **Lake's beach (AREA09 s1)**: the picture's left end is extended too (the boat scene shows it: the camera goes
     past `LK_X1`); `lk_take` lays either strip or both. Checked with the camera forced to the boat scene's position
     (`--poke-every 1:1F800176:VAL:2`, x = 1024 - VAL), not in the scene itself. Weak: at 21:9 / 32:9 with both
