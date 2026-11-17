@@ -231,7 +231,7 @@ static void lf_fix_make(void)
             Rgb c = rgb15(pic[y][318 + k]), n;
             if (lum(c) >= (y < LF_JF ? 56 : 132)) continue;
             if (y < LF_JF) { n = rgb15(pic[y < 146 ? y : y - 36][250 + k]); if (y >= LF_JF - 3) n = scale(n, 256 - (y - (LF_JF - 4)) * 40); }
-            else n = scale(lf_ground(y < LF_SAND ? LF_SAND : y, 28 + k), y < 184 ? 176 : y < 192 ? 256 - 80 * (192 - y) / 8 : 256);   /* (the shed's shadow, as the strip's) */
+            else n = scale(lf_ground(y < LF_SAND ? LF_SAND : y, 28 + k), y < 182 ? 204 : y < 186 ? 256 - 52 * (186 - y) / 5 : 256);   /* (the shade at the door's foot, as the strip's) */
             lf_fix[y][k] = (u16)(0x8000 | clampi(n.r, 0, 248) >> 3 | (clampi(n.g, 0, 248) >> 3) << 5 | (clampi(n.b, 0, 248) >> 3) << 10);
         }
 }
@@ -284,11 +284,17 @@ static void gen_lf(int pad)
                     lf_set(j, y, c);
                 }
             for (int j = 0; j < 6; j++) lf_set(j, LF_JF, lf_ground(LF_SAND, j + 30));   /* (sand, not the deck's foot, under it) */
-            for (int y = LF_D; y < 192; y++)              /* the shed's shadow on the deck and the sand (under the jamb's foot too) */
-                for (int j = y >= LF_JF ? 0 : 6; j < 20; j++) {
-                    int *p = lf_px(j, y), k = 256 - (20 - (j < 6 ? 6 : j)) * 110 / 14;
-                    if (y >= LF_JF && j < 10) k = (176 * (10 - j) + k * j) / 10;   /* (the picture's sand at the door's foot is lighter) */
-                    if (y >= 184) k = 256 - (256 - k) * (192 - y) / 8;
+            for (int y = LF_D; y < LF_JF; y++)            /* the shed's shadow on the deck */
+                for (int j = 6; j < 20; j++) {
+                    int *p = lf_px(j, y), k = 256 - (20 - j) * 110 / 14;
+                    p[0] = p[0] * k / 256; p[1] = p[1] * k / 256; p[2] = p[2] * k / 256;
+                }
+            /* on the sand only the shade the picture has at the door's foot (its columns 313-317, rows 174-183),
+               fading out over 8 columns: a longer shadow of the shed "came out of nowhere" (the user, 2026-11-17) */
+            for (int y = LF_JF; y < 186; y++)
+                for (int j = 0; j < 8; j++) {
+                    int *p = lf_px(j, y), k = 212 + 44 * j / 8;
+                    if (y >= 182) k = 256 - (256 - k) * (186 - y) / 5;
                     p[0] = p[0] * k / 256; p[1] = p[1] * k / 256; p[2] = p[2] * k / 256;
                 }
         }
