@@ -4,6 +4,11 @@ Update this file whenever something lands or a task is decided. Newest first.
 
 ## Last release
 
+v0.5.10 (2026-11-17, master 2583011b5): AREA05 square fixed (the back lane's fountain solid again, as an obstacle to
+hop over; both lanes open to the right edge; the notice-board box change reverted), top-down map margins for the
+Hidden Village and the Dwarf Village (other agent). First APK run with a warm ccache: 17 min (USA/JP 64-bit steps,
+~4-5 min each, still redo gen2 + a one-file clang -O2 + WABT every run).
+
 v0.5.9 (2026-11-17): same content as v0.5.8, published again because v0.5.8 went out with VERSION still at 0.5.7
 (the Android launcher showed 0.5.7). v0.5.8: widescreen exits moved to the wide edge in the rooms reviewed with the
 user (docs/PORT.md "Widescreen exits"), AREA05 notice board talk box widened, the first room's added foreground
