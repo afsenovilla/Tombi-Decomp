@@ -20,18 +20,26 @@
  * The right wall is not the left one's mirror: a door stands in it, with a lamp, a narrow panel before it and a long
  * one after it that the edge cuts 18 columns in; its wainscot shows no stile after the door.
  *
- * The strips (made once per picture, ck_gen; ck_take lays the frame's strips from them and the picture's columns):
- *   - left wall, cornice to floor: the wall itself one period deeper (ck_deep: the picture seen through the
- *     perspective of a wall moved along its length), so the wainscot goes on with its period and phase (the cut
- *     panel is closed by its stile and the next one starts), the mouldings stay on their rays, the big plaster panel
- *     runs on (the picture never shows where it ends);
- *   - right wall: the cornice and the plaster over it the same way; from the cornice down the door is in the way,
- *     so the wall goes on along its rays with the tone of its last columns (ck_smear), the plaster's grain from
- *     the left panel and the wainscot's wood from the one whole panel of that wall; its panels run on;
+ * The strips (made once per picture, ck_gen; ck_take lays the frame's strips from them and the picture's columns).
+ * Second version: the first one was the wall one period deeper everywhere (ck_deep), i.e. the picture's texels
+ * enlarged 1.2 times in height and 1.5 in width, and the join showed as a change of texture ("se nota mucho el
+ * empalme").  Now nothing that carries texture is enlarged:
+ *   - both walls from the cornice to the floor go on along their rays with the tone the ray has in the picture's
+ *     first 8 columns (ck_profile / ck_ray: a profile at quarter rows, so the cornice, the plaster's frame lines,
+ *     the chair rail, the wainscot's inlay and the skirting leave the picture where they are, to a fraction of a
+ *     row, and as sharp as they are there; no tone to correct at the join);
+ *   - on that, the picture's own texture texel for texel: the plaster's grain in patches (ck_grain), the wood's
+ *     streaks of the cornice, rail, wainscot and skirting column by column along the ray (ck_streak);
+ *   - the left wainscot's stiles are the wall one period deeper (ck_deep: the picture seen through the perspective
+ *     of a wall moved along its length), so the cut panel is closed by its stile at the measured period and phase
+ *     and the next one starts; the right wainscot's panel runs on (that wall shows no period);
+ *   - the lunettes (the plaster between the wall arch and the cornice) are the deeper wall's tones, smoothed, with
+ *     the lunette's own grain texel for texel and its tone at the join per row;
  *   - the wall arch goes on along its ellipse, the rib 2.9 rows thick as at the edge, the ceiling over it the
  *     picture's own 72 columns further in; past its end (wider than 16:9) the ceiling comes down to the cornice;
  *   - the floor is the same row, whole tiles further in;
- *   - the join's tone (per ray, the picture's first 6 columns less the strip's) fades out, halved every 32 columns.
+ *   - where the deeper wall is used, the join's tone (per ray, the picture's first 6 columns less the strip's)
+ *     fades out, halved every 32 columns.
  * Nothing is mirrored; clock, table, chandeliers, fireplace and door are not in the strips.  Every colour is the
  * nearest of the picture's CLUT.  Integers only; a texel depends on its place, not on the strip's width. */
 #define CK_HM 1226                                        /* the ROOMS row's mark (no picture has this height) */
@@ -125,73 +133,172 @@ static int ck_deep_n(int d2)                             /* the fewest periods t
     while ((ck_i64)d2 * CK_P2 > (ck_i64)476 * (CK_P2 + n * d2)) n++;
     return n;
 }
-/* the right wall between the cornice and the chair rail: the edge's own tone per ray (the door and its lamp are in
-   the way further in), with the plaster's grain from the left wall's panel */
-static Rgb ck_prof[CK_H];
+/* What runs along the rays (cornice, the plaster's frame lines, chair rail; on the right wall everything down to the
+   floor): the side's own tone per ray, from the picture's first CK_PN columns, at quarter rows of the edge column
+   (the columns cross a ray at different heights, so together they sample it finer than one column does: the
+   strip's lines come out as sharp as the picture's, and where they are in the picture to a fraction of a row). */
+#define CK_PN 8
+#define CK_PB (CK_H * 4 + 8)
+static Rgb ck_pr[CK_PB]; static short ck_pl[CK_PB];
 static void ck_profile(void)
 {
-    static Rgb raw[CK_H];
-    for (int y = 0; y < CK_H; y++) {
-        int r = 0, g = 0, b = 0;
-        for (int m = 1; m <= 6; m++) {
-            Rgb c = ck_bil(m << 16, (int)(CK_VY16 + ck_fdiv((ck_i64)((y << 16) - CK_VY16) * (479 - 2 * m), 479)));
-            r += c.r; g += c.g; b += c.b;
+    static int acc[CK_PB][4]; static Rgb raw[CK_PB]; int last = -1;
+    memset(acc, 0, sizeof acc);
+    for (int m = 0; m < CK_PN; m++) for (int y = 0; y < CK_H; y++) {
+        ck_i64 p = (CK_VY16 + ck_fdiv((ck_i64)((y << 16) - CK_VY16) * 479, 479 - 2 * m)) * 4;
+        int b0, f; Rgb c = ck_t(m, y);
+        if (p < 0) continue;
+        b0 = (int)(p >> 16); f = (int)(p >> 8) & 255;
+        for (int k = -2; k <= 3; k++) {
+            int b = b0 + k, w = k * 256 - f;
+            w = 768 - (w < 0 ? -w : w);
+            if (b < 0 || b >= CK_PB || w <= 0) continue;
+            acc[b][0] += c.r * w; acc[b][1] += c.g * w; acc[b][2] += c.b * w; acc[b][3] += w;
         }
-        raw[y].r = r / 6; raw[y].g = g / 6; raw[y].b = b / 6;
     }
-    for (int y = 0; y < CK_H; y++) {                     /* smoothed along the wall's height, not across an edge */
-        int r = 0, g = 0, b = 0, n = 0, l0 = lum(raw[y]);
-        for (int k = -4; k <= 4; k++) {
-            int yy = clampi(y + k, 0, CK_H - 1), dl = lum(raw[yy]) - l0;
-            if (dl > 10 || dl < -10) continue;
-            r += raw[yy].r; g += raw[yy].g; b += raw[yy].b; n++;
+    for (int b = 0; b < CK_PB; b++) if (acc[b][3]) {
+        raw[b].r = acc[b][0] / acc[b][3]; raw[b].g = acc[b][1] / acc[b][3]; raw[b].b = acc[b][2] / acc[b][3];
+        if (last < 0) for (int k = 0; k < b; k++) raw[k] = raw[b];
+        last = b;
+    } else if (last >= 0) raw[b] = raw[last];
+    for (int pass = 0; pass < 3; pass++) {               /* smoothed along the height, not across an edge: over 3 rows,
+                                                            then over 8 and 20 where it is even (a ray's noise would be a
+                                                            line, a blotch of the plaster a band) */
+        int n0 = pass == 2 ? 40 : pass ? 16 : 6, t = pass ? 3 : 6;
+        for (int b = 0; b < CK_PB; b++) {
+            int r = 0, g = 0, bl = 0, n = 0, l0 = lum(raw[b]);
+            for (int k = -n0; k <= n0; k++) {
+                int bb = clampi(b + k, 0, CK_PB - 1), dl = lum(raw[bb]) - l0;
+                if (dl > t || dl < -t) continue;
+                r += raw[bb].r; g += raw[bb].g; bl += raw[bb].b; n++;
+            }
+            ck_pr[b].r = r / n; ck_pr[b].g = g / n; ck_pr[b].b = bl / n; ck_pl[b] = (short)lum(ck_pr[b]);
         }
-        ck_prof[y].r = r / n; ck_prof[y].g = g / n; ck_prof[y].b = b / n;
+        memcpy(raw, ck_pr, sizeof raw);
     }
 }
-static Rgb ck_grain(int X, int v16)                      /* the left panel's plaster less its mean round the texel */
+/* the ray through (d2 half columns from the vanishing column, row y16): its place in the profile (16.16 quarter rows) */
+static ck_i64 ck_ppos(int d2, int y16) { return (CK_VY16 + ck_fdiv((ck_i64)(y16 - CK_VY16) * 479, d2)) * 4; }
+static Rgb ck_pget(ck_i64 p)
 {
-    int x = 3 + (X - 1) % 60, vl = CK_V(-220) + (int)((((ck_i64)v16 - CK_VCB) % CK_V(320) + CK_V(320)) % CK_V(320));
-    int y = (int)((CK_VY16 + (((ck_i64)vl * (479 - 2 * x)) >> 1) + 32768) >> 16), r = 0, g = 0, b = 0; Rgb c, o;
-    for (int j = -2; j <= 2; j++) for (int i = -2; i <= 2; i++) { c = rgb15(ck_src[clampi(y + j, 0, CK_H - 1)][clampi(x + i, 0, CK_W - 1)]); r += c.r; g += c.g; b += c.b; }
-    c = rgb15(ck_src[clampi(y, 0, CK_H - 1)][x]);
-    o.r = c.r - r / 25; o.g = c.g - g / 25; o.b = c.b - b / 25;
+    int b = clampi((int)(p >> 16), 0, CK_PB - 2), f = (int)(p >> 8) & 255; Rgb o;
+    o.r = ck_pr[b].r + (ck_pr[b + 1].r - ck_pr[b].r) * f / 256; o.g = ck_pr[b].g + (ck_pr[b + 1].g - ck_pr[b].g) * f / 256;
+    o.b = ck_pr[b].b + (ck_pr[b + 1].b - ck_pr[b].b) * f / 256;
     return o;
 }
-/* the right wainscot's wood: the corner panel's field (the one whole panel of that wall) less its mean along the ray */
-static Rgb ck_wood(int d2, int v16)
+/* how even the profile is within n quarter rows of p: 256 where it changes less than t0, 0 from t1 */
+static int ck_flat(ck_i64 p, int n, int t0, int t1)
 {
-    int U = 2000000000 / d2, r = 0, g = 0, b = 0; Rgb c = { 0, 0, 0 }, o;
-    U = 5420000 + (5950000 - U) % 530000;
-    for (int k = 0; k <= 8; k++) {
-        int Uk = k < 8 ? 5420000 + k * 66250 + 33125 : U, d16 = (int)((((ck_i64)1000000000) << 16) / Uk);
-        c = ck_bil((479 << 15) - d16, (int)(CK_VY16 + (((ck_i64)v16 * d16) >> 16)));
-        if (k < 8) { r += c.r; g += c.g; b += c.b; }
+    int b = clampi((int)((p + 32768) >> 16), 0, CK_PB - 1), f = 0;
+    for (int k = -n; k <= n; k++) { int d = ck_pl[clampi(b + k, 0, CK_PB - 1)] - ck_pl[b]; if (d < 0) d = -d; if (d > f) f = d; }
+    return clampi((t1 - f) * 256 / (t1 - t0), 0, 256);
+}
+/* The plaster's grain, texel for texel (not enlarged): a clean piece of the picture's plaster less its mean over
+   13 x 13 texels, laid in patches of 24 x 22 texels, each from its own place in the piece (a hash of the patch),
+   cross-faded over 6 texels.  The walls': the left wall's panel (columns 1-62, rows 144-201: nothing but plaster;
+   not mirrored on the right wall: both walls' streaks run the same way in the picture).  The lunettes': each
+   side's own, between the wall arch and the cornice (42 columns from the third, rows 42-77). */
+#define CK_BW 24
+#define CK_BH 22
+#define CK_BF 6
+#define CK_GAW 218                                        /* the grain's strength: the panel's at the edge is 0.85 of its mean */
+#define CK_GAU 176                                        /* ... the lunettes': 0.7 (the CLUT's steps do the rest) */
+typedef struct { int x0, y0, w, h; short g[58 * 62][3]; } CkGrain;
+static CkGrain ck_gw = { 1, 144, 62, 58 }, ck_gu = { 2, 42, 42, 36 };
+static int ck_gin(const CkGrain *G, int x, int y)       /* plaster and nothing else? */
+{
+    int m = G == &ck_gu && ck_side ? CK_W - 1 - x : x, v16;
+    if (m < 0 || m > 66 || y < 0 || y >= CK_H) return 0;
+    v16 = (int)ck_fdiv((ck_i64)((y << 16) - CK_VY16) * 2, 479 - 2 * m);
+    if (G == &ck_gu) return v16 < CK_V(-440) && (y << 16) > ck_arch((ck_i64)(479 - 2 * m) << 15) + 3 * 65536;
+    return v16 > CK_V(-231) && v16 < CK_V(101);
+}
+static void ck_grain_make(CkGrain *G)
+{
+    G->x0 = G == &ck_gu && ck_side ? CK_W - 2 - G->w : G == &ck_gu ? 2 : G->x0;
+    for (int y = 0; y < G->h; y++) for (int x = 0; x < G->w; x++) {
+        int r = 0, g = 0, b = 0, n = 0; Rgb c; short *t = G->g[y * G->w + x];
+        for (int j = -10; j <= 10; j++) for (int i = -10; i <= 10; i++) {
+            if (!ck_gin(G, G->x0 + x + i, G->y0 + y + j)) continue;
+            c = rgb15(ck_src[G->y0 + y + j][G->x0 + x + i]); r += c.r; g += c.g; b += c.b; n++;
+        }
+        c = rgb15(ck_src[G->y0 + y][G->x0 + x]);
+        if (!n || !ck_gin(G, G->x0 + x, G->y0 + y)) { t[0] = t[1] = t[2] = 0; continue; }
+        t[0] = (short)(c.r - r / n); t[1] = (short)(c.g - g / n); t[2] = (short)(c.b - b / n);
     }
-    o.r = c.r - r / 8; o.g = c.g - g / 8; o.b = c.b - b / 8;
+}
+static Rgb ck_grain(const CkGrain *G, int X, int y)
+{
+    int u = ck_side ? X : 4080 - X, bx = u / CK_BW, by = y / CK_BH, fx = u % CK_BW, fy = y % CK_BH;
+    int r = 0, g = 0, b = 0, w2 = 0, s; Rgb o;
+    for (int j = 0; j < 2; j++) for (int i = 0; i < 2; i++) {
+        int lx = fx + i * CK_BW, ly = fy + j * CK_BH, wx, wy, w; u32 h; const short *t;
+        if (lx >= CK_BW + CK_BF || ly >= CK_BH + CK_BF) continue;
+        wx = lx < CK_BF ? 2 * lx + 1 : lx >= CK_BW ? 2 * (CK_BW + CK_BF - lx) - 1 : 2 * CK_BF;
+        wy = ly < CK_BF ? 2 * ly + 1 : ly >= CK_BH ? 2 * (CK_BH + CK_BF - ly) - 1 : 2 * CK_BF;
+        w = wx * wy;
+        h = (u32)(bx - i + 64) * 73856093u ^ (u32)(by - j + 64) * 19349663u; h ^= h >> 13; h *= 0x5bd1e995u; h ^= h >> 15;
+        t = G->g[((h >> 10) % (u32)(G->h - CK_BH - CK_BF + 1) + ly) * G->w + h % (u32)(G->w - CK_BW - CK_BF + 1) + lx];
+        r += t[0] * w; g += t[1] * w; b += t[2] * w; w2 += w * w;
+    }
+    s = (int)ck_isqrt((unsigned long long)w2 << 8);     /* (the patches' grains do not add up: by the root of the weights) */
+    o.r = r * 16 / s; o.g = g * 16 / s; o.b = b * 16 / s;
     return o;
 }
-static Rgb ck_smear(int X, int d2, int y16, int v16)
+/* a moulding's own streaks: side's texel on the ray v16, at one of the n columns up to mh (the picture's columns as
+   they are, further out as X grows), less its mean along the ray */
+static Rgb ck_streak(int X, int v16, int side, int mh, int n)
 {
-    ck_i64 y0 = CK_VY16 + ck_fdiv((ck_i64)(y16 - CK_VY16) * 479, d2);
-    int y = (int)(y0 >> 16), f = (int)(y0 >> 8) & 255; Rgb a = ck_prof[clampi(y, 0, CK_H - 1)], b = ck_prof[clampi(y + 1, 0, CK_H - 1)], g = { 0, 0, 0 }, o;
-    if (v16 < CK_VRT) g = ck_grain(X, v16);
-    else if (v16 > CK_V(225) && v16 < CK_V(318)) g = ck_wood(d2, v16);
-    o.r = a.r + (b.r - a.r) * f / 256 + g.r; o.g = a.g + (b.g - a.g) * f / 256 + g.g; o.b = a.b + (b.b - a.b) * f / 256 + g.b;
+    int m0 = mh - (X - 1) % n, save = ck_side, r = 0, g = 0, b = 0; Rgb c = { 0, 0, 0 }, o;
+    ck_side = side;
+    for (int k = -4; k <= 4; k++) {
+        int m = m0 + k; Rgb t = ck_bil(m << 16, (int)(CK_VY16 + (((ck_i64)v16 * (479 - 2 * m)) >> 1)));
+        r += t.r; g += t.g; b += t.b; if (!k) c = t;
+    }
+    ck_side = save;
+    o.r = c.r - r / 9; o.g = c.g - g / 9; o.b = c.b - b / 9;
+    return o;
+}
+#define CK_VPT CK_V(-436)                                 /* the rays' profile: from just over the cornice down to the floor */
+/* how much of a texel on the ray v16 is the profile's (0-256): not the left wainscot's stiles, which are the deeper
+   wall's (its columns 9.5 to 22.5: the stile with the ends of both panels' inlay) */
+static int ck_pw(int d2, int v16)
+{
+    int w = clampi((v16 - CK_VPT) * 256 / CK_V(8), 0, 256);
+    if (v16 > CK_VFL + CK_V(12)) return 0;
+    if (!ck_side && v16 > CK_V(200) && v16 < CK_V(334)) {
+        ck_i64 s = ((ck_i64)CK_P2 << 16) / (CK_P2 + ck_deep_n(d2) * d2);
+        int m16 = (int)(((ck_i64)479 << 15) - (((ck_i64)d2 * s) >> 1));
+        int sw = clampi((m16 - 622592) / 384, 0, 256) * clampi((1474560 - m16) / 384, 0, 256) / 256;
+        sw = sw * clampi((v16 - CK_V(200)) * 256 / CK_V(8), 0, 256) / 256;
+        sw = sw * clampi((CK_V(334) - v16) * 256 / CK_V(8), 0, 256) / 256;
+        w = w * (256 - sw) / 256;
+    }
+    return w;
+}
+static Rgb ck_ray(int X, int d2, int y16, int v16)
+{
+    ck_i64 p = ck_ppos(d2, y16); Rgb o = ck_pget(p), g = { 0, 0, 0 }; int w = 0;
+    if (v16 <= CK_VCB) { g = ck_streak(X, v16, ck_side, 35, 32); w = ck_flat(p, 3, 10, 30); }      /* the cornice */
+    else if (v16 < CK_VRT) { g = ck_grain(&ck_gw, X, y16 >> 16); w = ck_flat(p, 8, 8, 16) * CK_GAW / 256; }   /* the plaster */
+    else if (v16 < CK_V(228)) { g = ck_streak(X, v16, 0, 35, 32); w = ck_flat(p, 5, 6, 14) / 2; }   /* the chair rail */
+    else if (v16 < CK_V(320)) { g = ck_streak(X, v16, 0, 41, 18); w = ck_flat(p, 5, 6, 14) * 5 / 8; }   /* the wainscot's wood */
+    else if (v16 < CK_VFL) { g = ck_streak(X, v16, 0, 35, 32); w = ck_flat(p, 5, 6, 14) / 2; }      /* the skirting */
+    o.r += g.r * w / 256; o.g += g.g * w / 256; o.b += g.b * w / 256;
     return o;
 }
 /* the side wall and the floor X columns out of the picture's edge on row y16 (no vault) */
 static Rgb ck_wall(int X, int y16)
 {
-    int d2 = 479 + 2 * X, v16 = (int)ck_fdiv((ck_i64)(y16 - CK_VY16) * 2, d2), n = ck_deep_n(d2);
-    Rgb c;
-    if (ck_side && v16 >= CK_VCB && v16 <= CK_VFL + CK_V(12)) c = ck_smear(X, d2, y16, v16);
-    else {
+    int d2 = 479 + 2 * X, v16 = (int)ck_fdiv((ck_i64)(y16 - CK_VY16) * 2, d2), n = ck_deep_n(d2), pw = ck_pw(d2, v16);
+    Rgb c = { 0, 0, 0 };
+    if (pw < 256) {
         int k = 1;
         c = ck_deep(d2, y16, n);
         while (k <= 8 && ck_deep_n(d2 + 2 * k) == n) k++;
         if (k <= 8) c = mix(c, ck_deep(d2, y16, n + 1), (9 - k) * 256 / 9);     /* (one more period from 8 columns before it is needed) */
     }
+    if (pw) c = mix(c, ck_ray(X, d2, y16, v16), pw);
     if (v16 > CK_VFL) {                                  /* the floor: the same row, whole tiles further in */
         int px = (int)(((ck_i64)(y16 - CK_VY16) * CK_TILE) >> 10), m16 = -X * 65536 + px, w;
         Rgb f;
@@ -205,12 +312,15 @@ static Rgb ck_wall(int X, int y16)
 static Rgb ck_cv_px(const Rgb *cv, int pad, int X, int y) { return cv[(size_t)clampi(y, 0, CK_H - 1) * pad + clampi(X, 1, pad) - 1]; }
 static void ck_gen(int pad)
 {
-    Rgb *cv = malloc((size_t)CK_H * pad * sizeof *cv); static Rgb dl[CK_H], ds[CK_H];
-    if (!cv) return;
+    int out = pad; Rgb *cv, *cu; static Rgb dl[CK_H], ds[CK_H]; static int ln[CK_H], lok[CK_H];
+    pad += 3;                                            /* (3 more columns for the lunette's means: a texel does not depend on the strip's width) */
+    cv = malloc((size_t)CK_H * pad * sizeof *cv); cu = malloc((size_t)CK_H * pad * sizeof *cv);
+    if (!cv || !cu) { free(cv); free(cu); return; }
     memset(ck_qh, 0, sizeof ck_qh);
+    ck_side = 0; ck_grain_make(&ck_gw);
     for (ck_side = 0; ck_side < 2; ck_side++) {
         Rgb band[3];
-        if (ck_side) ck_profile();
+        ck_profile();
         for (int k = 0; k < 3; k++) {                    /* the rib's rows over the wall arch at the edge */
             int r = 0, g = 0, b = 0;
             for (int m = 0; m < 3; m++) { Rgb c = ck_t(m, ((ck_arch((ck_i64)(479 - 2 * m) << 15) + 32768) >> 16) - 1 - k); r += c.r; g += c.g; b += c.b; }
@@ -235,8 +345,70 @@ static void ck_gen(int pad)
         }
         for (int y = 0; y < CK_H; y++) for (int X = 1; X <= pad; X++) {
             int y0 = (int)(CK_VY16 + ck_fdiv((ck_i64)((y << 16) - CK_VY16) * 479, 479 + 2 * X)), f = (y0 >> 8) & 255, w = CK_TF * 256 / (CK_TF + X);
+            w = w * (256 - ck_pw(479 + 2 * X, (int)ck_fdiv((ck_i64)((y << 16) - CK_VY16) * 2, 479 + 2 * X))) / 256;   /* (not the profile's rays: they are the join's) */
             Rgb *c = &cv[(size_t)y * pad + X - 1], d0 = ds[clampi(y0 >> 16, 0, CK_H - 1)], d1 = ds[clampi((y0 >> 16) + 1, 0, CK_H - 1)];
             c->r += (d0.r * 256 + (d1.r - d0.r) * f) * w / 65536; c->g += (d0.g * 256 + (d1.g - d0.g) * f) * w / 65536; c->b += (d0.b * 256 + (d1.b - d0.b) * f) * w / 65536;
+        }
+        /* the lunette (the plaster between the wall arch and the cornice): the deeper wall's tones (its mean over
+           7 x 7 texels) with the lunette's own grain, texel for texel ... */
+        ck_grain_make(&ck_gu);
+        memcpy(cu, cv, (size_t)CK_H * pad * sizeof *cv);
+        memset(ds, 0, sizeof ds); memset(ln, 0, sizeof ln);
+        for (int X = 1; X <= pad; X++) {
+            int d2 = 479 + 2 * X, y0 = (ck_arch((ck_i64)d2 << 15) >> 16) + 2;
+            for (int y = y0; y < CK_H; y++) {
+                int v16 = (int)ck_fdiv((ck_i64)((y << 16) - CK_VY16) * 2, d2), r = 0, g = 0, b = 0, n = 0, w; Rgb o, t;
+                if (v16 >= CK_VPT) break;
+                for (int i = -3; i <= 3; i++) {
+                    int Xi = clampi(X + i, 1, pad), di = 479 + 2 * Xi, ya = (ck_arch((ck_i64)di << 15) >> 16) + 2;
+                    for (int j = -3; j <= 3; j++) {
+                        if (y + j < ya || (int)ck_fdiv((ck_i64)(((y + j) << 16) - CK_VY16) * 2, di) >= CK_VPT) continue;
+                        t = cu[(size_t)(y + j) * pad + Xi - 1]; r += t.r; g += t.g; b += t.b; n++;
+                    }
+                }
+                t = ck_grain(&ck_gu, X, y);
+                o.r = r / n; o.g = g / n; o.b = b / n;
+                if (X <= 2) { ds[y].r += o.r; ds[y].g += o.g; ds[y].b += o.b; ln[y]++; }
+                o.r += t.r * CK_GAU / 256; o.g += t.g * CK_GAU / 256; o.b += t.b * CK_GAU / 256;
+                w = clampi((y - y0 + 1) * 64, 0, 256) * clampi((CK_VPT - v16) * 256 / CK_V(8), 0, 256) / 256;
+                cv[(size_t)y * pad + X - 1] = mix(cv[(size_t)y * pad + X - 1], o, w);
+            }
+        }
+        /* ... and its tone at the join, per row: the picture's first 4 columns, carried on to the strip's first
+           two by 3/4 of what they are less the next 4 (3 at most), less the strip's; over 9 rows, halved every
+           CK_TF columns */
+        {   int have = 0;
+            for (int y = 0; y < CK_H; y++) {
+                int a[3] = { 0, 0, 0 }, b[3] = { 0, 0, 0 }, c[3] = { 0, 0, 0 }, na = 0, nb = 0, nc = 0;
+                for (int j = -4; j <= 4; j++) {
+                    int yy = y + j;
+                    if (yy < 0 || yy >= CK_H) continue;
+                    for (int m = 0; m < 8; m++) {
+                        Rgb t;
+                        if (!ck_gin(&ck_gu, ck_side ? CK_W - 1 - m : m, yy)) continue;
+                        t = ck_t(m, yy);
+                        if (m < 4) { a[0] += t.r; a[1] += t.g; a[2] += t.b; na++; } else { b[0] += t.r; b[1] += t.g; b[2] += t.b; nb++; }
+                    }
+                    if (ln[yy] == 2) { c[0] += ds[yy].r; c[1] += ds[yy].g; c[2] += ds[yy].b; nc += 2; }
+                }
+                lok[y] = na >= 16 && nb >= 16 && nc >= 8;
+                if (!lok[y]) continue;
+                dl[y].r = a[0] / na + clampi((a[0] * 3 / na - b[0] * 3 / nb) / 4, -3, 3) - c[0] / nc;
+                dl[y].g = a[1] / na + clampi((a[1] * 3 / na - b[1] * 3 / nb) / 4, -3, 3) - c[1] / nc;
+                dl[y].b = a[2] / na + clampi((a[2] * 3 / na - b[2] * 3 / nb) / 4, -3, 3) - c[2] / nc;
+                have = 1;
+            }
+            for (int X = 1; X <= pad && have; X++) {
+                int d2 = 479 + 2 * X, y0 = (ck_arch((ck_i64)d2 << 15) >> 16) + 2;
+                for (int y = y0; y < CK_H; y++) {
+                    int v16 = (int)ck_fdiv((ck_i64)((y << 16) - CK_VY16) * 2, d2), yy = y, w; Rgb *c = &cv[(size_t)y * pad + X - 1];
+                    if (v16 >= CK_VPT) break;
+                    while (yy < CK_H - 1 && !lok[yy]) yy++;
+                    while (yy > 0 && !lok[yy]) yy--;
+                    w = clampi((y - y0 + 1) * 64, 0, 256) * clampi((CK_VPT - v16) * 256 / CK_V(8), 0, 256) / 256 * (CK_TF * 256 / (CK_TF + X)) / 256;
+                    c->r += dl[yy].r * w / 256; c->g += dl[yy].g * w / 256; c->b += dl[yy].b * w / 256;
+                }
+            }
         }
         /* the ceiling's tone at the join, per row (the rows over the rib there) */
         for (int y = 0; y < CK_H; y++) {
@@ -260,11 +432,11 @@ static void ck_gen(int pad)
                 *c = mix(*c, ce, cc);
             }
         }
-        for (int y = 0; y < CK_H; y++) for (int X = 1; X <= pad; X++)
-            ck_ext[(size_t)y * 2 * pad + (ck_side ? pad + X - 1 : pad - X)] = ck_quant(cv[(size_t)y * pad + X - 1]);
+        for (int y = 0; y < CK_H; y++) for (int X = 1; X <= out; X++)
+            ck_ext[(size_t)y * 2 * out + (ck_side ? out + X - 1 : out - X)] = ck_quant(cv[(size_t)y * pad + X - 1]);
     }
     ck_side = 0;
-    free(cv);
+    free(cv); free(cu);
 }
 #ifndef WS_BACKDROP_MAIN
 static u16 *ck_buf; static int ck_pad = -1; static u32 ck_sum;

@@ -4370,36 +4370,85 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     24.5, fitted to 0.2 rows; the rib's other edge is the same curve at 0.923 of the distance, which shows the
     arch's nearer half 20 columns past the edge: it is symmetric); the floor's joints are 0.476 columns apart per row
     under the horizon.  The right wall is not the left one's mirror: a door with a lamp, a narrow panel before it, a
-    long one after it cut 18 columns in, and no stile after the door.  **The strips**: the left wall from the
-    cornice to the floor is the wall itself one period deeper (`ck_deep`: the picture's texels through the
-    perspective of the wall moved along its length, bilinear, 1.2 to 1.3 times larger), so the cut wainscot panel is
-    closed by its stile at the measured period and phase and the next panel starts, every moulding stays on its ray,
-    and the big plaster panel runs on to the frame's edge (the picture never shows its end); the right wall's
-    cornice and lunette the same way; from the cornice down the door is in the way of any deeper copy, so that wall
-    goes on along its rays with the tone of its last 6 columns (`ck_smear`, smoothed along the height but not across
-    an edge), the plaster's grain taken from the left wall's panel (texels less their 5 x 5 mean, not mirrored) and
-    the wainscot's wood from that wall's one whole panel (less its mean along the ray); its two panels run on.  The
-    wall arch goes on along its ellipse (over the top and slowly down), the rib 2.9 rows thick as at the edge, the
-    ceiling over it the picture's own 72 columns further in; the floor is the same row whole tiles further in (its
-    joints keep their lines); the join's tone (per ray, the picture's first 6 columns less the strip's first 6) is
-    added, halved every 32 columns.  Every colour is the nearest of the CLUT's.  Clock, table, chandeliers,
-    fireplace and door are not duplicated; nothing is mirrored.  Checked (2026-11-17, headless): 16:9 at both ends,
-    at the spawn, half-way and with the camera up; the game's strips = the standalone generator's (0 texels); the
-    21:9 frames hold the 16:9 ones (0 texels; 32:9 holds 21:9); 4:3 identical to the build before; with the default
-    flags the room's 16:9 frame is identical to the build before; the other rooms' 16:9 frames with `--ws-backdrop
-    on` identical to the build before (2:5 2:1 5:1 5:3 19:1 11:2 9:5 9:3 9:4 17:3 17:4 16:4); OpenGL (xvfb): the
-    strips = the software ones (0 texels); i386 = wasm2c whole frames (4:3, 16:9 at both ends and the spawn, 21:9 at
-    both ends); made in 5 ms at 16:9, 9 ms at 21:9, 15 ms at 32:9.  Along the rays the join's mean step is 3 to 8
-    (one 5-bit step) in every band on both sides (`tools/ws_seam.py` compares rows, which the sloped mouldings cross:
-    its texture checks do not apply here; its join steps are within the picture's own).  Weak points: the strips'
-    texels are the picture's enlarged 1.2 to 1.3 times (softer than the picture at 8x); the right wall's lower part
-    has no structure of its own in the strip (the long panel and the wainscot panel run on to the frame's edge
-    without a stile: that wall shows no period to measure), and its plaster is a little smoother than the
-    picture's; where the left wall's big panel and both arches end is not in the picture: at 16:9 they run on, wider
-    than that the arch comes down on the cornice 96 columns out and the ceiling follows it down (a choice); wider
-    than 16:9 the left wall changes to two periods deeper 57 columns out (cross-faded over 8 columns, a faint tone
-    step in the cornice) and the left wainscot is the same panel again and again; the rib is drawn at the edge's
-    thickness (a real vault would hide it past the apex); not seen on the device.
+    long one after it cut 18 columns in, and no stile after the door.
+    **The strips, first version** (2026-11-17): the left wall from the
+    cornice to the floor was the wall itself one period deeper (`ck_deep`: the picture's texels through the
+    perspective of the wall moved along its length, bilinear), the right wall's cornice and lunette the same way, and
+    the right wall from the cornice down its last 6 columns' tone along the rays with a grain taken from the left
+    panel through the same perspective.  The user's verdict: "se nota mucho el empalme".  Measured, per band, along
+    the rays, the picture's first 10 columns against the strip's: no tone step to speak of (0 to 2 levels of 255),
+    no moulding off its ray; what showed was the **texture**: the deeper wall is the picture enlarged 1.2 times in
+    height and 1.43 to 1.54 in width (the derivative of the perspective map, not the 1.2 to 1.3 noted then), so the
+    plaster's diagonal streaks, the wood's vertical ones and every moulding's edge were coarser and softer next to
+    the picture's (detail left after a 3 x 3 mean, strip / picture, left / right wall: cornice 0.67 / 0.77, chair
+    rail 0.78 / 0.54, skirting 0.84 / 0.65, lunettes 0.94 / 0.66, the left wall's plaster 0.62 to 0.88; the
+    wainscot's column-to-column step 0.38 / 0.33); the frame line of the left wall's panel
+    came out paler (the deeper wall shows it 38 columns further in, where it is paler); the lunettes were one flat
+    CLUT colour next to the picture's speckle of three, 2 to 3 levels lighter.  **Second version** (same day, this
+    entry's code): nothing that carries texture is enlarged.
+    - *The rays' profile* (`ck_profile`, `ck_ray`): both walls from just over the cornice to the floor go on along
+      their rays with the tone each ray has in the picture's first 8 columns (the right wall has no more before its
+      panel's shadow and the door).  The columns cross a ray at different heights, so their texels are laid on a
+      profile at quarter rows of the edge column (a tent of 0.75 row) and it is read by position: the cornice, the
+      plaster's frame lines, the chair rail, the wainscot's inlay and the skirting leave the picture exactly where
+      they are (by construction: no step, no kink; a ray fitted 0.4 rows off would be 0.09 rows off at the 16:9
+      frame's edge) and as sharp as there, 1.0 to 1.22 times larger as the wall comes nearer.  Smoothed along the
+      height only among bins within 6, then 3 levels (over 3, 8 and 20 rows), never across an edge: a ray's noise
+      would be a line across the strip, a blotch of the plaster a band.  No tone correction is needed there (the
+      profile is the join's tone); the wall darkens by 0.25 levels a column towards the left edge and the strip
+      keeps the edge's tone (never darker).
+    - *The plaster's grain, texel for texel* (`ck_grain`): a clean piece of the picture's plaster less its mean
+      over 21 x 21 texels, laid in patches of 24 x 22 texels, each from its own place in the piece (an integer hash
+      of the patch's place), cross-faded over 6 texels and scaled by the root of the weights (independent grains do
+      not add up).  The walls': the left wall's panel (columns 1-62, rows 144-201), at 0.85 (its grain at the edge
+      is weaker than its mean); used on the right wall too, not mirrored: in the picture both walls' streaks run the
+      same way (lag-1 correlations down-left 0.80 / 0.82, down-right 0.71 / 0.72), and the right wall has only 12
+      clean columns.  Only where the profile is even (no grain on a frame line).
+    - *The wood's streaks* (`ck_streak`): cornice, chair rail, wainscot and skirting take the picture's texels on
+      the same ray column by column (no enlargement across the streaks: a column is a column), less their mean over
+      9 columns along the ray, from columns 4-35 (cornice: each side's own; rail and skirting: the left wall's) or
+      24-41 (the wainscot's field between the left wall's two stiles); the cornice's at full strength, the others
+      at 0.5 to 0.63, and only where the profile is even.
+    - *The left wainscot's stiles* stay the deeper wall's (`ck_deep`, where its source is the picture's columns
+      9.5-22.5: the stile and the ends of both panels' inlay), so the cut panel is closed at the measured period and
+      phase and the next one starts; the right wainscot's panel runs on.
+    - *The lunettes*: the deeper wall's tones, their mean over 7 x 7 texels, plus each side's own lunette grain
+      (42 x 36 texels between the wall arch and the cornice) at 0.7, and the tone at the join per row (the picture's
+      first 4 columns carried on by 3/4 of their step from the next 4, 3 levels at most, less the strip's first two
+      columns; over 9 rows; halved every 32 columns).
+    - Unchanged: the wall arch along its ellipse, the rib, the ceiling (the picture's own 72 columns further in),
+      the floor (the same row whole tiles further in), and the per-ray tone correction wherever the deeper wall is
+      still used.  Every colour is the nearest of the CLUT's; nothing is mirrored; no object is duplicated.
+    **After**, the same measures (strip / picture, left / right): cornice 0.88 / 0.91, chair rail 0.88 / 0.73,
+    skirting 0.80 / 0.84, lunettes 1.14 / 0.77, the left wall's plaster 0.77 (the 10 rows over the frame line) to
+    1.09, the wainscot's step 0.49 / 0.50 (the right wall's plaster cannot be measured that way: the picture's
+    first columns there hold its panel's shadow); in clean rectangles next to the join the texel detail (texel less
+    its 4 neighbours' mean) is 1.94 (left strip) and 2.21 (right) for the picture's 2.16 on the walls, where it was
+    1.64 and 2.55, and 1.79 / 1.30 for 1.34 / 1.14 in the lunettes, where it was 1.01 / 1.02 (the left one's excess
+    is the CLUT: its tone sits between two colours); mean tone within 2 levels in every band on both sides (4 in
+    the wainscot, where the measured columns of the picture hold the dark end of its inlay); at four times the
+    contrast the wall and lunette joins cannot be placed by eye.
+    Checked (2026-11-17, headless): 16:9 at both ends; the game's strips = the generator's run on its own over the
+    dumped picture (`PORT_WS_BACKDROP_DUMP`; 0 texels, software and OpenGL under xvfb, both
+    ends); the 21:9 frames hold the 16:9 ones (0 texels; the 32:9 strips hold
+    the 21:9 ones); 4:3 identical to the build before; with the default flags the room's 16:9 frames are identical
+    to the build before; the other rooms' 16:9 frames with `--ws-backdrop on` identical to the build before (2:5
+    2:1 5:1 5:3 19:1 11:2 9:5 9:3 9:4 17:3 17:4 16:4); i386 = wasm2c whole frames (4:3, 16:9 and 21:9 at both
+    ends); made in about 50 ms at 16:9 and 21:9, 85 ms at 32:9 (most of it the two 21 x 21 means).  Not checked in
+    the game with the camera up (the lunettes and the arch were only looked at in the standalone picture), and
+    `tools/ws_seam.py` still does not apply (it compares rows, which the sloped mouldings cross).  Weak points: the
+    wainscot's wood is the strips' least like the picture (column-to-column step half the picture's at both
+    joins: the streaks are damped on purpose, at full strength they read as corduroy; its source
+    is 18 columns, so the pattern repeats every 18); the left wainscot's stiles are still the enlarged picture
+    (softer at 8x); the mouldings' edges are the picture's edge profile up to 1.22 times larger at 16:9 (more on
+    wider screens: the wall really is nearer, but a renderer would have drawn it as sharp); the plaster's large
+    blotches (over 20 texels) do not go on, the strip's wall is evenly lit along each ray; the right wall's panel
+    and wainscot run on to the frame's edge without a stile (that wall shows no period to measure: the dark
+    column 12-15 columns in is its panel's own frame, not a stile); the grain patches are drawn from a 62 x 58
+    piece, so a trained eye could find a patch twice on a 32:9 screen; where the left wall's big panel and both
+    arches end is not in the picture: at 16:9 they run on, wider than that the arch comes down on the cornice 96
+    columns out and the ceiling follows it down (a choice); the rib is drawn at the edge's thickness; not seen on
+    the device.
 - **Sub-screens** (Select screens Objetos / Eventos / Estado / Mapa, memory card, options, button config, screen
   adjust).  The Select screens (`subScreenDrawTabs`, D0SPSUB / D0SPSUB3, `#ifdef PORT2`) call `port_ws_layout(left cut,
   right cut, below)` each frame; while it is set, `shims/gpu.c` spreads the textured primitives of the frame
