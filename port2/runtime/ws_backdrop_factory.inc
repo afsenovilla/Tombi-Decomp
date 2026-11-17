@@ -21,7 +21,8 @@
  *   - trees: crowns are ragged discs lit from the upper left, in six rows, the upper ones behind; the foliage's
  *     texels are 8 x 8 windows of the picture's clean foliage, each chosen for its overlap with what is already laid
  *     and for the tone the crowns ask for there, then lit by the crowns through the foliage's own colour ramp;
- *   - the deck's front carried on at its period, the sand under it from the same columns (cross-faded where it wraps);
+ *   - the deck's top (rows 118-123) in the sun as at the picture's left edge (the hut shades the rest of it); its
+ *     front carried on at its period, the sand under it from the same columns (cross-faded where it wraps);
  *   - left: the eave to its corner and the brace's end;
  *   - right: the jamb's 6 missing columns (the left jamb's planks, not mirrored), the shed's edge, its shadow on the
  *     deck and the sand; the deck and the trees go on behind it.  The rock's shadow on the sand is not carried on
@@ -38,6 +39,7 @@ static int (*lf_cv)[3]; static int lf_pad;
 static u8 lf_fm[LF_D][PW];                                /* 1: foliage */
 static short lf_sx[LF_NS], lf_sy[LF_NS]; static int lf_sl[LF_NS], lf_ns;   /* the windows, their mean tone x 16 */
 static int lf_ramp[256][3], lf_lo, lf_hi;
+static int lf_etop;                                      /* the first foliage row at the picture's left edge */
 static short *lf_T; static int *lf_Z; static int lf_wd;  /* the crowns' tone (-1: sky) and height */
 
 static int *lf_px(int j, int y) { return lf_cv[(size_t)y * lf_pad + j]; }
@@ -64,6 +66,7 @@ static void lf_sources(void)
         }
         for (int k = 0; k < 3; k++) lf_ramp[L][k] = n ? s[k] / n : 0;
     }
+    for (lf_etop = 0; lf_etop < LF_D - 1 && !lf_fm[lf_etop][0]; lf_etop++) ;
     lf_ns = 0;
     for (int r = 0; r < 4; r++)
         for (int y = RECT[r][1]; y <= RECT[r][3] - LF_PS; y++)
@@ -119,29 +122,41 @@ static void lf_crowns(int side)
         int seen = 0;
         for (int y = 0; y < LF_D; y++) {
             if (lf_T[y * wd + x] >= 0) seen = 1;
-            else if (seen || y >= 64) lf_T[y * wd + x] = (short)(60 - (y > 64 ? (y - 64) / 2 : 0));
+            else if (seen || y >= 64 || (!side && x < 8 && y >= lf_etop + x / 2)) lf_T[y * wd + x] = (short)(60 - (y > 64 ? (y - 64) / 2 : 0));
         }
     }
 }
 
-static void lf_foliage(int side, int js)
+static void lf_foliage(int side)
 {
     int wd = lf_wd, pad = lf_pad, hg = LF_D - LF_Y0, step = LF_PS - LF_OV;
+    int el[LF_D], en[LF_D];                               /* the picture's foliage tone at the left edge, per row */
     int (*out)[3] = calloc((size_t)(hg + LF_PS) * wd, sizeof *out);
     u8 *done = calloc((size_t)(hg + LF_PS) * wd, 1);
     if (!out || !done || !lf_ns) { free(out); free(done); return; }
     lf_crowns(side);
+    for (int y = LF_Y0; y < LF_D; y++) {
+        el[y] = en[y] = 0;
+        if (side) continue;
+        for (int c = 0; c < LF_OV; c++)                   /* canvas columns 0..LF_OV-1: the picture's columns 2, 1, 0 */
+            if (lf_fm[y][LF_OV - 1 - c]) {
+                Rgb k = rgb15(pic[y][LF_OV - 1 - c]); int *o = out[(y - LF_Y0) * wd + c];
+                o[0] = k.r; o[1] = k.g; o[2] = k.b; done[(y - LF_Y0) * wd + c] = 2;
+            }
+        for (int v = -3; v <= 3; v++) for (int x = 0; x < 4; x++)
+            if (y + v >= LF_Y0 && y + v < LF_D && lf_fm[y + v][x]) { el[y] += lum(rgb15(pic[y + v][x])); en[y]++; }
+    }
     for (int by = 0; by < hg; by += step)
         for (int bx = 0; bx < wd - LF_OV; bx += step) {
             int yy = LF_Y0 + by, tw = wd - bx < LF_PS ? wd - bx : LF_PS, th = LF_PS;
             int ts = 0, tn = 0, want, nd = 0, best[5], bi[5], nb = 0, pick;
             for (int v = 0; v < th && yy + v < LF_D; v++) for (int u = 0; u < tw; u++) {
-                int t = lf_T[(yy + v) * wd + bx + u];
+                int t = bx + u >= LF_OV ? lf_T[(yy + v) * wd + bx + u - LF_OV] : -1;
                 if (t >= 0) { ts += t; tn++; }
             }
             if (!tn) continue;
             want = lf_lo + (lf_hi - lf_lo) * (ts / tn) / 255;
-            for (int v = 0; v < th; v++) for (int u = 0; u < tw; u++) nd += done[(by + v) * wd + bx + u];
+            for (int v = 0; v < th; v++) for (int u = 0; u < tw; u++) nd += done[(by + v) * wd + bx + u] != 0;
             for (int s = 0; s < lf_ns; s++) {
                 int e = 0, dl = lf_sl[s] - want, i;
                 if (nd) {
@@ -161,6 +176,7 @@ static void lf_foliage(int side, int js)
             for (int v = 0; v < th; v++) for (int u = 0; u < tw; u++) {
                 int *o = out[(by + v) * wd + bx + u], w = 16;
                 Rgb c = rgb15(pic[lf_sy[pick] + v][lf_sx[pick] + u]);
+                if (done[(by + v) * wd + bx + u] == 2) continue;
                 if (done[(by + v) * wd + bx + u]) {
                     if (bx > 0 && u < LF_OV) w = w * (u + 1) / (LF_OV + 1);
                     if (by > 0 && v < LF_OV) w = w * (v + 1) / (LF_OV + 1);
@@ -169,14 +185,22 @@ static void lf_foliage(int side, int js)
                 done[(by + v) * wd + bx + u] = 1;
             }
         }
-    for (int y = LF_Y0; y < LF_D; y++)
-        for (int j = js; j < pad; j++) {
-            const int *o = out[(y - LF_Y0) * wd + j]; int t = lf_T[y * wd + j], l, *p;
-            if (t < 0 || !done[(y - LF_Y0) * wd + j]) continue;
+    for (int y = LF_Y0; y < LF_D; y++) {
+        int sm = 0, sn = 0, de = 0;
+        for (int j = 0; j < 6 && j < pad; j++)             /* the strip's tone next to the join, to meet the picture's */
+            if (lf_T[y * wd + j] >= 0) { const int *o = out[(y - LF_Y0) * wd + j + LF_OV]; sm += (o[0] * 3 + o[1] * 6 + o[2]) / 10; sn++; }
+        if (!side && sn && en[y]) de = el[y] / en[y] - sm / sn;
+        for (int j = 0; j < pad; j++) {
+            const int *o = out[(y - LF_Y0) * wd + j + LF_OV]; int t = lf_T[y * wd + j], l, *p, near = 256;
+            if (t < 0 || !done[(y - LF_Y0) * wd + j + LF_OV]) continue;
+            if (side && y * 2 < 104 - (j - 6) * 3 + (noise(j, y, 3, 3, 77) - 128) / 24) continue;   /* the trees come up from behind the shed */
+            if (!side && j < 8 && y < lf_etop - j) continue;                                     /* the picture's tree top at the join */
+            if (!side && j < 20 && en[y]) near = j * 256 / 20;                                   /* the picture's own tree goes on */
             l = (o[0] * 3 + o[1] * 6 + o[2]) / 10;
-            l = clampi(l + (t - 104) / 2 + (noise(j + side * 300, y, 24, 24, 5) - 128) / 8, 0, 255);
+            l = clampi(l + (t - 104) * near / 512 + de * (256 - near) / 256 + (noise(j + side * 300, y, 24, 24, 5) - 128) / 8, 0, 255);
             p = lf_px(j, y); p[0] = lf_ramp[l][0]; p[1] = lf_ramp[l][1]; p[2] = lf_ramp[l][2];
         }
+    }
     free(out); free(done);
 }
 
@@ -193,7 +217,7 @@ static Rgb lf_ground(int y, int u)                        /* the deck's front an
 
 static void gen_lf(int pad)
 {
-    lf_cv = calloc((size_t)PH * (size_t)pad, sizeof *lf_cv); lf_pad = pad; lf_wd = pad + LF_PS;
+    lf_cv = calloc((size_t)PH * (size_t)pad, sizeof *lf_cv); lf_pad = pad; lf_wd = pad + LF_PS + LF_OV;
     lf_T = malloc(sizeof(short) * (size_t)LF_D * lf_wd); lf_Z = malloc(sizeof(int) * (size_t)LF_D * lf_wd);
     if (!lf_cv || !lf_T || !lf_Z) { free(lf_cv); free(lf_T); free(lf_Z); lf_cv = 0; return; }
     lf_sources();
@@ -213,9 +237,11 @@ static void gen_lf(int pad)
                     lf_set(j, y, c);
                 }
             } else
-                for (int j = 0; j < pad; j++) lf_set(j, y, lf_ground(y, side ? j + 30 : -1 - j));
+                for (int j = 0; j < pad; j++)
+                    lf_set(j, y, y < 124 ? rgb15(pic[y][(y < 120 ? 1 : 0) + hash3(y, j / 3, side + 5) % (y < 120 ? 3 : 6)])   /* the deck's top in the sun, as left of the hut */
+                                         : lf_ground(y, side ? j + 30 : -1 - j));
         }
-        lf_foliage(side, side ? 6 : 0);
+        lf_foliage(side);
         if (!side) {
             for (int j = 0; j < 9; j++) {                 /* the eave to its corner */
                 int t = 64 + ((j + 1) * 85 + 50) / 100;

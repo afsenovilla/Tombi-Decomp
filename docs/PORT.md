@@ -3681,7 +3681,9 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     ramp; the deck's front carried on at its 76-column period with the sand under it; left, the hut's eave to its corner
     and the brace's end; right, the 6 missing columns of the door's jamb, the shed's edge and its shadow, the deck and
     the trees behind. Checked on the PC (headless, soft renderer) at 16:9, 21:9 and 32:9; 4:3 and the default 16:9
-    frames are unchanged. Weak points: the deck's lit bumps repeat every 76 columns (seen at 32:9); the rock's shadow
+    frames are unchanged. After the user's first look ("the cuts and joins show a lot"): the left strip's foliage starts from the picture's own
+    edge columns and takes their tone and tree top, the deck's top is in the sun on both strips (it was wrapped with the
+    hut's shadow), the right trees come up from behind the shed. Weak points: the rock's shadow
     on the sand ends at the 4:3 edge while the rock is whole. Not built with wasm2c yet, not tested on the device or GL.
   - AREA08 s1 / s3, Baccus Pier, done 2026-11-17 (`gen_pr` / `pr_take`, `runtime/ws_backdrop_pier.inc`; approved by the user on the
     game's captures and on by default since 2026-11-17; the look was settled on prototype renders, option by option).
