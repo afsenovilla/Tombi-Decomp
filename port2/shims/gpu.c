@@ -1219,6 +1219,7 @@ void port_gpu_vblank(void) {
         }
         path_for(path, "vram_");
         write_png(path, frame_rgb, 1024, 512);
+        { const char *e = getenv("PORT_VRAM_RAW"); FILE *f = e ? fopen(e, "wb") : 0; if (f) { fwrite(vram, 2, 1024 * 512, f); fclose(f); } }   /* research: the words as they are (the PNG drops bit 15) */
     }
 }
 /* runtime/panel_side.c (second screen, opt-in): the VRAM as the game left it, rect (x, y, w, h) brought up to date first */
