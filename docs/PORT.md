@@ -3675,8 +3675,8 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     the right edge, rows 0-140 and 175-215) are cut by both edges, and the picture has no clean leaf windows to go on
     with them without copying the same leaves next to themselves; the right edge's crown needs foliage from the top
     canopy (rows 0-45) taken at other rows.  Not delivered until that is solved.
-  - AREA08 s1 / s3, Baccus Pier, done 2026-11-17 (`gen_pr` / `pr_take`, `runtime/ws_backdrop_pier.inc`; preview, off by
-    default: `--ws-backdrop-rooms 8:1,8:3`; the look approved by the user on prototype renders, option by option).
+  - AREA08 s1 / s3, Baccus Pier, done 2026-11-17 (`gen_pr` / `pr_take`, `runtime/ws_backdrop_pier.inc`; approved by the user on the
+    game's captures and on by default since 2026-11-17; the look was settled on prototype renders, option by option).
     The picture's layers are read from VRAM (`pr_take`: the water quads' texels, the 4 bpp ray layer).  The strips:
     (1) the scene without the pier (its texels back to the water layer) goes on past each edge from the picture's
     other side, never mirrored, from the column that matches the edge column best (sum of absolute differences over

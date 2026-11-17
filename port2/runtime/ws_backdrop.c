@@ -14,7 +14,7 @@
  * mirrored at its edge); also PORT_WS_BACKDROP=1 (approved) / 2 (mirror) / 3 (every room) (not in the wasm2c build,
  * which has no environment).
  *
- * AREA08 s1 / s3 (Baccus Pier, ws_backdrop_pier.inc): a preview since 2026-11-17.
+ * AREA08 s1 / s3 (Baccus Pier, ws_backdrop_pier.inc): approved by the user, on by default since 2026-11-17.
  *
  * The redraw (build_redraw) is drawn by code, the way shims/gfx_es.c makes its Spanish graphics: nothing of the
  * picture is copied or mirrored and no pixels are shipped.  The tables below hold coordinates only (the brick bond,
@@ -794,9 +794,9 @@ static const Room ROOMS[] = {
                                                             camera, its two ends (mm_take, ws_backdrop_mermaid.inc) */
     { 17, 2, IM_H, 1, { { 0 } }, { { 0 } }, gen_im },   /* the Iron Castle main room: a 640-column picture moved by the
                                                             camera, its two ends (im_take, ws_backdrop_ironmain.inc) */
-    { 8, 1, 224, 0, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, gen_pr },   /* Baccus Pier: the picture over a water layer, light
-                                                            rays over both (pr_take, ws_backdrop_pier.inc; preview) */
-    { 8, 3, 224, 0, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, gen_pr },
+    { 8, 1, 224, 1, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, gen_pr },   /* Baccus Pier: the picture over a water layer, light
+                                                            rays over both (pr_take, ws_backdrop_pier.inc) */
+    { 8, 3, 224, 1, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, gen_pr },
     { 9, 2, CK_HM, 1, { { 0 } }, { { 0 } }, gen_ck },   /* the grandfather clock room: a 480 x 288 picture moved by the
                                                             camera, its two ends (ck_take, ws_backdrop_clock.inc; preview) */
     { 9, 1, LK_HM, 1, { { 0 } }, { { 0 } }, gen_lk },   /* the Lake's beach: a 512-column picture moved by the camera,

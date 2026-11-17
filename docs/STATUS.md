@@ -61,9 +61,9 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    (`ws_backdrop.c`, `ws_room3d.c`, `ws_floor3d.c`, `ws_trick.c`, `ws_edge.c`, `ws_topdown_gen.inc`) is approved and on
    by default; no preview is waiting (the items below that say "off by default / waiting" are history). A fresh
    `tools/ws_survey.py rooms` + `sweep` at 16:9 over the 96 rooms lists these with flat strips next to a non-flat
-   picture: **done as a preview, OFF by default, waiting for the user's look at the real captures** (2026-11-17): AREA08 s1 / s3
-   (Baccus Pier, `gen_pr`, `runtime/ws_backdrop_pier.inc`, `--ws-backdrop-rooms 8:1,8:3`; to approve: `approved` = 1 in
-   both ROOMS entries; PORT.md "More rooms with picture strips" has how and what the user rejected on the way).
+   picture: **done, approved by the user on the game's captures and on by default** (2026-11-17): AREA08 s1 / s3
+   (Baccus Pier, `gen_pr`, `runtime/ws_backdrop_pier.inc`; PORT.md "More rooms with picture strips" has how and what
+   the user rejected on the way; not tested on the device or on GL).
    **still to do**: AREA11 s1 (Lumberjack Factory, the cage scene),
    AREA17 s1 (Iron Castle entrance: a 384-row picture drawn from frame row -144). **Valid as they are, decided by the
    user 2026-11-17 (black strips, do not list or propose again)**: AREA00 s3 (100 Year Old Man's Hut), AREA13 s1 (Pig
