@@ -49,8 +49,8 @@ const char *port_ws_trick_rooms;         /* --ws-trick-rooms A:S,A:S,... (decima
 
 /* the rooms (the debug select's numbers); approved: on by default once the user has seen the room */
 static const struct { u8 area, sec, approved; } ROOMS[] = {
-    {10, 3, 0},        /* Trick Village, cursed (night, flooded) */
-    {10, 7, 0},        /* Trick Village, purified */
+    {10, 3, 1},        /* Trick Village, cursed (night, flooded) */
+    {10, 7, 1},        /* Trick Village, purified */
 };
 static int room_enabled(int area, int sec)
 {
