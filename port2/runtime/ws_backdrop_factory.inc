@@ -33,6 +33,7 @@
 #define LF_Y0 24                                          /* the foliage's first row */
 #define LF_D 118                                          /* the deck's first row */
 #define LF_SAND 176
+#define LF_JF 175                                         /* the right jamb's foot: the picture's columns 316-317 are sand from row 174 */
 #define LF_PER 76                                         /* the deck's period */
 #define LF_NS 1024
 static int (*lf_cv)[3]; static int lf_pad;
@@ -215,8 +216,29 @@ static Rgb lf_ground(int y, int u)                        /* the deck's front an
     return rgb15(pic[y][t]);
 }
 
+/* The picture's last two columns keep the dark texels of the rock that stood in the door (rows 130-199) once the
+   rock is broken: the open door the game then draws (a quad from page 256, texel (64, 0), 80 columns at 238) ends at
+   column 317.  On 4:3 that was a ragged frame edge; with the strips it was a black line up the middle of the right
+   jamb (the user, 2026-11-17).  lf_fix holds those two columns' dark texels done again (bit 15 set; 0: leave the
+   picture's): the jamb's planks (the left jamb's, as the strip's columns) and the sand under it; shims/gpu.c draws
+   them when the game draws the open door (port_ws_backdrop_fix). */
+static u16 lf_fix[PH][2];
+static void lf_fix_make(void)
+{
+    memset(lf_fix, 0, sizeof lf_fix);
+    for (int y = 120; y < 200; y++)
+        for (int k = 0; k < 2; k++) {
+            Rgb c = rgb15(pic[y][318 + k]), n;
+            if (lum(c) >= (y < LF_JF ? 56 : 132)) continue;
+            if (y < LF_JF) { n = rgb15(pic[y < 146 ? y : y - 36][250 + k]); if (y >= LF_JF - 3) n = scale(n, 256 - (y - (LF_JF - 4)) * 40); }
+            else n = scale(lf_ground(y < LF_SAND ? LF_SAND : y, 28 + k), y < 184 ? 176 : y < 192 ? 256 - 80 * (192 - y) / 8 : 256);   /* (the shed's shadow, as the strip's) */
+            lf_fix[y][k] = (u16)(0x8000 | clampi(n.r, 0, 248) >> 3 | (clampi(n.g, 0, 248) >> 3) << 5 | (clampi(n.b, 0, 248) >> 3) << 10);
+        }
+}
+
 static void gen_lf(int pad)
 {
+    lf_fix_make();
     lf_cv = calloc((size_t)PH * (size_t)pad, sizeof *lf_cv); lf_pad = pad; lf_wd = pad + LF_PS + LF_OV;
     lf_T = malloc(sizeof(short) * (size_t)LF_D * lf_wd); lf_Z = malloc(sizeof(int) * (size_t)LF_D * lf_wd);
     if (!lf_cv || !lf_T || !lf_Z) { free(lf_cv); free(lf_T); free(lf_Z); lf_cv = 0; return; }
@@ -254,16 +276,18 @@ static void gen_lf(int pad)
                     if (j < 6 || y == 76 || y == 77) lf_set(j, y + s, j < 5 ? rgb15(pic[y][0]) : scale(rgb15(pic[y][0]), 170));
             }
         } else {
-            for (int y = 52; y < 184; y++)                /* the jamb's missing columns; the table hides the left one's foot */
+            for (int y = 52; y < LF_JF; y++)              /* the jamb's missing columns; the table hides the left one's foot */
                 for (int j = 0; j < 6; j++) {
                     Rgb c = rgb15(pic[y < 146 ? y : y - 36][252 + j]);
-                    if (y >= 180) c = scale(c, 256 - (y - 179) * 40);
+                    if (y >= LF_JF - 3) c = scale(c, 256 - (y - (LF_JF - 4)) * 40);
                     if (j == 5) c = scale(c, 154);
                     lf_set(j, y, c);
                 }
-            for (int y = LF_D; y < 192; y++)              /* the shed's shadow on the deck and the sand */
-                for (int j = 6; j < 20; j++) {
-                    int *p = lf_px(j, y), k = 256 - (20 - j) * 110 / 14;
+            for (int j = 0; j < 6; j++) lf_set(j, LF_JF, lf_ground(LF_SAND, j + 30));   /* (sand, not the deck's foot, under it) */
+            for (int y = LF_D; y < 192; y++)              /* the shed's shadow on the deck and the sand (under the jamb's foot too) */
+                for (int j = y >= LF_JF ? 0 : 6; j < 20; j++) {
+                    int *p = lf_px(j, y), k = 256 - (20 - (j < 6 ? 6 : j)) * 110 / 14;
+                    if (y >= LF_JF && j < 10) k = (176 * (10 - j) + k * j) / 10;   /* (the picture's sand at the door's foot is lighter) */
                     if (y >= 184) k = 256 - (256 - k) * (192 - y) / 8;
                     p[0] = p[0] * k / 256; p[1] = p[1] * k / 256; p[2] = p[2] * k / 256;
                 }

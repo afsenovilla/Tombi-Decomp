@@ -968,6 +968,14 @@ const u16 *port_ws_backdrop_over(int pad, int tx, int u, int v)
     if (!room || room->gen != gen_en || !strip || strip_pad != pad || !en_ov || en_ov_pad != pad) return 0;
     return tx == EN_Q[13].tx && u == EN_Q[13].u && v == EN_Q[13].v ? en_ov : 0;
 }
+/* Texels of the picture itself to draw again (bit 15 set; 0 = leave), *w columns from the picture's column *x, PH
+   rows, when the game is about to draw that textured quad over the picture; else 0.  AREA11 s1 (lf_fix). */
+const u16 *port_ws_backdrop_fix(int tx, int u, int v, int *x, int *w)
+{
+    if (!room || room->gen != gen_lf || !strip || tx != 256 || u != 64 || v != 0) return 0;
+    *x = 318; *w = 2;
+    return &lf_fix[0][0];
+}
 /* AREA09 s1 with the island's strips on (ws_backdrop_island.inc): the columns an object sprite's quad moves left,
    for the foreground ledge's two quads (drawObjectSprite; else 0) */
 int port_ws_island_fg(int tpage, int clut, int uv)

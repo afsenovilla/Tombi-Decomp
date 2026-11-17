@@ -945,8 +945,18 @@ static void ws_backdrop(const Vtx *a, int w, int h, int u, int v, const GpuTex *
    the --fps replays take them as any other primitive. */
 static void ws_backdrop_over(int tx, int u, int v) {
     extern const unsigned short *port_ws_backdrop_over(int, int, int, int);
-    int P = port_widescreen; const unsigned short *s;
-    if (ws_ov_frame != port_frame || !(s = port_ws_backdrop_over(P, tx, u, v))) return;
+    extern const unsigned short *port_ws_backdrop_fix(int, int, int, int *, int *);
+    int P = port_widescreen, fx = 0, fw = 0; const unsigned short *s;
+    if (ws_ov_frame != port_frame) return;
+    if ((s = port_ws_backdrop_fix(tx, u, v, &fx, &fw)))    /* (texels of the picture itself: AREA11 s1) */
+        for (int j = 0; j < ws_ov_h; j++)
+            for (int i = 0; i < fw; i++) {
+                u16 q = s[j * fw + i]; u32 c = (u32)(q & 31) << 3 | (u32)((q >> 5) & 31) << 11 | (u32)((q >> 10) & 31) << 19;
+                if (!q) continue;
+                be->rect(ws_ov_bx + P + fx + i, ws_ov_y + j, 1, 1, c, 0, 0, 0, 0, 1);
+                if (hfr_rec) hfr_rect(ws_ov_bx + P + fx + i, ws_ov_y + j, 1, 1, c, 0, 0, 0, 0, 1);
+            }
+    if (!(s = port_ws_backdrop_over(P, tx, u, v))) return;
     for (int side = 0; side < 2; side++) {
         if (!(ws_ov_sd >> side & 1)) continue;
         for (int j = 0; j < ws_ov_h; j++) {
