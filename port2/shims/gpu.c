@@ -161,6 +161,8 @@ static void soft_use_texture(const GpuTex *t) { tp_x = t->tx; tp_y = t->ty; tp_d
 /* ------------------------------------------------------------------ triangles */
 typedef GpuVtx Vtx;
 static void ws_backdrop(const Vtx *a, int w, int h, int u, int v, const GpuTex *t);   /* --widescreen room picture strips */
+static void ws_backdrop_over(int tx, int u, int v);
+static int ws_ov_frame = -1, ws_ov_bx, ws_ov_y, ws_ov_h, ws_ov_sd;   /* the strips laid this frame (ws_backdrop) */
 
 static void soft_tri(const Vtx *a, const Vtx *b, const Vtx *c, int shade, const GpuTex *texp, int semi, int raw) {
     int tex = texp != 0;
@@ -564,6 +566,7 @@ static int gp0(const u32 *p, int n) {
             { int dx = gs.ox + (ws_on ? ws_dx : 0); port_primlog(tex ? tpage : -1, tex ? clut : -1, u0, v0, u1, v1, x0 - dx, y0 - gs.oy, x1 - dx, y1 - gs.oy, quad ? 4 : 3); }
         }
         if (tex && raw) shade = 0;
+        if (ws_on && tex && quad && ws_ov_frame == port_frame) ws_backdrop_over(t.tx, v[0].u, v[0].v);
         if (ws_on && !tex && quad) ws_full_width_quad(v);
         if (hfr_rec && hfr_test_cut_dx && port_frame >= hfr_test_cut_frame) for (int i = 0; i < nv; i++) v[i].x += hfr_test_cut_dx;
         {   int dx = 0, tile = 0, w = 0, x0 = 0, x1 = 0, sv[2], c;
@@ -929,12 +932,36 @@ static void ws_backdrop(const Vtx *a, int w, int h, int u, int v, const GpuTex *
     { extern int port_ws_backdrop_dy; y += port_ws_backdrop_dy; }   /* (a picture taller than the frame: its rows on it) */
     extern int port_ws_backdrop_side; int sd = port_ws_backdrop_side;   /* (1: the left strip, 2: the right one; a picture with one end to fill) */
     if (!s || y < 0 || y + h > 512 || bx + 320 + 2 * P > WS_STRIDE) return;
+    ws_ov_frame = port_frame; ws_ov_bx = bx; ws_ov_y = y; ws_ov_h = h; ws_ov_sd = sd;
     for (int j = 0; j < h; j++) {
         if (sd & 1) memcpy(&wvram[y + j][bx], s + (size_t)j * 2 * P, (size_t)P * 2);
         if (sd & 2) memcpy(&wvram[y + j][bx + P + 320], s + (size_t)j * 2 * P + P, (size_t)P * 2);
     }
     if (be->ws_upload) { if (sd & 1) be->ws_upload(bx, y, P, h, &wvram[y][bx], WS_STRIDE); if (sd & 2) be->ws_upload(bx + P + 320, y, P, h, &wvram[y][bx + P + 320], WS_STRIDE); }
     if (hfr_rec) { if (sd & 1) hfr_upload(bx, y, P, h, 1); if (sd & 2) hfr_upload(bx + P + 320, y, P, h, 1); }
+}
+/* The strips' texels that stand in front of the actors (runtime/ws_backdrop.c port_ws_backdrop_over), drawn when
+   the game draws the first of the room's front pieces: runs of one colour as flat rectangles, so both renderers and
+   the --fps replays take them as any other primitive. */
+static void ws_backdrop_over(int tx, int u, int v) {
+    extern const unsigned short *port_ws_backdrop_over(int, int, int, int);
+    int P = port_widescreen; const unsigned short *s;
+    if (ws_ov_frame != port_frame || !(s = port_ws_backdrop_over(P, tx, u, v))) return;
+    for (int side = 0; side < 2; side++) {
+        if (!(ws_ov_sd >> side & 1)) continue;
+        for (int j = 0; j < ws_ov_h; j++) {
+            const unsigned short *r = s + (size_t)j * 2 * P + (side ? P : 0);
+            for (int i = 0; i < P; ) {
+                int k = i + 1; u32 c;
+                if (!r[i]) { i++; continue; }
+                while (k < P && r[k] == r[i]) k++;
+                c = (u32)(r[i] & 31) << 3 | (u32)((r[i] >> 5) & 31) << 11 | (u32)((r[i] >> 10) & 31) << 19;
+                be->rect(ws_ov_bx + (side ? P + 320 : 0) + i, ws_ov_y + j, k - i, 1, c, 0, 0, 0, 0, 1);
+                if (hfr_rec) hfr_rect(ws_ov_bx + (side ? P + 320 : 0) + i, ws_ov_y + j, k - i, 1, c, 0, 0, 0, 0, 1);
+                i = k;
+            }
+        }
+    }
 }
 /* --title-bg (runtime/titlebg.c): while the title screen's background is in this list, fill the wide copy of the
    buffer with the user's wide picture first (the game then draws its own 4:3 background, logo and text over it) */

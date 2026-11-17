@@ -960,6 +960,14 @@ const u16 *port_ws_backdrop(const u16 *vram, int pad, int x, int y, int w, int h
     *rows = PH;
     return strip;
 }
+/* The strips' texels that stand in front of the actors (bit 15 set, 0 = none; laid out as the strips), when the
+   textured quad the game is about to draw (its page and first texel) is the first of the room's front pieces and
+   the room's strips are the ones laid this frame (shims/gpu.c checks that); else 0.  AREA17 s5 (gen_en). */
+const u16 *port_ws_backdrop_over(int pad, int tx, int u, int v)
+{
+    if (!room || room->gen != gen_en || !strip || strip_pad != pad || !en_ov || en_ov_pad != pad) return 0;
+    return tx == EN_Q[13].tx && u == EN_Q[13].u && v == EN_Q[13].v ? en_ov : 0;
+}
 /* AREA09 s1 with the island's strips on (ws_backdrop_island.inc): the columns an object sprite's quad moves left,
    for the foreground ledge's two quads (drawObjectSprite; else 0) */
 int port_ws_island_fg(int tpage, int clut, int uv)

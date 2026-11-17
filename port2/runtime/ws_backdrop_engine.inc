@@ -524,11 +524,23 @@ static void en_seams(int s, int pad)
         }
     }
 }
+/* The pipes the edges cut are in front of the player in the picture: the game draws EN_Q's last six quads (the left
+   48 columns' pipes, the copper elbow at the right) after the actors.  Their continuation in the strips was back
+   layer, so an actor jumping across the 4:3 edge was hidden on one side of it and whole on the other (the user's
+   video, 2026-11-17).  en_ov keeps the strips' pipe texels (bit 15 set; 0 elsewhere), and shims/gpu.c draws them
+   again when the game draws the first of those six quads (port_ws_backdrop_over). */
+static u16 *en_ov; static int en_ov_pad;
+#define EN_RINGS 0                                       /* 1: the copper pipe's turn with copies of the picture's two riveted rings on
+                                                            its joints (the first version; the user, 2026-11-17: "the joints of the
+                                                            right pipe are horrible, take the rivets off"): now a plain turn */
 #define EN_RX 13                                         /* the rust pipe turns up after this strip column */
 #define EN_GX 62                                         /* the grey pipe */
 static void gen_en(int pad)
 {
+    Rgb *bk;
     if (!canvas_open(pad + 32)) return;                  /* (a margin: a column never depends on the strip's width) */
+    bk = malloc((size_t)cw * PH * sizeof *bk);
+    free(en_ov); en_ov = calloc((size_t)2 * pad * PH, 2); en_ov_pad = pad;
     en_bprof(); en_flight(); en_grain(); en_joint_k(); en_seam_k();
     en_vprof(0, 7, 39, 141, 147); en_vprof(1, 30, 51, 88, 108); en_vprof(2, 260, 300, 204, 224);
     for (int side = 0; side < 2; side++) {
@@ -538,8 +550,9 @@ static void gen_en(int pad)
             for (int y = 0; y < PH; y++) put(X, y, y * 256 + 128 >= ft ? en_floor(side, X, y) : en_wall(side, X, y));
         }
         en_seams(side, cw - 2);
+        for (int X = 1; X <= pad; X++) en_hoses(side, X);
+        if (bk) memcpy(bk, cv, (size_t)cw * PH * sizeof *cv);   /* the back layer: what follows stands in front of the player */
         for (int X = 1; X <= pad; X++) {
-            en_hoses(side, X);
             if (!side) {
                 en_amp = 150;
                 if (X <= EN_RX) en_run(0, X, 91, 126, en_ease(X), 0); else en_rise(X, EN_RX, 91, 126, en_ease(X), 32, 0);
@@ -556,11 +569,15 @@ static void gen_en(int pad)
         if (!side) en_seam(EN_RX - 1);
         if (side) {
             for (int X = 1; X <= pad; X++) en_cturn(X);
-            for (int X = 1; X <= pad; X++) { en_ringcopy(0, X); en_ringcopy(1, X); }
+            if (EN_RINGS) for (int X = 1; X <= pad; X++) { en_ringcopy(0, X); en_ringcopy(1, X); }
         }
         for (int y = 0; y < PH; y++)
             for (int X = 1; X <= pad; X++)
-                strip[(size_t)y * 2 * pad + (side ? pad + (X - 1) : pad - X)] = quant(cv[(size_t)y * cw + X - 1]);
+            {   size_t at = (size_t)y * 2 * pad + (side ? pad + (X - 1) : pad - X), c = (size_t)y * cw + X - 1;
+                strip[at] = quant(cv[c]);
+                if (en_ov) en_ov[at] = bk && memcmp(&bk[c], &cv[c], sizeof *cv) ? (u16)(strip[at] | 0x8000) : 0;
+            }
     }
+    free(bk);
     canvas_close();
 }
