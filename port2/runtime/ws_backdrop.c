@@ -790,7 +790,7 @@ static const Room ROOMS[] = {
                                                             camera, its two ends (mm_take, ws_backdrop_mermaid.inc) */
     { 17, 2, IM_H, 0, { { 0 } }, { { 0 } }, gen_im },   /* the Iron Castle main room: a 640-column picture moved by the
                                                             camera, its two ends (im_take, ws_backdrop_ironmain.inc) */
-    { 9, 2, CK_HM, 0, { { 0 } }, { { 0 } }, gen_ck },   /* the grandfather clock room: a 480 x 288 picture moved by the
+    { 9, 2, CK_HM, 1, { { 0 } }, { { 0 } }, gen_ck },   /* the grandfather clock room: a 480 x 288 picture moved by the
                                                             camera, its two ends (ck_take, ws_backdrop_clock.inc; preview) */
 };
 #define NROOMS ((int)(sizeof ROOMS / sizeof ROOMS[0]))
