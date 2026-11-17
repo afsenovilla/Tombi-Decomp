@@ -37,6 +37,8 @@ static u8 ic_k[IC_H][PW];                                 /* 1 grass, 2 copper, 
 static int ic_l[IC_H][PW];
 static int ic_sky[IC_H][3], ic_grow[IC_H][3], ic_g0, ic_g1, ic_cr[256][3];
 static const int IC_GT[2] = { 346, 353 }, IC_T0[2] = { 264, 254 };
+#define IC_LW 38                                          /* a plate's width on the ground (columns) */
+static const int IC_LO[2] = { 14, 6 };                    /* the plates' phase per side */
 static const int IC_PL[2] = { 289, 279 };                 /* the front plate's upper edge at the picture's edges (rows) */
 
 static int ic_icmp(const void *a, const void *b) { return *(const int *)a - *(const int *)b; }
@@ -217,6 +219,20 @@ static void ic_gen(u16 *ext, int pad)
                 int tone = pd[d] - j * 10 / 80 + (noise(j + side * 333, y, 2, 2, 21) - 128) * 6 / 128
                            + (noise(j + side * 333, y, 10, 34, 22) - 128) * 8 / 128 - (y - top < 2 ? 25 : 0);
                 (void)v;
+                {   /* curved plates, as the skirt has on the picture (the user, 2026-11-17: "in the 4:3 part it is made
+                       of curved pieces: let us try that"): their edges are the dome's meridians, bowed; across a plate
+                       (t: 0 at the edge under the plate nearer the door, 256 at its own outer edge) the shade the
+                       inner plate casts, the lit middle, the dark turn of its edge; rivets along the inner edge */
+                    int q = (160 + j) * 576 / (y + 230) + (y - 300) * (y - 300) / 200 + IC_LO[side];
+                    int li = fdiv(q, IC_LW), t = fmodi(q, IC_LW) * 256 / IC_LW, f = j < 10 ? j : 10, ry;
+                    int m = t < 16 ? -70 : t < 70 ? -45 + (t - 16) * 55 / 54 : t < 170 ? 10 + (t - 70) * 30 / 100
+                          : t < 235 ? 40 - (t - 170) * 50 / 65 : -10 - (t - 235) * 50 / 21;
+                    m += (int)(hash3(li, side, 31) % 17) - 8;
+                    if (side) m = m * 5 / 8;
+                    ry = fmodi(y + (int)(hash3(li, side, 37) % 26), 26);
+                    if (t >= 30 && t < 44 && ry < 2 && y - top > 6) m = ry ? -55 : 60;
+                    tone += m * f / 10;
+                }
                 if (j < 12 && ic_k[y][ex] == 2)            /* (from the edge texel's own tone: the picture's last columns can be darker than the 24's mean) */
                     tone = (ic_l[y][ex] * (12 - j) + tone * j) / 12;
                 tone = clampi(tone, 0, 255);
