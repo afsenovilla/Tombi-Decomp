@@ -4295,9 +4295,12 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     23.8, 11: 12 to 13 columns apart, wider towards the viewer), a pink cornice with a joint per hole, a window in a
     dark frame (gold-faced members, a mullion; its near pane is what the edge cuts, 12 columns of it), a rail, a
     balustrade with the holes' period and phase (columns 46.5, 35.5, 23.5, 10.5), a baseboard, its shadow and the
-    wooden floor.  From the corner the window is 5 periods long, and its fifth baluster is the next one past the
-    edge.  The back wall's bay at the corner is closed by a pilaster: two grey plates with four rivets at their seam,
-    a pink block and a light foot under the rail.
+    wooden floor.  The window, measured from the corner in periods of the wall: its dark casing 0.72 (columns
+    44.5-52), a gold member 0.59 (38-44.5), a pane 1.02 (26-38), a mullion with its dark side 1.0 (13-26), then the
+    pane the edge cuts (0.93 of it on columns 0-13).  No pier and no second window show on that wall: its one window
+    is all the picture gives.  (The back wall's bay at the corner is closed by a pilaster, two grey plates with four
+    rivets: the first version put one of those after the window.  The user's verdict, 2026-11-17: "El pilar
+    remachado no está bien, continúa con ventanas.")
     The extensions (every texel the picture's own, bilinear, then the nearest of the picture's CLUT; nothing
     mirrored, each end from its own texels):
     - the wall's period: a point of the end wall, its shadow or the floor is the picture's point the smallest whole
@@ -4308,17 +4311,20 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     - the parapet's top line stays at its crest (level along the wall: a line through the vanishing point; it
       leaves the frame 38 columns out), the gold under it stretched from each source column's own top line; the dark
       ceiling over it;
-    - the window is closed in its own shape: one more column of pane, then its near member (the mullion's gold face,
-      the far member's dark bar), ending 5 periods from the corner, 11 columns out, with its fifth baluster under
-      it;
-    - then a pilaster as the one that closes the back wall's bay at that end, from its texels: the plates along the
-      wall, scaled as the wall there, in the end wall's light (the end wall's cornice against the pilaster's capital,
-      never under 13/16); the rivets at one scale both ways (they stay round); the block and its foot under the rail
-      (speckled stone: its 16 columns at the wall's scale both ways, tiled; along the wall they would smear).  Its
-      length (25.9 rows of depth at the corner's scale for a focal length of 280, against the back one's 19 columns)
-      is chosen so that it ends with the 16:9 strip;
-    - wider strips go on with the next bay (the corner to the pilaster's near end, one bay nearer): the 21:9 strip is
-      the 16:9 one and then the dark bar, the far member and most of a second window.
+    - the window is closed in its own shape: one more column of pane, then its near member (the mullion's gold
+      face), ending 5 columns out;
+    - then the wall goes on with more windows (second version): the same window again and again, abutting, one dark
+      casing post between two of them.  The bay is the window's length, from the corner to its near member's end
+      (4.62 periods of the wall); a point of the window band (between the rail's upper edge and the cornice's lower
+      edge) is the picture's point a whole number of bays further along the wall, same height, and past the
+      picture's edge the first window's closure again.  So each window is the picture's: casing (columns 50 to 44.5;
+      the corner's own two columns are left out, they hold the back wall's plate), gold member, pane, mullion with
+      its bolts, pane, near member, 21 to 24 % larger than its source at 16:9 (rows; 1.5 times along the wall, as
+      the perspective asks), the texels as they are: the light along the wall is the picture's own.  Under the
+      windows the rail, the balusters and the baseboard go on at the wall's period and phase, over them the cornice
+      and the parapet.  The 16:9 strip holds the first window's end, the post, the second window's gold member and
+      pane and the start of its mullion; wider strips the rest of it and the next windows (21:9: its second pane, a second
+      post and the third window's gold member).
     The gate and the doors are not repeated (their quads and the picture's are 58 columns and more from the ends).
     Checked (headless, 2026-11-17, camera flown to both limits with `--sweep-x`): 4:3 with the flag and the default
     16:9 run byte-identical to the build before, at both ends; the 16:9 frame's centre = the 4:3 frame; the 21:9
@@ -4331,13 +4337,22 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     `tools/ws_seam.py` is of little use here (its bands are level and the join cuts a window on purpose: the
     picture split against itself passes 1 band of 5); its median join steps are under the picture's own in the
     parapet, the rail and the floor at both ends.  Not checked on the device.
-    Weak points: what stands past the window is an assumption (the picture shows no end wall past its window: the
-    pilaster is the back wall's, so the room has one more riveted pillar at each end than the artist drew), and so
-    are the window's near member (the mullion's and the far member's texels, not a view of that member from its
-    own side) and the pilaster's length; the pilaster's plates are stretched 1.7 to 2.3 times along the wall
-    (smooth metal: soft, not smeared); the cornice has a joint on the join itself (its phase: the picture's is at
-    column 13); the floor's texture repeats every period (15 to 19 columns), which the speckle hides at 1x and 2x;
-    the extension is 5 to 22 % softer than the picture next to it.
+    Second version checked the same way (2026-11-17): 4:3 and the default 16:9 run byte-identical to the build
+    before at both ends; 16:9 centre = 4:3; the 21:9 frame holds the 16:9 frame; the game's strips = the standalone
+    generator's at 16:9 and 21:9, both ends; twelve other rooms' 16:9 frames with `--ws-backdrop on` byte-identical
+    (2:5 2:1 5:1 5:3 19:1 11:2 9:5 9:3 9:4 17:3 17:4 16:4); OpenGL (xvfb): the strips = the software ones; i386 =
+    wasm2c whole frames (16:9 and 21:9, both ends); gcc x86-64 / gcc -m32 / clang the same strips; 0.01 s per room
+    entry.  Not checked on the device.
+    Weak points: what stands past the window is still an assumption (the picture shows one window on that wall and
+    nothing after it: that the next one abuts, sharing a casing post, is the simplest reading), and so are the
+    window's near member (the mullion's texels, not a view of that member from its own side) and the bay's length,
+    which is not a whole number of the wall's periods (4.62: the balusters and the cornice's joints fall differently
+    under each window); the cut pane is closed one column past the edge, though the back wall's windows have a wide
+    middle pane between two narrow ones, so the end wall's may have been longer than drawn here; every window has
+    the first one's highlights (the left end's gold member is bright in each); the new windows are magnified 1.5 times
+    along the wall at 16:9 (2.5 times where the 21:9 strip ends), so they are softer than the picture's; the cornice has a joint on the join itself (its
+    phase: the picture's is at column 13); the floor's texture repeats every period (15 to 19 columns), which the
+    speckle hides at 1x and 2x.
   - AREA09 s2 (the Haunted Mansion's grandfather clock room, 2026-11-17, `runtime/ws_backdrop_clock.inc`; off by
     default, preview with `--ws-backdrop-rooms 9:2`).  Not in the first scan (a scrolling picture: tools/ws_survey.py
     found a full black strip at each end of the room and at the spawn, which is the right end).  How it is drawn: one

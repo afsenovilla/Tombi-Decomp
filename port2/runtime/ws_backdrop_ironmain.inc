@@ -17,26 +17,26 @@
  * dark frame, the far member's gold face on columns 38-43, the mullion on 20-24, the near pane on 0-11, cut by the
  * edge); the rail (5.5 to 13); the balusters (same period and phase as the holes: columns 46.5, 35.5, 23.5, 10.5);
  * the baseboard (down to -24.8), its shadow and the floor, whose shading and faint plank lines follow the lines
- * through the vanishing point.  The window is 5 periods long from the corner.  The back wall's bay next to the corner
- * is closed by a pilaster (columns 53-71: two riveted grey plates, a pink block and its light foot under the rail).
+ * through the vanishing point.  No pier shows past the window, and nothing of a second one: the wall's own window is
+ * all the picture gives of it.  (The back wall's bay next to the corner is closed by a riveted pilaster, columns
+ * 53-71: the first version put one of those after the window, and the user's verdict was "El pilar remachado no
+ * está bien, continúa con ventanas.")
  *
  * The extensions, every texel the picture's own (bilinear, then the nearest colour of the picture's CLUT), nothing
  * mirrored; each end from its own texels:
  *   - a point of the end wall, its foot's shadow and the floor is the picture's point k periods further along the
  *     wall at the same height (im_shift: a translation in 1 / u, rows scaled about the horizon), k the smallest that
  *     lands in the picture: holes, cornice, rail, balusters, baseboard and the floor's lines go on at their period,
- *     phase and perspective;
+ *     phase and perspective, all along the wall;
  *   - the parapet's top line stays at its crest's height (level along the wall: a line through the vanishing point),
  *     the gold under it stretched from the source column's own top line; over it the dark ceiling;
- *   - the window is closed: one more column of pane, the near member (the mullion's gold face, then the far member's
- *     dark bar) to the window's 5 periods;
- *   - then the pilaster that closes a bay in this room, from the back wall's one at this end (im_pilaster): its
- *     plates along the wall (25.9 rows of depth, so that it ends with the 16:9 strip), scaled as the wall there, in the
- *     end wall's light (the cornice's against the pilaster's capital, never under 13/16); its four rivets drawn at one
- *     scale both ways (round); its block and foot under the rail: speckled stone, the block's 16 columns at the
- *     wall's scale both ways, again and again (along the wall they would smear), in half that light;
- *   - wider strips go on with the next bay: the same window and pilaster one bay (the corner to the pilaster's near
- *     end) nearer.
+ *   - the window is closed: one more column of pane, then its near member (the mullion's gold face), 5 columns out
+ *     (u2 = 650);
+ *   - then the same window again and again, abutting (IM_BQ, the bay: from the corner to that near member's end,
+ *     4.62 periods of the wall): the dark casing (one post between two windows), the gold member, the pane, the
+ *     mullion and the pane from the picture's columns 50 to 0, then the same closure, in the wall's perspective (a
+ *     translation in 1 / u by whole bays), the texels as they are: the light along the wall is the picture's.
+ *     The 16:9 strip ends in the second window's mullion.
  * Integers only; a texel depends on its place, not on the strip's width (a wider strip starts with the same
  * columns).
  *
@@ -54,16 +54,14 @@ static u16 *im_ext;                                      /* the two extensions: 
 #define IM_PQ 4872211LL                                   /* the side wall's period (holes, balusters) */
 #define IM_T0 IM_TQ(640)                                  /* the picture's edge */
 #define IM_TC IM_TQ(536)                                  /* the room's corner (column 52) */
-#define IM_TW (IM_TC - 5 * IM_PQ)                         /* the window's near end */
-#define IM_TP IM_TQ(747)                                  /* the pilaster's near end */
+#define IM_TW IM_TQ(650)                                  /* the window's near end: the next one's casing starts */
+#define IM_BQ (IM_TC - IM_TW)                             /* a window bay: the windows abut */
 #define IM_HG (104 * 256)                                 /* wall heights (x 256): over the holes */
 #define IM_HCB 20070                                      /* the cornice's lower edge (78.4) */
 #define IM_HRT 3328                                       /* the rail's upper edge (13) */
-#define IM_HBK 1408                                       /* the rail's lower edge (5.5) */
 #define IM_HFL (-6349)                                    /* the wall's foot (-24.8) */
 static Rgb *im_cv; static int im_cw;                     /* the canvas: [side][y][X - 1] */
 static int im_es[24], im_E;                              /* the parapet's top edge per column (texel coordinate x 256); its crest */
-static int im_gain;                                      /* the side wall's light against the back wall's (x 256) */
 static u16 im_qc[32768]; static u8 im_qh[32768];
 static int im_fl8(int v) { return v >= 0 ? v >> 8 : -((-v + 255) >> 8); }
 static Rgb im_tx(int side, int xn, int y)                /* a texel: column xn from the end inwards; xn < 0: the canvas */
@@ -73,15 +71,10 @@ static Rgb im_tx(int side, int xn, int y)                /* a texel: column xn f
     xn = clampi(xn, 0, IM_W - 1);
     return rgb15(im_src[y][side ? IM_W - 1 - xn : xn]);
 }
-static Rgb im_plate(int side, int xn, int y)             /* the back wall's pilaster without its rivets */
-{
-    if (y >= 111 && y <= 125 && ((xn >= 54 && xn <= 58) || (xn >= 65 && xn <= 69))) xn = 62;
-    return im_tx(side, xn, y);
-}
-static Rgb im_bil(int side, int xs, int ys, Rgb (*tx)(int, int, int))
+static Rgb im_bil(int side, int xs, int ys)
 {
     int x0 = im_fl8(xs), y0 = im_fl8(ys), fx = xs - x0 * 256, fy = ys - y0 * 256;
-    Rgb a = tx(side, x0, y0), b = tx(side, x0 + 1, y0), c = tx(side, x0, y0 + 1), d = tx(side, x0 + 1, y0 + 1), o;
+    Rgb a = im_tx(side, x0, y0), b = im_tx(side, x0 + 1, y0), c = im_tx(side, x0, y0 + 1), d = im_tx(side, x0 + 1, y0 + 1), o;
     o.r = ((a.r * (256 - fx) + b.r * fx) * (256 - fy) + (c.r * (256 - fx) + d.r * fx) * fy + 32768) >> 16;
     o.g = ((a.g * (256 - fx) + b.g * fx) * (256 - fy) + (c.g * (256 - fx) + d.g * fx) * fy + 32768) >> 16;
     o.b = ((a.b * (256 - fx) + b.b * fx) * (256 - fy) + (c.b * (256 - fx) + d.b * fx) * fy + 32768) >> 16;
@@ -104,19 +97,12 @@ static u16 im_quant(Rgb c)
 }
 static void im_measure(int side)
 {
-    int ls = 0, lb = 0;
     for (int x = 0; x < 24; x++) {
         int y = 1;
         while (y < 100 && lum(im_tx(side, x, y)) < 96) y++;
         im_es[x] = y * 256 - 128 - clampi(lum(im_tx(side, x, y - 1)) * 256 / lum(im_tx(side, x, y)), 0, 256);
     }
     im_E = (int)((long long)(IM_YH - im_es[0]) * 536 / 639);
-    for (int x = 2; x < 40; x++) {                       /* the side wall's cornice against the back pilaster's capital */
-        int y = 162 - 85 * (320 - x) / 268;
-        for (int j = -2; j <= 2; j++) ls += lum(im_tx(side, x, y + j));
-    }
-    for (int x = 55; x < 71; x++) for (int y = 74; y < 82; y++) lb += lum(im_tx(side, x, y));
-    im_gain = clampi(ls * 256 / (38 * 5) * (16 * 8) / (lb ? lb : 1), 208, 256);
 }
 /* the source of the wall's point at depth t + s, same height, of the pixel (u2, y): texel coordinates x 256 */
 static void im_shift(int u2, int y, long long s, int *xs, int *ys)
@@ -125,51 +111,24 @@ static void im_shift(int u2, int y, long long s, int *xs, int *ys)
     *xs = 320 * 256 - 128 - us;
     *ys = IM_YH + (int)((long long)(2 * y - 323) * us / u2);
 }
-static Rgb im_pilaster(int side, int u2, int X, int y)
-{
-    static const short RV[4][2] = { { 56 * 256, 29312 }, { 67 * 256, 29312 }, { 56 * 256, 31104 }, { 67 * 256, 31104 } };
-    long long t = IM_TQ(u2);
-    int ph = (int)((IM_TW - t) * 4096 / (IM_TW - IM_TP));
-    int xs = 70 * 256 - ph * 4224 / 4096, ys = IM_YH + (int)((long long)(2 * y - 323) * 68608 / u2);
-    Rgb c;
-    if (2 * y - 323 > -IM_HBK * u2 / 68608) {           /* the block under it: speckled stone, its 16 columns at the
-                                                            wall's scale both ways (along the wall they would smear) */
-        int o = X * 256 * 536 / u2, x0 = (o >> 8) & 15, fx = o & 255, y0 = im_fl8(ys), fy = ys - y0 * 256, g = (im_gain + 256) / 2;
-        Rgb p = im_tx(side, 54 + x0, y0), q = im_tx(side, 54 + ((x0 + 1) & 15), y0), r = im_tx(side, 54 + x0, y0 + 1),
-            v = im_tx(side, 54 + ((x0 + 1) & 15), y0 + 1);
-        c.r = (((p.r * (256 - fx) + q.r * fx) * (256 - fy) + (r.r * (256 - fx) + v.r * fx) * fy + 32768) >> 16) * g / 256;
-        c.g = (((p.g * (256 - fx) + q.g * fx) * (256 - fy) + (r.g * (256 - fx) + v.g * fx) * fy + 32768) >> 16) * g / 256;
-        c.b = (((p.b * (256 - fx) + q.b * fx) * (256 - fy) + (r.b * (256 - fx) + v.b * fx) * fy + 32768) >> 16) * g / 256;
-        return c;
-    }
-    c = im_bil(side, xs, ys, im_plate);
-    for (int i = 0; i < 4; i++) {                        /* the rivets, round: at the wall's scale there both ways */
-        long long tc = IM_TW - (long long)(70 * 256 - RV[i][0]) * (IM_TW - IM_TP) / 4224;
-        int uc = (int)((1LL << 43) / tc);                /* u x 256 */
-        int dx = (uc - 320 * 256 + 128) - X * 256;       /* towards the picture, x 256 */
-        int yc = IM_YH + (int)((long long)(RV[i][1] - IM_YH) * uc / 68608);
-        int dy = y * 256 - yc;
-        int sx = dx * 68608 / uc, sy = (int)((long long)dy * 68608 / uc);
-        if (sx > -640 && sx < 640 && sy > -640 && sy < 640) {
-            Rgb p = im_bil(side, RV[i][0] + sx, RV[i][1] + sy, im_tx), q = im_bil(side, RV[i][0] + sx, RV[i][1] + sy, im_plate);
-            c.r += p.r - q.r; c.g += p.g - q.g; c.b += p.b - q.b;
-        }
-    }
-    c.r = c.r * im_gain / 256; c.g = c.g * im_gain / 256; c.b = c.b * im_gain / 256;
-    return c;
-}
 static void im_gen_side(int side, int pad)
 {
-    const long long B = IM_TC - IM_TP;
     im_measure(side);
     for (int X = 1; X <= pad; X++) {
         int u2 = 639 + 2 * X;
         long long t = IM_TQ(u2);
         for (int y = 0; y < PH; y++) {
-            int h = (323 - 2 * y) * 68608 / u2, xs, ys, cust = 0;
+            int h = (323 - 2 * y) * 68608 / u2, xs, ys;
             long long s;
-            Rgb c;
-            if (h >= IM_HCB) {                           /* the parapet and the cornice: the wall's period */
+            if (h >= IM_HRT && h < IM_HCB) {             /* the windows: the picture's one, closed; then it again */
+                long long k = t < IM_TW ? (IM_TW - t - 1) / IM_BQ + 1 : 0, tw = t + k * IM_BQ;
+                s = k * IM_BQ;
+                if (tw >= IM_T0) ;                       /* the picture's part of it */
+                else if (tw >= IM_TQ(642)) s += IM_TQ(634) - IM_TQ(642);            /* one more column of pane */
+                else s += IM_TQ(591) - IM_TQ(642);                                  /* the near member: a gold face */
+                im_shift(u2, y, s, &xs, &ys);
+                if (xs > 50 * 256) xs = 50 * 256;        /* (its casing ends at the corner: not the back wall's plate) */
+            } else {                                     /* the wall's period: parapet, cornice, rail, balusters, floor */
                 s = ((IM_T0 - t) / IM_PQ + 1) * IM_PQ;
                 im_shift(u2, y, s, &xs, &ys);
                 if (h > IM_HG) {                         /* up to the crest, level from the edge on */
@@ -179,20 +138,8 @@ static void im_gen_side(int side, int pad)
                     ys = yg - (int)((long long)(h - IM_HG) * (yg - es) / (im_E - IM_HG));
                     if (ys < 0) ys = 0;
                 }
-            } else if (h < IM_HFL) s = ((IM_T0 - t) / IM_PQ + 1) * IM_PQ, im_shift(u2, y, s, &xs, &ys);   /* the floor */
-            else if (t < IM_TP) s = B, im_shift(u2, y, s, &xs, &ys);                 /* the next bay */
-            else if (h >= IM_HRT) {                      /* the window: its pane, then its near member; the pilaster */
-                if (u2 <= 642) s = IM_TQ(634) - IM_TQ(642);
-                else if (u2 <= 650) s = IM_TQ(591) - IM_TQ(642);
-                else if (t >= IM_TW) s = IM_TQ(551) - IM_TW;
-                else { s = 0; cust = 1; }
-                if (!cust) im_shift(u2, y, s, &xs, &ys);
-            } else if (t >= IM_TW || h >= IM_HBK) {     /* the rail, the balusters under the window, the baseboard */
-                s = ((IM_T0 - t) / IM_PQ + 1) * IM_PQ;
-                im_shift(u2, y, s, &xs, &ys);
-            } else cust = 1;                             /* the pilaster's block */
-            c = cust ? im_pilaster(side, u2, X, y) : im_bil(side, xs, ys, im_tx);
-            im_cv[((size_t)side * PH + y) * im_cw + X - 1] = c;
+            }
+            im_cv[((size_t)side * PH + y) * im_cw + X - 1] = im_bil(side, xs, ys);
         }
     }
 }
