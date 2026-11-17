@@ -1266,6 +1266,36 @@ about 5 px; piece names as in the table above):
 
 Not matched: props 14-17 (anims 16, 17, 13 is the gate), the room covers 0-4, and the two rail rows (anim 23).
 
+### Which page slice each prop draws from (2026-11-17)
+
+A prop's subtype picks its scenery def, and the def's `w1e` is added to every part's page word (FORMATS.md "SPR").
+In the Hidden Village every part's own page word is 128 (8 bpp, page 0), so `w1e` alone gives the page: 2 -> VRAM x
+128, 4 -> 256, 6 -> 384, 8 -> 512; a part's u, v then address a 256-texel slice from there. The cut towns' parts are
+lost, so their own page words are not known; with the same convention:
+
+- The pages' VRAM places (SYS reload lists): A06100 and A08000 at x 64, 448 words wide; A07600 at x 64, 320 wide,
+  A07601 at x 384, 128 wide. So in a page's 8 bpp view, VRAM x 128 is view column 128, x 256 is 384, x 384 is 640.
+- **Iron Town** (defs `w1e` 2, 4, 6, 8): subtype 0 (the five room props, anims 0-4) draws from view columns 128-383
+  (the hut interiors); subtype 1 (props 5-12, anims 5-12) from 384-639; subtype 2 (props 13-34, anims 13, 16-23) from
+  640-895. That agrees with every match made by eye: fence segments and ring posts in 384-639, gate panels, dome
+  roof and the east notch wall in 640-895.
+- It also settles some: props 19 / 20 (anims 21, 22; the court's side corners) are subtype 2, so they are the two
+  pillars with a diagonal wall of columns 848-895 (`slab_pillar_ne`, `mossy_wall_e`), not `corner_post_1 / 2`
+  (columns 384-511). The rail props (anim 23) are subtype 2: the thin strips at (792, 212) and (864, 124).
+- **The lifts are props 13 and 14** (list indices; anims 17 and 16, kind 1): they start on the two rail rows
+  ((83, 300) and (142, 82)), and they are the `wb8` 0xD / 0xE platforms of `topdownA17SceneryUpdate`. Their drawings are in
+  columns 640-895: most likely the two dark panels on a post (`sign_rail_a / b`), which are then lift platforms, not
+  signs.
+- **Prop 15** (anim 13, kind 2, at world (263, 457)) is the one whose anim takes `D_8009CFA1` (0..2): frames 13, 14,
+  15. The page has two full pictures of the round gate (columns 640-735 and 736-831): gate states, by progress.
+- **Scenery scripts.** Iron Town's 24 scenery anims are one still frame each (anim n = frame n, hold). Lumberjack
+  Town's anims 0-15 likewise; Stonetown's def points at Baccus Village's anim table (0x80102FA0).
+- **Lumberjack Town** (defs `w1e` 2, 8): props 0-11 (rooms and outdoor, anims 0-11) from A06100 view columns
+  128-383; props 12, 13 (anims 14, 15) from VRAM x 512, which is outside the town's page.
+- **Stonetown** (defs `w1e` 2, 6, 8): the four room props from A07600 columns 128-383; props 4 and 6 (anims 8, 9)
+  from VRAM x 384 = A07601 (the page with the "Stone the No.1" slab); prop 5 (anim 10, or 12 in the alternative
+  list: the clock) from VRAM x 512, outside the town's pages.
+
 ## Folkin's rough notes — verification
 
 Folkin (TCRF) left rough notes on the Civilization towns. Each claim was checked against the decompiled code and the
