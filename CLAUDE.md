@@ -1,7 +1,9 @@
 # Working on Tombi-Decomp with Claude Code
 
 Read this first in every session. The current state and the open tasks are in `docs/STATUS.md`; keep that file up
-to date as work lands (it is the hand-off between sessions).
+to date as work lands (it is the hand-off between sessions). `docs/AGENT_GUIDE.md` has the practical knowledge of
+earlier sessions (how the user reviews work, headless recipes and addresses, build / CI / release pitfalls): read it
+before the first task.
 
 **First thing in a new cloud session:** run `bash tools/session_bootstrap.sh`, without being asked. It installs the
 packages and the PS1 toolchain, downloads the PAL disc from the `GAME_FILES_URL` environment variable, extracts `game/`
@@ -30,6 +32,9 @@ Main references: `README.md`, `docs/PORT.md` (long; search it), `docs/STATUS.md`
 - Reply in **Spanish**, short and direct, first person **singular** ("he mirado", "no lo he comprobado"; never "hemos"), also in Discord texts ("I", not "we"). Never claim something works without verifying it; say
   plainly what was tested (PC headless renders) and what was not (the device).
 - Show real renders/screenshots of UI changes (send the PNGs), not descriptions.
+- Name rooms by place (debug-select names, `port2/runtime/main.c` `port_dbg_area` / `port_dbg_sec`), not as "AREA03 s2"
+  alone, and show them: for several rooms, one numbered sheet (4:3 left, wide right). Widescreen changes are decided
+  room by room with the user; never bulk-apply.
 - When the user proposes UI, they like 3-4 real-render options to choose from.
 - The user tests on an AYN Thor (Android 13, Snapdragon 8 Gen 2 → arm64 = wasm2c build, top 1920x1080 60 Hz,
   bottom 1240x1080) and an Odin 3. Bugs that only show on the device usually come from the wasm2c build or Android
@@ -61,8 +66,9 @@ Main references: `README.md`, `docs/PORT.md` (long; search it), `docs/STATUS.md`
 - Long lists on the touch panel scroll by finger, smoothly (no paging).
 - The user does not review PRs (they approve them all by default): verified work goes straight to master, and
   Claude is responsible for judging that the code is correct before pushing. Open a PR only when asked.
-- Releases only when the user says so: `release.yml` (workflow_dispatch, inputs `version`, `include_tools: true`)
-  after the Windows exe and Android APK CI runs of the head commit are green. Release title "Tombi port X".
+- Releases only when the user says so: bump `VERSION` first, then `release.yml` (workflow_dispatch, inputs `version`,
+  `include_tools: true`) after the Windows exe and Android APK CI runs of the head commit are green and master has not
+  moved since. Release title "Tombi port X". Checklist in docs/AGENT_GUIDE.md.
 - Disk in the cloud container is small: delete builds/dumps when done; agents in worktrees must clean up.
 
 ## CI and the game discs

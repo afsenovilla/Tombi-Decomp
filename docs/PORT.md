@@ -2682,6 +2682,9 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     height at that edge pixel and without the walls (repeated as it was, a sloped piece and a wall came back every 8
     units: a sawtooth floor in AREA03 s1/s5).  The collision view draws that copy too (it is not in game RAM).
   In side view 1 unit is about 1 column at Tomba's depth (measured), so the pad in units is the pad in columns.
+  Check: `python3 tools/ws_exit_sweep.py [--rooms A:S,...] [--all] [--ws 4:3,16:9,...]` puts Tomba 70 units inside
+  each edge exit after the debug select and walks him out, reading `PORT_CVLOG=1` lines of the collision view
+  (`CVLOG area section H Y D` per frame); a moved exit must reach the same room on the floor at every width.
   Also for AREA05 s1/s3: the notice board at the back (L4 type 0x1A subtype 0x13) takes a 32-unit talk box instead of
   8 (fixes.txt), it was hard to stand in.
   Walk limits are decided room by room, apart from the exits: a wide frame does not always mean wider limits.  The
@@ -4428,6 +4431,27 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     is the CLUT: its tone sits between two colours); mean tone within 2 levels in every band on both sides (4 in
     the wainscot, where the measured columns of the picture hold the dark end of its inlay); at four times the
     contrast the wall and lunette joins cannot be placed by eye.
+    **Third version, the right join only** (same day; the user boxed the right wall just past the door at 16:9: plaster,
+    chair rail and wainscot).  Measured there along the rays, the picture's last 8 columns against the strip's first
+    8, at 2x, 4x and 8x: every line stays on its ray (rail top, the shadow under it, both inlay lines, the groove, the
+    skirting's highlight and the wall's foot within 0.1 rows across the join, no kink, no step) and the plaster's and
+    the wood's tone are within 5 levels; what showed was **colour lost on the thin lines**, so the panel's frame
+    looked as if it ended at the join: the wainscot's lower inlay line went from orange (150, 78, 24) to brown
+    (134, 76, 46) and read as cut, the upper one kept only its top half (0.4 rows higher, 12 levels duller), the
+    rail's top highlight went from (213, 163, 131) to (192, 162, 142) (a notch in the rail at the join), and the
+    dark line at the wall's foot took the skirting's brown (16 levels).  The cause: `ck_profile` smooths the rays'
+    profile among bins of the same *luma* within 4 and 10 rows, and the inlay's orange has the luma of the
+    skirting's shoulder 4 rows below it, the rail's highlight that of the plaster, the foot's grey that of the
+    skirting's shade.  The fix (right side only; the left strip is byte-identical): a bin is also left out when its
+    red-less-blue differs by more than twice the luma threshold, and the panel's inlay lines (profile's red less
+    blue over 96, between the rail and the skirting) take the speckle of the picture's own texels on that ray, one
+    of its last 8 columns per strip column less the profile, so the lines go on dotted as they are in the picture
+    instead of as a solid stroke.  After (means over 8 columns): lower inlay (139, 72, 22) for the picture's (148, 76,
+    21), upper (151, 79, 24) for (151, 78, 22), rail top (204, 158, 126) for (205, 158, 127), foot within 6;
+    the right wall reads as one panel running on.  Checked as below (4:3, default flags, the 12 other rooms, the
+    left end and the left strip identical to the build before; 21:9 holds 16:9; strips = the standalone generator
+    in software and OpenGL; i386 = wasm2c).  Not changed: the left strip has the same loss on its cut panel's upper
+    inlay line ((142, 74, 17) to (127, 70, 40)), left as it is on the user's word.
     Checked (2026-11-17, headless): 16:9 at both ends; the game's strips = the generator's run on its own over the
     dumped picture (`PORT_WS_BACKDROP_DUMP`; 0 texels, software and OpenGL under xvfb, both
     ends); the 21:9 frames hold the 16:9 ones (0 texels; the 32:9 strips hold

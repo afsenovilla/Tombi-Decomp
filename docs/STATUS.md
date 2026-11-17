@@ -42,8 +42,8 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    exits the headless sweep could not reach (AREA01 s1, AREA03 s0/s2/s4, AREA09 s0, AREA10 s2, AREA10 s3/s7 right)
    were shown to the user as room pictures: none needs a change (2026-11-17). The
    top-down / tunnel exits (func_800270A0 with map coordinates) are not drawn by the collision view yet. Not tested
-   on the device. The headless sweep (place Tomba 70 units from the exit, walk out, compare 4:3/16:9/21:9/32:9) was a
-   scratch script: rewrite it from PORT.md if needed (it needs a CVLOG line in colview.c's tick, not committed).
+   on the device. Re-check after a change with `python3 tools/ws_exit_sweep.py` (places Tomba 70 units from each
+   moved exit and walks him out at 4:3/16:9/21:9/32:9; needs `PORT_CVLOG`, built into the collision view).
 0. **Widescreen room strips, next (2026-11-15).** Approved and on by default: AREA02 s5, AREA05 s1/s3, AREA02 s1
    (the bottom-left pink sphere left as the user accepted it "for now"). AREA19 s1 (Dwarf Village in blossom) redone
    2026-11-17 (`gen_cb`: every band quilted from the picture at run time, the front bushes' scalloped top included;
