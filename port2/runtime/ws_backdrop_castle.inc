@@ -23,11 +23,6 @@
  *     colour ramp), darker outwards, with grain;
  *   - the chains: each texel is the chain's own texel one or more link periods back (never mirrored); the left big
  *     one stops on the grass over a shadow, the thin one and the right one go on to the frame's edge.
- * 2026-11-17, from the user's marks on a device capture: the skirt's tone goes by the distance from the front
- * plate's upper edge carried on (IC_PL: the plate, its edge and the plate behind it cross the join; it was one ramp
- * top to bottom, a jump at the join); the thin chain's copies are filled (only its dark texels were copied: hollow
- * links); where the edge is plain sky the strip has the edge's own blue and no cloud haze (a lighter block).  Two
- * later versions (a dome's outline, a cloud bank / puffs, lobes) were rejected: "you were doing much better here".
  * Integers only; a texel depends on its place, not on the strip's width. */
 #define IC_HM 1229                                        /* the ROOMS row's mark (no picture has this height) */
 #define IC_H 384
@@ -37,9 +32,6 @@ static u8 ic_k[IC_H][PW];                                 /* 1 grass, 2 copper, 
 static int ic_l[IC_H][PW];
 static int ic_sky[IC_H][3], ic_grow[IC_H][3], ic_g0, ic_g1, ic_cr[256][3];
 static const int IC_GT[2] = { 346, 353 }, IC_T0[2] = { 264, 254 };
-#define IC_LW 15                                          /* the plates' edges: columns apart */
-static const int IC_LO[2] = { 12, 1 };                    /* the first edge's foot in each strip (column) */
-static const int IC_PL[2] = { 289, 279 };                 /* the front plate's upper edge at the picture's edges (rows) */
 
 static int ic_icmp(const void *a, const void *b) { return *(const int *)a - *(const int *)b; }
 static void ic_measure(void)
@@ -123,17 +115,7 @@ static void ic_prof(int side, int *pr, int n)
 static int ic_chain(int side, int which, int x, int y)   /* the picture's texel (x, y) is that chain's */
 {
     if (x < 0 || x >= PW || y < 0 || y >= IC_H) return 0;
-    if (!side && which == 0) {                            /* the thin chain: its dark texels and what lies between them (its
-                                                            light texels: left out, the copies were hollow) */
-        int up = 0, dn = 0;
-        if (x >= 12 || abs(y - (240 - x)) > 9) return 0;
-        if (ic_k[y][x] & 16) return 1;
-        for (int a = 1; a <= 4; a++) {
-            if (y - a >= 0 && abs(y - a - (240 - x)) <= 9 && (ic_k[y - a][x] & 16)) up = 1;
-            if (y + a < IC_H && abs(y + a - (240 - x)) <= 9 && (ic_k[y + a][x] & 16)) dn = 1;
-        }
-        return up && dn;
-    }
+    if (!side && which == 0) return x < 12 && abs(y - (240 - x)) <= 9 && (ic_k[y][x] & 16);
     if (!side) {
         Rgb c = rgb15(ic_p[y][x]);
         return x < 17 && abs(y - (298 - 2 * x)) <= 27 && (ic_k[y][x] & 8) && !(ic_l[y][x] > 150 && c.b - c.r >= 24 && y < 270);
@@ -149,10 +131,9 @@ static void ic_gen(u16 *ext, int pad)
     if (!cv) return;
     for (int side = 0; side < 2; side++) {
         int ex = side ? PW - 1 : 0, gt = IC_GT[side], t0 = IC_T0[side], n0 = gt - t0, pr[128], ea[IC_H];
-        int pd[160], pdl = -1;
         for (int y = 0; y < IC_H; y++) {
             int sl = (ic_sky[y][0] * 3 + ic_sky[y][1] * 6 + ic_sky[y][2]) / 10, k = ic_k[y][ex];
-            ea[y] = (k == 4 || k == 8) && ic_l[y][ex] - sl > 14 ? clampi((ic_l[y][ex] - sl) * 256 / (236 - sl > 1 ? 236 - sl : 1), 0, 256) : 0;   /* (plain sky is no cloud: it left a lighter block by the join) */
+            ea[y] = (k == 4 || k == 8) ? clampi((ic_l[y][ex] - sl) * 256 / (236 - sl > 1 ? 236 - sl : 1), 0, 256) : 0;
         }
         for (int y = 0; y < IC_H; y++) {
             int e = 0, en = 0, ge = 0, gn = 0, gl;
@@ -164,9 +145,7 @@ static void ic_gen(u16 *ext, int pad)
                 if (band < 0) band = 0;
                 a = clampi((n - 168 + band) * 3, 0, 230);
                 if (j < 40) a = (e * (40 - j) + a * j) / 40;
-                {   Rgb ec = rgb15(ic_p[y][ex]);            /* the edge's own blue where the edge is plain sky (no seam) */
-                    int own = ic_k[y][ex] == 4 && ec.b - ec.r >= 80 && !e, sk[3] = { own ? ec.r : ic_sky[y][0], own ? ec.g : ic_sky[y][1], own ? ec.b : ic_sky[y][2] };
-                    for (int k = 0; k < 3; k++) p[k] = (sk[k] * (256 - a) + WHITE[k] * a) / 256; }
+                for (int k = 0; k < 3; k++) p[k] = (ic_sky[y][k] * (256 - a) + WHITE[k] * a) / 256;
             }
             if (y < gt - 2 || ic_g0 < 0) continue;
             {   int yy = clampi(y, ic_g0 + 4, ic_g1);     /* grass */
@@ -181,63 +160,13 @@ static void ic_gen(u16 *ext, int pad)
             }
         }
         ic_prof(side, pr, n0);
-        {   /* the skirt's plates: on the picture the front plate's upper edge comes down outwards 0.61 rows a column and
-               crosses the edge on row IC_PL (the line the user drew, 2026-11-17: "the line of continuity that piece
-               has to have; now there is a jump").  The copper's tone by rows from that line (pd, row - line + 64),
-               from the 24 columns next to the edge: the strip's skirt has that tone at the same distance from the
-               line carried on, so the plate, its edge and the darker plate behind it go on across the join. */
-            static int sm[160], cn[160];
-            memset(sm, 0, sizeof sm); memset(cn, 0, sizeof cn);
-            for (int i = 0; i < 24; i++)
-                for (int y = 0; y < IC_H; y++) {
-                    int x = side ? PW - 1 - i : i, d = y - (IC_PL[side] - 61 * i / 100) + 64;
-                    if (d < 0 || d >= 160 || ic_k[y][x] != 2) continue;
-                    sm[d] += ic_l[y][x]; cn[d]++;
-                }
-            for (int d = 0, last = -1; d < 160; d++) {
-                if (cn[d] < 3) { pd[d] = -1; continue; }
-                pd[d] = sm[d] / cn[d];
-                if (last < 0) for (int k = 0; k < d; k++) pd[k] = pd[d];
-                else for (int k = last + 1; k < d; k++) pd[k] = pd[last] + (pd[d] - pd[last]) * (k - last) / (d - last);
-                last = d;
-                pdl = d;
-            }
-            for (int d = pdl + 1; d < 160; d++) pd[d] = pdl >= 0 ? pd[pdl] : 120;
-            if (pdl < 0) for (int d = 0; d < 160; d++) pd[d] = 120;
-            for (int it = 0; it < 2; it++) {              /* (smooth: single rows' means came out as streaks) */
-                int t[160];
-                for (int d = 0; d < 160; d++) { int q = 0; for (int k = -3; k <= 3; k++) q += pd[clampi(d + k, 0, 159)]; t[d] = q / 7; }
-                memcpy(pd, t, sizeof t);
-            }
-        }
         for (int j = 0; j < pad; j++) {                   /* the copper skirt */
             int top = side ? t0 + j * 75 / 100 + j * j * 8 / 1000 : t0 + j * 90 / 100 + j * j * 12 / 1000, hg = gt + 2 - top;
             if (top >= gt + 1) break;
             for (int y = top; y < gt + 2; y++) {
                 int v = (y - top) * (n0 - 1) / (hg > 1 ? hg : 1), *p = cv[(size_t)y * pad + j];
-                int d = clampi(y - (IC_PL[side] + 61 * j / 100) + 64, 0, 159);
-                int tone = pd[d] - j * 10 / 80 + (noise(j + side * 333, y, 2, 2, 21) - 128) * 6 / 128
-                           + (noise(j + side * 333, y, 10, 34, 22) - 128) * 8 / 128 - (y - top < 2 ? 25 : 0);
-                (void)v;
-                {   /* The skirt's plates, as on the picture (the user drew two of their edges on each side, 2026-11-17:
-                       "maybe a similar pattern can be generated"): each plate's outer edge is an S: from its foot it
-                       leans in, steps back out at a kink two thirds up and then sweeps in towards the castle (IC_SX:
-                       columns inwards by frame row, read off those lines); the edges stand 14-15 columns apart.  On the
-                       castle's side of an edge the plate is lit up to a bright rim; outside it lies its shadow. */
-                    static const short SY[] = { 60, 90, 100, 110, 125, 140, 155, 182, 250 }, SXv[] = { 58, 25, 13, 8, 10, 13, 7, 0, 0 };
-                    int r = y - 144, c = 0, u, t, f = j < 8 ? j : 8, m;
-                    for (int k = 0; k < 8; k++)
-                        if (r <= SY[k + 1] || k == 7) { int rr = clampi(r, SY[k], SY[k + 1]); c = SXv[k] + (SXv[k + 1] - SXv[k]) * (rr - SY[k]) / (SY[k + 1] - SY[k]); break; }
-                    if (r < SY[0]) c = SXv[0];
-                    u = (j + c - IC_LO[side]) * 256 / IC_LW;
-                    t = fmodi(u, 256);
-                    m = t < 20 ? -60 + t : t < 200 ? -40 + (t - 20) * 75 / 180 : t < 244 ? 35 + (t - 200) * 25 / 44 : 75 - (t - 244) * 9;
-                    m += (int)(hash3(fdiv(u, 256), side, 31) % 13) - 6;
-                    if (side) m = m * 5 / 8;
-                    tone += m * f / 8;
-                }
-                if (j < 12 && ic_k[y][ex] == 2)            /* (from the edge texel's own tone: the picture's last columns can be darker than the 24's mean) */
-                    tone = (ic_l[y][ex] * (12 - j) + tone * j) / 12;
+                int tone = pr[v] - j * 40 / 80 + (noise(j + side * 333, y, 2, 2, 21) - 128) * 6 / 128
+                           + (noise(j + side * 333, y, 10, 34, 22) - 128) * 18 / 128 - (y - top < 2 ? 25 : 0);
                 tone = clampi(tone, 0, 255);
                 for (int k = 0; k < 3; k++) p[k] = ic_cr[tone][k];
             }
