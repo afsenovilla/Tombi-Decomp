@@ -4362,6 +4362,60 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     along the wall at 16:9 (2.5 times where the 21:9 strip ends), so they are softer than the picture's; the cornice has a joint on the join itself (its
     phase: the picture's is at column 13); the floor's texture repeats every period (15 to 19 columns), which the
     speckle hides at 1x and 2x.
+    Third version (2026-11-17), after the user's marks on the right end at 16:9, which they confirmed for the left
+    end too: "En el número 1, no tiene que haber líneas ahí, debe ser una sola franja uniforme. En el 2, ese empalme
+    está muy mal hecho, le falta perspectiva y la unión en general es una chapuza. En el 3, el color es gris que
+    tira hacia cada vez más oscuro, cuando debería ser más del color por el que empieza, no seguir oscureciéndose."
+    (1 the band under the parapet's holes, 2 where the picture's cut window met the strip's, 3 the rail under the
+    windows.)  Measured again, on the end wall rectified (periods from the corner against height):
+    - the cornice's face has one joint on that wall, 3.31 periods from the corner (column 13; a rivet on each side
+      of it on the right end), not one per hole: the second version repeated the picture's last period, so it drew
+      that joint every period, and its light jumped at each repeat;
+    - the window's members lean, their tops towards the corner: the first pane's two edges and the mullion's face
+      move 0.16 periods (2 columns) over the window's height, 0.0046 periods per row of height, at both ends.  The
+      second version cut its pieces on lines of constant depth (dead upright, one column wide, no blending) and
+      stretched one column over the post;
+    - the window is seen from its near side: after the corner a brown face (to 0.76 periods), that member's lit
+      side (to 1.3), a pane, the mullion's face (2.3 to 2.8), its dark side (to 3.3), the second pane.  The second
+      pane is whole at the picture's edge (4.28 periods: as wide as the first at mid height; the picture's last
+      column is pane on every row, with no bolt), so what follows is a member's face, and the mullion's face with
+      its bolts (the second version's closure) would have put a cut bolt on the join;
+    - the rail is red-brown near the corner (130 / 75 / 53 left, 122 / 71 / 47 right) and grey-brown from 2.5
+      periods on (109 / 89 / 77, 97 / 80 / 68), at one lightness: the picture's own last 22 columns are the grey the
+      user saw, and the strip repeated it.
+    What changed (`im_cornice`, `im_window`, the rail and parapet lines of `im_gen_side`):
+    - the cornice's face (heights 78.4 to 91) is one band with no joint: the picture's two clean stretches of it,
+      before the joint (2.2 to 3.08 periods) and after it (3.55 to the edge), laid one after the other and crossed
+      over 0.1 periods, the far one's light levelled to the block at the picture's edge (a line fitted to the face's
+      light over the columns 15-29).  The parapet over it keeps its holes at their period and phase; the last
+      quarter of each period crosses over to the next one's texels, so no seam per period is left there either;
+    - the window: the second pane goes on (the picture's last column) to the window's near edge, a line with the
+      members' lean, 4.40 periods from the corner at height 45 (0.3 columns past the picture's edge at the pane's
+      top, 3.4 at its foot), laid by each pixel's coverage (sub-texel, anti-aliased).  From that line the next
+      window starts, one bay on (4.08 periods): its far member's brown face is the one post between the two
+      windows (0.44 periods wide, both its edges leaning alike), then its lit side, pane, mullion, pane, exactly as
+      the picture has them (a translation in 1 / u by whole bays, the rows scaled about the horizon: each member's
+      lean, width and edges are the picture's, at the wall's perspective), and the same closure again.  Projected
+      back (the strip rectified as the picture): the second window's pane and mullion edges are within 0.04 periods
+      (half a column) of the first one's plus 4.08 on every height, the near edge fits 4.38 - 0.0046 (h - 45);
+    - the rail keeps its texels and goes back to its colour near the corner over 1.5 periods (per channel, the mean
+      of the columns 32-47 over the mean of the columns 1-12, 5 % lighter than the edge): 130 / 82 / 61 left,
+      116 / 72 / 50 right from there on, constant.
+    Checked the same way (2026-11-17): 4:3 with the flag and the default 16:9 run byte-identical to the second
+    version's build, both ends; 16:9 centre = 4:3; the 21:9 frame holds the 16:9 frame and its extension starts with
+    the 16:9 columns; the game's strips = the standalone generator's at 16:9 and 21:9, both ends; twelve other
+    rooms' 16:9 frames with `--ws-backdrop on` byte-identical (2:5 2:1 5:1 5:3 19:1 11:2 9:5 9:3 9:4 17:3 17:4
+    16:4); OpenGL (xvfb): the strips = the software ones; i386 = wasm2c whole frames (16:9 and 21:9, both ends); gcc
+    x86-64 / gcc -m32 / clang the same strips; 0.005 s per room entry.  Not checked on the device.
+    Weak points now: the post between two windows is still a reading (the picture shows no near member: the far
+    one's face, 0.44 periods of it, stands for both), and at the left end it is as dark as the corner it comes from
+    (black at its foot); the pane's last 0 to 3 columns before the post repeat the picture's last column; the
+    rail's red is a tint of the edge's grey texels, and the picture keeps its own grey stretch (22 columns) before
+    it; the cornice's two stretches repeat every 1.5 periods (about 21 columns), which the speckle hides, and the
+    picture's own joint stays where it is, 13 columns before the join; the bay (4.08 periods) is still not a whole
+    number of the wall's periods; every window has the first one's highlights and is 1.2 times larger than its
+    source; the floor repeats every period.  The second version's weak points about the near member, the bay of
+    4.62 periods and the cornice's joint on the join no longer apply.
   - AREA09 s2 (the Haunted Mansion's grandfather clock room, 2026-11-17, `runtime/ws_backdrop_clock.inc`; off by
     default, preview with `--ws-backdrop-rooms 9:2`).  Not in the first scan (a scrolling picture: tools/ws_survey.py
     found a full black strip at each end of the room and at the spawn, which is the right end).  How it is drawn: one
