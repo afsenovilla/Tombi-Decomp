@@ -5031,6 +5031,59 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     arches end is not in the picture: at 16:9 they run on, wider than that the arch comes down on the cornice 96
     columns out and the ceiling follows it down (a choice); the rib is drawn at the edge's thickness; not seen on
     the device.
+  - AREA02 s2 (the Underground Prison, 2026-11-17, `gen_up` in `runtime/ws_backdrop_prison.inc`; off by default,
+    preview with `--ws-backdrop-rooms 2:2`).  The room has two states and one picture.  X002
+    `updateLightsOutDarkness` (layer type handler 0x801194AC) reads event 0xB3 "Where'd the Lights Go?" (`GCD.bce57`,
+    0x8009CE57): while the event is open (1..3; entering the room from the debug select opens it, the dwarf calls from
+    the cage) it holds `GAME.fadeScreenControl` 0x10 / amount 0xC0, which the game draws as one subtractive 320 x 256
+    rectangle (C0 C0 C0) over the finished frame, bubbles excepted: every texel loses 24 of its 31 levels, so only the
+    wall's lightest texels round the cage and the candle are left (the "vignette").  Once the event is done (0xFF) the
+    rectangle is gone and the room is lit (the dwarf is out of the cage).  Picture, CLUT and VRAM pages are the same
+    in both states (compared: only the frame buffers differ).  Recipe for the lit room, headless:
+    `--skip-movies --poke 900:1F8001B4:1 --poke 1200:8009CE57:FF:1 --poke 1250:8009C960:2:2 --poke 1250:8009C962:2:2
+    --pad-script 1000:start,1300:circle:3` (without the poke at 1200: the dark room).  The camera is fixed.
+    At 16:9 the dark room's sides were black next to an all but black picture (fine); the lit room showed two black
+    strips next to a lit rock wall.  The picture: one 320 x 224 picture drawn as the usual two sprites (page (128, 0),
+    page (256, 0) u 0-63) at frame row 16, the cage's bars a quad over it inside the 4:3 columns.  A rock wall with
+    the cage's niche (x 78-246, rows 70-190), a candle in a small niche right of it (flame (260, 106)), the ceiling in
+    shade, the sandy floor.  Both edges are rock.  What the left edge cuts: a ledge (a lit band rows 64-73 over a
+    dark line rows 74-75, level from x 0 to 62) and a dark rock face (rows 119-170, its outline from (0, 119) down to
+    the right, one row per column at the edge, two further in); the right edge cuts nothing with a shape.
+    The strips:
+    - the rock: `rq_quilt` on the texels over their light (the luminance averaged over 17 x 17, cage and candle out),
+      three bands per side (ceiling 0-62 and floor from windows near their own rows, the wall from any wall row
+      22-172), blocks of 12 columns; never copied: the cage, the candle, the left cracks (x 21-62), the right X-shaped
+      crack and the boulder under it (x 266-298), the dark face (they came back as rows of chevrons in the first try),
+      and texels in too dark a light (the ceiling's shade lit 5 times over showed its 5-bit steps as flat pale-green
+      patches: `UP_LM`); texels more than 1.13 times their light eased (to 1.44) so a bright light makes no flat white;
+    - the light: right, the edge columns' light per row; left, the row's mean over the edge's 21 columns, so the
+      ledge's lit band and dark line and the floor's line go on at their rows (differences under 1/8 of the 5-row
+      mean halved: the rock's grain would run on as ruled lines), the line fading between strip columns 56 and 104;
+      both sides fall off as the candle's light, S^2 / (S^2 + r^2), S 60, over an ambient 0.4 (fits the picture: -25 %
+      over its last 36 columns on the candle's row, and the left edge's level, 260 columns away); the first try's
+      flat falloff left a second bright zone at 21:9;
+    - the dark face: its outline goes on up to the left (row 119 at the edge, one row per column, easing to level at
+      row 109 by column 20, 1/16-row coverage), the rock under it lit with the face's own light (mean of its texels 3
+      columns inside), the two rows under the outline darker as in the picture; no far end (a closed dark dome in the
+      wall, the second try, read as a doorway): its shade eases back to the wall's light between columns 36 and 100;
+    - contrast per row matched to the picture's 32 edge columns (x 0.8 .. 1.5, about each texel's 9 x 9 mean), the
+      join as in `gen_rw` (the first 8 columns' mean onto the picture's last 8, the first column onto the last one).
+    The dark state with the strips on: the rectangle is widened with the frame like every full-screen fade, so the
+    left strip is black and the right one keeps 269 dim texels (at most 33 of 255) where the candle's glow at the
+    picture's edge goes on.  Measured: the face's outline across the join, first dark row per column: strip 115, 116,
+    117, 118 | picture 119, 120, 121 (no step); the ledge's line rows 74-75 on both sides.  ws_seam (bands 0-62 /
+    62-100 / 100-140 / 140-172 / 172-224): every join step within the picture's own (>= 92 % of the rows); the "tone"
+    checks of the right bands fail by design (the strip's 16 columns go on with the falloff: 180, 148 | 143, 136, 126
+    per 8 columns on rows 100-140), the left ones where the face takes the strip's rows.  0.2 s per room entry at
+    16:9 (0.3 s at 21:9).  Checked (headless): 4:3 identical with the room on; default flags identical at 16:9 (lit
+    and dark); the 21:9 frame holds the 16:9 one; the other rooms' frames identical to the build before with
+    `--ws-backdrop on` (2:5 2:1 5:1 5:3 19:1 11:2 9:5 9:3 9:4 17:3 17:4 16:4, and 2:3); the OpenGL renderer's strips
+    identical to the software one's (xvfb; lit and dark); i386 = wasm2c (the 16:9 lit and dark frames and the 21:9 lit
+    one identical).  Not seen on the device.
+    Weak points: the left strip's strata are level bands (the ledge's line is ruler-straight for 56 columns); the dark
+    face is a plain shaded slab with no far end; the strips' rock is a little smoother and more streaked than the
+    mottled rock at the right edge (most wall windows come from the wall over the cage); a small flat patch (8 x 5,
+    one palette colour) in the right strip at rows 144-149.
 - **Sub-screens** (Select screens Objetos / Eventos / Estado / Mapa, memory card, options, button config, screen
   adjust).  The Select screens (`subScreenDrawTabs`, D0SPSUB / D0SPSUB3, `#ifdef PORT2`) call `port_ws_layout(left cut,
   right cut, below)` each frame; while it is set, `shims/gpu.c` spreads the textured primitives of the frame

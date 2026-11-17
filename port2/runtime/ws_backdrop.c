@@ -753,6 +753,7 @@ static void gen_cb(int pad);
 #include "ws_backdrop_factory.inc"
 #include "ws_backdrop_castle.inc"
 #include "ws_backdrop_island.inc"
+#include "ws_backdrop_prison.inc"
 #define PIECES_TOP4 { 128, 0, 224, 64, 32, 256, 0 }, { 128, 64, 224, 64, 32, 256, 32 }, { 128, 128, 224, 64, 32, 256, 64 }, \
                     { 128, 192, 224, 64, 32, 256, 96 }
 #define OVER_A5 { { 256, 0, 112, 56, 104, 0, 0 }, { 256, 56, 112, 200, 104, 56, 0 }, { 256, 144, 0, 64, 80, 256, 24 }, \
@@ -809,6 +810,8 @@ static const Room ROOMS[] = {
                                                             its right end (lk_take, ws_backdrop_lake.inc; preview) */
     { 9, 1, IS_HM, 1, { { 0 } }, { { 0 } }, gen_is },   /* the Lake's island screen (the mansion's base): a 640-column
                                                             mosaic, its two ends (is_take, ws_backdrop_island.inc; preview) */
+    { 2, 2, 224, 0, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, gen_up },   /* the Underground Prison, lit (preview;
+                                                            ws_backdrop_prison.inc) */
 };
 #define NROOMS ((int)(sizeof ROOMS / sizeof ROOMS[0]))
 const char *port_ws_backdrop_rooms;                      /* --ws-backdrop-rooms A:S,A:S,... (decimal; "all") */
