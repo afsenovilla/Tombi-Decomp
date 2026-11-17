@@ -2499,6 +2499,47 @@ Items / Events / Status / Map, the Triangle item screen with a message, AREA02/0
 Triangle): no `not composed`, no fault, no new stub (AREA06's `X006_area6ScriptOp` stub is there in English too;
 AREA17 section 0 crashes in every language, see above). English, Spanish and Portuguese frames are unchanged.
 
+### LZ overlap: `lzDecompress`'s copy must be a forward byte loop (fixed 2026-11-17)
+
+`lzDecompress` (0x8003BAFC) copies a back-reference with Psy-Q's `bcopy` (0x8005BD24): `bcopy(dst - off, dst, n)`, a
+forward byte loop, so a reference longer than its distance (`n > off`) repeats the last `off` bytes (how the packer
+stores runs). `shims/libc.c` had that loop in its own `bcopy`, but `FUN_8005bd24` called it as `bcopy(s, d, n)` and
+both GCC and clang know `bcopy` as a builtin: the call was compiled as a jump to `memmove`. With `memmove` an
+overlapping copy writes the first `off` bytes right and then **the old contents of the load buffer** (the previous
+file) instead of the repeated pattern. Most references of the game's files do not overlap, so almost everything
+decoded right and the bug went unseen. Now `FUN_8005bd24` and `bcopy` use `psx_bcopy`, a loop through a volatile
+pointer that neither compiler turns into `memcpy` / `memmove`. `PORT_LZ_MEMMOVE=1` (research) brings the old
+behaviour back to compare frames.
+
+How it was found: the Million-Year-Old Man's room (AREA02 s4) showed teal and dark specks over the floor and plants,
+in both renderers. `PORT_PRIMLOG`: the picture is two sprites (256 + 104 x 224, tpage 0x82 / 0x84 = 8 bpp at VRAM
+128,0, CLUT 0x7FC8 = 256 entries at 128,511); depth, CLUT row and blend bits were all right. The CLUT is the last row
+of an LZ image loaded at 128,480 (256 x 32). Its entries 176..191 are sixteen 0000 words (32 bytes), packed as five zero
+bytes and a 27-byte reference at distance 5: `memmove` left entries 181..191 with eleven stale words of an earlier
+file (`3433 1122 2111 ...`), so the texels with those indices were drawn in garbage colours. The
+reference (`tools/psxemu`, the game's own MIPS code) has 0000 in all sixteen, and so does the port now.
+
+What the grey clear of that room is: the DrawEnv background colour 424242 (`isbg`) is part of the picture. Entries
+176..191 are transparent (0000), about 3500 pixels of stones and floor per frame, and the clear colour shows through
+them. With `--widescreen` the side strips are cleared black (the vignette's corners are opaque black), so the grey
+is drawn as a flat rectangle under each of the picture's two sprites (`ws_under` in `shims/gpu.c`); the 4:3 columns
+of a wide frame are byte-identical to the 4:3 frame.
+
+Other rooms (sweep of the 96 debug-select rooms, frame 1700, `PORT_LZ_MEMMOVE=1` against the fix, frame and VRAM):
+
+- Frames: only AREA02 s4 differs at frame 1700 (3019 pixels).
+- The Flower Tower (AREA13 s0) differs in behaviour: with the fix the Sacred Fish falls with Tombi and "Sacred Fish
+  Acquired!" shows (frames 1500..1660), as in the reference emulator; with `memmove` the fish was never spawned (an
+  LZ-to-RAM file was decoded wrong).
+- VRAM differs in 57 rooms, a few words to ~200, nearly all in the last row of a texture or CLUT block (rows 254 /
+  255 / 511): all rooms of AREA00, AREA01, AREA04 and AREA05; AREA02 s4 s5; AREA03 s3; AREA06 s0; AREA08 s0 s2;
+  AREA09 s0 s1 s2 s5 s6; AREA10 s0 s1 s4 s5 s8; AREA11 s1; AREA13 s0 s1; AREA14 s1 s4 s7. Checked against the
+  reference emulator in AREA00 s3, AREA02 s4 s5, AREA04 s12, AREA05 s0, AREA09 s1, AREA10 s0 and AREA14 s1: every
+  word that changed is now equal to the emulator's. Nothing of it was on screen at frame 1700, but any of those
+  palette entries or texels can show in other moments of those rooms.
+- The sweep compares one frame per room: other LZ-to-RAM data (models, object lists, scripts) may have been wrong
+  in ways it does not see.
+
 ### Pointer audit and room sweep (`port2/tools/audit_pointers.py`, `port2/tools/sweep_areas.py`)
 
 Two tools check what open point 1 is about: the retail code pointers the game jumps through.

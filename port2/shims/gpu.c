@@ -404,12 +404,16 @@ static void ws_mirror_write(int x, int y, int w, int h) {
     }
 }
 /* a GP0 02 / isbg / ClearImage fill that covers a whole display buffer clears the wide copy too */
+static int ws_under = -1;            /* AREA02 s4: the game's clear colour (15-bit), drawn under the room's picture; -1 = no */
 static void ws_fill(int x, int y, int w, int h, u16 c) {
     if (!port_widescreen || w < 320 || h < 200) return;
-    {   /* the Million-Year-Old Man's room (AREA02 s4) clears to grey 424242, unseen on 4:3 (the picture covers it);
-           its vignette's corners are black, so the wide strips are cleared black (the user's call) */
+    {   /* the Million-Year-Old Man's room (AREA02 s4) clears to grey 424242.  That grey is part of the picture: 16 of
+           its palette entries (176..191) are transparent, about 3500 pixels of stones and floor that show the clear
+           colour.  The picture's vignette has black corners, so the wide strips are cleared black (the user's call),
+           and the grey is drawn under the picture's two sprites instead (GP0 rectangles below, ws_under). */
         const u8 *g = (const u8 *)port_ram_ptr(PORT_A_GAME);
-        if (*(const u16 *)g == 2 && *(const u16 *)(g + 2) == 4) c = 0; }
+        ws_under = -1;
+        if (*(const u16 *)g == 2 && *(const u16 *)(g + 2) == 4) { ws_under = c; c = 0; } }
     {   /* research: PORT_WSCLEAR=7C1F (15-bit colour, hex) clears the wide copy with that colour instead, so what no
            primitive covers shows in the frame dumps (how the rooms whose model ends inside the wide frame were found) */
         static int wc = -2; if (wc == -2) { const char *e = getenv("PORT_WSCLEAR"); wc = e ? (int)strtol(e, 0, 16) : -1; } if (wc >= 0) c = (u16)wc; }
@@ -641,6 +645,10 @@ static int gp0(const u32 *p, int n) {
             }
             a.x += dx;
         }
+        if (ws_on && tex && ws_under > 0 && t.depth == 1 && h >= 200 && !semi)   /* AREA02 s4's picture (256 + 104 x 224, 8 bpp): see ws_fill */
+        {   u32 uc = (u32)(ws_under & 31) << 3 | (u32)((ws_under >> 5) & 31) << 11 | (u32)((ws_under >> 10) & 31) << 19;
+            be->rect(a.x, a.y, w, h, uc, 0, 0, 0, 0, 1);
+            if (hfr_rec) hfr_rect(a.x, a.y, w, h, uc, 0, 0, 0, 0, 1); }
         if (ws_on && tex && w == 256) ws_backdrop(&a, w, h, u, v, &t);
         if (w && h) { be->rect(a.x, a.y, w, h, p[0] & 0xFFFFFF, tex ? &t : 0, u, v, semi, raw);
                       if (hfr_rec) hfr_rect(a.x, a.y, w, h, p[0] & 0xFFFFFF, tex ? &t : 0, u, v, semi, raw); }

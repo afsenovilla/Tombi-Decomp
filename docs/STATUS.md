@@ -39,6 +39,14 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
 
 ## In progress / open
 
+0b. **LZ decoder fix (2026-11-17, docs/PORT.md "LZ overlap", not released yet).** `lzDecompress`'s overlapping copies
+   were compiled as `memmove` (a `bcopy()` call the compilers treat as a builtin) and left stale buffer bytes: the
+   colour specks of the Million-Year-Old Man's room (AREA02 s4, 11 bad CLUT entries), small VRAM differences in 57
+   of 96 rooms, and the Sacred Fish of the Flower Tower (AREA13 s0) never spawning from the debug select. Fixed in
+   `shims/libc.c` (`psx_bcopy`); that room's grey clear (it shows through 16 transparent palette entries) is drawn
+   under the picture with `--widescreen` (`ws_under`, `shims/gpu.c`). Checked headless on PC only (software + GL,
+   4:3 / 16:9, i386 and the wasm2c build); not tested on the device. Worth a play-through look at rooms that load
+   LZ-to-RAM data, which the one-frame sweep does not cover.
 0a. **Widescreen exits (2026-11-17, docs/PORT.md "Widescreen exits", `runtime/ws_exits.c`).** Moved to the wide
    edge, reviewed room by room with the user: AREA02 s1 (and the blossom village, which runs as 2:1), s5; AREA03 s1,
    s5; AREA04 s2; AREA05 s1/s3 (+ right side opened on both lanes, the back lane's fountain an obstacle; the wider notice-board box was dropped); AREA06 s1, s2 (+ right side; its
