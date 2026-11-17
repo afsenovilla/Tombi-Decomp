@@ -63,8 +63,8 @@ const char *port_ws_trick_rooms;         /* --ws-trick-rooms A:S,A:S,... (decima
 static const struct { u8 area, sec, end, approved, relief, wall; } ROOMS[] = {   /* end: 0 = the left one, 1 = the right one */
     {10, 3, 0, 1, 0, 0},  /* Trick Village, cursed (night, flooded) */
     {10, 7, 0, 1, 0, 0},  /* Trick Village, purified */
-    {3, 1, 1, 1, 1, 1},   /* Stormy Mountain 2: the cliff's rock face past the cave door */
-    {3, 5, 1, 1, 1, 1},   /* Phoenix Mountain 2 (the same mountain, purified) */
+    {3, 1, 1, 1, 1, 2},   /* Stormy Mountain 2: the cliff's rock face past the cave door */
+    {3, 5, 1, 1, 1, 2},   /* Phoenix Mountain 2 (the same mountain, purified) */
 };
 static int room_relief;                  /* the end is a relief (the cliff's columns of facets): relief() below */
 static int room_wall;                    /* the wall that ends inside the 4:3 picture goes on too (wall() below); ROOMS `wall`: 1 = a preview
