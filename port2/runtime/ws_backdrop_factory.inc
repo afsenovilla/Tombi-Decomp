@@ -33,6 +33,8 @@
 #define LF_Y0 24                                          /* the foliage's first row */
 #define LF_D 118                                          /* the deck's first row */
 #define LF_SAND 176
+#define LF_FEATHER 28
+#define LF_DOOR(y) ((y) < 182 ? 176 : (y) < 190 ? 176 + 80 * ((y) - 181) / 9 : 256)   /* the sand's tone in front of the door (the picture's columns 313-317), x 256 */
 #define LF_JF 175                                         /* the right jamb's foot: the picture's columns 316-317 are sand from row 174 */
 #define LF_PER 76                                         /* the deck's period */
 #define LF_NS 1024
@@ -231,7 +233,7 @@ static void lf_fix_make(void)
             Rgb c = rgb15(pic[y][318 + k]), n;
             if (lum(c) >= (y < LF_JF ? 56 : 132)) continue;
             if (y < LF_JF) { n = rgb15(pic[y < 146 ? y : y - 36][250 + k]); if (y >= LF_JF - 3) n = scale(n, 256 - (y - (LF_JF - 4)) * 40); }
-            else n = scale(lf_ground(y < LF_SAND ? LF_SAND : y, 28 + k), y < 182 ? 204 : y < 186 ? 256 - 52 * (186 - y) / 5 : 256);   /* (the shade at the door's foot, as the strip's) */
+            else n = scale(lf_ground((y < LF_SAND ? LF_SAND : y) + (y < LF_SAND + 12 ? 12 : 0), 28 + k), LF_DOOR(y));   /* (as the strip's first columns) */
             lf_fix[y][k] = (u16)(0x8000 | clampi(n.r, 0, 248) >> 3 | (clampi(n.g, 0, 248) >> 3) << 5 | (clampi(n.b, 0, 248) >> 3) << 10);
         }
 }
@@ -289,13 +291,16 @@ static void gen_lf(int pad)
                     int *p = lf_px(j, y), k = 256 - (20 - j) * 110 / 14;
                     p[0] = p[0] * k / 256; p[1] = p[1] * k / 256; p[2] = p[2] * k / 256;
                 }
-            /* on the sand only the shade the picture has at the door's foot (its columns 313-317, rows 174-183),
-               fading out over 8 columns: a longer shadow of the shed "came out of nowhere" (the user, 2026-11-17) */
-            for (int y = LF_JF; y < 186; y++)
-                for (int j = 0; j < 8; j++) {
-                    int *p = lf_px(j, y), k = 212 + 44 * j / 8;
-                    if (y >= 182) k = 256 - (256 - k) * (186 - y) / 5;
-                    p[0] = p[0] * k / 256; p[1] = p[1] * k / 256; p[2] = p[2] * k / 256;
+            /* the deck's shadow on the sand along its foot (rows 176-187 of the carried-on sand) started as a straight
+               edge at the jamb, next to the lit sand in front of the door: it comes in over LF_FEATHER columns, from
+               the lit sand 12 rows further down (the user, 2026-11-17: "feather it on the left, where it starts") */
+            for (int y = LF_JF; y < LF_SAND + 12; y++)
+                for (int j = 0; j < LF_FEATHER; j++) {
+                    Rgb lit = scale(lf_ground((y < LF_SAND ? LF_SAND : y) + 12, j + 30), LF_DOOR(y)), c;
+                    int *p = lf_px(j, y), a = (j + 1) * 256 / (LF_FEATHER + 1);
+                    a = a * a / 256;                      /* (eased) */
+                    c.r = p[0]; c.g = p[1]; c.b = p[2]; c = mix(lit, c, a);
+                    p[0] = c.r; p[1] = c.g; p[2] = c.b;
                 }
         }
         for (int y = 0; y < PH; y++)
