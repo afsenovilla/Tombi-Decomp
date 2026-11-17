@@ -807,7 +807,7 @@ static const Room ROOMS[] = {
                                                             camera, its two ends (ck_take, ws_backdrop_clock.inc; preview) */
     { 9, 1, LK_HM, 1, { { 0 } }, { { 0 } }, gen_lk },   /* the Lake's beach: a 512-column picture moved by the camera,
                                                             its right end (lk_take, ws_backdrop_lake.inc; preview) */
-    { 9, 1, IS_HM, 0, { { 0 } }, { { 0 } }, gen_is },   /* the Lake's island screen (the mansion's base): a 640-column
+    { 9, 1, IS_HM, 1, { { 0 } }, { { 0 } }, gen_is },   /* the Lake's island screen (the mansion's base): a 640-column
                                                             mosaic, its two ends (is_take, ws_backdrop_island.inc; preview) */
 };
 #define NROOMS ((int)(sizeof ROOMS / sizeof ROOMS[0]))
