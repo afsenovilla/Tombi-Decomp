@@ -90,6 +90,17 @@ static int port_ws_whm_rep;
 static const struct { unsigned char area; unsigned int secs; short d0, d1, h0, h1, up; } OBST[] = {
     { 5, 1u << 1 | 1u << 3, 60, 120, 306, 346, 32 },
 };
+/* Lanes whose opened left side is not the edge column repeated but a plain ledge: from x < x0 a filled block with its
+   floor at h.  AREA02 s1 (the Dwarf Village; the blossom village runs as 2:1 too), the back lane: its left end is
+   the hatch down to the Underground Prison, a pit (floor 0) at x < 40 that Tomba reaches over the hut's roof, where
+   exit 1 fires (H < 30, Y >= -77; kept at its 4:3 place, colview_exits.json).  Carried on from the column at the
+   camera limit + 0x80 (x 32..39: the pit and the roof's left tip, a floor at -184) Tomba walked on air at the roof's
+   height out to the wide edge.  Now the pit keeps its place and the ground the fence stands on (-88, as right of
+   the hut) goes on left of it (the user's call, 2026-11-17). */
+static const struct { unsigned char area; unsigned int secs; short d0, d1, x0, h; } LEDGE[] = {
+    { 2, 1u << 1, 45, 32767, 8, -88 },
+};
+static int whm_ledge = -1;                /* the LEDGE row port_ws_whm_col makes the column from */
 static int whm_xo, whm_d;                 /* the x and depth getCollisionPlaneAt was asked for (port_ws_whm_col) */
 
 static int walk_lane(int d)               /* a WALK side of this room whose lane d is in: carried on from +- 0x80 */
@@ -102,8 +113,16 @@ static int walk_lane(int d)               /* a WALK side of this room whose lane
 }
 short port_ws_whm_x(short x, short d, short minx, short maxx)
 {
-    port_ws_whm_rep = 0; whm_xo = x; whm_d = d;
+    port_ws_whm_rep = 0; whm_ledge = -1; whm_xo = x; whm_d = d;
     if (!port_ws_side_margin(-1)) return x;
+    {   int area, sec;
+        room(&area, &sec);
+        for (unsigned i = 0; i < sizeof LEDGE / sizeof LEDGE[0]; i++)
+            if (LEDGE[i].area == area && (LEDGE[i].secs >> sec & 1) && d >= LEDGE[i].d0 && d <= LEDGE[i].d1) {
+                if (x >= LEDGE[i].x0) return x;             /* the room's own data, the pit included */
+                port_ws_whm_rep = 1; whm_ledge = (int)i; return LEDGE[i].x0;
+            }
+    }
     int wl = (sides & 12) && walk_lane(d);
     int lo = sides & 1 || (sides & 4 && wl) ? minx - 0x80 : sides & 4 ? minx - 0xAA : -0x8000;
     int hi = sides & 2 || (sides & 8 && wl) ? maxx + 0x80 : sides & 8 ? maxx + 0xAA : 0x7FFF;
@@ -122,6 +141,13 @@ char *port_ws_whm_col(char *col, int x)
     if (!port_ws_whm_rep || cnt <= 0 || cnt > 32) return col;
     port_ws_whm_rep = 0;
     unsigned short *q = ring[ri++ & 15];
+    if (whm_ledge >= 0) {                                  /* a filled block from 1 up to h, its top a floor */
+        short h = LEDGE[whm_ledge].h;
+        whm_ledge = -1;
+        q[0] = 2; q[1] = 0x11; q[2] = 1; q[3] = (unsigned short)h; q[4] = 0x80;
+        q[5] = 1; q[6] = (unsigned short)h; q[7] = 0; q[8] = 0x80;
+        return (char *)q;
+    }
     for (int i = 0; i < cnt; i++) {
         const unsigned short *r = s + 1 + 4 * i;
         unsigned short f = r[0]; short h = (short)r[1], k = (short)r[2];
