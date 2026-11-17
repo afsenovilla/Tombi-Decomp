@@ -801,7 +801,7 @@ static const Room ROOMS[] = {
     { 8, 1, 224, 1, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, gen_pr },   /* Baccus Pier: the picture over a water layer, light
                                                             rays over both (pr_take, ws_backdrop_pier.inc) */
     { 8, 3, 224, 1, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, gen_pr },
-    { 11, 1, 224, 1, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, gen_lf },   /* the Lumberjack Factory (ws_backdrop_factory.inc) */
+    { 11, 1, 224, 1, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 256, 64, 0, 80, 181, 238, 43 } }, gen_lf },   /* the Lumberjack Factory (ws_backdrop_factory.inc) */
     { 17, 1, IC_HM, 1, { { 0 } }, { { 0 } }, gen_ic },   /* the Iron Castle's entrance: a 384-row picture drawn from frame
                                                             row -144 (ic_take, ws_backdrop_castle.inc) */
     { 9, 2, CK_HM, 1, { { 0 } }, { { 0 } }, gen_ck },   /* the grandfather clock room: a 480 x 288 picture moved by the

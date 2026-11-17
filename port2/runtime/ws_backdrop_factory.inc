@@ -34,7 +34,6 @@
 #define LF_D 118                                          /* the deck's first row */
 #define LF_SAND 176
 #define LF_FEATHER 28
-#define LF_DOOR(y) ((y) < 182 ? 176 : (y) < 190 ? 176 + 80 * ((y) - 181) / 9 : 256)   /* the sand's tone in front of the door (the picture's columns 313-317), x 256 */
 #define LF_JF 175                                         /* the right jamb's foot: the picture's columns 316-317 are sand from row 174 */
 #define LF_PER 76                                         /* the deck's period */
 #define LF_NS 1024
@@ -225,6 +224,26 @@ static Rgb lf_ground(int y, int u)                        /* the deck's front an
    picture's): the jamb's planks (the left jamb's, as the strip's columns) and the sand under it; shims/gpu.c draws
    them when the game draws the open door (port_ws_backdrop_fix). */
 static u16 lf_fix[PH][2];
+/* the lit sand (a texel 12 rows further down) with the tone the picture's sand has on row y in front of the door
+   (the open door's columns 311-317, clean sand; the door is in pic as an over piece), per channel */
+static int lf_dt[PH][3], lf_lt[3];
+static void lf_door_tone(void)
+{
+    int n = 0;
+    lf_lt[0] = lf_lt[1] = lf_lt[2] = 0;
+    for (int y = LF_SAND + 12; y < LF_SAND + 24; y++) for (int u = 28; u < 60; u++) { Rgb c = lf_ground(y, u); lf_lt[0] += c.r; lf_lt[1] += c.g; lf_lt[2] += c.b; n++; }
+    for (int k = 0; k < 3; k++) lf_lt[k] = lf_lt[k] / n > 0 ? lf_lt[k] / n : 1;
+    for (int y = 0; y < PH; y++) {
+        int s[3] = { 0, 0, 0 }, m = 0;
+        for (int d = -1; d <= 1; d++) for (int x = 311; x < 318; x++) { Rgb c = rgb15(pic[clampi(y + d, LF_JF, PH - 1)][x]); s[0] += c.r; s[1] += c.g; s[2] += c.b; m++; }
+        for (int k = 0; k < 3; k++) lf_dt[y][k] = s[k] / m;
+    }
+}
+static Rgb lf_door(Rgb c, int y)
+{
+    Rgb o = { clampi(c.r * lf_dt[y][0] / lf_lt[0], 0, 255), clampi(c.g * lf_dt[y][1] / lf_lt[1], 0, 255), clampi(c.b * lf_dt[y][2] / lf_lt[2], 0, 255) };
+    return o;
+}
 static void lf_fix_make(void)
 {
     memset(lf_fix, 0, sizeof lf_fix);
@@ -233,14 +252,14 @@ static void lf_fix_make(void)
             Rgb c = rgb15(pic[y][318 + k]), n;
             if (lum(c) >= (y < LF_JF ? 56 : 132)) continue;
             if (y < LF_JF) { n = rgb15(pic[y < 146 ? y : y - 36][250 + k]); if (y >= LF_JF - 3) n = scale(n, 256 - (y - (LF_JF - 4)) * 40); }
-            else n = scale(lf_ground((y < LF_SAND ? LF_SAND : y) + (y < LF_SAND + 12 ? 12 : 0), 28 + k), LF_DOOR(y));   /* (as the strip's first columns) */
+            else n = y < LF_SAND + 12 ? lf_door(lf_ground((y < LF_SAND ? LF_SAND : y) + 12, 28 + k), y) : lf_ground(y, 28 + k);   /* (as the strip's first columns) */
             lf_fix[y][k] = (u16)(0x8000 | clampi(n.r, 0, 248) >> 3 | (clampi(n.g, 0, 248) >> 3) << 5 | (clampi(n.b, 0, 248) >> 3) << 10);
         }
 }
 
 static void gen_lf(int pad)
 {
-    lf_fix_make();
+    lf_door_tone(); lf_fix_make();
     lf_cv = calloc((size_t)PH * (size_t)pad, sizeof *lf_cv); lf_pad = pad; lf_wd = pad + LF_PS + LF_OV;
     lf_T = malloc(sizeof(short) * (size_t)LF_D * lf_wd); lf_Z = malloc(sizeof(int) * (size_t)LF_D * lf_wd);
     if (!lf_cv || !lf_T || !lf_Z) { free(lf_cv); free(lf_T); free(lf_Z); lf_cv = 0; return; }
@@ -296,7 +315,7 @@ static void gen_lf(int pad)
                the lit sand 12 rows further down (the user, 2026-11-17: "feather it on the left, where it starts") */
             for (int y = LF_JF; y < LF_SAND + 12; y++)
                 for (int j = 0; j < LF_FEATHER; j++) {
-                    Rgb lit = scale(lf_ground((y < LF_SAND ? LF_SAND : y) + 12, j + 30), LF_DOOR(y)), c;
+                    Rgb lit = lf_door(lf_ground((y < LF_SAND ? LF_SAND : y) + 12, j + 30), y), c;
                     int *p = lf_px(j, y), a = (j + 1) * 256 / (LF_FEATHER + 1);
                     a = a * a / 256;                      /* (eased) */
                     c.r = p[0]; c.g = p[1]; c.b = p[2]; c = mix(lit, c, a);
