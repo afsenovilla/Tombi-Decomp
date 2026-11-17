@@ -14,6 +14,8 @@
  * mirrored at its edge); also PORT_WS_BACKDROP=1 (approved) / 2 (mirror) / 3 (every room) (not in the wasm2c build,
  * which has no environment).
  *
+ * AREA08 s1 / s3 (Baccus Pier, ws_backdrop_pier.inc): a preview since 2026-11-17.
+ *
  * The redraw (build_redraw) is drawn by code, the way shims/gfx_es.c makes its Spanish graphics: nothing of the
  * picture is copied or mirrored and no pixels are shipped.  The tables below hold coordinates only (the brick bond,
  * the floor line, where to sample); every colour comes from the user's picture in VRAM at run time:
@@ -746,6 +748,7 @@ static void gen_cb(int pad);
 #include "ws_backdrop_mermaid.inc"
 #include "ws_backdrop_ironmain.inc"
 #include "ws_backdrop_clock.inc"
+#include "ws_backdrop_pier.inc"
 #define PIECES_TOP4 { 128, 0, 224, 64, 32, 256, 0 }, { 128, 64, 224, 64, 32, 256, 32 }, { 128, 128, 224, 64, 32, 256, 64 }, \
                     { 128, 192, 224, 64, 32, 256, 96 }
 #define OVER_A5 { { 256, 0, 112, 56, 104, 0, 0 }, { 256, 56, 112, 200, 104, 56, 0 }, { 256, 144, 0, 64, 80, 256, 24 }, \
@@ -790,6 +793,9 @@ static const Room ROOMS[] = {
                                                             camera, its two ends (mm_take, ws_backdrop_mermaid.inc) */
     { 17, 2, IM_H, 1, { { 0 } }, { { 0 } }, gen_im },   /* the Iron Castle main room: a 640-column picture moved by the
                                                             camera, its two ends (im_take, ws_backdrop_ironmain.inc) */
+    { 8, 1, 224, 0, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, gen_pr },   /* Baccus Pier: the picture over a water layer, light
+                                                            rays over both (pr_take, ws_backdrop_pier.inc; preview) */
+    { 8, 3, 224, 0, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, gen_pr },
     { 9, 2, CK_HM, 1, { { 0 } }, { { 0 } }, gen_ck },   /* the grandfather clock room: a 480 x 288 picture moved by the
                                                             camera, its two ends (ck_take, ws_backdrop_clock.inc; preview) */
 };
@@ -848,6 +854,7 @@ static u32 grab(const u16 *vram, int cx, int cy)
             if (c && p->y + y < PH && p->x + x < PW) { pic[p->y + y][p->x + x] = c; pic_ov[p->y + y][p->x + x] = 1; }
         }
     }
+    if (room->gen == gen_pr) pr_take(vram);              /* (its water and ray layers) */
     if (room->gen == gen_en) en_take(vram, cx, cy, en_gl());   /* (its scene: 19 more quads, as the renderer shows them) */
     for (int y = 0; y < PH; y++) for (int x = 0; x < PW; x++) h = (h ^ pic[y][x]) * 16777619u;
     return h;

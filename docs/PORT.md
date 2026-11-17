@@ -3633,6 +3633,29 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     the right edge, rows 0-140 and 175-215) are cut by both edges, and the picture has no clean leaf windows to go on
     with them without copying the same leaves next to themselves; the right edge's crown needs foliage from the top
     canopy (rows 0-45) taken at other rows.  Not delivered until that is solved.
+  - AREA08 s1 / s3, Baccus Pier, done 2026-11-17 (`gen_pr` / `pr_take`, `runtime/ws_backdrop_pier.inc`; preview, off by
+    default: `--ws-backdrop-rooms 8:1,8:3`; the look approved by the user on prototype renders, option by option).
+    The picture's layers are read from VRAM (`pr_take`: the water quads' texels, the 4 bpp ray layer).  The strips:
+    (1) the scene without the pier (its texels back to the water layer) goes on past each edge from the picture's
+    other side, never mirrored, from the column that matches the edge column best (sum of absolute differences over
+    offsets 1..69), its tone brought to the edge's over 28 columns; (2) a nearer tree right at each join, behind the
+    leaves the edge cuts (the user asked for a tree that "connects with those leaves" and for it to be nearer): the
+    big middle trunk (columns 188-223, rows 30-165) drawn 1.7 times nearer at the left and 1.5 at the right, scaled
+    about the horizon (row 113); its bark is the trunk's 5 x 5 mean shading at that scale plus the bark's grain at the
+    picture's own texel size (a plain enlargement showed horizontal bands, which the user rejected); its foot, which
+    the pier's post hides in the picture, is bark of the clean rows above and meets the water in a U (0.16 of its
+    width deep, a dark contact line; the user: "more like a U", "fill it up to the U"), the reflection below follows
+    that curve; (3) the leaves cut by the edge are completed, each along its own axis: its texels are flood-filled in
+    the picture (similar colours, 26 columns in), the axis is the direction of largest spread among 32, the width the
+    5-95 % range across it, and it goes on as a lens (4.2 widths long, at most 16 columns past what is visible) in its
+    own colours across its width; runs without a clear leaf get a short tip; (4) the light: the glow's radial profile
+    about (12, -44) (the 15 % point of each ring of the ray layer) and the rays crossing an edge continued along their
+    lines from (30.25, -15.25), added like the game's layer.  Rejected on the way (do not try again): loose leaves
+    drawn in the strip without a tree behind them ("they make no sense", "they look like they are falling").
+    Checked headless 2026-11-17: 16:9 / 21:9 / 32:9 in the game, i386 = wasm2c frames (16:9, 21:9), 4:3 identical
+    with the flag, the default identical to `--ws-backdrop off`; not on the device, not on the GL renderer.  Weak
+    points: both near trees are the middle trunk again (the original stays in the picture); at 32:9 the picture's
+    trees repeat; the near trees' bark is smoother than the picture's.
   - Looked at in the same round (2026-11-16) and dropped, with the reason: AREA18 s2 (the witch's kitchen: rafters of
     a roof slope cut by both edges, a cupboard / shelf wall at the left and a bunch of grapes cut by the right edge:
     every edge holds objects, nothing to continue without inventing them; since done by continuing each object on its
