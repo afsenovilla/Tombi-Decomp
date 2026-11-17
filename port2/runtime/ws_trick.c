@@ -38,7 +38,8 @@
  * and so do the straw ledges cut into it (y -2464: the floor, its fringe at z -45 and the lip under it).  Nothing is
  * culled there either (PORT_WSXTRA=300 PORT_WSBLK=600 draws the same frames).  The relief goes on with its own two
  * columns (relief() below, ROOMS `relief`), the fringe by the sweep above (in a relief room a cut-out the model
- * itself lays tile after tile is swept too).
+ * itself lays tile after tile is swept too; one alone in its plane that the polygon's edge cuts, the far rock's last
+ * step, goes on with the edge's own texel column).
  *
  * Off by default: a room is extended when it is in ROOMS and approved there, or named by --ws-trick-rooms, or with
  * --ws-trick on (every room of the table).  Without --widescreen nothing here runs. */
@@ -383,7 +384,7 @@ static void build(void)
             if ((r1->y - r0->y) * (r2->z - r0->z) - (r1->z - r0->z) * (r2->y - r0->y) != 0) continue;
             if (p->nv == 4) { const Vx *r3 = &p->v[ring[3]]; if ((r1->y - r0->y) * (r3->z - r0->z) - (r1->z - r0->z) * (r3->y - r0->y) != 0) continue; }
         }
-        int have_tile = 0, t0 = 0, t1 = 0, t1e = 0, flip = 0, holes = 0;
+        int have_tile = 0, t0 = 0, t1 = 0, t1e = 0, flip = 0, holes = 0, hold = 0;
         for (int e = 0; e < p->nv; e++) {
             int ia = ring[e], ib = ring[(e + 1) % p->nv];
             const Vx *a = &p->v[ia], *b = &p->v[ib];
@@ -405,10 +406,13 @@ static void build(void)
             if (!have_tile) {
                 have_tile = 1; holes = has_holes(p); tile(p, &t0, &t1); flip = join_kind(p, t0, t1);
                 if (holes && room_relief && flip >= 0) holes = 0;       /* (a fringe the model itself lays tile after tile: the straw on a ledge) */
+                if (holes && room_relief) { holes = 0; hold = 1; }      /* (a cut-out alone in its plane that its polygon's edge cuts, the far
+                                                                           rock's last step: the edge's own texel column goes on, so the
+                                                                           step runs on level and what is see-through stays so) */
                 if (flip < 0) { flip = 0; t1e = wrap_column(p, t0, t1); if (t1e < a->u || t1e < b->u) t1e = t1; t1 = t1e; }
             }
             if (holes) continue;                                             /* a tree's crown ends where it ends */
-            if (iabs(rho) < 8 || t1 - t0 < 4) rho = 0;                       /* one texel column */
+            if (iabs(rho) < 8 || t1 - t0 < 4 || hold) rho = 0;               /* one texel column */
             u32 ca = p->col[ia] & 0xFFFFFF, cb = p->col[ib] & 0xFFFFFF;
             int x[2] = {a->x, b->x}, u[2] = {a->u * 256, b->u * 256}, r[2] = {rho, rho}, end[2] = {xwide(a->z), xwide(b->z)};
             const Vx *ev[2] = {a, b};

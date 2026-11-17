@@ -751,6 +751,7 @@ static void gen_cb(int pad);
 #include "ws_backdrop_pier.inc"
 #include "ws_backdrop_lake.inc"
 #include "ws_backdrop_factory.inc"
+#include "ws_backdrop_island.inc"
 #define PIECES_TOP4 { 128, 0, 224, 64, 32, 256, 0 }, { 128, 64, 224, 64, 32, 256, 32 }, { 128, 128, 224, 64, 32, 256, 64 }, \
                     { 128, 192, 224, 64, 32, 256, 96 }
 #define OVER_A5 { { 256, 0, 112, 56, 104, 0, 0 }, { 256, 56, 112, 200, 104, 56, 0 }, { 256, 144, 0, 64, 80, 256, 24 }, \
@@ -803,6 +804,8 @@ static const Room ROOMS[] = {
                                                             camera, its two ends (ck_take, ws_backdrop_clock.inc; preview) */
     { 9, 1, LK_HM, 1, { { 0 } }, { { 0 } }, gen_lk },   /* the Lake's beach: a 512-column picture moved by the camera,
                                                             its right end (lk_take, ws_backdrop_lake.inc; preview) */
+    { 9, 1, IS_HM, 0, { { 0 } }, { { 0 } }, gen_is },   /* the Lake's island screen (the mansion's base): a 640-column
+                                                            mosaic, its two ends (is_take, ws_backdrop_island.inc; preview) */
 };
 #define NROOMS ((int)(sizeof ROOMS / sizeof ROOMS[0]))
 const char *port_ws_backdrop_rooms;                      /* --ws-backdrop-rooms A:S,A:S,... (decimal; "all") */
@@ -893,6 +896,14 @@ const u16 *port_ws_backdrop(const u16 *vram, int pad, int x, int y, int w, int h
         for (int i = 0; i < NROOMS; i++)
             if (ROOMS[i].h == CK_HM && ROOMS[i].area == a && ROOMS[i].sec == sc)
                 return room_enabled(&ROOMS[i]) ? ck_take(vram, pad, x, y, rows) : 0;
+    }
+    if (enabled && pad > 0 && w == 256 && h == 256 && !u && !v && !tx && ty == 256 && depth == 1 && cx == 128 && cy == 510) {
+        u8 *g = port_ram_ptr(PORT_A_GAME); int a = *(u16 *)(g + 0), sc = *(u16 *)(g + 2);   /* AREA09 s1, the island (is_take) */
+        for (int i = 0; i < NROOMS; i++)
+            if (ROOMS[i].h == IS_HM && ROOMS[i].area == a && ROOMS[i].sec == sc && room_enabled(&ROOMS[i])) {
+                const u16 *st = is_take(vram, pad, x, y, rows);
+                if (st) return st;
+            }
     }
     if (enabled && pad > 0 && y == 4 && w == 256 && h == 256 && !u && !v && !tx && ty == 256 && depth == 1 && cx == 128 && cy == 510) {
         u8 *g = port_ram_ptr(PORT_A_GAME); int a = *(u16 *)(g + 0), sc = *(u16 *)(g + 2);   /* AREA09 s1 (lk_take) */

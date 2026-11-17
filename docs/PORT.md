@@ -3042,6 +3042,18 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   on / off; i386 = wasm2c whole frames (20 frames per flight: s1 at 16:9 and 32:9, s5 at 16:9 and 21:9; in s1's
   flight at fly -1250 one frame on the way, 1980, differs in an object of the room, a swinging orange arm, between
   the two builds before this change as well).  To approve a room: `approved` = 1 in ROOMS of ws_trick.c.
+  **Higher up at the same end** (2026-11-17): flights at fly -1200 .. -1450 (the upper ledge with the second cave
+  door, and the camera above it) show the relief and the upper ledge's straw closed by the code above.  One thing
+  was still cut: the far rock (a card at z 290, a stair of strata) ends at x 5747, 5 columns short of a 16:9 frame,
+  and only its lower row (an opaque tile) was swept; the row above (y -2570..-2455) is a cut-out, the stair's
+  silhouette, alone in its plane, and was left "as it ends" although the polygon's edge cuts through its last step.
+  In a relief room such a cut-out now goes on with the edge's own texel column (rho 0): the step runs on level and
+  what is see-through stays see-through (1 more quad).  Checked: with the flag, the 16:9 / 21:9 frames at fly -40
+  and -1250 identical to the build before in both rooms, at -1350 / -1450 different only in the step's columns
+  (16:9: 7 columns, 24 rows); Trick Village's left end, AREA03 s0 and AREA10 s1 identical; 4:3 identical; i386 =
+  wasm2c (s5 16:9 / 21:9, s1 16:9).  The mountain's top itself (the strata tower behind the upper ledge) ends
+  inside the 4:3 frame on the right; nothing is added there.  Weak points: at 21:9 the step is 72 columns of level
+  streaks; on the LEFT of the same views the tower's ragged left edge shows in the left strip (not this end's work).
   Weak points: the copied columns repeat the last two exactly (same facets, 76 units further out: at 32:9 the pair
   shows three times); the first new column is narrower than the model's (33 units against 44: A is laid from the
   end's line to the copy of I); the straw fringe's swept strip is thinner than the model's ragged one for its first
@@ -4293,6 +4305,48 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     cloud's top is a level streak and the cliff has no end (it leaves the frame); at 21:9 the left strip at the
     other end of the screen (64 columns left of the picture) is still the clear colour; `lk_take` uses the Singing
     Rock's buffers (`mm_src`), which that room then grabs again.
+  - AREA09 s1, the Lake's island screen (the base of the Familiar Looking Mansion; 2026-11-17,
+    `runtime/ws_backdrop_island.inc`; off by default, preview with `--ws-backdrop-rooms 9:1`, the beach's flag: the
+    two are rows of the same room).  The room is one sprite world moved by the camera (CAMERA_SCROLL 160..1074): the
+    beach picture at world columns 768..1279 and, at 0..639, the island, a mosaic of ten sprites of CLUT (128, 511),
+    640 x 448 (`IS_P`; rows 448 on of its pages are the shore's wave tiles).  `updateAreaScrollB` (section 1) cuts
+    between them: under player x 840 the screen fades and the camera is held at 480 or less; spawn point 1
+    (`GAME.selectedSpawnPoint`, 0x8009C982) starts on the island.  The picture is exactly two 4:3 frames wide, so both
+    ends of the screen are picture endings: 53 columns of the clear colour (the sky's) over the whole height at 16:9,
+    on the left with the camera at 160 (standing at the mansion's doors) and on the right with it at 480 (swimming in
+    from the beach).  The camera's height is fixed while playing (picture rows 220..443 on frame rows 16..239; a jump
+    does not move it); only the first visit's pan up to the mansion shows the rows above.  The game draws a
+    foreground ledge past the picture's left edge (quads of page (256, 0) from frame column -53 at the left limit,
+    moving 1.5 times as fast as the picture): it stays in front of the strip.
+    Measured (rows from 220): at the left edge the trunk's wall, lit evenly, to its foot on row 170, level; sand from
+    171.  At the right edge the sky's gradient to row 77, a cloud whose last lump peaks 13 columns in and comes down
+    to the edge, its body and the haze to row 133, the sea from 134.  Its own grab (`is_take`, called from
+    `port_ws_backdrop` on the room's first backdrop sprite, the beach picture's right half, whose frame position
+    gives the camera; it falls through to `lk_take` on the beach): the extensions are made once with the Singing
+    Rock's `mb_band`, never mirrored: left, the wall as one band (windows: the wall over the doors, columns 0-199)
+    and the sand from its own rows; right, the sky as a smooth band, the cloud as a band of its own texels whose top
+    goes on in lumps (ellipse arcs, `is_lump`), the sea from its own rows.  The rows above 220 on the left
+    (`is_gen_up`, made only when the camera first rises): the cap's grass and rock and the ledge under it go on level
+    as bands, the crown of the tree the edge cuts closes round 16 columns out (an ellipse about its trunk, outline in
+    lumps); on the right they are the clear colour, as in the picture.  Each frame the strips are those columns for
+    the camera's place and height; the picture's own columns are left to the game's sprites.
+    To reach the screens headless: `--poke 1250:8009C982:1:2` with the select (the island, camera at its left
+    limit); the right end: the select's beach, `--sweep-x 1900:12:-600 --sweep-fly 0` (the flight ends over the
+    water and the room cuts; the debug select's save cannot walk into the water).  `--sweep-x` takes `~N` (let the
+    player go for N vblanks).
+    Checked (software, i386): both ends covered at 16:9, 21:9 and 32:9; 4:3 with the flag and the default 16:9 / 21:9
+    frames byte-identical to the build before (island both ends, beach); the beach's right end with the flag
+    identical to the build before; the other rooms' 16:9 frames with `--ws-backdrop on` identical (2:5 2:1 5:1 5:3
+    19:1 11:2 9:5 9:3 9:4 9:2 17:2 17:3 17:4 17:5 16:3 16:4 16:5 16:6 18:2 6:1 6:2); a 21:9 frame holds the 16:9 one
+    and a 32:9 one the 21:9 one; OpenGL (xvfb): the strips are covered, the frame differs from the GL frame without
+    the flag only in the strip, and from the software strip only where game objects are (the foreground ledge, 55
+    pixels of a sprite on the right); i386 = wasm2c whole frames (both ends at 16:9, 21:9, 32:9; the left end with
+    the camera raised); under 0.5 s once at room entry (0.12 and 0.45 s more over a whole run, two timings).  Weak points: the rows above 220 were only seen by flying
+    (the first visit's pan was not reproduced headless), the tree's closed crown is a smooth lump and the cap's grass
+    runs level and straight; past column 53 (21:9) the foreground ledge is cut by its own quad's edge, as the game
+    draws it; the wall has no end (it leaves the frame) and repeats the look of the wall over the doors; the cloud's
+    lumps repeat every 136 columns; pads over 264 columns (32:9: 267) leave their last columns the clear colour; the
+    collision does not go on (Tomba stops where he stopped at 4:3).
   - AREA06 s2 and s1, the Mermaid's Singing Rock (2026-11-16, `runtime/ws_backdrop_mermaid.inc`; off by default,
     preview with `--ws-backdrop-rooms 6:1,6:2`)..  Neither was in the first scan (flat clear blue, 6394ff, in the
     strips, which reads as sky on one frame; tools/ws_survey.py found them)..  Both are outside the table's layout, so
