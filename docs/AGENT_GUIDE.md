@@ -66,6 +66,8 @@ is the reference for each feature (it is long: search it).
   that resets Tomba (AREA03 s0/s4), a pit under the poked position. Say so instead of guessing.
 - `--show-collision` draws the WHM lines, object boxes and room exits; `PORT_CVLOG=1` (with it) prints one line per
   frame, `CVLOG area section H=.. Y=.. D=..`, used by `tools/ws_exit_sweep.py`.
+  It prints nothing in the wasm2c build (`build/wasm/tombi2w`): there compare positions with `--dump-ram FRAME:FILE`
+  (PLAYER x / y at 0x800A604A / 0x800A604E).
 - In side view one world unit is about one screen column at Tomba's depth (measured), so the widescreen pad in
   columns is also the distance in units.
 - Picking the moment of a room change in a frame series: the last frame before the fade (brightness drops).

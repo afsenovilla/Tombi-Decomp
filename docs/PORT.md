@@ -2685,12 +2685,18 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   Check: `python3 tools/ws_exit_sweep.py [--rooms A:S,...] [--all] [--ws 4:3,16:9,...]` puts Tomba 70 units inside
   each edge exit after the debug select and walks him out, reading `PORT_CVLOG=1` lines of the collision view
   (`CVLOG area section H Y D` per frame); a moved exit must reach the same room on the floor at every width.
-  Also for AREA05 s1/s3: the notice board at the back (L4 type 0x1A subtype 0x13) takes a 32-unit talk box instead of
-  8 (fixes.txt), it was hard to stand in.
   Walk limits are decided room by room, apart from the exits: a wide frame does not always mean wider limits.  The
-  `WALK` table of `ws_exits.c` opens a side without a moved exit (the clamps and the WHM column as above): AREA05 s1/s3
-  right (the square goes on; its 4:3 WHM wall at H 321 is past the repeated column, so it goes too); AREA06 s2 right.  Checked: Tomba
-  stops at H 310 on 4:3, 363 on 16:9, 430 on 21:9, on the floor.
+  `WALK` table of `ws_exits.c` opens a side without a moved exit, per depth plane (lane), with the lane's scale in
+  columns per unit: on a deeper lane the clamps' margin is scaled ((150 + pad) / scale - 150) so Tomba still reaches
+  the wide edge.  On a WALK lane the WHM is carried on from the camera limit +- 0x80 like an exit side (the 4:3
+  data's walls past it dropped); on the other lanes only past the room's own WHM end (+- 0xAA), so their walls stay.
+  `OBST` raises the floor of the carried-on WHM over a span (an obstacle Tomba hops onto or over).  Rooms: AREA05
+  s1/s3 right, both lanes; the back lane (0.835 column per unit) has the fountain as a 32-unit obstacle at H 306..346
+  (the user's choice 2026-11-17: an obstacle to jump over, standing on it allowed; v0.5.9 let Tomba walk through it).
+  Checked: front lane H 310 / 363 / 430 at 4:3 / 16:9 / 21:9, back lane 310 / 403 / 483, on the floor past the
+  fountain.  AREA06 s2 right.  (A wider talk box for the AREA05 notice board, 2026-11-16, was dropped: the board is
+  out of reach on the back lane and `--cut-content` moves its sign to the ground, so the change only widened that
+  copy.)
   Moved (each checked by a headless sweep that puts Tomba 70 units from the exit and walks him out, at 4:3, 16:9, 21:9
   and 32:9: same destination, on the floor; and reviewed room by room on renders): AREA02 s1 left (both lanes; the
   flowered village, AREA19 on the disc, runs as area 2 section 1 and so has it too), s5 right; AREA03 s1, s5 left;

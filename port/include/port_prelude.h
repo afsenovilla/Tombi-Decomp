@@ -22,7 +22,7 @@ void *port_bios_tcb_table(void);
 #define PORT_WSM 0
 #define PORT_WSL 0
 #define PORT_WSR 0
-static int port_ws_whm_rep;
+#define port_ws_whm_x(x, d, lo, hi) (x)
 #define port_ws_whm_col(col, x) (col)
 #define port_ws_exit_hold(m, e) 0
 extern int port_ws_backdrop_period(void *, int);   /* --widescreen: repeat a wrapping backdrop column (port2 main0_handwritten.c) */

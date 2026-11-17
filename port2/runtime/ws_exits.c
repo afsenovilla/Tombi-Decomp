@@ -27,17 +27,25 @@ static int room(int *area, int *sec)
 }
 
 /* Room sides opened up to the wide edge without a moved exit there (decided room by room, from renders: a wide frame
-   does not always mean wider limits).  sides: 1 = left, 2 = right */
-static const struct { unsigned char area; unsigned int secs; unsigned char sides; } WALK[] = {
-    { 5, 1u << 1 | 1u << 3, 2 },     /* AREA05 s1/s3 (one room, two states): the square goes on to the right */
-    { 6, 1u << 2, 2 },               /* AREA06 s2, the Mermaid's Singing Rock: the beach goes on (ws_backdrop_mermaid.inc) */
+   does not always mean wider limits).  sides: 1 = left, 2 = right;
+   d0..d1: the depth planes (lanes) whose WHM is carried on from the camera limit +- 0x80, dropping the 4:3 data's walls
+   there; on the other planes the room's own WHM is kept to its end (+- 0xAA), walls included.
+   cpu: screen columns per path unit on that lane (1000 = 1.0); on a deeper lane the clamps' margin is scaled so Tomba
+   still reaches the wide edge (the clamps count units from the camera limit: 150 + pad units reach the edge at 1.0). */
+static const struct { unsigned char area; unsigned int secs; unsigned char sides; short d0, d1, cpu; } WALK[] = {
+    /* AREA05 s1/s3 (one room, two states): the square goes on to the right on both lanes; on the back lane (deeper:
+       0.835 column per unit, measured on the fountain's wall) the fountain is an obstacle (OBST) */
+    { 5, 1u << 1 | 1u << 3, 2, -45, 45, 1000 },
+    { 5, 1u << 1 | 1u << 3, 2, 60, 120, 835 },
+    { 6, 1u << 2, 2, -32768, 32767, 1000 },   /* AREA06 s2, the Mermaid's Singing Rock: the beach goes on (ws_backdrop_mermaid.inc) */
 };
 
 /* the pad when Tomba may walk past the 4:3 limit on that side (right: 1 / left: 0; -1: either): a moved exit there, or
    WALK; else 0 */
+static int sides;          /* this room's opened sides: 1 / 2 = left / right exit moved, 4 / 8 = left / right WALK */
 int port_ws_side_margin(int right)
 {
-    static int last_area = -1, last_sec = -1, sides = 0;
+    static int last_area = -1, last_sec = -1;
     int area, sec;
     if (!port_ws_cull || !port_ws_exits || !room(&area, &sec)) return 0;
     if (area != last_area || sec != last_sec) {
@@ -49,17 +57,62 @@ int port_ws_side_margin(int right)
             if (x->ws0 < 0 || x->ws1 < 0) sides |= 1;
         }
         for (unsigned i = 0; i < sizeof WALK / sizeof WALK[0]; i++)
-            if (WALK[i].area == area && (WALK[i].secs >> sec & 1)) sides |= WALK[i].sides;
+            if (WALK[i].area == area && (WALK[i].secs >> sec & 1)) sides |= WALK[i].sides << 2;
     }
-    if (!(sides & (right < 0 ? 3 : right ? 2 : 1))) return 0;
-    return port_ws_cull < WS_EXIT_MAX ? port_ws_cull : WS_EXIT_MAX;
+    if (!(sides & (right < 0 ? 15 : right ? 10 : 5))) return 0;
+    int m = port_ws_cull < WS_EXIT_MAX ? port_ws_cull : WS_EXIT_MAX;
+    if (right >= 0 && !(sides & (right ? 2 : 1))) {          /* a WALK side: the lane Tomba is on, at its scale */
+        int d = *(short *)PORT_SPAD(0x172);
+        for (unsigned i = 0; i < sizeof WALK / sizeof WALK[0]; i++)
+            if (WALK[i].area == area && (WALK[i].secs >> sec & 1) && (WALK[i].sides & (right ? 2 : 1))
+                && d >= WALK[i].d0 && d <= WALK[i].d1)
+                return WALK[i].cpu < 1000 ? (150 + m) * 1000 / WALK[i].cpu - 150 : m;
+    }
+    return m;
 }
 int port_ws_player_margin(void) { return port_ws_side_margin(-1); }
 
 /* getCollisionPlaneAt (fixes.txt): past the opened edge the column of the edge pixel x goes on.  Repeated as it is,
    its sloped pieces and walls came back every 8 units (a sawtooth floor, a wall every column): the copy keeps the
    floors, ceilings and filled blocks, each flat at its height at x, and drops the walls. */
-int port_ws_whm_rep;
+static int port_ws_whm_rep;
+
+/* getCollisionPlaneAt (fixes.txt), before its own range test: x past an opened edge is moved to the edge column, and
+   port_ws_whm_col then gives the flattened copy of it.  Beside a moved exit the copy starts at the camera limit
+   -/+ 0x80, a column Tomba always walks over on 4:3 before the exit (the WHM ends at -/+ 0xAA and may already stop
+   or slope there).  On a WALK side (no exit) the same on the lanes WALK lists; on the others it starts only where
+   the room's WHM ends, -/+ 0xAA, so a wall inside the 4:3 data stays (AREA05 s1: the fountain on the back lane, a
+   wall at H 321, was walkable when every lane was carried on from +0x80). */
+/* Obstacles in the WHM carried on past an opened edge: from h0 to h1 (path units) on the depth planes d0..d1 the
+   floor and the filled block's top are raised by `up` units, so Tomba has to jump over (and may stand on top: the
+   user's choice, 2026-11-17).  AREA05 s1/s3: the fountain (pump and trough) on the back lane, H about 311..354 (that
+   lane is deeper: 0.84 column per unit); on 4:3 the room's wall at H 324, in the middle of it, stopped Tomba. */
+static const struct { unsigned char area; unsigned int secs; short d0, d1, h0, h1, up; } OBST[] = {
+    { 5, 1u << 1 | 1u << 3, 60, 120, 306, 346, 32 },
+};
+static int whm_xo, whm_d;                 /* the x and depth getCollisionPlaneAt was asked for (port_ws_whm_col) */
+
+static int walk_lane(int d)               /* a WALK side of this room whose lane d is in: carried on from +- 0x80 */
+{
+    int area, sec;
+    room(&area, &sec);
+    for (unsigned i = 0; i < sizeof WALK / sizeof WALK[0]; i++)
+        if (WALK[i].area == area && (WALK[i].secs >> sec & 1) && d >= WALK[i].d0 && d <= WALK[i].d1) return 1;
+    return 0;
+}
+short port_ws_whm_x(short x, short d, short minx, short maxx)
+{
+    port_ws_whm_rep = 0; whm_xo = x; whm_d = d;
+    if (!port_ws_side_margin(-1)) return x;
+    int wl = (sides & 12) && walk_lane(d);
+    int lo = sides & 1 || (sides & 4 && wl) ? minx - 0x80 : sides & 4 ? minx - 0xAA : -0x8000;
+    int hi = sides & 2 || (sides & 8 && wl) ? maxx + 0x80 : sides & 8 ? maxx + 0xAA : 0x7FFF;
+    if (lo < 0 && *(unsigned short *)PORT_M0(PORT_A_GAME) != 0xe && (sides & 5)) lo = 0;   /* (the game's x < 0 test) */
+    if ((sides & 5) && x < lo) { port_ws_whm_rep = 1; return (short)lo; }
+    if ((sides & 10) && x > hi) { port_ws_whm_rep = 1; return (short)hi; }
+    return x;
+}
+
 static unsigned short ring[16][1 + 32 * 4]; static int ri;
 int port_ws_whm_is_copy(const void *p) { return (const char *)p >= (const char *)ring && (const char *)p < (const char *)(ring + 16); }
 char *port_ws_whm_col(char *col, int x)
@@ -83,6 +136,18 @@ char *port_ws_whm_col(char *col, int x)
         o[0] = f; o[1] = (unsigned short)h; o[2] = (unsigned short)k; o[3] = r[3];
     }
     q[0] = (unsigned short)n;
+    {   int area, sec;
+        room(&area, &sec);
+        for (unsigned i = 0; i < sizeof OBST / sizeof OBST[0]; i++) {
+            if (OBST[i].area != area || !(OBST[i].secs >> sec & 1) || whm_d < OBST[i].d0 || whm_d > OBST[i].d1
+                || whm_xo < OBST[i].h0 || whm_xo > OBST[i].h1) continue;
+            for (int k = 0; k < n; k++) {             /* up is negative Y: a filled block's top is base + dY */
+                unsigned short *o = q + 1 + 4 * k;
+                if (o[0] & 0x10) o[2] = (unsigned short)((short)o[2] - OBST[i].up);
+                else if (o[0] & 1) o[1] = (unsigned short)((short)o[1] - OBST[i].up);
+            }
+        }
+    }
     return (char *)q;
 }
 

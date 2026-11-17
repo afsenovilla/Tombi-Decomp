@@ -36,7 +36,7 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
 
 0a. **Widescreen exits (2026-11-17, docs/PORT.md "Widescreen exits", `runtime/ws_exits.c`).** Moved to the wide
    edge, reviewed room by room with the user: AREA02 s1 (and the blossom village, which runs as 2:1), s5; AREA03 s1,
-   s5; AREA04 s2; AREA05 s1/s3 (+ right side opened, + wider notice-board talk box); AREA06 s1, s2 (+ right side; its
+   s5; AREA04 s2; AREA05 s1/s3 (+ right side opened on both lanes, the back lane's fountain an obstacle; the wider notice-board box was dropped); AREA06 s1, s2 (+ right side; its
    beach strips are the other agent's, still off by default); AREA18 s1 both sides. Kept at 4:3 by the user: door
    exits (AREA00 s5, AREA01 s4, AREA03 s3, AREA09 s1, s3, AREA10 s3/s7 left) and the AREA09 s4/s5 stairs. The edge
    exits the headless sweep could not reach (AREA01 s1, AREA03 s0/s2/s4, AREA09 s0, AREA10 s2, AREA10 s3/s7 right)
