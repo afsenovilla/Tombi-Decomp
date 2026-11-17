@@ -650,7 +650,7 @@ full:
         extern void port_ws_edge_blocks(char *, const u8 *, int, int);
         port_ws_edge_blocks(list, (const u8 *)(unsigned long)(u32)wmd, game, sec);
     }
-    if (game == 10) {   /* Trick Village's left end: the wall, the grass blocks and the water carried on (runtime/ws_trick.c; off by default) */
+    if (game == 10 || game == 3) {   /* a room's end wall carried on: Trick Village's left end, the mountain's cliff (runtime/ws_trick.c; previews off by default) */
         extern void port_ws_trick_blocks(char *, const u8 *, int, int);
         port_ws_trick_blocks(list, (const u8 *)(unsigned long)(u32)wmd, game, sec);
     }

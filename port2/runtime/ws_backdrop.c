@@ -746,6 +746,7 @@ static void gen_cb(int pad);
 #include "ws_backdrop_mermaid.inc"
 #include "ws_backdrop_ironmain.inc"
 #include "ws_backdrop_clock.inc"
+#include "ws_backdrop_lake.inc"
 #define PIECES_TOP4 { 128, 0, 224, 64, 32, 256, 0 }, { 128, 64, 224, 64, 32, 256, 32 }, { 128, 128, 224, 64, 32, 256, 64 }, \
                     { 128, 192, 224, 64, 32, 256, 96 }
 #define OVER_A5 { { 256, 0, 112, 56, 104, 0, 0 }, { 256, 56, 112, 200, 104, 56, 0 }, { 256, 144, 0, 64, 80, 256, 24 }, \
@@ -792,6 +793,8 @@ static const Room ROOMS[] = {
                                                             camera, its two ends (im_take, ws_backdrop_ironmain.inc) */
     { 9, 2, CK_HM, 1, { { 0 } }, { { 0 } }, gen_ck },   /* the grandfather clock room: a 480 x 288 picture moved by the
                                                             camera, its two ends (ck_take, ws_backdrop_clock.inc; preview) */
+    { 9, 1, LK_HM, 0, { { 0 } }, { { 0 } }, gen_lk },   /* the Lake's beach: a 512-column picture moved by the camera,
+                                                            its right end (lk_take, ws_backdrop_lake.inc; preview) */
 };
 #define NROOMS ((int)(sizeof ROOMS / sizeof ROOMS[0]))
 const char *port_ws_backdrop_rooms;                      /* --ws-backdrop-rooms A:S,A:S,... (decimal; "all") */
@@ -863,7 +866,7 @@ const u16 *port_ws_backdrop(const u16 *vram, int pad, int x, int y, int w, int h
 {
     const Room *r = 0;
     if (enabled < 0) { const char *e = getenv("PORT_WS_BACKDROP"); enabled = e && *e >= '1' && *e <= '3' ? *e - '0' : port_ws_backdrop_on; }
-    port_ws_backdrop_dy = 0;
+    port_ws_backdrop_dy = 0; port_ws_backdrop_side = 3;
     if (enabled && pad > 0 && depth == 1 && cx == 128 && (cy == 510 || cy == 511)) {   /* AREA06 s1 / s2 (mm_take) */
         u8 *g = port_ram_ptr(PORT_A_GAME); int a = *(u16 *)(g + 0), sc = *(u16 *)(g + 2);
         for (int i = 0; i < NROOMS; i++)
@@ -881,6 +884,12 @@ const u16 *port_ws_backdrop(const u16 *vram, int pad, int x, int y, int w, int h
         for (int i = 0; i < NROOMS; i++)
             if (ROOMS[i].h == CK_HM && ROOMS[i].area == a && ROOMS[i].sec == sc)
                 return room_enabled(&ROOMS[i]) ? ck_take(vram, pad, x, y, rows) : 0;
+    }
+    if (enabled && pad > 0 && y == 4 && w == 256 && h == 256 && !u && !v && !tx && ty == 256 && depth == 1 && cx == 128 && cy == 510) {
+        u8 *g = port_ram_ptr(PORT_A_GAME); int a = *(u16 *)(g + 0), sc = *(u16 *)(g + 2);   /* AREA09 s1 (lk_take) */
+        for (int i = 0; i < NROOMS; i++)
+            if (ROOMS[i].h == LK_HM && ROOMS[i].area == a && ROOMS[i].sec == sc)
+                return room_enabled(&ROOMS[i]) ? lk_take(vram, pad, x, rows) : 0;
     }
     if (enabled && pad > 0 && x == 0 && w == 256 && !u && !v && !ty && depth == 1 && cx == 128 && cy == 511
         && (tx == 128 || tx == 256 || tx == 384)) {     /* a tall picture's set (AREA16 s4: tw_take) */

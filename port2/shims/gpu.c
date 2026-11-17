@@ -927,13 +927,14 @@ static void ws_backdrop(const Vtx *a, int w, int h, int u, int v, const GpuTex *
     int P = port_widescreen, fx = a->x - gs.ox - ws_dx, fy = a->y - gs.oy, bx = ws_base(ws_ax), y = a->y;
     const unsigned short *s = port_ws_backdrop(&vram[0][0], P, fx, fy, w, h, u, v, t->tx, t->ty, t->depth, t->cx, t->cy, &h);   /* h: the strips' rows */
     { extern int port_ws_backdrop_dy; y += port_ws_backdrop_dy; }   /* (a picture taller than the frame: its rows on it) */
+    extern int port_ws_backdrop_side; int sd = port_ws_backdrop_side;   /* (1: the left strip, 2: the right one; a picture with one end to fill) */
     if (!s || y < 0 || y + h > 512 || bx + 320 + 2 * P > WS_STRIDE) return;
     for (int j = 0; j < h; j++) {
-        memcpy(&wvram[y + j][bx], s + (size_t)j * 2 * P, (size_t)P * 2);
-        memcpy(&wvram[y + j][bx + P + 320], s + (size_t)j * 2 * P + P, (size_t)P * 2);
+        if (sd & 1) memcpy(&wvram[y + j][bx], s + (size_t)j * 2 * P, (size_t)P * 2);
+        if (sd & 2) memcpy(&wvram[y + j][bx + P + 320], s + (size_t)j * 2 * P + P, (size_t)P * 2);
     }
-    if (be->ws_upload) { be->ws_upload(bx, y, P, h, &wvram[y][bx], WS_STRIDE); be->ws_upload(bx + P + 320, y, P, h, &wvram[y][bx + P + 320], WS_STRIDE); }
-    if (hfr_rec) { hfr_upload(bx, y, P, h, 1); hfr_upload(bx + P + 320, y, P, h, 1); }
+    if (be->ws_upload) { if (sd & 1) be->ws_upload(bx, y, P, h, &wvram[y][bx], WS_STRIDE); if (sd & 2) be->ws_upload(bx + P + 320, y, P, h, &wvram[y][bx + P + 320], WS_STRIDE); }
+    if (hfr_rec) { if (sd & 1) hfr_upload(bx, y, P, h, 1); if (sd & 2) hfr_upload(bx + P + 320, y, P, h, 1); }
 }
 /* --title-bg (runtime/titlebg.c): while the title screen's background is in this list, fill the wide copy of the
    buffer with the user's wide picture first (the game then draws its own 4:3 background, logo and text over it) */
