@@ -3006,6 +3006,48 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   left of it the wall's top edge (y -1160, its dark top row) stands against the sky; the camera's lower range in s3
   (under water) and its top (-1200) were not reached headless: the rows there are built by the same rule but were
   not seen; s3's lower rows were only seen from the ledge (the water's surface strip).
+  **The mountain's right end** (the same file, 2026-11-17; previews, OFF by default: `--ws-trick-rooms 3:1,3:5` or
+  `--ws-trick on`; from tools/ws_survey.py: "the cliff stops 7 columns before the wide edge"): AREA03 s1 (Stormy
+  Mountain 2) and s5 (Phoenix Mountain 2, the same room purified), debug select area 3 sections 1 and 5.  One WMD model
+  of 41 blocks, unrotated scrolling camera (H 544, CAMERA_SCROLL maxX 5430; at that end minY..maxY -2690..-2309).  With
+  the camera at its right limit a 16:9 frame showed the clear colour (grey in s1, sky blue in s5) right of the cliff
+  over the whole height, 7 to 19 columns wide and ragged, and the far rock card behind it.  Cause: missing geometry,
+  not a cull: `PORT_WSXTRA=300 PORT_WSBLK=600` draws the very same frames, and the parsed model ends there.  The cliff
+  is not a flat face but a relief: columns of facets about 45 units wide, alternately out (z -50) and in (z -60), the
+  columns that turn away darker (the model's vertex colours), each half of the rock tile wide (page 0x10, CLUT 0x794F,
+  u 0..45), so it repeats every two columns; its last line is a zigzag of free edges at x 5599..5616, while the 4:3
+  frame's edge is at x 5575 there.  The straw ledges cut into it (the floor at y -2464, z -55..45; its fringe, a
+  cut-out strip at z -45, and the lip under it, laid over the rock as a second layer of the same quads) end on
+  x 5608.  Further up the mountain's top is a narrow tower with sky on both sides inside the 4:3 picture as well
+  (the back wall at z 45 ends at x 5553..5569): nothing is cut there, nothing is added.
+  Method: `ROOMS` has an `end` (the right end is read as the left end of the mirrored model, so every rule above is
+  the same code) and a `relief` flag.  In a relief room, a free edge of a quad B whose plane does not hold x (the
+  same tests: left of its polygon, outside the 4:3 frustum of the camera at its limit, inside the wide one; a second
+  layer over the same quad does not count as a neighbour) is carried on with the model's own two columns: with I the
+  quad's opposite edge and A the quad across it (J its far edge), one period further out (the median of O - J along
+  x: 76 units) stand B moved by the period, unchanged, and A moved by the period with its far edge laid on the end's
+  own vertices (no crack), each with its own texture rectangle and vertex colours; again every period until the wide
+  frame is covered (16:9: one period, 33 quads; 21:9: two).  So the tile starts again where the model starts it, the
+  row lines keep their zigzag and the light changes column by column as before.  The fringe (a plane that holds x)
+  goes on by the sweep; in a relief room a cut-out is swept when the model itself lays it tile after tile (its
+  neighbour in the plane shows the join), a tree's crown still ends where it ends.  Nothing mirrored, no random
+  value, integers only.
+  Checked (software, i386; the debug select, then `--sweep-x` / `--sweep-fly` to the right limit at five heights,
+  fly -40 / -1250 / -1400 / -1550 / -1700 = camera y -2309 .. -2690): the cliff and the ledge reach the frame's edge
+  at 16:9, 21:9 and 32:9; the 4:3 centre and the left strip of every 16:9 frame identical on / off (20 frames per run);
+  4:3 runs with the flag and the default 16:9 / 21:9 frames byte-identical to the build before; the left end of both
+  rooms, AREA03 s0 and AREA10 s1 identical with `--ws-trick on`; Trick Village's left end (AREA10 s3, s7; 16:9 and
+  21:9 flights) byte-identical to the build before; a 21:9 and a 32:9 frame start with exactly the 16:9 columns (only
+  the HUD, anchored to the frame's edges, differs); OpenGL (xvfb, 16:9) covers the strip, its 4:3 centre identical
+  on / off; i386 = wasm2c whole frames (20 frames per flight: s1 at 16:9 and 32:9, s5 at 16:9 and 21:9; in s1's
+  flight at fly -1250 one frame on the way, 1980, differs in an object of the room, a swinging orange arm, between
+  the two builds before this change as well).  To approve a room: `approved` = 1 in ROOMS of ws_trick.c.
+  Weak points: the copied columns repeat the last two exactly (same facets, 76 units further out: at 32:9 the pair
+  shows three times); the first new column is narrower than the model's (33 units against 44: A is laid from the
+  end's line to the copy of I); the straw fringe's swept strip is thinner than the model's ragged one for its first
+  13 units; the floor goes on in the picture but the collision does not (the door is the exit: Tomba stops where he
+  stopped at 4:3); the far rock card's lowest row (z 290) is swept too, hidden behind the cliff; heights only seen by
+  flying, the room was not played.
 - **Top-down map** (`runtime/ws_topdown.c`, fixes.txt hooks at the end of `topdownDrawMapLayers` /
   `overheadDrawMapLayers` and their USA / JP versions): the overhead background is the room's map picture (8 bpp TIM
   in RAM, scratch 0x1F800394) of which the game uploads a 384x288 window (12x9 tiles of 32 px, USA / JP 384x256) into
@@ -4209,6 +4251,38 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     is extrapolated 40 rows; wider strips: the sky
     repeats loosely (few windows of the same rows), the clouds are the picture's three views again and the fields
     under row 176 are the last rows of land repeated downwards.
+  - AREA09 s1, the Lake (the beach with the cave in the cliff; 2026-11-17, `runtime/ws_backdrop_lake.inc`; off by
+    default, preview with `--ws-backdrop-rooms 9:1`; from tools/ws_survey.py: "7 flat columns at the right edge at the
+    right end").  A picture ending, not geometry: the beach is a 512 x 256 picture, CLUT (128, 510), two sprites at
+    frame row 4 (the left half from page (896, 0), rows 32-255 only: above them the clear colour is the sky's; the
+    right half from page (0, 256)), moved by the camera: the right half is at frame column 110 with the camera at its
+    right limit and at 200 at the other end of this screen (then the room cuts to the island, a 640 x 512 mosaic of
+    CLUT (128, 511)).  So at the right limit the picture ends 46 columns past the 4:3 frame: 7 columns short at 16:9
+    (the clear colour over the whole height), 74 at 21:9.  Measured at the edge (strip rows = frame row - 16): sky to
+    row 49, level tones without grain, with the top of a cloud on rows 39-49 that the edge cuts; the cliff's grass
+    from row 50 to 64, about level; its rock, a mottled face without strata, to its foot on row 200; sand from 201;
+    the foot's line comes down towards the edge 0.2 rows per column.  The edge cuts the cliff's face, which goes on.
+    Its own grab (`lk_take`, called from `port_ws_backdrop` on the right half's sprite; the `ROOMS` row only names the
+    room): the extension is made once with the Singing Rock's tools (`mb_band`: a band's tone at the edge carried on
+    level plus its detail quilted from the picture's own texels, the edge's own columns first, the join's tone fading
+    out; never mirrored): the sky as a smooth band (the cloud's top goes on level behind the grass), the grass and
+    the rock as one band whose windows are the face right of the cave (columns 446-511, rows 50-186, each near its
+    own row), the sand from its own rows; the rock comes down to the foot's line carried on at its slope, the sand
+    under it.  Colours: the nearest of the picture's CLUT.  Each frame the right strip is the picture's columns and
+    then the extension's, for the sprite's column; the left strip is not touched (`port_ws_backdrop_side`, new in
+    `shims/gpu.c`: which strips a grab lays; 3 for every other room), and nothing is laid while the picture covers the
+    frame.  Only as many columns as can ever show are made (pad - 46: 7 at 16:9, so 32:9 fits the quilter's canvas).
+    Checked (software, i386, the select run at the right limit and a flight to the other end of the screen): no flat
+    column left at 16:9 and 21:9; every 16:9 column but the 7 new ones identical on / off; the 21:9 frame holds the
+    16:9 one; 4:3 with the flag and the default 16:9 / 21:9 frames byte-identical to the build before; the other
+    rooms' 16:9 frames with `--ws-backdrop on` byte-identical (2:5 2:1 5:1 5:3 19:1 11:2 9:5 9:3 9:4 9:2 17:2 17:3 17:4
+    17:5 16:3 16:4 16:5 16:6 18:2 6:1 6:2); OpenGL (xvfb): the new columns = the software ones (frame row 239
+    differs, the game's own wash sprite); i386 = wasm2c whole frames (16:9, 21:9, 32:9); about 0.3 s more over a
+    whole 16:9 run.  Weak points: at 21:9 and wider the rock shows
+    the quilt's blocks in places (a few 18 x 14 blocks a tone apart), the grass' top runs level and straight, the
+    cloud's top is a level streak and the cliff has no end (it leaves the frame); at 21:9 the left strip at the
+    other end of the screen (64 columns left of the picture) is still the clear colour; `lk_take` uses the Singing
+    Rock's buffers (`mm_src`), which that room then grabs again.
   - AREA06 s2 and s1, the Mermaid's Singing Rock (2026-11-16, `runtime/ws_backdrop_mermaid.inc`; off by default,
     preview with `--ws-backdrop-rooms 6:1,6:2`)..  Neither was in the first scan (flat clear blue, 6394ff, in the
     strips, which reads as sky on one frame; tools/ws_survey.py found them)..  Both are outside the table's layout, so
