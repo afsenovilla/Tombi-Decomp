@@ -3687,7 +3687,7 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     the right edge, rows 0-140 and 175-215) are cut by both edges, and the picture has no clean leaf windows to go on
     with them without copying the same leaves next to themselves; the right edge's crown needs foliage from the top
     canopy (rows 0-45) taken at other rows.  Not delivered until that is solved.
-  - AREA11 s1, the Lumberjack Factory, preview 2026-11-17, off by default (`gen_lf`, `runtime/ws_backdrop_factory.inc`; its
+  - AREA11 s1, the Lumberjack Factory, done 2026-11-17, approved by the user and on by default (`gen_lf`, `runtime/ws_backdrop_factory.inc`; its
     header has the measures): sky from the picture's plain gradient; trees as ragged crowns lit from the upper left, their
     texels 8 x 8 windows of the picture's clean foliage chosen by overlap and tone, lit through the foliage's own colour
     ramp; the deck's front carried on at its 76-column period with the sand under it; left, the hut's eave to its corner
