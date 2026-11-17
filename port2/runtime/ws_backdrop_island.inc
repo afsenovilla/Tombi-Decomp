@@ -13,7 +13,10 @@
  *
  * The game itself draws an object past the picture's left edge: a ledge in the foreground, quads of page (256, 0)
  * from frame column -53 with the camera at its left limit (grass on top, rock under it, its underside a slope that
- * comes down to the left; it moves about 1.5 times as fast as the picture).  It stays in front of the strip.
+ * comes down to the left; it moves about 1.5 times as fast as the picture): an object sprite, nearer than the
+ * picture, that at 4:3 only comes in from the frame's left edge while the camera pans up.  With the strips on its
+ * quads are drawn a strip's width further left (is_fg_face, port_ws_island_fg in ws_backdrop.c, called from
+ * drawObjectSprite), so it keeps that place against the frame's edge and does not hang in the corner while playing.
  *
  * Measured on the picture, rows counted from 220 (the frame's): at its left edge the trunk's wall, lit evenly,
  * without strata, down to its foot on row 170, level over the first 16 columns; sand from 171.  The edge cuts the
@@ -22,8 +25,9 @@
  *
  * The extensions are made once with the Singing Rock's tools (ws_backdrop_mermaid.inc: mb_band, a band's tone at
  * the edge carried on level plus its detail quilted from the picture's own texels, never mirrored):
- *   - left: the wall as one band whose windows are the wall over the doors (columns 0-199, rows 12-99), the sand
- *     from its own rows under the doors;
+ *   - left: the wall as one band whose windows are the wall over the doors (columns 0-199, rows 12-99); the sand
+ *     is the texels of its own rows at the edge (is_sand); the ledge at the top of the play view is a band of its
+ *     own (IS_LD, laid over the wall's);
  *   - right: the sky as a smooth band, the cloud as a band of its own texels whose top goes on in lumps (arcs, as
  *     the picture's: is_lump), the sea from its own rows.
  * Every colour is then the nearest of the picture's CLUT.  Integers only; a texel depends on its place, not on the
@@ -40,9 +44,25 @@ static const Piece IS_P[10] = { { 128, 0, 0, 256, 256, 0, 0 }, { 256, 0, 0, 24, 
     { 256, 88, 216, 168, 40, 344, 216 }, { 384, 0, 0, 256, 256, 0, 256 }, { 512, 0, 0, 256, 256, 256, 256 },
     { 768, 0, 184, 128, 72, 512, 256 } };
 static void gen_is(int pad) { (void)pad; }               /* (the table's gen: is_take makes the strips) */
-static const MbBand IS_L[2] = {
+/* the foreground ledge's two quads (an object sprite): page (256, 0) 8 bpp, the picture's CLUT, texels (152..247,
+   0..151) (the door beside them is rows 152 on) */
+static int is_fg_face(int tpage, int clut, int uv) { return clut == 0x7fc8 && (tpage & 0x19f) == 0x84 && (uv & 255) >= 152 && (uv >> 8 & 255) < 152; }
+/* the sand past the left edge.  The picture's sand is two CLUT tones (three at the wall's foot) dithered without a
+   pattern, lighter down the rows and level along them near the edge; the wall's foot is level over the first 13
+   columns, with one row of shade under it.  So a texel is one of its own row's (or of the row above or under it)
+   among the picture's first columns, left of the rock on the sand and of its shade: each row keeps its tones in
+   the picture's proportions, and nothing is repeated as a block. */
+static void is_sand(void)
+{
+    for (int y = IS_F - 1; y < PH; y++)
+        for (int X = 1; X <= mm_cw; X++) {
+            u32 h = hash3(X, y, 0x15a);
+            int n = y < IS_F + 3 ? 5 : 10, v = y < IS_F + 5 ? y : clampi(y + (int)((h >> 16) % 3) - 1, IS_F + 5, PH - 1);
+            mm_put(0, X, y, mm_px((int)((h >> 4) % (u32)n), v));
+        }
+}
+static const MbBand IS_L[1] = {
     { 0, PH, MC_ANY, 0, 200, 12, 100, IS_F - 1, 0, 40, 16, 16, 18, 14, 8, 4, 6, 1, 1, 0, 16, 1, 0, 0, 0 },         /* the wall */
-    { IS_F, PH, MC_ANY, 0, 120, IS_F + 19, PH, 0, 0, 8, 2, 4, 12, 10, 6, 4, 8, 1, 2, 0, 16, 1, 0, 0, 0 },         /* sand */
 };
 static const MbBand IS_R[3] = {
     { 0, IS_CT + 14, MC_ANY, 600, IS_W, 0, 60, IS_CT - 2, 0, 3, 1, 3, 24, 24, 12, 8, 12, 4, 4, 2, 16, 0, 0, 0, 0 },       /* sky */
@@ -67,7 +87,7 @@ static void is_gen(void)
 {
     Rgb *sky = malloc((size_t)(IS_CT + 14) * mm_cw * sizeof *sky);
     mb_band(0, &IS_L[0], 0);
-    mb_band(0, &IS_L[1], 1);
+    is_sand();
     mb_band(1, &IS_R[0], 2);
     if (sky) for (int y = 0; y < IS_CT + 14; y++) for (int X = 1; X <= mm_cw; X++) sky[(size_t)y * mm_cw + X - 1] = *mm_at(1, X, y);
     mb_band(1, &IS_R[1], 3);
@@ -97,14 +117,14 @@ static void is_gen(void)
 /* the rows above (seen only while the first visit's pan rises), rows counted from the picture's: at the left edge the
    sky to row 17, the crown of the tree beside the mansion and the bush at its foot to 125 (the trunk is 18 columns
    in, the crown reaches 32 columns right of it), the cap's grass and its rock to 186, the grass of the ledge under
-   it to 218, the trunk's wall from there.  The cap and the ledge go on level, each a band of its own rows; the crown
+   it to 218, the trunk's wall from there.  The cap goes on level, a band of its own rows (the ledge, rows 186 on, is
+   IS_LD's, made with the play view's rows); the crown
    closes round 16 columns out (an ellipse about the trunk, its outline in lumps like the leaves' clusters), the bush
    within 8, and past them the sky is the clear colour. */
 #define IS_UT 126                                         /* the cap's grass at the left edge: its first row */
-static const MbBand IS_U[3] = {
+static const MbBand IS_U[2] = {
     { 16, IS_UT + 2, MC_ANY, 0, 36, 18, 100, 0, 0, 6, 3, 6, 12, 10, 6, 4, 8, 1, 1, 0, 16, 1, 0, 0, 0 },           /* the crown */
     { IS_UT - 2, 190, MC_ANY, 0, 200, IS_UT - 2, 188, 0, 0, 24, 2, 4, 18, 14, 8, 4, 4, 1, 1, 0, 16, 1, 0, 0, 0 }, /* the cap */
-    { 186, PH, MC_ANY, 0, 48, 186, PH, 0, 0, 12, 2, 4, 14, 12, 6, 4, 4, 1, 1, 0, 16, 1, 0, 0, 0 },               /* the ledge */
 };
 static void is_gen_up(Rgb clear)
 {
@@ -120,8 +140,15 @@ static void is_gen_up(Rgb clear)
         }
     }
     mb_band(0, &IS_U[1], 1);
-    mb_band(0, &IS_U[2], 2);
 }
+
+/* the ledge under the cap at the left edge (picture rows 186..264: its grass, the fringe the grass hangs over the
+   rock, the lit rock under it and its shaded underside), one band of its own rows in a canvas of the picture's rows
+   from IS_LY, so the fringe and the rock under it go on as one piece on both sides of the play view's top row */
+#define IS_LY 150
+#define IS_LA 186
+#define IS_LB 265
+static const MbBand IS_LD = { IS_LA - IS_LY, IS_LB - IS_LY, MC_ANY, 0, 64, IS_LA - IS_LY, IS_LB - IS_LY, 0, 0, 12, 2, 4, 16, 14, 6, 4, 2, 1, 1, 0, 16, 1, 0, 0, 0 };
 
 #ifndef WS_BACKDROP_MAIN
 static u16 *is_ext[2], *is_buf; static int is_pad = -1, is_w; static u32 is_sum; static u16 is_clear;
@@ -158,6 +185,11 @@ static int is_build(const u16 *vram, int w)
                 is_ext[s][(size_t)r * w + X - 1] = y < 0 ? is_clear : mm_quant(*mm_at(s, X, y < PH ? y : PH - 1));
             }
     mm_canvas_free();
+    for (int y = 0; y < PH; y++) for (int x = 0; x < IS_W; x++) mm_src[0][y][x] = is_pic[IS_LY + y][x];
+    if (!mm_canvas(w)) return 0;
+    mb_band(0, &IS_LD, 0);
+    for (int r = IS_LA; r < IS_LB; r++) for (int X = 1; X <= w; X++) is_ext[0][(size_t)r * w + X - 1] = mm_quant(*mm_at(0, X, r - IS_LY));
+    mm_canvas_free();
     is_up = 0;
     return 1;
 }
@@ -168,7 +200,7 @@ static void is_build_up(int w)                           /* the left strip's row
     for (int y = 0; y < PH; y++) for (int x = 0; x < IS_W; x++) mm_src[0][y][x] = is_pic[y][x];
     if (!mm_canvas(w)) return;
     is_gen_up(rgb15(is_clear));
-    for (int r = 0; r < IS_Y0; r++) for (int X = 1; X <= w; X++) is_ext[0][(size_t)r * w + X - 1] = mm_quant(*mm_at(0, X, r));
+    for (int r = 0; r < IS_LA; r++) for (int X = 1; X <= w; X++) is_ext[0][(size_t)r * w + X - 1] = mm_quant(*mm_at(0, X, r));
     mm_canvas_free();
 }
 /* the beach picture's right half (the first sprite of the room's backdrop, drawn every frame) at frame (x, y) while

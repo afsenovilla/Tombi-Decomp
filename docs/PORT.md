@@ -4351,10 +4351,59 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     pixels of a sprite on the right); i386 = wasm2c whole frames (both ends at 16:9, 21:9, 32:9; the left end with
     the camera raised); under 0.5 s once at room entry (0.12 and 0.45 s more over a whole run, two timings).  Weak points: the rows above 220 were only seen by flying
     (the first visit's pan was not reproduced headless), the tree's closed crown is a smooth lump and the cap's grass
-    runs level and straight; past column 53 (21:9) the foreground ledge is cut by its own quad's edge, as the game
-    draws it; the wall has no end (it leaves the frame) and repeats the look of the wall over the doors; the cloud's
+    runs level and straight; (first round: past column 53 (21:9) the foreground ledge was cut by its own quad's
+    edge; see the second round;) the wall has no end (it leaves the frame) and repeats the look of the wall over the
+    doors; the cloud's
     lumps repeat every 136 columns; pads over 264 columns (32:9: 267) leave their last columns the clear colour; the
     collision does not go on (Tomba stops where he stopped at 4:3).
+    **Second round, the left end** (2026-11-17; the user on the first one: "La playa está bien en la parte derecha, la
+    izquierda no tanto porque el empalme se nota a la altura de la arena. Ahí arriba además hay un asset que flota,
+    que se mueve cuando entras por esa puerta si no me equivoco y también hay que ajustarlo independientemente.").
+    The right end is as it was (frames byte-identical).  *The sand.*  Measured on the 16:9 frame (rows of the frame):
+    the mean tones of the strip and of the picture agreed within 2 levels on every row, so the join was texture and
+    geometry: the picture's sand is two CLUT tones (231/222/189 and 239/231/198, a third, 222/214/189, at the wall's
+    foot) dithered without a pattern, lighter down the rows and level along them near the edge (deviation 1.5-2.5
+    per row), while the quilted strip had blocks (deviation 3-4.5: a patch of the lighter tone on rows 197-207, one
+    of the darker on 199-218) and texels of a fourth, brighter tone that the picture only has further right; the
+    wall's foot was one row lower than the picture's (row 186 against 185, level over the
+    picture's first 13 columns), without the row of shade the picture has under it (row 186) and with
+    two white texels beside the join.  Now (`is_sand`, in place of the sand's band) a strip texel is one of its
+    own row's, or of the row above or under it, among the picture's first 10 columns (5 on the foot's rows, no other
+    row there), chosen by a hash of its place: left of the rock on the sand and of its shade, so every row keeps its
+    tones in the picture's proportions, the foot's shade row goes on level and nothing repeats as a block.  *The
+    asset.*  It is the game's foreground ledge, an object sprite (`drawObjectSprite`, two quads of page (256, 0),
+    texels (152..247, 0..151), found with `PORT_PRIMLOG` and a watchpoint on its packet): a ledge nearer than the
+    picture, projected, so it moves 1.5 times as fast as the picture, with the grass on top and a shaded underside
+    that comes down to the left.  Its sprite ends 53 columns left of the 4:3 frame with the camera at its left limit:
+    at 4:3 it only shows during the first visit's pan, as a ledge that comes in from the frame's left edge, and
+    while playing it is out of sight but for 13 texels in the corner.  At 16:9 those 53 columns are on screen: while
+    playing, the underside's last 64 x 50 texels hung in the top left corner over the strip, in front of the
+    picture's own ledge, whose lit rock and grass they cut on a slant: a dark wedge with nothing under it, and the
+    picture's ledge ending in the air beside it.  Now, with the island's strips on, the object's quads are drawn
+    as many columns left as the strip is wide (`port_ws_island_fg`, called from `drawObjectSprite` under `PORT2`; 0
+    for every other sprite and with the strips off): the ledge keeps the place it has at 4:3 against the frame's
+    left edge at every width, so it comes in from the edge during the pan and stays out of sight while playing, as
+    the game shows it, and its sprite's cut edge is never on screen (21:9 and wider too).  It is 53 columns further
+    left against the picture than at 4:3.  And the picture's ledge behind it now goes on to the frame's edge: one
+    band of its own rows (`IS_LD`, picture rows 186..264: grass, the fringe the grass hangs over the rock, the lit
+    rock, the shaded underside), made at room entry in a canvas of the picture's rows from 150 so the fringe and the
+    rock under it are one piece on both sides of the play view's top row (before, the rows from 220 were the wall's
+    band with the ledge's tone, in square blocks, under a grass edge cut straight on row 219); `is_gen_up` now makes
+    the rows above 186 only.  The pan is reproduced headless: `--poke 1250:8009C982:1:2` with the select, then
+    `--poke 1700:8009C982:0:2` and `--pad-script 1000:start,1300:circle:3,1800:left:700` (spawn point 0 on the
+    island: `updateAreaScrollB` cuts to the beach and back, Tomba is left at the picture's right end and walks
+    left; under x 200 the camera rises 342 rows, about vblanks 2050-2130, waits and is down again by 2290).  Checked
+    (software, i386, the select at the left limit and that pan): 4:3 with the flag, and 16:9 / 21:9 without it,
+    byte-identical to the build before (still and nine frames of the pan); the island's right end (17 frames of the
+    flight, 16:9 and 21:9) and the beach's right end with the flag byte-identical; the other rooms' 16:9 frames with
+    `--ws-backdrop on` identical (2:5 2:1 5:1 5:3 19:1 11:2 9:5 9:3 9:4 17:3 17:4 16:4); the 21:9 frame holds the
+    16:9 one and the 32:9 one the 21:9 one but for the foreground ledge's own texels (it keeps its place against the
+    frame's edge, not against the picture); OpenGL (xvfb): the strip is the software one but where the ledge's
+    sprite is; i386 = wasm2c whole frames (the still and nine frames of the pan at 16:9, 21:9 and 32:9); no measurable change at room entry (1.7-2.1 s for the whole select run either way).  Weak points:
+    during the pan the foreground ledge shows its last 43 columns only, as at 4:3, and for a few frames its tip
+    lies on the picture's ledge at the same height (a step in the grass 43 columns in); the fringe in the strip
+    repeats the shapes of the picture's first 64 columns; the wall over the sand is as before (its foot runs
+    straight, darker and busier than the picture's on rows 176-185).
   - AREA06 s2 and s1, the Mermaid's Singing Rock (2026-11-16, `runtime/ws_backdrop_mermaid.inc`; off by default,
     preview with `--ws-backdrop-rooms 6:1,6:2`)..  Neither was in the first scan (flat clear blue, 6394ff, in the
     strips, which reads as sky on one frame; tools/ws_survey.py found them)..  Both are outside the table's layout, so

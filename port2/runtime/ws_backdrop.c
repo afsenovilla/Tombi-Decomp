@@ -957,6 +957,20 @@ const u16 *port_ws_backdrop(const u16 *vram, int pad, int x, int y, int w, int h
     *rows = PH;
     return strip;
 }
+/* AREA09 s1 with the island's strips on (ws_backdrop_island.inc): the columns an object sprite's quad moves left,
+   for the foreground ledge's two quads (drawObjectSprite; else 0) */
+int port_ws_island_fg(int tpage, int clut, int uv)
+{
+    extern int port_widescreen;
+    u8 *g; int a, sc;
+    if (port_widescreen <= 0 || !is_fg_face(tpage, clut, uv)) return 0;
+    if (enabled < 0) { const char *e = getenv("PORT_WS_BACKDROP"); enabled = e && *e >= '1' && *e <= '3' ? *e - '0' : port_ws_backdrop_on; }
+    if (!enabled) return 0;
+    g = port_ram_ptr(PORT_A_GAME); a = *(u16 *)(g + 0); sc = *(u16 *)(g + 2);
+    for (int i = 0; i < NROOMS; i++)
+        if (ROOMS[i].h == IS_HM && ROOMS[i].area == a && ROOMS[i].sec == sc && room_enabled(&ROOMS[i])) return port_widescreen;
+    return 0;
+}
 #else
 int main(int argc, char **argv)
 {
