@@ -3499,7 +3499,7 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     the right strip would need a new mound and sconce copied from the picture's, a visible duplicate one period from
     the original; since done without copying any mound or sconce, above).  The re-scan of the 96 debug-select rooms at 16:9 found no other fixed-camera picture rooms than
     the ones listed here.  (It missed AREA06 s2, a fixed picture with flat clear-blue strips, and the scrolling
-    pictures such as AREA06 s1: tools/ws_survey.py lists them; AREA06 s1 / s2 since done, below.)
+    pictures such as AREA06 s1: tools/ws_survey.py lists them; AREA06 s1 / s2 and AREA09 s2 since done, below.)
   - AREA09 s4 (the rock wall with the stair down to the right) was tried with the same generator and dropped: the left
     strip (the rock under the stair, windows translated along the stair) worked, but the right strip lies next to the
     row of sconce mounds along the stair, whose windows came out as dark shadow fragments; matching on relit texels
@@ -4338,6 +4338,53 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     (smooth metal: soft, not smeared); the cornice has a joint on the join itself (its phase: the picture's is at
     column 13); the floor's texture repeats every period (15 to 19 columns), which the speckle hides at 1x and 2x;
     the extension is 5 to 22 % softer than the picture next to it.
+  - AREA09 s2 (the Haunted Mansion's grandfather clock room, 2026-11-17, `runtime/ws_backdrop_clock.inc`; off by
+    default, preview with `--ws-backdrop-rooms 9:2`).  Not in the first scan (a scrolling picture: tools/ws_survey.py
+    found a full black strip at each end of the room and at the spawn, which is the right end).  How it is drawn: one
+    480 x 288 picture, CLUT (128, 511), rows 0-255 from pages (128, 0) / (256, 0), rows 256-287 from page (384, 0),
+    four sprites moved by the camera 160 columns sideways and 64 rows up; clock, table, chairs, chandeliers, flames
+    and the gem are objects.  Nothing is culled (`PORT_WSXTRA=200` draws the same frame): the picture ends, and the
+    wide frame needs up to 53 more columns at each end.  Outside the table's layout, so it has its own grab and hook
+    (`ck_take`, called from `port_ws_backdrop` on the 256 x 256 sprite of page 128, with `port_ws_backdrop_dy` for
+    the rows; the `ROOMS` row only carries the room and the approval).  **What the ends are**: the room's side walls
+    in perspective, not the back wall with its ornaments.  Measured: the picture's geometry is mirror-symmetric about
+    column 239.5; all the side walls' mouldings meet at (239.5, 184.25) (five lines per side within 0.4 rows); in the
+    wall's own space (1 / distance from the vanishing column, ray) the left wainscot's stiles are 0.000820 per column
+    apart (columns 12 and 48, the next one 40 columns out; the same length as the back wall's panels for a focal
+    length of about 380 columns); the vault meets each side wall along an ellipse in that space (apex at column
+    24.5, fitted to 0.2 rows; the rib's other edge is the same curve at 0.923 of the distance, which shows the
+    arch's nearer half 20 columns past the edge: it is symmetric); the floor's joints are 0.476 columns apart per row
+    under the horizon.  The right wall is not the left one's mirror: a door with a lamp, a narrow panel before it, a
+    long one after it cut 18 columns in, and no stile after the door.  **The strips**: the left wall from the
+    cornice to the floor is the wall itself one period deeper (`ck_deep`: the picture's texels through the
+    perspective of the wall moved along its length, bilinear, 1.2 to 1.3 times larger), so the cut wainscot panel is
+    closed by its stile at the measured period and phase and the next panel starts, every moulding stays on its ray,
+    and the big plaster panel runs on to the frame's edge (the picture never shows its end); the right wall's
+    cornice and lunette the same way; from the cornice down the door is in the way of any deeper copy, so that wall
+    goes on along its rays with the tone of its last 6 columns (`ck_smear`, smoothed along the height but not across
+    an edge), the plaster's grain taken from the left wall's panel (texels less their 5 x 5 mean, not mirrored) and
+    the wainscot's wood from that wall's one whole panel (less its mean along the ray); its two panels run on.  The
+    wall arch goes on along its ellipse (over the top and slowly down), the rib 2.9 rows thick as at the edge, the
+    ceiling over it the picture's own 72 columns further in; the floor is the same row whole tiles further in (its
+    joints keep their lines); the join's tone (per ray, the picture's first 6 columns less the strip's first 6) is
+    added, halved every 32 columns.  Every colour is the nearest of the CLUT's.  Clock, table, chandeliers,
+    fireplace and door are not duplicated; nothing is mirrored.  Checked (2026-11-17, headless): 16:9 at both ends,
+    at the spawn, half-way and with the camera up; the game's strips = the standalone generator's (0 texels); the
+    21:9 frames hold the 16:9 ones (0 texels; 32:9 holds 21:9); 4:3 identical to the build before; with the default
+    flags the room's 16:9 frame is identical to the build before; the other rooms' 16:9 frames with `--ws-backdrop
+    on` identical to the build before (2:5 2:1 5:1 5:3 19:1 11:2 9:5 9:3 9:4 17:3 17:4 16:4); OpenGL (xvfb): the
+    strips = the software ones (0 texels); i386 = wasm2c whole frames (4:3, 16:9 at both ends and the spawn, 21:9 at
+    both ends); made in 5 ms at 16:9, 9 ms at 21:9, 15 ms at 32:9.  Along the rays the join's mean step is 3 to 8
+    (one 5-bit step) in every band on both sides (`tools/ws_seam.py` compares rows, which the sloped mouldings cross:
+    its texture checks do not apply here; its join steps are within the picture's own).  Weak points: the strips'
+    texels are the picture's enlarged 1.2 to 1.3 times (softer than the picture at 8x); the right wall's lower part
+    has no structure of its own in the strip (the long panel and the wainscot panel run on to the frame's edge
+    without a stile: that wall shows no period to measure), and its plaster is a little smoother than the
+    picture's; where the left wall's big panel and both arches end is not in the picture: at 16:9 they run on, wider
+    than that the arch comes down on the cornice 96 columns out and the ceiling follows it down (a choice); wider
+    than 16:9 the left wall changes to two periods deeper 57 columns out (cross-faded over 8 columns, a faint tone
+    step in the cornice) and the left wainscot is the same panel again and again; the rib is drawn at the edge's
+    thickness (a real vault would hide it past the apex); not seen on the device.
 - **Sub-screens** (Select screens Objetos / Eventos / Estado / Mapa, memory card, options, button config, screen
   adjust).  The Select screens (`subScreenDrawTabs`, D0SPSUB / D0SPSUB3, `#ifdef PORT2`) call `port_ws_layout(left cut,
   right cut, below)` each frame; while it is set, `shims/gpu.c` spreads the textured primitives of the frame

@@ -745,6 +745,7 @@ static void gen_cb(int pad);
 #include "ws_backdrop_gears.inc"
 #include "ws_backdrop_mermaid.inc"
 #include "ws_backdrop_ironmain.inc"
+#include "ws_backdrop_clock.inc"
 #define PIECES_TOP4 { 128, 0, 224, 64, 32, 256, 0 }, { 128, 64, 224, 64, 32, 256, 32 }, { 128, 128, 224, 64, 32, 256, 64 }, \
                     { 128, 192, 224, 64, 32, 256, 96 }
 #define OVER_A5 { { 256, 0, 112, 56, 104, 0, 0 }, { 256, 56, 112, 200, 104, 56, 0 }, { 256, 144, 0, 64, 80, 256, 24 }, \
@@ -789,6 +790,8 @@ static const Room ROOMS[] = {
                                                             camera, its two ends (mm_take, ws_backdrop_mermaid.inc) */
     { 17, 2, IM_H, 0, { { 0 } }, { { 0 } }, gen_im },   /* the Iron Castle main room: a 640-column picture moved by the
                                                             camera, its two ends (im_take, ws_backdrop_ironmain.inc) */
+    { 9, 2, CK_HM, 0, { { 0 } }, { { 0 } }, gen_ck },   /* the grandfather clock room: a 480 x 288 picture moved by the
+                                                            camera, its two ends (ck_take, ws_backdrop_clock.inc; preview) */
 };
 #define NROOMS ((int)(sizeof ROOMS / sizeof ROOMS[0]))
 const char *port_ws_backdrop_rooms;                      /* --ws-backdrop-rooms A:S,A:S,... (decimal; "all") */
@@ -872,6 +875,12 @@ const u16 *port_ws_backdrop(const u16 *vram, int pad, int x, int y, int w, int h
         for (int i = 0; i < NROOMS; i++)
             if (ROOMS[i].h == IM_H && ROOMS[i].area == a && ROOMS[i].sec == sc)
                 return room_enabled(&ROOMS[i]) ? im_take(vram, pad, x, y, w, h, u, v, tx, ty, rows) : 0;
+    }
+    if (enabled && pad > 0 && w == 256 && h == 256 && !u && !v && tx == 128 && !ty && depth == 1 && cx == 128 && cy == 511) {
+        u8 *g = port_ram_ptr(PORT_A_GAME); int a = *(u16 *)(g + 0), sc = *(u16 *)(g + 2);   /* AREA09 s2 (ck_take) */
+        for (int i = 0; i < NROOMS; i++)
+            if (ROOMS[i].h == CK_HM && ROOMS[i].area == a && ROOMS[i].sec == sc)
+                return room_enabled(&ROOMS[i]) ? ck_take(vram, pad, x, y, rows) : 0;
     }
     if (enabled && pad > 0 && x == 0 && w == 256 && !u && !v && !ty && depth == 1 && cx == 128 && cy == 511
         && (tx == 128 || tx == 256 || tx == 384)) {     /* a tall picture's set (AREA16 s4: tw_take) */
