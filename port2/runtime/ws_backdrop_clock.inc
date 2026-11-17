@@ -28,6 +28,8 @@
  *     first 8 columns (ck_profile / ck_ray: a profile at quarter rows, so the cornice, the plaster's frame lines,
  *     the chair rail, the wainscot's inlay and the skirting leave the picture where they are, to a fraction of a
  *     row, and as sharp as they are there; no tone to correct at the join);
+ *     on the right wall the profile also keeps each line's hue, and the panel's inlay lines take the speckle of
+ *     the picture's own texels on their ray (third version: the lower line had lost its orange at the join);
  *   - on that, the picture's own texture texel for texel: the plaster's grain in patches (ck_grain), the wood's
  *     streaks of the cornice, rail, wainscot and skirting column by column along the ray (ck_streak);
  *   - the left wainscot's stiles are the wall one period deeper (ck_deep: the picture seen through the perspective
@@ -168,8 +170,9 @@ static void ck_profile(void)
         for (int b = 0; b < CK_PB; b++) {
             int r = 0, g = 0, bl = 0, n = 0, l0 = lum(raw[b]);
             for (int k = -n0; k <= n0; k++) {
-                int bb = clampi(b + k, 0, CK_PB - 1), dl = lum(raw[bb]) - l0;
+                int bb = clampi(b + k, 0, CK_PB - 1), dl = lum(raw[bb]) - l0, dc = raw[bb].r - raw[bb].b - raw[b].r + raw[b].b;
                 if (dl > t || dl < -t) continue;
+                if (ck_side && (dc > 2 * t || dc < -2 * t)) continue;    /* (the right wall: nor across a hue: the inlay's orange has the skirting's luma) */
                 r += raw[bb].r; g += raw[bb].g; bl += raw[bb].b; n++;
             }
             ck_pr[b].r = r / n; ck_pr[b].g = g / n; ck_pr[b].b = bl / n; ck_pl[b] = (short)lum(ck_pr[b]);
@@ -285,6 +288,13 @@ static Rgb ck_ray(int X, int d2, int y16, int v16)
     else if (v16 < CK_V(320)) { g = ck_streak(X, v16, 0, 41, 18); w = ck_flat(p, 5, 6, 14) * 5 / 8; }   /* the wainscot's wood */
     else if (v16 < CK_VFL) { g = ck_streak(X, v16, 0, 35, 32); w = ck_flat(p, 5, 6, 14) / 2; }      /* the skirting */
     o.r += g.r * w / 256; o.g += g.g * w / 256; o.b += g.b * w / 256;
+    if (ck_side && v16 > CK_V(200) && v16 < CK_V(334)) {     /* the right panel's inlay: its own texels' speckle along the line */
+        int m = CK_PN - 1 - (X - 1) % CK_PN, wo = clampi((o.r - o.b - 96) * 16, 0, 256);
+        if (wo) {
+            Rgb t = ck_bil(m << 16, (int)(CK_VY16 + (((ck_i64)v16 * (479 - 2 * m)) >> 1))), q = ck_pget(p);
+            o.r += (t.r - q.r) * wo / 256; o.g += (t.g - q.g) * wo / 256; o.b += (t.b - q.b) * wo / 256;
+        }
+    }
     return o;
 }
 /* the side wall and the floor X columns out of the picture's edge on row y16 (no vault) */
