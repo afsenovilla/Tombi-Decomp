@@ -5697,7 +5697,7 @@ on means every item) and passes the plain switch when all are on. The early titl
 `--cut-content` (launcher: *Cut content* page) now also makes the AREA05 notice board readable and adds the AREA06
 Mermaid's Singing Rock save point (docs/CUT_CONTENT.md, Restored). Both go through one port hook on sign set-up,
 `port_cc_sign` (port2/runtime/main.c, rule in port/fixes.txt on `updateL4Type1AObject`): the board sign that
-`spawnNpcSet09` places out of reach (AREA05 s1, depth 90) is moved to the ground under the painted board, and
+`spawnNpcSet09` places out of reach (AREA05 s1, depth 90) is moved to depth 117, within reach of the ledge the board stands on (walked at depth 144; until 2026-11-17 it was moved down to the ground under the board and read from the lower lane, which the user rejected: the board is read standing by it), and
 `port_cc_saves` lists port signs spawned next to an existing sign (area, section, anchor subtype, offset, text group
 and line; subtypes 0x40+i, their text set by `port_cc_sign_text`). `-v` logs each spawn/move, `-v -v` every sign set
 up. Check: `--cut-content --skip-movies --poke 900:1F8001B4:1 --poke 1250:8009C960:5:2 --poke 1250:8009C962:1:2

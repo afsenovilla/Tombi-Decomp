@@ -905,9 +905,12 @@ void port_cc_sign(void *obj, int area, int section) {
     int i;
     if (port_verbose > 1) port_printf("[port] --cut-content: sign AREA%02d s%d subtype %d at %d,%d,%d\n", area, section, o[3], *(short *)(o + 0x12), *(short *)(o + 0x16), *(short *)(o + 0x1a));
     if (area == 5 && (o[3] == 19 || o[3] == 20) && *(short *)(o + 0x16) == -144 && *(short *)(o + 0x1a) == 90) {
-        /* AREA05 s1 notice board: from the unreachable depth-90 spot onto the ground under the board */
-        *(short *)(o + 0x16) = -60; *(short *)(o + 0x1a) = 0;
-        if (port_verbose) port_printf("[port] --cut-content: AREA05 notice board (subtype %d) moved to %d,-60,0\n", o[3], *(short *)(o + 0x12));
+        /* AREA05 s1 notice board: its sign is at depth 90 and the ledge it stands on is walked at depth 144, out of
+           the sign's reach (|dz| 54 > 45).  Moved to depth 117, so Tomba reads it standing by the board, on the ledge
+           (up to 2026-11-17 it was moved down to the ground under the board and read from the lower lane: "it is read
+           from below instead of from above", the user) */
+        *(short *)(o + 0x1a) = 117;
+        if (port_verbose) port_printf("[port] --cut-content: AREA05 notice board (subtype %d) at %d,%d moved to depth 117\n", o[3], *(short *)(o + 0x12), *(short *)(o + 0x16));
         return;
     }
     for (i = 0; port_cc_saves[i].area >= 0; i++) {

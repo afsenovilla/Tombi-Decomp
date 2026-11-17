@@ -21,6 +21,9 @@ Update this file whenever something lands or a task is decided. Newest first.
   - **Brick staircase (AREA09 s5)**, report "Tomba hops going downhill": walking down is a straight diagonal, the
     same frame by frame at 4:3 and 16:9 (CVLOG); the port changes nothing in that room's collision. In the video
     Tomba is dashing; not compared with the original game yet (tools/psxemu).
+  - **Baccus Village notice board (`--cut-content`)**: read from the ledge by the board, not from the ground under
+    it (`port_cc_sign`: the sign at depth 117). Checked with Tomba placed on the ledge by position pokes (depth 90
+    and 144: the text opens; on the ground: nothing); climbing up there in play not checked.
   - Open: the Iron Castle's entrance (AREA17 s1) strips are being redone (sky seam, clouds, skirt, chain end); the
     Forest of 100 Flowers' right entrance (AREA01 s1), the stone house with the cave door: the sky shows past the
     house's right end on a wide frame (a room end to carry on, `runtime/ws_edge.c`); not reproduced headless yet

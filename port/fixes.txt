@@ -544,8 +544,8 @@ src/updateL4Type1AObject.c | o->box0 = 4; | { extern int port_cut_content; exter
 # table D_80117AC8[GCD.bceed]) does place the board's sign in section 1, subtype 19 (-> 20 once the baby mouse is back,
 # -> 35 after event 50), at (28,-144) depth 90 next to the townsfolk who mentions it, but nothing Tombi can stand on is
 # within its hit depth (the ledge above the wall is at depth 144, |dz| 54 > 45; the ground is 88 px too low), so the
-# board was never readable and events 46/49 never started from it. port_cc_sign (runtime/main.c) moves it down to the
-# ground under the board; port_cc_sign_text shows the unused (1,6) once before the first (1,7) (mouse found, event 49
+# board was never readable and events 46/49 never started from it. port_cc_sign (runtime/main.c) moves it to depth 117,
+# in reach of that ledge (read standing by the board, not from the ground under it); port_cc_sign_text shows the unused (1,6) once before the first (1,7) (mouse found, event 49
 # not started yet) and chains (1,7) after it. Save points restored with the same hook: port_cc_sign spawns them.
 src/updateL4Type1AObject.c | o->msg = showMessageBox(text, opt, 0xa0, 0x8c); | { extern void port_cc_sign_text(void *, int, int, int, unsigned short *, unsigned short *); port_cc_sign_text(o, GAME[0], D_8009CEED, D_8009CDD5, &text, &opt); } o->msg = showMessageBox(text, opt, 0xa0, 0x8c);
 src/updateL4Type1AObject.c | D_8009C942 = 0; | { extern void *port_cc_sign_next(void *); M *nm = (M *)port_cc_sign_next(o); if (nm) { o->msg = nm; break; } } D_8009C942 = 0;
