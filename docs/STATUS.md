@@ -24,10 +24,11 @@ Update this file whenever something lands or a task is decided. Newest first.
   - **Baccus Village notice board (`--cut-content`)**: read from the ledge by the board, not from the ground under
     it (`port_cc_sign`: the sign at depth 117). Checked with Tomba placed on the ledge by position pokes (depth 90
     and 144: the text opens; on the ground: nothing); climbing up there in play not checked.
-  - **Iron Castle's entrance (AREA17 s1)**: strips redone twice (`ws_backdrop_castle.inc`): the picture's own sky
-    texels, cloud puffs from the edge's cloud, the skirt as the dome it is (an ellipse that ends on the grass 60
-    columns out), the chains from a cleaned mask, everything quantised to the picture's colours. Waiting for the
-    user's look at the third version.
+  - **Iron Castle's entrance (AREA17 s1)**: back to the first strips, which the user preferred to two redone
+    versions (a dome outline with lobes and cloud puffs; a cloud bank), with what he marked on a capture: the
+    skirt's tone follows the front plate's upper edge carried on across the join (`IC_PL`), the thin chain's copies
+    are filled, no lighter sky block by the left join. Open there: the small towers' cones that stand right at both
+    joins ("odd peaks I do not know how to fit: if the wall joins there it looks raised"), left as they are.
   - **Lake's beach (AREA09 s1)**: the picture's left end is extended too (the boat scene shows it: the camera goes
     past `LK_X1`); `lk_take` lays either strip or both. Checked with the camera forced to the boat scene's position
     (`--poke-every 1:1F800176:VAL:2`, x = 1024 - VAL), not in the scene itself. Weak: at 21:9 / 32:9 with both
