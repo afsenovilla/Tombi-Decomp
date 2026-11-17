@@ -5056,34 +5056,47 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
       crack and the boulder under it (x 266-298), the dark face (they came back as rows of chevrons in the first try),
       and texels in too dark a light (the ceiling's shade lit 5 times over showed its 5-bit steps as flat pale-green
       patches: `UP_LM`); texels more than 1.13 times their light eased (to 1.44) so a bright light makes no flat white;
-    - the light: right, the edge columns' light per row; left, the row's mean over the edge's 21 columns, so the
-      ledge's lit band and dark line and the floor's line go on at their rows (differences under 1/8 of the 5-row
-      mean halved: the rock's grain would run on as ruled lines), the line fading between strip columns 56 and 104;
-      both sides fall off as the candle's light, S^2 / (S^2 + r^2), S 60, over an ambient 0.4 (fits the picture: -25 %
-      over its last 36 columns on the candle's row, and the left edge's level, 260 columns away); the first try's
-      flat falloff left a second bright zone at 21:9;
-    - the dark face: its outline goes on up to the left (row 119 at the edge, one row per column, easing to level at
-      row 109 by column 20, 1/16-row coverage), the rock under it lit with the face's own light (mean of its texels 3
-      columns inside), the two rows under the outline darker as in the picture; no far end (a closed dark dome in the
-      wall, the second try, read as a doorway): its shade eases back to the wall's light between columns 36 and 100;
+    - the right strip's light: the edge columns' light per row, falling off as the candle's light, S^2 / (S^2 + r^2),
+      S 60, over an ambient 0.4 (fits the picture: about -25 % over its last 36 columns on the candle's row, and the
+      left edge's level, 260 columns away); the first try's flat falloff left a second bright zone at 21:9;
+    - the left strip, third version (the user on the second: "you could have done the left part better instead of
+      only continuing what was there"; the first two ran the edge's rows on: a ruler-straight ledge line, level
+      strata and a plain dark slab over the whole strip).  It is drawn as more of the cave's wall: blocks of 20 x 37
+      from the whole wall (the thin cracks over the cage among them; never the cracks next to the strip, the right
+      edge's X-shaped crack or the boulder: an X came back at once as a copy one knows again), lit with the wall's
+      smooth light (17 x 17 at the edge, behind the dark face from the wall over it to the floor), the candle's
+      falloff and a soft mottle (value noise, at most 12 %).  The edge's own rows (the mean of its 21 columns per
+      row: the lit ledge, the floor's line; read up to 2 rows off, value noise, so they do not run level) hold at the
+      join and hand over to that light within 32 columns;
+    - what the left edge cuts ends inside the strip.  The ledge's line: in the picture it is level (row 75 for x 0-25,
+      rows 74-75 for x 35-61, broken by the cracks at x 26-34, fading over x 58-69); the strip's columns take the
+      line texels of picture columns 22..0 in their order, each as what it is of the rock over and under it, full for
+      9 columns and gone by column 23 (`up_line`).  The dark face: its outline goes on up to the left (row 119 at
+      the edge, one row per column, easing to level at row 109 by column 20, +- 1.5 rows of noise, 1/16-row
+      coverage); it is filled with rock quilted from the face's own texels (6 x 8 blocks from its even lower part,
+      rows 142-170, over their 7 x 7 light, 3/4 of the grain: the whole face's blotches came out as camouflage), lit
+      with the face's light, the two rows under the outline darker as in the picture; it dissolves into the wall
+      between columns 14 and 46.  No far outline: a rounded end (first version), a mound closed down to the wall's
+      foot and a long wedge (second) all read as a dark opening in the wall at 21:9;
     - contrast per row matched to the picture's 32 edge columns (x 0.8 .. 1.5, about each texel's 9 x 9 mean), the
       join as in `gen_rw` (the first 8 columns' mean onto the picture's last 8, the first column onto the last one).
     The dark state with the strips on: the rectangle is widened with the frame like every full-screen fade, so the
     left strip is black and the right one keeps 269 dim texels (at most 33 of 255) where the candle's glow at the
-    picture's edge goes on.  Measured: the face's outline across the join, first dark row per column: strip 115, 116,
+    picture's edge goes on.  Measured: the face's outline across the join, first dark row per column: strip 116,
     117, 118 | picture 119, 120, 121 (no step); the ledge's line rows 74-75 on both sides.  ws_seam (bands 0-62 /
-    62-100 / 100-140 / 140-172 / 172-224): every join step within the picture's own (>= 92 % of the rows); the "tone"
+    62-100 / 100-140 / 140-172 / 172-224): every join step within the picture's own (>= 88 % of the rows); the "tone"
     checks of the right bands fail by design (the strip's 16 columns go on with the falloff: 180, 148 | 143, 136, 126
-    per 8 columns on rows 100-140), the left ones where the face takes the strip's rows.  0.2 s per room entry at
+    per 8 columns on rows 100-140), the left ones (tone, contrast) where the face is.  0.2 s per room entry at
     16:9 (0.3 s at 21:9).  Checked (headless): 4:3 identical with the room on; default flags identical at 16:9 (lit
     and dark); the 21:9 frame holds the 16:9 one; the other rooms' frames identical to the build before with
     `--ws-backdrop on` (2:5 2:1 5:1 5:3 19:1 11:2 9:5 9:3 9:4 17:3 17:4 16:4, and 2:3); the OpenGL renderer's strips
     identical to the software one's (xvfb; lit and dark); i386 = wasm2c (the 16:9 lit and dark frames and the 21:9 lit
     one identical).  Not seen on the device.
-    Weak points: the left strip's strata are level bands (the ledge's line is ruler-straight for 56 columns); the dark
-    face is a plain shaded slab with no far end; the strips' rock is a little smoother and more streaked than the
-    mottled rock at the right edge (most wall windows come from the wall over the cage); a small flat patch (8 x 5,
-    one palette colour) in the right strip at rows 144-149.
+    The right strip is byte-identical in the three versions.
+    Weak points: the lit ledge ends rather squarely about 19 columns out (it reads as a shelf's end); the dark face
+    has no far outline, it is a shaded bulge that dissolves; the left strip's wall comes mostly from the lit wall
+    over the cage, so its grain is a little more streaked than the rock at the edge; a small flat patch (8 x 5, one
+    palette colour) in the right strip at rows 144-149.
 - **Sub-screens** (Select screens Objetos / Eventos / Estado / Mapa, memory card, options, button config, screen
   adjust).  The Select screens (`subScreenDrawTabs`, D0SPSUB / D0SPSUB3, `#ifdef PORT2`) call `port_ws_layout(left cut,
   right cut, below)` each frame; while it is set, `shims/gpu.c` spreads the textured primitives of the frame
