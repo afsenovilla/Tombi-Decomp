@@ -30,6 +30,10 @@
  *   - the chains: each texel is the chain's own texel one or more link periods back (never mirrored), from a mask
  *     with its holes filled and its specks dropped; all three go on to the frame's edge (the left big one in front of
  *     the grass and out of the bottom, as the right one does in the picture, over a soft shadow on the grass).
+ * Third version (2026-11-17, after the user's "go back to the 4:3 picture, you are not seeing what has to be done"):
+ * the skirt is the dome it is on the picture, an ellipse about the castle's axis that ends upright on the grass 60
+ * columns out (IC_TOP16), darker towards its outline, not a ramp out to the frame's edge; the clouds are puffs with sky
+ * between them, not a bank down to the ground; the edge's own cloud ends raggedly.
  * Integers only; a texel depends on its place, not on the strip's width. */
 #define IC_HM 1229                                        /* the ROOMS row's mark (no picture has this height) */
 #define IC_H 384
@@ -185,8 +189,17 @@ static int ic_chain(int side, int which, int x, int y)   /* the picture's texel 
     return x >= 0 && x < PW && y >= 0 && y < IC_H && (ic_cm[y][x] >> which & 1);
 }
 
-/* the skirt's top (x 16) j columns out: the edge's own row, then a curve down to the grass */
-#define IC_TOP16(side, j) ((side) ? IC_T0[1] * 16 + (j) * 12 + (j) * (j) * 128 / 1000 : IC_T0[0] * 16 + (j) * 144 / 10 + (j) * (j) * 192 / 1000)
+/* The skirt is a dome: on the picture its outline is an ellipse about the castle's axis (column 160), half axis 220
+   columns (fitted on the right outline: rows 82 / 86 / 92 / 101 of the frame's picture rows at columns 282 / 295 /
+   307 / 320), standing on the grass.  So it does not run out as a ramp: it comes down ever steeper and ends upright
+   on the ground 60 columns past the edge.  Its top (x 16) j columns out, through the edge's own row; IC_END from
+   where there is none. */
+#define IC_AX 220
+#define IC_END (IC_AX - 160)
+static int ic_isqrt(int v) { int r = 0; while ((r + 1) * (r + 1) <= v) r++; return r; }
+static int ic_rel(int j) { return j >= IC_END ? 0 : ic_isqrt((IC_AX * IC_AX - (160 + j) * (160 + j)) * 16) * 256 / ic_isqrt((IC_AX * IC_AX - 160 * 160) * 16); }   /* the dome's height j columns out over its height at the edge, x 256 */
+static int ic_top16(int side, int j) { int b = IC_GT[side] + 2; return b * 16 - (b - IC_T0[side]) * ic_rel(j) / 16; }
+#define IC_TOP16(side, j) ic_top16(side, j)
 static void ic_gen(u16 *ext, int pad)
 {
     static const int VEC[2][2][2] = { { { 12, 11 }, { 17, 34 } }, { { 31, 34 }, { 31, 34 } } };
@@ -254,6 +267,9 @@ static void ic_gen(u16 *ext, int pad)
                 if (j > 60) top += ((noise(X, 0, 150, 1, 9) - 128) * 56 / 128 + 12) * (j < 140 ? j - 60 : 80) / 80;
                 h = (y - top) * 16 + (noise(X, y, 17, 11, 5) - 128) * 150 / 128 + (noise(X, y, 7, 5, 6) - 128) * 40 / 128;
                 wa = clampi(h * 3, 0, 256);
+                {   int g = clampi((noise(X, y, 70, 34, 11) - 96) * 3 + (noise(X, y, 22, 12, 14) - 128) / 2, 0, 256);   /* puffs with sky between them, as the picture's */
+                    int L = 12 + noise(side * 91 + 7, y, 1, 17, 12) * 40 / 256 + noise(side * 91 + 7, y, 1, 6, 13) * 10 / 256;   /* (the edge's own cloud ends raggedly) */
+                    wa = wa * (j < L ? (256 * (L - j) + g * j) / L : g) / 256; }
                 wi = 262 + (noise(X, y, 40, 20, 7) - 128) * 76 / 128;
                 wi += (noise(X, y, 13, 9, 8) - 128) * 26 / 128;
                 wi += clampi(100 - h / 4, 0, 60) - clampi(y - (gt - 22), 0, 22) * 5;
@@ -268,7 +284,7 @@ static void ic_gen(u16 *ext, int pad)
         for (int j = 0; j < pad; j++) {                   /* the copper skirt */
             int top16 = IC_TOP16(side, j);
             int top = top16 >> 4, hg = gt + 1 - top, D = 161 + j, f = j < 10 ? j : 10, fb = j < 12 ? j : 12;
-            if (top >= gt) break;
+            if (j >= IC_END || top >= gt) break;
             for (int y = top; y < gt + 3; y++) {
                 int v = clampi((y - top) * (n0 - 1) / (hg > 1 ? hg : 1), 0, n0 - 1), *p = cv[(size_t)y * pad + j];
                 int q = D * 576 / (y + 230) - 160 - LO[side], li = fdiv(q, LW[side]), t = 255 - fmodi(q, LW[side]) * 256 / LW[side];
@@ -277,6 +293,7 @@ static void ic_gen(u16 *ext, int pad)
                 m += (int)(hash3(li, side, 31) % 25) - 12;
                 m += (noise(j + side * 333, y, 13, 21, 22) - 128) * 26 / 128;
                 tone = tone * (256 + m * f / 10) / 256;
+                tone = tone * (150 + 106 * ic_rel(j) / 256) / 256;   /* (the dome turns away: darker towards its outline) */
                 g = (noise(j + side * 333, y, 3, 3, 21) - 128) * 7 / 128;
                 tone += g + (int)(hash3(j + side * 333, y, 23) % 11) - 5;
                 if (y >= gt) tone = tone * 5 / 8;
