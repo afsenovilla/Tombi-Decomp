@@ -4,6 +4,27 @@ Update this file whenever something lands or a task is decided. Newest first.
 
 ## Since v0.6.0 (not released)
 
+- Widescreen fixes from the user's device feedback (2026-11-17; all checked on the PC, headless, soft renderer,
+  i386; not on the device or GL):
+  - **Dwarf Village (AREA02 s1), back lane**: Tomba walked on air at the roof's height left of the hut and the hatch
+    to the Underground Prison did not take him. The hatch exit is back at its 4:3 place and the ground goes on left of
+    it (`LEDGE` in `runtime/ws_exits.c`, docs/PORT.md "Widescreen exits"). Tested by dropping Tomba on the back lane
+    in the left strip (position pokes) and walking right: lands at Y -88, falls into the pit, room 2:2.
+  - **Iron Castle engine room (AREA17 s5)**: the strips' pipes are drawn in front of the actors, as the picture's own
+    front pieces are (`en_ov`, `port_ws_backdrop_over`, `ws_backdrop_over` in shims/gpu.c); the copper pipe's turn in
+    the right strip lost its two copied riveted rings (`EN_RINGS`). Checked: the mask (tinted) at 16:9 / 21:9, frames
+    with and without the layer equal where no actor stands. Not seen with an actor crossing the edge (the exits fire
+    before Tomba gets there in a headless run): to check on the device.
+  - **Lumberjack Factory (AREA11 s1)**: the black line in the right jamb is gone (the picture's last two columns keep
+    the broken rock's texels; done again when the game draws the open door: `lf_fix`, `port_ws_backdrop_fix`), the
+    strip's jamb ends at the door's foot. 4:3 frame unchanged.
+  - **Brick staircase (AREA09 s5)**, report "Tomba hops going downhill": walking down is a straight diagonal, the
+    same frame by frame at 4:3 and 16:9 (CVLOG); the port changes nothing in that room's collision. In the video
+    Tomba is dashing; not compared with the original game yet (tools/psxemu).
+  - Open: the Iron Castle's entrance (AREA17 s1) strips are being redone (sky seam, clouds, skirt, chain end); the
+    Forest of 100 Flowers' right entrance (AREA01 s1), the stone house with the cave door: the sky shows past the
+    house's right end on a wide frame (a room end to carry on, `runtime/ws_edge.c`); not reproduced headless yet
+    (Tomba has to get past the vines; `--ws-edge all` is the first thing to try).
 - NOW LOADING screen in widescreen (2026-11-17): the pig tiles are drawn across the wide frame (`port/fixes.txt`,
   `drawLoadingSprites`, columns added on both sides by `port_ws_cull`). Checked on the PC at 16:9 and 21:9 (headless,
   soft renderer); not on the device, GL or the wasm2c build.

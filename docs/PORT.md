@@ -2738,6 +2738,12 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   fountain.  AREA06 s2 right.  (A wider talk box for the AREA05 notice board, 2026-11-16, was dropped: the board is
   out of reach on the back lane and `--cut-content` moves its sign to the ground, so the change only widened that
   copy.)
+  A lane that ends in a pit is not carried on as its edge column: AREA02 s1's back lane ends at the hatch down to the
+  Underground Prison (a pit at x < 40, reached over the hut's roof; exit 1 fires in it at H < 30, Y >= -77).  With the
+  exit moved and the column at the camera limit + 0x80 repeated (the pit plus the roof's left tip, a floor at -184)
+  Tomba walked on air at the roof's height and never fell into the hatch (the user's report, 2026-11-17).  That exit
+  keeps its 4:3 box and `LEDGE` (`ws_exits.c`) gives the lane, left of x 8, a plain block with its floor at -88 (the
+  ground the fence stands on), so the pit stays where the picture has the hatch.
   Moved (each checked by a headless sweep that puts Tomba 70 units from the exit and walks him out, at 4:3, 16:9, 21:9
   and 32:9: same destination, on the floor; and reviewed room by room on renders): AREA02 s1 left (both lanes; the
   flowered village, AREA19 on the disc, runs as area 2 section 1 and so has it too), s5 right; AREA03 s1, s5 left;
@@ -3768,7 +3774,7 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     the trees behind. Checked on the PC (headless, soft renderer) at 16:9, 21:9 and 32:9; 4:3 and the default 16:9
     frames are unchanged. After the user's first look ("the cuts and joins show a lot"): the left strip's foliage starts from the picture's own
     edge columns and takes their tone and tree top, the deck's top is in the sun on both strips (it was wrapped with the
-    hut's shadow), the right trees come up from behind the shed. Weak points: the rock's shadow
+    hut's shadow), the right trees come up from behind the shed. 2026-11-17, from the device: the black line in the right jamb (the picture's columns 318-319 keep the broken rock's dark texels; `lf_fix` draws them again when the game draws the open door) and the strip's jamb ending at the picture's door foot (row 174, it went on to 183). Weak points: the rock's shadow
     on the sand ends at the 4:3 edge while the rock is whole. Not built with wasm2c yet, not tested on the device or GL.
   - AREA08 s1 / s3, Baccus Pier, done 2026-11-17 (`gen_pr` / `pr_take`, `runtime/ws_backdrop_pier.inc`; approved by the user on the
     game's captures and on by default since 2026-11-17; the look was settled on prototype renders, option by option).
@@ -4580,6 +4586,12 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   Checked (headless, 2026-11-14): at 16:9 and 21:9 in the four rooms; 4:3 runs identical with `--ws-backdrop on` and
   off; with the default flags the new rooms are identical to `--ws-backdrop off`, and AREA02 s5 is identical to the
   build before the table; i386 = wasm2c strips; not checked on the device.
+  - (AREA17 s5, 2026-11-17, from the device: the pipes the edges cut are front pieces, drawn by the game after the
+    actors, so their strips are too: `en_ov` holds the strips' pipe texels and `ws_backdrop_over` (shims/gpu.c) draws
+    them as runs of flat colour when the game draws the first front quad, through `be->rect`, so the OpenGL renderer
+    and the --fps replays need nothing of their own.  A texture in VRAM was ruled out: the page that looks free after
+    the debug select, (0, 256) 192 x 256, is loaded by a new game.  The right pipe's copied riveted rings are off,
+    `EN_RINGS`.)
   - AREA17 s5 (the Iron Castle engine room, 2026-11-16, `gen_en` in `runtime/ws_backdrop_engine.inc`; off by default,
     preview with `--ws-backdrop-rooms 17:5`).  Dropped at first ("pipes and machines cut by both edges").  How it is
     drawn: the 256 + 64 column sprite pair (the hall's layout, 256 rows drawn) is only the room's box (back wall, side
