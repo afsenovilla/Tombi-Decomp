@@ -27,7 +27,7 @@ Main references: `README.md`, `docs/PORT.md` (long; search it), `docs/STATUS.md`
 
 ## How to talk to the user
 
-- Reply in **Spanish**, short and direct, first person. Never claim something works without verifying it; say
+- Reply in **Spanish**, short and direct, first person **singular** ("he mirado", "no lo he comprobado"; never "hemos"), also in Discord texts ("I", not "we"). Never claim something works without verifying it; say
   plainly what was tested (PC headless renders) and what was not (the device).
 - Show real renders/screenshots of UI changes (send the PNGs), not descriptions.
 - When the user proposes UI, they like 3-4 real-render options to choose from.
