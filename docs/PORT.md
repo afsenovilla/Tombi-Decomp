@@ -2682,6 +2682,9 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     height at that edge pixel and without the walls (repeated as it was, a sloped piece and a wall came back every 8
     units: a sawtooth floor in AREA03 s1/s5).  The collision view draws that copy too (it is not in game RAM).
   In side view 1 unit is about 1 column at Tomba's depth (measured), so the pad in units is the pad in columns.
+  Check: `python3 tools/ws_exit_sweep.py [--rooms A:S,...] [--all] [--ws 4:3,16:9,...]` puts Tomba 70 units inside
+  each edge exit after the debug select and walks him out, reading `PORT_CVLOG=1` lines of the collision view
+  (`CVLOG area section H Y D` per frame); a moved exit must reach the same room on the floor at every width.
   Also for AREA05 s1/s3: the notice board at the back (L4 type 0x1A subtype 0x13) takes a 32-unit talk box instead of
   8 (fixes.txt), it was hard to stand in.
   Walk limits are decided room by room, apart from the exits: a wide frame does not always mean wider limits.  The

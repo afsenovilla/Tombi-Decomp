@@ -10,6 +10,7 @@
  * frame that is being shown) and projected like the game projects its sprites (drawObjectSprite: the camera matrix at
  * 0x1F8000C0, then RTPS with the GTE's own screen distance and offset); port_colview_draw draws them in the vblank with
  * the debug overlay's fills.  Nothing runs without the flag. */
+#include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include "port_runtime.h"
@@ -152,6 +153,12 @@ void port_colview_tick(void) {
             }
         }
         nlab[w] = nl;
+    }
+    {   /* PORT_CVLOG=1: one line per game frame on stderr, "CVLOG area section H=.. Y=.. D=..", for tools/ws_exit_sweep.py */
+        static int lg = -1;
+        if (lg < 0) lg = getenv("PORT_CVLOG") != NULL;
+        if (lg) fprintf(stderr, "CVLOG %d %d H=%d Y=%d D=%d\n", *(u16 *)PORT_M0(PORT_A_GAME), *(u16 *)PORT_M0(PORT_A_GAME + 2),
+                        (int)H, (int)whole(pl + 0x14), (int)D);
     }
     nseg[w] = n; ready = w; cur = w;
 }
