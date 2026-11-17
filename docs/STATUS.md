@@ -2,7 +2,11 @@
 
 Update this file whenever something lands or a task is decided. Newest first.
 
-## Since v0.6.0 (not released)
+## Since v0.6.1 (not released)
+
+(nothing yet)
+
+## In v0.6.1
 
 - Widescreen fixes from the user's device feedback (2026-11-17; all checked on the PC, headless, soft renderer,
   i386; not on the device or GL):
@@ -53,6 +57,13 @@ rejected and the user said to leave it for now. Nothing changed in the generator
 docs/CIVILIZATION.md "Iron Town: findings of 2026-11-17". Do not restart without the user asking.
 
 ## Last release
+
+v0.6.1 (2026-11-17, built from master 186beea): the widescreen fixes from the user's device feedback (Dwarf Village
+back lane and prison hatch, the engine room's pipes in front of the actors, the Lumberjack Factory's jamb and sand,
+the boat scene's left strip, the rock wall past the stone house of the Forest of 100 Flowers) and the Baccus notice
+board read from its ledge (`--cut-content`). The Iron Castle's entrance strips are v0.6.0's. Checked on the PC only
+(soft renderer; i386 = wasm2c frames in six rooms); the Windows exe workflow has a path filter, so its last run was
+on the last code commit (0d24c55, success), the APK run on the head. Before it:
 
 v0.6.0 (2026-11-17, built from master 2f5acec8; the head at release time, 48f1865, only adds docs): widescreen strips
 for Baccus Pier (AREA08 s1 / s3), the Lumberjack Factory (AREA11 s1) and the Iron Castle entrance (AREA17 s1), all
