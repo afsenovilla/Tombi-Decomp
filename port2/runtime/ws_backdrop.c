@@ -751,6 +751,7 @@ static void gen_cb(int pad);
 #include "ws_backdrop_pier.inc"
 #include "ws_backdrop_lake.inc"
 #include "ws_backdrop_factory.inc"
+#include "ws_backdrop_castle.inc"
 #include "ws_backdrop_island.inc"
 #define PIECES_TOP4 { 128, 0, 224, 64, 32, 256, 0 }, { 128, 64, 224, 64, 32, 256, 32 }, { 128, 128, 224, 64, 32, 256, 64 }, \
                     { 128, 192, 224, 64, 32, 256, 96 }
@@ -800,6 +801,8 @@ static const Room ROOMS[] = {
                                                             rays over both (pr_take, ws_backdrop_pier.inc) */
     { 8, 3, 224, 1, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, gen_pr },
     { 11, 1, 224, 1, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, gen_lf },   /* the Lumberjack Factory (ws_backdrop_factory.inc) */
+    { 17, 1, IC_HM, 0, { { 0 } }, { { 0 } }, gen_ic },   /* the Iron Castle's entrance: a 384-row picture drawn from frame
+                                                            row -144 (ic_take, ws_backdrop_castle.inc; preview) */
     { 9, 2, CK_HM, 1, { { 0 } }, { { 0 } }, gen_ck },   /* the grandfather clock room: a 480 x 288 picture moved by the
                                                             camera, its two ends (ck_take, ws_backdrop_clock.inc; preview) */
     { 9, 1, LK_HM, 1, { { 0 } }, { { 0 } }, gen_lk },   /* the Lake's beach: a 512-column picture moved by the camera,
@@ -890,6 +893,12 @@ const u16 *port_ws_backdrop(const u16 *vram, int pad, int x, int y, int w, int h
         for (int i = 0; i < NROOMS; i++)
             if (ROOMS[i].h == IM_H && ROOMS[i].area == a && ROOMS[i].sec == sc)
                 return room_enabled(&ROOMS[i]) ? im_take(vram, pad, x, y, w, h, u, v, tx, ty, rows) : 0;
+    }
+    if (enabled && pad > 0 && !x && w == 256 && h == 256 && !u && !v && tx == 128 && !ty && depth == 1 && cx == 128 && cy == 511) {
+        u8 *g = port_ram_ptr(PORT_A_GAME); int a = *(u16 *)(g + 0), sc = *(u16 *)(g + 2);   /* AREA17 s1 (ic_take) */
+        for (int i = 0; i < NROOMS; i++)
+            if (ROOMS[i].h == IC_HM && ROOMS[i].area == a && ROOMS[i].sec == sc)
+                return room_enabled(&ROOMS[i]) ? ic_take(vram, pad, y, rows) : 0;
     }
     if (enabled && pad > 0 && w == 256 && h == 256 && !u && !v && tx == 128 && !ty && depth == 1 && cx == 128 && cy == 511) {
         u8 *g = port_ram_ptr(PORT_A_GAME); int a = *(u16 *)(g + 0), sc = *(u16 *)(g + 2);   /* AREA09 s2 (ck_take) */

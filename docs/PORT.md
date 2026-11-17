@@ -3687,6 +3687,14 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     the right edge, rows 0-140 and 175-215) are cut by both edges, and the picture has no clean leaf windows to go on
     with them without copying the same leaves next to themselves; the right edge's crown needs foliage from the top
     canopy (rows 0-45) taken at other rows.  Not delivered until that is solved.
+  - AREA17 s1, the Iron Castle's entrance, preview 2026-11-17, off by default (`ic_take`, `runtime/ws_backdrop_castle.inc`;
+    its header has the measures): the row's own sky with noise clouds low over the horizon, the grass, the castle's copper
+    skirt down to the grass (shaded as the edge's own copper), and the three chains the edges cut carried on with their
+    own texels one link period back (the left big one down to the grass over a shadow). The strips are made for all 384
+    rows and the frame's 224 handed wherever the game puts the picture. Checked on the PC (headless, soft renderer) at
+    16:9, 21:9 and 32:9; 4:3 and the default 16:9 frames are unchanged. Weak points: the skirt in the strips is a plain
+    dome (no plates or rivets); the left big chain ends flat on the grass. Not built with wasm2c, not tested on the
+    device or GL.
   - AREA11 s1, the Lumberjack Factory, done 2026-11-17, approved by the user and on by default (`gen_lf`, `runtime/ws_backdrop_factory.inc`; its
     header has the measures): sky from the picture's plain gradient; trees as ragged crowns lit from the upper left, their
     texels 8 x 8 windows of the picture's clean foliage chosen by overlap and tone, lit through the foliage's own colour
