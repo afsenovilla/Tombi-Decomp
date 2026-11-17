@@ -750,6 +750,7 @@ static void gen_cb(int pad);
 #include "ws_backdrop_clock.inc"
 #include "ws_backdrop_pier.inc"
 #include "ws_backdrop_lake.inc"
+#include "ws_backdrop_factory.inc"
 #define PIECES_TOP4 { 128, 0, 224, 64, 32, 256, 0 }, { 128, 64, 224, 64, 32, 256, 32 }, { 128, 128, 224, 64, 32, 256, 64 }, \
                     { 128, 192, 224, 64, 32, 256, 96 }
 #define OVER_A5 { { 256, 0, 112, 56, 104, 0, 0 }, { 256, 56, 112, 200, 104, 56, 0 }, { 256, 144, 0, 64, 80, 256, 24 }, \
@@ -797,6 +798,7 @@ static const Room ROOMS[] = {
     { 8, 1, 224, 1, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, gen_pr },   /* Baccus Pier: the picture over a water layer, light
                                                             rays over both (pr_take, ws_backdrop_pier.inc) */
     { 8, 3, 224, 1, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, gen_pr },
+    { 11, 1, 224, 0, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, gen_lf },   /* the Lumberjack Factory: preview, off by default (ws_backdrop_factory.inc) */
     { 9, 2, CK_HM, 1, { { 0 } }, { { 0 } }, gen_ck },   /* the grandfather clock room: a 480 x 288 picture moved by the
                                                             camera, its two ends (ck_take, ws_backdrop_clock.inc; preview) */
     { 9, 1, LK_HM, 1, { { 0 } }, { { 0 } }, gen_lk },   /* the Lake's beach: a 512-column picture moved by the camera,

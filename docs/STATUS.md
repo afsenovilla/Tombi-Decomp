@@ -64,8 +64,9 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    picture: **done, approved by the user on the game's captures and on by default** (2026-11-17): AREA08 s1 / s3
    (Baccus Pier, `gen_pr`, `runtime/ws_backdrop_pier.inc`; PORT.md "More rooms with picture strips" has how and what
    the user rejected on the way; not tested on the device or on GL).
-   **still to do**: AREA11 s1 (Lumberjack Factory, the cage scene),
-   AREA17 s1 (Iron Castle entrance: a 384-row picture drawn from frame row -144). **Valid as they are, decided by the
+   **Preview shown to the user, waiting for their answer, off by default** (`--ws-backdrop on`): AREA11 s1 (Lumberjack
+   Factory, `gen_lf`, `runtime/ws_backdrop_factory.inc`; set `approved` to 1 in `ROOMS` once they approve).
+   **still to do**: AREA17 s1 (Iron Castle entrance: a 384-row picture drawn from frame row -144). **Valid as they are, decided by the
    user 2026-11-17 (black strips, do not list or propose again)**: AREA00 s3 (100 Year Old Man's Hut), AREA13 s1 (Pig
    Island Cave, the same picture), AREA10 s8 (10000 Year Old Man), all vignettes with black corners; AREA02 s4 the
    same; AREA09 s6 (Leaf Slider, 3D: the user sees nothing to do). AREA16 s5's white right strip is approved. The survey only

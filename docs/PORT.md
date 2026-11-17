@@ -3675,6 +3675,14 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     the right edge, rows 0-140 and 175-215) are cut by both edges, and the picture has no clean leaf windows to go on
     with them without copying the same leaves next to themselves; the right edge's crown needs foliage from the top
     canopy (rows 0-45) taken at other rows.  Not delivered until that is solved.
+  - AREA11 s1, the Lumberjack Factory, preview 2026-11-17, off by default (`gen_lf`, `runtime/ws_backdrop_factory.inc`; its
+    header has the measures): sky from the picture's plain gradient; trees as ragged crowns lit from the upper left, their
+    texels 8 x 8 windows of the picture's clean foliage chosen by overlap and tone, lit through the foliage's own colour
+    ramp; the deck's front carried on at its 76-column period with the sand under it; left, the hut's eave to its corner
+    and the brace's end; right, the 6 missing columns of the door's jamb, the shed's edge and its shadow, the deck and
+    the trees behind. Checked on the PC (headless, soft renderer) at 16:9, 21:9 and 32:9; 4:3 and the default 16:9
+    frames are unchanged. Weak points: the deck's lit bumps repeat every 76 columns (seen at 32:9); the rock's shadow
+    on the sand ends at the 4:3 edge while the rock is whole. Not built with wasm2c yet, not tested on the device or GL.
   - AREA08 s1 / s3, Baccus Pier, done 2026-11-17 (`gen_pr` / `pr_take`, `runtime/ws_backdrop_pier.inc`; approved by the user on the
     game's captures and on by default since 2026-11-17; the look was settled on prototype renders, option by option).
     The picture's layers are read from VRAM (`pr_take`: the water quads' texels, the 4 bpp ray layer).  The strips:
