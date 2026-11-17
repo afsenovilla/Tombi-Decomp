@@ -45,9 +45,9 @@
 enum { TG_TRIM = 1, TG_MARGIN = 2 };
 int port_ws_topdown_gen = 1;              /* --ws-topdown-gen: 1 the approved rooms (default), 0 off, 3 every room of the table */
 static const struct { u8 area, sec, approved, kind; } TG_ROOMS[] = {
-    {19, 2, 0, TG_MARGIN},                /* Hidden Village */
-    { 2, 0, 0, TG_TRIM},                  /* Dwarf Village */
-    {19, 0, 0, TG_TRIM},                  /* Dwarf Village, the AREA19 copy (runs as AREA02 s0) */
+    {19, 2, 1, TG_MARGIN},                /* Hidden Village */
+    { 2, 0, 1, TG_TRIM},                  /* Dwarf Village */
+    {19, 0, 1, TG_TRIM},                  /* Dwarf Village, the AREA19 copy (runs as AREA02 s0) */
 };
 static int tg_room(void)
 {
