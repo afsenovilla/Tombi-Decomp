@@ -1,13 +1,21 @@
-/* runtime/ws_backdrop.c: AREA09 s1, the Lake (the beach with the cave in the cliff): the right end of its picture
+/* runtime/ws_backdrop.c: AREA09 s1, the Lake (the beach with the cave in the cliff): the two ends of its picture
  * (included there; docs/PORT.md "More rooms with picture strips").
  *
  * The beach is a 512 x 256 picture, CLUT (128, 510): its left half from page (896, 0) (rows 32-255 only: above them
  * the clear colour is the sky's) and its right half from page (0, 256), two sprites at frame row 4, moved by the
  * camera: the right half's sprite is at frame column 110 with the camera at its right limit and at 200 at the other
- * end of this screen (then the room cuts to the island).  So the picture's right edge is 46 columns past the 4:3
- * frame at the right limit: 7 columns short of a 16:9 frame, 74 of a 21:9 one.  Only that end needs content: lk_take()
- * fills the frame's right strip from the picture's columns and the extension (made once), wherever the camera is,
- * and leaves the left strip alone (port_ws_backdrop_side).
+ * end of this screen while playing (then the room cuts to the island); the boat scene holds the camera further left
+ * (about 228 on the owner's screenshot; not reached headless).  So the picture's right edge is 46 columns past the
+ * 4:3 frame at the right limit (7 columns short of a 16:9 frame, 74 of a 21:9 one) and its left edge 56 columns past
+ * it at the other end (8 columns short at 21:9; in the boat scene 25 at 16:9).  lk_take() takes any column from 110
+ * on: it fills the strip of each end the wide frame looks past, from the picture's columns and that end's extension
+ * (made once, when first needed), and leaves the other strip alone (port_ws_backdrop_side).  The left strip alone is
+ * laid from the left half's first row with texels (LK_S), so the rows above stay the game's clear colour; with both
+ * strips those rows are the right half's first column (a tone of the CLUT, one step of blue from the clear colour:
+ * the step the game itself shows where the two halves meet).
+ *
+ * The world goes on to the left: the island's mosaic (ws_backdrop_island.inc) ends 128 columns left of this picture,
+ * and the game draws it over the strip from there (seen at 32:9 only); nothing of the game fills those 128 columns.
  *
  * Measured on the picture (rows counted from frame row 16, as the strips are: picture row - 12), at its right edge:
  *   - sky to row 49: a gradient of flat tones without grain, level; on rows 39-49 the top of a cloud that rises
@@ -17,15 +25,26 @@
  *     columns in;
  *   - the sand from row 201; the foot's line comes down towards the edge, 0.2 rows per column over the last 40.
  * The edge cuts the cliff's face, which goes on: the same grass line, the same rock, the foot further down its line.
+ * At its left edge:
+ *   - sky to row 103: the same gradient of flat, level tones (rows 0-19: the clear colour);
+ *   - the cumulus bank from row 104 to the horizon: the big cloud's left flank comes down to the edge (a lump 20
+ *     columns in, top on row 91) and the edge cuts its body and the haze over the horizon;
+ *   - the sea from row 152 (LK_H; the horizon is level within 4 rows over the picture) to the bottom: glints and
+ *     ripples that grow towards the viewer, no sand (the shore starts 210 columns in).
  *
- * The extension is made with the Singing Rock's tools (ws_backdrop_mermaid.inc: mb_band, a band's tone at the edge
+ * The extensions are made with the Singing Rock's tools (ws_backdrop_mermaid.inc: mb_band, a band's tone at the edge
  * carried on level plus its detail quilted from the picture's own texels next to the edge, never mirrored; the
- * edge's own columns go on first and the join's tone fades out):
+ * edge's own columns go on first and the join's tone fades out).  Right:
  *   - the sky as a smooth band (the cloud's top goes on level behind the grass);
  *   - the grass and the rock as one band whose windows are the face's columns right of the cave, rows 50 to 186
  *     (above the foot's line there), each near its own row, so the grass stays the top fringe;
  *   - the sand as a band from its own rows under the cliff;
  *   - the rock comes down to the foot's line, 0.2 rows per column lower, the sand under it (one texel of coverage).
+ * Left (LK_L, as the Singing Rock's beach):
+ *   - the sky and the clouds as one smooth band: its tone the rows' own, its detail the clouds' lumps quilted from
+ *     the picture's first 320 columns within 2 rows of their own (the gradient stays level), so the bank goes on in
+ *     lumps of the picture's kind;
+ *   - the far sea (to row 179) and the near sea as bands from their own rows of the open water (columns 4-189).
  * Every colour is then the nearest of the picture's CLUT.  Integers only; a texel depends on its place, not on the
  * strip's width. */
 #define LK_HM 1227                                        /* the ROOMS row's mark (no picture has this height) */
@@ -33,7 +52,7 @@
 #define LK_G 50                                           /* the grass' first row at the edge */
 #define LK_F 201                                          /* the sand's first row at the edge */
 #define LK_X0 110                                         /* the right half's frame column, camera at its right limit */
-#define LK_X1 200                                         /* and at the other end of the screen */
+#define LK_X1 200                                         /* and at the other end of the screen (playing) */
 static void gen_lk(int pad) { (void)pad; }               /* (the table's gen: lk_take makes the strip) */
 static const MbBand LK_B[3] = {
     { 0, LK_G, MC_ANY, 440, LK_W, 0, LK_G, 0, 0, 3, 1, 3, 24, 24, 12, 8, 12, 4, 4, 2, 16, 0, 0, 0, 0 },           /* sky */
@@ -55,12 +74,24 @@ static void lk_gen(void)
     free(rock);
 }
 
+#define LK_H 152                                          /* the sea's first row at the left edge (the horizon) */
+#define LK_S 20                                           /* the left half's first row with texels */
+static const MbBand LK_L[3] = {
+    { 0, LK_H, MC_ANY, 0, 320, 0, LK_H, 0, 0, 400, 6, 6, 24, 24, 12, 8, 2, 4, 4, 2, 16, 0, 0, 0, 0 },            /* sky, clouds */
+    { LK_H, 180, MC_ANY, 4, 190, LK_H, 180, 0, 0, 20, 1, 8, 16, 7, 8, 3, 1, 1, 2, 0, 16, 30, 0, 0, 1 },          /* the far sea */
+    { 180, PH, MC_ANY, 4, 190, 180, PH, 0, 0, 20, 2, 8, 12, 11, 6, 4, 8, 1, 2, 0, 16, 1, 0, 0, 0 },              /* the near sea */
+};
+static void lk_gen_l(void)
+{
+    for (int i = 0; i < 3; i++) mb_band(0, &LK_L[i], i);
+}
+
 #ifndef WS_BACKDROP_MAIN
-static u16 *lk_ext, *lk_buf; static int lk_pad = -1, lk_w; static u32 lk_sum;
+static u16 *lk_ext[2], *lk_buf; static int lk_pad = -1, lk_w[2], lk_made[2]; static u32 lk_sum;
 int port_ws_backdrop_side = 3;                            /* the strips shims/gpu.c lays: 1 the left one, 2 the right one */
 static u16 lk_tex(const u16 *vram, int x, int y)          /* the picture's column x on strip row y */
 {
-    return x < 256 ? (y + 12 >= 32 ? tex8(vram, 896, x, y + 12, 128, 510) : tex8(vram, 0, 0, 256 + y + 12, 128, 510))
+    return x < 256 ? (y >= LK_S ? tex8(vram, 896, x, y + 12, 128, 510) : tex8(vram, 0, 0, 256 + y + 12, 128, 510))
                    : tex8(vram, 0, x - 256, 256 + y + 12, 128, 510);
 }
 static u32 lk_check(const u16 *vram)                      /* the right half's page and the CLUT, sampled */
@@ -70,43 +101,55 @@ static u32 lk_check(const u16 *vram)                      /* the right half's pa
     for (int y = 259; y < 512; y += 8) for (int x = 0; x < 128; x++) h = (h ^ vram[(size_t)y * 1024 + x]) * 16777619u;
     return h;
 }
-static int lk_build(const u16 *vram, int w)
+static void lk_build(const u16 *vram, int side)           /* an end's extension, made when the frame first looks past it */
 {
+    int w = lk_w[side];
+    Rgb t = rgb15(tex8(vram, 0, 4, 256 + 16, 128, 510));  /* (the sky in the top left corner: this picture) */
+    lk_made[side] = 1;
+    if (t.b < t.r + 24) return;
     mm_w = LK_W; mm_ph = 0; mm_pad = -1;                 /* (the Singing Rock's picture is no longer in mm_src) */
     for (int i = 0; i < 256; i++) mm_clut[i] = vram[(size_t)510 * 1024 + 128 + i];
     memset(mm_qh, 0, sizeof mm_qh);
     for (int y = 0; y < PH; y++) for (int x = 0; x < LK_W; x++) mm_src[0][y][x] = lk_tex(vram, x, y);
-    free(lk_ext); lk_ext = calloc((size_t)PH * w, 2);
-    if (!lk_ext || !mm_canvas(w)) { free(lk_ext); lk_ext = 0; return 0; }
-    lk_gen();
-    for (int y = 0; y < PH; y++) for (int X = 1; X <= w; X++) lk_ext[(size_t)y * w + X - 1] = mm_quant(*mm_at(1, X, y));
+    lk_ext[side] = calloc((size_t)PH * w, 2);
+    if (!lk_ext[side] || !mm_canvas(w)) { free(lk_ext[side]); lk_ext[side] = 0; return; }
+    if (side) lk_gen(); else lk_gen_l();
+    for (int y = 0; y < PH; y++) for (int X = 1; X <= w; X++) lk_ext[side][(size_t)y * w + X - 1] = mm_quant(*mm_at(side, X, y));
     mm_canvas_free();
-    return 1;
 }
-/* the picture's right half (page (0, 256), CLUT (128, 510)) at frame column x: the right strip when the wide frame
-   looks past the picture's right edge */
+/* the picture's right half (page (0, 256), CLUT (128, 510)) at frame column x: the strips of the ends the wide frame
+   looks past, the picture's own columns and then the extension's */
 static const u16 *lk_take(const u16 *vram, int pad, int x, int *rows)
 {
-    int w = pad - (LK_X0 + 256 - 320), over = 320 + pad - (x + 256);   /* the columns ever needed; needed now */
+    int nl = x - 256 > -pad, nr = x + 256 < 320 + pad, top;
     u32 s;
-    if (w <= 0 || x < LK_X0 || x > LK_X1 || over <= 0) return 0;
+    if (x < LK_X0 || (!nl && !nr)) return 0;
     s = lk_check(vram);
     if (!lk_buf || lk_pad != pad || s != lk_sum) {
-        Rgb t = rgb15(tex8(vram, 0, 4, 256 + 16, 128, 510));               /* (the sky in the top left corner: this picture) */
-        lk_pad = pad; lk_sum = s; lk_w = w;
+        lk_pad = pad; lk_sum = s;
+        lk_w[0] = pad < MQ_SW - 56 ? pad : MQ_SW - 56;   /* (the quilter's canvas) */
+        lk_w[1] = pad - (LK_X0 + 256 - 320);             /* the columns ever needed */
+        free(lk_ext[0]); free(lk_ext[1]); lk_ext[0] = lk_ext[1] = 0; lk_made[0] = lk_made[1] = 0;
         free(lk_buf); lk_buf = calloc((size_t)PH * 2 * pad, 2);
-        if (t.b < t.r + 24 || !lk_buf || !lk_build(vram, w)) { free(lk_ext); lk_ext = 0; }
     }
-    if (!lk_ext || !lk_buf) return 0;
-    for (int j = 0; j < PH; j++) {
-        u16 *row = lk_buf + (size_t)j * 2 * pad + pad;
-        for (int c = 0; c < pad; c++) {
+    if (!lk_buf) return 0;
+    if (nl && !lk_made[0]) lk_build(vram, 0);
+    if (nr && !lk_made[1]) lk_build(vram, 1);
+    if ((nl && !lk_ext[0]) || (nr && !lk_ext[1])) return 0;
+    top = nr ? 0 : LK_S;                                 /* the left strip alone: the rows above it stay the clear colour */
+    for (int j = top; j < PH; j++) {
+        u16 *row = lk_buf + (size_t)j * 2 * pad;
+        if (nl) for (int c = 0; c < pad; c++) {
+            int e = c - pad - (x - 256), X = -e > lk_w[0] ? lk_w[0] : -e;   /* the picture's column at the left strip's column c */
+            row[c] = e >= 0 ? lk_tex(vram, e, j) : lk_ext[0][(size_t)j * lk_w[0] + X - 1];
+        }
+        if (nr) for (int c = 0; c < pad; c++) {
             int f = 320 + c - (x - 256);                  /* the picture's column at the right strip's column c */
-            row[c] = f < LK_W ? lk_tex(vram, f, j) : f - LK_W < lk_w ? lk_ext[(size_t)j * lk_w + f - LK_W] : 0;
+            row[pad + c] = f < LK_W ? lk_tex(vram, f, j) : f - LK_W < lk_w[1] ? lk_ext[1][(size_t)j * lk_w[1] + f - LK_W] : 0;
         }
     }
-    port_ws_backdrop_dy = 12; port_ws_backdrop_side = 2;
-    *rows = PH;
-    return lk_buf;
+    port_ws_backdrop_dy = 12 + top; port_ws_backdrop_side = (nl ? 1 : 0) | (nr ? 2 : 0);
+    *rows = PH - top;
+    return lk_buf + (size_t)top * 2 * pad;
 }
 #endif

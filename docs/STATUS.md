@@ -24,13 +24,19 @@ Update this file whenever something lands or a task is decided. Newest first.
   - **Baccus Village notice board (`--cut-content`)**: read from the ledge by the board, not from the ground under
     it (`port_cc_sign`: the sign at depth 117). Checked with Tomba placed on the ledge by position pokes (depth 90
     and 144: the text opens; on the ground: nothing); climbing up there in play not checked.
-  - Open: the Iron Castle's entrance (AREA17 s1) strips are being redone (sky seam, clouds, skirt, chain end); the
-    Forest of 100 Flowers' right entrance (AREA01 s1), the stone house with the cave door: the sky shows past the
-    house's right end on a wide frame (a room end to carry on, `runtime/ws_edge.c`); not reproduced headless yet
-    (Tomba has to get past the vines; `--ws-edge all` is the first thing to try).
-- NOW LOADING screen in widescreen (2026-11-17): the pig tiles are drawn across the wide frame (`port/fixes.txt`,
-  `drawLoadingSprites`, columns added on both sides by `port_ws_cull`). Checked on the PC at 16:9 and 21:9 (headless,
-  soft renderer); not on the device, GL or the wasm2c build.
+  - **Iron Castle's entrance (AREA17 s1)**: strips redone twice (`ws_backdrop_castle.inc`): the picture's own sky
+    texels, cloud puffs from the edge's cloud, the skirt as the dome it is (an ellipse that ends on the grass 60
+    columns out), the chains from a cleaned mask, everything quantised to the picture's colours. Waiting for the
+    user's look at the third version.
+  - **Lake's beach (AREA09 s1)**: the picture's left end is extended too (the boat scene shows it: the camera goes
+    past `LK_X1`); `lk_take` lays either strip or both. Checked with the camera forced to the boat scene's position
+    (`--poke-every 1:1F800176:VAL:2`, x = 1024 - VAL), not in the scene itself. Weak: at 21:9 / 32:9 with both
+    strips laid, rows 0-19 of the left strip are one blue step off the game's clear colour (it would need the clear
+    colour from `ws_fill`); at 32:9 a seam 128 columns left of the picture where the island's mosaic starts.
+  - Open: the Forest of 100 Flowers' right entrance (AREA01 s1), the stone house with the cave door: the sky shows
+    past the house's right end on a wide frame (a room end to carry on, `runtime/ws_edge.c`; `--ws-edge all` is the
+    first thing to try). The user's tip: leave the Dwarf Village by its left side to arrive there. The brick
+    staircase's dash is still to compare with the original game.
 
 ## Parked (2026-11-17): new pictures for the cut Civilization towns
 
