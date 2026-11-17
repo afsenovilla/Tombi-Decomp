@@ -3687,7 +3687,7 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     the right edge, rows 0-140 and 175-215) are cut by both edges, and the picture has no clean leaf windows to go on
     with them without copying the same leaves next to themselves; the right edge's crown needs foliage from the top
     canopy (rows 0-45) taken at other rows.  Not delivered until that is solved.
-  - AREA17 s1, the Iron Castle's entrance, preview 2026-11-17, off by default (`ic_take`, `runtime/ws_backdrop_castle.inc`;
+  - AREA17 s1, the Iron Castle's entrance, done 2026-11-17, approved by the user and on by default (`ic_take`, `runtime/ws_backdrop_castle.inc`;
     its header has the measures): the row's own sky with noise clouds low over the horizon, the grass, the castle's copper
     skirt down to the grass (shaded as the edge's own copper), and the three chains the edges cut carried on with their
     own texels one link period back (the left big one down to the grass over a shadow). The strips are made for all 384

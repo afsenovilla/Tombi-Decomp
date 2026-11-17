@@ -66,9 +66,9 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    the user rejected on the way; not tested on the device or on GL).
    AREA11 s1 (Lumberjack Factory, `gen_lf`, `runtime/ws_backdrop_factory.inc`): approved by the user on the game's
    captures and on by default (2026-11-17; not tested on the device or on GL).
-   **Preview shown to the user, waiting for their answer, off by default** (`--ws-backdrop on`): AREA17 s1 (Iron Castle
-   entrance, a 384-row picture drawn from frame row -144; `ic_take`, `runtime/ws_backdrop_castle.inc`; set `approved`
-   to 1 in its `ROOMS` row once they approve). With it every room of the survey is done. **Valid as they are, decided by the
+   AREA17 s1 (Iron Castle entrance, a 384-row picture drawn from frame row -144; `ic_take`,
+   `runtime/ws_backdrop_castle.inc`): approved by the user on the game's captures and on by default (2026-11-17; not
+   tested on the device or on GL). **Every room of the survey is done; nothing is left to do here.** **Valid as they are, decided by the
    user 2026-11-17 (black strips, do not list or propose again)**: AREA00 s3 (100 Year Old Man's Hut), AREA13 s1 (Pig
    Island Cave, the same picture), AREA10 s8 (10000 Year Old Man), all vignettes with black corners; AREA02 s4 the
    same; AREA09 s6 (Leaf Slider, 3D: the user sees nothing to do). AREA16 s5's white right strip is approved. The survey only
