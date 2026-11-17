@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "port_runtime.h"
+extern char *getenv(const char *);   /* (not <stdlib.h>: this file defines rand / srand itself; clang on Android rejects the implicit declaration) */
 
 typedef unsigned int size_t_;
 /* names the game's sources use for the same retail routines */
