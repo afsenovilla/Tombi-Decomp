@@ -4277,6 +4277,67 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     over, turned; the turns have no seam at their far end and the grey turn (18:9 on) none at all; the seam is laid
     as a luminance ratio, not as texels; four copper rings still sit close together; the grey run is still 53
     columns long at 16:9; walls and sprites as before.
+  - AREA17 s2 (the Iron Castle main room, 2026-11-17, `runtime/ws_backdrop_ironmain.inc`; off by default, preview
+    with `--ws-backdrop-rooms 17:2`).  Not a fixed-camera room: one 640 x 224 picture (CLUT (128, 511): two sprites
+    of 256 columns from pages (128, 0) and (256, 0), five pieces of 128 columns for columns 512-639) moved by the
+    camera over 320 units, so the wide frame is covered in the middle of the room and showed a black strip at the
+    end the camera rests at (the 16:9 survey, `tools/ws_survey.py sweep`).  Nothing is culled there
+    (`PORT_WSXTRA=300` draws the same frames at both ends): the picture ends.  As the Singing Rock beach, the room
+    has its own grab (`im_take`, called from `port_ws_backdrop`; the `ROOMS` row only names the room): it keeps the
+    640 columns and the two extensions (made once per picture and strip width) and fills the frame's strips from
+    them for the camera's position.
+    Measured: a box room in one-point perspective, vanishing point (320, 162) (the end wall's cornice falls 14 rows
+    in 50 columns, its rail and the balusters' white part stay level on rows 148 / 162, the baseboard's lines rise
+    0.05 rows per column).  The picture's last 52 columns at each end are the room's end wall, seen along it from
+    the corner (column 52) towards the viewer: depth is linear in 1 / u, u = 320 - x, rows are scaled by u / 268
+    about the horizon.  On it, top to bottom: the dark ceiling, a gold parapet whose top line rises to a crest (level
+    at the edge, 121 rows over the horizon at the corner's scale) with a hole every 0.0001418 of 1 / u (columns 36,
+    23.8, 11: 12 to 13 columns apart, wider towards the viewer), a pink cornice with a joint per hole, a window in a
+    dark frame (gold-faced members, a mullion; its near pane is what the edge cuts, 12 columns of it), a rail, a
+    balustrade with the holes' period and phase (columns 46.5, 35.5, 23.5, 10.5), a baseboard, its shadow and the
+    wooden floor.  From the corner the window is 5 periods long, and its fifth baluster is the next one past the
+    edge.  The back wall's bay at the corner is closed by a pilaster: two grey plates with four rivets at their seam,
+    a pink block and a light foot under the rail.
+    The extensions (every texel the picture's own, bilinear, then the nearest of the picture's CLUT; nothing
+    mirrored, each end from its own texels):
+    - the wall's period: a point of the end wall, its shadow or the floor is the picture's point the smallest whole
+      number of periods further along the wall, same height (a translation in 1 / u, the rows scaled about the
+      horizon), so the holes, the cornice's joints, the rail, the balusters, the baseboard and the floor's shading
+      and plank lines (which run to the vanishing point) go on with their period, phase and perspective, 5 to 22 %
+      larger than their source at 16:9;
+    - the parapet's top line stays at its crest (level along the wall: a line through the vanishing point; it
+      leaves the frame 38 columns out), the gold under it stretched from each source column's own top line; the dark
+      ceiling over it;
+    - the window is closed in its own shape: one more column of pane, then its near member (the mullion's gold face,
+      the far member's dark bar), ending 5 periods from the corner, 11 columns out, with its fifth baluster under
+      it;
+    - then a pilaster as the one that closes the back wall's bay at that end, from its texels: the plates along the
+      wall, scaled as the wall there, in the end wall's light (the end wall's cornice against the pilaster's capital,
+      never under 13/16); the rivets at one scale both ways (they stay round); the block and its foot under the rail
+      (speckled stone: its 16 columns at the wall's scale both ways, tiled; along the wall they would smear).  Its
+      length (25.9 rows of depth at the corner's scale for a focal length of 280, against the back one's 19 columns)
+      is chosen so that it ends with the 16:9 strip;
+    - wider strips go on with the next bay (the corner to the pilaster's near end, one bay nearer): the 21:9 strip is
+      the 16:9 one and then the dark bar, the far member and most of a second window.
+    The gate and the doors are not repeated (their quads and the picture's are 58 columns and more from the ends).
+    Checked (headless, 2026-11-17, camera flown to both limits with `--sweep-x`): 4:3 with the flag and the default
+    16:9 run byte-identical to the build before, at both ends; the 16:9 frame's centre = the 4:3 frame; the 21:9
+    frame holds the 16:9 frame; the game's strips = the standalone generator's (`wsb 17:2 PIC.raw 53 OUT.ppm`) at
+    both ends, at 16:9 and 21:9, and 21 / 24 units away from the ends (extension and picture share the strip); the
+    21:9 and 32:9 extensions start with the 16:9 columns; sixteen other rooms' 16:9 frames with `--ws-backdrop on`
+    byte-identical (2:5 2:1 5:1 5:3 19:1 11:2 9:5 9:3 9:4 17:3 17:4 16:4 6:1 6:2 17:5 16:3); OpenGL (xvfb): the
+    strips = the software ones (the frames differ elsewhere exactly as without the strips); i386 = wasm2c whole
+    frames (16:9, 21:9, both ends); gcc x86-64 / gcc -m32 / clang give the same strips; 0.014 s per room entry.
+    `tools/ws_seam.py` is of little use here (its bands are level and the join cuts a window on purpose: the
+    picture split against itself passes 1 band of 5); its median join steps are under the picture's own in the
+    parapet, the rail and the floor at both ends.  Not checked on the device.
+    Weak points: what stands past the window is an assumption (the picture shows no end wall past its window: the
+    pilaster is the back wall's, so the room has one more riveted pillar at each end than the artist drew), and so
+    are the window's near member (the mullion's and the far member's texels, not a view of that member from its
+    own side) and the pilaster's length; the pilaster's plates are stretched 1.7 to 2.3 times along the wall
+    (smooth metal: soft, not smeared); the cornice has a joint on the join itself (its phase: the picture's is at
+    column 13); the floor's texture repeats every period (15 to 19 columns), which the speckle hides at 1x and 2x;
+    the extension is 5 to 22 % softer than the picture next to it.
 - **Sub-screens** (Select screens Objetos / Eventos / Estado / Mapa, memory card, options, button config, screen
   adjust).  The Select screens (`subScreenDrawTabs`, D0SPSUB / D0SPSUB3, `#ifdef PORT2`) call `port_ws_layout(left cut,
   right cut, below)` each frame; while it is set, `shims/gpu.c` spreads the textured primitives of the frame

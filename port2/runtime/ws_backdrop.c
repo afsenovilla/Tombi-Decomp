@@ -744,6 +744,7 @@ static void gen_cb(int pad);
 #include "ws_backdrop_belltower.inc"
 #include "ws_backdrop_gears.inc"
 #include "ws_backdrop_mermaid.inc"
+#include "ws_backdrop_ironmain.inc"
 #define PIECES_TOP4 { 128, 0, 224, 64, 32, 256, 0 }, { 128, 64, 224, 64, 32, 256, 32 }, { 128, 128, 224, 64, 32, 256, 64 }, \
                     { 128, 192, 224, 64, 32, 256, 96 }
 #define OVER_A5 { { 256, 0, 112, 56, 104, 0, 0 }, { 256, 56, 112, 200, 104, 56, 0 }, { 256, 144, 0, 64, 80, 256, 24 }, \
@@ -786,6 +787,8 @@ static const Room ROOMS[] = {
     { 6, 2, MM_H2, 1, { { 0 } }, { { 0 } }, gen_mm },   /* the mermaid on her rock: the sea is a loop of four pictures */
     { 6, 1, MM_H1, 1, { { 0 } }, { { 0 } }, gen_mm },   /* the Singing Rock beach: a 640-column picture moved by the
                                                             camera, its two ends (mm_take, ws_backdrop_mermaid.inc) */
+    { 17, 2, IM_H, 0, { { 0 } }, { { 0 } }, gen_im },   /* the Iron Castle main room: a 640-column picture moved by the
+                                                            camera, its two ends (im_take, ws_backdrop_ironmain.inc) */
 };
 #define NROOMS ((int)(sizeof ROOMS / sizeof ROOMS[0]))
 const char *port_ws_backdrop_rooms;                      /* --ws-backdrop-rooms A:S,A:S,... (decimal; "all") */
@@ -864,6 +867,12 @@ const u16 *port_ws_backdrop(const u16 *vram, int pad, int x, int y, int w, int h
             if ((ROOMS[i].h == MM_H1 || ROOMS[i].h == MM_H2) && ROOMS[i].area == a && ROOMS[i].sec == sc)
                 return room_enabled(&ROOMS[i]) ? mm_take(vram, pad, sc, x, y, w, h, u, v, tx, ty, cy, rows) : 0;
     }
+    if (enabled && pad > 0 && depth == 1 && cx == 128 && cy == 511 && tx == 128 && w == 256 && h == PH) {   /* AREA17 s2 (im_take) */
+        u8 *g = port_ram_ptr(PORT_A_GAME); int a = *(u16 *)(g + 0), sc = *(u16 *)(g + 2);
+        for (int i = 0; i < NROOMS; i++)
+            if (ROOMS[i].h == IM_H && ROOMS[i].area == a && ROOMS[i].sec == sc)
+                return room_enabled(&ROOMS[i]) ? im_take(vram, pad, x, y, w, h, u, v, tx, ty, rows) : 0;
+    }
     if (enabled && pad > 0 && x == 0 && w == 256 && !u && !v && !ty && depth == 1 && cx == 128 && cy == 511
         && (tx == 128 || tx == 256 || tx == 384)) {     /* a tall picture's set (AREA16 s4: tw_take) */
         u8 *g = port_ram_ptr(PORT_A_GAME); int a = *(u16 *)(g + 0), sc = *(u16 *)(g + 2);
@@ -909,6 +918,7 @@ int main(int argc, char **argv)
     if (argc > 1 && sscanf(argv[1], "%d:%d", &a, &sc) == 2) { argc--; argv++; }   /* the room, default 2:5 */
     for (int i = 0; i < NROOMS; i++) if (ROOMS[i].area == a && ROOMS[i].sec == sc) { room = &ROOMS[i]; break; }
     if (room && room->h == TW_H) return tw_main(argc, argv);   /* (a 672-row picture: rooms2.inc) */
+    if (room && room->h == IM_H) return im_main(argc, argv);   /* (a 640-column picture: ws_backdrop_ironmain.inc) */
     if (!room || argc < 4 || !(f = fopen(argv[1], "rb"))) { fprintf(stderr, "usage: wsb [AREA:SECTION] PIC.raw PAD OUT.ppm [mirror]\n"); return 1; }
     for (int y = 0; y < PH; y++) for (int x = 0; x < PW; x++) { u8 b[2]; if (fread(b, 1, 2, f) != 2) return 1; pic[y][x] = (u16)(b[0] | b[1] << 8); }
     if (fread(pic_ov, 1, sizeof pic_ov, f) != sizeof pic_ov) memset(pic_ov, 0, sizeof pic_ov);   /* (older dumps: none) */
