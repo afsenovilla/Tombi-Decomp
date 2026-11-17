@@ -10,7 +10,14 @@ docs/CIVILIZATION.md "Iron Town: findings of 2026-11-17". Do not restart without
 
 ## Last release
 
-v0.5.10 (2026-11-17, master 2583011b5): AREA05 square fixed (the back lane's fountain solid again, as an obstacle to
+v0.6.0 (2026-11-17, built from master 2f5acec8; the head at release time, 48f1865, only adds docs): widescreen strips
+for Baccus Pier (AREA08 s1 / s3), the Lumberjack Factory (AREA11 s1) and the Iron Castle entrance (AREA17 s1), all
+approved by the user on PC captures (not tested on the device or on GL); the other agent's widescreen ends (the
+Lake's beach and island screen, the mountain) and the LZ decoder fix. The APK job had failed since the LZ fix
+(`getenv` undeclared in `shims/libc.c`, clang only): fixed in 57d5b75. Master kept moving during the wait (each push
+cancels the running builds): docs-only pushes do not start builds, so the release took the last green pair.
+
+Previous: v0.5.10 (2026-11-17, master 2583011b5): AREA05 square fixed (the back lane's fountain solid again, as an obstacle to
 hop over; both lanes open to the right edge; the notice-board box change reverted), top-down map margins for the
 Hidden Village and the Dwarf Village (other agent). First APK run with a warm ccache: 17 min (USA/JP 64-bit steps,
 ~4-5 min each, still redo gen2 + a one-file clang -O2 + WABT every run).
