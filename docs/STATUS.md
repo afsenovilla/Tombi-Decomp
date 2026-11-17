@@ -2,6 +2,12 @@
 
 Update this file whenever something lands or a task is decided. Newest first.
 
+## Parked (2026-11-17): new pictures for the cut Civilization towns
+
+The user asked for the three town pictures (`tools/civ_rebuild.py`) to be redone; two approaches on Iron Town were
+rejected and the user said to leave it for now. Nothing changed in the generator. Findings and what not to repeat:
+docs/CIVILIZATION.md "Iron Town: findings of 2026-11-17". Do not restart without the user asking.
+
 ## Last release
 
 v0.5.10 (2026-11-17, master 2583011b5): AREA05 square fixed (the back lane's fountain solid again, as an obstacle to

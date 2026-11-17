@@ -1153,6 +1153,80 @@ assembled.
 
 Nothing derived from the disc, the FMV or the community files is committed. The palettes are rebuilt at every run.
 
+## Iron Town: findings of 2026-11-17 (a new picture was tried and parked)
+
+The user asked for the three town pictures to be redone "like the widescreen strips". Two approaches were tried on
+Iron Town (AREA17 s0) and rejected by the user; the work is parked. What was learnt is kept here.
+
+**What does not work.** (1) Carrying the flyover's bands on sideways (texture quilting and period copies, as for the
+room strips): endless strips, no town. (2) A 2D collage on a drawn plan (materials from the flyover, the page's
+cut-outs pasted on): better structure, still far from a real map. The real maps (Baccus Village, AREA05 s0) are
+complete pre-rendered 3D scenes; only a real 3D model rendered with one light could come close, which is days of work
+per town and was not started. Also rejected: copies of the dome as the other four houses (the user wants the
+current entrances kept: the real wall cut-out with the flyover's door).
+
+**Findings (mosaic = BUNMEI frames 61-91; picture px = mosaic + (196, 36) = world + (128, -40)).**
+- **The inner court is an octagon.** The walls leaving the two upper pillars (mosaic (40, 78) and (272, 78)) run
+  outwards and down at about 0.78 rows per column; the lower diagonal walls come back in at about 0.9. Carried on,
+  they meet at mosaic (-28, 132) and (340, 132), just outside the flyover: exactly on props 21 (world (48, 219)) and
+  22 (world (404, 211)). So those two props are the court's side corner posts, and the page's posts with a wall on
+  two sides (`corner_post_1` / `corner_post_2` below) are the likely drawings. H4 and H3 stand outside the octagon,
+  on the upper terraces; H5 and H2 at the sides of the two plazas (copper tiles west, paving east).
+- **The dotted dark lines of the flyover are the lift rails**, not video defects: the two rows of eight equal props
+  (anim 23, 63 px apart) at world y 302 and y 84 fall on the dotted lines at mosaic y 226-240 and y 8-22.
+  `tools/civ_rebuild.py` `destripe` removes them ("FMV stripes"); it should keep them.
+- **Symmetry.** Props and houses are laid out almost in mirror about world x 223 (gate, dome, castle door).
+- **Other props.** 5 / 6 sit on the outer fence either side of the gate; 7 / 10 at the foot of H5 / H2 (their doors
+  from the lawn); 11 / 12 are the two ring-and-chain wall blocks of the upper terrace; 13 the gate; 18 / 19 the
+  pillars at the plaza's edge; 20 the dome's roof.
+- **The outer outline is not known.** The flyover only shows a straight south front (fence and round gate); the
+  page has no diagonal fence segment.
+
+**Exterior pieces of SYSTEM/A08000 (x >= 384).** The layout file catalogues 12; there are 35. Rectangles are
+approximate (drawn by eye on the page; neighbours may touch), `x, y, w, h` in the page's 8 bpp view:
+
+| # | name | x, y, w, h | in the flyover? |
+|---|---|---|---|
+| 1 | `fence_a` | 388, 2, 160, 52 | in the flyover |
+| 2 | `fence_b` | 384, 58, 166, 52 | in the flyover |
+| 3 | `gate_ring` | 552, 0, 88, 56 | in the flyover |
+| 4 | `gate_leg` | 588, 56, 34, 54 | in the flyover |
+| 5 | `gate_left` | 640, 0, 96, 128 | in the flyover |
+| 6 | `gate_right` | 736, 0, 96, 128 | in the flyover |
+| 7 | `arch_door` | 832, 0, 34, 50 | in the flyover |
+| 8 | `dome_roof_a` | 772, 172, 50, 38 | in the flyover |
+| 9 | `dome_roof_b` | 772, 212, 38, 38 | in the flyover |
+| 10 | `vane` | 734, 128, 30, 72 | in the flyover |
+| 11 | `yard_wall_sw` | 386, 112, 88, 50 | in the flyover |
+| 12 | `yard_wall_arc` | 458, 112, 40, 48 | in the flyover |
+| 13 | `yard_wall_se1` | 580, 152, 24, 66 | in the flyover |
+| 14 | `yard_wall_se2` | 606, 152, 34, 80 | in the flyover |
+| 15 | `pillars_row` | 548, 112, 82, 40 | not in the flyover |
+| 16 | `pillars_tall` | 688, 214, 50, 42 | in the flyover |
+| 17 | `notch_wall_w` | 388, 160, 126, 44 | not in the flyover |
+| 18 | `notch_wall_e` | 772, 130, 50, 40 | not in the flyover |
+| 19 | `ring_post_w` | 512, 160, 36, 42 | not in the flyover |
+| 20 | `ring_post_e` | 548, 198, 52, 32 | not in the flyover |
+| 21 | `plant_1` | 540, 156, 40, 32 | not in the flyover |
+| 22 | `plant_2` | 514, 205, 34, 30 | not in the flyover |
+| 23 | `lamp_pole_1` | 645, 134, 17, 84 | not in the flyover |
+| 24 | `lamp_pole_2` | 666, 132, 16, 84 | not in the flyover |
+| 25 | `sign_rail_a` | 690, 128, 44, 36 | not in the flyover |
+| 26 | `sign_rail_b` | 640, 212, 38, 44 | not in the flyover |
+| 27 | `crank_wheel` | 824, 150, 34, 26 | not in the flyover |
+| 28 | `crank_lever` | 826, 128, 20, 22 | not in the flyover |
+| 29 | `corner_post_1` | 384, 200, 31, 43 | not in the flyover |
+| 30 | `corner_wall` | 416, 200, 56, 42 | in the flyover |
+| 31 | `corner_post_2` | 472, 192, 40, 60 | not in the flyover |
+| 32 | `slab_pillar_ne` | 848, 0, 48, 60 | in the flyover |
+| 33 | `mossy_wall_e` | 864, 64, 32, 60 | in the flyover |
+| 34 | `yard_wall_pair` | 688, 163, 40, 48 | in the flyover |
+| 35 | `post_wall` | 608, 216, 24, 40 | not in the flyover |
+
+Not in the flyover and unused by the current map: the lift machinery (`crank_wheel`, six rotation frames from
+(824, 150) on, and `crank_lever`, three frames from (826, 128)), the two `sign_rail` panels, `ring_post_w / e`,
+`notch_wall_e`. Two thin strips ((792, 212, 32, 4) and (864, 124, 32, 4)) were not identified.
+
 ## Folkin's rough notes — verification
 
 Folkin (TCRF) left rough notes on the Civilization towns. Each claim was checked against the decompiled code and the
