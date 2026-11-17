@@ -4416,6 +4416,49 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
     number of the wall's periods; every window has the first one's highlights and is 1.2 times larger than its
     source; the floor repeats every period.  The second version's weak points about the near member, the bay of
     4.62 periods and the cornice's joint on the join no longer apply.
+    Fourth version (2026-11-17), after the user's marks on both ends of the third at 16:9 (1 the strip's mullion, 2
+    the post between the picture's window and the strip's): "El número 1 es correcto pero el 2 no, el 2 debería ser
+    más como el 1 y encajar bien. Pongo imágenes de ambos lados."  So the post is gone, and what closes the
+    picture's cut pane is a member like the mullion.  What the picture's own members say (both ends alike): the
+    mullion is a face 0.5 periods wide (thin gold edge, a bolt at its head on the casing, the bolt reaching 0.3
+    periods over the first pane's corner; a curled foot towards the viewer) with a dark side 0.5 periods wide
+    towards the viewer; its face's far edge is 2.35 periods from the corner at height 45; the first pane is 0.94
+    periods wide between rounded corners; the second is 0.9 wide at the picture's edge and still square there (no
+    corner, no rim), and the edge's column holds no bolt, though a bolt starts 0.3 periods before its mullion: so
+    the second pane is wider than the first, and the next mullion cannot stand less than 2.24 periods after the
+    picture's.  The brighter gold member next to the corner is the far reveal of the window, seen only from this
+    side: nothing like it can face the viewer at the near end, which is why the third version's post (that member's
+    brown face) looked wrong.
+    What changed (`im_window`, `im_measure`; the cornice, the rail and the rest are the third version's): the window
+    is one glazed band, a mullion every 2.28 periods (`IM_WB`, the shortest bay the picture allows plus a quarter
+    column).  A point of the band is the picture's point a whole number of bays towards the corner, same height (a
+    translation in 1 / u, the rows scaled about the horizon), taken from the mullion's far edge (a leaning line,
+    `IM_WM`, `IM_WS`) to the picture's last column: the mullion with its bolt, edge, dark side and foot, then the
+    second pane, each with the picture's lean and width at the wall's perspective.  Where those texels end, the pane
+    goes on (the picture's last column, up to 0.2 periods of it) and closes on the next mullion with the first
+    pane's own end (0.26 periods before the mullion's edge: the rounded corners, the bolt's half over the pane),
+    crossed over 0.08 periods and brought to the second pane's light (per channel, the mean of the columns 0-2 over
+    the mean of the columns 27-30 at heights 30 to 60: about 1.35 left, 1.5 right; only between the pane's heights
+    and not on the last 0.1 periods before the mullion).  The picture's own cut pane is closed the same way, so
+    the join falls inside a pane, with pane on both sides of it on every row.  Bilinear, so no hard line anywhere;
+    the casing over and under the panes comes with the same texels and meets the cornice and the rail at their
+    heights.  The 16:9 strip holds the rest of the cut pane (4 to 7 columns), a mullion, a pane and the next
+    mullion's face.
+    Checked the same way (2026-11-17): 4:3 with the flag and the default 16:9 run byte-identical to the third
+    version's build, both ends; 16:9 centre = 4:3; the 21:9 frame holds the 16:9 frame and its extension starts with
+    the 16:9 columns; the game's strips = the standalone generator's at 16:9 and 21:9, both ends; twelve other
+    rooms' 16:9 frames with `--ws-backdrop on` byte-identical (2:5 2:1 5:1 5:3 19:1 11:2 9:5 9:3 9:4 17:3 17:4
+    16:4); OpenGL (xvfb): the strips = the software ones; i386 = wasm2c whole frames (16:9 and 21:9, both ends); gcc
+    x86-64 / gcc -m32 / clang the same strips; 0.02 s for the standalone generator, file output included.  Not
+    checked on the device.
+    Weak points now: the bay (2.28 periods) is a lower bound, not a measure (the picture shows one mullion per end
+    and never the second pane's end), and it is not the wall's two periods, so the mullions drift against the
+    balusters and the parapet's holes; the panes of the strip (1.2 periods) are wider than the first pane (0.94),
+    as the picture's cut pane must be; every mullion and pane is the picture's one (the right end's two teal specks
+    come back on each pane), 1.1 to 1.3 times larger than its source; the pane's last columns before a mullion
+    repeat the picture's last column; the mullion's dark side keeps its width, though seen from nearer it would be
+    up to 15 % narrower; the 16:9 frame ends inside the second mullion.  The third version's weak points about the
+    post no longer apply; those about the rail, the cornice and the floor stand.
   - AREA09 s2 (the Haunted Mansion's grandfather clock room, 2026-11-17, `runtime/ws_backdrop_clock.inc`; off by
     default, preview with `--ws-backdrop-rooms 9:2`).  Not in the first scan (a scrolling picture: tools/ws_survey.py
     found a full black strip at each end of the room and at the spawn, which is the right end).  How it is drawn: one

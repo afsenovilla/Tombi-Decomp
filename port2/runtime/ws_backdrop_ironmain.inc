@@ -26,9 +26,9 @@
  * column 13, a rivet on each side of it on the right end), not one per hole; the window's members lean, their tops
  * towards the corner, 0.0046 periods per row of height (pane and mullion edges: 0.16 periods, 2 columns, over the
  * window), and are seen from the near side: after the corner a brown face (to 0.76 periods), that member's lit side
- * (to 1.3), a pane, the mullion's face (2.3 to 2.8) and its dark side (to 3.3), the second pane, which is whole at the
- * picture's edge (4.28: as wide as the first at mid height, and no member in the last column); the rail (heights 5.5
- * to 13) is red-brown near the corner and grey-brown from 2.5 periods on, at one lightness.
+ * (to 1.3), a pane, the mullion's face (2.3 to 2.8) and its dark side (to 3.3), the second pane, cut by the
+ * picture's edge (4.28: as wide there as the first at mid height, and no member in the last column); the rail
+ * (heights 5.5 to 13) is red-brown near the corner and grey-brown from 2.5 periods on, at one lightness.
  *
  * The extensions, every texel the picture's own (bilinear, then the nearest colour of the picture's CLUT), nothing
  * mirrored; each end from its own texels:
@@ -43,14 +43,18 @@
  *     stretches of it, before the joint (2.2 to 3.08 periods) and after it (3.55 to the edge), one after the other,
  *     crossed over 0.1 periods, the far one's light levelled to the block at the picture's edge (a line fitted to
  *     the face's light along the wall);
- *   - the window (im_window): its second pane goes on (the picture's last column) to the window's near edge, a line
- *     with the members' lean (IM_WE, IM_WS: 4.40 periods from the corner at height 45; 0.02 periods past the picture's
- *     edge at the pane's top, 0.25 at its foot), laid by each pixel's coverage; from that line the next window, one
- *     bay on (IM_WB, 4.08 periods): its far member's brown face is the post between the two (0.44 periods wide, its
- *     two edges leaning alike), then its lit side, the pane, the mullion, the pane, as the picture has them from
- *     its column 50 to 0 (a translation in 1 / u by whole bays: every member's lean, width and edges are the
- *     picture's own, at the wall's perspective), and the same closure again.  The 16:9 strip ends in the second
- *     window's mullion;
+ *   - the window (im_window) goes on as one glazed band, a mullion every 2.28 periods (IM_WB): the picture's own
+ *     mullion (its face with the bolt at its head, its dark side, its curled foot) and the second pane after it,
+ *     moved along the wall by whole bays (a translation in 1 / u: every member's lean, width and edges are the
+ *     picture's own, at the wall's perspective).  Where those texels end (the picture's edge) the pane goes on (the
+ *     picture's last column) and closes on the next mullion with the first pane's own end, 0.26 periods of it (its
+ *     rounded corners, the bolt's half over the pane), in the second pane's light (im_pg).  The bay is the shortest
+ *     the picture allows: its last column (4.28 periods from the corner) is pane on every row and holds no bolt,
+ *     and the mullion's bolt starts 2.02 to 2.04 periods from the corner, 0.3 before its face's edge (IM_WM), so
+ *     the next mullion is at least 2.24 to 2.26 periods after the picture's.  (The
+ *     third version closed the window there with the far member's brown face as a post between two windows; the
+ *     user's verdict on it: it must be a member like the mullion, and fit.)  The 16:9 strip holds one mullion, one
+ *     pane and the next mullion's face;
  *   - the rail keeps its texels (the wall's period) and goes back to its colour near the corner over 1.5 periods
  *     (per channel: the mean of the columns 32-47 over the mean of the columns 1-12, 5 % lighter than the edge).
  * Integers only; a texel depends on its place, not on the strip's width (a wider strip starts with the same
@@ -71,11 +75,12 @@ static u16 *im_ext;                                      /* the two extensions: 
 #define IM_T0 IM_TQ(640)                                  /* the picture's edge */
 #define IM_TC IM_TQ(536)                                  /* the room's corner (column 52) */
 #define IM_PE (IM_TC - IM_T0)                             /* the picture's edge, from the corner (4.276 periods) */
-#define IM_WE 21437728LL                                  /* the window's near edge at height 45: 4.40 periods from the corner */
+#define IM_WM 11457491LL                                  /* the mullion's far edge (its face / the first pane) at height 45: 2.35 periods */
 #define IM_WS 22412                                       /* its lean, as every member's: 0.0046 periods per row of height */
-#define IM_WB 19878621LL                                  /* a window bay: 4.08 periods (one post between two windows) */
-#define IM_WQ0 (IM_TC - IM_TQ(539))                       /* a window's texels: from the picture's column 50 ... */
-#define IM_WQ1 (IM_TC - IM_TQ(639))                       /* ... to its last one */
+#define IM_WB 11108641LL                                  /* from a mullion to the next: 2.28 periods */
+#define IM_WQ1 (IM_TC - IM_TQ(639))                       /* the window's texels end on the picture's last column */
+#define IM_WR 1266775LL                                   /* the pane's end before a mullion: the first pane's, 0.26 periods ... */
+#define IM_WF 389777LL                                    /* ... crossed over 0.08 with the pane going on */
 #define IM_CB (IM_PQ * 22 / 10)                           /* the cornice's texels: from 2.2 periods after the corner ... */
 #define IM_CLB (IM_PQ * 78 / 100)                         /* ... 0.78 periods; then from 3.65 on (its one joint is at 3.31, */
 #define IM_CLA (IM_PQ * 52 / 100)                         /*     a rivet on each side of it), 0.52 periods */
@@ -90,6 +95,7 @@ static Rgb *im_cv; static int im_cw;                     /* the canvas: [side][y
 static int im_es[24], im_E;                              /* the parapet's top edge per column (texel coordinate x 256); its crest */
 static int im_ca, im_cb, im_cr;                          /* the cornice's light per column (x 256): a + b x; at the picture's edge */
 static int im_rg[3];                                     /* the rail: its colour near the corner over the edge's (x 256) */
+static int im_pg[3];                                     /* the panes: the second at the picture's edge over the first's end (x 256) */
 static u16 im_qc[32768]; static u8 im_qh[32768];
 static int im_fl8(int v) { return v >= 0 ? v >> 8 : -((-v + 255) >> 8); }
 static Rgb im_tx(int side, int xn, int y)                /* a texel: column xn from the end inwards; xn < 0: the canvas */
@@ -160,6 +166,15 @@ static void im_measure(int side)
     }
     yt = (t[0] * 77 + t[1] * 150 + t[2] * 29) >> 8; ye = ((e[0] * 77 + e[1] * 150 + e[2] * 29) >> 8) * 7 / 5;   /* (16 columns, 12; 5 % lighter) */
     for (int i = 0; i < 3; i++) im_rg[i] = clampi((int)((long long)t[i] * 3 / 4 * ye * 256 / ((long long)(e[i] ? e[i] : 1) * (yt ? yt : 1))), 128, 512);
+    /* the panes (heights 30 to 60): the second on the picture's last columns (0-2) over the first next to the
+       mullion (27-30) */
+    for (int i = 0; i < 3; i++) t[i] = e[i] = 0;
+    for (int x = 0; x <= 30; x++) {
+        if (x > 2 && x < 27) continue;
+        im_band(side, x, 30, 60, c);
+        for (int i = 0; i < 3; i++) { if (x <= 2) e[i] += c[i] >> 4; else t[i] += c[i] >> 4; }
+    }
+    for (int i = 0; i < 3; i++) im_pg[i] = clampi(e[i] * 4 * 256 / (t[i] * 3 > 0 ? t[i] * 3 : 1), 256, 448);
 }
 /* the source of the wall's point at depth t + s, same height, of the pixel (u2, y): texel coordinates x 256 */
 static void im_shift(int u2, int y, long long s, int *xs, int *ys)
@@ -189,26 +204,31 @@ static Rgb im_wall(int side, int u2, int y, int h, long long s)
     }
     return im_bil(side, xs, ys);
 }
-/* a window's point q from its corner (the picture's corner): the picture's; past its edge the pane goes on */
+/* a window's point q from the corner: the picture's; past its edge the pane goes on (its last column) */
 static Rgb im_winq(int side, int u2, int y, long long q)
 {
     int xs, ys;
-    if (q < IM_WQ0) q = IM_WQ0;                          /* (the corner's own two columns hold the back wall's plate) */
     if (q > IM_WQ1) q = IM_WQ1;
     im_shift(u2, y, IM_TC - q - IM_TQ(u2), &xs, &ys);
     return im_bil(side, xs, ys);
 }
-/* the windows: the picture's one ends on a leaning line (its members lean: 0.0046 periods per row), the pane's last
-   column going on to it; from that line the next window's far post, one bay on.  The line is laid by coverage. */
+/* the window goes on, a mullion every IM_WB: the picture's own mullion (its face with the bolt, its dark side, its
+   foot) and the second pane after it, moved along the wall by whole bays, their lean kept; where those texels end
+   (the picture's edge) the pane goes on to the next mullion's edge, and closes on it with the first pane's end (its
+   rounded corners, the bolt's near half), in the second pane's light */
 static Rgb im_window(int side, int u2, int y, int h, long long t)
 {
-    long long d = IM_TC - t, e = IM_WE - (long long)IM_WS * (h - 45 * 256) / 256;
-    long long j = (d - e + IM_WB / 2) / IM_WB, de = e + j * IM_WB;
-    long long lo = IM_TC - IM_TQ(u2 - 1), hi = IM_TC - IM_TQ(u2 + 1);
-    int a = clampi((int)((hi - de) * 256 / (hi - lo)), 0, 256);
-    Rgb c;
-    if (a < 256) c = im_winq(side, u2, y, d - j * IM_WB);
-    if (a > 0) { Rgb n = im_winq(side, u2, y, d - (j + 1) * IM_WB); c = a < 256 ? im_mix(c, n, a) : n; }
+    long long d = IM_TC - t, s = d + (long long)IM_WS * (h - 45 * 256) / 256;   /* (the lean taken out) */
+    long long j = (s - IM_WM) / IM_WB, g = IM_WM + (j + 1) * IM_WB - s;         /* whole bays; up to the next mullion */
+    Rgb c = im_winq(side, u2, y, d - j * IM_WB);
+    if (d - j * IM_WB > IM_WQ1 && g < IM_WR) {
+        Rgb n = im_winq(side, u2, y, d - (j + 1) * IM_WB);
+        int w = clampi((int)(g * 256 / (IM_PQ / 10)), 0, 256) * clampi(h - 21 * 256, 0, 768) / 768 * clampi(67 * 256 - h, 0, 768) / 768;
+        n.r = clampi(n.r * (65536 + (im_pg[0] - 256) * w) >> 16, 0, 255);
+        n.g = clampi(n.g * (65536 + (im_pg[1] - 256) * w) >> 16, 0, 255);
+        n.b = clampi(n.b * (65536 + (im_pg[2] - 256) * w) >> 16, 0, 255);
+        c = im_mix(c, n, im_smooth((int)((IM_WR - g) * 256 / IM_WF)));
+    }
     return c;
 }
 /* the cornice's face: one band, no joint.  The picture's two clean stretches of it (before its joint and after),
