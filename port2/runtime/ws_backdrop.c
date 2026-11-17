@@ -810,7 +810,7 @@ static const Room ROOMS[] = {
                                                             its right end (lk_take, ws_backdrop_lake.inc; preview) */
     { 9, 1, IS_HM, 1, { { 0 } }, { { 0 } }, gen_is },   /* the Lake's island screen (the mansion's base): a 640-column
                                                             mosaic, its two ends (is_take, ws_backdrop_island.inc; preview) */
-    { 2, 2, 224, 0, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, gen_up },   /* the Underground Prison, lit (preview;
+    { 2, 2, 224, 1, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, gen_up },   /* the Underground Prison, lit (preview;
                                                             ws_backdrop_prison.inc) */
 };
 #define NROOMS ((int)(sizeof ROOMS / sizeof ROOMS[0]))
