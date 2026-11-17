@@ -980,6 +980,7 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--ws-room3d-rooms") && v) { extern const char *port_ws_room3d_rooms; port_ws_room3d_rooms = argv[++i]; }   /* exactly these rooms: A:S,A:S,... (decimal) or all */
         else if (!strcmp(a, "--ws-pigs") && v) { extern int port_ws_pigs_on; const char *m = argv[++i]; port_ws_pigs_on = !strcmp(m, "on") ? 3 : !strcmp(m, "off") ? 0 : 1; }   /* runtime/ws_pigs.c: the Evil Pig rooms past their model's ends; on = previews too */
         else if (!strcmp(a, "--ws-pigs-rooms") && v) { extern const char *port_ws_pigs_rooms; port_ws_pigs_rooms = argv[++i]; }   /* exactly these rooms: A:S,A:S,... (decimal) or all */
+        else if (!strcmp(a, "--ws-topdown-gen") && v) { extern int port_ws_topdown_gen; const char *m = argv[++i]; port_ws_topdown_gen = !strcmp(m, "on") ? 3 : !strcmp(m, "off") ? 0 : 1; }   /* runtime/ws_topdown_gen.inc: top-down map margins; default = the approved rooms, on = previews too */
         else if (!strcmp(a, "--ws-exits") && v) { extern int port_ws_exits; port_ws_exits = strcmp(argv[++i], "off") != 0; }   /* runtime/ws_exits.c */
         else if (!strcmp(a, "--ws-edge") && v) { extern int port_ws_edge; const char *m = argv[++i]; port_ws_edge = !strcmp(m, "off") ? 0 : !strcmp(m, "all") ? 2 : 1; }   /* runtime/ws_edge.c */
         else if (!strcmp(a, "--hud-bottom")) { extern int port_hud_bottom; port_hud_bottom = 1; }   /* runtime/panel_hud.c */

@@ -2931,7 +2931,8 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   4:3 view stays inside the map picture, so at an edge the wide frame ran up to `pad` columns past it (black).  While
   the scene draws, everything in it moves `dx` columns, chosen each frame so the wide frame's edge meets the picture's
   edge (pictures at least as wide as the wide frame: Dwarf Village 448 px at 16:9, AREA05 864, AREA08 544), or so a
-  picture narrower than the wide frame (but not than 4:3) is centred (Dwarf Village at 21:9, AREA19 s2 384 px);
+  picture narrower than the wide frame (but not than 4:3) is centred (Dwarf Village at 21:9, AREA19 s2 384 px: black
+  columns on both sides, filled by "Top-down map margins" below when that preview is on);
   |dx| <= pad.  The objects move through the GTE (`gte.c` `port_gte_dx`, added to every RTPS / RTPT screen X between
   the two hooks, so their own screen culls see the moved position), the map through its SPRT packets in
   `port_ws_overhead_map` (the side windows are computed from the moved ones); the culls (`port_ws_cull`) keep
@@ -2943,6 +2944,50 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   menu and the HUD stay put (anything else a room draws in 2D during the scene would stay put too; none showed in
   the checked rooms).  Game logic, camera and the 4:3 picture are untouched: every frame is the old frame moved by dx
   (checked pixel for pixel), identity without --widescreen and outside these rooms.
+- **Top-down map margins** (`runtime/ws_topdown_gen.inc`, included by `ws_topdown.c`; previews, OFF by default:
+  `--ws-topdown-gen on` = every room of its table `TG_ROOMS`, `off`; to approve a room, `approved` = 1 there): the
+  two top-down rooms whose picture does not reach the wide frame's edge.
+  *Hidden Village* (AREA19 s2, `TG_MARGIN`): the map picture is 384 px wide, the 16:9 frame 426, so the centred map
+  had 21 black columns on each side in every frame.  The picture is a rock pinnacle under a sky; both side edges cut
+  only the sky (clouds) and the rock face under the pinnacle's outline.  A margin is built once per picture, at the
+  first map draw, from the picture's own texels (palette indices of the TIM in RAM, nothing stored): the 96 columns
+  at the edge are classed sky (blue, or near white above the outline) / rock (grey-brown, 90 % of its 9 x 9
+  neighbourhood, reached from the edge along its row) / other (trees, palisade, houses: never a source); the outline
+  (first rock row per column: row 120 at the left edge, 123 at the right) goes on straight with the slope of its last
+  12 columns (0.83 rows per column on both sides); the margin is quilted in 16 x 16 blocks with 6 px overlap, outwards
+  and top to bottom, each block the source block (same rows +- 40, further up by the outline's drop) whose overlap
+  differs least and whose classes match the wanted ones, picked by a hash among those within 10 % of the best, with
+  a price on re-used texels (without both, the far columns locked into a 10-px period); minimum-error cuts between
+  blocks.  The join with the picture cannot be cut, the picture stays as it is: the overlap counts 4 / 3 / 2 / 1
+  times towards the join, the row's mean tone difference (5 rows) fades over the block and the join column's own
+  difference over 4 columns, sky over sky is feathered; changed pixels take the nearest palette colour the class
+  uses.  No mirroring (the right edge is worked on in flipped coordinates and written back flipped).  Measured at
+  the join (sum of |RGB| differences between the two columns at the join / between the picture's first two columns):
+  sky 2.8 / 2.6 left and 5.8 / 3.8 right (one palette step is 8), rock 108 / 125 and 74 / 83 left (rows 140-300,
+  300-496), 35 / 34 and 30 / 40 right.
+  `port_ws_overhead_map` hands the uploads a widened copy of the picture (`need` columns per side, `need` = half the
+  missing width, even: 22 at 16:9, 88 at 21:9, at most 90, so 32:9 keeps black beyond them) and adds a batch for
+  the game's own window (k = 0), which holds the right margin when the window starts at picture column 32; the
+  centring (`dx`) is unchanged, so both margins show the same width and the margin scrolls with the map in both
+  directions.  Block columns never depend on those further out: the 21:9 margin starts with the 16:9 columns.
+  Integer only, fixed order; about 0.1 s at 16:9 and 0.35 s at 21:9 on the PC build (once per room entry; a hash of
+  the palette and the two edge bands per frame tells a new picture).
+  *Dwarf Village* (AREA02 s0 / AREA19 s0, `TG_TRIM`): no generator needed.  Its TIM is padded to whole tiles with 16
+  black columns (448 wide, the picture is 432; 16 black rows at the bottom too), and the game stops its camera with
+  the 4:3 view one column inside that padding (retail shows one black column at the right limit).  With the
+  padding counted as picture, the wide frame showed the 16 columns.  The trailing black columns (CLUT colour 0 in
+  every row) are dropped from the width, so `dx` stops the frame at the real edge (432 >= 426), and `dx` may pass
+  `pad` by 2 columns in such a room (the 4:3 view's own column).  At 21:9 the 432 columns are centred.
+  Checked (PAL, i386, software renderer; Hidden Village walked from the entry to the top and to both camera limits,
+  27 frames, Dwarf Village flown to both limits): no black pixel in the margins; flag on = off outside the 21 margin
+  columns in every frame; no flag = `off` = the build before this (AREA05 s0, AREA08 s0, AREA02 s0 / s3, AREA19 s2);
+  4:3 identical with and without the flag; AREA05 / AREA08 identical on / off (not in the table); the 21:9 frames'
+  centre equals the 16:9 frames; the C margin equals the Python prototype byte for byte; OpenGL: the margins equal
+  the software renderer's.  Weak points: the sky is short of texels, so the right margin's clouds are soft
+  repeats of the edge's; at 21:9 the far rock columns show dimples at a regular pitch on the left and the outline is a
+  straight line for 88 columns; a camera position that showed the 4:3 view's black column at the Dwarf Village limit
+  now shows picture there (16:9 only); AREA08 s0 shows one black column at its right limit with or without the flag
+  (not looked into, not in the table).
 - **Event titles** (`spawnEventTitle`, `l8Type01MoveStep`, `#ifdef PORT2`): the title tiles start at screen x 340
   (just past 4:3, inside the wide frame, where they popped into view) and left at x 480 (inside 21:9 / 32:9).  They
   now start `pad + 160` further right (the tiles sit up to ~150 either side of the title's x) and leave once past `320 + pad`; the fly-in speed is derived from the distance over
