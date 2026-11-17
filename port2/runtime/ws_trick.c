@@ -38,8 +38,9 @@
  * and so do the straw ledges cut into it (y -2464: the floor, its fringe at z -45 and the lip under it).  Nothing is
  * culled there either (PORT_WSXTRA=300 PORT_WSBLK=600 draws the same frames).  The relief goes on with its own two
  * columns (relief() below, ROOMS `relief`), the fringe by the sweep above (in a relief room a cut-out the model
- * itself lays tile after tile is swept too; one alone in its plane that the polygon's edge cuts, the far rock's last
- * step, goes on with the edge's own texel column).
+ * itself lays tile after tile is swept too; one alone in its plane, the far rock's stair at z 290, ends where it ends).
+ * On the other side of the same views the mountain's top, a strata wall with a flank, stops inside the left strip:
+ * far_wall() below carries it on (ROOMS `far`; a preview).
  *
  * Off by default: a room is extended when it is in ROOMS and approved there, or named by --ws-trick-rooms, or with
  * --ws-trick on (every room of the table).  Without --widescreen nothing here runs. */
@@ -58,18 +59,20 @@ int port_ws_trick_on = 1;                /* 1: the approved rooms (default), 0: 
 const char *port_ws_trick_rooms;         /* --ws-trick-rooms A:S,A:S,... (decimal; "all" = every room of the table) */
 
 /* the rooms (the debug select's numbers); approved: on by default once the user has seen the room */
-static const struct { u8 area, sec, end, approved, relief; } ROOMS[] = {   /* end: 0 = the left one, 1 = the right one */
-    {10, 3, 0, 1, 0},  /* Trick Village, cursed (night, flooded) */
-    {10, 7, 0, 1, 0},  /* Trick Village, purified */
-    {3, 1, 1, 1, 1},   /* Stormy Mountain 2: the cliff's rock face past the cave door */
-    {3, 5, 1, 1, 1},   /* Phoenix Mountain 2 (the same mountain, purified) */
+static const struct { u8 area, sec, end, approved, relief, far; } ROOMS[] = {   /* end: 0 = the left one, 1 = the right one */
+    {10, 3, 0, 1, 0, 0},  /* Trick Village, cursed (night, flooded) */
+    {10, 7, 0, 1, 0, 0},  /* Trick Village, purified */
+    {3, 1, 1, 1, 1, 1},   /* Stormy Mountain 2: the cliff's rock face past the cave door */
+    {3, 5, 1, 1, 1, 1},   /* Phoenix Mountain 2 (the same mountain, purified) */
 };
 static int room_relief;                  /* the end is a relief (the cliff's columns of facets): relief() below */
+static int room_far;                     /* the wall on the view's far side goes on too (far_wall() below); ROOMS `far`: 1 = a preview (only
+                                            with --ws-trick-rooms / --ws-trick on), 2 = approved (whenever the room is extended) */
 static int room_enabled(int area, int sec, int end)
 {
     for (unsigned i = 0; i < sizeof ROOMS / sizeof ROOMS[0]; i++) {
         if (ROOMS[i].area != area || ROOMS[i].sec != sec || ROOMS[i].end != end) continue;
-        room_relief = ROOMS[i].relief;
+        room_relief = ROOMS[i].relief; room_far = ROOMS[i].far;
         const char *l = port_ws_trick_rooms;
         if (l) {
             if (!strcmp(l, "all")) return 1;
@@ -81,6 +84,7 @@ static int room_enabled(int area, int sec, int end)
             }
             return 0;
         }
+        if (room_far == 1 && port_ws_trick_on != 3) room_far = 0;
         return port_ws_trick_on == 3 || (port_ws_trick_on && ROOMS[i].approved);
     }
     return 0;
@@ -93,6 +97,7 @@ typedef struct { u16 clut, tpage; u8 cmd, nv, gour, pad; u32 col[4]; Vx v[4]; s1
 #define MAXQ 600                          /* packets per kind */
 #define H 544
 #define NEAR 400                          /* how far right of the 4:3 frame's left edge (camera at its limit) a polygon is still read */
+#define FAR_REACH 240                     /* and how much further for the far side's wall (far_wall) */
 
 static Poly ps[MAXP]; static int np;
 static u8 ft4[MAXQ][40], gt4[MAXQ][52]; static int n4, g4;
@@ -110,7 +115,7 @@ static int x43(int z) { return lo - (160 * (z + H) + H - 1) / H; }
 static int xwide(int z) { return lo - ((160 + port_ws_cull + 8) * (z + H) + H - 1) / H; }
 
 /* the model's polygons near the left end -> ps[]; 0 if the model is not what this file expects */
-static int parse(const u8 *tbl)
+static int parse(const u8 *tbl, int reach)
 {
     int n = tbl[0];
     const s32 *off = (const s32 *)(tbl + 4);
@@ -138,7 +143,7 @@ static int parse(const u8 *tbl)
                     if (v->z < q.z0) q.z0 = v->z; if (v->z > q.z1) q.z1 = v->z;
                     if (v->u < q.u0) q.u0 = v->u; if (v->u > q.u1) q.u1 = v->u;
                     if (v->v < q.v0) q.v0 = v->v; if (v->v > q.v1) q.v1 = v->v;
-                    if (v->z > -H + 64 && v->x <= x43(v->z) + NEAR) near = 1;
+                    if (v->z > -H + 64 && v->x <= x43(v->z) + reach) near = 1;
                 }
                 if (!near) continue;
                 if (np >= MAXP) return 0;
@@ -201,7 +206,7 @@ static int in_plane(const Poly *p, const Poly *q)
 /* what the model does at the end of this tile: 1 = laid flipped, 0 = starts again.  First the polygons that follow p
    inwards in its plane (same stuff, about its rows): the first join that is not just the mapping going on decides.
    -1: the model shows nothing (no polygon follows in the plane). */
-static int join_kind(const Poly *p, int t0, int t1)
+static int join_kind(const Poly *p, int t0, int t1, int dir)       /* dir 1: inwards is to the right; -1: to the left (far_wall) */
 {
     const Poly *c = p;
     for (int step = 0; step < 4; step++) {
@@ -209,13 +214,13 @@ static int join_kind(const Poly *p, int t0, int t1)
         for (int i = 0; i < np; i++) {
             const Poly *q = &ps[i];
             if (q == c || !same_stuff(p, q) || q->x1 - q->x0 < 8 || q->u1 - q->u0 < 8 || !in_plane(p, q)) continue;
-            if (q->x0 < c->x1 - 8 || q->x0 > c->x1 + 8) continue;
+            if (dir > 0 ? (q->x0 < c->x1 - 8 || q->x0 > c->x1 + 8) : (q->x1 < c->x0 - 8 || q->x1 > c->x0 + 8)) continue;
             int oy = (q->y1 < c->y1 ? q->y1 : c->y1) - (q->y0 > c->y0 ? q->y0 : c->y0), oz = (q->z1 < c->z1 ? q->z1 : c->z1) - (q->z0 > c->z0 ? q->z0 : c->z0);
             if (2 * oy < c->y1 - c->y0 || 2 * oz < c->z1 - c->z0) continue;
             if (!nx || q->x1 - q->x0 > nx->x1 - nx->x0) nx = q;
         }
         if (!nx) break;
-        int cl = side_u(c, 0), cr = side_u(c, 1), nl = side_u(nx, 0), nr = side_u(nx, 1);
+        int cl = side_u(c, dir < 0), cr = side_u(c, dir > 0), nl = side_u(nx, dir < 0), nr = side_u(nx, dir > 0);
         if (iabs(nl - cr) <= 8) {
             if ((cr > cl) != (nr > nl)) return 1;                        /* turns back: flipped */
         } else if (2 * iabs(nl - cr) >= t1 - t0) return 0;               /* jumps to the tile's other end */
@@ -371,9 +376,10 @@ static int relief(void)
     return nrow;
 }
 
-static void build(void)
+static int far_wall(void);
+static void build(const u8 *tbl)
 {
-    int nedge = 0;
+    int nedge = 0, nfar = 0;
     n4 = g4 = 0;
     if (room_relief) nedge += relief();
     for (int i = 0; i < np; i++) {
@@ -384,7 +390,7 @@ static void build(void)
             if ((r1->y - r0->y) * (r2->z - r0->z) - (r1->z - r0->z) * (r2->y - r0->y) != 0) continue;
             if (p->nv == 4) { const Vx *r3 = &p->v[ring[3]]; if ((r1->y - r0->y) * (r3->z - r0->z) - (r1->z - r0->z) * (r3->y - r0->y) != 0) continue; }
         }
-        int have_tile = 0, t0 = 0, t1 = 0, t1e = 0, flip = 0, holes = 0, hold = 0;
+        int have_tile = 0, t0 = 0, t1 = 0, t1e = 0, flip = 0, holes = 0;
         for (int e = 0; e < p->nv; e++) {
             int ia = ring[e], ib = ring[(e + 1) % p->nv];
             const Vx *a = &p->v[ia], *b = &p->v[ib];
@@ -404,15 +410,12 @@ static void build(void)
             if (!nr) continue;
             rho /= nr;
             if (!have_tile) {
-                have_tile = 1; holes = has_holes(p); tile(p, &t0, &t1); flip = join_kind(p, t0, t1);
+                have_tile = 1; holes = has_holes(p); tile(p, &t0, &t1); flip = join_kind(p, t0, t1, 1);
                 if (holes && room_relief && flip >= 0) holes = 0;       /* (a fringe the model itself lays tile after tile: the straw on a ledge) */
-                if (holes && room_relief) { holes = 0; hold = 1; }      /* (a cut-out alone in its plane that its polygon's edge cuts, the far
-                                                                           rock's last step: the edge's own texel column goes on, so the
-                                                                           step runs on level and what is see-through stays so) */
                 if (flip < 0) { flip = 0; t1e = wrap_column(p, t0, t1); if (t1e < a->u || t1e < b->u) t1e = t1; t1 = t1e; }
             }
             if (holes) continue;                                             /* a tree's crown ends where it ends */
-            if (iabs(rho) < 8 || t1 - t0 < 4 || hold) rho = 0;               /* one texel column */
+            if (iabs(rho) < 8 || t1 - t0 < 4) rho = 0;                       /* one texel column */
             u32 ca = p->col[ia] & 0xFFFFFF, cb = p->col[ib] & 0xFFFFFF;
             int x[2] = {a->x, b->x}, u[2] = {a->u * 256, b->u * 256}, r[2] = {rho, rho}, end[2] = {xwide(a->z), xwide(b->z)};
             const Vx *ev[2] = {a, b};
@@ -450,6 +453,7 @@ static void build(void)
         }
     }
 pack:
+    if (room_far && parse(tbl, NEAR + FAR_REACH)) nfar = far_wall();
     {
         u8 *d = blk; u32 n = 0;
         memcpy(d, &n, 4); d += 4;
@@ -459,7 +463,291 @@ pack:
         memset(d, 0, 16);
         blk_polys = n4 + g4;
     }
-    if (port_verbose) port_printf("[port] ws trick: %s end, camera limit %d, %d polygons read, %d edges carried on, %d quads\n", sgn > 0 ? "left" : "right", sgn * lo, np, nedge, blk_polys);
+    if (port_verbose) port_printf("[port] ws trick: %s end, camera limit %d, %d polygons read, %d edges carried on, %d of the far wall, %d quads\n", sgn > 0 ? "left" : "right", sgn * lo, np, nedge, nfar, blk_polys);
+}
+
+/* The far side of the view at an end (ROOMS `far`): with the camera at its right limit the mountain's top (AREA03
+   s1 / s5) is a box, the strata wall at z 45 with a flank going back to z 135 on its left, and that corner (x
+   5221..5228 above the rock arm that stands out of it, 5202..5216 under the arm, down to the straw path) is 22 to 37
+   columns inside the left strip of a 16:9 frame: sky beside the wall in the strip, none in the 4:3 picture.  It is
+   not an end of the model (the camera goes on to the left and a 4:3 frame sees the corner about 30 units later),
+   so what is added here is seen from further left as well, in a wide frame's 4:3 centre too: the wall is wider by
+   what the wide frame needs at the limit (16:9: 38 units), nothing else.  That is why it is a preview.
+     - the wall's line: the edges of the polygons of a plane of one depth that a flank shares (a polygon that leaves
+       the plane), the wall inwards of them, both ends past the 4:3 frame's far edge with the camera at its limit and
+       one inside the wide one (of the plane that has most of them); and the edges of the wall between two vertices
+       of that line (the line goes on across what stands out of the wall: the arm's root);
+     - every edge is swept outwards until the whole line is out of the wide frame, in the wall's plane, with its
+       heights, vertex colours, page and palette, the texture going on with the polygon's own mapping inside its tile
+       and starting again at the tile's end as the model does one column further in (its grid is 60..62 units, each
+       column one tile), so every band stays level and in phase; the new line is the old one moved by that distance,
+       with the flanks put again there (the box is closed the way the model closes it);
+     - under the line's lowest vertex the wall's foot stands on the floor that goes on from there (the straw path's
+       back edge at the wall's depth, carried on in its last direction where it ends): that corner is filled with
+       the row of tiles the model lays under a row of this kind elsewhere in the wall.
+   The model's own polygons of that plane (the arm's front) are drawn over the new ones: this block is the list's last. */
+static int holds_x(const Poly *p)
+{
+    const u8 *ring = p->nv == 4 ? RING4 : RING3;
+    const Vx *r0 = &p->v[ring[0]], *r1 = &p->v[ring[1]], *r2 = &p->v[ring[2]];
+    if ((r1->y - r0->y) * (r2->z - r0->z) - (r1->z - r0->z) * (r2->y - r0->y) != 0) return 0;
+    if (p->nv == 4) { const Vx *r3 = &p->v[ring[3]]; if ((r1->y - r0->y) * (r3->z - r0->z) - (r1->z - r0->z) * (r3->y - r0->y) != 0) return 0; }
+    return 1;
+}
+/* the 4:3 frame's far edge at depth z with the camera at this end's limit, rounded outwards; the wide frame's (+ 8) */
+static int xf43(int z) { return lo + (160 * (z + H) + H - 1) / H; }
+static int xfwide(int z) { return lo + ((160 + port_ws_cull + 8) * (z + H) + H - 1) / H; }
+/* texels per unit (8.8) of a polygon of one depth: U along x and V along y, from its first three vertices */
+static int grad(const Poly *p, int *gu, int *gv)
+{
+    const Vx *o = &p->v[0], *a = &p->v[1], *b = &p->v[2];
+    int den = (a->x - o->x) * (b->y - o->y) - (b->x - o->x) * (a->y - o->y);
+    if (!den) return 0;
+    *gu = ((a->u - o->u) * (b->y - o->y) - (b->u - o->u) * (a->y - o->y)) * 256 / den;
+    *gv = ((b->v - o->v) * (a->x - o->x) - (a->v - o->v) * (b->x - o->x)) * 256 / den;
+    return 1;
+}
+/* one quad like t's (its command bits and shading kind): v[] in packet order, x as read */
+static void put_quad(const Poly *t, u16 clut, u16 tpage, const u32 *col, const Vx *v)
+{
+    if (n4 >= MAXQ || g4 >= MAXQ) return;
+    u8 *d = t->gour ? gt4[g4++] : ft4[n4++];
+    u32 w = (col[0] & 0xFFFFFF) | ((u32)(t->cmd | 8) << 24);
+    memcpy(d, &clut, 2); memcpy(d + 2, &tpage, 2); memcpy(d + 4, &w, 4); d += 8;
+    if (t->gour) for (int j = 1; j < 4; j++) { w = col[j] & 0xFFFFFF; memcpy(d, &w, 4); d += 4; }
+    for (int j = 0; j < 4; j++) { Vx q = v[j]; q.x = (s16)(sgn * q.x); memcpy(d, &q, 8); d += 8; }
+}
+/* a piece of flank where the model has none (under what stands out of the wall, and beside the wall's foot): from
+   the flank T at the corner (x, y) down or up to (wx, wy), with T's depths, colours and texture going on along y */
+static void put_flank(const Poly *T, const Vx *vs, int wx, int wy, int P)
+{
+    const Vx *tf = 0, *tb = 0, *t2 = 0;
+    for (int j = 0; j < T->nv; j++) {
+        const Vx *v = &T->v[j];
+        if (v->x == vs->x && v->y == vs->y) { if (v->z == vs->z) tf = v; else tb = v; }
+        else if (v->z == vs->z) t2 = v;
+    }
+    if (!tf || !tb || wy == vs->y) return;
+    int g = t2 && t2->y != tf->y ? (t2->v - tf->v) * 256 / (t2->y - tf->y) : 0;
+    int dv = g * (wy - vs->y) / 256, vf = tf->v + dv, vk = tb->v + dv, area = 0, mine = 0;
+    if (vf < T->v0) vf = T->v0;
+    if (vf > T->v1) vf = T->v1;
+    if (vk < T->v0) vk = T->v0;
+    if (vk > T->v1) vk = T->v1;
+    Vx q[4] = {*tf, *tb, *tb, *tf};                                         /* ring: corner front, corner back, far back, far front */
+    u32 col[4] = {T->col[tf - T->v], T->col[tb - T->v], T->col[tb - T->v], T->col[tf - T->v]};
+    q[0].x = q[1].x = (s16)(vs->x + P);
+    q[2].x = q[3].x = (s16)(wx + P); q[2].y = q[3].y = (s16)wy; q[2].v = (u8)vk; q[3].v = (u8)vf;
+    const u8 *ring = T->nv == 4 ? RING4 : RING3;
+    for (int e = 0; e < T->nv; e++) { const Vx *a = &T->v[ring[e]], *b = &T->v[ring[(e + 1) % T->nv]]; area += a->z * b->y - b->z * a->y; }
+    for (int j = 0; j < 4; j++) mine += q[j].z * q[(j + 1) & 3].y - q[(j + 1) & 3].z * q[j].y;
+    if ((mine > 0) != (area > 0)) { Vx t = q[0]; q[0] = q[1]; q[1] = t; t = q[2]; q[2] = q[3]; q[3] = t; u32 c = col[0]; col[0] = col[1]; col[1] = c; c = col[2]; col[2] = col[3]; col[3] = c; }
+    { Vx t = q[2]; q[2] = q[3]; q[3] = t; u32 c = col[2]; col[2] = col[3]; col[3] = c; }      /* packet order */
+    put_quad(T, T->clut, T->tpage, col, q);
+}
+#define MAXF 48
+#define TUCK 8                            /* the foot goes this far under the floor's edge (no seam of sky along it) */
+static int far_wall(void)
+{
+    static struct { const Poly *f, *s; const Vx *a, *b; } fe[MAXF];
+    int nf = 0, n1 = 0, P = 0, wz = 0, kind = 0;
+    for (int pass = -1; pass < 2; pass++) {                                  /* -1: the wall's depth (the plane with most corners); 0: its
+                                                                                corners; 1: the line across what stands out of it */
+        if (pass == 0) {
+            int best = 0;
+            for (int i = 0; i < nf; i++) { int c = 0; for (int k = 0; k < nf; k++) c += fe[k].f->z0 == fe[i].f->z0; if (c > best) { best = c; wz = fe[i].f->z0; } }
+            if (!nf) return 0;
+            nf = 0;
+        }
+        for (int i = 0; i < np && nf < MAXF; i++) {
+            const Poly *p = &ps[i];
+            const u8 *ring = p->nv == 4 ? RING4 : RING3;
+            if (!holds_x(p) || p->z0 != p->z1 || (pass >= 0 && p->z0 != wz)) continue;
+            for (int e = 0; e < p->nv; e++) {
+                const Vx *a = &p->v[ring[e]], *b = &p->v[ring[(e + 1) % p->nv]];
+                const Vx *na = &p->v[ring[(e + p->nv - 1) % p->nv]], *nb = &p->v[ring[(e + 2) % p->nv]];
+                int dx = b->x - a->x, dy = b->y - a->y;
+                if (dx * dx > dy * dy) continue;                             /* runs along x */
+                if (na->x > a->x || nb->x > b->x || (na->x == a->x && nb->x == b->x)) continue;    /* the wall lies inwards */
+                if (a->x < xf43(a->z) || b->x < xf43(b->z)) continue;        /* (part of) it is in the 4:3 picture */
+                if (a->x >= xfwide(a->z) && b->x >= xfwide(b->z)) continue;  /* out of the wide frame too */
+                const Poly *s = 0;
+                for (int k = 0; k < np; k++) {                               /* (the wall's own stone rather than a fringe's side) */
+                    const Poly *q = &ps[k];
+                    if (k == i || holds_x(q) || !has_vertex(q, a) || !has_vertex(q, b)) continue;
+                    if (!s || (q->tpage == p->tpage && q->clut == p->clut && !(s->tpage == p->tpage && s->clut == p->clut))) s = q;
+                }
+                if (pass <= 0) { if (!s) continue; }
+                else {
+                    int ha = 0, hb = 0;
+                    if (s) continue;
+                    for (int k = 0; k < n1; k++) { ha |= same_pos(fe[k].a, a) || same_pos(fe[k].b, a); hb |= same_pos(fe[k].a, b) || same_pos(fe[k].b, b); }
+                    if (!ha || !hb) continue;
+                }
+                if (has_holes(p)) break;                                     /* (a fringe laid over the wall) */
+                fe[nf].f = p; fe[nf].s = s; fe[nf].a = a; fe[nf].b = b; nf++;
+                if (pass >= 0 && port_verbose > 1) port_printf("[port] ws trick: far %s (%d,%d,%d u%d) (%d,%d,%d u%d) tp %04x cl %04x\n", s ? "corner" : "line",
+                    sgn * a->x, a->y, a->z, a->u, sgn * b->x, b->y, b->z, b->u, p->tpage, p->clut);
+                break;
+            }
+        }
+        if (pass == 0) n1 = nf;
+    }
+    int cuts[2] = {0, 0};                                                    /* (a 16:9 and a 21:9 frame's distances: a wider frame has a
+                                                                                seam of pieces there, so it starts with exactly their columns) */
+    for (int i = 0; i < nf; i++) for (int k = 0; k < 2; k++) {              /* how far: until the whole line is out of the wide frame */
+        const Vx *v = k ? fe[i].b : fe[i].a;
+        if (xfwide(v->z) - v->x > P) P = xfwide(v->z) - v->x;
+        for (int c = 0; c < 2; c++) { int w = lo + ((160 + (c ? 120 : 53) + 8) * (v->z + H) + H - 1) / H - v->x; if (w > cuts[c]) cuts[c] = w; }
+    }
+    if (!n1 || P < 1) return 0;
+    for (int i = 0; i < n1 && kind <= 0; i++) {                              /* what the model does at a tile's end in this wall */
+        int t0, t1;
+        tile(fe[i].f, &t0, &t1); kind = join_kind(fe[i].f, t0, t1, -1);
+    }
+    for (int i = 0; i < nf; i++) {                                           /* the wall, carried on */       
+        const Poly *p = fe[i].f;
+        const Vx *ev[2] = {fe[i].a, fe[i].b};
+        int gu = 0, gv = 0, t0, t1, flip;
+        grad(p, &gu, &gv);
+        tile(p, &t0, &t1); flip = join_kind(p, t0, t1, -1);
+        if (flip < 0) flip = kind > 0;                                       /* (a facet with none beside it: as the wall's other rows) */
+        if (iabs(gu) < 8 || t1 - t0 < 4) gu = 0;                             /* one texel column */
+        int x[2] = {ev[0]->x, ev[1]->x}, u[2] = {ev[0]->u * 256, ev[1]->u * 256}, r[2] = {gu, gu};
+        u32 col[4]; col[0] = col[2] = p->col[ev[1] - p->v]; col[1] = col[3] = p->col[ev[0] - p->v];
+        if (port_verbose > 1) port_printf("[port] ws trick: far sweep (%d,%d) (%d,%d) tile %d..%d rho %d %s\n", sgn * x[0], ev[0]->y, sgn * x[1], ev[1]->y, t0, t1, gu, flip ? "flipped" : "again");
+        for (int guard = 0; guard < 16 && x[0] < ev[0]->x + P; guard++) {
+            int nx[2], nu[2], d[2] = {ev[0]->x + P - x[0], ev[1]->x + P - x[1]}, dd;
+            for (int k = 0; k < 2 && r[k]; k++) {
+                for (int twice = 0; twice < 2; twice++) {                    /* at the tile's end (a texel and a half: the model's corners
+                                                                                are a texel off now and then): flipped, or again */
+                    int bound = (r[k] > 0 ? t1 : t0) * 256;
+                    if (iabs(u[k] - bound) >= 384) break;
+                    if (flip) r[k] = -r[k]; else u[k] = (r[k] > 0 ? t0 : t1) * 256;
+                }
+                int bound = (r[k] > 0 ? t1 : t0) * 256;
+                int w = (iabs(bound - u[k]) + iabs(r[k]) / 2) / iabs(r[k]);
+                if (w < 1) w = 1;
+                if (w < d[k]) d[k] = w;
+            }
+            for (int k = 0; k < 2; k++) for (int c = 0; c < 2; c++) if (x[k] - ev[k]->x < cuts[c] && d[k] > cuts[c] - (x[k] - ev[k]->x)) d[k] = cuts[c] - (x[k] - ev[k]->x);
+            dd = d[0] < d[1] ? d[0] : d[1];                                  /* both ends go on by the same step: no quad folds to a line */
+            for (int k = 0; k < 2; k++) {
+                nx[k] = x[k] + dd; nu[k] = u[k] + r[k] * dd;
+                if (nu[k] < t0 * 256) nu[k] = t0 * 256;
+                if (nu[k] > t1 * 256) nu[k] = t1 * 256;
+            }
+            Vx q[4] = {*ev[1], *ev[0], *ev[1], *ev[0]};                      /* ring (b, a, a', b') = packet b, a, b', a' */
+            int qx[4] = {x[1], x[0], nx[1], nx[0]}, qu[4] = {u[1], u[0], nu[1], nu[0]};
+            for (int j = 0; j < 4; j++) { q[j].x = (s16)qx[j]; q[j].u = (u8)((qu[j] + 128) >> 8); }
+            put_quad(p, p->clut, p->tpage, col, q);
+            for (int k = 0; k < 2; k++) { x[k] = nx[k]; u[k] = nu[k]; }
+        }
+    }
+    for (int i = 0; i < n1; i++) {                                           /* the flanks, moved along */
+        const Poly *s = fe[i].s;
+        int seen = 0;
+        for (int k = 0; k < i; k++) seen |= fe[k].s == s;
+        if (seen) continue;
+        Vx q[4]; u32 col[4];
+        for (int j = 0; j < 4; j++) { int m = j < s->nv ? j : s->nv - 1; q[j] = s->v[m]; q[j].x = (s16)(q[j].x + P); col[j] = s->col[m]; }
+        put_quad(s, s->clut, s->tpage, col, q);
+    }
+    for (int i = n1; i < nf; i++) {                                          /* and under what stands out: the flank below it goes on up
+                                                                                (it is in the arm's shade, as that one's top is) */
+        const Vx *up = fe[i].a->y < fe[i].b->y ? fe[i].a : fe[i].b, *dn = up == fe[i].a ? fe[i].b : fe[i].a;
+        for (int k = 0; k < n1; k++) if (same_pos(fe[k].a, dn) || same_pos(fe[k].b, dn)) { put_flank(fe[k].s, dn, up->x, up->y, P); break; }
+    }
+    {   /* the wall's foot */
+        const Vx *vb = 0; const Poly *fb = 0, *Y = 0;
+        for (int i = 0; i < n1; i++) for (int k = 0; k < 2; k++) { const Vx *v = k ? fe[i].b : fe[i].a; if (!vb || v->y > vb->y) { vb = v; fb = fe[i].f; } }
+        int cx[10], cy[10], nc = 1, ft0, ft1, yt0 = 0, yt1 = 0, gu = 0, gv = 0;
+        cx[0] = vb->x; cy[0] = vb->y;
+        while (nc < 8 && cx[nc - 1] < vb->x + P) {                           /* the floor's edge at the wall's depth, outwards */
+            int bx = -32768, by = 0;
+            for (int i = 0; i < np; i++) {
+                const Poly *p = &ps[i];
+                const u8 *ring = p->nv == 4 ? RING4 : RING3;
+                if (p->z0 == p->z1) continue;
+                for (int e = 0; e < p->nv; e++) for (int way = 0; way < 2; way++) {
+                    const Vx *c = &p->v[ring[(e + way) % p->nv]], *d = &p->v[ring[(e + 1 - way) % p->nv]];
+                    if (c->x != cx[nc - 1] || c->y != cy[nc - 1] || c->z != vb->z || d->z != vb->z || d->x <= c->x || d->y < c->y) continue;
+                    if (d->x > bx) { bx = d->x; by = d->y; }
+                }
+            }
+            if (bx == -32768) break;
+            cx[nc] = bx; cy[nc] = by; nc++;
+        }
+        if (nc >= 2 && cx[nc - 1] < vb->x + P) {                             /* where it ends: on in its last direction */
+            cy[nc] = cy[nc - 1] + (cy[nc - 1] - cy[nc - 2]) * (vb->x + P - cx[nc - 1]) / (cx[nc - 1] - cx[nc - 2]);
+            cx[nc] = vb->x + P; nc++;
+        }
+        tile(fb, &ft0, &ft1);
+        if (port_verbose > 1) port_printf("[port] ws trick: far foot: (%d,%d) %d floor points, tile %d..%d\n", sgn * vb->x, vb->y, nc, ft0, ft1);
+        for (int i = 0; i < np && !Y && nc >= 2; i++) {                      /* the row the model lays under a row of this kind */
+            const Poly *X = &ps[i];
+            int a, b;
+            if (X->z0 != X->z1 || X->z0 != fb->z0 || X->tpage != fb->tpage || X->clut != fb->clut) continue;
+            tile(X, &a, &b);
+            if (a != ft0 || b != ft1) continue;
+            for (int k = 0; k < np && !Y; k++) {
+                const Poly *q = &ps[k];
+                const Vx *sh[2]; int ns = 0;
+                if (k == i || q->z0 != q->z1 || q->z0 != fb->z0 || q->tpage != X->tpage || q->u1 - q->u0 < 8 || q->v1 - q->v0 < 8) continue;
+                if (q->y0 + q->y1 <= X->y0 + X->y1) continue;                /* below it */
+                for (int j = 0; j < q->nv && ns < 2; j++) if (has_vertex(X, &q->v[j])) sh[ns++] = &q->v[j];
+                if (ns < 2 || iabs(sh[0]->x - sh[1]->x) <= iabs(sh[0]->y - sh[1]->y)) continue;
+                tile(q, &yt0, &yt1);
+                if (q->clut == X->clut && yt0 == ft0 && yt1 == ft1) continue;
+                if (has_holes(q)) continue;
+                Y = q;
+            }
+        }
+        if (Y && grad(fb, &gu, &gv) && gv > 0) {
+            int rho = iabs(gu) < 8 || yt1 - yt0 < 4 ? 0 : gu, area = 0;
+            int ub = (yt0 + ((int)vb->u - ft0)) * 256, x0 = vb->x, seg = 1;
+            if (ub < yt0 * 256) ub = yt0 * 256;
+            if (ub > yt1 * 256) ub = yt1 * 256;
+            u32 c = fb->col[vb - fb->v], col[4] = {c, c, c, c};
+            const u8 *ring = fb->nv == 4 ? RING4 : RING3;
+            for (int e = 0; e < fb->nv; e++) { const Vx *a = &fb->v[ring[e]], *b = &fb->v[ring[(e + 1) % fb->nv]]; area += a->x * b->y - b->x * a->y; }
+            if (port_verbose > 1) port_printf("[port] ws trick: far foot from (%d,%d), %d floor points to (%d,%d), row tp %04x cl %04x tile %d..%d rho %d %d\n",
+                sgn * vb->x, vb->y, nc, sgn * cx[nc - 1], cy[nc - 1], Y->tpage, Y->clut, yt0, yt1, rho, gv);
+            for (int guard = 0; guard < 24 && x0 < vb->x + P; guard++) {
+                int x1 = vb->x + P, u1 = ub;
+                while (seg < nc - 1 && cx[seg] <= x0) seg++;
+                if (cx[seg] < x1) x1 = cx[seg];
+                for (int c = 0; c < 2; c++) if (x0 < vb->x + cuts[c] && x1 > vb->x + cuts[c]) x1 = vb->x + cuts[c];
+                if (rho) {
+                    int bound = (rho > 0 ? yt1 : yt0) * 256;
+                    if (iabs(ub - bound) < 128) ub = (rho > 0 ? yt0 : yt1) * 256;      /* the tile starts again */
+                    int d = (iabs(bound - ub) + iabs(rho) / 2) / iabs(rho);
+                    if (d < 1) d = 1;
+                    if (x0 + d <= x1) { x1 = x0 + d; u1 = bound; }
+                    else u1 = ub + rho * (x1 - x0);
+                }
+                int yb0 = cy[seg - 1] + (cy[seg] - cy[seg - 1]) * (x0 - cx[seg - 1]) / (cx[seg] - cx[seg - 1]) + TUCK;
+                int yb1 = cy[seg - 1] + (cy[seg] - cy[seg - 1]) * (x1 - cx[seg - 1]) / (cx[seg] - cx[seg - 1]) + TUCK;
+                int v0 = Y->v0 + (gv * (yb0 - vb->y) + 128) / 256, v1 = Y->v0 + (gv * (yb1 - vb->y) + 128) / 256;
+                if (v0 > Y->v1) v0 = Y->v1;
+                if (v1 > Y->v1) v1 = Y->v1;
+                Vx q[4] = {*vb, *vb, *vb, *vb};                              /* ring: top out, bottom out, bottom in, top in */
+                q[0].x = (s16)x1; q[0].u = (u8)((u1 + 128) >> 8); q[0].v = Y->v0;
+                q[1].x = (s16)x1; q[1].u = q[0].u; q[1].y = (s16)yb1; q[1].v = (u8)v1;
+                q[3].x = (s16)x0; q[3].u = (u8)((ub + 128) >> 8); q[3].v = Y->v0;
+                q[2].x = (s16)x0; q[2].u = q[3].u; q[2].y = (s16)yb0; q[2].v = (u8)v0;
+                int mine = 0;
+                for (int j = 0; j < 4; j++) mine += q[j].x * q[(j + 1) & 3].y - q[(j + 1) & 3].x * q[j].y;
+                if ((mine > 0) != (area > 0)) { Vx t = q[0]; q[0] = q[1]; q[1] = t; t = q[2]; q[2] = q[3]; q[3] = t; }      /* (the wall's own winding) */
+                { Vx t = q[2]; q[2] = q[3]; q[3] = t; }                      /* packet order */
+                put_quad(fb, Y->clut, Y->tpage, col, q);
+                x0 = x1; ub = u1;
+            }
+            for (int k = 0; k < n1; k++) if (fe[k].a == vb || fe[k].b == vb) { put_flank(fe[k].s, vb, vb->x, cy[nc - 1] + TUCK, P); break; }
+        }
+    }
+    if (port_verbose) port_printf("[port] ws trick: far wall, %d edges (%d corners), %d units out\n", nf, n1, P);
+    return nf;
 }
 
 /* called from port_ws_area_model_link with the game's (merged) block list of this frame (list[3] = count, u32
@@ -467,8 +755,8 @@ pack:
 void port_ws_trick_blocks(char *list, const u8 *tbl, int area, int section)
 {
     if (!port_ws_cull || !tbl) return;
-    int on[2], rel[2];
-    for (int e = 0; e < 2; e++) { room_relief = 0; on[e] = room_enabled(area, section, e); rel[e] = room_relief; }
+    int on[2], rel[2], far[2];
+    for (int e = 0; e < 2; e++) { room_relief = room_far = 0; on[e] = room_enabled(area, section, e); rel[e] = room_relief; far[e] = on[e] ? room_far : 0; }
     if (!on[0] && !on[1]) return;
     int n = tbl[0];
     if (n < 2) return;
@@ -498,8 +786,8 @@ void port_ws_trick_blocks(char *list, const u8 *tbl, int area, int section)
         key = (key ^ (u32)port_ws_cull) * 16777619u; key = (key ^ (u32)(lo + 16384)) * 16777619u;
         if (!ends[e].have_key || key != ends[e].key) {
             ends[e].have_key = 1; ends[e].key = key; blk_polys = 0;
-            room_relief = rel[e];
-            if (parse(tbl)) build();
+            room_relief = rel[e]; room_far = far[e];
+            if (parse(tbl, NEAR)) build(tbl);
             ends[e].polys = blk_polys;
         }
         if (!ends[e].polys) continue;
