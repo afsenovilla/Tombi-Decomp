@@ -10,19 +10,11 @@ Update this file whenever something lands or a task is decided. Newest first.
   ws_room3d.c, ws_trick.c, ws_floor3d.c (1.1 MB). check_3dsx.py's limit is now 26 MB. To do later: those tables on
   the heap only while used, so the 3DS can have them.
 
-## In v0.7.2-fix (released 2026-11-18): back to the state before v0.7
+## In v0.7.2-fix (released 2026-11-18)
 
-- **v0.7.1 crashed on the 3DS too** (the user's dump: out of memory at start; the 28.7 MB image, +2.7 MB over the
-  build that ran, mostly the top-down map margin tables of ws_topdown_gen.inc). The user asked for the version
-  before 0.7 again: master's code is that of v0.6.1 (69a2420a; README, release.yml and STATUS kept), VERSION 0.7.2,
-  and the 3DS files are the Actions build the user runs (3ds.yml run 43647748843, branch commit 2409c2b2, image
-  26.0 MB), published through release.yml's new `n3ds_run` input. The 3DS work after it (launcher look, widescreen
-  strips, v0.7.0/0.7.1 merge) stays on the branch claude/wizardly-heisenberg-5fllxj and in git history; it comes
-  back only with an image at most ~26 MB and a test on the device first.
-
-- Pending (the user, 2026-11-18): the widescreen "officially supported / auto by default" change below moves to the
-  next release; a **Saves** page on the 3DS start screen (list the card's saves, import from `sdmc:/3ds/tombi/import/`
-  any format tools/save_import.py takes, export a save to .mcs, backups) was proposed, not started.
+- v0.7.1's PC / Android (they always worked) with the 3DS files of the Actions build the user runs (3ds.yml run
+  43647748843, branch commit 2409c2b2, image 26.0 MB), published through release.yml's `n3ds_run` input. (Master
+  was briefly put back to v0.6.1's code by mistake, 80047b39; the next commit restored v0.7.1's.)
 
 ## In v0.7.1 (released 2026-11-18)
 
