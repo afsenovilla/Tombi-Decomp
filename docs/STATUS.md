@@ -10,9 +10,11 @@ Update this file whenever something lands or a task is decided. Newest first.
 option in the settings and drop "experimental" everywhere it is shown or documented: the PC launcher
 (`tools/port_launcher.py`, `tools/port_launcher_lang.py`: the aspect labels `a.w16` / `a.w21` ... in every language),
 the Android app (`port2/android/app/src/main/res/values*/strings.xml`), the `--widescreen` usage / comment in
-`port2/runtime/main.c`, README.md and docs/PORT.md "Widescreen". How the option itself should change (its name, its
-place, whether 16:9 / auto becomes the default) was not said: ask the user and show him 3-4 real renders of the
-settings page before applying. Not done yet.
+`port2/runtime/main.c`, README.md and docs/PORT.md "Widescreen". The default becomes **auto** (the user, 2026-11-18:
+"I would make it auto by default"): the pad that fills the real display, in the PC launcher and the Android app
+(check what a fresh install and an existing saved setting do: an explicit 4:3 choice must stay 4:3). The option's name
+and place in the settings were not said: show him 3-4 real renders of the settings page before applying. Not done
+yet.
 
 ## In v0.6.1
 
