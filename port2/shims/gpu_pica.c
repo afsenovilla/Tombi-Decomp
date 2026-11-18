@@ -136,6 +136,7 @@ static int ref_start(void) {
     for (int i = 0; i < 3; i++) if (!atlas[i]) atlas[i] = calloc(PICA_ATLAS, sizeof *atlas[i]);
     if (getenv("PICA_GPU_CLIPS")) pica_gpu_clips = atoi(getenv("PICA_GPU_CLIPS"));   /* (the sides a 3DS's probe would report: 15 = all) */
     pica_n128x = getenv("PICA_NO128X") ? 0 : PICA_N128X;   /* (PICA_NO128X: a device without the third atlas) */
+    if (getenv("PICA_128X")) pica_n128x = atoi(getenv("PICA_128X"));   /* (PICA_128X=32: its half, as an Old 3DS has it) */
     return rt && atlas[0] && atlas[1] ? 0 : -1;
 }
 static u32 c15to32_(u16 c);
@@ -643,7 +644,7 @@ static int tex_slot(const GpuTex *t, int u0, int v0, int u1, int v1, int *obx, i
                 slots[wso.e[k].slot].used = ++use_clock;
                 return wso.e[k].slot;
             }
-    if (ws_res && present_no - ws_seen > 120) ws_release();   /* (out of the top-down rooms: the slots back) */
+    if (ws_res && present_no - ws_seen > 120) ws_release();   /* (out of the top-down rooms: the slots back) */   /* (out of the top-down rooms: the slots back) */
     int tw = gs->twmx | gs->twmy << 5 | gs->twox << 10 | gs->twoy << 15;
     if (memo.ok && memo.ver == ver_clock && memo.epoch == drawn_epoch && memo.tx == t->tx && memo.ty == t->ty && memo.depth == t->depth
         && memo.tw == tw && (t->depth == 2 || (memo.cx == t->cx && memo.cy == t->cy))
@@ -829,6 +830,9 @@ static void ws_release(void) {
 }
 void pica_ws_strips(int side, int n, const PicaStrip *e) {
     const int slot = PICA_N256 - 2 + (side & 1);
+    wso.n = 0;
+    {   int any = 0; for (int k = 0; k < n; k++) any |= e[k].w > 0 && e[k].h > 0;
+        if (!any) return; }   /* (nothing to draw: the slots stay the cache's) */
     if (!ws_buf[0]) { ws_buf[0] = calloc(256 * 256, 4); ws_buf[1] = calloc(256 * 256, 4); if (!ws_buf[0] || !ws_buf[1]) return; }
     if (!ws_res) {
         flush();
