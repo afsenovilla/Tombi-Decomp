@@ -127,8 +127,12 @@ void port_window_start(void) {
     }
     SDL_AudioSpec want, have;
     SDL_zero(want);
+#ifndef PORT2_WASM_HOST   /* (--audio-half, an Old 3DS's: port_sound_half lives in shims/sound.c, inside the wasm module there) */
     { extern int port_sound_half;
       want.freq = port_sound_half ? 22050 : 44100; want.samples = port_sound_half ? 512 : 1024; }
+#else
+    want.freq = 44100; want.samples = 1024;
+#endif
     want.format = AUDIO_S16SYS; want.channels = 2; want.callback = audio_cb;
     dev = SDL_OpenAudioDevice(NULL, 0, &want, &have, 0);
 #ifdef __3DS__

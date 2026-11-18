@@ -975,7 +975,9 @@ void port_sound_mixer_run(void) {                   /* (returns when the program
            so a piece's hold can last several times its own work) */
         LOCK();
         if (mixer_thread) render(piece, 64);
+#ifdef __3DS__   /* (runtime/sdl.c's: it only yields there; the wasm2c build has no runtime/sdl.c) */
         { extern void port_audio_yield(void); port_audio_yield(); }   /* (the game thread first, if it waits for the lock: the lock is held here, as in the callback) */
+#endif
         UNLOCK();
         unsigned w = ring_w;
         for (int i = 0; i < 64; i++) { ring[2 * ((w + i) & (RING - 1))] = piece[2 * i]; ring[2 * ((w + i) & (RING - 1)) + 1] = piece[2 * i + 1]; }
@@ -983,7 +985,7 @@ void port_sound_mixer_run(void) {                   /* (returns when the program
     }
 }
 int port_sound_pull(short *dst, int frames) {       /* the audio device's callback (holds the device lock) */
-    extern unsigned long long port_time_us(void), port_prof_sound_us; extern void port_audio_yield(void);
+    extern unsigned long long port_time_us(void), port_prof_sound_us;
     unsigned long long t0 = port_time_us();
     int done = 0;
     if (mixer_thread) {
@@ -1013,7 +1015,9 @@ int port_sound_pull(short *dst, int frames) {       /* the audio device's callba
         render(out, k);
         memcpy(dst, out, k * 4);
         dst += 2 * k; frames -= k; done += k;
-        if (frames > 0) port_audio_yield();
+#ifdef __3DS__
+        { extern void port_audio_yield(void); if (frames > 0) port_audio_yield(); }
+#endif
     }
     port_prof_sound_us += port_time_us() - t0;       /* (the fps line's "sound": here the callback's time, on its thread) */
     return done;
