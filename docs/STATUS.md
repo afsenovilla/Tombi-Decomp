@@ -6,6 +6,14 @@ Update this file whenever something lands or a task is decided. Newest first.
 
 (nothing yet)
 
+**For the next release (the user, 2026-11-18): widescreen becomes officially supported.** Change the widescreen
+option in the settings and drop "experimental" everywhere it is shown or documented: the PC launcher
+(`tools/port_launcher.py`, `tools/port_launcher_lang.py`: the aspect labels `a.w16` / `a.w21` ... in every language),
+the Android app (`port2/android/app/src/main/res/values*/strings.xml`), the `--widescreen` usage / comment in
+`port2/runtime/main.c`, README.md and docs/PORT.md "Widescreen". How the option itself should change (its name, its
+place, whether 16:9 / auto becomes the default) was not said: ask the user and show him 3-4 real renders of the
+settings page before applying. Not done yet.
+
 ## In v0.6.1
 
 - Widescreen fixes from the user's device feedback (2026-11-17; all checked on the PC, headless, soft renderer,
