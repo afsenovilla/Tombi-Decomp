@@ -300,7 +300,7 @@ void port_launcher_game_draw(unsigned char *top, unsigned char *bot, const LuiSt
     static const char *lab[4] = { "LANGUAGE:", "MOVIES:", "SPEED:", "PICTURE:" }, *name[4] = { "LANGUAGE", "MOVIES", "SPEED", "PICTURE" };
     char lang[64]; upper(lang, s->lang, sizeof lang);
     const char *val[4] = { lang, s->movies ? "PLAY" : "SKIP", s->hz == 50 ? "50 HZ" : "60 HZ",
-                           s->picture == 1 ? "WIDE (EXPERIMENTAL)" : s->picture == 2 ? "3D (EXPERIMENTAL)" : "4:3" };
+                           s->picture == 1 ? "WIDE" : s->picture == 2 ? "3D (EXPERIMENTAL)" : "4:3" };
     Cv t = { top, 400, 240 }, b = { bot, 320, 240 };
     /* ---- the top screen: the options, as the game's OPTIONS, on the green squares.  What never changes (the squares,
        the logo, the keys' hint; the bottom screen's squares) is drawn once and copied afterwards: drawing it all again
@@ -345,7 +345,7 @@ void port_launcher_game_draw(unsigned char *top, unsigned char *bot, const LuiSt
                                                       : "La traducci\xF3n mejorada se prepara la primera vez: unos minutos.";
         } else if (s->row == 1) { d0 = "Play: the logos, the intro, the movies."; d1 = "Skip: straight to the title screen."; }
         else if (s->row == 2) { d0 = "60 Hz: the speed of the US game."; d1 = "50 Hz: the speed of the PAL disc."; }
-        else { d0 = "4:3 as on the PS1, Wide: all of the top screen, 3D: depth with the slider."; d1 = "Wide and 3D are slower."; }
+        else { d0 = "4:3 as on the PS1, Wide: all of the top screen, 3D: depth with the slider."; d1 = "3D is experimental and slower."; }
         char disc[96]; snprintf(disc, sizeof disc, "%s", s->disc && *s->disc ? s->disc : "-");
         wrap_dry = 1;
         int n0 = wrap(&b, 0, 0, 288, d0, 3), n1 = d1 ? wrap(&b, 0, 0, 288, d1, 3) : 0, nd = wrap(&b, 0, 0, 288, disc, 3);

@@ -75,7 +75,7 @@ void lui_start_rect(int *x0, int *y0, int *x1, int *y1) { *x0 = START_X0; *y0 = 
 void lui_draw(unsigned char *top, unsigned char *bot, const LuiState *s) {
     static const char *lab[4] = { "Language", "Movies", "Speed", "Picture" };
     const char *val[4] = { s->lang, s->movies ? "Play" : "Skip", s->hz == 50 ? "50 Hz" : "60 Hz",
-                           s->picture == 1 ? "Wide (experimental)" : s->picture == 2 ? "3D (experimental)" : "4:3" };
+                           s->picture == 1 ? "Wide" : s->picture == 2 ? "3D (experimental)" : "4:3" };
     Cv t = { top, 400, 240 }, b = { bot, 320, 240 };
     /* ---- the top screen */
     fill(&t, 0, 0, 399, 239, C_BG);
@@ -111,7 +111,7 @@ void lui_draw(unsigned char *top, unsigned char *bot, const LuiState *s) {
         L("4:3: the picture as on the PS1.", C_MUTED);
         L("Wide: the whole top screen, 400 columns.", C_MUTED);
         L("3D: depth with the 3D slider.", C_MUTED);
-        L("Wide and 3D are experimental: slower in", C_MUTED); L("the busiest places.", C_MUTED);
+        L("3D is experimental: slower in the busiest", C_MUTED); L("places.", C_MUTED);
     }
 #undef L
     for (int i = 0; i < n; i++) text(&b, 12, 34 + i * 14, LF_BOOK11, ln[i], lc[i]);

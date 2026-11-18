@@ -4,7 +4,15 @@ Update this file whenever something lands or a task is decided. Newest first.
 
 ## Since v0.6.1 (not released)
 
-(nothing yet)
+- **Nintendo 3DS: an official platform (2026-11-18, for v0.7.0).** The 3DS port (branch
+  `claude/wizardly-heisenberg-5fllxj`, merged) ships in the release: `tombi-port-<ver>-3ds.3dsx` / `-3ds.cia` from
+  `.github/workflows/3ds.yml` (release.yml collects the newest green `tombi-3ds` artifact of master). What it has: the
+  pica renderer (citro3d), the touch panel on the bottom screen (`--hud-bottom`), the start screen in the look of the
+  game's OPTIONS (graphics, music and cursor sound read from the disc), 4:3 / wide 5:3 (every widescreen patch of the
+  PC, approved rooms on: checked on the PC with `--renderer pica --widescreen 5:3` against the software renderer) /
+  experimental stereoscopic 3D, the improved Spanish translation. Wide is no longer labelled experimental on the 3DS
+  start screen (3D still is); the start screen keeps 4:3 as the default. Details in "In progress / open" below (the
+  3DS entry) and docs/PORT.md "Nintendo 3DS".
 
 **For the next release (the user, 2026-11-18): widescreen becomes officially supported.** Change the widescreen
 option in the settings and drop "experimental" everywhere it is shown or documented: the PC launcher
