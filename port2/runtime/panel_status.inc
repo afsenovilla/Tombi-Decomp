@@ -17,7 +17,7 @@ static void fruit_s(int x, int y, int hp, int max, int sc) {
         pa_spr(x + sx * sc, y + seg[k][3] * sc, HUD, seg[k][0], seg[k][1], 16, 16, 368, fruit_clut(i, hp), (right ? PA_FLIPX : 0) | F);
     }
     pa_spr(x + 24 * sc, y + 16 * sc, HUD, 144, 200, 24, 24, 368, 483, F);
-    { int u, v; if (!fruit_digit(hp, &u, &v)) pa_spr(x + 28 * sc, y + 19 * sc, HUD, u, v, 16, 16, 368, 489, F); }
+    { int u, v, w = fruit_digit_w(hp); if (!fruit_digit(hp, &u, &v)) pa_spr(x + (28 + (16 - w) / 2) * sc, y + 19 * sc, HUD, u, v, w, 16, 368, 489, F); }
 }
 /* a number in the HUD's digits (8 x 8) at scale sc, outlined; returns the width */
 static int hud_num(int x, int y, const char *d, int sc) {
