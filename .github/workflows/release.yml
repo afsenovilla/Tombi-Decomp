@@ -1,8 +1,9 @@
 name: Publish release
 
 # Publishes the newest green build of the native port (artifacts bin-<platform>-port of port2-exe, tombi-port-android of
-# android-apk) as ONE GitHub Release with tombi-port-<ver>-windows-x64.exe, tombi-port-<ver>-linux-x64.tar.gz (tar keeps
-# the executable bit) and tombi-port-<ver>-android.apk (arm64-v8a + armeabi-v7a); the PC launchers bundle the PAL game
+# android-apk, tombi-3ds of 3ds) as ONE GitHub Release with tombi-port-<ver>-windows-x64.exe, tombi-port-<ver>-linux-x64.tar.gz
+# (tar keeps the executable bit), tombi-port-<ver>-android.apk (arm64-v8a + armeabi-v7a) and tombi-port-<ver>-3ds.3dsx /
+# -3ds.cia (Nintendo 3DS); the PC launchers bundle the PAL game
 # (tombi-pc) and, when port2-exe had the GAME_FILES_URL_USA / GAME_FILES_URL_JP discs, the USA / JP ones (tombi-pc-usa,
 # tombi-pc-jp; versions.txt says which);
 # with the dispatch input "include tools" also Tombi-Tools-<ver>-windows-x64.zip / -linux-x64.tar.gz (tombi-text,
@@ -109,6 +110,14 @@ jobs:
           [ -n "$run" ] || { echo "::error::no artifact tombi-port-android"; exit 1; }
           gh run download "$run" -R "$R" -n tombi-port-android -D art/android
           echo "tombi-port-android <- run $run"
+          # the Nintendo 3DS program of the newest green 3ds run (tombi.3dsx, tombi.cia when makerom built it)
+          run=""
+          for id in $(gh api "repos/$R/actions/workflows/3ds.yml/runs?branch=master&status=success&per_page=20" --jq '.workflow_runs[].id'); do
+            if gh api "repos/$R/actions/runs/$id/artifacts" --jq '.artifacts[] | select(.expired | not) | .name' | grep -qx "tombi-3ds"; then run=$id; break; fi
+          done
+          [ -n "$run" ] || { echo "::error::no artifact tombi-3ds"; exit 1; }
+          gh run download "$run" -R "$R" -n tombi-3ds -D art/3ds
+          echo "tombi-3ds <- run $run"
           find art -type f | xargs ls -l
 
       - name: Package and publish
@@ -124,6 +133,9 @@ jobs:
             unzip -l art/android/tombi-port-android-debug.apk | grep -q " lib/$abi/libtombi.so$" || { echo "::error::the APK has no lib/$abi/libtombi.so"; exit 1; }
           done
           cp art/android/tombi-port-android-debug.apk "out/tombi-port-$VER-android.apk"
+          X=$(find art/3ds -name '*.3dsx' | head -n1); [ -n "$X" ] || { echo "::error::no .3dsx in tombi-3ds"; exit 1; }
+          cp "$X" "out/tombi-port-$VER-3ds.3dsx"
+          C=$(find art/3ds -name '*.cia' | head -n1); [ -z "$C" ] || cp "$C" "out/tombi-port-$VER-3ds.cia"
           if [ -d art/windows-text ]; then
             mkdir tw tl
             cp art/windows-assets/*.exe art/windows-gfx/*.exe art/windows-text/*.exe tw/
@@ -132,7 +144,7 @@ jobs:
             tar -C tl -czf "out/Tombi-Tools-$VER-linux-x64.tar.gz" .
           fi
           {
-            echo "Tombi port $VER (build of ${SHA::7}): PC (Windows, Linux) and Android."; echo
+            echo "Tombi port $VER (build of ${SHA::7}): PC (Windows, Linux), Android and Nintendo 3DS."; echo
             if [ -n "$PREV" ]; then echo "### Changes since $PREV"
               python3 tools/release_notes.py "$PREV" "$SHA"   # player-facing commits only (see the script)
             else echo "### Commit"; gh api "repos/$R/commits/$SHA" --jq '"- " + (.commit.message | split("\n")[0])'; fi
@@ -143,6 +155,8 @@ jobs:
             echo "- \`tombi-port-$VER-windows-x64.exe\`: native port with launcher (Windows): $(games windows)"
             echo "- \`tombi-port-$VER-linux-x64.tar.gz\`: \`tombi-port\` (Linux; the game is i386, see README): $(games linux)"
             echo "- \`tombi-port-$VER-android.apk\`: Android, one APK for 64-bit ARM (arm64-v8a, including 64-bit-only devices such as Snapdragon 8 Gen 3 and newer) and 32-bit ARM (armeabi-v7a). No game data: pick your own PAL disc image (SCES-01331) in the app."
+            CIA=""; [ -f "out/tombi-port-$VER-3ds.cia" ] && CIA=" / \`tombi-port-$VER-3ds.cia\`"
+            echo "- \`tombi-port-$VER-3ds.3dsx\`$CIA: Nintendo 3DS homebrew (New 3DS recommended, Old 3DS supported): the .3dsx in sdmc:/3ds/ (Homebrew Launcher) or the .cia installed; your own PAL disc image (SCES-01331) in sdmc:/3ds/tombi/."
             [ -d tw ] && echo "- \`Tombi-Tools-$VER-windows-x64.zip\` / \`-linux-x64.tar.gz\`: $(cd tw && ls | tr '\n' ' ')"
             true
           } > notes.md

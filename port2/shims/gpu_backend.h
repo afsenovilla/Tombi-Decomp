@@ -13,7 +13,7 @@
 
 typedef unsigned char gpu_u8; typedef unsigned short gpu_u16; typedef unsigned int gpu_u32;
 
-typedef struct { int x, y, r, g, b, u, v; } GpuVtx;             /* x, y: VRAM pixels (offset applied); r, g, b 0..255 */
+typedef struct { int x, y, r, g, b, u, v, sh; } GpuVtx;         /* x, y: VRAM pixels (offset applied); r, g, b 0..255; sh: --stereo, the right eye's x is x + sh */
 /* --texture-pack (texpack.c): a replacement image (GL texture) for the texels (ou .. ou + w - 1, ov .. ov + h - 1) of the page */
 typedef struct PortTexRep { unsigned gltex; int ou, ov, w, h; } PortTexRep;
 typedef struct { int tx, ty, depth, cx, cy; const PortTexRep *rep; } GpuTex;   /* texture page base, 0 = 4-bit / 1 = 8-bit / 2 = 15-bit, CLUT x, y; rep: 0 = none */
@@ -64,10 +64,13 @@ typedef struct {
     void (*ws_upload)(int wx, int wy, int w, int h, const gpu_u16 *src, int stride);
     void (*ws_read)(int wx, int wy, int w, int h, gpu_u16 *dst, int stride);
     int (*ws_present)(int wx, int wy, int w, int h);                            /* show a wide frame; 0 = not handled */
+    /* optional (null: two tri calls): the quad v[0..3] as the triangles (0, 1, 2) and (1, 2, 3) in one go; 0 = not
+       taken, the decoder then draws the two triangles */
+    int (*quad)(const GpuVtx *v, int shade, const GpuTex *tex, int semi, int raw);
 } GpuBackend;
 
-extern const GpuBackend port_gpu_soft, port_gpu_gl;
+extern const GpuBackend port_gpu_soft, port_gpu_gl, port_gpu_pica;
 extern const GpuBackend *port_gpu_be;
-extern int port_renderer;           /* --renderer: 1 = gl (default), 0 = soft, -1 = not given (headless picks soft) */
+extern int port_renderer;           /* --renderer: 1 = gl (default), 0 = soft, 2 = pica (gpu_pica.c), -1 = not given (headless picks soft) */
 gpu_u16 *port_vram(void);           /* &vram[0][0], 1024 words per row */
 #endif

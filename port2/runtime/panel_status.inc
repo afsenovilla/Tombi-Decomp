@@ -91,7 +91,57 @@ static void st_item(int x, int y, int item, int sc) { if (item >= 0) pa_item_ico
 static void st_label(int x, int y, const char *s) { pa_text(x, y, 16, s, C_RED, C_REDE); }
 
 /* ---- the page: 2 x 2 windows */
+/* the small canvas (a 320x240 screen: the 3DS bottom screen): the same four windows, the 8 px font and 1x icons, no
+   hint; the place wraps over two lines */
+static void page_status_small(void) {
+    int W = pa_cw, H = pa_ch, top = 56, g = 4, cw = (W - 16 - g) / 2, ch = (H - 8 - top - g) / 2; char b[160];
+    int x0 = 8, x1 = 8 + cw + g, y0 = top, y1 = top + ch + g, w1 = W - 8 - x1, h1 = H - 8 - y1;
+    /* vitality */
+    window_(x0, y0, cw, ch);
+    st_label(x0 + 6, y0 + 4, T("Vitality", "Vitalidad"));
+    fruit_s(x0 + 4, y0 + 20, G_HEALTH, G_MAXHEALTH, 1);
+    lives(x0 + cw - 44, y0 + 6, G_LIVES);
+    ap_badge(x0 + 8, y0 + ch - 16);
+    fmt_ap(b, sizeof b, G_AP); pa_text(x0 + cw - 8 - pa_text_w(8, b), y0 + ch - 14, 8, b, C_DARK, C_EDGE);
+    /* equipped */
+    window_(x1, y0, w1, ch);
+    st_label(x1 + 6, y0 + 4, T("Equipped", "Equipado"));
+    int acc[8], na = st_accessories(acc), its[2] = { st_weapon_item(), st_pants_item() };
+    for (int r = 0; r < 2; r++) {
+        int ry = y0 + 22 + r * 24;
+        frame_(x1 + 5, ry, 22, 22); stone(x1 + 7, ry + 2, 18, 18); st_item(x1 + 7, ry + 2, its[r], 1);
+        const char *nm = its[r] >= 0 ? it_name(its[r], b, sizeof b) : T("None", "Nada");
+        int nl = text_lines(8, w1 - 38, 2, nm);
+        text_wrap(x1 + 31, ry + (nl > 1 ? 1 : 7), 8, w1 - 38, 10, 2, 0, nm, its[r] >= 0 ? C_DARK : C_MUTED, C_EDGE);
+    }
+    if (!na) pa_text(x1 + 8, y0 + 72, 8, T("No accessories", "Sin accesorios"), C_MUTED8, C_EDGE);
+    for (int i = 0; i < na && i < 6; i++) st_item(x1 + 6 + i * 20, y0 + 70, acc[i], 1);
+    /* progress */
+    window_(x0, y1, cw, h1);
+    st_label(x0 + 6, y1 + 4, T("Progress", "Progreso"));
+    int tot, d = st_menu_done(&tot), rt, rv = st_regions(&rt), ly = y1 + 22;
+    snprintf(b, sizeof b, T("%d of %d events", "%d de %d eventos"), d, tot); pa_text(x0 + 8, ly, 8, b, C_DARK, C_EDGE);
+    st_bar(x0 + 8, ly + 11, cw - 16, 6, d, tot, RGB(56, 156, 56), RGB(120, 210, 110)); ly += 23;
+    snprintf(b, sizeof b, T("Regions %d of %d", "Regiones %d de %d"), rv, rt); pa_text(x0 + 8, ly, 8, b, C_DARK, C_EDGE); ly += 11;
+    snprintf(b, sizeof b, T("Items %d", "Objetos %d"), G_INV_COUNT); pa_text(x0 + 8, ly, 8, b, C_DARK, C_EDGE); ly += 11;
+    st_time(b, sizeof b); pa_text(x0 + 8, ly, 8, T("Time", "Tiempo"), C_RED8, C_REDE); pa_text(x0 + cw - 8 - pa_text_w(8, b), ly, 8, b, C_DARK, C_EDGE);
+    /* the next goal */
+    int ids[EVENTS], n = st_events(ids);
+    window_(x1, y1, w1, h1);
+    st_label(x1 + 6, y1 + 4, n && ev_pinned(ids[0]) ? T("Tracking", "Siguiendo") : T("Next goal", "Objetivo"));
+    if (!n) { pa_text(x1 + 8, y1 + 26, 8, T("Nothing in progress", "Nada en curso"), C_MUTED8, C_EDGE); return; }
+    {   int e = ids[0], pend = ev_state(e) == F_PENDING; char t[96];
+        frame_(x1 + 5, y1 + 21, 22, 22); stone(x1 + 7, y1 + 23, 18, 18); st_icon(x1 + 7, y1 + 23, 18, 18, e, 1, pend ? PA_DIM : 0);
+        const char *ti = pend ? "? ? ?" : ev_title(e, t, sizeof t);
+        int nl = text_lines(8, w1 - 38, 2, ti);
+        text_wrap(x1 + 31, y1 + 22 + (nl > 1 ? 0 : 6), 8, w1 - 38, 10, 2, 0, ti, C_DARK, C_EDGE);
+        ev_place(e, b, sizeof b);
+        text_wrap(x1 + 6, y1 + 46, 8, w1 - 12, 9, 4, 0, b, C_RED8, C_REDE);
+    }
+}
+
 static void page_status(void) {
+    if (pa_ch < 280) { page_status_small(); return; }
     int W = pa_cw, H = pa_ch, top = 56, g = 4, cw = (W - 16 - g) / 2, ch = (H - 8 - top - g) / 2; char b[160];
     int x0 = 8, x1 = 8 + cw + g, y0 = top, y1 = top + ch + g, w1 = W - 8 - x1, h1 = H - 8 - y1;
     /* vitality */

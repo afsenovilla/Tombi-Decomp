@@ -245,6 +245,127 @@ static const struct { char ch; u8 rows[5]; } font3[] = {
     { 'L', { 4, 4, 4, 4, 7 } }, { 'R', { 6, 5, 6, 5, 5 } }, { 'B', { 6, 5, 6, 5, 6 } }, { 'T', { 7, 2, 2, 2, 2 } },
     { 'Z', { 7, 1, 2, 4, 7 } }, { '1', { 2, 6, 2, 2, 7 } }, { '2', { 6, 1, 2, 4, 7 } },
 };
+/* --prompt-big (the 3DS's default: its screen shows the game's 320 columns one to one, and a 6 x 8 letter on a
+   disc could not be told from another): the letter alone, bold, 8 x 10, coloured and outlined (big_letter) */
+int port_prompt_big;
+static const struct { char ch; u8 rows[10]; } font8[] = {
+    { 'A', { 0x3C, 0x7E, 0xE7, 0xC3, 0xC3, 0xFF, 0xFF, 0xC3, 0xC3, 0xC3 } },
+    { 'B', { 0xFE, 0xFF, 0xC3, 0xC3, 0xFE, 0xFF, 0xC3, 0xC3, 0xFF, 0xFE } },
+    { 'X', { 0xC3, 0xC3, 0x66, 0x3C, 0x18, 0x18, 0x3C, 0x66, 0xC3, 0xC3 } },
+    { 'Y', { 0xC3, 0xC3, 0x66, 0x3C, 0x18, 0x18, 0x18, 0x18, 0x18, 0x18 } },
+    { 'L', { 0xC0, 0xC0, 0xC0, 0xC0, 0xC0, 0xC0, 0xC0, 0xC0, 0xFF, 0xFF } },
+    { 'R', { 0xFE, 0xFF, 0xC3, 0xC3, 0xFF, 0xFE, 0xCC, 0xC6, 0xC3, 0xC3 } },
+};
+/* the letter alone, 8 x 10, in its button's colour with a black outline, centred on (cx2 / 2, cy2 / 2), into an index
+   image of w x h (stride given): index 15 the letter, 7 the outline (the rows of custom_row); 1 + the port CLUT row */
+static int big_letter(u8 *p, int stride, int w, int h, int cx2, int cy2, int src) {
+    static const u32 colour[4] = { 0xFFD800, 0xF03040, 0x40C850, 0x4088FF };   /* B yellow, A red, Y green, X blue: the SNES's, the New 3DS's */
+    static int rows_set;
+    if (!rows_set) { rows_set = 1; for (int i = 0; i < 4; i++) custom_row(i, 0x000000, colour[i]); }
+    const char ch = "BAYX"[src]; int x0 = cx2 / 2 - 4, y0 = cy2 / 2 - 5;
+    if (x0 < 1) x0 = 1; if (y0 < 1) y0 = 1; if (y0 + 11 > h) y0 = h - 11; if (y0 < 0) y0 = 0;
+    for (int y = 0; y < h; y++) for (int x = 0; x < w; x++) p[y * stride + x] = 0;
+    for (unsigned i = 0; i < sizeof font8 / sizeof font8[0]; i++) if (font8[i].ch == ch)
+        for (int y = 0; y < 10; y++) for (int x = 0; x < 8; x++)
+            if ((font8[i].rows[y] >> (7 - x) & 1) && x0 + x < w && y0 + y < h) p[(y0 + y) * stride + x0 + x] = 15;
+    for (int y = 0; y < h; y++) for (int x = 0; x < w; x++) {
+        if (p[y * stride + x]) continue;
+        int near = 0;
+        for (int dy = -1; dy <= 1; dy++) for (int dx = -1; dx <= 1; dx++) {
+            int xx = x + dx, yy = y + dy;
+            if (xx >= 0 && xx < w && yy >= 0 && yy < h && p[yy * stride + xx] == 15) near = 1;
+        }
+        if (near) p[y * stride + x] = 7;
+    }
+    return 1 + ROW_CUSTOM + src;
+}
+/* --prompt-big 2 / 3: a black disc and the letter in white, its strokes two pixels wide (7 x 8); 3: the disc two
+   rows taller and the letter 7 x 10.  Index 7 the disc, 15 the letter, 9 the soft edge (custom_row) */
+static int bold_disc(u8 *p, int stride, int w, int h, int cx2, int cy2, int src, int tall) {
+    static int rows_set;
+    if (!rows_set) { rows_set = 1; for (int i = 0; i < 4; i++) custom_row(i, 0x000000, 0xFFFFFF); }
+    const char ch = "BAYX"[src]; const int dh = tall ? 14 : 12, lh = tall ? 10 : 8;
+    int dx0 = cx2 / 2 - 6, dy0 = cy2 / 2 - dh / 2;
+    for (int y = 0; y < h; y++) for (int x = 0; x < w; x++) p[y * stride + x] = 0;
+    for (int y = 0; y < dh; y++) {
+        const char *row = disc_rows[tall ? (y < 6 ? y : y < 8 ? 5 : y - 2) : y];
+        for (int x = 0; x < 12; x++) {
+            int xx = dx0 + x, yy = dy0 + y; char c = row[x];
+            if (xx < 0 || xx >= w || yy < 0 || yy >= h || c == '.') continue;
+            p[yy * stride + xx] = c == '6' ? 7 : (u8)hexv(c);
+        }
+    }
+    for (unsigned i = 0; i < sizeof font6 / sizeof font6[0]; i++) if (font6[i].ch == ch)
+        for (int y = 0; y < lh; y++) {
+            int sy = tall ? (y < 3 ? y : y < 7 ? y - 1 : y - 2) : y;   /* (rows 2 and 5 twice) */
+            unsigned r = font6[i].rows[sy]; r = r << 1 | r;
+            for (int x = 0; x < 7; x++) {
+                int xx = cx2 / 2 - 4 + x + 1, yy = cy2 / 2 - lh / 2 + y;
+                if ((r >> (6 - x) & 1) && xx >= 0 && xx < w && yy >= 0 && yy < h) p[yy * stride + xx] = 15 | 0x80;
+            }
+        }
+    static const u8 soft_c[16] = { [15] = 9 };
+    letter_fx(p, stride, w, h, 7, 7, soft_c);
+    return 1 + ROW_CUSTOM + src;
+}
+/* --prompt-big 4 (the 3DS's default): a round button, black to its edge (the usual disc has a lighter rim a pixel
+   wide: this one is the same circle with that pixel black too, and two pixels wider where the cell has the room),
+   and the same white letter (7 x 8) in its middle.  The circle is the one inscribed in the box (bx0, by0, bw x bh) */
+static int black_box(u8 *p, int stride, int w, int h, int bx0, int by0, int bw, int bh, int src) {
+    static int rows_set;
+    if (!rows_set) {
+        rows_set = 1;
+        for (int i = 0; i < 4; i++) {   /* (10 / 11 / 12: the rim's greys, light to dark) */
+            custom_row(i, 0x000000, 0xFFFFFF);
+            u16 *r = port_prompt_clut + (9 + i) * 16;
+            r[10] = bgr_of(0xA8A8A8); r[11] = bgr_of(0x686868); r[12] = bgr_of(0x383838);
+        }
+    }
+    const char ch = "BAYXLR"[src];   /* (SRC_L1, SRC_R1 follow the four face buttons) */
+    for (int y = 0; y < h; y++) for (int x = 0; x < w; x++) p[y * stride + x] = 0;
+    for (int y = 0; y < bh; y++) for (int x = 0; x < bw; x++) {
+        int dx = 2 * x + 1 - bw, dy = 2 * y + 1 - bh, d = bw < bh ? bw : bh;   /* in half pixels, from the middle */
+        int xx = bx0 + x, yy = by0 + y;
+        if (xx < 0 || xx >= w || yy < 0 || yy >= h) continue;
+        if (src >= SRC_L1) {   /* L, R: a shoulder button, wider than tall, its corners rounded */
+            int ex = x < bw - 1 - x ? x : bw - 1 - x, ey = y < bh - 1 - y ? y : bh - 1 - y;
+            if (ex + ey < 2) continue;
+        } else if (dx * dx + dy * dy > d * d + d / 2) continue;
+        p[yy * stride + xx] = 7;
+    }
+    if (port_prompt_big >= 5) {   /* the rim: 5 a grey ring, 6 lit from the upper left (light there, dark opposite) */
+        static u8 rim[16][16];
+        memset(rim, 0, sizeof rim);
+        for (int y = 0; y < h && y < 16; y++) for (int x = 0; x < w && x < 16; x++) {
+            if (p[y * stride + x] != 7) continue;
+            int out = x == 0 || y == 0 || x == w - 1 || y == h - 1 || !p[y * stride + x - 1] || !p[y * stride + x + 1] || !p[(y - 1) * stride + x] || !p[(y + 1) * stride + x];
+            if (!out) continue;
+            int dx = 2 * (x - bx0) + 1 - bw, dy = 2 * (y - by0) + 1 - bh;
+            rim[y][x] = port_prompt_big == 5 ? 11 : dx + dy < -bw / 2 ? 10 : dx + dy > bw / 2 ? 12 : 11;
+        }
+        for (int y = 0; y < h && y < 16; y++) for (int x = 0; x < w && x < 16; x++) if (rim[y][x]) p[y * stride + x] = rim[y][x];
+    }
+    /* the letter: 6 x 8 with strokes two pixels wide, an even width so it sits exactly in the middle of the button */
+    static const struct { char ch; u8 rows[8]; } bold6[] = {
+        { 'A', { 0x0C, 0x1E, 0x33, 0x33, 0x3F, 0x33, 0x33, 0x33 } },
+        { 'B', { 0x3E, 0x33, 0x33, 0x3E, 0x33, 0x33, 0x33, 0x3E } },
+        { 'X', { 0x33, 0x33, 0x1E, 0x0C, 0x0C, 0x1E, 0x33, 0x33 } },
+        { 'Y', { 0x33, 0x33, 0x1E, 0x0C, 0x0C, 0x0C, 0x0C, 0x0C } },
+        { 'L', { 0x30, 0x30, 0x30, 0x30, 0x3F, 0x3F, 0, 0 } },   /* (L, R: six rows, black above and below them in the shoulder button) */
+        { 'R', { 0x3E, 0x33, 0x3E, 0x3C, 0x36, 0x33, 0, 0 } },
+    };
+    const int lh = src >= SRC_L1 ? 6 : 8;
+    int lx = bx0 + (bw - 6) / 2, ly = by0 + (bh - lh) / 2;
+    for (unsigned i = 0; i < sizeof bold6 / sizeof bold6[0]; i++) if (bold6[i].ch == ch)
+        for (int y = 0; y < lh; y++)
+            for (int x = 0; x < 6; x++) {
+                int xx = lx + x, yy = ly + y;
+                if ((bold6[i].rows[y] >> (5 - x) & 1) && xx >= 0 && xx < w && yy >= 0 && yy < h) p[yy * stride + xx] = 15 | 0x80;
+            }
+    static const u8 soft_c[16] = { [15] = 9 };
+    letter_fx(p, stride, w, h, 7, 7, soft_c);
+    return 1 + ROW_CUSTOM + (src & 3);   /* (the four rows are the same here) */
+}
 static void letter6(char ch, int x0, int y0, int c) {
     for (unsigned i = 0; i < sizeof font6 / sizeof font6[0]; i++) if (font6[i].ch == ch)
         for (int y = 0; y < 8; y++) for (int x = 0; x < 6; x++) if (font6[i].rows[y] >> (5 - x) & 1) put(x0 + x, y0 + y, c);
@@ -301,6 +422,7 @@ static int draw(int ps, int src, int style) {   /* returns 1 + the port CLUT row
     static const int xb_col[4] = { P_XGREEN, P_XRED, P_XBLUE, P_XYELLOW };   /* port CLUT */
     draw_disc();
     if (src == SRC_NONE) return 0;
+    if (port_prompt_big >= 4 && style != PROMPT_PS && (src == SRC_L1 || src == SRC_R1)) return black_box(&img[0][0], GW, GW, GH, 0, 3, 12, 10, src);
     if (src >= SRC_L1) {
         const char *t = style == PROMPT_XBOX ? xb_sh[src - SRC_L1] : style == PROMPT_NINTENDO || THORISH(style) || style == PROMPT_CUSTOM ? nt_sh[src - SRC_L1] : ps_sh[src - SRC_L1];
         if (style == PROMPT_PS || style == PROMPT_GENERIC) { label(t, C_CREAM); return 0; }
@@ -308,6 +430,9 @@ static int draw(int ps, int src, int style) {   /* returns 1 + the port CLUT row
         letter_fx(&img[0][0], GW, GW, GH, C_DISC, 7, soft_cream);
         return 1 + ROW_NINTENDO;
     }
+    if (port_prompt_big == 1 && style != PROMPT_PS) return big_letter(&img[0][0], GW, GW, GH, 12, 16, src);   /* (the disc's centre: rows 2..13) */
+    if (port_prompt_big >= 4 && style != PROMPT_PS) return black_box(&img[0][0], GW, GW, GH, 0, 2, 12, 12, src);
+    if (port_prompt_big >= 2 && style != PROMPT_PS) return bold_disc(&img[0][0], GW, GW, GH, 12, 16, src, port_prompt_big == 3);
     switch (style) {
     case PROMPT_PS: ps_symbol(src); break;   /* SRC_SOUTH..NORTH are in PS_CROSS..TRIANGLE order */
     case PROMPT_XBOX: {
@@ -414,7 +539,7 @@ static u8 mi_pclut[NMI];       /* ... drawn with port CLUT row mi_pclut - 1 (0: 
 static int mi_gen[NMI];
 int port_prompt_icons_on;      /* any mi_on: gpu.c's fast path */
 static void (*mi_write)(int, int, int, int, const unsigned short *);
-static int prompt_gen(void) { return port_prompt_style * 4096 + port_prompt_src[0] * 512 + port_prompt_src[1] * 64 + port_prompt_src[2] * 8 + port_prompt_src[3]; }
+static int prompt_gen(void) { return port_prompt_big * 65536 + port_prompt_style * 4096 + port_prompt_src[0] * 512 + port_prompt_src[1] * 64 + port_prompt_src[2] * 8 + port_prompt_src[3]; }
 
 #define MW 16
 static u8 mimg[16][MW];
@@ -454,6 +579,14 @@ static int mi_draw(int i, int w, int h) {
     static const int xb_col[4] = { P_XGREEN, P_XRED, P_XBLUE, P_XYELLOW };
     static const char *xb_sh[] = { "LB", "RB", "LT", "RT" }, *nt_sh[] = { "L", "R", "ZL", "ZR" }, *ps_sh[] = { "L1", "R1", "L2", "R2" };
     if (src == SRC_NONE) return 1;   /* the empty disc (row 0) */
+    if (port_prompt_big == 1 && src < 4 && st != PROMPT_PS) return big_letter(&mimg[0][0], MW, w, h, cx2, cy2, src);
+    if (port_prompt_big >= 4 && src <= SRC_R1 && st != PROMPT_PS) {   /* (the icon's whole box, at most 14 x 14 round the original's middle) */
+        int bw = d + 2 < w ? d + 2 : w, bh, bx, by;   /* (two pixels wider than the original's disc, inside the icon) */
+        if (bw > h) bw = h; bh = src >= SRC_L1 && bw > 10 ? 10 : bw; bx = cx2 / 2 - bw / 2; by = cy2 / 2 - bh / 2;
+        if (bx < 0) bx = 0; if (by < 0) by = 0; if (bx + bw > w) bx = w - bw; if (by + bh > h) by = h - bh;
+        return black_box(&mimg[0][0], MW, w, h, bx, by, bw, bh, src);
+    }
+    if (port_prompt_big >= 2 && src < 4 && st != PROMPT_PS) return bold_disc(&mimg[0][0], MW, w, h, cx2, cy2, src, port_prompt_big == 3 && y1 - y0 + 1 >= 14);
     if (src >= SRC_L1) t = st == PROMPT_XBOX ? xb_sh[src - SRC_L1] : st == PROMPT_NINTENDO || THORISH(st) || st == PROMPT_CUSTOM ? nt_sh[src - SRC_L1] : ps_sh[src - SRC_L1];
     else if (st == PROMPT_XBOX) { one[0] = "ABXY"[src]; t = one; col = xb_col[src]; }
     else if (st == PROMPT_CUSTOM && custom_sym != SYM_PS) { one[0] = (custom_sym == SYM_XBOX ? "ABXY" : "BAYX")[src]; t = one; col = P_WHITE; }
@@ -555,4 +688,26 @@ int port_prompt_tex_clut(int tx, int ty, int u0, int v0, int u1, int v1) {
         return mi_on[i] ? mi_pclut[i] : 0;
     }
     return 0;
+}
+
+/* A button glyph as colours, for screens the port draws itself (the 3DS start screen, runtime/launcher_game.c):
+   src = the physical button by position (SRC_SOUTH .. SRC_NORTH), style = PROMPT_*; rgb gets 12 x 16 pixels 0xRRGGBB,
+   a 0 / 1 (transparent / drawn).  The colours come from the port CLUT row the glyph uses, else the game font's
+   (the indices measured above). */
+void port_prompt_rgb(int src, int style, unsigned *rgb, unsigned char *a) {
+    static const unsigned font_clut[16] = { 0, 0x000000, 0x9C9C9C, 0x4A4A4A, 0x6B6B6B, 0x848484, 0x292929, 0x6B94FF, 0x00FF00,
+                                            0xFF8484, 0xFF5A52, 0xCEC6A5, 0xA59C8C, 0x8C8473, 0xFFEFDE, 0xFFEFDE };
+    const int big = port_prompt_big;
+    port_prompt_big = 0;
+    const int r = draw(0, src, style);
+    port_prompt_big = big;
+    for (int y = 0; y < GH; y++) for (int x = 0; x < GW; x++) {
+        const int k = img[y][x] & 15;
+        unsigned c = 0; int on = k != 0;
+        if (on && r) {
+            const u16 v = port_prompt_clut[(r - 1) * 16 + k];
+            on = v != 0; c = (unsigned)(v & 31) << 19 | (unsigned)(v >> 5 & 31) << 11 | (unsigned)(v >> 10 & 31) << 3;
+        } else if (on) c = font_clut[k];
+        rgb[y * GW + x] = c; a[y * GW + x] = (unsigned char)on;
+    }
 }

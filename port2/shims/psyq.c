@@ -36,7 +36,7 @@ static unsigned long long vblank_epoch_us;   /* absolute schedule: vblank n is d
 static unsigned vblank_n;
 int port_stall_frame, port_stall_ms;             /* --stall FRAME:MS (test hook): sleep MS ms before that vblank */
 int port_show_fps;                              /* --show-fps: log the measured vblank rate every second; 2: with a histogram of the inter-vblank intervals */
-unsigned long long port_prof_wait_us, port_prof_present_us;   /* the fps line's breakdown (port_prof_draw_us: gpu.c) */
+unsigned long long port_prof_wait_us, port_prof_present_us, port_prof_panel_us, port_prof_sound_us;   /* the fps line's breakdown (port_prof_draw_us: gpu.c) */
 static unsigned vb_hist[12];                    /* ms buckets: <10,10-14,15-17,18-19,20-21,22-24,25-29,30-39,40-59,60-99,100-199,>=200 */
 static unsigned long long vb_last_us, vb_max_us;
 static unsigned long long vb_total_n, vb_total_t0;
@@ -440,6 +440,7 @@ void port_test_message_add(const char *s) {
 }
 void port_poke_reset(void) { n_pokes = 0; dump_ram_path = 0; menu_frame = 0; title_frame = 0; movie_frame = 0; item_frame = 0; msg_frame = 0; }
 void port_vblank(void) {
+    { extern int port_frameskip, port_skip_draw; if (port_frameskip == 2) port_skip_draw = port_frame & 1; }   /* (--frameskip test: every other frame) */
     if (port_stall_frame && port_frame + 1 == port_stall_frame) port_sleep_us((unsigned long long)port_stall_ms * 1000);
     if (port_realtime) {
         /* absolute schedule from one epoch (no relative sleeps: their rounding would accumulate into a faster or
@@ -450,10 +451,17 @@ void port_vblank(void) {
         if (!vblank_epoch_us) { vblank_epoch_us = now; vblank_n = 0; }
         vblank_n++;
         unsigned long long due = vblank_epoch_us + (unsigned long long)vblank_n * 1000000ull / (unsigned)port_hz;
+        {   /* --frameskip: behind the clock, the next frame is not drawn (three in a row at most); then the
+               schedule is only given up when four periods late, or the frames skipped would win nothing back */
+            extern int port_frameskip, port_skip_draw; static int run;
+            if (port_frameskip == 1) { if (now > due + period / 8 && run < 3) { port_skip_draw = 1; run++; } else { port_skip_draw = 0; run = 0; } }
+            if (port_frameskip == 1 && now <= due + 4 * period) { if (due > now) { port_sleep_until_us(due); port_prof_wait_us += port_time_us() - now; } goto paced; }
+        }
         if (now > due + period) { vblank_epoch_us = now - (unsigned long long)vblank_n * 1000000ull / (unsigned)port_hz; due = now;
                                   if (port_hfr_fps) { extern void port_hfr_wait(unsigned long long, unsigned long long, int); port_hfr_wait(due, period, 1); } }
         else if (port_hfr_fps) { extern void port_hfr_wait(unsigned long long, unsigned long long, int); port_hfr_wait(due, period, 1); port_prof_wait_us += port_time_us() - now; }
         else if (due > now) { port_sleep_until_us(due); port_prof_wait_us += port_time_us() - now; }
+    paced:
         {
             unsigned long long t = port_time_us();
             if (!vb_total_t0) vb_total_t0 = t;
@@ -479,11 +487,14 @@ void port_vblank(void) {
                 if (port_hfr_fps) {   /* --fps: the presents of this second, and how many of them were interpolated */
                     extern void port_hfr_second(char *, int); size_t n = strlen(low); port_hfr_second(low + n, (int)(sizeof low - n));
                 }
-                port_printf("[port] fps: %d.%02d vblank/s (frame %d, %d audio samples/s) ms/frame: game %llu.%llu draw %llu.%llu present %llu.%llu wait %llu.%llu;%s\n",
+                /* (the present's part of the panel, --second-screen, and the sound mixer, inside game, are also given on their own) */
+                game = game > port_prof_sound_us ? game - port_prof_sound_us : 0;
+                port_printf("[port] fps: %d.%02d vblank/s (frame %d, %d audio samples/s) ms/frame: game %llu.%llu draw %llu.%llu present %llu.%llu (panel %llu.%llu) sound %llu.%llu wait %llu.%llu;%s\n",
                             (int)(nf * 100000000ull / tot / 100), (int)(nf * 100000000ull / tot % 100), port_frame, smp,
                             game / nf / 1000, game / nf / 100 % 10, port_prof_draw_us / nf / 1000, port_prof_draw_us / nf / 100 % 10,
-                            port_prof_present_us / nf / 1000, port_prof_present_us / nf / 100 % 10, port_prof_wait_us / nf / 1000, port_prof_wait_us / nf / 100 % 10, low);
-                port_prof_draw_us = port_prof_wait_us = port_prof_present_us = 0;
+                            port_prof_present_us / nf / 1000, port_prof_present_us / nf / 100 % 10, port_prof_panel_us / nf / 1000, port_prof_panel_us / nf / 100 % 10,
+                            port_prof_sound_us / nf / 1000, port_prof_sound_us / nf / 100 % 10, port_prof_wait_us / nf / 1000, port_prof_wait_us / nf / 100 % 10, low);
+                port_prof_draw_us = port_prof_wait_us = port_prof_present_us = port_prof_panel_us = port_prof_sound_us = 0;
                 if (port_show_fps >= 2) vb_hist_print("this second");
                 t0 = t; n0 = port_frame;
             }
@@ -519,7 +530,7 @@ void port_vblank(void) {
     if (vsync_cb) call_psx((void *)vsync_cb);
     /* sound first: with both pipes on, a player that interleaves audio and video by timestamp finds the
        audio of this vblank already buffered while it reads the (larger) video frame */
-    port_sound_vblank();
+    { unsigned long long t0 = port_time_us(); port_sound_vblank(); port_prof_sound_us += port_time_us() - t0; }
     { unsigned long long t0 = port_time_us(); port_gpu_vblank(); port_prof_present_us += port_time_us() - t0; }
     {   /* -v: report area / section changes and (every 50 frames) where the player is */
         static int last = -1;
@@ -1043,6 +1054,17 @@ int port_cd_open(const char *path) {
     else if (port_verbose || port_trace_cd) port_printf("[port] disc self-check: PVD ok, volume \"%.32s\"\n", sec + 40);
     return 0;
 }
+/* the disc closed again (the 3DS start screen reads the game's pictures from it before the game opens it itself) */
+void port_cd_close(void) {
+    if (cd_fp) { fclose(cd_fp); cd_fp = 0; }
+    if (cd_chd) { port_chd_close(); cd_chd = 0; }
+    if (cd_data) {
+        for (int i = 0; i < cd_nranges; i++) { if (cd_ranges[i].fp) fclose(cd_ranges[i].fp); free(cd_ranges[i].path); }
+        free(cd_ranges); cd_ranges = 0; cd_nranges = 0; cd_data = 0;
+        memset(cd_open_ranges, 0, sizeof cd_open_ranges); cd_open_next = 0;
+    }
+    cd_sector_count = 0;
+}
 int port_tpatch_sector(int lba, unsigned char *d, int bytes);              /* shims/tpatch.c (--text-patch) */
 unsigned char *port_tpatch_named(const char *path, unsigned *size);
 extern int port_tpatch_count;
@@ -1088,6 +1110,28 @@ static int cd_read_sectors_base(int lba, int count, void *dst, int bytes) {
         return 0;
     }
     if (!cd_fp) { port_printf("[port] CD read of lba %d: no disc image open\n", lba); return -1; }
+    /* Sectors come from a read-ahead of 32 (75 KB of the image in one read): a read is a request to the SD card's
+       service on a 3DS, milliseconds each, and the game asks sector by sector: an overlay is 170 of them (its menu
+       took a second to open and to close), a movie 10 a frame (most of the 160 ms a frame took there).  What the
+       read-ahead cannot give (the image's end, an error) falls to the loop below, which reports it. */
+    if (!port_trace_cd) {
+        static u8 ra[32 * 2352]; static int ra_lba = -1, ra_n; static FILE *ra_fp;
+        const int ss = cd_raw ? 2352 : 2048, skip = cd_raw ? (bytes == 2048 ? 24 : 12) : 0;
+        int i = 0;
+        if (ra_fp != cd_fp) { ra_fp = cd_fp; ra_lba = -1; ra_n = 0; }
+        while (i < count && bytes <= ss - skip) {
+            int l = lba + i;
+            if (ra_lba < 0 || l < ra_lba || l >= ra_lba + ra_n) {
+                int got = port_pread(cd_fp, ra, 32 * ss, (long long)l * ss);
+                ra_lba = l; ra_n = got > 0 ? got / ss : 0;
+                if (!ra_n) { ra_lba = -1; break; }
+            }
+            memcpy(d + (size_t)i * bytes, ra + (size_t)(l - ra_lba) * ss + skip, bytes);
+            i++;
+        }
+        if (i == count) return 0;
+        lba += i; count -= i; d += (size_t)i * bytes;
+    }
     for (int i = 0; i < count; i++) {
         long long off = cd_raw ? (long long)(lba + i) * 2352 + (bytes == 2048 ? 24 : 12) : (long long)(lba + i) * 2048;
         int got = port_pread(cd_fp, d, bytes, off);
@@ -1275,6 +1319,7 @@ int port_cd_stats(int *sectors) { *sectors = cd_sectors; return cd_reads; }
  * part of the stream (the file after the movie) end it; the game ends a movie on its own frame count three
  * frames before that.  --skip-movies: StGetNext at once reports a frame past the end of every movie, so
  * moviePlayerTask takes its "movie finished" path (CdMix, StUnSetRing, exitTask) without playing. */
+int port_skip_all;        /* --no-movies: --skip-intro, and the game's own movies skipped too */
 int port_skip_movies;     /* 1 = every movie (--skip-movies), 2 = only those before gameplay starts (--skip-intro: logos, title movie) */
 int port_in_game;         /* set by the overlay loader on the first area overlay (runtime/ovl.c) */
 typedef struct { u16 id, type, secCount, nSectors; u32 frameCount, frameSize; u16 width, height; u16 nCodes, magic, q, version; u32 zero; } StHEADER;
@@ -1363,7 +1408,16 @@ static int st_deliver(void) {
  * movies their 15 frames per second (10 sectors per frame) */
 void port_st_vblank(void) {
     if (!st_active || !st_ring || st_ended) return;
+#ifdef __3DS__
+    {   /* by the clock, not by the vblank: the decoder takes more than a vblank's time there, and a movie fed per
+           vblank would play in slow motion (6.7 s of logo in 16); late frames are dropped, as the drive drops them */
+        static unsigned long long last; unsigned long long now = port_time_us(), dt = last && now - last < 200000 ? now - last : 1000000ull / (unsigned)port_hz;
+        last = now;
+        st_budget += (int)(((cd_mode & 0x80) ? 150 : 75) * dt * (unsigned)port_hz / 1000000ull);
+    }
+#else
     st_budget += (cd_mode & 0x80) ? 150 : 75;         /* sectors per second: 75 at single speed, 150 at double */
+#endif
     int cap = port_hz * st_ring_n;                     /* a full ring's worth at most: the drive would have dropped the rest */
     if (st_budget > cap) st_budget = cap;
     while (st_budget >= port_hz && !st_ended) {
@@ -1371,14 +1425,21 @@ void port_st_vblank(void) {
         st_budget -= port_hz;
     }
 }
+/* --skip-movies (1): every movie; --skip-intro (2): those before the game starts; --logo-only (3): every movie but
+   the first stream of the session, the developer's logo (LOGO.STR, 6.7 s) */
+static int st_count;
+static int st_skipped(void) {
+    return port_skip_all || port_skip_movies == 1 || (port_skip_movies == 2 && !port_in_game) || (port_skip_movies == 3 && st_count > 1);
+}
 int CdRead2(int mode) {
     u8 param = (u8)mode;
+    st_count++;
     CdControl(14, &param, 0);
     st_active = 1; st_ended = 0; st_lba = cd_pos; st_misses = 0; st_budget = 0; st_have_pending = 0; st_frames = 0;
     st_full = 0; st_handed = 0; st_start_vblank = port_frame; st_start_lba = cd_pos;
     port_sound_xa_reset();
     if (port_verbose) port_printf("[port] st: stream started at lba %d, mode %03x, ring %d sectors (frame %d)%s\n", st_lba, mode, st_ring_n, port_frame,
-                                  (port_skip_movies == 1 || (port_skip_movies == 2 && !port_in_game)) ? ", skipped (--skip-movies/--skip-intro)" : "");
+                                  st_skipped() ? ", skipped (--skip-movies/--skip-intro)" : "");
     return 1;
 }
 /* StUnSetRing / the end of a movie: one line with the pace, so a log from another machine says whether a slow movie
@@ -1388,6 +1449,13 @@ void port_st_stop(void) {
     if (st_active)
         port_printf("[port] st: stream stopped at frame %d: %d frames handed out in %d vblanks (%d sectors read, ring full on %d vblanks, mode %02x, %d/s)\n",
                     port_frame, st_handed, port_frame - st_start_vblank, st_lba - st_start_lba, st_full, cd_mode, (cd_mode & 0x80) ? 150 : 75);
+    if (st_active) {
+        extern unsigned long long port_mdec_us[2]; extern unsigned port_mdec_n[2];
+        const unsigned nf = port_mdec_n[0] ? port_mdec_n[0] : 1;
+        port_printf("[port] st: decoding: %u frames, ms each: %llu.%llu the codes (DecDCTvlc), %llu.%llu the pictures (%u words)\n", port_mdec_n[0],
+                    port_mdec_us[0] / nf / 1000, port_mdec_us[0] / nf / 100 % 10, port_mdec_us[1] / nf / 1000, port_mdec_us[1] / nf / 100 % 10, port_mdec_n[1] / nf);
+        port_mdec_us[0] = port_mdec_us[1] = 0; port_mdec_n[0] = port_mdec_n[1] = 0;
+    }
     st_active = 0; port_sound_xa_end();
 }
 static void st_stop(void) { port_st_stop(); }
@@ -1413,7 +1481,7 @@ static int st_end_header(void **a, void **b) {
     return 0;
 }
 int StGetNext(void **a, void **b) {
-    if (port_skip_movies == 1 || (port_skip_movies == 2 && !port_in_game) || !st_ring) {
+    if (st_skipped() || !st_ring) {
         if (port_verbose) port_printf("[port] movie skipped (StGetNext reports the last frame)\n");
         return st_end_header(a, b);
     }

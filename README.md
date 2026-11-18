@@ -12,7 +12,7 @@ the original PlayStation.
 
 - **Decompilation:** the game's code rewritten as C that compiles, with the original compiler, into the same machine
   code as the disc. One source tree builds every release: PAL, USA, Japan and the demos.
-- **Native port:** the same C built as a Windows, Linux and Android program (`port2/`), with OpenGL or software
+- **Native port:** the same C built as a Windows, Linux, Android and Nintendo 3DS program (`port2/`), with OpenGL or software
   rendering, controllers, the original music, voices and movies, saves, all nine PAL languages and a launcher with
   mods. You supply your own disc image.
 
@@ -27,10 +27,16 @@ the original PlayStation.
 
 ## Play the port
 
-Download `tombi-port-<ver>-windows-x64.exe`, `-linux-x64.tar.gz` or `-android.apk` from the
+Download `tombi-port-<ver>-windows-x64.exe`, `-linux-x64.tar.gz`, `-android.apk` or `-3ds.3dsx` / `-3ds.cia` from the
 [latest release](https://github.com/afsenovilla/Tombi-Decomp/releases/latest) and point the launcher at your disc image
 (Tombi! PAL Rev 1, `SCES-01331` or `SCES-01330`). Both PAL discs carry all nine languages (EN FR DE IT NL ES PT SV DA),
 so either one gives you every language. Details: [docs/PORT.md](docs/PORT.md).
+
+**Nintendo 3DS** (homebrew; New 3DS / New 2DS recommended, the Old 3DS runs it too): put the `.3dsx` in `sdmc:/3ds/`
+(Homebrew Launcher) or install the `.cia`, and copy your disc image (`.bin`/`.cue`, `.iso` or `.chd`) to `sdmc:/3ds/tombi/`.
+The start screen (shown the first time, or with L held at boot) sets the language, movies, speed and picture (4:3,
+wide 5:3 on the top screen, or experimental stereoscopic 3D); the bottom screen is the touch panel (status, events,
+map, items).
 
 ## Progress
 
@@ -517,8 +523,9 @@ Releases of the port are published by hand by `.github/workflows/release.yml` (A
 workflow, or `gh workflow run release.yml`) once the owner approves; there is no automatic release.
 
 - Versions are `vX.Y.Z`: tag `v0.0.N`, title "Tombi port 0.0.N", one release for every platform: `tombi-port-0.0.N-windows-x64.exe`,
-  `tombi-port-0.0.N-linux-x64.tar.gz` and `tombi-port-0.0.N-android.apk` (one APK with both arm64-v8a, the 64-bit
-  wasm2c build, and armeabi-v7a; Android picks the one the device runs), optionally `Tombi-Tools-0.0.N-...`
+  `tombi-port-0.0.N-linux-x64.tar.gz`, `tombi-port-0.0.N-android.apk` (one APK with both arm64-v8a, the 64-bit
+  wasm2c build, and armeabi-v7a; Android picks the one the device runs) and `tombi-port-0.0.N-3ds.3dsx` / `-3ds.cia`
+  (Nintendo 3DS, from `.github/workflows/3ds.yml`), optionally `Tombi-Tools-0.0.N-...`
   (translation editor, graphics editor, assets extractor). Each release bumps the patch of the latest `v*` tag and is
   marked Latest; the notes list the player-facing commits since the previous `v*` tag (`tools/release_notes.py`).
 - To bump the minor/major version run the workflow with the input `version` (e.g. `0.1.0`; must be `X.Y.Z` and

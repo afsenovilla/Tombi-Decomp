@@ -4,7 +4,15 @@ Update this file whenever something lands or a task is decided. Newest first.
 
 ## Since v0.6.1 (not released)
 
-(nothing yet)
+- **Nintendo 3DS: an official platform (2026-11-18, for v0.7.0).** The 3DS port (branch
+  `claude/wizardly-heisenberg-5fllxj`, merged) ships in the release: `tombi-port-<ver>-3ds.3dsx` / `-3ds.cia` from
+  `.github/workflows/3ds.yml` (release.yml collects the newest green `tombi-3ds` artifact of master). What it has: the
+  pica renderer (citro3d), the touch panel on the bottom screen (`--hud-bottom`), the start screen in the look of the
+  game's OPTIONS (graphics, music and cursor sound read from the disc), 4:3 / wide 5:3 (every widescreen patch of the
+  PC, approved rooms on: checked on the PC with `--renderer pica --widescreen 5:3` against the software renderer) /
+  experimental stereoscopic 3D, the improved Spanish translation. Wide is no longer labelled experimental on the 3DS
+  start screen (3D still is); the start screen keeps 4:3 as the default. Details in "In progress / open" below (the
+  3DS entry) and docs/PORT.md "Nintendo 3DS".
 
 **For the next release (the user, 2026-11-18): widescreen becomes officially supported.** Change the widescreen
 option in the settings and drop "experimental" everywhere it is shown or documented: the PC launcher
@@ -116,6 +124,32 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
 
 ## In progress / open
 
+0. **Nintendo 3DS port (branch `claude/wizardly-heisenberg-5fllxj`, tested by the user on an Old 3DS, 2026-11-13)**:
+   `--renderer pica` (n3ds/pica_c3d.c + shims/gpu_pica.c), 60 Hz with frameskip, the panel on the bottom screen
+   (no map tab on an Old 3DS, the game's HUD there: `--hud-bottom`), improved Spanish translation stored on the SD.
+   Start screen (n3ds/main_3ds.c, L held at boot): language, movies (skip = straight to the title),
+   50/60 Hz, picture 4:3 / wide (`--widescreen 5:3`, experimental, off by default) / 3D (`--stereo`, experimental).
+   Drawn in the look of the title screen's OPTIONS (runtime/launcher_game.c: the Tomba squares SYSTEM/A00801.GAM +
+   A00802, green on the top screen and yellow on the bottom one, the 8 x 16 font A00804 + A00803, the green bar, the
+   fixed texts in the LOAD screen's cream message boxes, the keys hint with drawn arrows and an A key drawn like the black Thor buttons, the title logo A00202 at half size, Start touchable; the disc is opened before the game and closed again,
+   port_cd_close), the plain DejaVu screen (n3ds/launcher_ui.c) when the disc cannot be read; PC preview
+   `PORT_LAUNCHER_PREVIEW=DIR` (with `--second-screen`).
+   The OPTIONS screen's music plays under it (SOUND/SND_SYS.WVD + S_SYS00.SEQ through shims/sound.c, fed to the
+   DSP (ndsp) by the start screen's loop, its buffers given back before the game; the screens in VRAM, not linear memory; PC check: PORT_LAUNCHER_MUSIC_WAV=FILE with the preview, its envelope
+   matched the game's own options music, r 0.83, same level); moving an option or its value plays the disc's language
+   menu cursor sound (its boot program's second VAB, sound 0: SsUtKeyOnV(23, vab, 0, 0, 8, 0, 100, 100)).  Not yet seen
+   on the console.
+   Measured on the console: gameplay 58-60 vblank/s in most rooms (the mansion AREA04 ~52: game logic 14 ms), Baccus
+   wide 59 (tiles of the top-down map copied by 32 x 32 cells, not decoded again).  Top-down map side strips (the map
+   pieces past the game's 384-px window, which filled in as the camera moved): on the pica backend they are decoded
+   straight from the map picture in RAM into two 256 slots of their own (gpu_pica.c pica_ws_strips, only when a piece
+   changes, only its cells) instead of being written into the game's VRAM and back every frame (that was ~0.9 M
+   instructions a frame on the PC's count, now ~0.2 M); frames identical to the VRAM way (PORT_WS_VRAM_STRIPS=1) in
+   AREA05/02/08/19 s0, 460 frames compared.  Not yet measured on the console.  3D: the left eye is the game's picture, the right
+   one the same batches drawn again by the GPU with a per-vertex shift (GTE SZ, else drawing order), in front of the
+   screen too; ~52 in the first village with the slider up before the last present change (presents no longer wait
+   for the GPU: not measured yet).  Open: the 3D's speed on the console; the PC syntax check for 3DS code uses
+   devkitPro headers in a scratch folder (not in the repo).
 0b. **LZ decoder fix (2026-11-17, docs/PORT.md "LZ overlap", not released yet).** `lzDecompress`'s overlapping copies
    were compiled as `memmove` (a `bcopy()` call the compilers treat as a builtin) and left stale buffer bytes: the
    colour specks of the Million-Year-Old Man's room (AREA02 s4, 11 bad CLUT entries), small VRAM differences in 57
