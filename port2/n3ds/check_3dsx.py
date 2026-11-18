@@ -36,6 +36,13 @@ def main():
     offs = [seg[0], seg[0] + seg[1]]
     total = sum(seg)
     print("image %#x bytes (%.1f MB): %#x..%#x" % (total, total / 1048576, BASE, BASE + total))
+    # the program's code, data and bss come out of the title's memory: an Old 3DS has 64 MB for everything (the heap and
+    # the linear memory the renderer's texture cache needs too), and v0.7.0 at 66 MB did not start at all (the loader:
+    # "invalid address", on both models).  The builds that ran well were about 26 MB.
+    LIMIT = 32 << 20
+    if total > LIMIT:
+        sys.exit("the program needs %.1f MB of code, data and bss: more than %d MB (the title's memory; see the comment)"
+                 % (total / 1048576, LIMIT >> 20))
     ntab = rsize // 4
     p = hsize
     counts = []

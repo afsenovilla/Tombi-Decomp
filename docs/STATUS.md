@@ -4,6 +4,14 @@ Update this file whenever something lands or a task is decided. Newest first.
 
 ## Since v0.7.0 (not released)
 
+- **3DS title did not start (v0.7.0, both models; the user's crash dump: "loader", undefined instruction after
+  `0xE0E01BF5` = OS / invalid address).** The 3dsx image had grown to 66 MB of code + data + bss (v0.6.x-era 3DS
+  builds: ~26 MB): the widescreen picture-strip generators of runtime/ws_backdrop.c keep 35 MB of static work tables.
+  On the 3DS ws_backdrop.c is now inert (no picture strips; every other widescreen part stays), and
+  port2/n3ds/check_3dsx.py fails the build above 32 MB. Emulators (Azahar in CI) start the oversized title anyway, so
+  CI could not see it. To do: the generators' tables on the heap only while a room's strips are made (then the 3DS
+  can have them, if the time they take at a room's start is acceptable there).
+
 - Pending (the user, 2026-11-18): the widescreen "officially supported / auto by default" change below moves to the
   next release; a **Saves** page on the 3DS start screen (list the card's saves, import from `sdmc:/3ds/tombi/import/`
   any format tools/save_import.py takes, export a save to .mcs, backups) was proposed, not started.
