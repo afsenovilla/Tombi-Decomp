@@ -122,8 +122,11 @@ void pa_blend(int x, int y, u32 c, int a) {
     u32 *p = &pa_cv[y * pa_cw + x];
     if (a >= 255) { *p = c | 0xFF000000u; return; }
     u32 d = *p;
-    u32 r = ((c & 0xFF) * a + (d & 0xFF) * (255 - a)) / 255, g = ((c >> 8 & 0xFF) * a + (d >> 8 & 0xFF) * (255 - a)) / 255,
-        bb = ((c >> 16 & 0xFF) * a + (d >> 16 & 0xFF) * (255 - a)) / 255;
+    /* x / 255 for x <= 255 * 255 as (x + 1 + (x >> 8)) >> 8: exact over that range, no division (the 3DS has none) */
+    #define DIV255(x) (((x) + 1 + ((x) >> 8)) >> 8)
+    u32 r = DIV255((c & 0xFF) * a + (d & 0xFF) * (255 - a)), g = DIV255((c >> 8 & 0xFF) * a + (d >> 8 & 0xFF) * (255 - a)),
+        bb = DIV255((c >> 16 & 0xFF) * a + (d >> 16 & 0xFF) * (255 - a));
+    #undef DIV255
     *p = 0xFF000000u | bb << 16 | g << 8 | r;
 }
 void pa_fill(int x, int y, int w, int h, u32 c) { for (int j = y; j < y + h; j++) for (int i = x; i < x + w; i++) pa_put(i, j, c); }
@@ -139,6 +142,25 @@ void pa_spr(int x, int y, int tx, int ty, int u, int v, int w, int h, int cx, in
     if (!pa_ok || w <= 0 || h <= 0 || w > 256 || h > 256) return;
     u16 pal[16]; static u8 idx[258 * 258], vis[258 * 258];
     for (int i = 0; i < 16; i++) pal[i] = vram[(cy & 511) * 1024 + ((cx + i) & 1023)];
+    if (!(flags & ~PA_OPAQUE)) {
+        /* the plain sprite (and every tile of a background): straight to the canvas, a row at a time inside the
+           clip, the colours converted once (the same pixels as the general way below, which is a fifth as fast:
+           an Old 3DS took 200 ms a panel) */
+        u32 p32[16]; u8 on[16];
+        for (int i = 0; i < 16; i++) { p32[i] = c15(pal[i]); on[i] = pal[i] || (flags & PA_OPAQUE); }
+        int x0 = x, x1 = x + w, y0 = y, y1 = y + h;
+        if (x0 < pa_clip_x0) x0 = pa_clip_x0; if (x0 < 0) x0 = 0; if (x1 > pa_clip_x1) x1 = pa_clip_x1; if (x1 > pa_cw) x1 = pa_cw;
+        if (y0 < pa_clip_y0) y0 = pa_clip_y0; if (y0 < 0) y0 = 0; if (y1 > pa_clip_y1) y1 = pa_clip_y1; if (y1 > pa_ch) y1 = pa_ch;
+        for (int j = y0; j < y1; j++) {
+            const u16 *row = &vram[((ty + v + (j - y)) & 511) * 1024];
+            u32 *d = pa_cv + j * pa_cw;
+            for (int i = x0; i < x1; i++) {
+                const int uu = u + (i - x), t = (row[(tx + (uu >> 2)) & 1023] >> ((uu & 3) * 4)) & 15;
+                if (on[t]) d[i] = p32[t];
+            }
+        }
+        return;
+    }
     /* PS1 GPU, textured sprite: a texel whose CLUT colour is 0x0000 is not drawn; any other (STP bit 0x8000 or not)
        is drawn (the panel draws opaque, like a primitive without semi-transparency) */
     for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) {
@@ -174,12 +196,47 @@ void pa_spr(int x, int y, int tx, int ty, int u, int v, int w, int h, int cx, in
     }
 }
 /* tile a rect over (x, y, W, H) */
+/* The tiles start at (x, y), so the picture is the same wherever it goes: a background of 512 pixels or more is kept
+   once drawn whole and copied afterwards, a row at a time inside the clip.  (Drawing one through the CLUT, texel by
+   texel, was most of a render: 30 to 45 ms on an Old 3DS, whose every touch waits for one.)  The least recently used
+   leave when the kept ones pass 640 KB. */
+#define TC_N 24
+static struct { int key[10], ok; unsigned used; u32 *pix; } tc[TC_N];
+static unsigned tc_clock, tc_bytes;
 void pa_tile(int x, int y, int W, int H, int tx, int ty, int u, int v, int w, int h, int cx, int cy) {
     int sx0 = pa_clip_x0, sy0 = pa_clip_y0, sx1 = pa_clip_x1, sy1 = pa_clip_y1;
+    const int key[10] = { W, H, tx, ty, u, v, w, h, cx, cy };
+    int big = pa_ok && W > 0 && H > 0 && W * H >= 512 && W <= 2048 && H <= 2048 && w > 0 && h > 0, slot = -1;
+    if (big) {
+        for (int i = 0; i < TC_N; i++) if (tc[i].ok && !memcmp(tc[i].key, key, sizeof key)) { slot = i; break; }
+        if (slot >= 0) {
+            int x0 = x, x1 = x + W, y0 = y, y1 = y + H;
+            if (x0 < pa_clip_x0) x0 = pa_clip_x0; if (x0 < 0) x0 = 0; if (x1 > pa_clip_x1) x1 = pa_clip_x1; if (x1 > pa_cw) x1 = pa_cw;
+            if (y0 < pa_clip_y0) y0 = pa_clip_y0; if (y0 < 0) y0 = 0; if (y1 > pa_clip_y1) y1 = pa_clip_y1; if (y1 > pa_ch) y1 = pa_ch;
+            if (x1 > x0) for (int j = y0; j < y1; j++) memcpy(pa_cv + j * pa_cw + x0, tc[slot].pix + (j - y) * W + (x0 - x), (size_t)(x1 - x0) * 4);
+            tc[slot].used = ++tc_clock;
+            return;
+        }
+    }
     if (x > pa_clip_x0) pa_clip_x0 = x; if (y > pa_clip_y0) pa_clip_y0 = y;
     if (x + W < pa_clip_x1) pa_clip_x1 = x + W; if (y + H < pa_clip_y1) pa_clip_y1 = y + H;
     for (int j = y; j < y + H; j += h) for (int i = x; i < x + W; i += w) pa_spr(i, j, tx, ty, u, v, w, h, cx, cy, PA_OPAQUE);
     pa_clip_x0 = sx0; pa_clip_y0 = sy0; pa_clip_x1 = sx1; pa_clip_y1 = sy1;
+    /* kept when all of it was drawn (inside the clip and the canvas) */
+    if (big && x >= sx0 && y >= sy0 && x + W <= sx1 && y + H <= sy1 && x >= 0 && y >= 0 && x + W <= pa_cw && y + H <= pa_ch) {
+        const unsigned bytes = (unsigned)W * H * 4, cap = 640u << 10;
+        if (bytes > cap / 2) return;
+        for (;;) {   /* room: a free entry, and under the cap */
+            int freei = -1, old = -1;
+            for (int i = 0; i < TC_N; i++) { if (!tc[i].ok) freei = i; else if (old < 0 || tc[i].used < tc[old].used) old = i; }
+            if (freei >= 0 && tc_bytes + bytes <= cap) { slot = freei; break; }
+            if (old < 0) return;
+            free(tc[old].pix); tc_bytes -= (unsigned)tc[old].key[0] * tc[old].key[1] * 4; tc[old].ok = 0; tc[old].pix = NULL;
+        }
+        if (!(tc[slot].pix = malloc(bytes))) return;
+        for (int j = 0; j < H; j++) memcpy(tc[slot].pix + j * W, pa_cv + (y + j) * pa_cw + x, (size_t)W * 4);
+        memcpy(tc[slot].key, key, sizeof key); tc[slot].ok = 1; tc[slot].used = ++tc_clock; tc_bytes += bytes;
+    }
 }
 /* 9-slice of a framed rect (u, v, w, h) with corner c; fill: 0 = tile the middle, else that colour, 1 = transparent */
 void pa_nine(int x, int y, int W, int H, int tx, int ty, int u, int v, int w, int h, int c, int cx, int cy, u32 fill) {

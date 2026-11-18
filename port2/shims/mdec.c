@@ -97,6 +97,7 @@ static const struct { const char *code; u8 size; } dc_chroma[] = {
 #define AC_ESC 0xFD
 /* lookup on the next 16 bits: length (0 = no code), run (AC_EOB / AC_ESC for the two specials), level */
 static u8 ac_len[65536], ac_run[65536], ac_lvl[65536];
+static u16 ac_small[256];
 static u8 dcl_len[256], dcl_size[256], dcc_len[256], dcc_size[256];   /* on the next 8 bits */
 
 static void lut_fill16(u8 *len, u8 *a, u8 *b, const char *code, u8 va, u8 vb) {
@@ -123,6 +124,13 @@ static void tables_init(void) {
     }
     lut_fill16(ac_len, ac_run, ac_lvl, "10", AC_EOB, 0);
     lut_fill16(ac_len, ac_run, ac_lvl, "000001", AC_ESC, 0);
+    /* the codes of 8 bits or fewer (nearly every coefficient) from a table of 512 bytes: the three of 64 KB above
+       are a cache miss each on a 3DS, three a coefficient.  An entry: length << 12 | run << 6 | level; 0: a longer
+       code, read from the big tables */
+    for (int p8 = 0; p8 < 256; p8++) {
+        int i16 = p8 << 8, l = ac_len[i16];
+        ac_small[p8] = l && l <= 8 ? (u16)(l << 12 | (ac_run[i16] == AC_EOB ? 62 : ac_run[i16] == AC_ESC ? 63 : ac_run[i16]) << 6 | ac_lvl[i16]) : 0;
+    }
     for (unsigned i = 0; i < sizeof dc_luma / sizeof dc_luma[0]; i++) lut_fill8(dcl_len, dcl_size, dc_luma[i].code, dc_luma[i].size);
     for (unsigned i = 0; i < sizeof dc_chroma / sizeof dc_chroma[0]; i++) lut_fill8(dcc_len, dcc_size, dc_chroma[i].code, dc_chroma[i].size);
     for (int k = 0; k < 64; k++) iq_y[k] = iq_c[k] = k == 0 ? 2 : quant_raster[zigzag[k]];
@@ -180,16 +188,18 @@ static int vlc_block(BR *b, int ver, int chroma, int *dc_pred, int q, u16 **out,
     *o++ = (u16)((q << 10) | (dc & 0x3FF));
     for (int k = 0; k < 64;) {
         u32 pk = br_peek(b, 16);
-        int len = ac_len[pk];
+        const u16 sm = ac_small[pk >> 8];
+        int len = sm ? sm >> 12 : ac_len[pk];
         if (!len) return 0;
         br_skip(b, len);
         int run, level;
-        if (ac_run[pk] == AC_EOB) { if (o >= out_end) return 0; *o++ = 0xFE00; *out = o; return 1; }
-        if (ac_run[pk] == AC_ESC) {
+        const int rr = sm ? ((sm >> 6 & 63) == 62 ? AC_EOB : (sm >> 6 & 63) == 63 ? AC_ESC : (sm >> 6 & 63)) : ac_run[pk];
+        if (rr == AC_EOB) { if (o >= out_end) return 0; *o++ = 0xFE00; *out = o; return 1; }
+        if (rr == AC_ESC) {
             run = (int)br_get(b, 6);
             level = (int)(br_get(b, 10) << 22) >> 22;
         } else {
-            run = ac_run[pk]; level = ac_lvl[pk];
+            run = rr; level = sm ? sm & 63 : ac_lvl[pk];
             if (br_get(b, 1)) level = -level;
         }
         k += run + 1;
@@ -201,7 +211,16 @@ static int vlc_block(BR *b, int ver, int chroma, int *dc_pred, int q, u16 **out,
     *o++ = 0xFE00; *out = o;
     return 1;
 }
+/* (a movie's time by stage, logged when its stream stops: psyq.c) */
+unsigned long long port_mdec_us[2]; unsigned port_mdec_n[2];   /* [0] DecDCTvlc, [1] the macroblocks of DecDCTout */
+extern unsigned long long port_time_us(void);
+static void vlc_run(u32 *bs, u32 *buf);
 void DecDCTvlc(u32 *bs, u32 *buf) {
+    unsigned long long t0 = port_time_us();
+    vlc_run(bs, buf);
+    port_mdec_us[0] += port_time_us() - t0; port_mdec_n[0]++;
+}
+static void vlc_run(u32 *bs, u32 *buf) {
     tables_init();
     const u16 *h = (const u16 *)bs;
     int nwords = h[0], q = h[2] & 0x3F, ver = h[3];
@@ -255,6 +274,56 @@ int DecDCToutSync(int mode) { (void)mode; return 0; }
 void *DecDCToutCallback(void *f) { void *o = (void *)out_cb; out_cb = (void (*)(void))f; return o; }
 void *DecDCTinCallback(void *f) { (void)f; return 0; }
 
+/* --mdec-fast (the 3DS's default: an Old 3DS decoded three frames a second with the sums below, 1024 multiplications
+   a block): the same inverse transform by Wang's factorisation, as the MPEG reference decoders have it (12
+   multiplications a row or column, rows without coefficients skipped, a block of its DC term alone filled).  Its
+   samples differ from the sums' by a unit of rounding at most, so the other builds keep the sums and their dumps. */
+int port_mdec_fast;
+#define W1 2841   /* 2048 sqrt(2) cos(1 pi / 16) */
+#define W2 2676
+#define W3 2408
+#define W5 1609
+#define W6 1108
+#define W7 565
+static void idct_fast(s32 *b, s32 *px) {
+    for (int i = 0; i < 8; i++) {   /* rows */
+        s32 *r = b + i * 8, x0, x1 = r[4] << 11, x2 = r[6], x3 = r[2], x4 = r[1], x5 = r[7], x6 = r[5], x7 = r[3], x8;
+        if (!(x1 | x2 | x3 | x4 | x5 | x6 | x7)) { r[0] = r[1] = r[2] = r[3] = r[4] = r[5] = r[6] = r[7] = r[0] << 3; continue; }
+        x0 = (r[0] << 11) + 128;
+        x8 = W7 * (x4 + x5); x4 = x8 + (W1 - W7) * x4; x5 = x8 - (W1 + W7) * x5;
+        x8 = W3 * (x6 + x7); x6 = x8 - (W3 - W5) * x6; x7 = x8 - (W3 + W5) * x7;
+        x8 = x0 + x1; x0 -= x1;
+        x1 = W6 * (x3 + x2); x2 = x1 - (W2 + W6) * x2; x3 = x1 + (W2 - W6) * x3;
+        x1 = x4 + x6; x4 -= x6; x6 = x5 + x7; x5 -= x7;
+        x7 = x8 + x3; x8 -= x3; x3 = x0 + x2; x0 -= x2;
+        x2 = (181 * (x4 + x5) + 128) >> 8; x4 = (181 * (x4 - x5) + 128) >> 8;
+        r[0] = (x7 + x1) >> 8; r[1] = (x3 + x2) >> 8; r[2] = (x0 + x4) >> 8; r[3] = (x8 + x6) >> 8;
+        r[4] = (x8 - x6) >> 8; r[5] = (x0 - x4) >> 8; r[6] = (x3 - x2) >> 8; r[7] = (x7 - x1) >> 8;
+    }
+    #define CL(v) ((v) < -128 ? -128 : (v) > 127 ? 127 : (v))
+    for (int i = 0; i < 8; i++) {   /* columns */
+        s32 *c = b + i, x0, x1 = c[32] << 8, x2 = c[48], x3 = c[16], x4 = c[8], x5 = c[56], x6 = c[40], x7 = c[24], x8;
+        if (!(x1 | x2 | x3 | x4 | x5 | x6 | x7)) {
+            s32 v = (c[0] + 32) >> 6; v = CL(v);
+            for (int y = 0; y < 8; y++) px[y * 8 + i] = v;
+            continue;
+        }
+        x0 = (c[0] << 8) + 8192;
+        x8 = W7 * (x4 + x5) + 4; x4 = (x8 + (W1 - W7) * x4) >> 3; x5 = (x8 - (W1 + W7) * x5) >> 3;
+        x8 = W3 * (x6 + x7) + 4; x6 = (x8 - (W3 - W5) * x6) >> 3; x7 = (x8 - (W3 + W5) * x7) >> 3;
+        x8 = x0 + x1; x0 -= x1;
+        x1 = W6 * (x3 + x2) + 4; x2 = (x1 - (W2 + W6) * x2) >> 3; x3 = (x1 + (W2 - W6) * x3) >> 3;
+        x1 = x4 + x6; x4 -= x6; x6 = x5 + x7; x5 -= x7;
+        x7 = x8 + x3; x8 -= x3; x3 = x0 + x2; x0 -= x2;
+        x2 = (181 * (x4 + x5) + 128) >> 8; x4 = (181 * (x4 - x5) + 128) >> 8;
+        s32 v;
+        v = (x7 + x1) >> 14; px[i] = CL(v); v = (x3 + x2) >> 14; px[8 + i] = CL(v);
+        v = (x0 + x4) >> 14; px[16 + i] = CL(v); v = (x8 + x6) >> 14; px[24 + i] = CL(v);
+        v = (x8 - x6) >> 14; px[32 + i] = CL(v); v = (x0 - x4) >> 14; px[40 + i] = CL(v);
+        v = (x3 - x2) >> 14; px[48 + i] = CL(v); v = (x7 - x1) >> 14; px[56 + i] = CL(v);
+    }
+    #undef CL
+}
 /* one block of codes -> 64 coefficients (raster order) -> 64 samples (-128..127) */
 static int rl_block(const u8 *qt, s32 *blk, s32 *px) {
     memset(blk, 0, 64 * sizeof *blk);
@@ -265,6 +334,7 @@ static int rl_block(const u8 *qt, s32 *blk, s32 *px) {
     val = qs ? val * qt[0] : val * 2;
     val = val < -0x400 ? -0x400 : val > 0x3FF ? 0x3FF : val;
     blk[0] = val;
+    int ac = 0;
     for (int k = 0; in_p < in_end;) {
         n = *in_p++;
         if (n == 0xFE00) break;
@@ -274,6 +344,14 @@ static int rl_block(const u8 *qt, s32 *blk, s32 *px) {
         val = qs ? (val * qt[k] * qs + 4) >> 3 : val * 2;
         val = val < -0x400 ? -0x400 : val > 0x3FF ? 0x3FF : val;
         blk[qs ? zigzag[k] : k] = val;
+        ac = 1;
+    }
+    if (port_mdec_fast) {
+        if (!ac) {   /* the DC term alone: a flat block */
+            s32 v = (blk[0] + 4) >> 3; v = v < -128 ? -128 : v > 127 ? 127 : v;
+            for (int i = 0; i < 64; i++) px[i] = v;
+        } else idct_fast(blk, px);
+        return 1;
     }
     /* separable IDCT: rows (frequency u along x) then columns */
     s32 t[64];
@@ -305,12 +383,35 @@ static int decode_mb(u8 *out) {
         for (int i = 0; i < 4; i++) for (int j = 0; j < 64; j++) y[i][j] = -128;
     }
     u8 *o = out;
+    /* (the chroma terms once per chroma sample, which four pixels share: the same sums) */
+    s32 rc[64], gc[64], bc[64];
+    for (int c = 0; c < 64; c++) { rc[c] = (1436 * cr[c]) >> 10; gc[c] = (352 * cb[c] + 731 * cr[c]) >> 10; bc[c] = (1815 * cb[c]) >> 10; }
+    if (in_depth != 2 && !in_signed) {
+        /* the usual output, 15-bit words of unsigned samples: a luma block at a time, the clamp and the cut to five
+           bits from a table (the same words as the general loop below, a quarter of its instructions) */
+        static u8 t5[768];
+        if (!t5[767]) for (int v = -384; v < 384; v++) { int c = v + 128; t5[v + 384] = (u8)((c < 0 ? 0 : c > 255 ? 255 : c) >> 3); }
+        const u16 top = (u16)(in_bit15 << 15);
+        for (int b4 = 0; b4 < 4; b4++) {
+            const int bx = (b4 & 1) * 8, by = (b4 >> 1) * 8;
+            const s32 *Y = y[b4];
+            for (int py = 0; py < 8; py++) {
+                u8 *q = out + ((by + py) * 16 + bx) * 2;
+                const int ci = ((by + py) >> 1) * 8 + (bx >> 1);
+                for (int px = 0; px < 8; px++) {
+                    const int c = ci + (px >> 1), Yv = Y[py * 8 + px] + 384;
+                    const u16 p = (u16)(t5[Yv + rc[c]] | t5[Yv - gc[c]] << 5 | t5[Yv + bc[c]] << 10 | top);
+                    q[px * 2] = (u8)p; q[px * 2 + 1] = (u8)(p >> 8);
+                }
+            }
+        }
+        return 128;
+    }
     for (int py = 0; py < 16; py++)
         for (int px = 0; px < 16; px++) {
             int Y = y[(py >> 3) * 2 + (px >> 3)][(py & 7) * 8 + (px & 7)];
             int c = (py >> 1) * 8 + (px >> 1);
-            int Cr = cr[c], Cb = cb[c];
-            int r = Y + ((1436 * Cr) >> 10), g = Y - ((352 * Cb + 731 * Cr) >> 10), b = Y + ((1815 * Cb) >> 10);
+            int r = Y + rc[c], g = Y - gc[c], b = Y + bc[c];
             if (in_signed) {
                 r = r < -128 ? -128 : r > 127 ? 127 : r; g = g < -128 ? -128 : g > 127 ? 127 : g; b = b < -128 ? -128 : b > 127 ? 127 : b;
                 r &= 0xFF; g &= 0xFF; b &= 0xFF;
@@ -334,7 +435,7 @@ static void decode_words(u32 *buf, int n) {
 void DecDCTout(u32 *buf, int n) {
     if (in_cb) { pending_buf = buf; pending_n = n; have_pending = 1; return; }
     for (;;) {
-        decode_words(buf, n);
+        { unsigned long long t0 = port_time_us(); decode_words(buf, n); port_mdec_us[1] += port_time_us() - t0; port_mdec_n[1] += (unsigned)n; }
         if (!out_cb) return;
         in_cb = 1; have_pending = 0;
         out_cb();

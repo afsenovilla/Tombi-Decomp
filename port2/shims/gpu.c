@@ -56,7 +56,8 @@ void port_gpu_start(void) {
     if (gpu_started) return;
     gpu_started = 1;
     int want_gl = port_renderer == 1 || (port_renderer < 0 && port_window);
-    if (want_gl && port_gpu_gl.start() == 0) port_gpu_be = &port_gpu_gl;
+    if (port_renderer == 2 && port_gpu_pica.start() == 0) port_gpu_be = &port_gpu_pica;
+    else if (want_gl && port_gpu_gl.start() == 0) port_gpu_be = &port_gpu_gl;
     else {
         if (want_gl) port_printf("[gpu] OpenGL renderer unavailable: using the software rasteriser\n");
         port_gpu_be = &port_gpu_soft;
@@ -125,6 +126,7 @@ static u16 (*wvram)[WS_STRIDE] = wvram_store;
 static u16 *tgt = &vram_store[0][0];
 static int tgt_stride = 1024;
 static void ws_fill(int x, int y, int w, int h, u16 c);
+extern int port_frameskip, port_skip_draw;
 static void ws_mirror_write(int x, int y, int w, int h);
 static inline void plot(int x, int y, u16 c, int semi) {
     u16 *d = tgt + y * tgt_stride + x;
@@ -351,6 +353,8 @@ static void ws_note_disp(int x) {
    wider (32:9, 854 columns) Tombi's two buffers (x 384 and 704) would overlap, so each gets its own 1024-column half
    of the 2048-wide plane instead (by x: below 512 the left half) */
 static int ws_base(int ax) {
+    /* (the pica backend's wide plane is a 1024-column target: a half each, so 96 columns a side at most) */
+    if (be == &port_gpu_pica) return ax < 512 ? 0 : 512;
     if (2 * port_widescreen <= 320) return 2 * ax;
     return ax < 512 ? 0 : 1024;
 }
@@ -424,7 +428,61 @@ static void ws_fill(int x, int y, int w, int h, u16 c) {
         if (be->ws_fill) be->ws_fill(ws_base(ax), y, 320 + 2 * port_widescreen, h, c); else
         for (int j = 0; j < h; j++) for (int i = 0; i < 320 + 2 * port_widescreen; i++) wvram[(y + j) & 511][ws_base(ax) + i] = c; }
 }
-static void vertex(Vtx *o, u32 w) { o->x = sx11(w) + gs.ox; o->y = sx11(w >> 16) + gs.oy; if (ws_on) o->x += ws_dx; }
+/* --stereo (experimental; the pica backend, so the 3DS): each ordering table is drawn twice, the left eye's into VRAM
+   as always and the right eye's into a target of its own (gpu_pica.c, PState.wide 2), things shifted apart by their
+   depth.  A polygon's vertices by the GTE's SZ (below); a sprite or a rectangle, which the GTE did not project, by its
+   place in the drawing order (far first).  port_stereo_k scales it (the 3DS's 3D slider; 0: one pass, as without) */
+static int st_dx;   /* this packet's right eye shift by its place in the drawing order (DrawOTag) */
+int port_stereo_sh; /* the same as the backend's sh of a rectangle or a line (st_dx) */
+/* a run of sprites, rectangles and fills keeps the shift of its first: a tile map, a menu's pieces, a top-down room's
+   picture are runs of them side by side, which shifts by their places apart opened one-pixel gaps between */
+static int st_run;
+static int st_new_depth(unsigned c) {
+    int flat = c == 0x02 || (c >= 0x60 && c < 0x80);
+    if (c >= 0xE0 || c < 0x02 || (c > 0x02 && c < 0x20)) return 0;   /* (the environment: the run goes on) */
+    int r = !(flat && st_run);
+    st_run = flat;
+    return r;
+}
+/* the depth of a projected vertex: the GTE notes each one's screen point and SZ (runtime/gte.c), the decoder looks a
+   polygon's vertices up: a mesh's shared vertices then get the same shift, so its polygons stay joined.  Two tables,
+   by the parity of the frame that built them (a table is drawn the frame after) */
+int port_stereo_on; float port_stereo_k = 1.0f;
+static int st_eye;                                  /* 1: this table is drawn for both eyes (the shifts are noted) */
+static float st_s = 16.0f, st_zf = 550.0f;          /* the widest shift between the eyes (pixels, k = 1); the SZ at the screen's plane */
+#define STH 8192
+static struct { short x, y; unsigned short z, ok; } sth[2][STH];
+static unsigned sth_hash(int x, int y) { return ((unsigned)(x & 0x7FF) * 73856093u ^ (unsigned)(y & 0x7FF) * 19349663u) & (STH - 1); }
+static unsigned st_notes;   /* vertices the GTE projected (a screen without any is flat: a menu, a 2D screen) */
+int port_stereo_flat;       /* the last table drawn had no depth: its right eye is its left one (n3ds/pica_c3d.c) */
+void port_stereo_note(int x, int y, unsigned z) {
+    st_notes++;
+    unsigned h = sth_hash(x, y); int p = port_frame & 1;
+    for (int k = 0; k < 4; k++, h = (h + 1) & (STH - 1))
+        if (sth[p][h].ok != (unsigned short)(port_frame | 1) || (sth[p][h].x == x && sth[p][h].y == y)) {
+            sth[p][h].x = (short)x; sth[p][h].y = (short)y; sth[p][h].z = (unsigned short)z; sth[p][h].ok = (unsigned short)(port_frame | 1); return;
+        }
+}
+static int st_lookup(int x, int y) {   /* the shift of a vertex at this screen point, or -9999 */
+    for (int q = 0; q < 2; q++) {
+        int p = (port_frame - 1 + q) & 1; unsigned h = sth_hash(x, y);
+        for (int k = 0; k < 4; k++, h = (h + 1) & (STH - 1)) {
+            int age = (unsigned short)(port_frame | 1) - sth[p][h].ok;
+            if (sth[p][h].ok && age >= -2 && age <= 4 && sth[p][h].x == x && sth[p][h].y == y) {
+                float z = sth[p][h].z ? sth[p][h].z : 1;
+                /* the right eye's shift (the left eye's picture is the game's own): + behind the screen, - in front */
+                float S = st_s * port_stereo_k, disp = S * (1.0f - st_zf / z);
+                if (disp < -S * 0.5f) disp = -S * 0.5f;
+                return (int)(disp + (disp >= 0 ? 0.5f : -0.5f));
+            }
+        }
+    }
+    return -9999;
+}
+static void vertex(Vtx *o, u32 w) {
+    o->x = sx11(w) + gs.ox; o->y = sx11(w >> 16) + gs.oy; if (ws_on) o->x += ws_dx; o->sh = st_dx;
+    if (st_eye) { int s = st_lookup(sx11(w), sx11(w >> 16)); if (s != -9999) o->sh = s; }
+}
 static void color(Vtx *o, u32 c) { o->r = c & 255; o->g = (c >> 8) & 255; o->b = (c >> 16) & 255; }
 
 /* --widescreen: an untextured tile or quad that covers the whole 4:3 width (pause dimming, fades to black/white,
@@ -517,9 +575,51 @@ static void ws_layout_clip(int on, int c0, int c1, int *save) {
     else { gs.x1 = save[0]; gs.x2 = save[1]; }
 }
 static int unknown_cmds;
+/* A polygon with nothing of the port's extras in play (poly_lean: set per ordering table by DrawOTag; no widescreen,
+   no --fps recording, no texture pack / dump, no prompt icons) and wholly inside VRAM: decoded once and handed to
+   the backend.  The general decoder below spends four times the instructions on it, and an Old 3DS a third of a
+   drawn frame.  Returns the words used, 0: not taken (the general decoder then does it, the same way). */
+static int poly_lean;
+static int poly_fast(const u32 *p, int n, u32 cmd) {
+    const int shade = cmd & 0x10, quad = cmd & 8, tex = cmd & 4, semi = cmd & 2, raw = cmd & 1;
+    const int nv = quad ? 4 : 3, need = 1 + nv * (1 + (tex ? 1 : 0) + (shade ? 1 : 0)) - (shade ? 1 : 0);
+    if (n < need) return 0;
+    /* (--widescreen: the wide plane's shift is all a polygon needs, but for the flat quads that are stretched to the
+       frame's full width and a sub-screen's pieces laid out again: those stay the general decoder's.  A 3DS drew a
+       wide frame in twice a 4:3 one's time with every polygon there) */
+    const int wdx = ws_on ? ws_dx : 0;
+    if (ws_on && ((!tex && quad) || ws_layout_active())) return 0;
+    Vtx v[4]; GpuTex t; int k = 1; u32 c = p[0], clut = 0, tpage = 0, ox = 0, oy = 0;
+    for (int i = 0; i < nv; i++) {
+        if (shade && i) c = p[k++];
+        v[i].r = c & 255; v[i].g = (c >> 8) & 255; v[i].b = (c >> 16) & 255;
+        u32 w = p[k++];
+        v[i].x = sx11(w) + gs.ox + wdx; v[i].y = sx11(w >> 16) + gs.oy; v[i].sh = st_dx;
+        if (st_eye) { int s = st_lookup(sx11(w), sx11(w >> 16)); if (s != -9999) v[i].sh = s; }
+        ox |= (u32)v[i].x; oy |= (u32)v[i].y;
+        if (tex) {
+            u32 uv = p[k++];
+            v[i].u = uv & 255; v[i].v = (uv >> 8) & 255;
+            if (i == 0) clut = uv >> 16;
+            if (i == 1) tpage = uv >> 16;
+        } else v[i].u = v[i].v = 0;
+    }
+    if (ox > 1023u || oy > 511u) return 0;   /* (inside VRAM: not over the GPU's size limit either) */
+    if (tex) {
+        if (PORT_CLUT_IS(clut)) return 0;
+        set_texpage16(tpage);
+        t.tx = tpg.tx; t.ty = tpg.ty; t.depth = tpg.tp; t.cx = (clut & 0x3F) * 16; t.cy = (clut >> 6) & 511; t.rep = 0;
+    }
+    const int sh = tex && raw ? 0 : shade;
+    if (quad && be->quad && be->quad(v, sh, tex ? &t : 0, semi, raw)) return need;
+    be->tri(&v[0], &v[1], &v[2], sh, tex ? &t : 0, semi, raw);
+    if (quad) be->tri(&v[1], &v[2], &v[3], sh, tex ? &t : 0, semi, raw);
+    return need;
+}
 /* executes one command; returns the number of words it used (0 = ignore the rest of the packet) */
 static int gp0(const u32 *p, int n) {
     u32 cmd = p[0] >> 24;
+    if (poly_lean && cmd >= 0x20 && cmd < 0x40) { int r = poly_fast(p, n, cmd); if (r) return r; }
     if (cmd >= 0x20 && cmd < 0x40) {                         /* polygon */
         int shade = cmd & 0x10, quad = cmd & 8, tex = cmd & 4, semi = cmd & 2, raw = cmd & 1;
         int nv = quad ? 4 : 3, per = 1 + (tex ? 1 : 0) + (shade ? 1 : 0);
@@ -587,8 +687,11 @@ static int gp0(const u32 *p, int n) {
                 if (c) ws_layout_clip(1, tile < 0 ? x0 - port_widescreen : x1, tile < 0 ? x0 : x1 + port_widescreen, sv);
                 for (int i = 0; i < nv; i++) v[i].x += off;
                 if (hfr_rec) hfr_poly(v, nv, shade, tex ? &t : 0, semi, raw);
-                if (!too_big(v, 3)) be->tri(&v[0], &v[1], &v[2], shade, tex ? &t : 0, semi, raw);
-                if (quad && !too_big(v + 1, 3)) be->tri(&v[1], &v[2], &v[3], shade, tex ? &t : 0, semi, raw);
+                if (quad && be->quad && !too_big(v, 3) && !too_big(v + 1, 3) && be->quad(v, shade, tex ? &t : 0, semi, raw)) ;
+                else {
+                    if (!too_big(v, 3)) be->tri(&v[0], &v[1], &v[2], shade, tex ? &t : 0, semi, raw);
+                    if (quad && !too_big(v + 1, 3)) be->tri(&v[1], &v[2], &v[3], shade, tex ? &t : 0, semi, raw);
+                }
                 for (int i = 0; i < nv; i++) v[i].x -= off;
                 if (c) ws_layout_clip(0, 0, 0, sv);
             }
@@ -721,7 +824,9 @@ void *PutDrawEnv(void *env) {
     {   u16 bg = rgb24to15((u32)e[25] | ((u32)e[26] << 8) | ((u32)e[27] << 16));
         be->fill(gs.x1, gs.y1, gs.x2 - gs.x1 + 1, gs.y2 - gs.y1 + 1, bg);
         if (hfr_rec) hfr_fill(gs.x1, gs.y1, gs.x2 - gs.x1 + 1, gs.y2 - gs.y1 + 1, bg, 0);
-        ws_fill(gs.x1, gs.y1, gs.x2 - gs.x1 + 1, gs.y2 - gs.y1 + 1, bg); }
+        /* (a frame that will not be drawn: the wide plane keeps what it shows; the clear was a change of target in
+           every skipped table on a 3DS) */
+        if (!(port_frameskip && port_skip_draw)) ws_fill(gs.x1, gs.y1, gs.x2 - gs.x1 + 1, gs.y2 - gs.y1 + 1, bg); }
     return env;
 }
 void *GetDrawEnv(void *env) { memcpy(env, cur_drawenv, sizeof cur_drawenv); return env; }
@@ -1001,6 +1106,23 @@ static void sky_grab(void) {
     be->vram_read(gs.x1, gs.y1, w, h);
     port_panel_sky_take(&vram[0][0], gs.x1, gs.y1, w, h);
 }
+/* --frameskip (the 3DS's default: an Old 3DS cannot draw 60 frames a second): when the game is behind its clock
+   (shims/psyq.c port_vblank sets port_skip_draw, at most three frames in a row) an ordering table's primitives are not
+   drawn, only its environment / image packets taken; the buffer it would have filled is not shown when the game
+   flips to it, so the screen keeps the last drawn frame.  The game's logic keeps its 60 Hz. */
+int port_frameskip, port_skip_draw;
+unsigned long long port_frames_skipped;
+static struct { int x, y, skipped; } fs_buf[4];
+static int fs_n;
+static void fs_mark(int x, int y, int skipped) {
+    for (int i = 0; i < fs_n; i++) if (fs_buf[i].x == x && fs_buf[i].y == y) { fs_buf[i].skipped = skipped; return; }
+    if (fs_n == 4) { memmove(&fs_buf[0], &fs_buf[1], 3 * sizeof fs_buf[0]); fs_n = 3; }
+    fs_buf[fs_n].x = x; fs_buf[fs_n].y = y; fs_buf[fs_n].skipped = skipped; fs_n++;
+}
+static int fs_skipped(int x, int y) {
+    for (int i = 0; i < fs_n; i++) if (fs_buf[i].x == x && fs_buf[i].y == y) return fs_buf[i].skipped;
+    return 0;
+}
 void (*port_ot_mark_fn)(u32);       /* set by runtime/ws_topdown.c while --widescreen is on; 0 = no marker test */
 void DrawOTag(u32 *ot) {
     { extern const char *port_title_bg_path; if (port_title_bg_path && port_widescreen) ws_title_bg(ot); }
@@ -1009,9 +1131,67 @@ void DrawOTag(u32 *ot) {
     unsigned long long t0 = port_time_us();
     tex_patch_idle();
     gpu_lists++;
+#ifdef __3DS__
+    const int skip = port_frameskip && port_skip_draw;
+#else   /* (PORT_FORCE_SKIP=N: N tables in every N + 1 skipped, to see on a PC what a 3DS behind its clock does) */
+    static int fskip = -1, fskip_n; if (fskip < 0) fskip = getenv("PORT_FORCE_SKIP") ? atoi(getenv("PORT_FORCE_SKIP")) : 0;
+    const int skip = port_frameskip && port_skip_draw;
+    if (fskip) { port_frameskip = 1; port_skip_draw = (++fskip_n % (fskip + 1)) != 0; }   /* (the next table's: its PutDrawEnv comes first) */
+#endif
+    poly_lean = !hfr_rec && !port_texpack_on && !port_drawdump_path && !port_prompt_icons_on && !hfr_test_cut_dx;
+#ifdef __3DS__
+    extern int pica_prof_on; extern unsigned long long pica_prof[6], port_ticks(void); extern unsigned pica_prof_n;
+    { static unsigned drawn; pica_prof_on = !skip && (++drawn % 29) == 0; }   /* (a drawn table in seven: the skips come in runs of three, a count of all tables only caught the light ones) */
+    unsigned long long prof_t0 = port_ticks();
+#endif
+#ifdef __3DS__
+    if (pica_prof_on) {   /* the two dry passes over the table's polygons, lines and sprites (shims/gpu_pica.c pica_dry) */
+        extern int pica_dry;
+        const GpuState sgs = gs; const int stx = tpg.tx, sty = tpg.ty, stp = tpg.tp;
+        for (int pass = 1; pass <= 2; pass++) {
+            unsigned long long d0 = port_ticks();
+            const u32 *q = ot; int m = 0;
+            pica_dry = pass;
+            while (m++ < 200000) {
+                u32 tag = *q, next = tag & 0xFFFFFF, len = tag >> 24;
+                if (len && (q[1] >> 24) >= 0x20 && (q[1] >> 24) < 0x80) packet(q + 1, len);
+                if (next == 0xFFFFFF) break;
+                q = (const u32 *)next;
+            }
+            be->list_end();
+            pica_prof[pass] += port_ticks() - d0;
+            gs = sgs; tpg.tx = stx; tpg.ty = sty; tpg.tp = stp;
+        }
+        pica_dry = 0;
+        prof_t0 = port_ticks();
+    }
+#endif
+    if (port_frameskip) { fs_mark(gs.x1, gs.y1, skip); port_frames_skipped += (unsigned)skip; }
+    /* (the game compacts its ordering tables: the slots' nodes are gone, so a packet's depth is its place in the
+       drawing order, far first: its count over the table's count the time before) */
+    static int st_init; static float st_focus = 0.3f; static int st_prev, st_cnt;
+    if (!st_init) { const char *e = getenv("PORT_STEREO_PARAMS"); st_init = 1; if (e) sscanf(e, "%f,%f,%f", &st_s, &st_focus, &st_zf); }   /* (strength, focus, SZ at the screen) */
+    extern int pica_eye_ok;
+    static unsigned st_notes_seen;
+    const int st_flat = st_notes - st_notes_seen < 64; st_notes_seen = st_notes;
+    if (!skip) port_stereo_flat = st_flat;
+    const int stereo = port_stereo_on && pica_eye_ok && port_stereo_k > 0.01f && !skip && !st_flat && be == &port_gpu_pica;
+    const GpuState st_gs0 = gs; const int st_tx0 = tpg.tx, st_ty0 = tpg.ty, st_tp0 = tpg.tp;   /* (the right eye's pass starts from here) */
+    st_eye = stereo;
+    { extern int pica_stereo_frame; pica_stereo_frame = stereo; }   /* (the backend draws the right eye from the left one's batches) */
+    st_cnt = 0; st_dx = 0; st_run = 0; port_stereo_sh = 0;
     while (n < 200000) {
         u32 tag = *p, next = tag & 0xFFFFFF, len = tag >> 24;
         n++;
+        if (st_eye && len && st_prev > 0 && st_new_depth(p[1] >> 24)) {
+            float d = 1.0f - (float)st_cnt / (float)st_prev; if (d < 0) d = 0;   /* 1 farthest .. 0 nearest */
+            /* (behind the screen past the focus, up to the widest shift; in front of it before, up to 0.35 of it) */
+            const float S = st_s * port_stereo_k;
+            float disp = d > st_focus ? S * (d - st_focus) / (1.0f - st_focus) : -0.35f * S * (st_focus - d) / st_focus;
+            st_dx = (int)(disp + (disp >= 0 ? 0.5f : -0.5f));
+            port_stereo_sh = st_dx;
+        }
+        if (len) st_cnt++;
         if (sky) {   /* sky = 1 + far packets seen; an ordering table node at slot >= 100 ends the far layer */
             if (p <= ot && p > ot - 808) { if (ot - p >= 100) { if (sky > 1) sky_grab(); sky = 0; } }
             else if (len) sky++;
@@ -1024,16 +1204,34 @@ void DrawOTag(u32 *ot) {
                 for (u32 k = 1; k <= len; k++) port_printf(" %08x", p[k]);
                 port_printf("\n");
             }
-            packet(p + 1, len);
+            /* (skipping: still taken are 0x80.. (image moves / loads, the environment) and whatever is drawn with a
+               drawing area that is not a screen's: the game fades palettes by drawing over their CLUT rows, and a
+               fade-in whose frame was skipped left the ground's textures transparent on an Old 3DS) */
+            if (!skip || (p[1] >> 24) >= 0x80 || gs.x2 - gs.x1 < 255 || gs.y2 - gs.y1 < 199) packet(p + 1, len);
             for (u32 k = 1; k <= len; k++) h = h * 16777619u ^ p[k];     /* the watchdog's "same picture every frame" test */
         }
         if (next == 0xFFFFFF) break;
         p = (u32 *)next;                     /* a native pointer: the whole data image sits below 16 MB */
     }
+#ifdef __3DS__
+    {   /* every table: its whole time, drawn and skipped apart (pica_ot[0..1] ticks, [2..3] counts) */
+        extern unsigned long long pica_ot[4];
+        be->list_end();
+        unsigned long long dt = port_ticks() - prof_t0;
+        pica_ot[skip ? 1 : 0] += dt; pica_ot[skip ? 3 : 2]++;
+        if (pica_prof_on) { pica_prof[0] += dt; pica_prof_n++; pica_prof_on = 0; }
+    }
+#endif
+    st_eye = 0; st_dx = 0; port_stereo_sh = 0; if (st_cnt > 50) st_prev = st_cnt;
+    poly_lean = 0;
     gpu_prims += n;
+    if (skip) ws_drew = 0;   /* (a table not drawn changed nothing of the wide plane: no copy of it to VRAM) */
     ws_sync_down();
     port_ot_signature = h * 31u + (unsigned)n;
     be->list_end();
+#ifdef __3DS__
+    if (!skip && be == &port_gpu_pica) { extern void pica_submit(void); pica_submit(); }
+#endif
     port_prof_draw_us += port_time_us() - t0;
     if (port_verbose > 1) port_printf("[port] DrawOTag %p: %d packets\n", ot, n);
 }
@@ -1183,6 +1381,12 @@ static void present_window(void) {
         RECT *d = (RECT *)cur_dispenv;
         int w = d->w > 0 ? d->w : 320, h = d->h > 0 ? d->h : 240;
         if (w > 1024) w = 1024; if (h > 512) h = 512;
+        if (port_frameskip && fs_skipped(d->x & 1023, d->y & 511)) {   /* (a buffer whose frame was not drawn) */
+#ifdef __3DS__
+            if (be == &port_gpu_pica) { extern void port_n3ds_present_pending(void); port_n3ds_present_pending(); }
+#endif
+            return;
+        }
         /* the GL backend blits the display area itself; the software one goes through RGB24 and an SDL_Renderer;
            the 24-bit mode (MDEC movies) is read out as RGB24 on both and shown by the backend's present_rgb when it
            has one (GL: its own texture; an SDL_Renderer on the GL window would be a second device on it) */
@@ -1213,7 +1417,8 @@ extern int port_hz;
 void port_gpu_vblank(void) {
     { extern int port_show_collision; extern void port_colview_draw(void); if (port_show_collision) port_colview_draw(); }
     { extern int port_debug_menu; extern void port_debug_draw(void); if (port_debug_menu) port_debug_draw(); }
-    { extern int port_panel_on; extern void port_panel_vblank(void); if (port_panel_on) port_panel_vblank(); }
+    { extern int port_panel_on; extern void port_panel_vblank(void); extern unsigned long long port_prof_panel_us;
+      if (port_panel_on) { unsigned long long t0 = port_time_us(); port_panel_vblank(); port_prof_panel_us += port_time_us() - t0; } }
     if (port_hfr_fps && !h_init && port_window && port_hfr_fps != -2 && hfr_rate() <= port_hz + 2) {
         /* --fps N / auto at or below the logic rate (a 60 Hz display at --hz 60): no time between two vblanks to fill.
            Interpolating there showed replayed / blended frames in place of real ones (movies flickered on an AYN Thor) */
@@ -1233,6 +1438,16 @@ void port_gpu_vblank(void) {
     port_gpu_frame(frame_rgb, &w, &h);
     path_for(path, "frame_");
     if (write_png(path, frame_rgb, w, h)) port_printf("[gpu] cannot write %s\n", path);
+#ifndef __3DS__
+    if (port_stereo_on && be == &port_gpu_pica) {   /* --stereo on a PC: the right eye's picture beside it (right_*.png) */
+        extern int pica_eye_frame(u8 *rgb, int x, int y, int w, int h);
+        RECT *d = (RECT *)cur_dispenv;
+        if (!cur_dispenv[0x11] && pica_eye_frame(frame_rgb, d->x & 1023, d->y & 511, w, h)) {
+            path_for(path, "right_");
+            if (write_png(path, frame_rgb, w, h)) port_printf("[gpu] cannot write %s\n", path);
+        }
+    }
+#endif
     {   /* --internal-res N > 1 on OpenGL: the display area at N x as well (hd_*.png) */
         extern int port_internal_res;
         extern int port_gl_frame_hd(u8 *rgb, int x, int y, int w, int h, int wide, int *ow, int *oh);

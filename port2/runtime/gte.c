@@ -7,9 +7,13 @@
 
 typedef int s32; typedef unsigned int u32; typedef short s16; typedef unsigned short u16; typedef long long s64;
 
-static s32 D[32];   /* data registers */
-static s32 C[32];   /* control registers */
-static u32 FLAG;
+/* (not static: the 3DS build's game code reads and writes the registers in line, include/port_prelude.h) */
+s32 port_gte_D[32];   /* data registers */
+s32 port_gte_C[32];   /* control registers */
+u32 port_gte_FLAG;
+#define D port_gte_D
+#define C port_gte_C
+#define FLAG port_gte_FLAG
 
 #define VX(n) ((s16)(D[(n) * 2] & 0xFFFF))
 #define VY(n) ((s16)((u32)D[(n) * 2] >> 16))
@@ -47,27 +51,46 @@ static void set_ir(int lm) {
    drawn, so the frame keeps inside the map picture at its edges; 0 otherwise (identity) */
 int port_gte_dx;
 
-static void rtp(int n, int last) {
-    s16 r[3][3]; mat(0, r);
-    s64 x = VX(n), y = VY(n), z = VZ(n);
-    s64 m1 = ((s64)C[5] << 12) + r[0][0] * x + r[0][1] * y + r[0][2] * z;
-    s64 m2 = ((s64)C[6] << 12) + r[1][0] * x + r[1][1] * y + r[1][2] * z;
-    s64 m3 = ((s64)C[7] << 12) + r[2][0] * x + r[2][1] * y + r[2][2] * z;
-    MAC1 = (s32)(m1 >> 12); MAC2 = (s32)(m2 >> 12); MAC3 = (s32)(m3 >> 12);
-    set_ir(0);
+static inline s32 clamp32(s32 v, s32 lo, s32 hi, u32 flag) {
+    if (v < lo) { FLAG |= flag; return lo; }
+    if (v > hi) { FLAG |= flag; return hi; }
+    return v;
+}
+/* floor((a + b + c) / 4096) of three 32-bit products, in 32 bits (their sum does not fit) */
+static inline s32 sum3_12(s32 a, s32 b, s32 c) {
+    return (a >> 12) + (b >> 12) + (c >> 12) + (((a & 0xFFF) + (b & 0xFFF) + (c & 0xFFF)) >> 12);
+}
+/* (the rotation's products are 16 x 16 bits: 32-bit multiplies, and the translation, a multiple of 4096 once shifted,
+   is added after the sum's own shift: the same values as the 64-bit sums, a third of the game's time on an Old 3DS) */
+static inline __attribute__((always_inline)) void rtp(int n, int last) {   /* (in line: RTPT's three share the matrix and the screen registers they load) */
+    s32 x = VX(n), y = VY(n), z = VZ(n);
+    s64 m1 = (s64)C[5] + sum3_12(M16LO(0) * x, M16HI(0) * y, M16LO(1) * z);
+    s64 m2 = (s64)C[6] + sum3_12(M16HI(1) * x, M16LO(2) * y, M16HI(2) * z);
+    s64 m3 = (s64)C[7] + sum3_12(M16LO(3) * x, M16HI(3) * y, M16LO(4) * z);
+    MAC1 = (s32)m1; MAC2 = (s32)m2; MAC3 = (s32)m3;
+    IR1 = clamp32(MAC1, -0x8000, 0x7FFF, 1u << 24);
+    IR2 = clamp32(MAC2, -0x8000, 0x7FFF, 1u << 23);
+    IR3 = clamp32(MAC3, -0x8000, 0x7FFF, 1u << 22);
     /* SZ FIFO */
     D[16] = D[17]; D[17] = D[18]; D[18] = D[19];
-    D[19] = clampf(m3 >> 12, 0, 0xFFFF, 1u << 18);
+    D[19] = clampf(m3, 0, 0xFFFF, 1u << 18);
     u32 h = (u16)C[26], sz = (u32)D[19];
     u32 q;
     if (sz * 2 <= h) { q = 0x1FFFF; FLAG |= 1u << 17; }
-    else { q = (u32)((((s64)h << 17) / sz + 1) >> 1); if (q > 0x1FFFF) { q = 0x1FFFF; FLAG |= 1u << 17; } }
+    else {
+        /* (h << 17) / sz with 32-bit divisions (h < 2 sz, both 16 bits: the quotient has 18): a 64-bit division is a
+           long library call on the 3DS's ARM11, once a vertex */
+        u32 a = (h << 16) / sz, rem = (h << 16) - a * sz, d = 2 * a + (2 * rem >= sz);
+        q = (d + 1) >> 1;
+        if (q > 0x1FFFF) { q = 0x1FFFF; FLAG |= 1u << 17; }
+    }
     s64 sx = (((s64)C[24] + (s64)IR1 * q) >> 16) + port_gte_dx;
     s64 sy = ((s64)C[25] + (s64)IR2 * q) >> 16;
     D[12] = D[13]; D[13] = D[14];
     s32 SX = clampf(sx, -0x400, 0x3FF, 1u << 14), SY = clampf(sy, -0x400, 0x3FF, 1u << 13);
     D[14] = (SX & 0xFFFF) | ((u32)SY << 16);
     D[15] = D[14];
+    { extern int port_stereo_on; extern void port_stereo_note(int, int, unsigned); if (port_stereo_on) port_stereo_note(SX, SY, sz); }
     if (last) {
         s64 m0 = (s64)(s16)C[27] * q + C[28];
         MAC0 = (s32)m0;
@@ -75,24 +98,30 @@ static void rtp(int n, int last) {
     }
 }
 
+/* (NCCS / NCCT and MVMVA in 32 bits, as rtp: every product is 16 x 16 bits, a sum of three is shifted by parts
+   (sum3_12), and what was a 64-bit value cut to 32 bits is the same sum made modulo 2^32) */
+static inline void set_ir0(void) {   /* set_ir(1) */
+    IR1 = clamp32(MAC1, 0, 0x7FFF, 1u << 24);
+    IR2 = clamp32(MAC2, 0, 0x7FFF, 1u << 23);
+    IR3 = clamp32(MAC3, 0, 0x7FFF, 1u << 22);
+}
 static void ncc(int n) {
-    s16 l[3][3], c[3][3]; mat(8, l); mat(16, c);
-    s64 x = VX(n), y = VY(n), z = VZ(n);
-    MAC1 = (s32)((l[0][0] * x + l[0][1] * y + l[0][2] * z) >> 12);
-    MAC2 = (s32)((l[1][0] * x + l[1][1] * y + l[1][2] * z) >> 12);
-    MAC3 = (s32)((l[2][0] * x + l[2][1] * y + l[2][2] * z) >> 12);
-    set_ir(1);
-    s64 a = IR1, b = IR2, d = IR3;
-    MAC1 = (s32)((((s64)C[13] << 12) + c[0][0] * a + c[0][1] * b + c[0][2] * d) >> 12);
-    MAC2 = (s32)((((s64)C[14] << 12) + c[1][0] * a + c[1][1] * b + c[1][2] * d) >> 12);
-    MAC3 = (s32)((((s64)C[15] << 12) + c[2][0] * a + c[2][1] * b + c[2][2] * d) >> 12);
-    set_ir(1);
+    s32 x = VX(n), y = VY(n), z = VZ(n);
+    MAC1 = sum3_12(M16LO(8) * x, M16HI(8) * y, M16LO(9) * z);
+    MAC2 = sum3_12(M16HI(9) * x, M16LO(10) * y, M16HI(10) * z);
+    MAC3 = sum3_12(M16LO(11) * x, M16HI(11) * y, M16LO(12) * z);
+    set_ir0();
+    s32 a = IR1, b = IR2, d = IR3;   /* (0 .. 0x7FFF) */
+    MAC1 = (s32)((u32)C[13] + (u32)sum3_12(M16LO(16) * a, M16HI(16) * b, M16LO(17) * d));
+    MAC2 = (s32)((u32)C[14] + (u32)sum3_12(M16HI(17) * a, M16LO(18) * b, M16HI(18) * d));
+    MAC3 = (s32)((u32)C[15] + (u32)sum3_12(M16LO(19) * a, M16HI(19) * b, M16LO(20) * d));
+    set_ir0();
     u32 rgbc = (u32)D[6];
-    MAC1 = (s32)((((s64)(rgbc & 0xFF) * IR1) << 4) >> 12);
-    MAC2 = (s32)((((s64)((rgbc >> 8) & 0xFF) * IR2) << 4) >> 12);
-    MAC3 = (s32)((((s64)((rgbc >> 16) & 0xFF) * IR3) << 4) >> 12);
-    set_ir(1);
-    u32 R = clampf(MAC1 >> 4, 0, 255, 1u << 21), G = clampf(MAC2 >> 4, 0, 255, 1u << 20), B = clampf(MAC3 >> 4, 0, 255, 1u << 19);
+    MAC1 = (s32)((rgbc & 0xFF) * (u32)IR1) >> 8;            /* (colour x IR << 4 >> 12: under 2^23) */
+    MAC2 = (s32)(((rgbc >> 8) & 0xFF) * (u32)IR2) >> 8;
+    MAC3 = (s32)(((rgbc >> 16) & 0xFF) * (u32)IR3) >> 8;
+    set_ir0();
+    u32 R = clamp32(MAC1 >> 4, 0, 255, 1u << 21), G = clamp32(MAC2 >> 4, 0, 255, 1u << 20), B = clamp32(MAC3 >> 4, 0, 255, 1u << 19);
     D[20] = D[21]; D[21] = D[22];
     D[22] = R | (G << 8) | (B << 16) | (rgbc & 0xFF000000u);
 }
@@ -100,15 +129,20 @@ static void ncc(int n) {
 static void mvmva(u32 op) {
     int sf = (op >> 19) & 1, mx = (op >> 17) & 3, v = (op >> 15) & 3, cv = (op >> 13) & 3, lm = (op >> 10) & 1;
     s16 m[3][3]; mat(mx == 0 ? 0 : mx == 1 ? 8 : 16, m);
-    s64 x, y, z;
+    s32 x, y, z;
     if (v == 3) { x = (s16)IR1; y = (s16)IR2; z = (s16)IR3; } else { x = VX(v); y = VY(v); z = VZ(v); }
-    s64 t1 = 0, t2 = 0, t3 = 0;
-    if (cv == 0) { t1 = C[5]; t2 = C[6]; t3 = C[7]; } else if (cv == 1) { t1 = C[13]; t2 = C[14]; t3 = C[15]; }
-    else if (cv == 2) { t1 = C[21]; t2 = C[22]; t3 = C[23]; }
-    int sh = sf ? 12 : 0;
-    MAC1 = (s32)(((t1 << 12) + m[0][0] * x + m[0][1] * y + m[0][2] * z) >> sh);
-    MAC2 = (s32)(((t2 << 12) + m[1][0] * x + m[1][1] * y + m[1][2] * z) >> sh);
-    MAC3 = (s32)(((t3 << 12) + m[2][0] * x + m[2][1] * y + m[2][2] * z) >> sh);
+    u32 t1 = 0, t2 = 0, t3 = 0;
+    if (cv == 0) { t1 = (u32)C[5]; t2 = (u32)C[6]; t3 = (u32)C[7]; } else if (cv == 1) { t1 = (u32)C[13]; t2 = (u32)C[14]; t3 = (u32)C[15]; }
+    else if (cv == 2) { t1 = (u32)C[21]; t2 = (u32)C[22]; t3 = (u32)C[23]; }
+    if (sf) {
+        MAC1 = (s32)(t1 + (u32)sum3_12(m[0][0] * x, m[0][1] * y, m[0][2] * z));
+        MAC2 = (s32)(t2 + (u32)sum3_12(m[1][0] * x, m[1][1] * y, m[1][2] * z));
+        MAC3 = (s32)(t3 + (u32)sum3_12(m[2][0] * x, m[2][1] * y, m[2][2] * z));
+    } else {
+        MAC1 = (s32)((t1 << 12) + (u32)(m[0][0] * x) + (u32)(m[0][1] * y) + (u32)(m[0][2] * z));
+        MAC2 = (s32)((t2 << 12) + (u32)(m[1][0] * x) + (u32)(m[1][1] * y) + (u32)(m[1][2] * z));
+        MAC3 = (s32)((t3 << 12) + (u32)(m[2][0] * x) + (u32)(m[2][1] * y) + (u32)(m[2][2] * z));
+    }
     set_ir(lm);
 }
 
@@ -118,9 +152,10 @@ void port_gte_op(unsigned long op) {
     case 0x01: rtp(0, 1); break;                                     /* RTPS */
     case 0x30: rtp(0, 0); rtp(1, 0); rtp(2, 1); break;               /* RTPT */
     case 0x06: {                                                     /* NCLIP */
-        s64 x0 = (s16)D[12], y0 = (s16)(D[12] >> 16), x1 = (s16)D[13], y1 = (s16)(D[13] >> 16);
-        s64 x2 = (s16)D[14], y2 = (s16)(D[14] >> 16);
-        MAC0 = (s32)(x0 * y1 + x1 * y2 + x2 * y0 - x0 * y2 - x1 * y0 - x2 * y1);
+        /* (modulo 2^32, what the 64-bit sum cut to 32 bits was) */
+        s32 x0 = (s16)D[12], y0 = (s16)(D[12] >> 16), x1 = (s16)D[13], y1 = (s16)(D[13] >> 16);
+        s32 x2 = (s16)D[14], y2 = (s16)(D[14] >> 16);
+        MAC0 = (s32)((u32)(x0 * y1) + (u32)(x1 * y2) + (u32)(x2 * y0) - (u32)(x0 * y2) - (u32)(x1 * y0) - (u32)(x2 * y1));
         break;
     }
     case 0x2D: {                                                     /* AVSZ3 */

@@ -23,7 +23,9 @@
  * padding columns) is dealt with in ws_topdown_gen.inc (previews, off by default: --ws-topdown-gen on). */
 #include <stdint.h>
 #include <string.h>
+#include <stdlib.h>
 #include "port_runtime.h"
+#include "../shims/gpu_pica.h"
 
 typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32; typedef short s16;
 typedef struct { s16 x, y, w, h; } RECT;
@@ -49,7 +51,8 @@ typedef struct {
     int px0, py0;                         /* picture px at the window's top left */
     int ww;                               /* window width (px) */
     int n; Rect r[MAXR];
-    struct { int k, ri, du, dw, j0, j1; } up[5 * MAXR]; int nup;   /* uploads per batch (k = -2..2) */
+    struct { int k, ri, du, dw, j0, j1, tx, ty, u, v, cx, cy; } up[5 * MAXR]; int nup;   /* uploads per batch (k = -2..2); tx..cy: the strip SPRT's texels (the pica path) */
+    int pica;                             /* the strips go to the pica backend's own slots, not into VRAM (below) */
     u16 save[MAXR][256 * 256 / 2 + 8 * 128]; int saved[MAXR];
 } Slot;
 static Slot slots[SLOTS];
@@ -84,13 +87,37 @@ static void mark(u32 id)
     Slot *s = &slots[(id >> 3) % SLOTS];
     int b = id & 7;
     if (!s->used) return;
-    if (b < 5) { upload(s, b - 2); return; }
-    for (int i = 0; i < s->n; i++) if (s->saved[i]) {
-        Rect *r = &s->r[i];
-        RECT rc = { (s16)r->x, (s16)r->y, (s16)r->w, (s16)r->h };
-        LoadImage(&rc, (u32 *)s->save[i]);
-        s->saved[i] = 0;
+    if (s->pica) {   /* the pica backend (the 3DS): the strips' pieces go to slots of its own, the game's VRAM is left alone */
+        if (b < 5) {
+            PicaStrip e[2 * MAXR]; int n = 0;
+            for (int i = 0; i < s->nup && n < 2 * MAXR; i++) {
+                if (s->up[i].k != b - 2) continue;
+                Rect *r = &s->r[s->up[i].ri];
+                e[n].pic = s->pic; e[n].stride = s->stride; e[n].col = s->px0 + r->ex + s->up[i].k * s->ww + s->up[i].du;
+                e[n].row = s->py0 + r->ey + s->up[i].j0; e[n].w = s->up[i].dw; e[n].h = s->up[i].j1 - s->up[i].j0;
+                e[n].tx = s->up[i].tx; e[n].ty = s->up[i].ty; e[n].u = s->up[i].u; e[n].v = s->up[i].v; e[n].cx = s->up[i].cx; e[n].cy = s->up[i].cy;
+                n++;
+            }
+            pica_ws_strips(b < 2 ? 0 : 1, n, e);
+        } else { pica_ws_strips_end(); s->used = 0; }
+        return;
     }
+    if (b < 5) { upload(s, b - 2); return; }
+    /* the game's pixels back, only where a strip went (the rest of its window was never touched: putting it all back
+       made every texture cache cell of it look written, a cost a 3DS feels) */
+    static u16 buf[256 * 288];
+    for (int i = 0; i < s->nup; i++) {
+        const int ri = s->up[i].ri, du = s->up[i].du, dw = s->up[i].dw, j0 = s->up[i].j0, j1 = s->up[i].j1;
+        if (!s->saved[ri]) continue;
+        Rect *r = &s->r[ri];
+        int dup = 0;   /* (the same strip twice: k = +-1 and +-2 can share one) */
+        for (int q = 0; q < i; q++) dup |= s->up[q].ri == ri && s->up[q].du == du && s->up[q].dw == dw && s->up[q].j0 == j0 && s->up[q].j1 == j1;
+        if (dup) continue;
+        for (int j = j0; j < j1; j++) memcpy(buf + (size_t)(j - j0) * (dw / 2), &s->save[ri][j * r->w + du / 2], (size_t)dw);
+        RECT rc = { (s16)(r->x + du / 2), (s16)(r->y + j0), (s16)(dw / 2), (s16)(j1 - j0) };
+        LoadImage(&rc, (u32 *)buf);
+    }
+    for (int i = 0; i < s->n; i++) s->saved[i] = 0;
     s->used = 0;
 }
 
@@ -152,6 +179,13 @@ void port_ws_overhead_map(void *o, int n, int row_off)
     for (int i = 0; i < n; i++) if ((rd32((u8 *)first + 0x10 + i * 0x20) >> 24) != 0x65) return;
     for (int i = 0; i < n; i++)                     /* the frame inside the picture: the map moves with the objects */
         *(s16 *)(first + 0x14 + i * 0x20) = (s16)(*(s16 *)(first + 0x14 + i * 0x20) + dx);
+    {   /* The 3DS (and PORT_WS_NO_WINDOWS=1 on a PC to see it): not the windows beside the game's.  Its wide frame
+           is 40 columns a side, of which the game's window has 32 already; the two more windows were three map
+           uploads into the same VRAM a frame, each a texture decode there (Baccus at 30 vblank/s, 22 ms a frame
+           decoding, on an Old 3DS) */
+        static int off = -1; if (off < 0) { const char *e = getenv("PORT_WS_NO_WINDOWS"); off = e && *e == '1'; }
+        if (off) return;
+    }
     port_ot_mark_fn = mark;
     const u8 *tim = *(const u8 **)port_ram_ptr(0x1F800394u), *map = *(const u8 **)port_ram_ptr(0x1F800390u);
     if (!tim || !map) return;
@@ -252,6 +286,10 @@ void port_ws_overhead_map(void *o, int n, int row_off)
             int q = s->nup++;
             s->up[q].k = k; s->up[q].ri = i; s->up[q].du = a - sx0; s->up[q].dw = b - a; s->up[q].j0 = j0; s->up[q].j1 = j1;
             const char *gsp = first + 0xC + i * 0x20;
+            {   const u32 e1 = rd32((const u8 *)gsp + 0x14 + 4); const u16 cl = rd16((const u8 *)gsp + 14);
+                s->up[q].tx = (int)(e1 & 15) * 64; s->up[q].ty = (int)((e1 >> 4) & 1) * 256;
+                s->up[q].u = ((const u8 *)gsp)[12] + (a - sx0); s->up[q].v = ((const u8 *)gsp)[13] + j0;
+                s->up[q].cx = (cl & 63) * 16; s->up[q].cy = (cl >> 6) & 511; }
             char *dm = prim(12), *sp = prim(0x14);
             memcpy(dm, gsp + 0x14, 12); memcpy(sp, gsp, 0x14);
             *(s16 *)(sp + 8) = (s16)a; *(s16 *)(sp + 10) = (s16)(Y + r->ey + j0);
@@ -264,6 +302,12 @@ void port_ws_overhead_map(void *o, int n, int row_off)
     char *m = prim(12);
     ((u32 *)m)[0] = 2u << 24; ((u32 *)m)[1] = OT_MARK; ((u32 *)m)[2] = (u32)(slot_next * 8 + 7);
     pk[np++] = m;
+    {   /* the pica backend takes the strips into its own slots (one per side: windows one width away only) */
+        extern int port_renderer; int far = 0;
+        for (int q = 0; q < s->nup; q++) far |= s->up[q].k < -1 || s->up[q].k > 1;
+        static int vram_way = -1; if (vram_way < 0) { const char *e = getenv("PORT_WS_VRAM_STRIPS"); vram_way = e && *e == '1'; }
+        s->pica = port_renderer == 2 && !far && !vram_way;   /* (PORT_WS_VRAM_STRIPS=1: the VRAM way, to compare on a PC) */
+    }
     s->used = 1;
     slot_next = (slot_next + 1) % SLOTS;
     /* link so that pk[0] runs first and the last marker runs just before the game's own map packets */

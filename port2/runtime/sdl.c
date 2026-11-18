@@ -45,9 +45,33 @@ static void ctrl_opened(void);
 
 /* the audio device pulls the mixer (shims/sound.c): audio time is what the device consumes, so the sequencer's
    tempo cannot depend on the game thread's pace; the game thread's calls into the mixer take the device lock */
-static void audio_cb(void *ud, Uint8 *stream, int len) { (void)ud; port_sound_pull((short *)stream, len / 4); }
-void port_audio_lock(void) { if (dev) SDL_LockAudioDevice(dev); }
+static void audio_cb(void *ud, Uint8 *stream, int len) {
+    (void)ud;
+#ifdef __3DS__
+    { extern void port_n3ds_audio_thread_boost(void); port_n3ds_audio_thread_boost(); }   /* (n3ds/pica_c3d.c) */
+#endif
+    port_sound_pull((short *)stream, len / 4);
+}
+/* (lock_wanted: the game thread is waiting for the lock.  The 3DS's audio thread shares a throttled core and holds
+   the lock for a whole callback, tens of milliseconds there: port_audio_yield, between the callback's pieces,
+   lets the game thread in) */
+static volatile int lock_wanted;
+/* (counted with atomic steps: the game's thread and, on an Old 3DS, the mixer's on the other core both come here, and
+   a count lost between them stayed above zero for good: every yield then waited its 20 ms, the mixer made a seventh
+   of the samples, and the sound broke up and held the game) */
+void port_audio_lock(void) {
+    if (dev) { __atomic_add_fetch(&lock_wanted, 1, __ATOMIC_SEQ_CST); SDL_LockAudioDevice(dev); __atomic_sub_fetch(&lock_wanted, 1, __ATOMIC_SEQ_CST); }
+}
 void port_audio_unlock(void) { if (dev) SDL_UnlockAudioDevice(dev); }
+void port_audio_yield(void) {
+#ifdef __3DS__
+    if (dev && lock_wanted) {
+        SDL_UnlockAudioDevice(dev);
+        for (int i = 0; i < 20 && lock_wanted; i++) SDL_Delay(1);
+        SDL_LockAudioDevice(dev);
+    }
+#endif
+}
 
 /* the desktop size of display 0 (--widescreen auto); 0 = ok */
 int port_display_size(int *w, int *h) {
@@ -66,7 +90,7 @@ void port_window_start(void) {
        the button icons (shims/prompts.c) can name the printed label by position */
     SDL_SetHint("SDL_GAMECONTROLLER_USE_BUTTON_LABELS", "0");
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMECONTROLLER) < 0) port_fatal("SDL_Init: %s", SDL_GetError());
-    int want_gl = port_renderer != 0;
+    int want_gl = port_renderer != 0 && port_renderer != 2;   /* (2: --renderer pica, no GL context of its own) */
     if (want_gl) {        /* (the SDL_Renderer of the software path is made on first use, so a failed GL start can fall back) */
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
         SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
@@ -83,6 +107,9 @@ void port_window_start(void) {
     if (port_widescreen)        /* the same logical width port_window_fit uses, times the scale (scaling the rounded 4:3
                                    width came out a pixel short of k * lw, so the fit dropped to 1x) */
         ww = (port_window_square ? 320 + 2 * port_widescreen : tvh * 4 * (320 + 2 * port_widescreen) / (3 * 320)) * port_window_scale;
+#ifdef __3DS__
+    ww = 400; tvh = 240; port_window_scale = 1;   /* the top screen */
+#endif
     win = SDL_CreateWindow("Tombi! (PC port)", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, ww,
                            tvh * port_window_scale, SDL_WINDOW_RESIZABLE | (want_gl ? SDL_WINDOW_OPENGL : 0) |
                            (port_window_fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0));
@@ -100,8 +127,25 @@ void port_window_start(void) {
     }
     SDL_AudioSpec want, have;
     SDL_zero(want);
-    want.freq = 44100; want.format = AUDIO_S16SYS; want.channels = 2; want.samples = 1024; want.callback = audio_cb;
+#ifndef PORT2_WASM_HOST   /* (--audio-half, an Old 3DS's: port_sound_half lives in shims/sound.c, inside the wasm module there) */
+    { extern int port_sound_half;
+      want.freq = port_sound_half ? 22050 : 44100; want.samples = port_sound_half ? 512 : 1024; }
+#else
+    want.freq = 44100; want.samples = 1024;
+#endif
+    want.format = AUDIO_S16SYS; want.channels = 2; want.callback = audio_cb;
     dev = SDL_OpenAudioDevice(NULL, 0, &want, &have, 0);
+#ifdef __3DS__
+    {   /* an Old 3DS (--audio-half): the mixer on its own thread on the second core (shims/sound.c, n3ds/pica_c3d.c) */
+        extern int port_sound_half; extern void port_sound_mixer_run(void); extern int port_n3ds_thread_core1(void (*)(void));
+        /* (with the second core's share raised to 80 % for it the system's own services there, the SD card and the
+           GPU's, starved: loads took seconds.  At 30 %, the share the panel's worker runs with, the mixer's 3.5 ms
+           of every 20 fit, and they are a sixth of what the game's core has; if the thread falls behind, the
+           callback takes the mixing back (shims/sound.c).  --audio-main: no thread.) */
+        extern int port_audio_main;
+        if (dev && port_sound_half && !port_audio_main) port_n3ds_thread_core1(port_sound_mixer_run);
+    }
+#endif
     if (dev) { port_sound_pulled(1); SDL_PauseAudioDevice(dev, 0); }
     else port_printf("[port2] no audio device: %s (the mixer runs per vblank, without output)\n", SDL_GetError());
     for (int i = 0; i < SDL_NumJoysticks(); i++)
@@ -114,6 +158,19 @@ void port_window_start(void) {
 
 static void window_stop_h(void *u) {
     (void)u;
+#ifdef __3DS__
+    /* (a console froze after "window closed", power button and all: each step of the way out is logged, and citro3d,
+       its command queue and interrupt handlers, is closed before SDL takes the screens away under it) */
+    { extern void port_n3ds_gpu_fini(void); extern void port_flush_log(void); extern void port_n3ds_threads_stop(void);
+      port_printf("[3ds] quit: threads\n"); port_flush_log(); port_n3ds_threads_stop();
+      port_printf("[3ds] quit: renderer\n"); port_flush_log(); port_n3ds_gpu_fini();
+      port_printf("[3ds] quit: renderer closed\n"); port_flush_log();
+      port_printf("[3ds] quit: audio\n"); port_flush_log();
+      if (dev) { port_sound_pulled(0); SDL_CloseAudioDevice(dev); } dev = 0;
+      port_printf("[3ds] quit: SDL\n"); port_flush_log();
+      if (win) SDL_Quit(); win = 0;
+      port_printf("[3ds] quit: done\n"); port_flush_log(); }
+#endif
     if (dev) { port_sound_pulled(0); SDL_CloseAudioDevice(dev); }
     if (glctx) SDL_GL_DeleteContext(glctx);
     if (win) SDL_Quit();
@@ -194,9 +251,22 @@ static void cbind_defaults(void) {
         { SDL_CONTROLLER_BUTTON_X, P_SQUARE }, { SDL_CONTROLLER_BUTTON_Y, P_TRI }, { SDL_CONTROLLER_BUTTON_LEFTSHOULDER, P_L1 },
         { SDL_CONTROLLER_BUTTON_RIGHTSHOULDER, P_R1 }, { SDL_CONTROLLER_BUTTON_START, P_START }, { SDL_CONTROLLER_BUTTON_BACK, P_SELECT } };
     ncbind = 0;
-    for (unsigned i = 0; i < sizeof d / sizeof d[0]; i++) cbind_add(CB_BUTTON, d[i].b, 0, d[i].m);
+    for (unsigned i = 0; i < sizeof d / sizeof d[0]; i++) {
+        unsigned short m = d[i].m;
+#ifdef __3DS__
+        /* (the four face buttons are read from the console itself, ctrl_state: SDL's names for them were one way in
+           an emulator on a handheld and the other on a console) */
+        if (m == P_CROSS || m == P_CIRCLE || m == P_SQUARE || m == P_TRI) continue;
+#endif
+        cbind_add(CB_BUTTON, d[i].b, 0, m);
+    }
     cbind_add(CB_AXIS, SDL_CONTROLLER_AXIS_TRIGGERLEFT, 1, P_L2);    /* (L2 / R2 were not read at all before) */
     cbind_add(CB_AXIS, SDL_CONTROLLER_AXIS_TRIGGERRIGHT, 1, P_R2);
+#ifdef __3DS__
+    /* the Circle Pad moves as the d-pad does (the console's main stick; the game is digital) */
+    cbind_add(CB_AXIS, SDL_CONTROLLER_AXIS_LEFTX, 2, P_LEFT); cbind_add(CB_AXIS, SDL_CONTROLLER_AXIS_LEFTX, 1, P_RIGHT);
+    cbind_add(CB_AXIS, SDL_CONTROLLER_AXIS_LEFTY, 2, P_UP); cbind_add(CB_AXIS, SDL_CONTROLLER_AXIS_LEFTY, 1, P_DOWN);
+#endif
 }
 /* --pad-map ps1=src[+src],...: src = an SDL controller button or axis name ("rightshoulder", "lefttrigger", "leftx-"),
    bN (raw joystick button), aN+ / aN- (raw axis), hN.M (raw hat N, direction mask M: 1 up 2 right 4 down 8 left) */
@@ -241,6 +311,14 @@ static void cbind_apply_map(void) {
 static unsigned short ctrl_state(void) {
     unsigned short m = 0;
     SDL_Joystick *j = ctrl ? SDL_GameControllerGetJoystick(ctrl) : NULL;
+#ifdef __3DS__
+    {   /* the face buttons by place, as a PlayStation pad's: B (the lower one) cross, A circle, Y square, X triangle */
+        extern unsigned port_n3ds_face_buttons(void);
+        unsigned f = port_n3ds_face_buttons();
+        if (f & 1) m |= P_CROSS; if (f & 2) m |= P_CIRCLE; if (f & 4) m |= P_SQUARE; if (f & 8) m |= P_TRI;
+    }
+    if (!ctrl) return m;
+#endif
     if (!ctrl) return 0;
     for (int k = 0; k < ncbind; k++) {
         const CtrlBind *b = &cbind[k]; int on = 0, v;
@@ -260,6 +338,14 @@ static unsigned short ctrl_state(void) {
 extern int port_prompt_option, port_prompt_style, port_prompt_src[4], port_prompt_map_fixed;
 static void prompts_update(void) {
     static const unsigned short face[4] = { P_CROSS, P_CIRCLE, P_SQUARE, P_TRI };
+#ifdef __3DS__
+    /* the console's own buttons, by place (ctrl_state): B, A, Y, X as Nintendo letters; a prompt was a blank disc */
+    if (!port_prompt_map_fixed) for (int f = 0; f < 4; f++) port_prompt_src[f] = f;
+    if (port_prompt_option == -1) port_prompt_style = 2;
+    (void)face;
+    port_printf("[port2] button prompts: nintendo, by place\n");
+    return;
+#endif
     if (!port_prompt_map_fixed)
         for (int f = 0; f < 4; f++) {
             int src = 8;                                       /* none */
@@ -351,6 +437,9 @@ void port_window_rumble(int small, int big) {
 
 static void pump_h(void *u) { (void)u; pump(); }
 static void pump(void) {
+#ifdef __3DS__   /* the bottom screen's touches to the panel (n3ds/pica_c3d.c) */
+    { extern void port_n3ds_touch(void); port_n3ds_touch(); }
+#endif
     SDL_Event e;
     while (SDL_PollEvent(&e)) {
         switch (e.type) {
@@ -518,6 +607,9 @@ static void panel_window_frame_h(void *a) {
     SDL_UpdateWindowSurface(pwin);
 }
 void port_panel_window_frame(const unsigned char *rgba, int w, int h) {
+#ifdef __3DS__   /* the bottom screen, through the citro3d renderer (n3ds/pica_c3d.c) */
+    { extern void port_n3ds_panel(const unsigned char *, int, int); port_n3ds_panel(rgba, w, h); return; }
+#endif
     if (!win || pwin_closed) return;
     FrameArgs a = { rgba, w, h }; port_host_call(panel_window_frame_h, &a);
 }

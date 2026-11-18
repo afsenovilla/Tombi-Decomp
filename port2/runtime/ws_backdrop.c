@@ -64,6 +64,27 @@
 
 typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32;
 
+#if defined(__3DS__) && !defined(WS_BACKDROP_MAIN)
+/* The 3DS: none of the picture strips.  Their generators keep their work in static tables, 35 MB of them, and a 3DS
+   title's code, data and bss must fit its 64 MB (an Old 3DS's whole application memory; past the code region on
+   both): with them the system's loader refused to start v0.7.0's title ("invalid address" in loader).  Every other
+   widescreen part stays (culls, room ends, 3D room walls, top-down maps).  The entry points shims/gpu.c and
+   runtime/main.c use, inert. */
+int port_ws_backdrop_on;
+int port_ws_backdrop_dy;
+int port_ws_backdrop_side = 3;
+const char *port_ws_backdrop_rooms;
+const u16 *port_ws_backdrop(const u16 *vram, int pad, int x, int y, int w, int h, int u, int v, int tx, int ty,
+                            int depth, int cx, int cy, int *rows)
+{
+    (void)vram; (void)pad; (void)x; (void)y; (void)w; (void)h; (void)u; (void)v; (void)tx; (void)ty; (void)depth; (void)cx; (void)cy; (void)rows;
+    return 0;
+}
+const u16 *port_ws_backdrop_over(int pad, int tx, int u, int v) { (void)pad; (void)tx; (void)u; (void)v; return 0; }
+const u16 *port_ws_backdrop_fix(int tx, int u, int v, int *x, int *w) { (void)tx; (void)u; (void)v; (void)x; (void)w; return 0; }
+int port_ws_island_fg(int tpage, int clut, int uv) { (void)tpage; (void)clut; (void)uv; return 0; }
+#else
+
 #define PW 320
 #define PH 224
 
@@ -1020,3 +1041,4 @@ int main(int argc, char **argv)
     return 0;
 }
 #endif
+#endif   /* (not the 3DS) */
