@@ -2,9 +2,11 @@
 
 Update this file whenever something lands or a task is decided. Newest first.
 
-## Since v0.7.2-fix (not released)
+## Since v0.7.2 (not released)
 
-- **v0.7.2 (planned): v0.7.1's code with a 3DS that fits.** The 3DS image of v0.7.1 was 28.7 MB, 2.9 MB over the
+## In v0.7.2 (released 2026-11-18, after v0.7.2-fix)
+
+- **v0.7.1's code with a 3DS that fits (image 25.3 MB; not yet run on the device).** The 3DS image of v0.7.1 was 28.7 MB, 2.9 MB over the
   build that runs (run 43647748843, 26.0 MB): the new widescreen modules from master. On the 3DS these are now inert:
   ws_topdown_gen.inc's margins (Hidden Village; 2.4 MB of tables; the Dwarf Village trim stays), ws_pigs.c,
   ws_room3d.c, ws_trick.c, ws_floor3d.c (1.1 MB). check_3dsx.py's limit is now 26 MB. To do later: those tables on
