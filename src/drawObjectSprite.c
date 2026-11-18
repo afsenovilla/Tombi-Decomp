@@ -385,6 +385,14 @@ void drawObjectSprite(TObj *o)
             p->tpage += o->w1e;
             if (o->b0d & 1)
                 p->clut = o->w08;
+#ifdef PORT2
+            {   /* widescreen with the island's strips on: its foreground ledge stays as far past the frame's left
+                   edge as at 4:3 (docs/PORT.md "More rooms with picture strips", the Lake's island screen) */
+                extern int port_ws_island_fg(int, int, int);
+                int d = port_ws_island_fg(p->tpage, p->clut, p->uv0);
+                if (d) { p->x0 -= d; p->x1 -= d; p->x2 -= d; p->x3 -= d; }
+            }
+#endif
             if (o->b0b) {
                 if (otadd((unsigned long *)p, CURRENT_OT + 0x10, 0, o->b0f, 0x9000000)) goto next;
             } else {

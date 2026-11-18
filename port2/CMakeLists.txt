@@ -129,6 +129,12 @@ if(gen_rc)
   message(FATAL_ERROR "gen2.py sources failed")
 endif()
 include(${GEN}/sources.cmake)
+# The filtered sources start with `#line 1 "src/..."` (relative to the repo root).  ccache follows that name from the
+# build directory, cannot find it and gives up on the file ("Could not read or parse input file": 3152 of the ~3200
+# compiles, so CI rebuilt the game every time): a src link in the build directory lets it hash the file and cache.
+if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/src)
+  file(CREATE_LINK ${ROOT}/src ${CMAKE_CURRENT_BINARY_DIR}/src RESULT port2_srclink SYMBOLIC)
+endif()
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
              ${CMAKE_CURRENT_SOURCE_DIR}/tools/gen2.py ${ROOT}/port/tools/gen_port.py ${ROOT}/port/tools/portver.py ${ROOT}/port/fixes.txt
              ${PORT2_FULL_DIR}/${PORT2_FULL_EXE}.full.ld)

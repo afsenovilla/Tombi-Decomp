@@ -17,19 +17,20 @@
  * both renderers, --fps replay and the texture tools see an ordinary upload); a last marker puts back what the game
  * uploaded before its own map packets run.  So the game's picture, tiles and palette, nothing else.
  *
- * Identity when off: nothing is linked and no marker exists without --widescreen; the gpu.c test is one compare. */
+ * Identity when off: nothing is linked and no marker exists without --widescreen; the gpu.c test is one compare.
+ *
+ * A picture that does not reach the wide frame's edge (Hidden Village: narrower than the frame; Dwarf Village: black
+ * padding columns) is dealt with in ws_topdown_gen.inc (previews, off by default: --ws-topdown-gen on). */
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
+#include "port_runtime.h"
 #include "../shims/gpu_pica.h"
 
 typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32; typedef short s16;
 typedef struct { s16 x, y, w, h; } RECT;
 
 extern int port_widescreen, port_ws_cull;
-extern int port_printf(const char *, ...);
-extern int port_is_ram_ptr(const void *);
-extern void *port_ram_ptr(unsigned int);
 extern int LoadImage(RECT *, u32 *);
 extern u16 *port_vram(void);
 extern char *NEXT_PRIM;
@@ -50,7 +51,7 @@ typedef struct {
     int px0, py0;                         /* picture px at the window's top left */
     int ww;                               /* window width (px) */
     int n; Rect r[MAXR];
-    struct { int k, ri, du, dw, j0, j1, tx, ty, u, v, cx, cy; } up[2 * MAXR * 2]; int nup;   /* uploads per batch (k = -2..2); tx..cy: the strip SPRT's texels (the pica path) */
+    struct { int k, ri, du, dw, j0, j1, tx, ty, u, v, cx, cy; } up[5 * MAXR]; int nup;   /* uploads per batch (k = -2..2); tx..cy: the strip SPRT's texels (the pica path) */
     int pica;                             /* the strips go to the pica backend's own slots, not into VRAM (below) */
     u16 save[MAXR][256 * 256 / 2 + 8 * 128]; int saved[MAXR];
 } Slot;
@@ -120,6 +121,8 @@ static void mark(u32 id)
     s->used = 0;
 }
 
+#include "ws_topdown_gen.inc"
+
 static char *prim(int size) { char *p = NEXT_PRIM; NEXT_PRIM += size; return p; }
 static void link_prim(u32 *ot, char *p)          /* addPrim: keeps the packet's length byte */
 {
@@ -139,7 +142,7 @@ static void link_prim(u32 *ot, char *p)          /* addPrim: keeps the packet's 
    K - SCREEN_ORIGIN_X + c, with K and the picture width taken from the previous map draw (the room's map must have
    drawn in the previous scene draw, else dx = 0). */
 extern int port_gte_dx;                           /* runtime/gte.c */
-static int td_seq, td_hook_seq = -100, td_K, td_pw, td_dx, td_cull = -1;
+static int td_seq, td_hook_seq = -100, td_K, td_pw, td_dx, td_cull = -1, td_slack;
 void port_ws_topdown_begin(void)
 {
     int pad = port_widescreen, dx = 0;
@@ -151,8 +154,8 @@ void port_ws_topdown_begin(void)
             if (L0 > -pad) dx = -pad - L0;
             else if (L0 + pw < 320 + pad) dx = 320 + pad - (L0 + pw);
         } else if (pw >= 320) dx = (320 - pw) / 2 - L0;
-        if (dx > pad) dx = pad;
-        if (dx < -pad) dx = -pad;
+        if (dx > pad + td_slack) dx = pad + td_slack;   /* (td_slack: a trimmed picture, port_ws_overhead_map) */
+        if (dx < -pad - td_slack) dx = -pad - td_slack;
     }
     td_dx = dx;
     port_gte_dx = dx;
@@ -191,6 +194,13 @@ void port_ws_overhead_map(void *o, int n, int row_off)
     int stride = wt * 32;
     if (pw < 64 || ph < 64 || stride < pw || stride > pw + 64 || (port_is_ram_ptr(tim) && !port_is_ram_ptr(tim + 0x220 + (size_t)stride * ph - 1))) return;
     const u8 *pic = tim + 0x220;
+    int gen = tg_room();                             /* ws_topdown_gen.inc: previews, 0 unless approved / asked for */
+    td_slack = 0;
+    if (gen == TG_TRIM) {
+        /* the game's camera stops with the 4:3 view's edge on the padded width, a column or two past the picture */
+        int w = tg_trim(tim, pic, stride, pw, ph);
+        if (w < pw) { pw = w; td_slack = 2; }
+    }
 
     const u8 *ob = (const u8 *)o;
     int d30 = *(const int *)(ob + 0x30), d34 = *(const int *)(ob + 0x34), b0f = (signed char)ob[0x0F];
@@ -237,10 +247,21 @@ void port_ws_overhead_map(void *o, int n, int row_off)
         if (pr + h > ph) *(u16 *)(sp + 18) = (u16)(ph - pr > 0 ? ph - pr : 0);
     }
 
+    /* a picture narrower than the wide frame, with a generated margin: the side windows upload from the widened
+       picture (the game's own window is the picture itself; dx still centres the picture, so both margins show the
+       same width) */
+    int mg = 0, opw = pw;                           /* margin columns per side, the picture's own width */
+    if (gen == TG_MARGIN && pw >= 320 && pw < 320 + 2 * pad) {
+        int need = ((320 + 2 * pad - pw + 1) / 2 + 1) & ~1;
+        if (need > TG_MAXM) need = TG_MAXM;
+        const u8 *e = tg_extend(tim, pic, stride, pw, ph, need);
+        if (e) { s->pic = e; s->px0 += need; pw += 2 * need; s->stride = s->pw = pw; mg = need; }
+    }
+
     /* the batches: the window moved k widths, each SPRT clipped to the wide frame [-pad, 320 + pad) and the picture */
-    char *pk[2 + 4 * (1 + 2 * MAXR)]; int np = 0, any = 0;
+    char *pk[2 + 5 * (1 + 2 * MAXR)]; int np = 0, any = 0;
     for (int k = -2; k <= 2; k++) {
-        if (!k) continue;
+        if (!k && !mg) continue;                    /* k = 0 (margin only): the right margin inside the game's window */
         int mark_at = -1;
         for (int i = 0; i < n; i++) {
             Rect *r = &s->r[i];
@@ -250,6 +271,7 @@ void port_ws_overhead_map(void *o, int n, int row_off)
             if (b > 320 + pad) b = 320 + pad;
             if (a < sx0 - pc) a = sx0 - pc;                          /* picture column 0 */
             if (b > sx0 - pc + pw) b = sx0 - pc + pw;
+            if (!k && a < sx0 - pc + mg + opw) a = sx0 - pc + mg + opw;
             a = sx0 + ((a - sx0) & ~1); b = sx0 + ((b - sx0 + 1) & ~1);
             if (b - a < 2) continue;
             int j0 = 0, j1 = r->h, pr = s->py0 + r->ey;

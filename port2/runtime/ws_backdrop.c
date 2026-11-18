@@ -8,11 +8,13 @@
  * shims/gpu.c calls port_ws_backdrop when it meets the left sprite of the picture while the wide plane is on and fills
  * the strips of the wide copy before the game draws the picture itself, so everything the game draws on top (drums,
  * actors, boxes) stays on top.  Identity without --widescreen and in every other room (the sprite signature and the
- * room are both checked).  The approved rooms are on by default with --widescreen (AREA02 s5 since 2026-11-14);
+ * room are both checked).  The approved rooms are on by default with --widescreen (AREA02 s5 since 2026-11-14, AREA05 s1/s3, AREA02 s1 and AREA19 s1 since 2026-11-15, AREA11 s2, AREA09 s5 and AREA09 s3 since 2026-11-16);
  * `--ws-backdrop off` disables them, `--ws-backdrop on` takes every room of the table (the previews too),
  * `--ws-backdrop-rooms A:S,...` exactly those rooms, `--ws-backdrop mirror` AREA02 s5's first preview (the picture
  * mirrored at its edge); also PORT_WS_BACKDROP=1 (approved) / 2 (mirror) / 3 (every room) (not in the wasm2c build,
  * which has no environment).
+ *
+ * AREA08 s1 / s3 (Baccus Pier, ws_backdrop_pier.inc): approved by the user, on by default since 2026-11-17.
  *
  * The redraw (build_redraw) is drawn by code, the way shims/gfx_es.c makes its Spanish graphics: nothing of the
  * picture is copied or mirrored and no pixels are shipped.  The tables below hold coordinates only (the brick bond,
@@ -49,7 +51,8 @@
  * on with new content (no repeat).  The same code gives the same strips on i386, x86-64 and the wasm2c build.
  *
  * Standalone check / iteration (WS_BACKDROP_MAIN): PORT_WS_BACKDROP_DUMP=FILE writes the picture (raw, 320x224
- * little-endian 15-bit colours) during a run; then
+ * little-endian 15-bit colours, then 320x224 bytes: 1 where a piece drawn again over the player is opaque) during a
+ * run; then
  *   cc -O2 -DWS_BACKDROP_MAIN port2/runtime/ws_backdrop.c -o /tmp/wsb && /tmp/wsb FILE PAD OUT.ppm
  * writes the picture with both strips. */
 #include <stdio.h>
@@ -65,6 +68,9 @@ typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32;
 #define PH 224
 
 static u16 pic[PH][PW];                 /* the picture as 15-bit colours */
+static u8 pic_ov[PH][PW];               /* 1: an opaque texel of a piece drawn again over the player (Room.over) */
+static int shown_gl;                    /* the OpenGL renderer draws the frames (it samples a stretched quad's texture
+                                           otherwise than the software one: gen_th's th_shown) */
 static u16 *strip; static int strip_pad; static u32 strip_sum;
 int port_ws_backdrop_on = 1;            /* 1: the approved rooms (default); --ws-backdrop off = 0, mirror = 2, on = 3 (main.c) */
 static int enabled = -1;                /* 0 off, 1 the approved rooms, 2 mirror (AREA02 s5), 3 every room */
@@ -714,7 +720,7 @@ static void build_redraw(int pad)
    pre-rendered 320 x 224 8 bpp picture with CLUT (128, 511): its left 256 columns are page (128, 0) rows 0-223, drawn as
    one sprite at frame (0, 16) (256 x 224, or 256 x 256 clipped by the frame); the right 64 columns come from page
    (256, 0) or are pieced together from 64 x 32 leftovers (the Iron Castle hall, AREA17 s3 / s4, draws its left part
-   256 x 256 and its right one from page (256, 0): not redrawn yet, see docs/PORT.md), and some rooms draw parts of the scene as further unscaled
+   256 x 256 and its right one from page (256, 0); gen_hl takes its 224 rows like the others'), and some rooms draw parts of the scene as further unscaled
    quads over it (the roof and tree tops of AREA05, the hut and the front blossoms of the Dwarf Village).  The table
    holds where those pieces are (coordinates only); grab() puts the room's picture together from VRAM with them, so
    the redraw samples what the player sees.  area / sec name the room (the debug select's numbers; --ws-backdrop-rooms
@@ -730,8 +736,24 @@ typedef struct {
     int (*is)(void);                                     /* rooms that share them: is the grabbed picture this one's? */
 } Room;
 static const Room *room;                                 /* the room being drawn */
+static u16 tex8(const u16 *vram, int tx, int u, int v, int cx, int cy);
 static void build_redraw(int pad);
+static void gen_cb(int pad);
 #include "ws_backdrop_rooms.inc"
+#include "ws_backdrop_rooms2.inc"
+#include "ws_backdrop_kitchen.inc"
+#include "ws_backdrop_engine.inc"
+#include "ws_backdrop_belltower.inc"
+#include "ws_backdrop_gears.inc"
+#include "ws_backdrop_mermaid.inc"
+#include "ws_backdrop_ironmain.inc"
+#include "ws_backdrop_clock.inc"
+#include "ws_backdrop_pier.inc"
+#include "ws_backdrop_lake.inc"
+#include "ws_backdrop_factory.inc"
+#include "ws_backdrop_castle.inc"
+#include "ws_backdrop_island.inc"
+#include "ws_backdrop_prison.inc"
 #define PIECES_TOP4 { 128, 0, 224, 64, 32, 256, 0 }, { 128, 64, 224, 64, 32, 256, 32 }, { 128, 128, 224, 64, 32, 256, 64 }, \
                     { 128, 192, 224, 64, 32, 256, 96 }
 #define OVER_A5 { { 256, 0, 112, 56, 104, 0, 0 }, { 256, 56, 112, 200, 104, 56, 0 }, { 256, 144, 0, 64, 80, 256, 24 }, \
@@ -740,11 +762,56 @@ static void build_redraw(int pad);
                        { 256, 8, 8, 192, 32, 0, 192 }, { 256, 8, 48, 128, 40, 192, 184 } }
 static const Room ROOMS[] = {
     { 2, 5, 224, 1, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, build_redraw },            /* Small Strange Room */
-    { 5, 1, 224, 0, { PIECES_TOP4, { 256, 0, 0, 64, 96, 256, 128 } }, OVER_A5, gen_a5 },    /* the house with the wall */
-    { 5, 3, 224, 0, { PIECES_TOP4, { 256, 0, 0, 64, 96, 256, 128 } }, OVER_A5, gen_a5 },
-    { 19, 1, 224, 0, { PIECES_TOP4, { 256, 8, 96, 64, 96, 256, 128 } }, OVER_VILLAGE, gen_village, 2, 1, v_cherry },   /* Dwarf
+    { 5, 1, 224, 1, { PIECES_TOP4, { 256, 0, 0, 64, 96, 256, 128 } }, OVER_A5, gen_a5 },    /* the house with the wall */
+    { 5, 3, 224, 1, { PIECES_TOP4, { 256, 0, 0, 64, 96, 256, 128 } }, OVER_A5, gen_a5 },
+    { 19, 1, 224, 1, { PIECES_TOP4, { 256, 8, 96, 64, 96, 256, 128 } }, OVER_VILLAGE, gen_cb, 2, 1, v_cherry },   /* Dwarf
       Village in blossom: AREA19 s1 runs as area 2 s1 (GAME.area), told apart from AREA02 s1 by its picture */
-    { 2, 1, 224, 0, { PIECES_TOP4, { 256, 8, 96, 64, 96, 256, 128 } }, OVER_VILLAGE, gen_village, 0, 0, v_not_cherry },
+    { 2, 1, 224, 1, { PIECES_TOP4, { 256, 8, 96, 64, 96, 256, 128 } }, OVER_VILLAGE, gen_vb, 0, 0, v_not_cherry },
+    { 11, 2, 224, 1, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 256, 64, 0, 88, 80, 24, 128 } }, gen_cv },   /* the cave with
+      the brick tower (the tower's foot and door drawn again over the player) */
+    { 9, 5, 224, 1, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 256, 64, 0, 192, 152, 0, 80 }, { 256, 64, 144, 128, 112, 192, 8 } },
+      gen_st },                                          /* the brick wall with the staircase (the stair drawn again
+                                                            over the player as two quads) */
+    { 9, 3, 224, 1, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 256, 64, 0, 40, 136, 0, 72 }, { 256, 104, 0, 40, 136, 280, 72 } },
+      gen_th },                                          /* the treasure hall (the arches drawn again over the player) */
+    { 9, 4, 224, 1, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 256, 64, 0, 192, 152, 0, 8 }, { 256, 64, 144, 128, 112, 192, 120 } },
+      gen_rw },                                          /* the rock wall with the stair down to the right (the stair
+                                                            drawn again over the player as two quads; rooms2.inc) */
+    { 17, 3, 256, 1, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, gen_hl },   /* the Iron Castle hall (256 rows drawn) */
+    { 17, 4, 256, 1, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, gen_hl },
+    { 16, 4, TW_H, 1, { { 0 } }, { { 0 } }, gen_tw },   /* the green tower: a 672-row picture moved by the camera (its
+                                                            pieces and hook: TW_P / tw_take, rooms2.inc) */
+    { 18, 2, 256, 1, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, gen_kt },   /* the witch's kitchen (256 rows drawn;
+                                                            ws_backdrop_kitchen.inc) */
+    { 17, 5, 256, 1, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, gen_en },   /* the Iron Castle engine room (preview;
+                                                            ws_backdrop_engine.inc) */
+    { 16, 5, 256, 1, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 256, 72, 96, 48, 80, 136, 0 }, { 256, 64, 0, 88, 96, 64, 0 },
+      { 256, 152, 0, 96, 96, 152, 0 }, { 256, 136, 104, 88, 24, 0, 199 } }, gen_bt },   /* the bell tower (the clapper, the
+                                                            bell and the floor's near left part drawn again over the
+                                                            player; ws_backdrop_belltower.inc) */
+    { 16, 3, 256, 1, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 256, 64, 0, 144, 144, 0, 80 }, { 256, 64, 144, 72, 96, 244, 128 } },
+      gen_gr },                                          /* the gears room (ws_backdrop_gears.inc) */
+    { 16, 6, 256, 1, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 256, 64, 0, 144, 144, 0, 80 }, { 256, 64, 144, 72, 96, 244, 128 },
+      { 256, 184, 216, 64, 40, 252, 184 } }, gen_gr },
+    { 6, 2, MM_H2, 1, { { 0 } }, { { 0 } }, gen_mm },   /* the mermaid on her rock: the sea is a loop of four pictures */
+    { 6, 1, MM_H1, 1, { { 0 } }, { { 0 } }, gen_mm },   /* the Singing Rock beach: a 640-column picture moved by the
+                                                            camera, its two ends (mm_take, ws_backdrop_mermaid.inc) */
+    { 17, 2, IM_H, 1, { { 0 } }, { { 0 } }, gen_im },   /* the Iron Castle main room: a 640-column picture moved by the
+                                                            camera, its two ends (im_take, ws_backdrop_ironmain.inc) */
+    { 8, 1, 224, 1, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, gen_pr },   /* Baccus Pier: the picture over a water layer, light
+                                                            rays over both (pr_take, ws_backdrop_pier.inc) */
+    { 8, 3, 224, 1, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, gen_pr },
+    { 11, 1, 224, 1, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 256, 64, 0, 80, 181, 238, 43 } }, gen_lf },   /* the Lumberjack Factory (ws_backdrop_factory.inc) */
+    { 17, 1, IC_HM, 1, { { 0 } }, { { 0 } }, gen_ic },   /* the Iron Castle's entrance: a 384-row picture drawn from frame
+                                                            row -144 (ic_take, ws_backdrop_castle.inc) */
+    { 9, 2, CK_HM, 1, { { 0 } }, { { 0 } }, gen_ck },   /* the grandfather clock room: a 480 x 288 picture moved by the
+                                                            camera, its two ends (ck_take, ws_backdrop_clock.inc; preview) */
+    { 9, 1, LK_HM, 1, { { 0 } }, { { 0 } }, gen_lk },   /* the Lake's beach: a 512-column picture moved by the camera,
+                                                            its right end (lk_take, ws_backdrop_lake.inc; preview) */
+    { 9, 1, IS_HM, 1, { { 0 } }, { { 0 } }, gen_is },   /* the Lake's island screen (the mansion's base): a 640-column
+                                                            mosaic, its two ends (is_take, ws_backdrop_island.inc; preview) */
+    { 2, 2, 224, 1, { { 256, 0, 0, 64, 224, 256, 0 } }, { { 0 } }, gen_up },   /* the Underground Prison, lit (preview;
+                                                            ws_backdrop_prison.inc) */
 };
 #define NROOMS ((int)(sizeof ROOMS / sizeof ROOMS[0]))
 const char *port_ws_backdrop_rooms;                      /* --ws-backdrop-rooms A:S,A:S,... (decimal; "all") */
@@ -778,6 +845,12 @@ static u16 tex8(const u16 *vram, int tx, int u, int v, int cx, int cy)
     u16 w = vram[(size_t)(v & 511) * 1024 + ((tx + u / 2) & 1023)];
     return vram[(size_t)(cy & 511) * 1024 + ((cx + (u & 1 ? w >> 8 : w & 255)) & 1023)];
 }
+#ifndef WS_BACKDROP_MAIN
+extern int port_gpu_is_gl(void);
+static int en_gl(void) { return port_gpu_is_gl(); }
+#else
+static int en_gl(void) { return shown_gl; }
+#endif
 static u32 grab(const u16 *vram, int cx, int cy)
 {
     u32 h = 2166136261u;
@@ -787,13 +860,16 @@ static u32 grab(const u16 *vram, int cx, int cy)
         for (int y = 0; y < p->h; y++) for (int x = 0; x < p->w; x++)
             if (p->y + y < PH && p->x + x < PW) pic[p->y + y][p->x + x] = tex8(vram, p->tx, p->u + x, p->v + y, cx, cy);
     }
+    memset(pic_ov, 0, sizeof pic_ov);
     for (int i = 0; i < 6; i++) {
         const Piece *p = &room->over[i];
         for (int y = 0; y < p->h; y++) for (int x = 0; x < p->w; x++) {
             u16 c = tex8(vram, p->tx, p->u + x, p->v + y, cx, cy);
-            if (c && p->y + y < PH && p->x + x < PW) pic[p->y + y][p->x + x] = c;
+            if (c && p->y + y < PH && p->x + x < PW) { pic[p->y + y][p->x + x] = c; pic_ov[p->y + y][p->x + x] = 1; }
         }
     }
+    if (room->gen == gen_pr) pr_take(vram);              /* (its water and ray layers) */
+    if (room->gen == gen_en) en_take(vram, cx, cy, en_gl());   /* (its scene: 19 more quads, as the renderer shows them) */
     for (int y = 0; y < PH; y++) for (int x = 0; x < PW; x++) h = (h ^ pic[y][x]) * 16777619u;
     return h;
 }
@@ -802,11 +878,60 @@ static u32 grab(const u16 *vram, int cx, int cy)
 /* sprite (cmd 0x64/0x65) at screen (x, y) of w x h texels from (u, v), page (tx, ty, depth), CLUT (cx, cy):
    the strip buffer when it is the left part of a listed room's picture (left strip at columns 0..pad-1, right strip
    at pad..2pad-1, PH rows, *rows set to PH), else 0 */
+extern int port_gpu_is_gl(void);                          /* shims/gpu.c */
 const u16 *port_ws_backdrop(const u16 *vram, int pad, int x, int y, int w, int h, int u, int v, int tx, int ty,
                             int depth, int cx, int cy, int *rows)
 {
     const Room *r = 0;
     if (enabled < 0) { const char *e = getenv("PORT_WS_BACKDROP"); enabled = e && *e >= '1' && *e <= '3' ? *e - '0' : port_ws_backdrop_on; }
+    port_ws_backdrop_dy = 0; port_ws_backdrop_side = 3;
+    if (enabled && pad > 0 && depth == 1 && cx == 128 && (cy == 510 || cy == 511)) {   /* AREA06 s1 / s2 (mm_take) */
+        u8 *g = port_ram_ptr(PORT_A_GAME); int a = *(u16 *)(g + 0), sc = *(u16 *)(g + 2);
+        for (int i = 0; i < NROOMS; i++)
+            if ((ROOMS[i].h == MM_H1 || ROOMS[i].h == MM_H2) && ROOMS[i].area == a && ROOMS[i].sec == sc)
+                return room_enabled(&ROOMS[i]) ? mm_take(vram, pad, sc, x, y, w, h, u, v, tx, ty, cy, rows) : 0;
+    }
+    if (enabled && pad > 0 && depth == 1 && cx == 128 && cy == 511 && tx == 128 && w == 256 && h == PH) {   /* AREA17 s2 (im_take) */
+        u8 *g = port_ram_ptr(PORT_A_GAME); int a = *(u16 *)(g + 0), sc = *(u16 *)(g + 2);
+        for (int i = 0; i < NROOMS; i++)
+            if (ROOMS[i].h == IM_H && ROOMS[i].area == a && ROOMS[i].sec == sc)
+                return room_enabled(&ROOMS[i]) ? im_take(vram, pad, x, y, w, h, u, v, tx, ty, rows) : 0;
+    }
+    if (enabled && pad > 0 && !x && w == 256 && h == 256 && !u && !v && tx == 128 && !ty && depth == 1 && cx == 128 && cy == 511) {
+        u8 *g = port_ram_ptr(PORT_A_GAME); int a = *(u16 *)(g + 0), sc = *(u16 *)(g + 2);   /* AREA17 s1 (ic_take) */
+        for (int i = 0; i < NROOMS; i++)
+            if (ROOMS[i].h == IC_HM && ROOMS[i].area == a && ROOMS[i].sec == sc)
+                return room_enabled(&ROOMS[i]) ? ic_take(vram, pad, y, rows) : 0;
+    }
+    if (enabled && pad > 0 && w == 256 && h == 256 && !u && !v && tx == 128 && !ty && depth == 1 && cx == 128 && cy == 511) {
+        u8 *g = port_ram_ptr(PORT_A_GAME); int a = *(u16 *)(g + 0), sc = *(u16 *)(g + 2);   /* AREA09 s2 (ck_take) */
+        for (int i = 0; i < NROOMS; i++)
+            if (ROOMS[i].h == CK_HM && ROOMS[i].area == a && ROOMS[i].sec == sc)
+                return room_enabled(&ROOMS[i]) ? ck_take(vram, pad, x, y, rows) : 0;
+    }
+    if (enabled && pad > 0 && w == 256 && h == 256 && !u && !v && !tx && ty == 256 && depth == 1 && cx == 128 && cy == 510) {
+        u8 *g = port_ram_ptr(PORT_A_GAME); int a = *(u16 *)(g + 0), sc = *(u16 *)(g + 2);   /* AREA09 s1, the island (is_take) */
+        for (int i = 0; i < NROOMS; i++)
+            if (ROOMS[i].h == IS_HM && ROOMS[i].area == a && ROOMS[i].sec == sc && room_enabled(&ROOMS[i])) {
+                const u16 *st = is_take(vram, pad, x, y, rows);
+                if (st) return st;
+            }
+    }
+    if (enabled && pad > 0 && y == 4 && w == 256 && h == 256 && !u && !v && !tx && ty == 256 && depth == 1 && cx == 128 && cy == 510) {
+        u8 *g = port_ram_ptr(PORT_A_GAME); int a = *(u16 *)(g + 0), sc = *(u16 *)(g + 2);   /* AREA09 s1 (lk_take) */
+        for (int i = 0; i < NROOMS; i++)
+            if (ROOMS[i].h == LK_HM && ROOMS[i].area == a && ROOMS[i].sec == sc)
+                return room_enabled(&ROOMS[i]) ? lk_take(vram, pad, x, rows) : 0;
+    }
+    if (enabled && pad > 0 && x == 0 && w == 256 && !u && !v && !ty && depth == 1 && cx == 128 && cy == 511
+        && (tx == 128 || tx == 256 || tx == 384)) {     /* a tall picture's set (AREA16 s4: tw_take) */
+        u8 *g = port_ram_ptr(PORT_A_GAME); int a = *(u16 *)(g + 0), sc = *(u16 *)(g + 2);
+        for (int i = 0; i < NROOMS; i++)
+            if (ROOMS[i].h == TW_H && ROOMS[i].area == a && ROOMS[i].sec == sc) {
+                if (!room_enabled(&ROOMS[i])) return 0;
+                room = &ROOMS[i]; return tw_take(vram, pad, y, tx, rows);
+            }
+    }
     if (!enabled || pad <= 0 || x != 0 || y != 16 || w != 256 || u || v || tx != 128 || ty || depth != 1
         || cx != 128 || cy != 511) return 0;
     {
@@ -819,12 +944,14 @@ const u16 *port_ws_backdrop(const u16 *vram, int pad, int x, int y, int w, int h
         }
         if (!r || !room_enabled(r)) return 0;
         room = r;
-        if (!strip || strip_pad != pad || s != strip_sum) {
-            strip_sum = s; build(pad);
+        if (!strip || strip_pad != pad || s != strip_sum || shown_gl != port_gpu_is_gl()) {
+            strip_sum = s; shown_gl = port_gpu_is_gl(); build(pad);
             {   const char *e = getenv("PORT_WS_BACKDROP_DUMP");      /* research: the picture, raw 15-bit LE */
                 FILE *f = e ? fopen(e, "wb") : 0;
                 if (f) {
                     for (int yy = 0; yy < PH; yy++) for (int xx = 0; xx < PW; xx++) { u8 b[2] = { (u8)pic[yy][xx], (u8)(pic[yy][xx] >> 8) }; fwrite(b, 1, 2, f); }
+                    fwrite(pic_ov, 1, sizeof pic_ov, f);   /* then the over pieces' opaque texels, one byte each */
+                    if (room->gen == gen_en) fwrite(en_bk, 1, sizeof en_bk, f);   /* (and that room's back layer) */
                     fclose(f);
                 }
             }
@@ -833,6 +960,36 @@ const u16 *port_ws_backdrop(const u16 *vram, int pad, int x, int y, int w, int h
     *rows = PH;
     return strip;
 }
+/* The strips' texels that stand in front of the actors (bit 15 set, 0 = none; laid out as the strips), when the
+   textured quad the game is about to draw (its page and first texel) is the first of the room's front pieces and
+   the room's strips are the ones laid this frame (shims/gpu.c checks that); else 0.  AREA17 s5 (gen_en). */
+const u16 *port_ws_backdrop_over(int pad, int tx, int u, int v)
+{
+    if (!room || room->gen != gen_en || !strip || strip_pad != pad || !en_ov || en_ov_pad != pad) return 0;
+    return tx == EN_Q[13].tx && u == EN_Q[13].u && v == EN_Q[13].v ? en_ov : 0;
+}
+/* Texels of the picture itself to draw again (bit 15 set; 0 = leave), *w columns from the picture's column *x, PH
+   rows, when the game is about to draw that textured quad over the picture; else 0.  AREA11 s1 (lf_fix). */
+const u16 *port_ws_backdrop_fix(int tx, int u, int v, int *x, int *w)
+{
+    if (!room || room->gen != gen_lf || !strip || tx != 256 || u != 64 || v != 0) return 0;
+    *x = 318; *w = 2;
+    return &lf_fix[0][0];
+}
+/* AREA09 s1 with the island's strips on (ws_backdrop_island.inc): the columns an object sprite's quad moves left,
+   for the foreground ledge's two quads (drawObjectSprite; else 0) */
+int port_ws_island_fg(int tpage, int clut, int uv)
+{
+    extern int port_widescreen;
+    u8 *g; int a, sc;
+    if (port_widescreen <= 0 || !is_fg_face(tpage, clut, uv)) return 0;
+    if (enabled < 0) { const char *e = getenv("PORT_WS_BACKDROP"); enabled = e && *e >= '1' && *e <= '3' ? *e - '0' : port_ws_backdrop_on; }
+    if (!enabled) return 0;
+    g = port_ram_ptr(PORT_A_GAME); a = *(u16 *)(g + 0); sc = *(u16 *)(g + 2);
+    for (int i = 0; i < NROOMS; i++)
+        if (ROOMS[i].h == IS_HM && ROOMS[i].area == a && ROOMS[i].sec == sc && room_enabled(&ROOMS[i])) return port_widescreen;
+    return 0;
+}
 #else
 int main(int argc, char **argv)
 {
@@ -840,10 +997,15 @@ int main(int argc, char **argv)
     int a = 2, sc = 5;
     if (argc > 1 && sscanf(argv[1], "%d:%d", &a, &sc) == 2) { argc--; argv++; }   /* the room, default 2:5 */
     for (int i = 0; i < NROOMS; i++) if (ROOMS[i].area == a && ROOMS[i].sec == sc) { room = &ROOMS[i]; break; }
+    if (room && room->h == TW_H) return tw_main(argc, argv);   /* (a 672-row picture: rooms2.inc) */
+    if (room && room->h == IM_H) return im_main(argc, argv);   /* (a 640-column picture: ws_backdrop_ironmain.inc) */
     if (!room || argc < 4 || !(f = fopen(argv[1], "rb"))) { fprintf(stderr, "usage: wsb [AREA:SECTION] PIC.raw PAD OUT.ppm [mirror]\n"); return 1; }
     for (int y = 0; y < PH; y++) for (int x = 0; x < PW; x++) { u8 b[2]; if (fread(b, 1, 2, f) != 2) return 1; pic[y][x] = (u16)(b[0] | b[1] << 8); }
+    if (fread(pic_ov, 1, sizeof pic_ov, f) != sizeof pic_ov) memset(pic_ov, 0, sizeof pic_ov);   /* (older dumps: none) */
+    if (fread(en_bk, 1, sizeof en_bk, f) != sizeof en_bk) memset(en_bk, 0, sizeof en_bk);
     fclose(f);
     pad = atoi(argv[2]); enabled = argc > 4 ? 2 : 1;
+    shown_gl = getenv("WSB_GL") != 0;                    /* as drawn by the OpenGL renderer (gen_th) */
     build(pad);
     if (getenv("WSB_INFO")) fprintf(stderr, "side_k %d %d floor_fit L %d-%d R %d-%d\n", side_k[0], side_k[1], floor_fit[0][0], floor_fit[0][1], floor_fit[1][0], floor_fit[1][1]);
     if (!strip || !(f = fopen(argv[3], "wb"))) return 1;

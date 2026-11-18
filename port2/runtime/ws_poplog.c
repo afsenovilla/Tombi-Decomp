@@ -75,7 +75,7 @@ void port_pop_end(unsigned long b, const void *key, int kind)
 }
 
 /* --sweep-x FRAME:STEP:X,X,... (research, with --log-pop): from vblank FRAME on, the player's X is set every vblank,
- * moving STEP units a frame through the listed X positions (=X jumps there), so a room can be scrolled end to end
+ * moving STEP units a frame through the listed X positions (=X jumps there, ~N lets the player go for N vblanks), so a room can be scrolled end to end
  * without playing it.  The game still runs: gravity, the camera, the spawners all see an ordinary walk. */
 static int sw_frame = -1, sw_step = 4, sw_n, sw_i, sw_x, sw_on, sw_fly, sw_fly_on, sw_y;
 /* --sweep-fly DY (with --sweep-x): the player flies at a fixed height, DY units from where the sweep starts (negative
@@ -89,8 +89,8 @@ void port_sweep_add(const char *s)
     sw_step = atoi(++s); s = strchr(s, ':'); if (!s) return;
     s++;
     while (*s && sw_n < 64) {
-        sw_jump[sw_n] = *s == '=';
-        if (*s == '=') s++;
+        sw_jump[sw_n] = *s == '=' ? 1 : *s == '~' ? 2 : 0;         /* (~N: let go for N vblanks, e.g. over a screen change) */
+        if (*s == '=' || *s == '~') s++;
         sw_wp[sw_n++] = atoi(s);
         while (*s && *s != ',') s++;
         if (*s == ',') s++;
@@ -101,6 +101,12 @@ void port_sweep_vblank(void)
     if (sw_frame < 0 || port_frame < sw_frame || sw_i >= sw_n) return;
     uint8_t *hp = *(uint8_t **)(PORT_M0(0x800A6038u) + 0x40);
     if (!port_is_ram_ptr(hp)) return;
+    if (sw_jump[sw_i] == 2) {
+        if (sw_fly_on) { *(int16_t *)(hp + 2) = (int16_t)sw_x; *(uint8_t *)PORT_M0(PORT_A_GVARS + 0x0E) = 0; sw_fly_on = 0; }
+        sw_fly = 0;                                         /* (on foot from here) */
+        if (--sw_wp[sw_i] <= 0) { sw_i++; sw_x = *(int16_t *)(hp + 2); }
+        return;
+    }
     if (!sw_on) { sw_on = 1; sw_x = *(int16_t *)(hp + 2); if (sw_fly) sw_y += *(int16_t *)(PORT_M0(PORT_A_PLAYER) + 0x16); }
     if (sw_fly && sw_i < sw_n) {
         uint8_t *pl = PORT_M0(PORT_A_PLAYER);
@@ -109,7 +115,7 @@ void port_sweep_vblank(void)
         *(int16_t *)(pl + 0x7C) = *(int16_t *)(pl + 0x7E) = *(int16_t *)(pl + 0x80) = *(int16_t *)(pl + 0x82) = 0;
     }
     int t = sw_wp[sw_i];
-    if (sw_jump[sw_i]) { sw_x = t; sw_i++; }
+    if (sw_jump[sw_i] == 1) { sw_x = t; sw_i++; }
     else if (sw_x < t) { sw_x += sw_step; if (sw_x >= t) { sw_x = t; sw_i++; } }
     else if (sw_x > t) { sw_x -= sw_step; if (sw_x <= t) { sw_x = t; sw_i++; } }
     else sw_i++;

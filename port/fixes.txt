@@ -477,6 +477,14 @@ src/x010/updateParallaxBackdropSprite.c | if (o->a.p.whole - 0x40 < 0x141 && o->
 # and AREA00's far sky / sea strip (two 232-column sprites from world x 1400, scrolled at 1/8) starts at the room's left
 # end: its two first sprites repeat to the left (period 464) over the wide frame's left strip
 src/updateA00FarBackdropWest.c | *(unsigned char *)&o->visible = 1; | *(unsigned char *)&o->visible = 1; if (port_ws_cull && x < 3300) { extern int port_ws_backdrop_period(void *, int); port_ws_backdrop_period(o, -464); }
+# and the Haunted Mansion's exterior backdrop (AREA04 s0-s3, updateStormBackdrop: eight 64-wide columns of trees and
+# lake on a 512-column cycle, the one at 384..448 skipped, so they cover s - 64 .. s + 384 for s = 0..63: up to 53
+# columns of clear colour in the left strip at 16:9): every column is listed and repeats one period left and right
+src/x004/updateStormBackdrop.c | if (x >= 0x180 && x <= 0x1c0) { | if (x >= 0x180 && x <= 0x1c0 && !port_ws_cull) {
+src/x004/updateStormBackdrop.c | o->visible = 1; | o->visible = 1; if (port_ws_cull) port_ws_backdrop_period(o, 512);
+src/x004/func_8011C894_scus94236.c | if (x >= 0x180 && x <= 0x1c0) { | if (x >= 0x180 && x <= 0x1c0 && !port_ws_cull) {
+src/x004/func_8011C894_scus94236.c | o->visible = 1; | o->visible = 1; if (port_ws_cull) port_ws_backdrop_period(o, 512);
+src/drawCategory7Objects.c | FUN_8011e778(o); | { extern void port_ws_cat7(TObj *, void (*)(TObj *)); port_ws_cat7(o, FUN_8011e778); }
 #
 # --title-bg (widescreen, runtime/titlebg.c): mark the ordering-table node the title background / logo sprites go into
 src/o0ptsub0/titleLogoDraw.c |     addTilePrim(&r, 0, 0, 1); |     { extern unsigned long *CURRENT_OT; extern void port_title_bg_mark(void *); port_title_bg_mark(CURRENT_OT + 1); } addTilePrim(&r, 0, 0, 1);
@@ -536,8 +544,8 @@ src/updateL4Type1AObject.c | o->box0 = 4; | { extern int port_cut_content; exter
 # table D_80117AC8[GCD.bceed]) does place the board's sign in section 1, subtype 19 (-> 20 once the baby mouse is back,
 # -> 35 after event 50), at (28,-144) depth 90 next to the townsfolk who mentions it, but nothing Tombi can stand on is
 # within its hit depth (the ledge above the wall is at depth 144, |dz| 54 > 45; the ground is 88 px too low), so the
-# board was never readable and events 46/49 never started from it. port_cc_sign (runtime/main.c) moves it down to the
-# ground under the board; port_cc_sign_text shows the unused (1,6) once before the first (1,7) (mouse found, event 49
+# board was never readable and events 46/49 never started from it. port_cc_sign (runtime/main.c) moves it to depth 117,
+# in reach of that ledge (read standing by the board, not from the ground under it); port_cc_sign_text shows the unused (1,6) once before the first (1,7) (mouse found, event 49
 # not started yet) and chains (1,7) after it. Save points restored with the same hook: port_cc_sign spawns them.
 src/updateL4Type1AObject.c | o->msg = showMessageBox(text, opt, 0xa0, 0x8c); | { extern void port_cc_sign_text(void *, int, int, int, unsigned short *, unsigned short *); port_cc_sign_text(o, GAME[0], D_8009CEED, D_8009CDD5, &text, &opt); } o->msg = showMessageBox(text, opt, 0xa0, 0x8c);
 src/updateL4Type1AObject.c | D_8009C942 = 0; | { extern void *port_cc_sign_next(void *); M *nm = (M *)port_cc_sign_next(o); if (nm) { o->msg = nm; break; } } D_8009C942 = 0;
@@ -816,6 +824,8 @@ src/drawHud.c | drawHudLives(o, 0x18 - port_ws_cull, 0xf0); | drawHudLives(o, 0x
 src/drawScreenFade.c | p->s1a = 0x100; | p->s1a = PORT_NTSC(0x100, 0xf0);
 src/printEventMessage.c | o->y.raw = 0xa00000; | o->y.raw = PORT_NTSC(0xa00000, 0x900000);
 src/drawLoadingSprites.c | FUN_80021478(0xc0, 0xa0, 0, 0, s); | FUN_80021478(0xc0, PORT_NTSC(0xa0, 0x80), 0, 0, s);
+# --widescreen: the NOW LOADING pig tiles (7 columns of 48) carried on to both sides of the wide frame, same checkerboard
+src/drawLoadingSprites.c | for (i = 0; i < 7; i++) { | for (i = -((port_ws_cull + 47) / 48); i < 7 + (port_ws_cull + 47) / 48; i++) {
 # Info message (item names...) bottom row y 212 -> 180 (USA printInfoMessage 0x80031124)
 src/printInfoMessage.c | F14 = (0xd4 - (3 - INFO_MESSAGE_SLOT) * 20) << 16; | F14 = (PORT_NTSC(0xd4, 0xb4) - (3 - INFO_MESSAGE_SLOT) * 20) << 16;
 # Cut-scene overlay sprites: no 24-line drop and no black bars at y 0 / 240 (USA drawLetterboxOverlay 0x8004E244)
@@ -1075,3 +1085,22 @@ src/d0spsub2/memCardDrawFileLocation.c | memCardDrawString(5, 0); | { extern int
 src/d0spsub2/memCardDrawString.c | void memCardDrawString(int pri, int mode) | extern int port_mc_prop_on, port_mc_last_x, port_mc_left; extern int port_mc_advance(int tpage, int clut, int u, int v, int w, int h, int c); void memCardDrawString(int pri, int mode)
 src/d0spsub2/memCardDrawString.c | { int t = g.w; x += t; } | { int t = g.w; if (port_mc_prop_on) { port_mc_last_x = (short)x; t = port_mc_advance(MEMCARD_DRAW_PARAMS.w, MEMCARD_DRAW_PARAMS.attr, g.u, g.v, g.w, g.h, (short)c); s->x0 = x - port_mc_left; } x += t; }
 src/d0spsub2/memCardDrawString.c | s->x0 = x - 0xB; | s->x0 = port_mc_prop_on ? port_mc_last_x + 8 - 0xB : x - 0xB;
+#
+# Widescreen exits (runtime/ws_exits.c, docs/PORT.md "Widescreen exits"): in the rooms whose exit sits at the 4:3 screen
+# edge, the exit fires at the wide frame's edge instead (tryStartItemInteraction holds it until Tomba is past the moved
+# boundary of tools/colview_exits.json "ws"), on that side Tomba may walk PORT_WSL / PORT_WSR (the pad, 0 elsewhere) further past the
+# camera than the 4:3 clamps allow, and past a column he always walks over on 4:3 before an edge exit (camera limit +- 0x80;
+# the exits sit at +- 0x88..0x91) the WHM repeats that column (getCollisionPlaneAt returned nothing past minX - 0xAA / maxX + 0xAA, so he fell short of the
+# exit), flat at the edge pixel's floor height and without its walls (port_ws_whm_col: repeated as it is, a column's
+# slope and walls came back every 8 units)
+src/tryStartItemInteraction.c | *p = 0; | if (port_ws_exit_hold(x, y)) return 0; *p = 0;
+src/cameraModeHandler6B.c | o->s2e + 150 | o->s2e + 150 + PORT_WSR
+src/cameraModeHandler6B.c | o->s2c - 150 | o->s2c - 150 - PORT_WSL
+src/cameraModeHandler6.c | (a = b - 0x90) | (a = b - 0x90 - PORT_WSL)
+src/cameraModeHandler6.c | (a = b + 0x90) | (a = b + 0x90 + PORT_WSR)
+src/updateCameraFollow.c | t = x - 0x90; | t = x - 0x90 - PORT_WSL;
+src/updateCameraFollow.c | t = x + 0x90; | t = x + 0x90 + PORT_WSR;
+src/cameraClampAroundTarget.c | t = x - 0x90; | t = x - 0x90 - PORT_WSL;
+src/cameraClampAroundTarget.c | t = x + 0x90; | t = x + 0x90 + PORT_WSR;
+src/getCollisionPlaneAt.c | if (x < CAMERA_SCROLL.minX - 0xaa || | x = port_ws_whm_x(x, y, CAMERA_SCROLL.minX, CAMERA_SCROLL.maxX); if (x < CAMERA_SCROLL.minX - 0xaa ||
+src/getCollisionPlaneAt.c | return b + *(unsigned short *)(b + (c << 1)); | return port_ws_whm_col(b + *(unsigned short *)(b + (c << 1)), x);

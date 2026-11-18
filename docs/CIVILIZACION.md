@@ -1257,3 +1257,10 @@ Comprobadas en I0NFO2 PAL / el C emparejado y en el disco JP; donde aciertan, la
 | No hay diálogo de Yan en el pueblo de madera | **coherente** | El único ヤン del banco de AREA11 es la línea de uso ヤンの弁当をつかった. Nunca dijimos lo contrario. |
 | Hoja comunitaria civ_towns: 82 de 108 paletas coinciden con JP; BUNMEI2 JP y PAL difieren | **sin comprobar** | No se ha releído la hoja. |
 | Paletas de ayuda de TombaEdit, sincronización del editor | **n/a** | Funciones del editor, no pruebas del disco. |
+
+## Ciudad de Hierro: hallazgos del 17-11-2026 (dibujo nuevo intentado y aparcado)
+
+Se intentó rehacer el dibujo de la Ciudad de Hierro y el usuario lo descartó; queda aparcado. Los hallazgos (el
+patio central es un octógono cuyas esquinas laterales son los objetos 21 y 22; las líneas de puntos del vídeo son
+los raíles de los ascensores; la página A08000 tiene 35 piezas de exterior, no 12; qué no funcionó y por qué) están
+en `docs/CIVILIZATION.md`, "Iron Town: findings of 2026-11-17".

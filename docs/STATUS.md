@@ -2,12 +2,96 @@
 
 Update this file whenever something lands or a task is decided. Newest first.
 
+## Since v0.6.1 (not released)
+
+(nothing yet)
+
+**For the next release (the user, 2026-11-18): widescreen becomes officially supported.** Change the widescreen
+option in the settings and drop "experimental" everywhere it is shown or documented: the PC launcher
+(`tools/port_launcher.py`, `tools/port_launcher_lang.py`: the aspect labels `a.w16` / `a.w21` ... in every language),
+the Android app (`port2/android/app/src/main/res/values*/strings.xml`), the `--widescreen` usage / comment in
+`port2/runtime/main.c`, README.md and docs/PORT.md "Widescreen". The default becomes **auto** (the user, 2026-11-18:
+"I would make it auto by default"): the pad that fills the real display, in the PC launcher and the Android app
+(check what a fresh install and an existing saved setting do: an explicit 4:3 choice must stay 4:3). The option's name
+and place in the settings were not said: show him 3-4 real renders of the settings page before applying. Not done
+yet.
+
+## In v0.6.1
+
+- Widescreen fixes from the user's device feedback (2026-11-17; all checked on the PC, headless, soft renderer,
+  i386; not on the device or GL):
+  - **Dwarf Village (AREA02 s1), back lane**: Tomba walked on air at the roof's height left of the hut and the hatch
+    to the Underground Prison did not take him. The hatch exit is back at its 4:3 place and the ground goes on left of
+    it (`LEDGE` in `runtime/ws_exits.c`, docs/PORT.md "Widescreen exits"). Tested by dropping Tomba on the back lane
+    in the left strip (position pokes) and walking right: lands at Y -88, falls into the pit, room 2:2.
+  - **Iron Castle engine room (AREA17 s5)**: the strips' pipes are drawn in front of the actors, as the picture's own
+    front pieces are (`en_ov`, `port_ws_backdrop_over`, `ws_backdrop_over` in shims/gpu.c); the copper pipe's turn in
+    the right strip lost its two copied riveted rings (`EN_RINGS`). Checked: the mask (tinted) at 16:9 / 21:9, frames
+    with and without the layer equal where no actor stands. Not seen with an actor crossing the edge (the exits fire
+    before Tomba gets there in a headless run): to check on the device.
+  - **Lumberjack Factory (AREA11 s1)**: the black line in the right jamb is gone (the picture's last two columns keep
+    the broken rock's texels; done again when the game draws the open door: `lf_fix`, `port_ws_backdrop_fix`), the
+    strip's jamb ends at the door's foot. 4:3 frame unchanged.
+  - **Brick staircase (AREA09 s5)**, report "Tomba hops going downhill": walking down is a straight diagonal, the
+    same frame by frame at 4:3 and 16:9 (CVLOG); the port changes nothing in that room's collision. In the video
+    Tomba is dashing; not compared with the original game yet (tools/psxemu).
+  - **Baccus Village notice board (`--cut-content`)**: read from the ledge by the board, not from the ground under
+    it (`port_cc_sign`: the sign at depth 117). Checked with Tomba placed on the ledge by position pokes (depth 90
+    and 144: the text opens; on the ground: nothing); climbing up there in play not checked.
+  - **Iron Castle's entrance (AREA17 s1)**: the strips are v0.6.0's (the user's choice, 2026-11-17: the versions
+    tried that day were discarded, do not bring them back). Still open from his feedback: the joins, the thin left
+    chain's hollow copies, the left clouds.
+  - **Lake's beach (AREA09 s1)**: the picture's left end is extended too (the boat scene shows it: the camera goes
+    past `LK_X1`); `lk_take` lays either strip or both. Checked with the camera forced to the boat scene's position
+    (`--poke-every 1:1F800176:VAL:2`, x = 1024 - VAL), not in the scene itself. Weak: at 21:9 / 32:9 with both
+    strips laid, rows 0-19 of the left strip are one blue step off the game's clear colour (it would need the clear
+    colour from `ws_fill`); at 32:9 a seam 128 columns left of the picture where the island's mosaic starts.
+  - **Forest of 100 Flowers, right entrance (AREA01 s1), the stone house with the cave door**: the rock wall goes on
+    to the right on a wide frame, with the platform and the fence under it (`ROOMS` `props_only` + `PROPS` rows in
+    `runtime/ws_edge.c`, docs/PORT.md "Room ends"; the rock is part of the area model). 4:3 identical, the exit to
+    the Dwarf Village as before (PC, i386, soft renderer). Reached headless by leaving AREA02 s0 to the left
+    (`--pad-script 1000:start,1300:circle:3,1700:left:500` from the debug select 2:0). Weak: the stone pattern
+    repeats every 216 units; at 32:9 a crease between the copies shows against the sky.
+  - Closed (the user, 2026-11-18): the brick staircase (AREA09 s5), "Tomba hops going downhill". It was the suit
+    he wore, the reward of the red + blue quest, which makes Tomba run twice as fast: not the widescreen work, and
+    too narrow a case to pursue. What was measured: the dash is Square with `GAME.area00_eventControl & 0x40`
+    (`--poke 1590:8009C984:40:1x8`, pad `left+square`); H / Y per frame while dashing down are the same in the port
+    (4:3 and 16:9, speed levels 0-3) and in the original code (tools/psxemu, same pokes), a straight diagonal within
+    1 px. Not checked: whether the original game hops the same way with that suit.
+
+## Parked (2026-11-17): new pictures for the cut Civilization towns
+
+The user asked for the three town pictures (`tools/civ_rebuild.py`) to be redone; two approaches on Iron Town were
+rejected and the user said to leave it for now. Nothing changed in the generator. Findings and what not to repeat:
+docs/CIVILIZATION.md "Iron Town: findings of 2026-11-17". Do not restart without the user asking.
+
 ## Last release
 
-v0.5.6 (2026-11-14): Spanish CARGANDO redrawn at the logo's own pixel size and centred like NOW LOADING (version 1 kept
-in tools/gfx_es/cargando.py); widescreen AREA02 s5 side-wall strips on by default; Baron's walk-in fixed at every width;
-panel items usable in the underground tunnels; AREA05 / Dwarf Village strip previews (off by default). Earlier: v0.5.5
-(widescreen pop-in fixes), v0.5.4 (top-down maps, first room's left end, update check), ... v0.3.1 (66a8281).
+v0.6.1 (2026-11-17, built from master 186beea): the widescreen fixes from the user's device feedback (Dwarf Village
+back lane and prison hatch, the engine room's pipes in front of the actors, the Lumberjack Factory's jamb and sand,
+the boat scene's left strip, the rock wall past the stone house of the Forest of 100 Flowers) and the Baccus notice
+board read from its ledge (`--cut-content`). The Iron Castle's entrance strips are v0.6.0's. Checked on the PC only
+(soft renderer; i386 = wasm2c frames in six rooms); the Windows exe workflow has a path filter, so its last run was
+on the last code commit (0d24c55, success), the APK run on the head. Before it:
+
+v0.6.0 (2026-11-17, built from master 2f5acec8; the head at release time, 48f1865, only adds docs): widescreen strips
+for Baccus Pier (AREA08 s1 / s3), the Lumberjack Factory (AREA11 s1) and the Iron Castle entrance (AREA17 s1), all
+approved by the user on PC captures (not tested on the device or on GL); the other agent's widescreen ends (the
+Lake's beach and island screen, the mountain) and the LZ decoder fix. The APK job had failed since the LZ fix
+(`getenv` undeclared in `shims/libc.c`, clang only): fixed in 57d5b75. Master kept moving during the wait (each push
+cancels the running builds): docs-only pushes do not start builds, so the release took the last green pair.
+
+Previous: v0.5.10 (2026-11-17, master 2583011b5): AREA05 square fixed (the back lane's fountain solid again, as an obstacle to
+hop over; both lanes open to the right edge; the notice-board box change reverted), top-down map margins for the
+Hidden Village and the Dwarf Village (other agent). First APK run with a warm ccache: 17 min (USA/JP 64-bit steps,
+~4-5 min each, still redo gen2 + a one-file clang -O2 + WABT every run).
+
+v0.5.9 (2026-11-17): same content as v0.5.8, published again because v0.5.8 went out with VERSION still at 0.5.7
+(the Android launcher showed 0.5.7). v0.5.8: widescreen exits moved to the wide edge in the rooms reviewed with the
+user (docs/PORT.md "Widescreen exits"), AREA05 notice board talk box widened, the first room's added foreground
+trunks dropped, the collision view (with exits), the other agent's widescreen strips of the day. Earlier: v0.5.7
+(Dwarf Village strips), v0.5.6 (CARGANDO redraw, AREA02 s5 strips), v0.5.5 (widescreen pop-in fixes), ... v0.3.1.
+Bump VERSION before every release.
 
 Release number: `VERSION` (repo root) is the version the Android launcher shows (build.gradle versionName) and the
 default of release.yml; bump it before each release (it used to show 0.1.<CI run number>).
@@ -58,6 +142,94 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    screen too; ~52 in the first village with the slider up before the last present change (presents no longer wait
    for the GPU: not measured yet).  Open: the 3D's speed on the console; the PC syntax check for 3DS code uses
    devkitPro headers in a scratch folder (not in the repo).
+0b. **LZ decoder fix (2026-11-17, docs/PORT.md "LZ overlap", not released yet).** `lzDecompress`'s overlapping copies
+   were compiled as `memmove` (a `bcopy()` call the compilers treat as a builtin) and left stale buffer bytes: the
+   colour specks of the Million-Year-Old Man's room (AREA02 s4, 11 bad CLUT entries), small VRAM differences in 57
+   of 96 rooms, and the Sacred Fish of the Flower Tower (AREA13 s0) never spawning from the debug select. Fixed in
+   `shims/libc.c` (`psx_bcopy`); that room's grey clear (it shows through 16 transparent palette entries) is drawn
+   under the picture with `--widescreen` (`ws_under`, `shims/gpu.c`). Checked headless on PC only (software + GL,
+   4:3 / 16:9, i386 and the wasm2c build); not tested on the device. Worth a play-through look at rooms that load
+   LZ-to-RAM data, which the one-frame sweep does not cover.
+0a. **Widescreen exits (2026-11-17, docs/PORT.md "Widescreen exits", `runtime/ws_exits.c`).** Moved to the wide
+   edge, reviewed room by room with the user: AREA02 s1 (and the blossom village, which runs as 2:1), s5; AREA03 s1,
+   s5; AREA04 s2; AREA05 s1/s3 (+ right side opened on both lanes, the back lane's fountain an obstacle; the wider notice-board box was dropped); AREA06 s1, s2 (+ right side; its
+   beach strips are the other agent's, still off by default); AREA18 s1 both sides. Kept at 4:3 by the user: door
+   exits (AREA00 s5, AREA01 s4, AREA03 s3, AREA09 s1, s3, AREA10 s3/s7 left) and the AREA09 s4/s5 stairs. The edge
+   exits the headless sweep could not reach (AREA01 s1, AREA03 s0/s2/s4, AREA09 s0, AREA10 s2, AREA10 s3/s7 right)
+   were shown to the user as room pictures: none needs a change (2026-11-17). The
+   top-down / tunnel exits (func_800270A0 with map coordinates) are not drawn by the collision view yet. Not tested
+   on the device. Re-check after a change with `python3 tools/ws_exit_sweep.py` (places Tomba 70 units from each
+   moved exit and walks him out at 4:3/16:9/21:9/32:9; needs `PORT_CVLOG`, built into the collision view).
+0b. **Widescreen strips: what is left (2026-11-17, hand-over from the other agent).** Every room of the tables
+   (`ws_backdrop.c`, `ws_room3d.c`, `ws_floor3d.c`, `ws_trick.c`, `ws_edge.c`, `ws_topdown_gen.inc`) is approved and on
+   by default; no preview is waiting (the items below that say "off by default / waiting" are history). A fresh
+   `tools/ws_survey.py rooms` + `sweep` at 16:9 over the 96 rooms lists these with flat strips next to a non-flat
+   picture: **done, approved by the user on the game's captures and on by default** (2026-11-17): AREA08 s1 / s3
+   (Baccus Pier, `gen_pr`, `runtime/ws_backdrop_pier.inc`; PORT.md "More rooms with picture strips" has how and what
+   the user rejected on the way; not tested on the device or on GL).
+   AREA11 s1 (Lumberjack Factory, `gen_lf`, `runtime/ws_backdrop_factory.inc`): approved by the user on the game's
+   captures and on by default (2026-11-17; not tested on the device or on GL).
+   AREA17 s1 (Iron Castle entrance, a 384-row picture drawn from frame row -144; `ic_take`,
+   `runtime/ws_backdrop_castle.inc`): approved by the user on the game's captures and on by default (2026-11-17; not
+   tested on the device or on GL). **Every room of the survey is done; nothing is left to do here.** **Valid as they are, decided by the
+   user 2026-11-17 (black strips, do not list or propose again)**: AREA00 s3 (100 Year Old Man's Hut), AREA13 s1 (Pig
+   Island Cave, the same picture), AREA10 s8 (10000 Year Old Man), all vignettes with black corners; AREA02 s4 the
+   same; AREA09 s6 (Leaf Slider, 3D: the user sees nothing to do). AREA16 s5's white right strip is approved. The survey only
+   finds flat strips, not weak joins in rooms already done.
+0. **Widescreen room strips, next (2026-11-15).** Approved and on by default: AREA02 s5, AREA05 s1/s3, AREA02 s1
+   (the bottom-left pink sphere left as the user accepted it "for now"). AREA19 s1 (Dwarf Village in blossom) redone
+   2026-11-17 (`gen_cb`: every band quilted from the picture at run time, the front bushes' scalloped top included;
+   the front's bottom joins redone 2026-11-15 after the user found them very noticeable: outline-scored windows,
+   the outline bent to go on from the edge, tone per row and per kind over 20 columns; then the left front raised
+   to the picture's bush height with a target outline, loose pink bits dropped and enclosed grass filled; PORT.md
+   has the numbers and the weak points), OFF by default until the user approves it (`--ws-backdrop-rooms
+   19:1`; to approve: `approved` = 1 in its ROOMS entry). Next: the Haunted Mansion 3D side rooms AREA04 s10/s11/s15/s19 (black past the model's outer wall; postponed by the
+   user for token budget). The last fixed-camera picture, the AREA17 s3/s4 hall, has a preview since 2026-11-16
+   (`gen_hl`: side walls rectified with the camera's pitch, the panel unit repeated with its period; the panels'
+   light modelled along each wall from the picture (`hl_light`, 2026-11-16: B's pane continues B's light, the panels
+   further out follow the trend, no gold glare repeated); OFF by default,
+   `--ws-backdrop-rooms 17:3,17:4`; waiting for the user's verdict; PORT.md "More rooms
+   with picture strips"). User rules: show before|after first, never mirror, measure geometry/tones in the picture, no roots, match
+   blur; use tools/ws_seam.py on the joins.
+   2026-11-15, two more rooms as previews, OFF by default, waiting for the user's verdict (`--ws-backdrop-rooms
+   11:2,9:5`; docs/PORT.md "More rooms with picture strips"): AREA11 s2 (the cave with the brick tower, `gen_cv`: the
+   rock quilted in 28-row bands, light per row matched to the edge) and AREA09 s5 (the brick wall with the staircase,
+   `gen_st`: the wall quilted and relit, the stair continued exactly with its own steps, four steps = (90, 55)).
+   Looked at and dropped for now: AREA09 s4 (rock wall, stair down to the right: the band of sconce mounds along the
+   stair at the right edge cannot be quilted at a run-time cost like the others' ~2 s; the light-aware matching it
+   needs took 8-20 s), AREA16 s4 (a 672-row picture scrolled vertically: the hook only took a picture at frame row
+   16; since done, below), AREA08 s1 / s3 (a 4 bpp layer of near trees and translucent light rays over the 8 bpp picture: the rays converge
+   and would need geometric continuation), AREA16 s5 (architecture: pillars cut by both edges).
+   2026-11-16, one more preview, OFF by default (`--ws-backdrop-rooms 9:3`): AREA09 s3 (the treasure hall, `gen_th`):
+   the side walls rectified about their vanishing point (159.625, 117.25), where a move along the depth is a plain
+   shift, quilted there with `vb_quilt` and mapped back (beam, recess, dado and floor go on along their perspective
+   lines).  Looked at in the same round and dropped (PORT.md lists the reasons): AREA18 s2, AREA10 s8, AREA11 s1,
+   AREA16 s3 / s6, AREA17 s1, AREA17 s5, AREA18 s1, AREA09 s4 (again).  To approve AREA09 s3: `approved` = 1 in its
+   ROOMS entry.  The lower wall's cut at both joins fixed (the strips are rectified from the picture as the renderer
+   shows it under the arches' stretched quads, and the other wall's texels registered to this wall's rows): every
+   sloped line within 0.3 row of its continuation (PORT.md); waiting for the user's look.
+   2026-11-16, AREA09 s4 (rock wall, stair down to the right) redone as a preview, OFF by default
+   (`--ws-backdrop-rooms 9:4`; `gen_rw` in the new `runtime/ws_backdrop_rooms2.inc`): the wall quilted on texels over
+   their light (new 2-D quilter `rq_quilt`, 0.3 s) and relit, no mound or sconce copied (the mound cut by the right
+   edge closes), the stair continued by its own step per side (it is in perspective: 20.4 / 24.5 columns), from the
+   picture as shown (`th_shown`).  Rail and stringer within ~0.5 row across both joins.  To approve: `approved` = 1 in
+   its ROOMS entry.  AREA08 s1 / s3 (the lake) looked at again and not delivered: layers and ray geometry measured
+   (PORT.md), but the near leaves cut by both edges have no clean source to go on with yet.
+   2026-11-17, AREA16 s4 (the green tower) as a preview, OFF by default (`--ws-backdrop-rooms 16:4`; `gen_tw` /
+   `tw_take` in `runtime/ws_backdrop_rooms2.inc`): the 672-row picture is put together from its three sprite sets and
+   the strips follow the camera's height (the pan up the tower when Tombi enters the door included; gpu.c's hook
+   takes a row offset, 0 for the other rooms); sky per row from the edge, clouds quilted, the trees' foot and the
+   grass as slices of the edges' clean columns.  The trees redone after the user rejected the first version (a wall of
+   crown lumps with no trunks or points): per side the tree cut by the edge completed to its own point, one more tree
+   beyond it, crowns W (2t - t^2) with leaf-clump lumps quilted with the picture's crown light as a guide, trunks from
+   the picture's trunk texels (core and foot, moved, never mirrored).  ~0.3-0.4 s per room entry at 16:9.  To
+   approve: `approved` = 1 in its ROOMS entry.
+
+   2026-11-17, **3D rooms** (Haunted Mansion side rooms AREA04 s10 / s11 / s15 / s19): the black sides at 16:9 were
+   missing geometry (the room model's front wall ends just past 4:3; no cull involved).  `runtime/ws_room3d.c`
+   carries the wall on as extra facets in the model's own format, colours, texture tile and plane (PORT.md "3D room
+   walls").  Preview, OFF by default: `--ws-room3d on` or `--ws-room3d-rooms 4:10,4:11,4:15,4:19`; waiting for the
+   user's verdict per room (`approved` in its ROOMS).  Not in the launcher / Android options yet.
 
 -2. **WIP (owner's request): restore the Funga Chief's cut event** on the Funga stage (`--cut-content=funga`, AREA10 s2,
    chief already walking there: runtime/funga.c).  What survives (docs/CUT_CONTENT.md "Jungle (AREA10)", "Funga Chief"):
@@ -110,11 +282,16 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    "More rooms with picture strips").  New, OFF by default: AREA05 s1 / s3 (the house: wood, fence, dry-stone wall,
    path, bushes; redrawn 2026-11-14 after the user rejected the first version; wall and fence redone the same day from
    a closer study of the picture: irregular limestone slabs, two-rail fence with posts every 33 columns, the short
-   three-plank-looking object by each edge not continued; PORT.md has how), AREA19 s1 (Dwarf Village in blossom; runs as area 2 s1, told apart by its picture) and AREA02 s1
-   (the village with the balloon trees).  Preview: `--ws-backdrop on` (every room) or `--ws-backdrop-rooms
+   three-plank-looking object by each edge not continued; PORT.md has how; since approved and on by default), AREA19 s1
+   (Dwarf Village in blossom; runs as area 2 s1, told apart by its picture: the first version, rejected by the user as
+   garbage, redone 2026-11-17 like AREA02 s1, `gen_cb`, still off until approved) and AREA02 s1 (the village with the balloon trees: own generator `gen_vb`;
+   third version 2026-11-16 after the user's detailed review: textures quilted from the picture's own texels at run
+   time, the edge spheres completed from fitted circles; 2026-11-17: the cut the user saw at the right join fixed (the
+   lightest cream sphere there was cut by a new sphere in front of it; the lit one ran to a flat white dome), measured
+   with `tools/ws_seam.py`; waiting for the user's verdict).  Preview: `--ws-backdrop on` (every room) or `--ws-backdrop-rooms
    5:1,5:3,19:1,2:1` (only those); AREA02 s5 stays on by default.  To approve a room: set `approved` to 1 in its
-   `ROOMS` entry.  Not done: AREA17 s3 / s4 (Iron Castle hall): its side walls look oblique (the measured lines do not
-   meet in one vanishing point; numbers in PORT.md), needs a geometry fit first.  Checked headless (16:9 / 21:9, 4:3
+   `ROOMS` entry.  AREA17 s3 / s4 (Iron Castle hall, 2026-11-16): preview `gen_hl`, OFF by default (the walls were
+   not oblique: the camera is pitched up; numbers in PORT.md).  Checked headless (16:9 / 21:9, 4:3
    identical, defaults identical, i386 = wasm2c); not on the device.
 
 0. **Widescreen AREA02 s5, Small Strange Room (2026-11-14)**: user report: Baron visible at 16:9 waiting right of

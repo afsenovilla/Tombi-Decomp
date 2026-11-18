@@ -207,6 +207,7 @@ void port_debug_pad(u16 *buttons) {
 void port_debug_tick(void) {
     extern void addItemToInventory(int, int, int), setEventStarted(int, int, int), setEventComplete(int, int);
     int a = action, arg = action_arg; char b[48];
+    { extern void port_colview_tick(void); port_colview_tick(); }   /* --show-collision (runtime/colview.c) */
     if (!port_debug_menu || a == A_NONE) return;
     action = A_NONE;
     if (!in_gameplay()) { say("NOT IN GAMEPLAY"); return; }
@@ -278,6 +279,8 @@ static void text(int x, int y, const char *s, u16 col) {
         }
     }
 }
+/* the overlay font for runtime/colview.c (the exit labels) */
+void port_debug_text(int x, int y, const char *s, u16 col) { text(x, y, s, col); }
 void port_debug_draw(void) {
     char b[64];
     const u16 white = 0x7FFF, yellow = 0x03FF, green = 0x03E0, grey = 0x4210;

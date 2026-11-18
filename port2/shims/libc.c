@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "port_runtime.h"
+extern char *getenv(const char *);   /* (not <stdlib.h>: this file defines rand / srand itself; clang on Android rejects the implicit declaration) */
 
 typedef unsigned int size_t_;
 /* names the game's sources use for the same retail routines */
@@ -29,7 +30,16 @@ int puts(const char *s) { if (port_verbose) fprintf(stderr, "[game] %s\n", s); r
 int putchar(int c) { if (port_verbose) fputc(c, stderr); return c; }
 
 /* 0x8005BD24: Psy-Q's bcopy, a forward byte loop; lzDecompress relies on the overlap (dst - off -> dst, n bytes)
-   repeating the pattern, which memmove would not do */
-void bcopy(const void *s, void *d, unsigned int n) { const unsigned char *a = s; unsigned char *b = d; while (n--) *b++ = *a++; }
+   repeating the pattern, which memmove would not do.  The loop reads through a volatile pointer and this file never
+   calls it by the name "bcopy": the compilers know bcopy as memmove (GCC and clang turned the bcopy() call that was
+   here into a jump to memmove, which left the old buffer bytes after the first `off` of an overlapping copy: the
+   specks of the Million-Year-Old Man's room, docs/PORT.md "LZ overlap"), and may recognise a plain byte loop as
+   memcpy/memmove.  PORT_LZ_MEMMOVE=1 (research) brings the old behaviour back, to compare frames. */
+static void psx_bcopy(const void *s, void *d, unsigned int n) { const volatile unsigned char *a = s; unsigned char *b = d; while (n--) *b++ = *a++; }
+void bcopy(const void *s, void *d, unsigned int n) { psx_bcopy(s, d, n); }
 void bzero(void *d, unsigned int n) { memset(d, 0, n); }      /* (not in the Windows CRT) */
-void FUN_8005bd24(const void *s, void *d, unsigned int n) { bcopy(s, d, n); }
+void FUN_8005bd24(const void *s, void *d, unsigned int n)
+{
+    static int old = -1; if (old < 0) { const char *e = getenv("PORT_LZ_MEMMOVE"); old = e && *e == '1'; }
+    if (old) memmove(d, s, n); else psx_bcopy(s, d, n);
+}

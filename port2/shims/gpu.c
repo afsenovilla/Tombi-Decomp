@@ -65,6 +65,8 @@ void port_gpu_start(void) {
     }
     port_printf("[gpu] renderer: %s\n", port_gpu_be->name);
 }
+int port_gpu_is_gl(void) { return port_gpu_be == &port_gpu_gl; }   /* runtime/ws_backdrop.c (how a stretched quad
+                                                                     samples its texture) */
 void port_hfr_report(void);
 void port_gpu_stop(void) { port_hfr_report(); if (gpu_started && port_gpu_be->stop) port_gpu_be->stop(); }
 #define be port_gpu_be
@@ -161,6 +163,8 @@ static void soft_use_texture(const GpuTex *t) { tp_x = t->tx; tp_y = t->ty; tp_d
 /* ------------------------------------------------------------------ triangles */
 typedef GpuVtx Vtx;
 static void ws_backdrop(const Vtx *a, int w, int h, int u, int v, const GpuTex *t);   /* --widescreen room picture strips */
+static void ws_backdrop_over(int tx, int u, int v);
+static int ws_ov_frame = -1, ws_ov_bx, ws_ov_y, ws_ov_h, ws_ov_sd;   /* the strips laid this frame (ws_backdrop) */
 
 static void soft_tri(const Vtx *a, const Vtx *b, const Vtx *c, int shade, const GpuTex *texp, int semi, int raw) {
     int tex = texp != 0;
@@ -406,8 +410,19 @@ static void ws_mirror_write(int x, int y, int w, int h) {
     }
 }
 /* a GP0 02 / isbg / ClearImage fill that covers a whole display buffer clears the wide copy too */
+static int ws_under = -1;            /* AREA02 s4: the game's clear colour (15-bit), drawn under the room's picture; -1 = no */
 static void ws_fill(int x, int y, int w, int h, u16 c) {
     if (!port_widescreen || w < 320 || h < 200) return;
+    {   /* the Million-Year-Old Man's room (AREA02 s4) clears to grey 424242.  That grey is part of the picture: 16 of
+           its palette entries (176..191) are transparent, about 3500 pixels of stones and floor that show the clear
+           colour.  The picture's vignette has black corners, so the wide strips are cleared black (the user's call),
+           and the grey is drawn under the picture's two sprites instead (GP0 rectangles below, ws_under). */
+        const u8 *g = (const u8 *)port_ram_ptr(PORT_A_GAME);
+        ws_under = -1;
+        if (*(const u16 *)g == 2 && *(const u16 *)(g + 2) == 4) { ws_under = c; c = 0; } }
+    {   /* research: PORT_WSCLEAR=7C1F (15-bit colour, hex) clears the wide copy with that colour instead, so what no
+           primitive covers shows in the frame dumps (how the rooms whose model ends inside the wide frame were found) */
+        static int wc = -2; if (wc == -2) { const char *e = getenv("PORT_WSCLEAR"); wc = e ? (int)strtol(e, 0, 16) : -1; } if (wc >= 0) c = (u16)wc; }
     for (int ax = x; ax + 320 <= x + w && ax + 320 <= 1024; ax += 320)
     {   if (hfr_rec) hfr_fill(ws_base(ax), y, 320 + 2 * port_widescreen, h, c, 1);
         if (be->ws_fill) be->ws_fill(ws_base(ax), y, 320 + 2 * port_widescreen, h, c); else
@@ -651,6 +666,7 @@ static int gp0(const u32 *p, int n) {
             { int dx = gs.ox + (ws_on ? ws_dx : 0); port_primlog(tex ? tpage : -1, tex ? clut : -1, u0, v0, u1, v1, x0 - dx, y0 - gs.oy, x1 - dx, y1 - gs.oy, quad ? 4 : 3); }
         }
         if (tex && raw) shade = 0;
+        if (ws_on && tex && quad && ws_ov_frame == port_frame) ws_backdrop_over(t.tx, v[0].u, v[0].v);
         if (ws_on && !tex && quad) ws_full_width_quad(v);
         if (hfr_rec && hfr_test_cut_dx && port_frame >= hfr_test_cut_frame) for (int i = 0; i < nv; i++) v[i].x += hfr_test_cut_dx;
         {   int dx = 0, tile = 0, w = 0, x0 = 0, x1 = 0, sv[2], c;
@@ -735,6 +751,10 @@ static int gp0(const u32 *p, int n) {
             }
             a.x += dx;
         }
+        if (ws_on && tex && ws_under > 0 && t.depth == 1 && h >= 200 && !semi)   /* AREA02 s4's picture (256 + 104 x 224, 8 bpp): see ws_fill */
+        {   u32 uc = (u32)(ws_under & 31) << 3 | (u32)((ws_under >> 5) & 31) << 11 | (u32)((ws_under >> 10) & 31) << 19;
+            be->rect(a.x, a.y, w, h, uc, 0, 0, 0, 0, 1);
+            if (hfr_rec) hfr_rect(a.x, a.y, w, h, uc, 0, 0, 0, 0, 1); }
         if (ws_on && tex && w == 256) ws_backdrop(&a, w, h, u, v, &t);
         if (w && h) { be->rect(a.x, a.y, w, h, p[0] & 0xFFFFFF, tex ? &t : 0, u, v, semi, raw);
                       if (hfr_rec) hfr_rect(a.x, a.y, w, h, p[0] & 0xFFFFFF, tex ? &t : 0, u, v, semi, raw); }
@@ -1014,13 +1034,49 @@ static void ws_backdrop(const Vtx *a, int w, int h, int u, int v, const GpuTex *
     extern const unsigned short *port_ws_backdrop(const unsigned short *, int, int, int, int, int, int, int, int, int, int, int, int, int *);
     int P = port_widescreen, fx = a->x - gs.ox - ws_dx, fy = a->y - gs.oy, bx = ws_base(ws_ax), y = a->y;
     const unsigned short *s = port_ws_backdrop(&vram[0][0], P, fx, fy, w, h, u, v, t->tx, t->ty, t->depth, t->cx, t->cy, &h);   /* h: the strips' rows */
+    { extern int port_ws_backdrop_dy; y += port_ws_backdrop_dy; }   /* (a picture taller than the frame: its rows on it) */
+    extern int port_ws_backdrop_side; int sd = port_ws_backdrop_side;   /* (1: the left strip, 2: the right one; a picture with one end to fill) */
     if (!s || y < 0 || y + h > 512 || bx + 320 + 2 * P > WS_STRIDE) return;
+    ws_ov_frame = port_frame; ws_ov_bx = bx; ws_ov_y = y; ws_ov_h = h; ws_ov_sd = sd;
     for (int j = 0; j < h; j++) {
-        memcpy(&wvram[y + j][bx], s + (size_t)j * 2 * P, (size_t)P * 2);
-        memcpy(&wvram[y + j][bx + P + 320], s + (size_t)j * 2 * P + P, (size_t)P * 2);
+        if (sd & 1) memcpy(&wvram[y + j][bx], s + (size_t)j * 2 * P, (size_t)P * 2);
+        if (sd & 2) memcpy(&wvram[y + j][bx + P + 320], s + (size_t)j * 2 * P + P, (size_t)P * 2);
     }
-    if (be->ws_upload) { be->ws_upload(bx, y, P, h, &wvram[y][bx], WS_STRIDE); be->ws_upload(bx + P + 320, y, P, h, &wvram[y][bx + P + 320], WS_STRIDE); }
-    if (hfr_rec) { hfr_upload(bx, y, P, h, 1); hfr_upload(bx + P + 320, y, P, h, 1); }
+    if (be->ws_upload) { if (sd & 1) be->ws_upload(bx, y, P, h, &wvram[y][bx], WS_STRIDE); if (sd & 2) be->ws_upload(bx + P + 320, y, P, h, &wvram[y][bx + P + 320], WS_STRIDE); }
+    if (hfr_rec) { if (sd & 1) hfr_upload(bx, y, P, h, 1); if (sd & 2) hfr_upload(bx + P + 320, y, P, h, 1); }
+}
+/* The strips' texels that stand in front of the actors (runtime/ws_backdrop.c port_ws_backdrop_over), drawn when
+   the game draws the first of the room's front pieces: runs of one colour as flat rectangles, so both renderers and
+   the --fps replays take them as any other primitive. */
+static void ws_backdrop_over(int tx, int u, int v) {
+    extern const unsigned short *port_ws_backdrop_over(int, int, int, int);
+    extern const unsigned short *port_ws_backdrop_fix(int, int, int, int *, int *);
+    int P = port_widescreen, fx = 0, fw = 0; const unsigned short *s;
+    if (ws_ov_frame != port_frame) return;
+    if ((s = port_ws_backdrop_fix(tx, u, v, &fx, &fw)))    /* (texels of the picture itself: AREA11 s1) */
+        for (int j = 0; j < ws_ov_h; j++)
+            for (int i = 0; i < fw; i++) {
+                u16 q = s[j * fw + i]; u32 c = (u32)(q & 31) << 3 | (u32)((q >> 5) & 31) << 11 | (u32)((q >> 10) & 31) << 19;
+                if (!q) continue;
+                be->rect(ws_ov_bx + P + fx + i, ws_ov_y + j, 1, 1, c, 0, 0, 0, 0, 1);
+                if (hfr_rec) hfr_rect(ws_ov_bx + P + fx + i, ws_ov_y + j, 1, 1, c, 0, 0, 0, 0, 1);
+            }
+    if (!(s = port_ws_backdrop_over(P, tx, u, v))) return;
+    for (int side = 0; side < 2; side++) {
+        if (!(ws_ov_sd >> side & 1)) continue;
+        for (int j = 0; j < ws_ov_h; j++) {
+            const unsigned short *r = s + (size_t)j * 2 * P + (side ? P : 0);
+            for (int i = 0; i < P; ) {
+                int k = i + 1; u32 c;
+                if (!r[i]) { i++; continue; }
+                while (k < P && r[k] == r[i]) k++;
+                c = (u32)(r[i] & 31) << 3 | (u32)((r[i] >> 5) & 31) << 11 | (u32)((r[i] >> 10) & 31) << 19;
+                be->rect(ws_ov_bx + (side ? P + 320 : 0) + i, ws_ov_y + j, k - i, 1, c, 0, 0, 0, 0, 1);
+                if (hfr_rec) hfr_rect(ws_ov_bx + (side ? P + 320 : 0) + i, ws_ov_y + j, k - i, 1, c, 0, 0, 0, 0, 1);
+                i = k;
+            }
+        }
+    }
 }
 /* --title-bg (runtime/titlebg.c): while the title screen's background is in this list, fill the wide copy of the
    buffer with the user's wide picture first (the game then draws its own 4:3 background, logo and text over it) */
@@ -1316,6 +1372,8 @@ int port_gpu_overlay_fill(int x, int y, int w, int h, u16 c) {
     return 1;
 }
 void port_gpu_overlay_end(void) { if (be->list_end) be->list_end(); }
+/* the displayed picture's height (runtime/colview.c clips its fills to it): 240 NTSC, 256 PAL */
+int port_gpu_display_h(void) { RECT *d = (RECT *)cur_dispenv; int h = d->h > 0 ? d->h : 240; return h > 512 ? 512 : h; }
 static void path_for(char *buf, const char *kind) { snprintf(buf, 512, "%s/%s%06d.png", port_dump_dir, kind, port_frame); }
 /* the window present of the displayed frame (port_gpu_vblank; --fps: every present, interpolated or not) */
 static void present_window(void) {
@@ -1357,6 +1415,7 @@ extern int port_hz;
 #include "hfr.inc"
 
 void port_gpu_vblank(void) {
+    { extern int port_show_collision; extern void port_colview_draw(void); if (port_show_collision) port_colview_draw(); }
     { extern int port_debug_menu; extern void port_debug_draw(void); if (port_debug_menu) port_debug_draw(); }
     { extern int port_panel_on; extern void port_panel_vblank(void); extern unsigned long long port_prof_panel_us;
       if (port_panel_on) { unsigned long long t0 = port_time_us(); port_panel_vblank(); port_prof_panel_us += port_time_us() - t0; } }
@@ -1413,6 +1472,7 @@ void port_gpu_vblank(void) {
         }
         path_for(path, "vram_");
         write_png(path, frame_rgb, 1024, 512);
+        { const char *e = getenv("PORT_VRAM_RAW"); FILE *f = e ? fopen(e, "wb") : 0; if (f) { fwrite(vram, 2, 1024 * 512, f); fclose(f); } }   /* research: the words as they are (the PNG drops bit 15) */
     }
 }
 /* runtime/panel_side.c (second screen, opt-in): the VRAM as the game left it, rect (x, y, w, h) brought up to date first */

@@ -31,6 +31,7 @@
     <string name="wings_missing">%1$s: files not found on the disc: %2$s</string>
     <string name="wings_7z">%1$s: the .7z holds no disc image (a .7z of loose files is not supported: use the image or a .zip)</string>
     <string name="opt_debug">Menu di debug</string>
+    <string name="opt_showcoll">Mostra collisioni</string>
     <string name="opt_secondscreen">Secondo schermo: mappa e stato</string>
     <string name="opt_hudbottom">HUD sullo schermo inferiore</string>
     <string name="opt_renderer">Renderer</string>

@@ -598,46 +598,6 @@ static Rgb a5_stone_col(u32 h)                          /* a stone colour of the
 #define A5_BLUE(c) ((c).b > (c).r + 6)
 #define A5_WSX 21
 #define A5_BLUE(c) ((c).b > (c).r + 6)
-#define A5_WSX 21
-#define A5_BLUE(c) ((c).b > (c).r + 6)
-#define A5_WSX 21
-#define A5_BLUE(c) ((c).b > (c).r + 6)
-#define A5_WSX 21
-#define A5_BLUE(c) ((c).b > (c).r + 6)
-#define A5_WSX 21
-#define A5_BLUE(c) ((c).b > (c).r + 6)
-#define A5_WSX 21
-#define A5_BLUE(c) ((c).b > (c).r + 6)
-#define A5_WSX 21
-#define A5_BLUE(c) ((c).b > (c).r + 6)
-#define A5_WSX 21
-#define A5_BLUE(c) ((c).b > (c).r + 6)
-#define A5_WSX 21
-#define A5_BLUE(c) ((c).b > (c).r + 6)
-#define A5_WSX 21
-#define A5_BLUE(c) ((c).b > (c).r + 6)
-#define A5_WSX 21
-#define A5_BLUE(c) ((c).b > (c).r + 6)
-#define A5_WSX 21
-#define A5_BLUE(c) ((c).b > (c).r + 6)
-#define A5_WSX 21
-#define A5_BLUE(c) ((c).b > (c).r + 6)
-#define A5_WSX 21
-#define A5_BLUE(c) ((c).b > (c).r + 6)
-#define A5_WSX 21
-#define A5_BLUE(c) ((c).b > (c).r + 6)
-#define A5_WSX 21
-#define A5_BLUE(c) ((c).b > (c).r + 6)
-#define A5_WSX 21
-#define A5_BLUE(c) ((c).b > (c).r + 6)
-#define A5_WSX 21
-#define A5_BLUE(c) ((c).b > (c).r + 6)
-#define A5_WSX 21
-#define A5_BLUE(c) ((c).b > (c).r + 6)
-#define A5_WSX 21
-#define A5_BLUE(c) ((c).b > (c).r + 6)
-#define A5_WSX 21
-#define A5_BLUE(c) ((c).b > (c).r + 6)
 static void a5_wall(int side)
 {
     enum { Y0 = A5_STONE0, Y1 = A5_STONE1 };            /* stone rows 106..184 */
@@ -1014,24 +974,9 @@ static void gen_a5(int pad)
 }
 
 /* ================================================================== AREA19 s1 / AREA02 s1: the Dwarf Village
- * Two pictures with one layout (the same pieces), a frontal scene: bands by row, measured on the pictures:
- *   0-~100  the canopy: cherry blossom (AREA19: dark pink with light flower clusters) or the balloon trees (AREA02:
- *           big soft spheres, cream / pink / violet / blue, lit from the upper left);
- *   ~95-112 behind the canopy's lower edge: grey rock (AREA19) / the hazy wood (AREA02);
- *   112-138 the fence: posts 4-6 columns wide, tops at rows 112-122, two rails (rows 124-127, 130-134);
- *   138-150 the ledge: grass (AREA19) / golden leaves (AREA02), 150-155 its dark lip;
- *   155-182 the palisade under it: stakes 4 columns wide, in the ledge's shade at the top;
- *   182-~205 the ground (grass / leaves); ~198-223 the front: blossom mounds (AREA19) / big spheres (AREA02), as the
- *           picture's own front quads.
- * The huts, the dwarves, the jukebox, the bench and the barrel are objects of the picture and are not continued. */
-enum { V_CANOPY = 1, V_BACK, V_FENCE, V_RAIL, V_LEDGE, V_LIP, V_PALI, V_GROUND, V_FRONT };
-#define V_FENCE0 112
-#define V_LEDGE0 138
-#define V_LIP0 150
-#define V_PALI0 155
-#define V_GROUND0 182
-static Ramp V_rcan, V_rback, V_rfence, V_rledge, V_rpali, V_rground, V_rfront, V_rball[4];
-static int V_nball;
+ * Two pictures with one layout (the same pieces, huts, fence, ledge, bank, ladder and jukebox): AREA02 s1 with the
+ * balloon trees (gen_vb below) and AREA19 s1 in cherry blossom (gen_cb, after gen_vb's machinery).  AREA19 s1 runs as
+ * area 2 s1, so the table tells them apart by the picture: */
 static int v_cherry(void)                                /* the canopy mostly pink: the blossom (AREA19), else balloons */
 {
     int n = 0;
@@ -1039,211 +984,2477 @@ static int v_cherry(void)                                /* the canopy mostly pi
     return n * 10 > 44 * 160 * 6;
 }
 static int v_not_cherry(void) { return !v_cherry(); }
-static int v_balloons(void) { return !v_cherry(); }
-static int v_sat(u16 c) { Rgb k = rgb15(c); int mx = k.r > k.g ? (k.r > k.b ? k.r : k.b) : (k.g > k.b ? k.g : k.b), mn = k.r < k.g ? (k.r < k.b ? k.r : k.b) : (k.g < k.b ? k.g : k.b); return mx - mn; }
-static int v_pinkish(u16 c) { Rgb k = rgb15(c); return k.r > k.g + 20 && k.b > k.g + 4; }
-static int v_grey(u16 c) { return v_sat(c) < 48 && lum(rgb15(c)) < 150; }
-static int v_wood(u16 c) { Rgb k = rgb15(c); return k.r > k.b + 40 && k.g > k.b + 16 && lum(k) > 40; }
-static int v_notdark(u16 c) { return lum(rgb15(c)) > 36; }
-static int v_cream(u16 c) { Rgb k = rgb15(c); return v_sat(c) < 40 && lum(k) > 110; }
-static int v_blue(u16 c) { Rgb k = rgb15(c); return k.b > k.r + 12 && k.b > k.g + 24; }
-static int v_violet(u16 c) { Rgb k = rgb15(c); return k.b >= k.r - 8 && k.b <= k.r + 12 && k.r > k.g + 24; }
-static int v_pink(u16 c) { Rgb k = rgb15(c); return k.r > k.b + 12 && k.b > k.g + 12; }
-static int v_jukebox(int x, int y) { return x >= 258 && x < 317 && y >= 112 && y < 192; }   /* (and its lever) */
 
-static int v_picreg(int side, int x, int y)
+/* ================================================================== AREA02 s1: the Dwarf Village with the balloon trees
+ * Third version (2026-11-16), after the user's review of the second: the strips are now made from the user's own
+ * picture at run time instead of being drawn by hand-made procedures ("you invented the fence instead of looking at
+ * the fences literally next to it"; the palisade "practically a repeating texture"; the spheres cut by the edges not
+ * closed and not round; the right trunks "blobs").  Nothing of the picture is stored: the tables below are coordinates
+ * (measured circles, row bands, column ranges, boxes to leave out), every texel is read from VRAM when the room is
+ * entered.  Two techniques:
+ *
+ * 1. Image quilting (Efros & Freeman) for everything that is a texture: the trunks and the haze behind the canopy, the
+ *    fence, the ledge of golden leaves and its lip, the straw bank, the ground.  Each band (VB_BANDS: its rows, the
+ *    picture columns it may copy from, the boxes of objects to leave out) is filled outwards from the join in blocks
+ *    of B columns.  A block is a window of the picture's own texels on the SAME rows (so the fence rails, the
+ *    ledge's lip and the ground's perspective rows stay aligned; the back and the ground may shift a few rows), chosen
+ *    so that its OV columns of overlap match what is already there: for the first block the picture's columns at the
+ *    edge (the texture goes on with its phase), then the previous block; and its top rows match the band above.  Among
+ *    the windows within 1/8 of the best match one is taken by a position hash (deterministic variety); windows
+ *    near the ones just used are penalised (no visible repetition), and where a band has a clear horizontal period
+ *    (the fence posts, the straw blades: autocorrelation of the band's rows next to the edge, vb_period) an off-phase
+ *    window is penalised too.  The block is pasted along a minimum-error boundary cut (dynamic programming through
+ *    the overlap, vertical against the previous block, horizontal against the band above), so no straight seam
+ *    shows.  The picture's own columns are never changed: the first block meets the picture only through its match.
+ *    Rows of the back band hidden by the canopy in the picture (above row ~88) are taken from the band's clean rows
+ *    reflected upwards (the trunks are vertical): only their lowest part shows between the spheres.
+ *
+ * 2. Geometric completion for the spheres.  The circles of the spheres cut by each edge (canopy and front) were fitted
+ *    on the picture (outline points at 8x, then refined to the strongest colour step along the visible arc:
+ *    VB_PS).  At run time each sphere's shading is fitted on its visible texels (inside 0.9 r, not under a sphere in
+ *    front, of its colour class): luminance = a + b * (normal . light), the light direction itself fitted over all
+ *    the spheres (30 candidates, least error).  A completed sphere is drawn whole, in depth order with its neighbours:
+ *    every hidden texel takes the residual texture (picture - model) of a visible texel of the same sphere (its
+ *    reflection across the picture's edge first, so the cottony grain runs on through the join, then across the
+ *    sphere's vertical axis, then rotated) on the model's tone at its own place, as a shift along the colour class's
+ *    ramp (lighter pinks paler, as in the picture).  New spheres are drawn the same way from a donor sphere of the
+ *    picture of the chosen class (scaled to the new radius, its texture rotated / mirrored by hash, its tone moved by
+ *    depth), with a contact shade on what lies behind them.  A new sphere may reach the join only where the edge's
+ *    completed spheres are in front of it there, so the join shows exactly the picture's spheres.
+ *
+ * Bands and objects (rows measured on the picture at 6-12x): the fence 108-137 (left in the shade, x 0-43; right
+ * beside the jukebox, x 186-225), made first; then the trunks and haze above it (picture rows 90/96-109; left x 0-43,
+ * right x 186-319), matched to the fence band's top rows; the ledge 137/138-155 (its top rows on the left are a log,
+ * x 6-52, left out: taken from rows 144-155), the bank 156-180 (left x 0-215 without the barrel; right x 150-215,
+ * before the ladder), the ground 181- (rows 181-197 of x 0-99 for both sides: the right edge's ground is under the
+ * jukebox, the ladder and the front sphere), the front spheres from ~190.  Not continued: the huts, the dwarves, the
+ * jukebox, the ladder, the log, the barrel, the stones. */
+enum { VB_SPH = 1, VB_FRONTR = 5, VB_BACK = 9, VB_FENCE, VB_LEDGE, VB_BANK, VB_GROUND };
+typedef struct { short x2, y2, r2, cls, dep, side, fl; } VbS;   /* centre / radius in half texels, colour class (cream 0,
+                                                                   pink 1, blue 2), depth (more: in front), the edge that
+                                                                   cuts it (-1: none) */
+#define VBS_DONOR 1
+#define VBS_FRONT 2
+#define VBS_KEEP 16                                      /* completed: no new sphere in front of it in the strip (its
+                                                            outline beyond the join stays its own, round) */
+#define VBS_CAP 8                                        /* completed: its model's tone eased below the lightest of
+                                                            its visible texels (a sphere fitted on a short dim rim) */
+#define VBS_EDGE 32                                      /* completed front sphere: not drawn whole in the strip; the new
+                                                            cream spheres behind it reach the join, then only its
+                                                            outline zone goes on over them (vb_edge) */
+#define VBS_SOFTJ 4                                      /* its contact shade fades out over the strip's first 8
+                                                            columns (the picture shows none there) */
+static const VbS VB_PS[] = {
+    /* the canopy at the left edge */
+    {  22,  19, 28, 0, 10, 0, VBS_DONOR },               /* cream (11, 9.5) r 14 */
+    { -24,  72, 34, 1,  0, 0, 0 },                       /* the dark lilac one behind the pink, seen in columns 0-3 */
+    {  28,  76, 32, 1, 30, 0, VBS_DONOR },               /* pink (14, 38) r 16 */
+    {   5, 139, 38, 1, 20, 0, 0 },                       /* pink (2.5, 69.5) r 19, its lower right in a cast shade */
+    /* the canopy at the right edge */
+    { 592, -14, 24, 0,  5, 1, 0 },                       /* cream (296, -7) r 12 */
+    { 674,  -4, 50, 0,  4, 1, VBS_SOFTJ | VBS_CAP },                       /* cream (337, -2) r 25, lit, at the top right: its outline
+                                                            x 312 at rows 0-3 leaning to x 318 at row 16 */
+    { 638,  36, 45, 0,  2, 1, 0 },                       /* the grey cream (319, 18) r 22.5, in the shade, behind the
+                                                            others (its dark lower left at x 297-305, rows 7-14) */
+    { 602,  69, 40, 0,  8, 1, VBS_SOFTJ },               /* the light cream lump (301, 34.5) r 20 between the pink
+                                                            and the grey one, closing round in the strip's first
+                                                            column (its edge to the grey, a 45-degree line from
+                                                            (303, 16) to (318, 31), inside the circle: the grey one
+                                                            never takes its texels) */
+    { 570,  66, 37, 1, 15, -1, VBS_DONOR },              /* pink (285, 33) r 18.5 */
+    { 546, 125, 46, 2, 30, -1, VBS_DONOR },              /* blue (273, 62.5) r 23 */
+    { 631, 121, 45, 0, 25, 1, VBS_DONOR | VBS_KEEP },               /* cream (315.5, 60.5) r 22.5 */
+    /* the front, cut by the frame's bottom */
+    {  56, 496, 100, 1, 10, 0, VBS_FRONT | VBS_DONOR | VBS_EDGE },  /* pink (28, 248) r 50: its flank at the edge is dark
+                                                            brown (x 0-15, luminance 40-100, darkest at x 0-3), its pink
+                                                            only from x ~16 */
+    { 590, 472, 94, 2, 10, 1, VBS_FRONT | VBS_DONOR },   /* blue (295, 236) r 47 */
+    { 366, 492, 96, 0, 10, -1, VBS_FRONT | VBS_DONOR },  /* cream (183, 246) r 48 */
+};
+#define VB_NPS ((int)(sizeof VB_PS / sizeof VB_PS[0]))
+typedef struct { short x0, y0, x1, y1; } VbBox;          /* [x0, x1) x [y0, y1) */
+/* objects never copied: the huts, the log, the bucket, the barrel, the stones and their track, the plank stack, the
+   ladder, the jukebox and its lever */
+static const VbBox VB_EXCL[] = {
+    { 44, 40, 190, 143 }, { 6, 138, 53, 144 }, { 138, 126, 162, 150 }, { 34, 164, 60, 192 }, { 100, 181, 216, 196 },
+    { 226, 118, 254, 142 }, { 216, 133, 262, 188 }, { 252, 120, 268, 190 }, { 262, 108, 316, 196 }, { 0, 0, 0, 0 } };
+typedef struct { short y0, y1, ry0, ry1, sx0, sx1, B, OV, OT, OB, dy, reg, per, up, mr, st; } VbBand;
+/* rows [y0, y1) of the strip from the picture's rows [ry0, ry1) (others reflected into them), columns [sx0, sx1);
+   blocks of B columns, OV of overlap, OT / OB rows of overlap with the band above / below, windows shifted up to dy rows, per: look
+   for a horizontal period, up: rows above ry0 reflected into the first up rows only (the trunks: straight on up; -1:
+   the row ry0 repeated), mr:
+   the first mr columns the picture's last columns repeated with their own period (the quilt's first block then cut
+   into them), st: VBB_STRICT, a window whose rows (shifted) leave [ry0, ry1) is not taken (no rows reflected);
+   VBB_TIGHT, the first block is the best match of the picture's columns at the edge (not one within 1/8 of it);
+   VBB_SOFT below */
+#define VBB_STRICT 1
+#define VBB_TIGHT 2
+#define VBB_FEATHER 8                                    /* the cuts blended (below) */
+#define VBB_FAR 16                                       /* a window is penalised when it lies less than 96 columns
+                                                            from where it goes (a copy of the picture's texels next to
+                                                            them), and taken only when nothing else fits when it goes on
+                                                            from the block before (a run of the picture copied whole)
+                                                            or overlaps one of the last three */
+#define VBB_SOFT 4                                       /* objects in the overlap rows (OT / OB) do not rule a window
+                                                            out: those texels are neither compared nor pasted */
+#define VBB_OUTL 32                                      /* the bushes' outline (the first blossom row under the grass,
+                                                            vb_hcol) goes on: a window is also scored on how its
+                                                            outline, shifted, meets the one already there over the
+                                                            VB_OCTX columns up to its overlap's end */
+#define VBB_EDGEW 64                                     /* the overlap's columns next to the new block weigh more
+                                                            (a busy texture: the columns at the cut matter most) */
+#define VB_OCTX 20
+#define VB_OUTW 40000
+static const VbBand VB_BANDS[2][5] = {          /* (in the order they are made: the fence, then the back above it) */
+    { { 108, 138, 108, 138, 0, 44, 9, 4, 0, 0, 0, VB_FENCE, 1, 0 },
+      { 0, 108, 90, 110, 0, 44, 16, 6, 0, 6, 3, VB_BACK, 0, 6 },
+      { 138, 156, 144, 156, 0, 216, 16, 5, 4, 0, 0, VB_LEDGE, 0, 0 },
+      { 156, 181, 156, 181, 0, 216, 16, 5, 4, 0, 0, VB_BANK, 1, 0 },
+      { 181, PH, 181, 198, 0, 100, 16, 5, 4, 0, 1, VB_GROUND, 0, 0 } },
+    { { 108, 137, 108, 137, 186, 256, 12, 5, 0, 0, 0, VB_FENCE, 1, 0 },
+      { 0, 108, 96, 110, 186, 320, 24, 8, 0, 6, 3, VB_BACK, 0, -2, 12 },
+      { 137, 156, 143, 156, 150, 216, 16, 5, 4, 0, 0, VB_LEDGE, 0, 0 },
+      { 156, 181, 156, 181, 150, 216, 16, 5, 4, 0, 0, VB_BANK, 1, 0 },
+      { 181, PH, 181, 198, 0, 262, 16, 5, 4, 0, 1, VB_GROUND, 0, 0 } } };
+static Ramp VB_rc[3], VB_rf[3];
+static int VB_share[4];                                  /* the classes' shares of the canopy (cumulative, /256) */
+static int VB_L[3];                                      /* the light (x 256) */
+static int VB_a[VB_NPS], VB_b[VB_NPS], VB_n[VB_NPS], VB_m[VB_NPS], VB_hi[VB_NPS];   /* each sphere's shading: L = a + b (n . light) / 256;
+                                                                       m: its visible texels' mean luminance */
+static int vb_ow;                                        /* the working canvas' width (the strip + a margin, so a block
+                                                            or sphere at the strip's end is the same at any width) */
+
+static int vb_class(Rgb k)                               /* cream 0, pink / lilac 1, blue 2, else -1 */
 {
-    u16 c = pic[y][x]; (void)side;
-    if (v_jukebox(x, y)) return 0;
-    if (y < 88) return V_CANOPY;
-    if (y < V_FENCE0) return y >= 92 && v_grey(c) ? V_BACK : 0;
-    if (y < V_LEDGE0) return v_wood(c) ? V_FENCE : 0;
-    if (y < V_LIP0) return y > 142 ? V_LEDGE : 0;
-    if (y < V_PALI0) return 0;
-    if (y < V_GROUND0 - 2) return x < 34 || x > 290 ? V_PALI : 0;    /* (the barrel) */
-    if (y < 196) return x < 30 || x > 290 ? V_GROUND : 0;
-    if (y >= 214) return V_FRONT;
+    int mx = k.r > k.g ? (k.r > k.b ? k.r : k.b) : (k.g > k.b ? k.g : k.b), mn = k.r < k.g ? (k.r < k.b ? k.r : k.b) : (k.g < k.b ? k.g : k.b);
+    if (k.b > k.r + 16 && k.b > k.g + 24) return 2;
+    if (k.r > k.g + 20 && k.b > k.g + 8) return 1;
+    if (mx - mn < 40 && lum(k) > 70 && k.r >= k.b) return 0;
+    return -1;
+}
+static const VbBox *vb_ex = VB_EXCL;                     /* the room's objects (gen_cb sets its own) */
+/* VBB_OUTL bands: an outline the strip's front should keep to, per strip column X (gen_cb's left side), or none:
+   returns the row and sets *tol (rows off it that cost nothing), -1 for no target */
+static int (*vb_otgt)(int side, int X, int *tol);
+#define VB_TGTW 200000
+static int (*vb_exf)(int x, int y);                     /* objects that are not boxes (gen_st's stair), or none */
+static int *vb_srcmap;                                   /* where each canvas texel was copied from (y * PW + x), or
+                                                            none: gen_st relights the copies */
+static int vb_excl(int x, int y)
+{
+    if (x < 0 || x >= PW || y < 0 || y >= PH) return 1;
+    if (vb_exf && vb_exf(x, y)) return 1;
+    for (int i = 0; vb_ex[i].x1; i++)
+        if (x >= vb_ex[i].x0 && x < vb_ex[i].x1 && y >= vb_ex[i].y0 && y < vb_ex[i].y1) return 1;
     return 0;
 }
 
-static void v_analyse(void)
+/* --- the canvas in picture columns: wx < 0 (left strip) or >= PW (right strip); X = 1.. outwards, up to vb_ow */
+static int vb_X(int side, int wx) { return side ? wx - (PW - 1) : -wx; }
+static int vb_in(int side, int wx, int y) { int X = vb_X(side, wx); return X >= 1 && X <= vb_ow && y >= 0 && y < PH; }
+static Rgb *vb_px(int side, int wx, int y) { return vb_in(side, wx, y) ? &cv[(size_t)y * vb_ow + vb_X(side, wx) - 1] : 0; }
+static int vb_reg(int side, int wx, int y) { return vb_in(side, wx, y) ? rg[(size_t)y * vb_ow + vb_X(side, wx) - 1] : 0; }
+static void vb_put(int side, int wx, int y, Rgb c, int r)
 {
-    samp_edges(0, 48, 0, 88, v_balloons() ? 0 : v_pinkish); ramp_make(&V_rcan);
-    samp_box(0, 48, 95, V_FENCE0, v_grey); samp_box(PW - 40, PW, 100, V_FENCE0, v_grey); ramp_make(&V_rback);
-    if (!V_rback.ok) { samp_edges(0, 48, 95, V_FENCE0, 0); ramp_make(&V_rback); }
-    samp_box(0, 48, V_FENCE0, V_LEDGE0, v_wood); samp_box(PW - 3, PW, V_FENCE0, V_LEDGE0, v_wood); ramp_make(&V_rfence);
-    samp_box(0, 48, 142, V_LIP0, v_notdark); samp_box(PW - 3, PW, 142, V_LIP0, v_notdark); ramp_make(&V_rledge);
-    samp_box(0, 30, V_PALI0, V_GROUND0 - 2, 0); samp_box(PW - 3, PW, V_PALI0, V_GROUND0 - 2, 0); ramp_make(&V_rpali);
-    samp_box(0, 28, V_GROUND0 + 2, 196, 0); samp_box(PW - 3, PW, V_GROUND0 + 2, 194, 0); ramp_make(&V_rground);
-    samp_edges(0, 48, 214, PH, 0); ramp_make(&V_rfront);
-    {   static const Pred cls[4] = { v_cream, v_pink, v_violet, v_blue };   /* the balloons' colours, as the picture has them */
-        V_nball = 0;
-        for (int i = 0; i < 4; i++) {
-            samp_box(0, PW, 0, 88, cls[i]); samp_box(0, 60, 196, PH, cls[i]); samp_box(PW - 60, PW, 196, PH, cls[i]);
-            if (nsamp >= 600) ramp_make(&V_rball[V_nball++]); else nsamp = 0;
+    if (vb_in(side, wx, y)) { size_t i = (size_t)y * vb_ow + vb_X(side, wx) - 1; cv[i] = c; rg[i] = (u8)r; }
+}
+static int vb_lo(int side) { return side ? PW : -vb_ow; }            /* the canvas' columns [lo, hi) */
+static int vb_hi(int side) { return side ? PW + vb_ow : 0; }
+/* what is at picture column wx: the picture (when not an object), or the canvas where already filled */
+static int vb_get(int side, int wx, int y, Rgb *c)
+{
+    if (wx >= 0 && wx < PW) { if (y < 0 || y >= PH || vb_excl(wx, y)) return 0; *c = rgb15(pic[y][wx]); return 1; }
+    if (!vb_reg(side, wx, y)) return 0;
+    *c = *vb_px(side, wx, y); return 1;
+}
+static int vb_d2(Rgb a, Rgb b) { int r = a.r - b.r, g = a.g - b.g, bb = a.b - b.b; return 3 * r * r + 4 * g * g + 2 * bb * bb; }
+
+/* ================================================================== quilting */
+static int vb_srow(const VbBand *b, int y)               /* a row of the band's clean rows: reflected into [ry0, ry1) */
+{
+    int n = b->ry1 - b->ry0, k;
+    if (y >= b->ry0 && y < b->ry1) return y;
+    if (b->up < 0) {                                     /* (the trunks straight on up: the first -up rows reflected,
+                                                            few, so no haze repeats as bands) */
+        if (y >= b->ry1) return b->ry1 - 1;
+        k = fmodi(y - b->ry0, -2 * b->up); return b->ry0 + (k < -b->up ? k : -2 * b->up - 1 - k);
+    }
+    if (b->up && y >= b->ry1) { k = fmodi(b->ry1 - 1 - y, 2 * b->up); return b->ry1 - 1 - (k < b->up ? k : 2 * b->up - 1 - k); }
+    if (b->up) n = b->up;
+    k = fmodi(y - b->ry0, 2 * n);
+    return b->ry0 + (k < n ? k : 2 * n - 1 - k);
+}
+/* the band's horizontal period next to the edge (autocorrelation of each row's luminance minus its mean over the
+   window's columns), 0 if none is clear */
+static int vb_period(int side, const VbBand *b)
+{
+    int x0 = b->sx0, w = b->sx1 - b->sx0 < 40 ? b->sx1 - b->sx0 : 40, best = 0, bc = 0, ok[PH]; long long den = 0;
+    static int L[PH][40];
+    for (int y = b->ry0; y < b->ry1; y++) {
+        int s = 0; ok[y] = 1;
+        for (int i = 0; i < w; i++) { if (vb_excl(x0 + i, y)) ok[y] = 0; L[y][i] = lum(rgb15(pic[y][x0 + i])); s += L[y][i]; }
+        for (int i = 0; i < w; i++) { L[y][i] -= s / w; if (ok[y]) den += (long long)L[y][i] * L[y][i]; }
+    }
+    if (den <= 0) return 0;
+    for (int lag = 4; lag <= 16; lag++) {
+        long long s = 0; int c;
+        for (int y = b->ry0; y < b->ry1; y++) if (ok[y]) for (int i = 0; i + lag < w; i++) s += (long long)L[y][i] * L[y][i + lag];
+        c = (int)(s * 256 * w / (w - lag) / den);
+        if (c > bc) { bc = c; best = lag; }
+    }
+#ifdef WS_BACKDROP_MAIN
+    if (getenv("WSB_INFO")) fprintf(stderr, "side %d band %d-%d: period %d (corr %d/256)\n", side, b->y0, b->y1, best, bc);
+#endif
+    (void)side;
+    return bc >= 64 ? best : 0;
+}
+/* the minimum-error path through rows [ya, yb) x columns [0, w) of the error map e (indexed e[y - ya][j]): vertical
+   (one column per row, path[y - ya]) when vert, else horizontal (one row per column, path[j]) */
+#define VB_MAXH 128
+#define VB_MAXW 40
+static int vb_E[VB_MAXH][VB_MAXW];
+static void vb_cutpath(int e[VB_MAXH][VB_MAXW], int rows, int w, int vert, int *path)
+{
+    int (*E)[VB_MAXW] = vb_E, n = vert ? rows : w, m = vert ? w : rows;   /* n steps, m positions each */
+    for (int i = 0; i < n; i++)
+        for (int p = 0; p < m; p++) {
+            int c = vert ? e[i][p] : e[p][i], best = 1 << 30;
+            if (i == 0) best = 0;
+            else for (int d = -1; d <= 1; d++) if (p + d >= 0 && p + d < m && E[i - 1][p + d] < best) best = E[i - 1][p + d];
+            E[i][p] = c + best;
+        }
+    {   int p = 0;
+        for (int q = 1; q < m; q++) if (E[n - 1][q] < E[n - 1][p]) p = q;
+        for (int i = n - 1; i >= 0; i--) {
+            path[i] = p;
+            if (i > 0) { int bp = p; for (int d = -1; d <= 1; d++) if (p + d >= 0 && p + d < m && E[i - 1][p + d] < E[i - 1][bp]) bp = p + d; p = bp; }
         }
     }
 }
-
-/* a soft sphere (a balloon tree's crown): lit from the upper left and the front, a darker rim, a cottony grain */
-static void sphere(int cx16, int cy16, int r16, const Ramp *rp, int base, int r, int seed)
+static short vb_hs[PW];                                  /* the picture's outline, per column (VBB_OUTL bands) */
+/* the bushes' outline at picture column wx (picture or canvas): the first row from 184 of three texels that are not
+   grass (green or dark), PH when the column is grass down to the bottom, -1 when it cannot be told (an object, a texel
+   not made yet) */
+static int vb_grass(Rgb k) { return (k.g > k.r + 8 && k.g > k.b + 8) || lum(k) < 60; }
+static int vb_hcol(int side, int wx)
 {
-    int R = r16 / 16 + 1, X0 = cx16 / 16, Y0 = cy16 / 16;
-    for (int py = Y0 - R; py <= Y0 + R; py++)
-        for (int X = X0 - R; X <= X0 + R; X++) {
-            int dx = X * 16 + 8 - cx16, dy = py * 16 + 8 - cy16, q = r16 * r16 - dx * dx - dy * dy, dz, dot, t;
-            if (q <= 0 || X < 1 || X > cw || py < 0 || py >= PH) continue;
-            dz = isqrt_i(q);
-            if (!cur_side) dx = -dx;                                                 /* X grows leftwards on the left strip */
-            dot = (-dx * 120 - dy * 150 + dz * 170) / r16;                           /* n . light, -256..256 */
-            t = base + dot * 3 / 4 - 40 + noise(X * 16 + seed, py * 16, 40, 40, seed) / 6 - 21;
-            if (dz < r16 / 5) t -= 30;                                               /* the soft rim */
-            if (q < r16 * 24) { Rgb *p = px_at(X, py); putr(X, py, mix(*p, ramp(rp, t), 128), r); }   /* its edge blended */
-            else putr(X, py, ramp(rp, t), r);
-        }
-}
-
-static void v_back(int side)
-{
-    for (int X = 1; X <= cw; X++) {
-        int wx = wx_of(side, X);
-        for (int y = 0; y < V_FENCE0 + 30; y++) {
-            int t = 110 + noise(wx, y, 17, 23, 501) / 3 - 42 + (y - 100) / 2;
-            putr(X, y, ramp(&V_rback, t), V_BACK);
-        }
+    int run = 0, ex = -9; Rgb c;
+    for (int y = 184; y < PH; y++) {
+        if (wx >= 0 && wx < PW && vb_excl(wx, y)) { run = 0; ex = y; continue; }   /* (an object in the grass above) */
+        if (!vb_get(side, wx, y, &c)) return -1;
+        run = vb_grass(c) ? 0 : run + 1;
+        if (run == 3) return ex >= y - 4 ? -1 : y - 2;   /* (-1: the top hidden by the object) */
     }
+    return ex >= PH - 2 ? -1 : PH;
 }
-
-/* the blossom's texture: flower clusters, small fat stars (radius 3) on a jittered 8 x 7 grid, more of them and
-   lighter on the lit masses (mass 0..255) */
-static int v_flower(int wx, int y, int mass, int seed)
+/* a texel of the window's source an object covers, in the grass above the bushes (VBB_OUTL bands): a hole, neither
+   compared nor pasted (the grass under it, made by the band before, shows) */
+static int vb_hole(const VbBand *b, int x, int y)
 {
-    int best = 0;
-    for (int gy = fdiv(y, 7) - 1; gy <= fdiv(y, 7) + 1; gy++)
-        for (int gx = fdiv(wx, 8) - 1; gx <= fdiv(wx, 8) + 1; gx++) {
-            u32 h = hash3(gx, gy, seed); int fx = gx * 8 + (int)(h & 7), fy = gy * 7 + (int)(h >> 3) % 7, dx = wx - fx, dy = y - fy, t;
-            dx = dx < 0 ? -dx : dx; dy = dy < 0 ? -dy : dy;
-            if ((int)(h >> 8 & 255) > mass + 20 || dx + dy > 3 || (dx == 0 && dy == 3) || (dy == 0 && dx == 3)) continue;
-            t = 16 + mass / 5 - (dx + dy) * 3;
-            if (dx + dy == 3 && wx >= fx && y >= fy) t = 2;                      /* its rim away from the light */
-            if (t > best) best = t;
-        }
-    return best;
+    return (b->st & VBB_OUTL) && vb_excl(x, y) && x >= 0 && x < PW && vb_hs[x] >= 0 && y < vb_hs[x];
 }
-static void v_canopy(int side)
+static void vb_quilt(int side, const VbBand *b, int seed)
 {
-    int x0 = side ? PW - 30 : -cw - 40, x1 = side ? PW + cw + 40 : 30;
-    if (!v_balloons()) {
-        /* the blossom, soft as the picture's: light masses and darker hollows (two scales of value noise), small light
-           flower clusters over them, brightest on the lit masses; a ragged, darker lower edge (rows 92-106) */
-        for (int X = 1; X <= cw; X++) {
-            int wx = wx_of(side, X), lo = 96 + noise(wx, 0, 13, 1, 511) * 12 / 256 - 2;
-            for (int y = 0; y < lo; y++) {
-                int mass = noise(wx, y, 38, 28, 513), t = 20 + mass * 3 / 4 + noise(wx, y, 12, 9, 515) / 4;
-                t += v_flower(wx, y, mass, 517);
-                if (y > lo - 7) t -= (y - lo + 7) * 7;                                  /* the shaded underside */
-                putr(X, y, ramp(&V_rcan, t), V_CANOPY);
-            }
-        }
-    } else {
-        /* the balloon trees: spheres of radius 13-25, the far (small, darker) ones first, the picture's own colours */
-        for (int pass = 0; pass < 2; pass++)
-            for (int k = fdiv(x0, 30) - 1; k * 30 < x1 + 30; k++)
-                for (int row = 0; row < 3; row++) {
-                    u32 h = hash3(k, row * 2 + pass, 531);
-                    int cx = k * 30 + (int)(h % 24) - 12 + (pass ? 15 : 0), cy = row * 30 + (int)(h >> 5) % 16 - 4 + (pass ? 10 : 0);
-                    int rad = pass ? 18 + (int)(h >> 10 & 7) : 13 + (int)(h >> 10 & 7), X = side ? cx - (PW - 1) : -cx;
-                    if (row == 2 && pass == 0 && (h >> 14 & 1)) continue;
-                    sphere(X * 16 + 8, cy * 16 + 8, rad * 16, &V_rball[(h >> 16) % (u32)V_nball], pass ? 150 : 110, V_CANOPY, 533 + k);
+    int W = b->B + b->OV, ytop = b->y0 - b->OT, ybot = b->y1 + b->OB, H = ybot - ytop, per = b->per ? vb_period(side, b) : 0;
+    int pos = side ? PW : -1, nb = 0, used[3] = { -999, -999, -999 }, nd = 2 * b->dy + 1, ncand = (b->sx1 - b->sx0 - W + 1) * nd;
+    static int err[320 * 128], em[VB_MAXH][VB_MAXW], vcut[VB_MAXH], tcut[VB_MAXW], bcut[VB_MAXW];
+    static Rgb win[VB_MAXH][VB_MAXW]; static u8 pm[VB_MAXH][VB_MAXW];
+    if (H > VB_MAXH || W > VB_MAXW || ncand <= 0 || ncand > 320 * 128) return;
+    if (b->st & VBB_OUTL) for (int x = 0; x < PW; x++) vb_hs[x] = (short)vb_hcol(side, x);
+    if (b->mr > 0) {                                     /* the trunk cut by the edge goes on: the picture's last k
+                                                            columns repeated, k (mr/2+1 .. 2 mr) the shift at which
+                                                            its last 3 columns best match 3 earlier ones (the stripes'
+                                                            period; the first block is then cut into them) */
+        long long be = -1; int kp = b->mr;
+        for (int k = b->mr / 2 + 1; k <= 2 * b->mr; k++) {
+            long long e = 0;
+            for (int y = b->ry0; y < b->ry1; y++)
+                for (int i = 0; i < 3; i++) {
+                    int xa = side ? PW - 1 - i : i, xb = side ? xa - k : xa + k;
+                    if (!vb_excl(xa, y) && !vb_excl(xb, y)) e += vb_d2(rgb15(pic[y][xa]), rgb15(pic[y][xb]));
                 }
+            if (be < 0 || e < be) { be = e; kp = k; }
+        }
+        for (int X = 1; X <= b->mr; X++)
+            for (int y = b->y0; y < b->y1; y++)
+                vb_put(side, side ? PW - 1 + X : -X, y, rgb15(pic[vb_srow(b, y)][side ? PW - kp + (X - 1) % kp : kp - 1 - (X - 1) % kp]), b->reg);
+        pos += side ? b->mr : -b->mr;
     }
-}
-
-static void v_fence(int side)
-{
-    int x0 = side ? PW - 10 : -cw - 10, x1 = side ? PW + cw + 10 : 10;
-    for (int k = fdiv(x0, 8) - 1; k * 8 < x1; k++) {                      /* the posts, one every ~8 columns */
-        u32 h = hash3(k, 0, 541); int px = k * 8 + (int)(h % 3), w = 5 + (int)(h >> 4) % 3, top = V_FENCE0 + (int)(h >> 8) % 11, base = (int)(h >> 12 & 63) - 32;
-        for (int lx = px; lx < px + w; lx++) {
-            int X = side ? lx - (PW - 1) : -lx, u = lx - px;
-            for (int y = top; y < V_LEDGE0 + 2; y++) {
-                int t = 130 + base + noise(lx * 8, y, 9, 7, 543) / 5 - 25;
-                if (u == 0) t += 30; else if (u == w - 1) t -= 60;                    /* lit from the left */
-                if (y == top) t += 25;
-                putr(X, y, ramp(&V_rfence, t), V_FENCE);
+    while (side ? pos < vb_hi(side) : pos >= vb_lo(side)) {
+        int t0 = side ? pos - b->OV : pos - b->B + 1;             /* the window's first picture column (target) */
+        int first = nb == 0 && !b->mr, mn = 1 << 30, pick = -1, nc = 0, k, tol;
+        int oc0 = side ? t0 + b->OV - VB_OCTX : t0 + b->B, oht[VB_OCTX];   /* the outline context's first column */
+        int oref = -1, oslope = 0;                       /* the outline next to the new columns (its 2 nearest) and
+                                                            its slope outwards there (x 4, at most 2 rows a column:
+                                                            a valley's flat bottom goes on flat, not down its flank) */
+        if (b->st & VBB_OUTL) {
+            int a = 0, na = 0, c = 0, nc2 = 0;
+            for (int j = 0; j < VB_OCTX; j++) oht[j] = vb_hcol(side, oc0 + j);
+            for (int k = 0; k < 4; k++) {
+                int h = oht[side ? VB_OCTX - 1 - k : k];
+                if (h < 0 || (vb_otgt && h >= PH)) continue;   /* (with a target: a block's feathered outer
+                                                                  column, grass-tinted, is no outline) */
+                if (k < 2) { a += h; na++; } else { c += h; nc2++; }
             }
+            if (na) oref = a / na;
+            if (na && nc2) { oslope = (a * 4 / na - c * 4 / nc2) / 2; oslope = oslope > 8 ? 8 : oslope < -8 ? -8 : oslope; }
         }
-    }
-    for (int X = 1; X <= cw; X++) {                                          /* the rails */
-        int wx = wx_of(side, X);
-        for (int y = 124; y < 134; y++) {
-            int t;
-            if (y >= 128 && y < 130) continue;
-            t = 85 + noise(wx, y * 4, 21, 9, 547) / 5 - 25 + (y == 124 || y == 130 ? 25 : y == 127 || y == 133 ? -35 : 0);
-            putr(X, y, ramp(&V_rfence, t), V_RAIL);
-        }
-    }
-}
-
-static void v_ground(int side)
-{
-    for (int X = 1; X <= cw; X++) {
-        int wx = wx_of(side, X), top = V_LEDGE0 + (noise(wx, 0, 5, 1, 551) >> 7) - 1;
-        for (int y = top; y < PH; y++) {
-            int t, r; Rgb c;
-            if (y < V_LIP0) { t = 140 + noise(wx, y, 3, 2, 553) / 2 - 64 + (int)(hash3(wx, y, 554) & 63) - 32 - (y >= V_LIP0 - 3 ? 60 : 0) + (y == top ? 30 : 0); c = ramp(&V_rledge, t); r = V_LEDGE; }
-            else if (y < V_PALI0) { c = scale(ramp(&V_rpali, 10 + noise(wx, y, 4, 2, 555) / 8), 200); r = V_LIP; }
-            else if (y < V_GROUND0) {                                         /* stakes 4 columns wide */
-                int n = fdiv(wx, 4), u = wx - n * 4; u32 h = hash3(n, 0, 557);
-                t = 140 + (int)(h & 127) - 64 + noise(wx * 6, y, 13, 9, 559) / 2 - 64 + (y - V_PALI0) * 3 - 40;
-                if (u == 0) t -= 45; else if (u == 1) t += 15;
-                if (y >= V_GROUND0 - 2) t -= 50;
-                c = ramp(&V_rpali, t); r = V_PALI;
-            } else {
-                t = 130 + noise(wx, y, 4, 2, 561) / 2 - 64 + noise(wx, y, 23, 7, 563) / 3 - 42 + (int)(hash3(wx, y, 565) & 63) - 32;
-                if (y < V_GROUND0 + 2) t -= 40;
-                c = ramp(&V_rground, t); r = V_GROUND;
+        for (int c = 0; c < ncand; c++) {
+            int sx = b->sx0 + c / nd, dy = c % nd - b->dy, ok = 1, n = 0; long long e = 0;
+            if ((b->st & VBB_STRICT) && (ytop + dy < b->ry0 || ybot + dy > b->ry1)) ok = 0;
+            for (int y = ytop; y < ybot && ok; y++) {
+                if ((b->st & VBB_SOFT) && (y < b->y0 || y >= b->y1)) continue;
+                for (int j = 0; j < W; j++) if (vb_excl(sx + j, vb_srow(b, y + dy)) && !vb_hole(b, sx + j, vb_srow(b, y + dy))) { ok = 0; break; }
             }
-            putr(X, y, c, r);
-        }
-    }
-}
-
-static void v_front(int side)
-{
-    int x0 = side ? PW - 30 : -cw - 40, x1 = side ? PW + cw + 40 : 30;
-    if (!v_balloons()) {
-        /* blossom mounds: a wavy top (rows 195-210, rounder bumps every ~20 columns), the blossom texture inside, the
-           mound's lower part in its own shade */
-        for (int X = 1; X <= cw; X++) {
-            int wx = wx_of(side, X), k = fdiv(wx, 20), u = wx - k * 20, top;
-            u32 h = hash3(k, 0, 571);
-            top = 195 + (int)(h % 8) + (u - 10) * (u - 10) / 24 + noise(wx, 0, 5, 1, 573) / 50;
-            for (int y = top; y < PH; y++) {
-                int mass = noise(wx, y, 22, 16, 575), t = 70 + mass / 2 + v_flower(wx, y, mass + 40, 577) - (y - top) * 2;
-                if (y == top) t += 20;
-                putr(X, y, ramp(&V_rfront, t), V_FRONT);
+            if (!ok) { err[c] = -1; continue; }
+            for (int y = ytop; y < ybot; y++)
+                for (int j = 0; j < W; j++) {
+                    int ov = side ? j < b->OV : j >= b->B; Rgb o;
+                    if (!ov && y >= b->y0 && y < b->y1) continue;
+                    if (first && ov && (y < b->ry0 || y >= b->ry1)) continue;   /* (the picture's canopy above the back) */
+                    if (!vb_get(side, t0 + j, y, &o)) continue;
+                    if ((b->st & (VBB_SOFT | VBB_OUTL)) && vb_excl(sx + j, vb_srow(b, y + dy))) continue;
+                    {   int wv = 1;                      /* (VBB_EDGEW: the overlap columns next to the new ones
+                                                            weigh 4, the 2 after them 2) */
+                        if ((b->st & VBB_EDGEW) && ov && y >= b->y0 && y < b->y1) { int dj = side ? b->OV - 1 - j : j - b->B; wv = dj < 2 ? 4 : dj < 4 ? 2 : 1; }
+                        e += (long long)vb_d2(o, rgb15(pic[vb_srow(b, y + dy)][sx + j])) * wv; n += wv;
+                    }
+                }
+            e = n ? e * 64 / n : 0;
+            if (b->st & VBB_OUTL) {                      /* (the outline: squared row offsets, the 8 columns next to
+                                                            the window counted twice; unknown: as 6 rows off) */
+                long long so = 0; int no = 0;
+                for (int j = 0; j < VB_OCTX; j++) {
+                    int sc = sx + oc0 + j - t0, hs = sc >= 0 && sc < PW ? vb_hs[sc] : -1, d, wj;
+                    if (oht[j] < 0 || hs < 0) continue;
+                    d = oht[j] - (hs - dy); if (d < 0) d = -d;
+                    if (d > 12) d = 12;
+                    wj = (side ? j >= VB_OCTX - 8 - b->OV : j < b->OV + 8) ? 2 : 1;
+                    so += (long long)d * d * wj; no += wj;
+                }
+                e += (no ? so / no : 36) * VB_OUTW;
+                so = 0; no = 0;
+                if (oref > 0) for (int k = 1; k <= 6; k++) {   /* (the next 6 columns: on along the slope there,
+                                                                  more and more freely, no notch or step) */
+                    int sc = side ? sx + b->OV - 1 + k : sx + b->B - k, hs = sc >= 0 && sc < PW ? vb_hs[sc] : -1, d;
+                    if (hs < 0) continue;
+                    d = (hs - dy) - (oref + oslope * k / 4); if (d < 0) d = -d;
+                    d -= 1 + k / 2;
+                    if (d > 12) d = 12;
+                    if (d > 0) so += (long long)d * d;
+                    no++;
+                }
+                if (no) e += so / no * VB_OUTW;
+                so = 0; no = 0;
+                if (vb_otgt) for (int j = 0; j < W; j++) {     /* (the target outline over the window's strip
+                                                                  columns: squared rows beyond its tolerance) */
+                    int X = vb_X(side, t0 + j), hs = vb_hs[sx + j], tl, tg, d;
+                    if (X < 1 || hs < 0 || (tg = vb_otgt(side, X, &tl)) < 0) continue;
+                    d = hs - dy - tg; if (d < 0) d = -d;
+                    d -= tl; if (d > 12) d = 12;
+                    if (d > 0) so += (long long)d * d;
+                    no++;
+                }
+                if (no) e += so / no * VB_TGTW;
             }
+            if (b->up < 0) {                              /* (its top row repeated upwards: windows whose columns go
+                                                             straight on up, not a trunk's top or a haze's edge) */
+                long long v = 0;
+                for (int j = 0; j < W; j++) v += vb_d2(rgb15(pic[vb_srow(b, b->ry0 + dy)][sx + j]), rgb15(pic[vb_srow(b, b->ry0 + dy + 8)][sx + j]));
+                e += v * 512 / W;                          /* (weighed 8: no haze slab or trunk top) */
+            }
+            for (int u = 0; u < 3; u++) { int d = sx - used[u]; if (d < 0) d = -d; if (d < b->B) e += e / 2 + 2000; }
+            if (b->st & VBB_FAR) {                       /* (no copy of the picture next to itself, no run of it) */
+                int d = sx - t0, f = nb ? sx - (used[(nb - 1) % 3] + (side ? b->B : -b->B)) : 99;
+                if (d < 0) d = -d;
+                if (f < 0) f = -f;
+                if (d < 96) e += e / 2 + 2000;
+                if (f < b->B) e += 1 << 24;              /* (only when nothing else fits) */
+                for (int u = 0; u < 3; u++) { int g = sx - used[u]; if (g < 0) g = -g; if (g < W) { e += 1 << 24; break; } }
+            }
+            if (per) { int ph = fmodi(t0 - sx, per); if (ph > per / 2) ph = per - ph; e += e * ph / per; }
+            err[c] = (int)(e > (1 << 29) ? (1 << 29) : e);
+            if (err[c] < mn) mn = err[c];
         }
-    } else {
-        for (int k = fdiv(x0, 34) - 1; k * 34 < x1; k++) {                   /* big spheres, half under the frame */
-            u32 h = hash3(k, 0, 581); int cx = k * 34 + (int)(h % 14) - 7, cy = 228 + (int)(h >> 5) % 10, rad = 22 + (int)(h >> 10 & 7);
-            int X = side ? cx - (PW - 1) : -cx;
-            sphere(X * 16 + 8, cy * 16 + 8, rad * 16, &V_rball[(h >> 16) % (u32)V_nball], 150, V_FRONT, 583 + k);
+        if (mn == 1 << 30) {
+#ifdef WS_BACKDROP_MAIN
+            if (getenv("WSB_INFO")) fprintf(stderr, "side %d band %d-%d: no window for block %d\n", side, b->y0, b->y1, nb);
+#endif
+            return;
         }
+        tol = first && (b->st & VBB_TIGHT) ? 0 : mn / 8;
+        for (int c = 0; c < ncand; c++) if (err[c] >= 0 && err[c] <= mn + tol) nc++;
+        k = (int)(hash3(side * 64 + b->reg, nb, seed) % (u32)nc);
+        for (int c = 0; c < ncand && pick < 0; c++) if (err[c] >= 0 && err[c] <= mn + tol && k-- == 0) pick = c;
+        {   int sx = b->sx0 + pick / nd, dy = pick % nd - b->dy, j0 = side ? 0 : b->B;
+#ifdef WS_BACKDROP_MAIN
+            if (getenv("WSB_PICK") && (b->st & VBB_OUTL)) {
+                fprintf(stderr, "side %d band %d block %d t0 %d: sx %d dy %d err %d (min %d, %d cands) oref %d slope %d | ctx", side, b->y0, nb, t0, sx, dy, err[pick], mn, nc, oref, oslope);
+                for (int j = 0; j < VB_OCTX; j++) fprintf(stderr, " %d", oht[j]);
+                fprintf(stderr, " | src");
+                for (int j = 0; j < W; j++) fprintf(stderr, " %d", vb_hs[sx + j] < 0 ? -1 : vb_hs[sx + j] - dy);
+                fprintf(stderr, "\n");
+            }
+#endif
+            for (int y = 0; y < H; y++) for (int j = 0; j < W; j++) win[y][j] = rgb15(pic[vb_srow(b, ytop + y + dy)][sx + j]);
+            used[nb % 3] = sx;
+            for (int y = 0; y < H; y++) for (int j = 0; j < W; j++) { Rgb o; em[y][j] = vb_get(side, t0 + j, ytop + y, &o) ? vb_d2(o, win[y][j]) : 0; }
+            /* the vertical cut through the overlap columns (rows y0..y1): the new block on the outer side */
+            for (int y = 0; y < H; y++) vcut[y] = side ? -1 : W;
+            if (!first) {
+                static int ev[VB_MAXH][VB_MAXW]; int path[VB_MAXH];
+                for (int y = b->y0; y < b->y1; y++) for (int j = 0; j < b->OV; j++) ev[y - b->y0][j] = em[y - ytop][j0 + j];
+                vb_cutpath(ev, b->y1 - b->y0, b->OV, 1, path);
+                for (int y = b->y0; y < b->y1; y++) vcut[y - ytop] = j0 + path[y - b->y0];
+            }
+            /* the horizontal cuts through the overlap rows with the band above (the new block below the cut) and below
+               (the new block above it) */
+            for (int j = 0; j < W; j++) { tcut[j] = ytop; bcut[j] = ybot; }
+            if (b->OT > 0) {
+                vb_cutpath(em, b->OT, W, 0, tcut);
+                for (int j = 0; j < W; j++) tcut[j] += ytop;
+            }
+            if (b->OB > 0) {
+                vb_cutpath(em + (b->y1 - ytop), b->OB, W, 0, bcut);
+                for (int j = 0; j < W; j++) bcut[j] += b->y1 + 1;
+            }
+            for (int y = ytop; y < ybot; y++)
+                for (int j = 0; j < W; j++) {
+                    int tx = t0 + j, vc = vcut[y - ytop];
+                    pm[y - ytop][j] = 0;
+                    if (tx >= 0 && tx < PW) continue;                     /* never the picture */
+                    if (y >= b->y0 && y < b->y1 && (side ? j <= vc : j >= vc)) continue;   /* the old block's side of the cut */
+                    if (y < tcut[j] || y >= bcut[j]) continue;
+                    if ((b->st & (VBB_SOFT | VBB_OUTL)) && vb_excl(sx + j, vb_srow(b, y + dy))) continue;
+                    pm[y - ytop][j] = 1;
+                    if (!(b->st & VBB_FEATHER)) vb_put(side, tx, y, win[y - ytop][j], b->reg);
+                    if (vb_srcmap && vb_in(side, tx, y)) vb_srcmap[(size_t)y * vb_ow + vb_X(side, tx) - 1] = vb_srow(b, y + dy) * PW + sx + j;
+                }
+            if (b->st & VBB_FEATHER)                             /* the cuts blended over 5 x 5 texels (blurred bands:
+                                                                    a cut between two smooth textures shows as an edge) */
+                for (int y = ytop; y < ybot; y++)
+                    for (int j = 0; j < W; j++) {
+                        int tx = t0 + j, a = 0; Rgb o;
+                        if (tx >= 0 && tx < PW) continue;
+                        if (vb_hole(b, sx + j, vb_srow(b, y + dy))) continue;
+                        for (int v = -2; v <= 2; v++) for (int u = -2; u <= 2; u++) {
+                            int yy = y - ytop + v, jj = j + u;
+                            if (yy >= 0 && yy < H && jj >= 0 && jj < W)   /* (VBB_OUTL: the picture's columns count as
+                                                                              the new block's, so its edge columns are
+                                                                              its own, not blended into the grass under) */
+                                a += pm[yy][jj] || ((b->st & VBB_OUTL) && t0 + jj >= 0 && t0 + jj < PW);
+                        }
+                        if (!a) continue;
+                        if (!vb_get(side, tx, y, &o)) { if (pm[y - ytop][j]) vb_put(side, tx, y, win[y - ytop][j], b->reg); continue; }
+                        vb_put(side, tx, y, mix(o, win[y - ytop][j], a * 256 / 25), b->reg);
+                        if (vb_srcmap && a * 2 > 25 && vb_in(side, tx, y)) vb_srcmap[(size_t)y * vb_ow + vb_X(side, tx) - 1] = vb_srow(b, y + dy) * PW + sx + j;
+                    }
+        }
+        nb++; pos += side ? b->B : -b->B;
     }
 }
 
-static void gen_village(int pad)
+/* ================================================================== the spheres */
+static const short VB_COS[8] = { 256, 181, 0, -181, -256, -181, 0, 181 }, VB_SIN[8] = { 0, 181, 256, 181, 0, -181, -256, -181 };
+/* n . light (-256..256) at texel (x, y) of the circle centre (x2, y2) radius r2 (half texels), or -9999 outside */
+static int vb_dot(int x2, int y2, int r2, int x, int y, const int *L)
 {
-    pal_make(); v_analyse();
-    if (!V_rcan.ok || !V_rback.ok || !V_rfence.ok || !V_rledge.ok || !V_rpali.ok || !V_rground.ok || !V_rfront.ok
-        || (v_balloons() && !V_nball) || !canvas_open(pad)) return;
+    int dx = (x * 2 + 1 - x2) * 8, dy = (y * 2 + 1 - y2) * 8, R = r2 * 8, q = R * R - dx * dx - dy * dy;
+    if (q <= 0) return -9999;
+    return (dx * L[0] + dy * L[1] + isqrt_i(q) * L[2]) / R;
+}
+/* is the picture's texel (x, y) a visible texel of sphere i: inside 0.9 r, under no sphere in front, of its class */
+static int vb_vis(int i, int x, int y)
+{
+    const VbS *s = &VB_PS[i]; int dx = x * 2 + 1 - s->x2, dy = y * 2 + 1 - s->y2;
+    if (x < 0 || x >= PW || y < 0 || y >= PH || (dx * dx + dy * dy) * 100 >= s->r2 * s->r2 * 81) return 0;
+    for (int j = 0; j < VB_NPS; j++) {
+        const VbS *t = &VB_PS[j]; int ex = x * 2 + 1 - t->x2, ey = y * 2 + 1 - t->y2;
+        if (j == i || (t->fl & VBS_FRONT) != (s->fl & VBS_FRONT) || t->dep <= s->dep) continue;
+        if (ex * ex + ey * ey < (t->r2 + 2) * (t->r2 + 2)) return 0;
+    }
+    if (vb_excl(x, y)) return 0;                                  /* (the huts, the jukebox) */
+    return vb_class(rgb15(pic[y][x])) == s->cls;
+}
+/* the same by geometry only (any colour): inside 0.95 r, under no sphere in front, not an object */
+static int vb_vis_geo(int i, int x, int y)
+{
+    const VbS *s = &VB_PS[i]; int dx = x * 2 + 1 - s->x2, dy = y * 2 + 1 - s->y2;
+    if (vb_excl(x, y) || (dx * dx + dy * dy) * 400 >= s->r2 * s->r2 * 361) return 0;
+    for (int j = 0; j < VB_NPS; j++) {
+        const VbS *t = &VB_PS[j]; int ex = x * 2 + 1 - t->x2, ey = y * 2 + 1 - t->y2;
+        if (j == i || (t->fl & VBS_FRONT) != (s->fl & VBS_FRONT) || t->dep <= s->dep) continue;
+        if (ex * ex + ey * ey < (t->r2 + 2) * (t->r2 + 2)) return 0;
+    }
+    return 1;
+}
+/* each sphere's a, b by least squares on its visible texels for light L; returns the summed squared error */
+static long long vb_fit(const int *L, int apply)
+{
+    long long tot = 0;
+    for (int i = 0; i < VB_NPS; i++) {
+        const VbS *s = &VB_PS[i]; long long n = 0, sd = 0, sdd = 0, sl = 0, sdl = 0, sll = 0, den; int a, b, hl[256];
+        if (apply) memset(hl, 0, sizeof hl);
+        for (int y = (s->y2 - s->r2) / 2 - 1; y <= (s->y2 + s->r2) / 2 + 1; y++)
+            for (int x = (s->x2 - s->r2) / 2 - 1; x <= (s->x2 + s->r2) / 2 + 1; x++) {
+                int d, l;
+                if (!vb_vis(i, x, y)) continue;
+                d = vb_dot(s->x2, s->y2, s->r2, x, y, L); l = lum(rgb15(pic[y][x]));
+                n++; sd += d; sdd += (long long)d * d; sl += l; sdl += (long long)d * l; sll += (long long)l * l;
+                if (apply) hl[clampi(l, 0, 255)]++;
+            }
+        den = n * sdd - sd * sd;
+        if (n < 12) { a = n ? (int)(sl / n) : 120; b = 0; }
+        else {
+            b = den > 0 ? (int)((n * sdl - sd * sl) * 256 / den) : 0;   /* (x 256) */
+            b = clampi(b, 40, 150);
+            a = (int)((sl * 256 - (long long)b * sd) / (n * 256));
+        }
+        /* the error: sum (l - a - b d / 256)^2 */
+        tot += sll - 2 * a * sl - 2 * (long long)b * sdl / 256 + n * a * a + 2 * (long long)a * b * sd / 256 + (long long)b * b / 256 * sdd / 256;
+        if (apply) {
+            int k = 0, l = 255;                          /* (the 90th percentile of its visible texels) */
+            VB_a[i] = a; VB_b[i] = b; VB_n[i] = (int)n; VB_m[i] = n ? (int)(sl / n) : a;
+            while (l > 0 && (k += hl[l]) * 10 < n) l--;
+            VB_hi[i] = n ? l : 255;
+        }
+    }
+    return tot;
+}
+static void vb_light(void)
+{
+    static const short LX[6] = { -32, 0, 32, 64, 96, 128 }, LY[5] = { -128, -96, -64, -32, 0 };
+    long long be = -1; int L[3], bl[3] = { 64, -80, 230 };
+    for (int i = 0; i < 6; i++) for (int j = 0; j < 5; j++) {
+        long long e;
+        L[0] = LX[i]; L[1] = LY[j]; L[2] = isqrt_i(65536 - LX[i] * LX[i] - LY[j] * LY[j]);
+        e = vb_fit(L, 0);
+        if (be < 0 || e < be) { be = e; bl[0] = L[0]; bl[1] = L[1]; bl[2] = L[2]; }
+    }
+    VB_L[0] = bl[0]; VB_L[1] = bl[1]; VB_L[2] = bl[2];
+    vb_fit(VB_L, 1);
+#ifdef WS_BACKDROP_MAIN
+    if (getenv("WSB_INFO")) {
+        fprintf(stderr, "light %d %d %d\n", VB_L[0], VB_L[1], VB_L[2]);
+        for (int i = 0; i < VB_NPS; i++) fprintf(stderr, "sphere %d: a %d b %d (n %d, mean %d, p90 %d)\n", i, VB_a[i], VB_b[i], VB_n[i], VB_m[i], VB_hi[i]);
+    }
+#endif
+}
+/* a colour moved along its class's ramp from its luminance by dl (lighter pinks paler, as the picture's) */
+static Rgb vb_at_lum(const Ramp *rp, int l)
+{
+    int i = 0;
+    while (i < NRAMP - 1 && lum(rp->bin[i + 1]) <= l) i++;
+    if (i >= NRAMP - 1 || l <= lum(rp->bin[0])) return rp->bin[l <= lum(rp->bin[0]) ? 0 : NRAMP - 1];
+    {   int a = lum(rp->bin[i]), b = lum(rp->bin[i + 1]); return b > a ? mix(rp->bin[i], rp->bin[i + 1], (l - a) * 256 / (b - a)) : rp->bin[i]; }
+}
+static Rgb vb_shift(const Ramp *rp, Rgb c, int dl)
+{
+    int l = lum(c); Rgb a = vb_at_lum(rp, l), b = vb_at_lum(rp, clampi(l + dl, 4, 250));
+    Rgb o = { clampi(c.r + b.r - a.r, 0, 255), clampi(c.g + b.g - a.g, 0, 255), clampi(c.b + b.b - a.b, 0, 255) };
+    return o;
+}
+typedef struct { int x2, y2, r2, cls, dep, don, rot, mir, da, self, reg; } VbN;
+static u16 *vb_id; static int vb_cur;                    /* which sphere is on top at each strip texel (1 + index) */   /* a sphere to draw in the strip */
+/* source texel try t for sphere n (donor D) at offset (sdx, sdy) (1/16 texel): 0 the same place, 1 across the edge (a
+   completed sphere: any texel of it there), 2-4 the same direction nearer the centre, 5 mirrored, 6-12 rotated */
+static int vb_try(const VbN *n, const VbS *D, int side, int sdx, int sdy, int t, int *qx, int *qy)
+{
+    int rot = n->rot, mir = n->mir, ux, uy, q16x, q16y, k = 256;
+    if (t == 1 && !n->self) return 0;
+    if (t >= 2 && t <= 4) k = 256 - 51 * (t - 1);
+    if (t == 5) mir ^= 1;
+    if (t >= 6) rot = (rot + t - 5) & 7;
+    ux = (mir ? -sdx : sdx) * k / 256; uy = sdy * k / 256;
+    {   int rx = (ux * VB_COS[rot] - uy * VB_SIN[rot]) / 256, ry = (ux * VB_SIN[rot] + uy * VB_COS[rot]) / 256;
+        q16x = D->x2 * 8 + rx * D->r2 / n->r2; q16y = D->y2 * 8 + ry * D->r2 / n->r2; }
+    *qx = fdiv(q16x, 16); *qy = fdiv(q16y, 16);
+    if (t == 1) { *qx = side ? 2 * PW - 1 - *qx : -1 - *qx; return vb_vis_geo(n->don, *qx, *qy); }
+    return vb_vis(n->don, *qx, *qy);
+}
+/* the colour of source texel (qx, qy) of donor D moved to model tone lt at its new place: along the donor's ramp, or,
+   for a sphere of another class (a texture transfer), its luminance on the target class's ramp */
+static Rgb vb_col(const VbN *n, const VbS *D, const Ramp *rp, const Ramp *rpt, int qx, int qy, int lt, int front)
+{
+    int ls = VB_a[n->don] + VB_b[n->don] * vb_dot(D->x2, D->y2, D->r2, qx, qy, VB_L) / 256;
+    Rgb c = rgb15(pic[qy][qx]);
+    if (front) {                                          /* the front: the model's tone (a completed one never below its
+                                                             mean by more than 28: its flank is not the brown of the
+                                                             picture's rim), the texture's grain only (+-20) */
+        int l = (!n->self || lt > VB_m[n->don] - 28 ? lt : VB_m[n->don] - 28) + clampi(lum(c) - ls, -20, 20);
+        return vb_at_lum(rpt, clampi(l, 4, 250));
+    }
+    if (n->cls != D->cls) return vb_at_lum(rpt, clampi(lum(c) + lt - ls, 4, 250));
+    return vb_shift(rp, c, lt - ls);
+}
+/* sphere n into the strip: each texel the donor's texel at the same place on the sphere (scaled, rotated, mirrored),
+   or, where the donor's is hidden, another visible texel of the donor (across the edge, across its axis, rotated);
+   its residual on n's model tone at that place */
+static void vb_sphere(int side, const VbN *n)
+{
+    const VbS *D = &VB_PS[n->don]; const Ramp *rp = D->fl & VBS_FRONT ? &VB_rf[D->cls] : &VB_rc[D->cls];
+    const Ramp *rpt = D->fl & VBS_FRONT ? &VB_rf[n->cls] : &VB_rc[n->cls];      /* the target class's */
+    int R16 = n->r2 * 8, lo = vb_lo(side), hi = vb_hi(side), xa = (n->x2 - n->r2) / 2 - 7, xb = (n->x2 + n->r2) / 2 + 7;
+    int ya = (n->y2 - n->r2) / 2 - 7, yb = (n->y2 + n->r2) / 2 + 7;
+    /* the contact shade on the spheres behind it: a soft ring outside its outline, deeper at the lower left */
+    for (int y = ya; y <= yb; y++)
+        for (int wx = xa; wx <= xb; wx++) {
+            int dx = (wx * 2 + 1 - n->x2) * 8, dy = (y * 2 + 1 - n->y2) * 8, o = isqrt_i(dx * dx + dy * dy) - R16, rr; Rgb *p;
+            if (wx < lo || wx >= hi || y < 0 || y >= PH || o < 0 || o >= 72 || !(p = vb_px(side, wx, y))) continue;
+            rr = vb_reg(side, wx, y);
+            if (rr < VB_SPH || rr >= VB_BACK || occ[(size_t)y * vb_ow + vb_X(side, wx) - 1]) continue;   /* (once: not deeper
+                                                                       where several spheres in front meet) */
+            {   int sh = clampi(200 + o * 56 / 72 + (dx - dy) * 12 / (R16 + 1), 200, 256);
+                if (n->self && (VB_PS[n->don].fl & VBS_SOFTJ)) sh = 256 - (256 - sh) * clampi((vb_X(side, wx) - 2) * 256 / 6, 0, 256) / 256;
+                *p = scale(*p, sh); }
+            occ[(size_t)y * vb_ow + vb_X(side, wx) - 1] = 1;
+        }
+    for (int y = ya; y <= yb; y++)
+        for (int wx = xa; wx <= xb; wx++) {
+            int dx = (wx * 2 + 1 - n->x2) * 8, dy = (y * 2 + 1 - n->y2) * 8, d = isqrt_i(dx * dx + dy * dy), dt, src = 0, qx = 0, qy = 0, sdx, sdy;
+            Rgb c;
+            if (wx < lo || wx >= hi || y < 0 || y >= PH || d >= R16 || (wx >= 0 && wx < PW)) continue;
+            dt = vb_dot(n->x2, n->y2, n->r2, wx, y, VB_L);
+            {   int rin = R16 * 86 / 100; if (d > rin) { sdx = dx * rin / d; sdy = dy * rin / d; } else { sdx = dx; sdy = dy; } }   /* (the rim: texture
+                                                                       from just inside it, the tone of its own place) */
+            {   int front = (D->fl & VBS_FRONT) != 0, li = n->don, lt;
+                if (front && !n->self)                    /* a new front sphere: lit as the picture's front sphere of
+                                                             its class (the cream one: lilac grey in the shade, warm
+                                                             on the lit right), its grain from the donor */
+                    for (int i = 0; i < VB_NPS; i++) if ((VB_PS[i].fl & VBS_FRONT) && VB_PS[i].cls == n->cls && VB_n[i] >= 60) li = i;
+                lt = VB_a[li] + n->da + VB_b[li] * dt / 256;
+                if (n->self && !front && (VB_PS[n->don].fl & VBS_CAP)) {   /* (eased above its visible texels' 90th
+                                                                             percentile - 8: no flat white dome) */
+                    int K = VB_hi[n->don] - 8;
+                    if (lt > K) lt = K + (lt - K) / 4;
+                }
+                if (n->self && front) {
+                    /* a completed front sphere: the texture reflected across the edge (else its other flank), on the
+                       model's light; the first 12 columns blended from the exact continuation of the picture's texel */
+                    int X = side ? wx - (PW - 1) : -wx, ok = vb_try(n, D, side, sdx, sdy, 1, &qx, &qy);
+                    static const signed char ord[4] = { 5, 2, 3, 4 };
+                    for (int i = 0; i < 4 && !ok; i++) ok = vb_try(n, D, side, sdx, sdy, ord[i], &qx, &qy);
+                    if (!ok) c = vb_at_lum(rpt, clampi(lt > VB_m[n->don] - 28 ? lt : VB_m[n->don] - 28, 4, 250));
+                    else {
+                        c = vb_col(n, D, rp, rpt, qx, qy, lt, 1);
+                        if (X <= 12) {
+                            int ls = VB_a[n->don] + VB_b[n->don] * vb_dot(D->x2, D->y2, D->r2, qx, qy, VB_L) / 256;
+                            c = mix(vb_shift(rp, rgb15(pic[qy][qx]), lt - ls), c, X * 256 / 13);
+                        }
+                    }
+                } else {
+                    for (int t = 0; t < 13 && !src; t++) src = vb_try(n, D, side, sdx, sdy, t, &qx, &qy);
+                    if (src) c = vb_col(n, D, rp, rpt, qx, qy, lt, front);
+                    else c = vb_at_lum(rpt, clampi(lt + (int)(hash3(wx, y, 977) & 15) - 8, 4, 250));
+                }
+            }
+            if (d >= R16 - 24) { Rgb *p = vb_px(side, wx, y); if (p && vb_reg(side, wx, y)) c = mix(*p, c, 256 - (d - (R16 - 24)) * 150 / 24); }   /* (a soft outline) */
+            vb_put(side, wx, y, c, n->reg);
+            if (vb_in(side, wx, y)) { occ[(size_t)y * vb_ow + vb_X(side, wx) - 1] = 0; if (vb_id) vb_id[(size_t)y * vb_ow + vb_X(side, wx) - 1] = (u16)vb_cur; }
+        }
+}
+static int vb_cls(u32 h) { int a = (int)(h & 255), c = 0; while (c < 2 && VB_share[c + 1] <= a) c++; return c; }
+static int vb_ncmp(const void *a, const void *b)
+{
+    const VbN *p = a, *q = b;
+    if (p->dep != q->dep) return p->dep - q->dep;       /* (a total order: any qsort gives the same) */
+    if (p->x2 != q->x2) return p->x2 - q->x2;
+    if (p->y2 != q->y2) return p->y2 - q->y2;
+    if (p->r2 != q->r2) return p->r2 - q->r2;
+    if (p->don != q->don) return p->don - q->don;
+    if (p->cls != q->cls) return p->cls - q->cls;
+    if (p->rot != q->rot) return p->rot - q->rot;
+    return p->mir != q->mir ? p->mir - q->mir : p->da - q->da;
+}
+static int vb_donor(int cls, int front, u32 h)            /* a donor of the class (by hash among them) */
+{
+    int c[VB_NPS], n = 0;
+    for (int i = 0; i < VB_NPS; i++)
+        if ((VB_PS[i].fl & VBS_DONOR) && VB_PS[i].cls == cls && !(VB_PS[i].fl & VBS_FRONT) == !front && VB_n[i] >= 60) c[n++] = i;
+    return n ? c[h % (u32)n] : -1;
+}
+/* the deepest edge sphere in front at the strip texel (wx, y) next to the join, or -1000 */
+static int vb_edge_dep(int side, int front, int wx, int y)
+{
+    int m = -1000;
+    for (int i = 0; i < VB_NPS; i++) {
+        const VbS *s = &VB_PS[i]; int dx = wx * 2 + 1 - s->x2, dy = y * 2 + 1 - s->y2;
+        if (s->side != side || !(s->fl & VBS_FRONT) != !front) continue;
+        if (dx * dx + dy * dy < s->r2 * s->r2 && s->dep > m) m = s->dep;
+    }
+    return m;
+}
+/* may new sphere n stand where it is: in the strip's first 3 columns only under an edge sphere in front of it, and
+   nowhere in front of a VBS_KEEP edge sphere */
+static int vb_fits(int side, const VbN *n, int front)
+{
+    for (int i = 0; i < VB_NPS; i++) {
+        const VbS *s = &VB_PS[i]; int dx = n->x2 - s->x2, dy = n->y2 - s->y2, rr = n->r2 + s->r2;
+        if (!(s->fl & VBS_KEEP) || s->side != side || !(s->fl & VBS_FRONT) != !front || n->dep <= s->dep) continue;
+        if (dx * dx + dy * dy < rr * rr) return 0;
+    }
+    for (int k = 0; k < 3; k++) {
+        int wx = side ? PW + k : -1 - k;
+        for (int y = (n->y2 - n->r2) / 2 - 1; y <= (n->y2 + n->r2) / 2 + 1; y++) {
+            int dx = wx * 2 + 1 - n->x2, dy = y * 2 + 1 - n->y2;
+            if (y < 0 || y >= PH || dx * dx + dy * dy >= n->r2 * n->r2) continue;
+            if (vb_edge_dep(side, front, wx, y) <= n->dep) return 0;
+        }
+    }
+    return 1;
+}
+static VbN vb_s[700];
+static int vb_add(int side, int n, VbN t, int front, int filler)
+{
+    int dir = side ? 2 : -2;
+    if (n >= 700 || t.don < 0) return n;
+    if (!filler) {
+        int k = 0;
+        while (k < 120 && !vb_fits(side, &t, front)) { t.x2 += dir; k++; }
+        if (k == 120) return n;
+    }
+#ifdef WS_BACKDROP_MAIN
+    if (getenv("WSB_NONEW") && !filler) return n;
+#endif
+    if (side ? (t.x2 + t.r2) / 2 < PW : (t.x2 - t.r2) / 2 >= 0) return n;   /* (all inside the picture) */
+    vb_s[n] = t; return n + 1;
+}
+/* draw the n spheres of vb_s in order; then leave out every new one of which less than a fifth shows (a sliver
+   between the ones in front reads as a cut sphere) and draw them again */
+static void vb_draw_all(int side, int n)
+{
+    size_t np = (size_t)vb_ow * PH; Rgb *c0 = malloc(np * sizeof *c0); u8 *r0 = malloc(np); int *cnt = calloc((size_t)n + 1, sizeof *cnt);
+    vb_id = calloc(np, sizeof *vb_id);
+    if (!c0 || !r0 || !cnt || !vb_id) { free(c0); free(r0); free(cnt); free(vb_id); vb_id = 0; for (int i = 0; i < n; i++) vb_sphere(side, &vb_s[i]); return; }
+    memcpy(c0, cv, np * sizeof *c0); memcpy(r0, rg, np); memset(occ, 0, np);
+    for (int i = 0; i < n; i++) { vb_cur = i + 1; vb_sphere(side, &vb_s[i]); }
+    for (size_t k = 0; k < np; k++) if (vb_id[k]) cnt[vb_id[k]]++;
+    {   int m = 0;
+        for (int i = 0; i < n; i++) {
+            int area = 0, X0 = vb_X(side, (vb_s[i].x2 - vb_s[i].r2) / 2), X1 = vb_X(side, (vb_s[i].x2 + vb_s[i].r2) / 2);
+            for (int y = (vb_s[i].y2 - vb_s[i].r2) / 2; y <= (vb_s[i].y2 + vb_s[i].r2) / 2; y++)
+                for (int wx = (vb_s[i].x2 - vb_s[i].r2) / 2; wx <= (vb_s[i].x2 + vb_s[i].r2) / 2; wx++) {
+                    int dx = wx * 2 + 1 - vb_s[i].x2, dy = y * 2 + 1 - vb_s[i].y2;
+                    if (vb_in(side, wx, y) && dx * dx + dy * dy < vb_s[i].r2 * vb_s[i].r2) area++;
+                }
+            (void)X0; (void)X1;
+            if (vb_s[i].self || vb_s[i].dep < -40 || vb_s[i].y2 < 40 || cnt[i + 1] * 5 >= area) vb_s[m++] = vb_s[i];   /* (not the far ones
+                                                                       nor the top row: nothing behind them) */
+        }
+        memcpy(cv, c0, np * sizeof *c0); memcpy(rg, r0, np); memset(occ, 0, np);
+        for (int i = 0; i < m; i++) { vb_cur = i + 1; vb_sphere(side, &vb_s[i]); }
+    }
+    free(c0); free(r0); free(cnt); free(vb_id); vb_id = 0;
+}
+static void vb_canopy(int side)
+{
+    int n = 0, lo = vb_lo(side), hi = vb_hi(side);
+    for (int i = 0; i < VB_NPS; i++) {
+        const VbS *s = &VB_PS[i]; VbN t;
+        if (s->side != side || (s->fl & VBS_FRONT)) continue;
+        t.x2 = s->x2; t.y2 = s->y2; t.r2 = s->r2; t.cls = s->cls; t.dep = s->dep; t.don = i; t.rot = 0; t.mir = 0; t.da = 0; t.self = 1;
+        t.reg = VB_SPH + s->cls; vb_s[n++] = t;
+    }
+    /* far balloons behind everything (no gaps between the spheres): darker */
+    for (int k = fdiv(lo, 13) - 2; k * 13 < hi + 30; k++)
+        for (int row = 0; row < 6; row++) {
+            u32 h = hash3(k, row, 841); VbN t;
+            t.x2 = 2 * (k * 13 + (int)(h % 13) + (row & 1) * 6); t.y2 = 2 * (row * 11 - 4 + (int)(h >> 4) % 6);
+            t.r2 = 2 * (11 + (int)(h >> 8) % 5); t.cls = vb_cls(h >> 12); t.dep = -60 + row; t.don = vb_donor(t.cls, 0, h >> 20);
+            t.rot = (int)(h >> 24) & 7; t.mir = (int)(h >> 27) & 1; t.da = -46 - (int)(h >> 28) % 8; t.self = 0; t.reg = VB_SPH + t.cls;
+            n = vb_add(side, n, t, 0, 1);
+        }
+    /* three layers of new spheres, 26-column cells, the lower ones in front; the odd one lower still (ragged ends) */
+    for (int k = fdiv(lo, 26) - 2; k * 26 < hi + 56; k++)
+        for (int row = 0; row < 4; row++) {
+            u32 h = hash3(k, row, 851), h2 = hash3(k, row, 853); VbN t;
+            if (row == 3 && (h2 & 3) != 0) continue;
+            t.x2 = 2 * (k * 26 + (int)(h % 26) + row * 9);
+            t.y2 = 2 * (row == 0 ? -2 + (int)(h >> 5) % 12 : row == 1 ? 26 + (int)(h >> 5) % 14 : row == 2 ? 52 + (int)(h >> 5) % 14 : 72 + (int)(h >> 5) % 8);
+            t.r2 = 2 * (row == 0 ? 16 + (int)(h >> 9) % 8 : row == 1 ? 15 + (int)(h >> 9) % 8 : row == 2 ? 14 + (int)(h >> 9) % 7 : 11 + (int)(h >> 9) % 4);
+            t.r2 += (int)(h2 >> 4) & 1;
+            t.cls = vb_cls(h >> 16); t.dep = t.y2 / 2 + (int)(h >> 24) % 12 - 30; t.don = vb_donor(t.cls, 0, h2 >> 8);
+            t.rot = (int)(h2 >> 12) & 7; t.mir = (int)(h2 >> 15) & 1; t.da = (int)(h2 >> 16) % 17 - 8 - (row == 0 ? 6 : 0); t.self = 0;
+            t.reg = VB_SPH + t.cls;
+            n = vb_add(side, n, t, 0, 0);
+        }
+    qsort(vb_s, (size_t)n, sizeof vb_s[0], vb_ncmp);
+    vb_draw_all(side, n);
+}
+static void vb_front(int side)
+{
+    int n = 0, lo = vb_lo(side), hi = vb_hi(side), fdon = -1;
+    for (int i = 0; i < VB_NPS; i++)
+        if ((VB_PS[i].fl & VBS_FRONT) && (VB_PS[i].fl & VBS_DONOR) && (fdon < 0 || VB_n[i] > VB_n[fdon])) fdon = i;
+    for (int i = 0; i < VB_NPS; i++) {
+        const VbS *s = &VB_PS[i]; VbN t;
+        if (s->side != side || !(s->fl & VBS_FRONT) || (s->fl & VBS_EDGE)) continue;
+        t.x2 = s->x2; t.y2 = s->y2; t.r2 = s->r2; t.cls = s->cls; t.dep = s->dep; t.don = i; t.rot = 0; t.mir = 0; t.da = 0; t.self = 1;
+        t.reg = VB_FRONTR + s->cls; vb_s[n++] = t;
+    }
+    for (int k = fdiv(lo, 46) - 2; k * 46 < hi + 100; k++)
+        for (int row = 0; row < 2; row++) {
+            u32 h = hash3(k, side * 4 + row, 871), h2 = hash3(k, row, 873); VbN t;
+            t.x2 = 2 * (k * 46 + (int)(h % 30) + row * 23); t.y2 = 2 * (row ? 252 + (int)(h >> 5) % 14 : 238 + (int)(h >> 5) % 12);
+            t.r2 = 2 * (row ? 40 + (int)(h >> 10) % 12 : 42 + (int)(h >> 10) % 12);
+            t.cls = vb_cls(h >> 16); t.dep = row ? 5 + (int)(h >> 24) % 4 : 1 + (int)(h >> 24) % 4;
+            t.don = fdon;                                 /* (the front sphere best seen in the picture lends its
+                                                                     texture to every class: the pink and cream ones are
+                                                                     too hidden, their rims brown) */
+            t.rot = 0; t.mir = (int)(h2 >> 11) & 1; t.self = 0;  /* (only the donors' tops are in the picture: not rotated) */
+            t.da = (int)(h2 >> 12) % 21 - 10 - (row ? 0 : 8);
+            t.reg = VB_FRONTR + t.cls;
+            n = vb_add(side, n, t, 1, 0);
+        }
+    qsort(vb_s, (size_t)n, sizeof vb_s[0], vb_ncmp);
+    vb_draw_all(side, n);
+}
+/* a VBS_EDGE front sphere's silhouette in the strip, over what vb_front drew behind it: only its outline zone, on the
+   arc that leaves the picture where its outline meets the join (centre (33, 251) r 50 in picture texels: through
+   (-0.5, 213.9), tangent to the picture's outline there, which runs about 1.15 columns left per row from row 206;
+   near the bottom it curves 9 columns into the strip).  Inside: the sphere's own pink, not its dark brown flank
+   (x 0-15): its tone a + b * (normal . light) fitted on its visible pink texels (the light of the other spheres),
+   never below its darkest pink (the 5th percentile of those texels), and towards the outline eased down to that
+   darkest pink from the tone of its darkest pink band (the mean of its pink texels darker than the median) over 6
+   texels; the colour and grain of a pink texel of the same row (x 16-31, picked by position) moved along the front
+   pink ramp to that tone, keeping its offset from the fit.  The outline anti-aliased over 1.5 texels; outside it a
+   contact shade on the sphere behind (the cream one), 0.72 at the outline fading out over 5 texels, as the
+   picture's overlaps darken the rear sphere along the front one's outline. */
+#define VB_EDGE_X2 66
+#define VB_EDGE_Y2 502
+#define VB_EDGE_R2 100
+static void vb_edge(int side)
+{
+    int R16 = VB_EDGE_R2 * 8, lo = vb_lo(side);
+    if (side) return;
+    for (int i = 0; i < VB_NPS; i++) {
+        long long n = 0, sd = 0, sdd = 0, sl = 0, sdl = 0, den; int hl[256], fa, fb, l5 = 0, lmed = 0, lband, k;
+        if (VB_PS[i].side != side || !(VB_PS[i].fl & VBS_EDGE)) continue;
+        memset(hl, 0, sizeof hl);
+        for (int y = 0; y < PH; y++) for (int x = 16; x < PW; x++) {        /* the fit on its pink texels */
+            int d, l;
+            if (!vb_vis(i, x, y) || (d = vb_dot(VB_EDGE_X2, VB_EDGE_Y2, VB_EDGE_R2, x, y, VB_L)) == -9999) continue;
+            l = lum(rgb15(pic[y][x]));
+            n++; sd += d; sdd += (long long)d * d; sl += l; sdl += (long long)d * l; hl[clampi(l, 0, 255)]++;
+        }
+        if (n < 40) continue;
+        den = n * sdd - sd * sd;
+        fb = den > 0 ? clampi((int)((n * sdl - sd * sl) * 256 / den), 0, 200) : 0;
+        fa = (int)((sl * 256 - (long long)fb * sd) / (n * 256));
+        for (k = 0, l5 = 0; l5 < 255 && (k += hl[l5]) * 20 < n; l5++) continue;
+        for (k = 0, lmed = 0; lmed < 255 && (k += hl[lmed]) * 2 < n; lmed++) continue;
+        {   long long s0 = 0, c0 = 0; for (int l = 0; l < lmed; l++) { s0 += (long long)hl[l] * l; c0 += hl[l]; } lband = c0 ? (int)(s0 / c0) : l5; }
+#ifdef WS_BACKDROP_MAIN
+        if (getenv("WSB_INFO")) fprintf(stderr, "edge sphere %d: n %lld a %d b %d l5 %d band %d\n", i, n, fa, fb, l5, lband);
+#endif
+        for (int y = (VB_EDGE_Y2 - VB_EDGE_R2) / 2; y < PH; y++)
+            for (int wx = -1; wx >= lo; wx--) {
+                int dx = (wx * 2 + 1 - VB_EDGE_X2) * 8, dy = (y * 2 + 1 - VB_EDGE_Y2) * 8, d = isqrt_i(dx * dx + dy * dy) - R16;
+                int X = -wx, rr = vb_reg(side, wx, y), sphere = rr >= VB_SPH && rr < VB_BACK, a;
+                Rgb *p = vb_px(side, wx, y), bg;
+                if (!p || d >= 80) continue;
+                bg = *p;
+                if (sphere) bg = scale(bg, 256 - 72 * (80 - (d > 0 ? d : 0)) / 80);   /* (the contact shade) */
+                a = clampi((12 - d) * 256 / 24, 0, 256);                               /* (the outline's coverage) */
+                if (a > 0) {                                                           /* the user's call: the */
+                    int yy = y < 214 ? 214 : y;                                        /* sphere's tone right at the */
+                    bg = mix(bg, rgb15(pic[yy][(X - 1) % 3]), a);                      /* cut (picture cols 0-2, */
+                }                                                                      /* same row), no gradient */
+                if (sphere || a > 0) *p = bg;
+            }
+    }
+}
+
+static void vb_analyse(void)
+{
+    int cnt[3] = { 0, 0, 0 }, n = 0;
+    for (int c = 0; c < 3; c++) {                        /* the classes' ramps (the hut's chimney and roof left out) */
+        nsamp = 0;
+        for (int y = 0; y < 90; y++) for (int x = 0; x < PW; x++) {
+            Rgb k = rgb15(pic[y][x]);
+            if (y >= 14 && x >= 60 && x < 200) continue;
+            if (vb_class(k) == c && !(c == 0 && y > 62)) { samp_add(pic[y][x]); cnt[c]++; }
+        }
+        ramp_any(&VB_rc[c]);
+        nsamp = 0;
+        for (int i = 0; i < VB_NPS; i++)                   /* the front: the visible texels of its spheres of the class
+                                                              (not the stones' greys nor the rims' browns) */
+            if ((VB_PS[i].fl & VBS_FRONT) && VB_PS[i].cls == c)
+                for (int y = 186; y < PH; y++) for (int x = 0; x < PW; x++) if (vb_vis(i, x, y)) samp_add(pic[y][x]);
+        if (nsamp >= 200) ramp_any(&VB_rf[c]); else { nsamp = 0; VB_rf[c] = VB_rc[c]; }
+        n += cnt[c];
+    }
+    VB_share[0] = 0;
+    for (int c = 0; c < 3; c++) VB_share[c + 1] = VB_share[c] + (n ? cnt[c] * 256 / n : 85);
+    vb_light();
+}
+static void gen_vb(int pad)
+{
+    pal_make(); vb_analyse();
+    for (int c = 0; c < 3; c++) if (!VB_rc[c].ok || !VB_rf[c].ok) return;
+    vb_ow = pad + 64;
+    if (!canvas_open(vb_ow)) return;
     for (int side = 0; side < 2; side++) {
         canvas_clear(); cur_side = side;
-        v_back(side); v_canopy(side); v_fence(side); v_ground(side); v_front(side);
-        balance_regions(side, v_picreg, 1 << V_FENCE | 1 << V_RAIL | 1 << V_LEDGE | 1 << V_PALI | 1 << V_GROUND);
-        emit(side);
+        for (int i = 0; i < 5; i++) vb_quilt(side, &VB_BANDS[side][i], 701 + 13 * i);
+        vb_canopy(side);
+        vb_front(side);
+        vb_edge(side);
+        for (int y = 0; y < PH; y++)
+            for (int X = 1; X <= pad; X++) {
+                Rgb c = cv[(size_t)y * vb_ow + X - 1];
+                strip[(size_t)y * 2 * pad + (side ? pad + (X - 1) : pad - X)] = quant(c);
+            }
     }
+    canvas_close();
+}
+
+/* ================================================================== AREA19 s1: the Dwarf Village in cherry blossom
+ * The same layout as AREA02 s1 (the same huts, fence, ledge, straw bank, ladder and jukebox), with the canopy a pink
+ * cherry-blossom mass over a grey rock band, a green ledge and green ground, and a front row of blurred blossom bushes
+ * cut by the frame's bottom.  Everything is a texture here, so every band is quilted from the user's own picture at
+ * run time with gen_vb's vb_quilt (blocks of the picture's texels on the same rows, chosen by the error of their
+ * overlap with the picture's columns at the edge and with the block before, pasted along minimum-error cuts; nothing
+ * mirrored, objects never copied):
+ *   - the fence first (left x 0-43 rows 108-137, its first 9 columns the picture's own posts continued with their
+ *     period (the post cut by the edge goes on), then cut into by the quilt; right x 186-255 rows 108-138);
+ *   - the canopy's lower part with its fringe and the grey rocks under it (rows 60-107, windows shifted up to 8 rows so
+ *     the fringe goes on at the height the edge has it: ~row 98 at the left edge, ~104 at the right one; left from any
+ *     clean column (the rock towers by the left edge first), right from x 190-319), cut into the fence's top rows; then
+ *     its upper part (rows 0-59, from x 0-43 and 192-319, the hut and its chimney left out), cut into the lower part:
+ *     the windows keep their rows (up to 3 rows of shift), so the blossom's vertical structure (light flower clusters
+ *     above, darker and greyer low, the fringe's brown rim on the rocks) goes on as the picture has it by each edge;
+ *   - the green ledge: its lower rows (145-155, the grass and its dark lip) from x 0-215, its top (rows 136/137-144,
+ *     where the left edge has the log, x 2-52) from the clean stretch between the hut's pole and the ladder (x 192-213),
+ *     so its top edge under the fence is the picture's own; the straw bank (156-180), the ground (181-189);
+ *   - the front blossom: one band, rows 186-223 (windows of the picture's front, any column, up to 6 rows of shift,
+ *     the bottom rows reflected), on a grass underlay (rows 191-223 from the central valley's clean grass), scored
+ *     on the bushes' outline too (VBB_OUTL: a window's scalloped top, shifted, against the one already there over 20
+ *     columns, and its next 6 columns against the height and slope there), objects in the source's grass above the
+ *     bushes (the stones, the barrel) holes that keep the underlay; then cb_warp bends the strip's first 12 columns
+ *     so the outline starts where the picture's ends and goes on with its slope (the right edge's bush high, ~row
+ *     189; the left edge's valley flat at ~213 and then up its other flank; on the left over 8 columns only), the
+ *     left front keeps to a target outline (vb_otgt / cb_otgt: the edge's valley for a few columns, up to row ~203 by
+ *     column 14, then the picture's left bushes' height, ~196-206; windows there shifted up to 10 rows), cb_clean
+ *     drops loose blossom bits on its grass and fills grass enclosed by its bushes, and cb_ftone matches the tone per row
+ *     and per kind (grass, blossom; R, G, B, so the pink, not only the lightness) over 20 columns, fading by 72,
+ *     then the strip's first 2 columns onto the picture's last 2, fading over 12;
+ *   - the blurred bands (canopy, front) have their cuts blended over 5 x 5 texels (VBB_FEATHER), and the canopy's tone
+ *     is matched at the join per row (cb_tone: the strip's first 8 columns onto the picture's columns 2-9, fading out by
+ *     column 64; its first column onto the picture's last one, fading out over 8: the picture's edge columns are a
+ *     little darker, about 6 levels, and the strip goes on from them).
+ * Objects never copied (CB_EXCL): the hut and its chimney and pole, the log, the bucket, the barrel, the stones and
+ * their track, the stone pile, the ladder, the jukebox and its lever (and the front blossom under the jukebox, rows
+ * 182-201, whose top the jukebox hides: a flat top). */
+static const VbBox CB_EXCL[] = {
+    { 44, 40, 192, 144 }, { 70, 12, 110, 52 }, { 2, 138, 53, 145 }, { 138, 126, 162, 150 }, { 32, 164, 60, 192 },
+    { 98, 181, 218, 198 }, { 226, 118, 258, 142 }, { 214, 133, 262, 190 }, { 252, 120, 268, 191 }, { 284, 115, 302, 118 }, { 276, 118, 310, 124 },
+    { 262, 124, 317, 191 }, { 252, 182, 316, 202 }, { 0, 0, 0, 0 } };
+#define CB_S (VBB_STRICT | VBB_TIGHT)
+#define CB_F (VBB_TIGHT | VBB_FEATHER | VBB_FAR | VBB_OUTL)
+static const VbBand CB_BANDS[2][9] = {
+    { { 108, 138, 108, 138, 0, 44, 9, 5, 0, 0, 0, VB_FENCE, 1, 0, 9, VBB_TIGHT },
+      { 60, 108, 50, 124, 0, 320, 12, 6, 0, 6, 8, VB_BACK, 0, 0, 0, CB_S | VBB_SOFT | VBB_FEATHER | VBB_FAR },
+      { 0, 60, 0, 70, 0, 320, 16, 8, 0, 6, 3, VB_BACK, 0, 0, 0, CB_S | VBB_FEATHER | VBB_FAR },
+      { 145, 156, 145, 156, 0, 216, 16, 5, 0, 0, 0, VB_LEDGE, 0, 0, 0, VBB_TIGHT },
+      { 138, 145, 136, 148, 192, 214, 8, 4, 2, 3, 0, VB_LEDGE, 0, 0, 0, CB_S },
+      { 156, 181, 156, 181, 0, 216, 16, 5, 4, 0, 0, VB_BANK, 1, 0, 0, VBB_TIGHT },
+      { 181, 190, 181, 197, 0, 100, 16, 5, 4, 0, 1, VB_GROUND, 0, 0, 0, VBB_TIGHT },
+      { 191, PH, 188, 196, 60, 100, 16, 5, 1, 0, 0, VB_GROUND, 0, 0, 0, VBB_TIGHT },
+      { 186, PH, 186, PH, 0, 320, 16, 8, 3, 0, 10, VB_FRONTR, 0, 0, 0, CB_F } },
+    { { 108, 139, 108, 139, 186, 256, 12, 5, 0, 0, 0, VB_FENCE, 1, 0, 0, VBB_TIGHT },
+      { 60, 108, 50, 124, 190, 320, 16, 8, 0, 6, 8, VB_BACK, 0, 0, 0, CB_S | VBB_SOFT | VBB_FEATHER | VBB_FAR },
+      { 0, 60, 0, 70, 0, 320, 16, 8, 0, 6, 3, VB_BACK, 0, 0, 0, CB_S | VBB_FEATHER | VBB_FAR },
+      { 145, 156, 145, 156, 150, 216, 16, 5, 0, 0, 0, VB_LEDGE, 0, 0, 0, VBB_TIGHT },
+      { 139, 145, 136, 148, 192, 214, 8, 4, 2, 3, 0, VB_LEDGE, 0, 0, 0, CB_S },
+      { 156, 181, 156, 181, 150, 216, 16, 5, 4, 0, 0, VB_BANK, 1, 0, 0, VBB_TIGHT },
+      { 181, 190, 181, 197, 0, 262, 16, 5, 4, 0, 1, VB_GROUND, 0, 0, 0, VBB_TIGHT },
+      { 191, PH, 188, 196, 60, 100, 16, 5, 1, 0, 0, VB_GROUND, 0, 0, 0, VBB_TIGHT },
+      { 186, PH, 186, PH, 0, 320, 16, 8, 3, 0, 6, VB_FRONTR, 0, 0, 0, CB_F } } };
+/* the tone at the join, per row (rows [y0, y1), means over rows y +- 4 of them): the strip's columns 1-8 moved onto
+   the picture's columns 2-9 from the edge (full for 16 columns, gone at 64), and its first column onto the picture's
+   last one (easing out over 8 columns), so the join is neither a tone step nor a line (the picture's last columns are
+   often a little darker: the strip goes on from them and lightens as the picture does inwards) */
+static void cb_tone(int side, int y0, int y1)
+{
+    static int d[PH][2][3];
+    for (int y = y0; y < y1; y++) {
+        int s[4][3] = { { 0 } }, n[4] = { 0, 0, 0, 0 };     /* picture col 0, cols 2-9, strip col 1, cols 1-8 */
+        for (int yy = y - 4; yy <= y + 4; yy++) {
+            if (yy < y0 || yy >= y1) continue;
+            for (int i = 0; i < 10; i++) {
+                int x = side ? PW - 1 - i : i, g = i == 0 ? 0 : i == 1 ? -1 : 1; Rgb k;
+                if (g < 0 || vb_excl(x, yy)) continue;
+                k = rgb15(pic[yy][x]); s[g][0] += k.r; s[g][1] += k.g; s[g][2] += k.b; n[g]++;
+            }
+            for (int X = 1; X <= 8; X++) {
+                Rgb k = cv[(size_t)yy * vb_ow + X - 1];
+                for (int g = X == 1 ? 2 : 3; g <= 3; g++) { s[g][0] += k.r; s[g][1] += k.g; s[g][2] += k.b; n[g]++; }
+            }
+        }
+        for (int c = 0; c < 3; c++) {
+            d[y][0][c] = n[1] && n[3] ? s[1][c] / n[1] - s[3][c] / n[3] : 0;
+            d[y][1][c] = n[0] && n[2] ? s[0][c] / n[0] - s[2][c] / n[2] - d[y][0][c] : 0;
+        }
+    }
+    for (int y = y0; y < y1; y++)
+        for (int X = 1; X <= vb_ow; X++) {
+            Rgb *p = &cv[(size_t)y * vb_ow + X - 1];
+            int w2 = X <= 16 ? 256 : X >= 64 ? 0 : (64 - X) * 256 / 48, w1 = X <= 8 ? (9 - X) * 256 / 8 : 0;
+            p->r = clampi(p->r + (d[y][0][0] * w2 + d[y][1][0] * w1) / 256, 0, 255);
+            p->g = clampi(p->g + (d[y][0][1] * w2 + d[y][1][1] * w1) / 256, 0, 255);
+            p->b = clampi(p->b + (d[y][0][2] * w2 + d[y][1][2] * w1) / 256, 0, 255);
+        }
+}
+/* the bushes' outline at the join, bent: the strip's columns 1-CB_WN shifted up or down (rows 184 on, a column at a
+   time, at most 6 rows) so its outline starts where the picture's ends and goes on with its slope there (the mean of
+   the picture's 2 last known columns, the slope against the 2 before, at most 1 row a column), easing into the
+   strip's own outline by column CB_WN: no notch or step in the outline on the join */
+#define CB_WN 12
+#define CB_WNL 8
+static void cb_warp(int side)
+{
+    int h[4], n = 0, hs[CB_WN + 1], col[PH], wn = side ? CB_WN : CB_WNL;
+    for (int i = 0; i < 24 && n < 4; i++) { int v = vb_hcol(side, side ? PW - 1 - i : i); if (v >= 0) h[n++] = v; }
+    if (n < 2) return;
+    for (int X = 1; X <= CB_WN; X++) hs[X] = vb_hcol(side, side ? PW - 1 + X : -X);
+    {   int e4 = (h[0] + h[1]) * 2, sl = n == 4 ? e4 - (h[2] + h[3]) * 2 : 0;   /* (x 4) */
+        sl = sl > 8 ? 8 : sl < -8 ? -8 : sl;                                   /* (2 columns apart: 1 row a column) */
+        for (int X = 1; X <= wn; X++) {
+            int t, sft, k = X * 256 / wn, sm = k * k / 256 * (768 - 2 * k) / 256;   /* (smoothstep) */
+            if (hs[X] < 0 || hs[X] >= PH) continue;
+            t = (e4 + sl * X / 2) / 4; t += (hs[X] - t) * sm / 256;
+            sft = t - hs[X]; sft = sft > 6 ? 6 : sft < -6 ? -6 : sft;
+            if (!sft) continue;
+            for (int y = 184; y < PH; y++) { int sy = y - sft; col[y] = sy < 184 ? 184 : sy >= PH ? PH - 1 : sy; }
+            {   Rgb tmp[PH];
+                for (int y = 184; y < PH; y++) tmp[y] = cv[(size_t)col[y] * vb_ow + X - 1];
+                for (int y = 184; y < PH; y++) cv[(size_t)y * vb_ow + X - 1] = tmp[y];
+            }
+        }
+    }
+}
+/* the front's tone at the join, per row and per kind (grass, blossom), rows [y0, y1), means over rows y +- 2: the
+   strip's first CB_FN columns moved onto the picture's last CB_FN (all three channels, so the blossom's pink, not
+   only its lightness), fully up to column CB_FN, gone at column 72 */
+#define CB_FN 20
+#define CB_FH 12
+static void cb_ftone(int side, int y0, int y1)
+{
+    static int d[PH][2][3];
+    for (int y = y0; y < y1; y++) {
+        int s[2][2][3] = { { { 0 } } }, n[2][2] = { { 0 } };     /* [picture, strip][grass, blossom] */
+        for (int yy = y - 2; yy <= y + 2; yy++) {
+            if (yy < y0 || yy >= y1) continue;
+            for (int i = 0; i < CB_FN; i++) {
+                int x = side ? PW - 1 - i : i; Rgb k;
+                if (vb_excl(x, yy)) continue;
+                k = rgb15(pic[yy][x]); int g = !vb_grass(k);
+                s[0][g][0] += k.r; s[0][g][1] += k.g; s[0][g][2] += k.b; n[0][g]++;
+            }
+            for (int X = 1; X <= CB_FN; X++) {
+                Rgb k = cv[(size_t)yy * vb_ow + X - 1]; int g = !vb_grass(k);
+                s[1][g][0] += k.r; s[1][g][1] += k.g; s[1][g][2] += k.b; n[1][g]++;
+            }
+        }
+        for (int g = 0; g < 2; g++)
+            for (int c = 0; c < 3; c++)
+                d[y][g][c] = n[0][g] >= 8 && n[1][g] >= 8 ? s[0][g][c] / n[0][g] - s[1][g][c] / n[1][g] : 0;
+    }
+    for (int y = y0; y < y1; y++)
+        for (int X = 1; X <= vb_ow; X++) {
+            Rgb *p = &cv[(size_t)y * vb_ow + X - 1];
+            int g = !vb_grass(*p), w = X <= CB_FN ? 256 : X >= 72 ? 0 : (72 - X) * 256 / (72 - CB_FN);
+            p->r = clampi(p->r + d[y][g][0] * w / 256, 0, 255);
+            p->g = clampi(p->g + d[y][g][1] * w / 256, 0, 255);
+            p->b = clampi(p->b + d[y][g][2] * w / 256, 0, 255);
+        }
+    /* then the hand-over: the strip's first 2 columns onto the picture's last 2 (rows y +- 1, texels of the same kind
+       only), easing out over CB_FH columns (the picture's last columns are often a little darker or lighter than
+       the ones before: the strip goes on from them) */
+    for (int y = y0; y < y1; y++) {
+        int s[3] = { 0, 0, 0 }, n = 0;
+        for (int yy = y - 1; yy <= y + 1; yy++) {
+            if (yy < y0 || yy >= y1) continue;
+            for (int i = 0; i < 2; i++) {
+                int x = side ? PW - 1 - i : i; Rgb k = rgb15(pic[yy][x]), q = cv[(size_t)yy * vb_ow + i];
+                if (vb_excl(x, yy) || vb_grass(k) != vb_grass(q)) continue;
+                s[0] += k.r - q.r; s[1] += k.g - q.g; s[2] += k.b - q.b; n++;
+            }
+        }
+        for (int c = 0; c < 3; c++) d[y][0][c] = n >= 3 ? s[c] / n : 0;
+    }
+    for (int y = y0; y < y1; y++)
+        for (int X = 1; X < CB_FH; X++) {
+            Rgb *p = &cv[(size_t)y * vb_ow + X - 1]; int w = (CB_FH - X) * 256 / (CB_FH - 1);
+            p->r = clampi(p->r + d[y][0][0] * w / 256, 0, 255);
+            p->g = clampi(p->g + d[y][0][1] * w / 256, 0, 255);
+            p->b = clampi(p->b + d[y][0][2] * w / 256, 0, 255);
+        }
+}
+/* the left strip's front outline: the picture's valley at the edge (its height there) for a few columns, up its
+   other flank by column 14, then the bush mass at the picture's height (its left bushes' tops, rows ~196-207) */
+static int cb_h0 = 213;
+static int cb_otgt(int side, int X, int *tol)
+{
+    if (side) return -1;
+    if (X <= 4) { *tol = 2; return cb_h0; }
+    if (X < 14) { *tol = 3; return cb_h0 + (203 - cb_h0) * (X - 4) / 10; }
+    *tol = 5; return 201;
+}
+/* the left front cleaned (rows CB_CY on, the canvas' whole width): blossom bits loose on the grass (8-connected
+   non-grass pieces under CB_BLOB texels that do not reach the bottom row) go back to the grass underlay (und, the
+   canvas before the front band), with their 1-texel rim; grass enclosed by the bushes (4-connected grass not
+   reaching row CB_CY: a valley window lifted shows its grass in the reflected bottom rows) is filled with the blossom
+   above it (the hole's height up, moved down whole), or the mean of its blossom neighbours */
+#define CB_CY 184
+#define CB_BLOB 40
+#define CB_RIM 8
+static void cb_clean(const Rgb *und)
+{
+    int w = vb_ow, h = PH - CB_CY, n = w * h, *st = (int *)malloc(sizeof(int) * (size_t)n), *cm = (int *)malloc(sizeof(int) * (size_t)n);
+    u8 *gr = (u8 *)malloc((size_t)n);
+    if (!st || !cm || !gr) { free(st); free(cm); free(gr); return; }
+#define CBP(i) cv[(size_t)((i) / w + CB_CY) * w + (i) % w]
+    for (int i = 0; i < n; i++) { gr[i] = (u8)vb_grass(CBP(i)); cm[i] = -1; }
+    for (int pass = 0; pass < 2; pass++)                 /* (0: blossom bits, 1: grass holes) */
+        for (int i0 = 0; i0 < n; i0++) {
+            int sp = 0, cnt = 0, edge = 0, kind = pass ? 1 : 0;
+            if (cm[i0] >= 0 || gr[i0] != kind) continue;
+            st[sp++] = i0; cm[i0] = i0;
+            while (sp) {                                 /* (flood fill; cm: the piece's first texel) */
+                int i = st[--sp], y = i / w, x = i % w;
+                cnt++;
+                if (pass ? y == 0 : y == h - 1) edge = 1;
+                for (int dy = -1; dy <= 1; dy++)
+                    for (int dx = -1; dx <= 1; dx++) {
+                        int yy = y + dy, xx = x + dx, j;
+                        if ((!dx && !dy) || (pass && dx && dy) || yy < 0 || yy >= h || xx < 0 || xx >= w) continue;
+                        j = yy * w + xx;
+                        if (cm[j] < 0 && gr[j] == kind) { cm[j] = i0; st[sp++] = j; }
+                    }
+            }
+            if (edge || (!pass && cnt >= CB_BLOB)) continue;
+            for (int i = 0; i < n; i++) {
+                if (cm[i] != i0) continue;
+                if (!pass) {                             /* (the bit and its rim: the underlay) */
+                    int y = i / w, x = i % w;
+                    for (int dy = -1; dy <= 1; dy++)
+                        for (int dx = -1; dx <= 1; dx++) {
+                            int yy = y + dy, xx = x + dx, j;
+                            if (yy < 0 || yy >= h || xx < 0 || xx >= w) continue;
+                            j = yy * w + xx;
+                            if (j == i || gr[j]) CBP(j) = und[(size_t)(yy + CB_CY) * w + xx];
+                        }
+                    gr[i] = 1; cm[i] = -1;
+                } else cm[i] = -2;                       /* (filled below) */
+            }
+            if (pass) {                                  /* the hole with its rim (2 texels of the bushes' grey
+                                                            edge round it, holes of CB_RIM texels on): the blossom
+                                                            its height above it, moved down whole (no per-column
+                                                            streaks) */
+                int y0 = h, y1 = -1;
+                for (int r = 0; r < 2 && cnt >= CB_RIM; r++) {
+                    for (int i = 0; i < n; i++) {
+                        int y = i / w, x = i % w;
+                        if (cm[i] != -2) continue;
+                        for (int dy = -1; dy <= 1; dy++)
+                            for (int dx = -1; dx <= 1; dx++) {
+                                int yy = y + dy, xx = x + dx, j;
+                                if (yy < 0 || yy >= h || xx < 0 || xx >= w) continue;
+                                j = yy * w + xx;
+                                if (!gr[j] && cm[j] > -2) cm[j] = -6;
+                            }
+                    }
+                    for (int i = 0; i < n; i++) if (cm[i] == -6) cm[i] = -2;
+                }
+                int x0 = w, x1 = -1;
+                for (int i = 0; i < n; i++)
+                    if (cm[i] == -2) {
+                        if (i / w < y0) y0 = i / w;
+                        if (i / w > y1) y1 = i / w;
+                        if (i % w < x0) x0 = i % w;
+                        if (i % w > x1) x1 = i % w;
+                    }
+                for (int i = 0; i < n; i++) {
+                    int sh = x0 - (x1 - x0 + 1) >= 0 ? -(x1 - x0 + 1) : x1 + (x1 - x0 + 1) < w ? x1 - x0 + 1 : 0;
+                    int j = sh ? i + sh : i - (y1 - y0 + 1) * w;
+                    if (cm[i] != -2 || j < 0 || gr[j] || cm[j] <= -2) continue;
+                    CBP(i) = CBP(j); cm[i] = -3;
+                }
+                for (int i = 0; i < n; i++) if (cm[i] == -2) cm[i] = -5;   /* (left for the mean) */
+            }
+        }
+    for (int i = 0; i < n; i++) if (cm[i] == -5) cm[i] = -2;
+    for (int it = 0, left = 1; it < 16 && left; it++) {  /* (what is left: its blossom neighbours' mean, peeled) */
+        left = 0;
+        for (int i = 0; i < n; i++) {
+            int y = i / w, x = i % w, s[3] = { 0, 0, 0 }, c = 0;
+            if (cm[i] != -2) continue;
+            for (int d = 0; d < 4; d++) {
+                int yy = y + (d == 0) - (d == 1), xx = x + (d == 2) - (d == 3), j;
+                if (yy < 0 || yy >= h || xx < 0 || xx >= w) continue;
+                j = yy * w + xx;
+                if (cm[j] == -2 || (gr[j] && cm[j] != -3)) continue;
+                s[0] += CBP(j).r; s[1] += CBP(j).g; s[2] += CBP(j).b; c++;
+            }
+            if (!c) { left = 1; continue; }
+            CBP(i).r = s[0] / c; CBP(i).g = s[1] / c; CBP(i).b = s[2] / c; cm[i] = -3;
+        }
+    }
+    {   Rgb *t = (Rgb *)malloc(sizeof(Rgb) * (size_t)n);    /* the fill and its edge softened (3 x 3, twice): a
+                                                               copied patch has hard edges in the blurred bushes */
+        for (int pass = 0; t && pass < 2; pass++) {
+            for (int i = 0; i < n; i++) t[i] = CBP(i);
+            for (int i = 0; i < n; i++) {
+                int y = i / w, x = i % w, s[3] = { 0, 0, 0 }, c = 0, near = cm[i] == -3;
+                if (gr[i] && cm[i] != -3) continue;
+                for (int dy = -1; dy <= 1 && !near; dy++)
+                    for (int dx = -1; dx <= 1; dx++) {
+                        int yy = y + dy, xx = x + dx;
+                        if (yy >= 0 && yy < h && xx >= 0 && xx < w && cm[yy * w + xx] == -3) near = 1;
+                    }
+                if (!near) continue;
+                for (int dy = -1; dy <= 1; dy++)
+                    for (int dx = -1; dx <= 1; dx++) {
+                        int yy = y + dy, xx = x + dx, j;
+                        if (yy < 0 || yy >= h || xx < 0 || xx >= w) continue;
+                        j = yy * w + xx;
+                        if (gr[j] && cm[j] != -3) continue;
+                        s[0] += t[j].r; s[1] += t[j].g; s[2] += t[j].b; c++;
+                    }
+                CBP(i).r = s[0] / c; CBP(i).g = s[1] / c; CBP(i).b = s[2] / c;
+            }
+        }
+        free(t);
+    }
+#undef CBP
+    free(st); free(cm); free(gr);
+}
+static void gen_cb(int pad)
+{
+    pal_make();
+    vb_ow = pad + 64;
+    if (!canvas_open(vb_ow)) return;
+    vb_ex = CB_EXCL;
+    for (int side = 0; side < 2; side++) {
+        Rgb *und = 0;
+        canvas_clear(); cur_side = side;
+        for (int i = 0; i < 9; i++) {
+            if (i == 8 && !side) {                       /* (the edge's height: the picture's first known column) */
+                for (int x = 0; x < 8; x++) { int v = vb_hcol(0, x); if (v >= 0 && v < PH) { cb_h0 = v; break; } }
+                vb_otgt = cb_otgt;
+            }
+            vb_quilt(side, &CB_BANDS[side][i], 901 + 13 * i);
+            vb_otgt = 0;
+            if (i == 7 && !side && (und = (Rgb *)malloc(sizeof(Rgb) * (size_t)vb_ow * PH)) != 0)
+                memcpy(und, cv, sizeof(Rgb) * (size_t)vb_ow * PH);
+        }
+        if (und) { cb_clean(und); free(und); und = 0; }
+        cb_tone(side, 0, 108); cb_warp(side); cb_ftone(side, 181, PH);
+        for (int y = 0; y < PH; y++)
+            for (int X = 1; X <= pad; X++)
+                strip[(size_t)y * 2 * pad + (side ? pad + (X - 1) : pad - X)] = quant(cv[(size_t)y * vb_ow + X - 1]);
+    }
+    vb_ex = VB_EXCL;
+    canvas_close();
+}
+
+/* ================================================================== AREA11 s2: the cave with the brick tower
+ * Everything by the edges is rock (the ceiling and its light lip, the wall of rock pillars, the mossy floor, on the
+ * right the dark shadow along the wall's foot), so every band is quilted from the user's picture (vb_quilt, 28-row
+ * bands made bottom-up, each cut into the one below; the floor from x 0-199 on the left and from the shadow's columns
+ * on the right, so the shadow band goes on; the tower and the three niches never copied), then cv_tone matches the
+ * light per row to the picture's columns next to the edge (the cave darkens towards its sides). */
+enum { CV_CEIL = 1, CV_WALL, CV_FLOOR };
+static const VbBox CV_EXCL[] = {
+    { 26, 24, 124, 210 }, { 162, 22, 228, 70 }, { 204, 70, 268, 142 }, { 252, 90, 304, 152 }, { 0, 0, 0, 0 } };
+#define CV_Q (VBB_STRICT | VBB_TIGHT | VBB_FEATHER | VBB_FAR | VBB_EDGEW)
+#define CV_NB 8
+static const VbBand CV_BANDS[2][8] = {
+    { { 196, PH, 190, PH, 0, 200, 16, 6, 0, 0, 4, CV_FLOOR, 0, 0, 0, CV_Q },
+      { 168, 196, 162, 210, 0, 200, 16, 6, 0, 8, 4, CV_FLOOR, 0, 0, 0, CV_Q },
+      { 140, 168, 134, 182, 0, 320, 16, 6, 0, 8, 4, CV_WALL, 0, 0, 0, CV_Q },
+      { 112, 140, 106, 154, 0, 320, 16, 6, 0, 8, 4, CV_WALL, 0, 0, 0, CV_Q },
+      { 84, 112, 78, 126, 0, 320, 16, 6, 0, 8, 4, CV_WALL, 0, 0, 0, CV_Q },
+      { 56, 84, 50, 98, 0, 320, 16, 6, 0, 8, 4, CV_WALL, 0, 0, 0, CV_Q },
+      { 28, 56, 22, 70, 0, 320, 16, 6, 0, 8, 4, CV_WALL, 0, 0, 0, CV_Q },
+      { 0, 28, 0, 42, 0, 320, 16, 6, 0, 8, 4, CV_CEIL, 0, 0, 0, CV_Q } },
+    { { 196, PH, 190, PH, 200, 320, 16, 6, 0, 0, 4, CV_FLOOR, 0, 0, 0, CV_Q },
+      { 168, 196, 162, 210, 200, 320, 16, 6, 0, 8, 4, CV_FLOOR, 0, 0, 0, CV_Q },
+      { 140, 168, 134, 182, 0, 320, 16, 6, 0, 8, 4, CV_WALL, 0, 0, 0, CV_Q },
+      { 112, 140, 106, 154, 0, 320, 16, 6, 0, 8, 4, CV_WALL, 0, 0, 0, CV_Q },
+      { 84, 112, 78, 126, 0, 320, 16, 6, 0, 8, 4, CV_WALL, 0, 0, 0, CV_Q },
+      { 56, 84, 50, 98, 0, 320, 16, 6, 0, 8, 4, CV_WALL, 0, 0, 0, CV_Q },
+      { 28, 56, 22, 70, 0, 320, 16, 6, 0, 8, 4, CV_WALL, 0, 0, 0, CV_Q },
+      { 0, 28, 0, 42, 0, 320, 16, 6, 0, 8, 4, CV_CEIL, 0, 0, 0, CV_Q } } };
+/* the strip's light per row, three steps (means over rows y +- R): (1) its luminance (all its columns) mapped onto the
+   mean and spread of the picture's CV_TN columns next to the edge, the same map over the whole strip (the cave is
+   darker towards its sides: windows of the lit middle would come out too light); (2) its first 8 columns' mean moved
+   onto the picture's last 8 (R 4; fully up to column 8, gone at 40); (3) its first column onto the picture's last one
+   (R 1, three quarters of the step, easing out over 6 columns) */
+#define CV_TN 40
+#define CV_TR 16
+static void cv_tone(int side, int y0, int y1)
+{
+    static int mp[PH], dp[PH], ms[PH], ds[PH], jd[PH][2][3];
+    for (int y = y0; y < y1; y++) {
+        long long s[2] = { 0, 0 }, q[2] = { 0, 0 }; int n[2] = { 0, 0 };
+        for (int yy = y - CV_TR; yy <= y + CV_TR; yy++) {
+            if (yy < y0 || yy >= y1) continue;
+            for (int i = 0; i < CV_TN; i++) {
+                int x = side ? PW - 1 - i : i, l;
+                if (vb_excl(x, yy)) continue;
+                l = lum(rgb15(pic[yy][x])); s[0] += l; q[0] += l * l; n[0]++;
+            }
+            for (int X = 1; X <= vb_ow; X++) { int l = lum(cv[(size_t)yy * vb_ow + X - 1]); s[1] += l; q[1] += l * l; n[1]++; }
+        }
+        for (int k = 0; k < 2; k++) {
+            int m = n[k] ? (int)(s[k] * 16 / n[k]) : 0, d = n[k] ? isqrt_i((int)((q[k] * 256 - s[k] * s[k] * 256 / n[k]) / n[k])) : 0;
+            if (k) { ms[y] = m; ds[y] = d; } else { mp[y] = m; dp[y] = d; }
+        }
+    }
+    for (int y = y0; y < y1; y++) {
+        int k = ds[y] && dp[y] ? clampi(dp[y] * 256 / ds[y], 154, 358) : 256;
+        if (!ms[y] || !mp[y]) continue;
+        for (int X = 1; X <= vb_ow; X++) {
+            Rgb *p = &cv[(size_t)y * vb_ow + X - 1]; int l = lum(*p), l2 = clampi((mp[y] + (l * 16 - ms[y]) * k / 256) / 16, 1, 255);
+            *p = l ? scale(*p, clampi(l2 * 256 / l, 0, 1024)) : (Rgb){ l2, l2, l2 };
+        }
+    }
+    for (int st = 0; st < 2; st++) {
+        int R = st ? 1 : 4, N = st ? 1 : 8;
+        for (int y = y0; y < y1; y++) {
+            int s[2][3] = { { 0 } }, n[2] = { 0, 0 };
+            for (int yy = y - R; yy <= y + R; yy++) {
+                if (yy < y0 || yy >= y1) continue;
+                for (int i = 0; i < N; i++) {
+                    int x = side ? PW - 1 - i : i; Rgb a = cv[(size_t)yy * vb_ow + i];
+                    s[1][0] += a.r; s[1][1] += a.g; s[1][2] += a.b; n[1]++;
+                    if (vb_excl(x, yy)) continue;
+                    a = rgb15(pic[yy][x]); s[0][0] += a.r; s[0][1] += a.g; s[0][2] += a.b; n[0]++;
+                }
+            }
+            for (int c = 0; c < 3; c++) jd[y][st][c] = n[0] && n[1] ? (s[0][c] / n[0] - s[1][c] / n[1]) * (st ? 3 : 4) / 4 : 0;
+        }
+        for (int y = y0; y < y1; y++)
+            for (int X = 1; X <= (st ? 6 : 40); X++) {
+                Rgb *p = &cv[(size_t)y * vb_ow + X - 1]; int w = st ? (7 - X) * 256 / 6 : X <= 8 ? 256 : (40 - X) * 256 / 32;
+                p->r = clampi(p->r + jd[y][st][0] * w / 256, 0, 255); p->g = clampi(p->g + jd[y][st][1] * w / 256, 0, 255);
+                p->b = clampi(p->b + jd[y][st][2] * w / 256, 0, 255);
+            }
+    }
+}
+static void gen_cv(int pad)
+{
+    pal_make();
+    vb_ow = pad + 64;
+    if (!canvas_open(vb_ow)) return;
+    vb_ex = CV_EXCL;
+    for (int side = 0; side < 2; side++) {
+        canvas_clear(); cur_side = side;
+        for (int i = 0; i < CV_NB; i++) vb_quilt(side, &CV_BANDS[side][i], 1101 + 13 * i);
+        cv_tone(side, 0, PH);
+        for (int y = 0; y < PH; y++)
+            for (int X = 1; X <= pad; X++)
+                strip[(size_t)y * 2 * pad + (side ? pad + (X - 1) : pad - X)] = quant(cv[(size_t)y * vb_ow + X - 1]);
+    }
+    vb_ex = VB_EXCL;
+    canvas_close();
+}
+
+/* ================================================================== AREA09 s5: the brick wall with the staircase
+ * A frontal brick wall lit by four sconces, crossed by a straight staircase from the bottom left to the top right
+ * (rail, balusters, red steps, the marble stringer).  Measured on the picture: the rail's top row is
+ * yr(x) = 203.6 - 55 x / 90 at every column (16-column profile matches along the stair, within a row), the marble from
+ * yr + 35 to yr + 69, the wall in the stair's shadow from yr + 70; one step is (22.5, 13.75) texels, so four steps are
+ * exactly (90, 55) (the shift with the least error against (89 / 91, 54 / 56)).  The strips:
+ *   - the wall: quilted from the user's picture (vb_quilt, 28-row bands made bottom-up, windows of any clean column
+ *     shifted up to 10 rows, the stair (its band and 2 rows round it) and the sconces never copied: vb_exf / ST_EXCL),
+ *     then relit: every copied texel times the light wanted where it goes over the light where it came from (the
+ *     light: the wall's luminance averaged over 17 x 17 texels, stair and sconces left out).  The light wanted: on the
+ *     left, the edge's light per row with the glow of the sconce by the edge (flame at (26, 120)) falling off
+ *     radially, S^2 / (S^2 + r^2), towards the light far from it (the edge's 20th percentile); on the right the wall is
+ *     mostly in the stair's shadow, whose light runs in bands along the stair, so a texel takes the light of the edge
+ *     column where its line parallel to the stair meets it;
+ *   - the stair: the picture's own stair four steps further in ((x + 90, y - 55) on the left, (x - 90, y + 55) on the
+ *     right; eight steps where that leaves the clean stretch), so rail, balusters, steps and stringer go on exactly on
+ *     their lines; the rows below the rail scaled by the band's width at both places (the stringer's lower edge is
+ *     73.3 - 0.013 x rows below the rail: the band widens a little towards the bottom left), so that edge goes on
+ *     along its own line; its light per row of the stair's cross-section matched at the edge (the stair 90 columns in against
+ *     the stair at the edge);
+ *   - the join: per row, the wall's first 8 columns' mean onto the picture's last 8 (fading by 40) and its first column
+ *     onto the picture's last one (fading over 6). */
+enum { ST_WALL = 1 };
+#define ST_PX 90
+#define ST_PY 55
+static int st_y16(int x) { return 3258 - fdiv(880 * x, ST_PX); }     /* the rail's top row (x 16) at column x */
+static int st_t16(int x, int y) { return y * 16 + 8 - st_y16(x); }   /* rows (x 16) below it */
+static int st_h16(int x) { return 1173 + fdiv(-215 * x, 1024); }   /* the stringer's lower edge (x 16) below it:
+                                                            73.3 - 0.013 x rows (the band widens towards the bottom left) */
+static int st_band(int x, int y) { int t = st_t16(x, y); return t >= -16 && t < st_h16(x) + 16; }
+static int st_exf(int x, int y) { int t = st_t16(x, y); return t >= -48 && t < st_h16(x) + 48; }
+/* the stair's texel for (x, y) from k * four steps further in: its row below the rail scaled by the band's widths
+   there and here, so the stringer's lower edge goes on along its own line */
+static int st_src(int side, int x, int y, int k, int *xs, int *ys)
+{
+    int t = st_t16(x, y);
+    *xs = side ? x - ST_PX * k : x + ST_PX * k;
+    if (t > 0) t = (int)((long long)t * st_h16(*xs) / st_h16(x));
+    *ys = fdiv(st_y16(*xs) + t, 16);
+    return *xs >= 0 && *xs < PW && *ys >= 0 && *ys < PH;
+}
+static const VbBox ST_EXCL[] = {                          /* the sconces (three lit, one bare) */
+    { 186, 0, 244, 44 }, { 122, 20, 176, 78 }, { 75, 81, 102, 108 }, { 8, 96, 52, 150 }, { 0, 0, 0, 0 } };
+#define ST_Q (VBB_STRICT | VBB_TIGHT | VBB_FEATHER | VBB_FAR | VBB_EDGEW)
+#define ST_NB 8
+static const VbBand ST_BANDS[8] = {
+    { 196, PH, 184, PH, 0, 320, 16, 6, 0, 0, 10, ST_WALL, 0, 0, 0, ST_Q },
+    { 168, 196, 156, PH, 0, 320, 16, 6, 0, 8, 10, ST_WALL, 0, 0, 0, ST_Q },
+    { 140, 168, 128, 186, 0, 320, 16, 6, 0, 8, 10, ST_WALL, 0, 0, 0, ST_Q },
+    { 112, 140, 100, 158, 0, 320, 16, 6, 0, 8, 10, ST_WALL, 0, 0, 0, ST_Q },
+    { 84, 112, 72, 130, 0, 320, 16, 6, 0, 8, 10, ST_WALL, 0, 0, 0, ST_Q },
+    { 56, 84, 44, 102, 0, 320, 16, 6, 0, 8, 10, ST_WALL, 0, 0, 0, ST_Q },
+    { 28, 56, 16, 74, 0, 320, 16, 6, 0, 8, 10, ST_WALL, 0, 0, 0, ST_Q },
+    { 0, 28, 0, 46, 0, 320, 16, 6, 0, 8, 10, ST_WALL, 0, 0, 0, ST_Q } };
+#define ST_LX 26                                         /* the edge sconce's flame */
+#define ST_LY 120
+#define ST_S2 900                                        /* its glow's radius, squared */
+static short st_lf[PH][PW];                              /* the wall's light (0: no wall texel near) */
+static int st_le[PH], st_amb;                            /* the light at the edge per row (side being made), far light */
+static void st_light(void)
+{
+    static int S[PH + 1][PW + 1], C[PH + 1][PW + 1];
+    for (int y = 0; y < PH; y++)
+        for (int x = 0; x < PW; x++) {
+            int m = !vb_excl(x, y);
+            S[y + 1][x + 1] = S[y][x + 1] + S[y + 1][x] - S[y][x] + (m ? lum(rgb15(pic[y][x])) : 0);
+            C[y + 1][x + 1] = C[y][x + 1] + C[y + 1][x] - C[y][x] + m;
+        }
+    for (int y = 0; y < PH; y++)
+        for (int x = 0; x < PW; x++) {
+            int x0 = x - 8 < 0 ? 0 : x - 8, x1 = x + 9 > PW ? PW : x + 9, y0 = y - 8 < 0 ? 0 : y - 8, y1 = y + 9 > PH ? PH : y + 9;
+            int s = S[y1][x1] - S[y0][x1] - S[y1][x0] + S[y0][x0], c = C[y1][x1] - C[y0][x1] - C[y1][x0] + C[y0][x0];
+            st_lf[y][x] = (short)(c >= 16 ? (s / c > 4 ? s / c : 4) : 0);
+        }
+}
+static void st_edge(int side)                             /* st_le: the light of the 4 edge columns per row, gaps filled */
+{
+    int h[PH], n = 0;
+    for (int y = 0; y < PH; y++) {
+        int s = 0, c = 0;
+        for (int i = 0; i < 4; i++) { int x = side ? PW - 1 - i : i; if (!vb_excl(x, y) && st_lf[y][x]) { s += st_lf[y][x]; c++; } }
+        st_le[y] = c ? s / c : -1;
+        if (c) h[n++] = st_le[y];
+    }
+    for (int y = PH - 2; y >= 0; y--) if (st_le[y] < 0) st_le[y] = st_le[y + 1];   /* (the stair's rows: the light
+                                                            under it, as the strip's texels there take it) */
+    for (int y = 1; y < PH; y++) if (st_le[y] < 0) st_le[y] = st_le[y - 1];
+    for (int i = 1; i < n; i++) for (int j = i; j > 0 && h[j - 1] > h[j]; j--) { int t = h[j]; h[j] = h[j - 1]; h[j - 1] = t; }
+    st_amb = n ? h[n / 5] : 32;
+}
+static int st_want(int side, int X, int y)               /* the light wanted at strip column X, row y */
+{
+    if (side) {                                          /* (along the stair to the edge column) */
+        int ye = y + fdiv(X * ST_PY, ST_PX);
+        return st_le[clampi(ye, 0, PH - 1)];
+    } else {                                             /* (the edge's light, its sconce's glow falling off) */
+        int dx = -X - ST_LX, dy = y - ST_LY, ex = -ST_LX, g = st_le[y] - st_amb;
+        if (g <= 0) return st_le[y];
+        return st_amb + (int)((long long)g * (ST_S2 + ex * ex + dy * dy) / (ST_S2 + dx * dx + dy * dy));
+    }
+}
+static void st_stair(int side)
+{
+    int g[72][3], sm[72][3][2];
+    memset(sm, 0, sizeof sm);
+    for (int i = 0; i < 16; i++)                         /* the light per row of the cross-section: the edge's stair
+                                                            against the stair 90 columns in */
+        for (int y = 0; y < PH; y++) {
+            int x = side ? PW - 1 - i : i, xs, ys, t = st_t16(x, y);
+            Rgb a, b;
+            if (!st_band(x, y) || t < 0 || !st_src(side, x, y, 1, &xs, &ys)) continue;
+            a = rgb15(pic[y][x]); b = rgb15(pic[ys][xs]); t /= 16;
+            sm[t][0][0] += a.r; sm[t][1][0] += a.g; sm[t][2][0] += a.b; sm[t][0][1] += b.r; sm[t][1][1] += b.g; sm[t][2][1] += b.b;
+        }
+    for (int t = 0; t < 72; t++)
+        for (int c = 0; c < 3; c++) {
+            int a = 0, b = 0;
+            for (int u = t - 3; u <= t + 3; u++) if (u >= 0 && u < 72) { a += sm[u][c][0]; b += sm[u][c][1]; }
+            g[t][c] = a > 0 && b > 0 ? clampi((int)((long long)a * 256 / b), 160, 400) : 256;
+        }
+    for (int X = 1; X <= vb_ow; X++)
+        for (int y = 0; y < PH; y++) {
+            int x = side ? PW - 1 + X : -X, k = 1, xs, ys, t;
+            Rgb c;
+            if (!st_band(x, y)) continue;
+            while ((side ? x - ST_PX * k > 300 : x + ST_PX * k < 8) && k < 8) k++;
+            if (!st_src(side, x, y, k, &xs, &ys)) continue;
+            c = rgb15(pic[ys][xs]); t = clampi(st_t16(x, y) / 16, 0, 71);
+            c.r = clampi(c.r * g[t][0] / 256, 0, 255); c.g = clampi(c.g * g[t][1] / 256, 0, 255); c.b = clampi(c.b * g[t][2] / 256, 0, 255);
+            cv[(size_t)y * vb_ow + X - 1] = c;
+        }
+}
+static void st_join(int side)                            /* the wall at the join (stair texels left alone) */
+{
+    static int jd[PH][2][3];
+    for (int st = 0; st < 2; st++) {
+        int R = st ? 1 : 4, N = st ? 1 : 8;
+        for (int y = 0; y < PH; y++) {
+            int s[2][3] = { { 0 } }, n[2] = { 0, 0 };
+            for (int yy = y - R; yy <= y + R; yy++) {
+                if (yy < 0 || yy >= PH) continue;
+                for (int i = 0; i < N; i++) {
+                    int x = side ? PW - 1 - i : i, xo = side ? PW + i : -1 - i; Rgb a;
+                    if (vb_excl(x, yy) || st_exf(xo, yy)) continue;
+                    a = cv[(size_t)yy * vb_ow + i]; s[1][0] += a.r; s[1][1] += a.g; s[1][2] += a.b; n[1]++;
+                    a = rgb15(pic[yy][x]); s[0][0] += a.r; s[0][1] += a.g; s[0][2] += a.b; n[0]++;
+                }
+            }
+            for (int c = 0; c < 3; c++) jd[y][st][c] = n[0] && n[1] ? (s[0][c] / n[0] - s[1][c] / n[1]) * (st ? 3 : 4) / 4 : 0;
+        }
+        for (int y = 0; y < PH; y++)
+            for (int X = 1; X <= (st ? 6 : 40); X++) {
+                Rgb *p = &cv[(size_t)y * vb_ow + X - 1]; int w = st ? (7 - X) * 256 / 6 : X <= 8 ? 256 : (40 - X) * 256 / 32;
+                if (st_band(side ? PW - 1 + X : -X, y)) continue;
+                p->r = clampi(p->r + jd[y][st][0] * w / 256, 0, 255); p->g = clampi(p->g + jd[y][st][1] * w / 256, 0, 255);
+                p->b = clampi(p->b + jd[y][st][2] * w / 256, 0, 255);
+            }
+    }
+}
+static void gen_st(int pad)
+{
+    pal_make();
+    vb_ow = pad + 64;
+    if (!canvas_open(vb_ow)) return;
+    vb_srcmap = (int *)malloc(sizeof(int) * (size_t)vb_ow * PH);
+    if (!vb_srcmap) { canvas_close(); return; }
+    vb_ex = ST_EXCL; vb_exf = st_exf;
+    st_light();
+    for (int side = 0; side < 2; side++) {
+        canvas_clear(); cur_side = side;
+        for (int i = 0; i < vb_ow * PH; i++) vb_srcmap[i] = -1;
+        for (int i = 0; i < ST_NB; i++) vb_quilt(side, &ST_BANDS[i], 1301 + 13 * i);
+        st_edge(side);
+        for (int y = 0; y < PH; y++)                     /* relight */
+            for (int X = 1; X <= vb_ow; X++) {
+                int s = vb_srcmap[(size_t)y * vb_ow + X - 1], ls, lt;
+                if (s < 0) continue;
+                ls = st_lf[s / PW][s % PW]; lt = st_want(side, X, y);
+                if (ls > 0) cv[(size_t)y * vb_ow + X - 1] = scale(cv[(size_t)y * vb_ow + X - 1], clampi(lt * 256 / ls, 128, 512));
+            }
+        st_stair(side);
+        st_join(side);
+        for (int y = 0; y < PH; y++)
+            for (int X = 1; X <= pad; X++)
+                strip[(size_t)y * 2 * pad + (side ? pad + (X - 1) : pad - X)] = quant(cv[(size_t)y * vb_ow + X - 1]);
+    }
+    free(vb_srcmap); vb_srcmap = 0;
+    vb_ex = VB_EXCL; vb_exf = 0;
+    canvas_close();
+}
+
+/* ================================================================== AREA09 s3: the treasure hall (gen_th)
+ * A box room seen frontally: the back wall with the relief, two side walls running towards the camera, each with an
+ * arched door, a beam along its top, a recessed plaster panel, a wooden dado and the stone floor with the red carpet.
+ * Nothing past the 4:3 edges but more of those side walls (and a sliver of floor), nearer the camera.
+ * Measured on the picture: both side walls have their vanishing point at (159.625, 117.25) (the edge columns' row
+ * profiles matched against columns 58-68 / 252-262 along the lines through it, best fit on both sides).  A homothety
+ * about that point (screen) is a move along the depth (world): every element parallel to the depth axis (the beam,
+ * the recess's top, the dado's rails and panel, the floor's border and the carpet's edge) maps onto itself.  So the
+ * walls are rectified into depth / height coordinates where that move is a plain shift: column k of the rectified
+ * picture is the picture column at distance D(k) = de q^k from the vanishing point (de: the edge's distance, q =
+ * (de - 1) / de: one column per step at the edge), its row j the picture row vy + (j - vy) D(k) / de (j = the row at
+ * the edge).  There the strips are quilted outwards with vb_quilt (rows kept: the elements stay on their lines; the
+ * plaster's windows may move along the rows), the arches never copied, then mapped back: strip column X is at
+ * distance de + X, its rectified column k with D(-k) = de + X, its rows j = vy + (y - vy) de / (de + X).  The
+ * plaster: nearest texels both ways (its grain kept); below it (sill, dado, floor) the quilt's source texel is read
+ * from the picture in one step (th_back: resampled once, the slats and lines as crisp as the picture's, no softer
+ * band past the join).  The join: per row, the strip's first 8 rectified
+ * columns' mean moved onto the picture's last 8 (fading by 40), its first column onto the edge's (fading over 6).
+ * Everything is read from the picture as it is on the screen (th_shown: the arches' quads show the edge columns 1 row
+ * lower from row 141, the right one 1 column further left too), and the other wall's texels from its row with the same
+ * line (th_register: the right wall's lines lie 0.3-0.6 row higher): every sloped line of the lower wall goes on
+ * across both joins within 0.3 row. */
+#define TH_VX16 2554                                      /* the vanishing point (x 16) */
+#define TH_VY16 1876
+#define TH_NK 54                                          /* rectified columns of picture (inward) used */
+#define TH_NKP 34                                         /* ... in the plaster's rows (texels magnified less) */
+#define TH_PL0 38                                         /* the plaster's rows (nearest texels both ways) */
+#define TH_PL1 132
+static int th_plaster(int j) { return j >= TH_PL0 && j < TH_PL1; }
+#define TH_NO 400                                         /* rectified columns outwards (tables) */
+static u16 th_p0[PH][PW];                                 /* the picture as shown (th_shown; pic holds the rectified
+                                                            one meanwhile) */
+static u8 th_m[PH][PW];                                   /* rectified texel not to copy */
+static long long th_D[2][TH_NO + TH_NK + 1];              /* per wall, D(k), k = -TH_NO..TH_NK, in 2^-20 px */
+static int th_dj[2][PH];                                  /* side's rectified picture: the other wall's texels read
+                                                            this much lower (1/256 row; th_register) */
+static const VbBox TH_EXCL[] = { { 15, 66, 58, 203 }, { 262, 66, 305, 203 }, { 0, 0, 0, 0 } };   /* the arches */
+static const VbBox TH_NONE[] = { { 0, 0, 0, 0 } };
+static int th_exf(int x, int y) { return th_m[y][x]; }
+static int th_de16(int side) { return side ? (PW - 1) * 16 - TH_VX16 : TH_VX16; }
+static void th_table(int side)
+{
+    long long de = (long long)th_de16(side), *D = th_D[side] + TH_NO;
+    D[0] = de << 16;
+    for (int k = 1; k <= TH_NK; k++) D[k] = D[k - 1] - D[k - 1] * 16 / de;
+    for (int k = 1; k <= TH_NO; k++) D[-k] = D[-k + 1] + D[-k + 1] * 16 / (de - 16);
+}
+static int th_bad(int x, int y)
+{
+    if (x < 0 || x >= PW || y < 0 || y >= PH) return 1;
+    for (int i = 0; TH_EXCL[i].x1; i++)
+        if (x >= TH_EXCL[i].x0 && x < TH_EXCL[i].x1 && y >= TH_EXCL[i].y0 && y < TH_EXCL[i].y1) return 1;
+    return 0;
+}
+/* bilinear: the texel at (xf, yf) (2^-20 px) of the picture, 0 when one of the four is out or excluded */
+static int th_bil(const u16 (*src)[PW], long long xf, long long yf, Rgb *o)
+{
+    int x0 = (int)(xf >> 20), y0 = (int)(yf >> 20), fx = (int)((xf >> 12) & 255), fy = (int)((yf >> 12) & 255);
+    Rgb a, b;
+    if (th_bad(x0, y0) || th_bad(x0 + (fx > 0), y0) || th_bad(x0, y0 + (fy > 0)) || th_bad(x0 + (fx > 0), y0 + (fy > 0))) return 0;
+    a = mix(rgb15(src[y0][x0]), rgb15(src[y0][x0 + (fx > 0)]), fx); b = mix(rgb15(src[y0 + (fy > 0)][x0]), rgb15(src[y0 + (fy > 0)][x0 + (fx > 0)]), fx);
+    *o = mix(a, b, fy); return 1;
+}
+static u16 th_15(Rgb c) { return (u16)(clampi((c.r + 4) >> 3, 0, 31) | clampi((c.g + 4) >> 3, 0, 31) << 5 | clampi((c.b + 4) >> 3, 0, 31) << 10); }
+/* the rectified picture for the strip on side `side`: its own wall at columns k (left) / 319 - k (right), k < TH_NK,
+   and the other wall's rectified columns beside them in the screen's order (more windows for the narrow plaster /
+   dado / floor stretches between the edge and the arch; never mirrored: a texel keeps its left / right neighbours) */
+#define TH_OTH 160                                        /* the other wall's columns: [160, 230) on the left, [90, 160)
+                                                            on the right */
+static void th_rectify(int side)
+{
+    for (int c = 0; c < PW; c++) {
+        int w = side, k = side ? PW - 1 - c : c;
+        if (!side && c >= TH_OTH && c < TH_OTH + TH_NK) { w = 1; k = TH_OTH + TH_NK - 1 - c; }
+        if (side && c >= PW - TH_OTH - TH_NK && c < PW - TH_OTH) { w = 0; k = c - (PW - TH_OTH - TH_NK); }
+        for (int j = 0; j < PH; j++) {
+            Rgb o; int ok = 0; long long *D = th_D[w] + TH_NO, de = th_de16(w);
+            if (k < (th_plaster(j) ? TH_NKP : TH_NK)) {
+                long long xf = ((long long)TH_VX16 << 16) + (w ? D[k] : -D[k]);
+                long long yf = ((long long)TH_VY16 << 16) + (long long)(j * 16 - TH_VY16) * D[k] / de;
+                if (w != side && th_dj[side][j])          /* (the other wall: its row with the same line) */
+                    yf = ((long long)TH_VY16 << 16) + ((((long long)j * 256 + th_dj[side][j]) * 16 - ((long long)TH_VY16 << 8)) * D[k] / de >> 8);
+                if (th_plaster(j)) {                      /* (the plaster: nearest texels, its grain kept) */
+                    int xs = (int)((xf + (1 << 19)) >> 20), ys = (int)((yf + (1 << 19)) >> 20);
+                    ok = !th_bad(xs, ys);
+                    if (ok) o = rgb15(th_p0[ys][xs]);
+                } else ok = th_bil(th_p0, xf, yf, &o);
+            }
+            pic[j][c] = ok ? th_15(o) : 0;
+            th_m[j][c] = (u8)!ok;
+        }
+    }
+}
+/* rectified column c of side `side`'s rectified picture: its wall's picture column (x, 2^-20 px) and D / de (as D
+   in 2^-20 px and de x 16); 0 when it holds no rectified column of a wall */
+static int th_col(int side, int c, long long *x, long long *Dk, long long *de, int *wo)
+{
+    int w = side, k = side ? PW - 1 - c : c;
+    if (c < 0 || c >= PW) return 0;
+    if (!side && c >= TH_OTH && c < TH_OTH + TH_NK) { w = 1; k = TH_OTH + TH_NK - 1 - c; }
+    if (side && c >= PW - TH_OTH - TH_NK && c < PW - TH_OTH) { w = 0; k = c - (PW - TH_OTH - TH_NK); }
+    if (k < 0 || k >= TH_NK) return 0;
+    *Dk = th_D[w][TH_NO + k]; *de = th_de16(w); *wo = w;
+    *x = ((long long)TH_VX16 << 16) + (w ? *Dk : -*Dk);
+    return 1;
+}
+/* the picture's texel at the rectified position (column cf, row rf; 1/256 texel) of side `side` in one step (no
+   rectified texel in between): the nearest column (the wall's vertical lines, the slats and the panel's frame, stay
+   one texel wide), linear along it (a line along the depth keeps its slope: its row is the same rectified row in
+   every column); 0 when the column holds no wall or a texel is out */
+static int th_back(int side, int cf, int rf, Rgb *o)
+{
+    long long x, Dk, de, yf; int c = (cf + 128) >> 8, w;
+    if (!th_col(side, c, &x, &Dk, &de, &w)) return 0;
+    if (w != side) rf += th_dj[side][clampi((rf + 128) >> 8, 0, PH - 1)];
+    yf = ((long long)TH_VY16 << 16) + (((long long)rf * 16 - ((long long)TH_VY16 << 8)) * Dk / de >> 8);
+    return th_bil(th_p0, x, yf, o);
+}
+#define TH_Q (VBB_STRICT | VBB_TIGHT | VBB_EDGEW | VBB_FAR)
+#define TH_NB 8
+static const VbBand TH_BANDS[TH_NB] = {                   /* the left side (the right one: columns mirrored) */
+    { 0, 40, 0, 40, 0, 214, 12, 5, 0, 0, 0, 1, 0, 0, 0, TH_Q },          /* the beam and the recess's top */
+    { 40, 64, 40, 132, 0, 214, 9, 4, 6, 0, 16, 2, 0, 0, 0, TH_Q },      /* the recess's plaster */
+    { 64, 88, 40, 132, 0, 214, 9, 4, 6, 0, 40, 2, 0, 0, 0, TH_Q },
+    { 88, 110, 40, 132, 0, 214, 9, 4, 6, 0, 56, 2, 0, 0, 0, TH_Q },
+    { 110, 132, 40, 132, 0, 214, 9, 4, 6, 0, 60, 2, 0, 0, 0, TH_Q },
+    { 132, 166, 128, 166, 0, 214, 6, 3, 4, 0, 0, 3, 0, 0, 0, TH_Q },    /* the dado: the ledge, the rail, the panel */
+    { 166, 203, 162, 203, 0, 214, 6, 3, 4, 0, 0, 3, 0, 0, 0, TH_Q },
+    { 203, PH, 200, PH, 0, 214, 6, 3, 3, 0, 0, 4, 0, 0, 0, TH_Q } };    /* the floor */
+static void th_join(int side)
+{
+    static int jd[PH][2][3];
+    for (int st = 0; st < 2; st++) {
+        int R = st ? 1 : 2, N = st ? 1 : 8;
+        for (int y = 0; y < PH; y++) {
+            int s[2][3] = { { 0 } }, n[2] = { 0, 0 };
+            for (int yy = y - R; yy <= y + R; yy++) {
+                if (yy < 0 || yy >= PH) continue;
+                for (int i = 0; i < N; i++) {
+                    int x = side ? PW - 1 - i : i; Rgb a;
+                    if (th_m[yy][x]) continue;
+                    a = cv[(size_t)yy * vb_ow + i]; s[1][0] += a.r; s[1][1] += a.g; s[1][2] += a.b; n[1]++;
+                    a = rgb15(pic[yy][x]); s[0][0] += a.r; s[0][1] += a.g; s[0][2] += a.b; n[0]++;
+                }
+            }
+            for (int c = 0; c < 3; c++) jd[y][st][c] = n[0] && n[1] ? (s[0][c] / n[0] - s[1][c] / n[1]) * (st ? 3 : 4) / 4 : 0;
+        }
+        for (int y = 0; y < PH; y++)
+            for (int X = 1; X <= (st ? 6 : 40) && X <= vb_ow; X++) {
+                Rgb *p = &cv[(size_t)y * vb_ow + X - 1]; int w = st ? (7 - X) * 256 / 6 : X <= 8 ? 256 : (40 - X) * 256 / 32;
+                p->r = clampi(p->r + jd[y][st][0] * w / 256, 0, 255); p->g = clampi(p->g + jd[y][st][1] * w / 256, 0, 255);
+                p->b = clampi(p->b + jd[y][st][2] * w / 256, 0, 255);
+            }
+    }
+}
+/* the plaster's light: its windows come from all over the recess, whose mottling is larger and stronger there than
+   next to the edge; the strip's local light (luminance over 7 x 7) is pulled towards the edge's light of its row (the
+   picture's 13 columns at the edge, rows +- 6), keeping 1/5 of its own variation; the grain stays */
+static void th_plaster_light(int side)
+{
+    static int M[PH][TH_NO + 2], T[PH];
+    for (int y = TH_PL0; y < TH_PL1; y++) {
+        int s = 0, n = 0;
+        for (int yy = y - 6; yy <= y + 6; yy++) {
+            if (!th_plaster(yy)) continue;
+            for (int i = 0; i < 13; i++) { int x = side ? PW - 1 - i : i; if (!th_m[yy][x]) { s += lum(rgb15(pic[yy][x])); n++; } }
+        }
+        T[y] = n ? s * 16 / n : 0;
+        for (int X = 1; X <= vb_ow; X++) {
+            int s2 = 0, n2 = 0;
+            for (int yy = y - 3; yy <= y + 3; yy++) {
+                if (!th_plaster(yy)) continue;
+                for (int XX = X - 3; XX <= X + 3; XX++) if (XX >= 1 && XX <= vb_ow) { s2 += lum(cv[(size_t)yy * vb_ow + XX - 1]); n2++; }
+            }
+            M[y][X] = n2 ? s2 * 16 / n2 : 0;
+        }
+    }
+    for (int y = TH_PL0; y < TH_PL1; y++)
+        for (int X = 1; X <= vb_ow; X++) {
+            int m = M[y][X], t;
+            if (!m || !T[y]) continue;
+            t = T[y] + (m - T[y]) / 5;
+            cv[(size_t)y * vb_ow + X - 1] = scale(cv[(size_t)y * vb_ow + X - 1], clampi(t * 256 / m, 160, 400));
+        }
+}
+/* the picture as it is on the screen: the arches are drawn again over the player as two quads of 40 x 136 pixels whose
+   texture spans 39 x 135 texels (u 64-103 / 104-143, v 0-135), and the renderer takes the texel at the pixel's
+   position rounded (half up), texel x * 39 / 40 at pixel x: from the quad's pixel 21 (columns 301-319 on the right) one
+   column further left, from its row 69 (rows 141-207) one row higher (the left wall's sill, rail, inlay and dado foot
+   at the edge 1 row lower than in the picture; the opaque texels only, the picture under a transparent one unmoved).
+   The walls are rectified from this, so the strips continue what is on the screen (rectified from the picture, every
+   sloped line of the lower wall had a step of about 1 row at both joins).  The OpenGL renderer truncates like the PS1
+   (texel floor((x + 1/64) * 39 / 40 + 1/64), shader and half-pixel shift of shims/gpu_gl.c): one column further left
+   from the quad's pixel 2, one row higher from its row 5 (rows 77-207); at internal resolution > 1 the same model
+   (the HD picture's edges within a fraction of a row of it) */
+static void th_shown(void)
+{
+    for (int i = 0; i < 6; i++) {
+        const Piece *p = &room->over[i];
+        for (int r = 0; r < p->h; r++)
+            for (int x = 0; x < p->w; x++) {
+                int sx = p->x + (shown_gl ? (64 * x * (p->w - 1) + 2 * p->w - 1) / (64 * p->w) : (2 * x * (p->w - 1) + p->w) / (2 * p->w));
+                int sy = p->y + (shown_gl ? (64 * r * (p->h - 1) + 2 * p->h - 1) / (64 * p->h) : (2 * r * (p->h - 1) + p->h) / (2 * p->h));
+                if (p->y + r < PH && p->x + x < PW && pic_ov[sy][sx]) th_p0[p->y + r][p->x + x] = pic[sy][sx];
+            }
+    }
+}
+/* the two walls are not drawn quite alike: below the plaster the right wall's lines lie 0.3-0.6 row higher (in the
+   rectified rows, the row at the edge) than the left wall's, and the strip's quilt takes windows from both walls, so
+   a run of the other wall's texels put every sloped line half a row off its continuation (a step where the run
+   begins and ends).  Measured per row on the rectified picture as it is on the screen: the luminance profile down the
+   edge's 13 rectified columns (the arches start at the 15th) of each wall, at 1/16 row; for every row from the sill
+   down (TH_RG0..TH_RG1) the shift of the right wall's profile (-1.5..1.5 rows, 1/16) that best matches the left's
+   over rows +-4 (least squares), kept where the left's profile changes enough over them (an edge), the rows between
+   interpolated, then smoothed over 5 rows (measured: -0.41 at the sill's top, -0.31 at its foot and the ledge's
+   shadow, -0.38 at the rail, -0.5 at the inlay and the lower rail, -0.56 at the dado's foot, the floor keeps -0.5).
+   The other wall's texels are read that much lower (th_rectify, th_back) */
+#define TH_RG0 132
+#define TH_RG1 208
+#define TH_RGB (TH_RG0 - 8)                               /* the profiles' first row */
+#define TH_RGN (TH_RG1 - TH_RG0 + 16)
+static int th_prof(int w, int j16)                        /* the sum over the edge's 13 rectified columns of wall w of
+                                                            the luminance at row j16 / 16; -1 when a texel is missing */
+{
+    long long *D = th_D[w] + TH_NO, de = th_de16(w); int s = 0; Rgb o;
+    for (int k = 0; k < 13; k++) {
+        long long xf = ((long long)TH_VX16 << 16) + (w ? D[k] : -D[k]);
+        long long yf = ((long long)TH_VY16 << 16) + (((long long)j16 * 256 - ((long long)TH_VY16 << 8)) * D[k] / de >> 8);
+        if (!th_bil(th_p0, xf, yf, &o)) return -1;
+        s += lum(o);
+    }
+    return s;
+}
+static void th_register(void)
+{
+    static int P[2][TH_RGN * 16], d[PH], ok[PH];
+    for (int w = 0; w < 2; w++)
+        for (int i = 0; i < TH_RGN * 16; i++) P[w][i] = th_prof(w, TH_RGB * 16 + i);
+    for (int j = TH_RG0; j < TH_RG1; j++) {
+        long long best = -1; int bt = 0, g = 0;
+        for (int jj = j - 4; jj < j + 4; jj++) g += abs(P[0][(jj + 1 - TH_RGB) * 16] - P[0][(jj - TH_RGB) * 16]);
+        for (int t = -24; t <= 24; t++) {
+            long long e = 0; int bad = 0;
+            for (int jj = j - 4; jj <= j + 4 && !bad; jj++) {
+                int a = P[0][(jj - TH_RGB) * 16], b = P[1][(jj - TH_RGB) * 16 + t];
+                if (a < 0 || b < 0) bad = 1; else e += (long long)(a - b) * (a - b);
+            }
+            if (!bad && (best < 0 || e < best)) { best = e; bt = t; }
+        }
+        ok[j] = best >= 0 && g >= 25 * 13; d[j] = bt * 16;
+    }
+    for (int j = TH_RG0; j < TH_RG1; j++) {                /* rows without an edge: between the nearest ones */
+        int a = j, b = j;
+        if (ok[j]) continue;
+        while (a >= TH_RG0 && !ok[a]) a--;
+        while (b < TH_RG1 && !ok[b]) b++;
+        if (a >= TH_RG0 && b < TH_RG1) d[j] = d[a] + (d[b] - d[a]) * (j - a) / (b - a);
+        else d[j] = a >= TH_RG0 ? d[a] : b < TH_RG1 ? d[b] : 0;
+    }
+    for (int j = 0; j < PH; j++) {
+        int s = 0;
+        if (j < TH_RG0) { th_dj[0][j] = th_dj[1][j] = 0; continue; }
+        for (int jj = j - 2; jj <= j + 2; jj++) s += d[clampi(jj, TH_RG0, TH_RG1 - 1)];
+        th_dj[0][j] = s / 5; th_dj[1][j] = -(s / 5);
+    }
+}
+static u16 th_raw[PH][PW];                                /* the picture, given back to pic at the end */
+static void gen_th(int pad)
+{
+    long long *D; int nk; Rgb *cv0;
+    pal_make();
+    th_table(0); th_table(1); D = th_D[0] + TH_NO;
+    for (nk = 1; nk < TH_NO && D[-nk] < ((long long)th_de16(0) + 16 * (pad + 64)) << 16; nk++) ;
+    vb_ow = nk + 2;
+    if (!canvas_open(vb_ow)) return;
+    vb_srcmap = (int *)malloc(sizeof(int) * (size_t)vb_ow * PH); cv0 = (Rgb *)malloc(sizeof(Rgb) * (size_t)vb_ow * PH);
+    if (!vb_srcmap || !cv0) { free(vb_srcmap); free(cv0); vb_srcmap = 0; canvas_close(); return; }
+    memcpy(th_raw, pic, sizeof pic); memcpy(th_p0, pic, sizeof pic); th_shown(); th_register();
+    vb_ex = TH_NONE; vb_exf = th_exf;
+    for (int side = 0; side < 2; side++) {
+        long long de = th_de16(side);
+        D = th_D[side] + TH_NO; th_rectify(side);
+        canvas_clear(); cur_side = side;
+        for (int i = 0; i < vb_ow * PH; i++) vb_srcmap[i] = -1;
+        for (int i = 0; i < TH_NB; i++) {
+            VbBand b = TH_BANDS[i];
+            if (side) { short a = b.sx0; b.sx0 = (short)(PW - b.sx1); b.sx1 = (short)(PW - a); }
+            vb_quilt(side, &b, 1401 + 13 * i);
+        }
+        th_plaster_light(side);
+        for (size_t i = 0; i < (size_t)vb_ow * PH; i++) cv0[i] = cv[i];
+        th_join(side);
+        for (int X = 1; X <= pad; X++) {
+            long long d = (de + 16 * X) << 16; int k = 0, fk;
+            while (k < TH_NO - 1 && D[-k - 1] <= d) k++;
+            fk = (int)((d - D[-k]) * 256 / (D[-k - 1] - D[-k]));      /* rectified column k + fk / 256 */
+            for (int y = 0; y < PH; y++) {
+                long long jf = ((long long)TH_VY16 << 16) + (long long)(y * 16 - TH_VY16) * (de << 16) / (de + 16 * X);
+                int j = clampi((int)(jf >> 20), 0, PH - 2), fj = (int)((jf >> 12) & 255);
+                Rgb c[2];
+                if (th_plaster(j) && th_plaster(j + 1)) {      /* (nearest) */
+                    int kk = clampi(k + (fk >= 128), 0, vb_ow), jj = j + (fj >= 128);
+                    strip[(size_t)y * 2 * pad + (side ? pad + (X - 1) : pad - X)] =
+                        quant(kk ? cv[(size_t)jj * vb_ow + kk - 1] : rgb15(pic[jj][side ? PW - 1 : 0]));
+                    continue;
+                }
+                {   /* the dado and the floor: the quilt's source texel in one step from the picture (bilinear
+                       once: the slats, rails and the inlay as crisp as the picture's), plus the join's correction */
+                    int kr = k + (fk >= 128), jr = j + (fj >= 128), ox = k * 256 + fk - kr * 256, oy = j * 256 + fj - jr * 256, s;
+                    Rgb o;
+                    if (kr <= vb_ow && jr < PH) {
+                        s = kr ? vb_srcmap[(size_t)jr * vb_ow + kr - 1] : jr * PW + (side ? PW - 1 : 0);
+                        if (s >= 0 && th_back(side, (s % PW) * 256 + (side ? ox : -ox), (s / PW) * 256 + oy, &o)) {
+                            if (kr) {
+                                Rgb a = cv[(size_t)jr * vb_ow + kr - 1], b = cv0[(size_t)jr * vb_ow + kr - 1];
+                                o.r += a.r - b.r; o.g += a.g - b.g; o.b += a.b - b.b;
+                            }
+                            strip[(size_t)y * 2 * pad + (side ? pad + (X - 1) : pad - X)] = quant(o);
+                            continue;
+                        }
+                    }
+                }
+                for (int u = 0; u < 2; u++) {
+                    int kk = clampi(k + u, 0, vb_ow);
+                    Rgb a = kk ? cv[(size_t)j * vb_ow + kk - 1] : rgb15(pic[j][side ? PW - 1 : 0]);
+                    Rgb b = kk ? cv[(size_t)(j + 1) * vb_ow + kk - 1] : rgb15(pic[j + 1][side ? PW - 1 : 0]);
+                    c[u] = mix(a, b, fj);
+                }
+                strip[(size_t)y * 2 * pad + (side ? pad + (X - 1) : pad - X)] = quant(mix(c[0], c[1], fk));
+            }
+        }
+    }
+    memcpy(pic, th_raw, sizeof pic);
+    free(vb_srcmap); vb_srcmap = 0; free(cv0);
+    vb_ex = VB_EXCL; vb_exf = 0;
+    canvas_close();
+}
+
+
+/* ================================================================== AREA17 s3 / s4: the Iron Castle hall (gen_hl)
+ * (docs/PORT.md "More rooms with picture strips")  A hall seen from inside, the camera pitched up: the back wall
+ * frontal (the windows, the shield panel, the balustrade), and two side walls running towards the camera past the
+ * corner pilasters, each with the same panel (a gold / copper frame, a narrow pane, a bolted bar, then the wide pane
+ * cut by the edge), the cornice above, the balustrade (handrail, slats, base) below, the tiled floor.
+ * Measured on the picture: the camera is a pinhole pitched up (every vertical edge, the back wall's bars and frame,
+ * the pilasters, the side panels' bars and frames, meets at (153.04, -1921.1); fitted on 8 edges, each slope within
+ * 0.003), the horizon at row 155.5 (where each side wall's handrail top and foot meet), the left wall's lines along it
+ * vanish at column 161, the right wall's at 160 (rectified rows: the cornice, the frame, the handrail, the base and
+ * the foot level within 0.2 row per 10 columns).
+ * So each side wall is rectified exactly: a point's rectified row j is the row where its line to the wall's vanishing
+ * point meets the edge column (a homothety about it: the wall's lines are rows), its rectified column k its position
+ * along the wall (the vertical through it, a line through (153.04, -1921.1), met with the line of row 100: k affine
+ * in 1 / distance to the vanishing point), in picture columns at the edge (scaled by HL_KS: the slats' period, 13.25,
+ * is 13 rectified columns).  In those coordinates the frame, the handrail, the slats and the base are a rectangle
+ * pattern: verticals are columns, the wall's lines rows, the slats periodic.  The strips are quilted there with
+ * vb_quilt (rows kept, the slats on their period) and read back from the picture in one step through the quilt's
+ * source map (as gen_th).  The edge column is not a rectified column (the verticals lean): a rectified column at
+ * the bottom shows 9 columns more of the edge than at the top, so the rectified picture starts at HL_KMIN (the edge
+ * at the top) and the texels between there and the edge on the lower rows are the band's own texels one period /
+ * shift further in (the gap).  The panels (rows 13-129): the strip first closes the panel the edge cuts, then
+ * repeats the wall's panel (rim, bevel, pane, screwed bar) with its period (hl_unit).  The vases are never copied. */
+#define HL_HY (155 * 256 + 128)                           /* the horizon, 1/256 row */
+static const int HL_HX[2] = { 161 * 256, 159 * 256 };     /* each wall's vanishing point (side-local column, 1/256) */
+#define HL_VX 39178                                       /* the verticals' vanishing point (screen, 1/256 texel) */
+#define HL_VY (-491802)
+#define HL_JR (100 * 256)                                 /* the reference row of the along-wall coordinate */
+#define HL_KS 251                                         /* rectified column = geometric column x 251 / 256 */
+#define HL_KMIN (-9)                                      /* the first rectified column (the edge at the top) */
+#define HL_NK 52                                          /* rectified columns of the wall: HL_KMIN .. */
+#define HL_PA0 13                                         /* the panels: rectified rows [PA0, PA1) */
+#define HL_PA1 129
+#define HL_NO 300                                         /* canvas columns at most */
+typedef struct { short j0, j1, ka, kb, kc, kd, gap; } HlBand;   /* rows [j0, j1): source columns [ka, kb) and [kc, kd)
+                                                            (rectified), the gap filled from `gap` columns further in */
+static const HlBand HL_BANDS[] = {
+    { 0, 13, HL_KMIN, 41, 0, 0, 13 },                     /* the cornice */
+    { HL_PA0, HL_PA1, 0, 0, 0, 0, 13 },                   /* the panels (hl_unit, not quilted) */
+    { 129, 184, HL_KMIN, 40, 0, 0, 13 },                  /* the handrail and the slats (one band: hl_rbot) */
+    { 184, 197, HL_KMIN, 40, 0, 0, 13 },                  /* the base */
+    { 197, PH, HL_KMIN, 28, 0, 0, 18 } };                 /* the floor */
+#define HL_NB ((int)(sizeof HL_BANDS / sizeof HL_BANDS[0]))
+#define HL_QF (VBB_STRICT | VBB_TIGHT | VBB_EDGEW)
+static const VbBand HL_VB[HL_NB] = {                      /* (left side; the right one: columns mirrored) */
+    { 0, 13, 0, 13, 0, 56, 8, 3, 0, 0, 0, 1, 0, 0, 0, HL_QF },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 129, 184, 129, 184, 0, 56, 13, 4, 0, 0, 0, 1, 1, 0, 0, HL_QF },
+    { 184, 197, 184, 197, 0, 56, 10, 4, 0, 0, 0, 1, 0, 0, 0, HL_QF },
+    { 197, PH, 197, PH, 0, 56, 10, 4, 0, 0, 0, 1, 0, 0, 0, HL_QF } };
+static const VbBox HL_VASE[] = { { 26, 146, 56, 204 }, { 264, 146, 294, 204 }, { 0, 0, 0, 0 } };   /* (screen) */
+static u16 hl_p0[PH][PW];                                 /* the picture (pic holds the rectified one meanwhile) */
+static u8 hl_m[PH][PW];                                   /* rectified texel not to copy */
+static int hl_gsrc[PH][PW];                               /* a rectified texel's source texel (itself, or for a gap
+                                                            texel the one further in), j * PW + c; -1: none */
+static int hl_vx(int s) { return s ? 319 * 256 - HL_VX : HL_VX; }
+/* the picture point (side-local, 1/256) of the wall's point at geometric column k, rectified row j (1/256) */
+static void hl_pt(int s, long long k, long long j, long long *xo, long long *yo)
+{
+    long long hx = HL_HX[s], hy = HL_HY, vx = hl_vx(s), vy = HL_VY;
+    long long xr = k * hx / (hx + k), yr = hy + (HL_JR - hy) * (hx - xr) / hx;   /* on the reference line */
+    long long cn = vx - xr, cd = vy - yr, mn = j - hy;
+    long long y = (hy * hx * cd + mn * ((hx - xr) * cd + yr * cn)) / (hx * cd + mn * cn);
+    *yo = y; *xo = xr + (y - yr) * cn / cd;
+}
+/* the inverse: geometric column k and rectified row j (1/256) of the side-local point (x, y) (1/256) */
+static void hl_kj(int s, long long x, long long y, long long *ko, long long *jo)
+{
+    long long hx = HL_HX[s], hy = HL_HY, vx = hl_vx(s), vy = HL_VY, xr;
+    *jo = hy + (y - hy) * hx / (hx - x);
+    xr = hx * (x * (vy - y) + (vx - x) * (HL_JR - y)) / (hx * (vy - y) + (vx - x) * (HL_JR - hy));
+    *ko = hx * xr / (hx - xr);
+}
+static int hl_band(int j) { for (int i = 0; i < HL_NB; i++) if (j >= HL_BANDS[i].j0 && j < HL_BANDS[i].j1) return i; return -1; }
+/* rectified column of side s's rectified picture column c and back (oriented like vb_quilt's picture: the right side
+   mirrored) */
+static int hl_k(int s, int c) { return (s ? PW - 1 - c : c) + HL_KMIN; }
+static int hl_c(int s, int k) { return s ? PW - 1 - (k - HL_KMIN) : k - HL_KMIN; }
+/* bilinear: the picture (screen) at (x, y) (1/256), 0 when a tap is out or on a vase */
+static int hl_mode;                                      /* the read: 2 = bilinear with the fractions sharpened (x2 about the middle) */
+static int hl_bil(long long x, long long y, Rgb *o)
+{
+    int x0 = (int)(x >> 8), y0 = (int)(y >> 8), fx = (int)(x & 255), fy = (int)(y & 255), x1 = x0 + (fx > 0), y1 = y0 + (fy > 0);
+    Rgb a, b;
+    if (x < 0 || y < 0 || x1 >= PW || y1 >= PH) return 0;
+    for (int i = 0; HL_VASE[i].x1; i++)
+        if (x1 >= HL_VASE[i].x0 && x0 < HL_VASE[i].x1 && y1 >= HL_VASE[i].y0 && y0 < HL_VASE[i].y1) return 0;
+    if (hl_mode == 1) fx = fx >= 128 ? 256 : 0;
+    if (hl_mode == 2) { fx = clampi((fx - 64) * 2, 0, 256); fy = clampi((fy - 64) * 2, 0, 256); }
+    if (hl_mode == 3) fx = clampi((fx - 64) * 2, 0, 256);
+    a = mix(rgb15(hl_p0[y0][x0]), rgb15(hl_p0[y0][x1]), fx); b = mix(rgb15(hl_p0[y1][x0]), rgb15(hl_p0[y1][x1]), fx);
+    *o = mix(a, b, fy); return 1;
+}
+/* the picture at side s's rectified (k, j) (rectified column and row, 1/256) */
+static int hl_at(int s, long long k, long long j, Rgb *o)
+{
+    long long x, y;
+    hl_pt(s, k * 256 / HL_KS, j, &x, &y);
+    return hl_bil(s ? 319 * 256 - x : x, y, o);
+}
+static void hl_rectify(int s)
+{
+    for (int j = 0; j < PH; j++)
+        for (int c = 0; c < PW; c++) {
+            int k = hl_k(s, c), b = hl_band(j), ok; Rgb o;
+            const HlBand *hb = &HL_BANDS[b];
+            pic[j][c] = 0; hl_m[j][c] = 1; hl_gsrc[j][c] = -1;
+            if (k < HL_KMIN || k >= HL_KMIN + HL_NK) continue;
+            ok = hl_at(s, (long long)k * 256, (long long)j * 256, &o);
+            if (ok) { pic[j][c] = th_15(o); hl_gsrc[j][c] = j * PW + c; }
+            if (ok && ((k >= hb->ka && k < hb->kb) || (k >= hb->kc && k < hb->kd))) hl_m[j][c] = 0;
+        }
+    /* the gap: the rectified texels left of the picture's edge (lower rows), from `gap` columns further in */
+    for (int j = 0; j < PH; j++) {
+        int b = hl_band(j);
+        for (int k = HL_KMIN + HL_NK - 1; k >= HL_KMIN; k--) {
+            int c = hl_c(s, k), k2 = k + HL_BANDS[b].gap, c2;
+            long long x, y;
+            if (hl_gsrc[j][c] >= 0 || k2 >= HL_KMIN + HL_NK) continue;
+            hl_pt(s, (long long)k * 256 * 256 / HL_KS, (long long)j * 256, &x, &y);
+            if (x >= 0) continue;                         /* (only outside the picture) */
+            c2 = hl_c(s, k2);
+            if (hl_gsrc[j][c2] < 0) continue;
+            pic[j][c] = pic[j][c2]; hl_gsrc[j][c] = hl_gsrc[j][c2]; hl_m[j][c] = hl_m[j][c2];
+        }
+    }
+}
+static int hl_exf(int x, int y) { return hl_m[y][x]; }
+/* the handrail's lower edge (its shadow on the slats) is no line along the wall: it is all but level on the screen
+   (left: row 146.28 at the edge, rising 0.032 a column inwards; right: 146.35, 0.029; the handrail's top and the
+   other lines of the wall go to the vanishing point), so in rectified rows it drifts from 146.3 at the edge to 144.3
+   at the corner, and the strip's edge was 0.9 row higher than the line's continuation.  The quilt's windows come from
+   all along the wall (the handrail and the slats are one band, so a window holds both): their rows are moved so the
+   edge lies where the screen line puts it, at the source column and at the strip texel (fully at HL_RB1, fading to
+   none at HL_RB0 above and HL_RB2 down the slats; at most row 150) */
+#define HL_RB0 138
+#define HL_RB1 146
+#define HL_RB2 166                                        /* (back to the wall's rows on the slats) */
+static const int HL_RBY[2] = { 37448, 37466 }, HL_RBM[2] = { 130, 117 };   /* the edge's row at the edge column (1/256), and
+                                                            its slope (1/4096 row a column) */
+static long long hl_rbot(int s, long long kg)             /* its rectified row (1/256) at geometric column kg (1/256) */
+{
+    long long x, y, hx = HL_HX[s], yl;
+    hl_pt(s, kg, (long long)HL_RBY[s], &x, &y);
+    yl = HL_RBY[s] + x * HL_RBM[s] / 4096;
+    return HL_HY + (yl - HL_HY) * hx / (hx - x);
+}
+/* the strip texel of side s at strip column X, row y: the quilt's source, read from the picture in one step */
+static int hl_src(int s, long long kg, long long jq, Rgb *o)
+{
+    long long kq = kg * HL_KS / 256; int kr, jr, ox, oy, src;
+    {   int b = hl_band(clampi((int)(jq >> 8), 0, PH - 1));   /* (the nearest row of the band) */
+        jr = clampi((int)((jq + 128) >> 8), HL_BANDS[b].j0, HL_BANDS[b].j1 - 1); }
+    kr = fdiv((int)kq + 128, 256);
+    ox = (int)(kq - (long long)kr * 256); oy = (int)(jq - (long long)jr * 256);
+    if (kr >= HL_KMIN) { int c = hl_c(s, kr); if (c < 0 || c >= PW) return 0; src = hl_gsrc[jr][c]; }
+    else {
+        int Xc = HL_KMIN - kr;
+        if (Xc > vb_ow) return 0;
+        src = vb_srcmap[(size_t)jr * vb_ow + Xc - 1];
+        if (src >= 0) src = hl_gsrc[src / PW][src % PW];
+    }
+    if (src < 0) return 0;
+    if (jq > HL_RB0 * 256 && jq < HL_RB2 * 256) {        /* the handrail's lower edge: the source rows moved so it
+                                                            lies on its own line (hl_rbot) at the source and here */
+        int w = jq < HL_RB1 * 256 ? (int)((jq - HL_RB0 * 256) / (HL_RB1 - HL_RB0)) : (int)((HL_RB2 * 256 - jq) / (HL_RB2 - HL_RB1));
+        long long et = hl_rbot(s, kg), es = hl_rbot(s, (long long)hl_k(s, src % PW) * 65536 / HL_KS);
+        if (et > 150 * 256) et = 150 * 256;
+        oy += (int)((es - et) * w / 256);
+    }
+    return hl_at(s, (long long)hl_k(s, src % PW) * 256 + ox, (long long)(src / PW) * 256 + oy, o)
+        || hl_at(s, (long long)hl_k(s, src % PW) * 256, (long long)(src / PW) * 256 + oy, o)
+        || hl_at(s, (long long)hl_k(s, src % PW) * 256, (long long)(src / PW) * 256, o);   /* (by an edge of the
+                                                            source: its column, or the texel itself) */
+}
+/* the side wall's panels (rows HL_PA0..HL_PA1): framed panels side by side along the wall, each (rectified, from the
+   corner outwards) the frame's rim and wide bevel (the side facing the camera; white rim, rounded corners), the pane,
+   then the frame's far side, the bronze bar with the two screws (its bevel faces away from the camera, so only its
+   top shows); the next panel's rim follows the bar at once.  The picture shows one panel whole by the corner (A) and
+   the next one (B) cut by the edge: B's rim, its bevel (dark there: the metal reflects differently) and the start of
+   its pane (lit grey).  The rims are 30.9 rectified columns apart on both walls, so the strip first closes B (the rest
+   of its pane, then its bar with the screws) and only then starts the next panel, every texel A's texel at the same
+   offset in the unit (whole periods in, the same rectified row: every line and rounded corner goes on), read at its
+   exact position.  Measured (rectified columns, left / right wall): A's bar 12.37..16.29 / 12.06..15.90, pane
+   ..29.29 / ..29.52, inner shadow and bevel ..40.49 / ..39.92, rim ..43.27 / ..43.01; B's rim 10.58..12.36 / 10.24..
+   12.06, bevel from about 1 / 0.5; the edge cuts B's pane on the rows above the pane's lower third (at k -5.3 on the
+   pane's top row) and its bevel's lit side below.
+   The light (hl_light; docs/PORT.md has the measurements): the walls are polished metal lit by reflection, so each
+   part's tone changes along the wall its own way, and A's pane is brighter by its bar.  Each panel's texel is A's
+   texel times a smooth light ratio (A's texture kept, its light replaced): B's light over A's, both smoothed within
+   the part (+-1 column, +-2 rows) where B shows and held over the part from there; on the pane B's level by the edge
+   held flat across the pane over A's linear light (A's bright side by its bar does not come back; its inner shadow
+   does).  B's bar never shows: it takes the rim's ratio.  The panels further out follow the trend damped (the ratio's
+   power 1.25, then 1.375), a brightening one held at B's, and never darker than 0.3 of A's mean light on the part.
+   At the join the rest to B's edge texel is added, fading out over 3 columns (exact there). */
+#define HL_PN0 28                                         /* the pane's rows [PN0, PN1) (the frame above and below) */
+#define HL_PN1 125
+static const int HL_UE[2] = { 11077, 11011 };             /* the unit's end: the rim's outer edge (rectified, 1/256) */
+static const int HL_UPER[2] = { 7910, 7923 };             /* the period (30.90 / 30.95 rectified columns) */
+static const int HL_UBAR[2] = { 4170, 4070 };             /* the bar's end (the pane's start) */
+static const int HL_UPE[2] = { 7498, 7557 };              /* the pane's end (the inner shadow's and bevel's start) */
+static const int HL_URIM[2] = { 10365, 10220 };           /* the rim's start */
+#define HL_FADE (3 * 256)                                 /* the edge offset's fade outwards */
+#define HL_US 64                                          /* the light's grid: a quarter column */
+#define HL_NU 128                                         /* (P / HL_US + 2 samples from the unit's start) */
+#define HL_NJ (HL_PA1 - HL_PA0)
+#define HL_FLO 90                                         /* the panels further out: at least 0.35 of A's light */
+#define HL_SHW 768                                        /* the bevel's first 3 columns: its inner shadow (B's lit
+                                                            pane reaches about 2 columns further than A's there) */
+static int hl_ke[PH];                                     /* the edge's rectified column on rectified row j (1/256) */
+static int hl_eb[PH][3], hl_ea[PH][3];                    /* B's and A's texel at the edge */
+static int hl_ta[HL_NJ][HL_NU][3], hl_tb[HL_NJ][HL_NU][3], hl_la[HL_NJ][HL_NU][3];
+static unsigned char hl_vb[HL_NJ][HL_NU], hl_ms[HL_NJ][HL_NU], hl_md[HL_NJ][HL_NU];   /* B shows; measured; measured
+                                                            directly (not held) */
+static short hl_rho[3][HL_NJ][HL_NU][3];                  /* the light ratio (x 256): B, C, the panels after C */
+static int hl_lvl[HL_NJ][3];                              /* B's pane's level (its rows) */
+static int hl_avg(int s, long long k0, long long j, int n, int step, int *rgb)   /* mean of n texels along the row */
+{
+    int got = 0; Rgb o; rgb[0] = rgb[1] = rgb[2] = 0;
+    for (int i = 0; i < n; i++)
+        if (hl_at(s, k0 + (long long)i * step, j, &o)) { rgb[0] += o.r; rgb[1] += o.g; rgb[2] += o.b; got++; }
+    if (!got) return 0;
+    for (int c = 0; c < 3; c++) rgb[c] = rgb[c] / got;
+    return 1;
+}
+/* the unit at rectified column kc and row jq (1/256): the picture (A is always on it) */
+static int hl_uv(int s, long long kc, long long jq, Rgb *o)
+{
+    if (hl_at(s, kc, jq, o)) return 1;
+    for (int i = 1; i <= 48; i++) if (hl_at(s, kc + i * 64, jq, o)) return 1;
+    return 0;
+}
+static int hl_seg(int s, int u)                           /* the part at unit offset u: 0 bar, 1 pane, 2 the inner
+                                                            shadow, 3 bevel, 4 rim */
+{
+    return u < HL_UBAR[s] ? 0 : u < HL_UPE[s] ? 1 : u < HL_UPE[s] + HL_SHW ? 2 : u < HL_URIM[s] ? 3 : 4;
+}
+static int hl_rcls(int j) { return j < HL_PN0 ? 0 : j < HL_PN1 ? 1 : 2; }   /* the frame above, the pane's rows, below */
+static void hl_light(int s)
+{
+    int P = HL_UPER[s], u0 = HL_UE[s] - P, nu = P / HL_US + 2, lo[5], hi[5], mg[5];
+    static int q[HL_NJ][3], qs[HL_NJ][3], qv[HL_NJ], fa[HL_NJ][3], fb[HL_NJ][3];
+    static unsigned char rowok[HL_NJ];
+    static short tmp[6][HL_NU][3];
+    if (nu > HL_NU) nu = HL_NU;
+    for (int j = HL_PA0; j < HL_PA1; j++) {
+        int lo2 = -40 * 256, hi2 = 40 * 256;
+        while (hi2 - lo2 > 1) {                           /* the edge: hl_pt's column crosses 0 */
+            int m = (lo2 + hi2) / 2; long long x, y;
+            hl_pt(s, (long long)m * 256 / HL_KS, (long long)j * 256, &x, &y);
+            if (x < 0) lo2 = m; else hi2 = m;
+        }
+        hl_ke[j] = hi2;
+        if (!hl_avg(s, hi2 + 26, (long long)j * 256, 3, 64, hl_eb[j]) || !hl_avg(s, hi2 + 26 + P, (long long)j * 256, 3, 64, hl_ea[j]))
+            for (int c = 0; c < 3; c++) hl_eb[j][c] = hl_ea[j][c] = 0;
+        for (int i = 0; i < nu; i++) {                    /* A's and B's texels on the grid */
+            int u = u0 + i * HL_US, r = j - HL_PA0; Rgb o;
+            if (!hl_uv(s, u, (long long)j * 256, &o)) o.r = o.g = o.b = 0;
+            hl_ta[r][i][0] = o.r; hl_ta[r][i][1] = o.g; hl_ta[r][i][2] = o.b;
+            hl_vb[r][i] = (unsigned char)(u - P >= hl_ke[j] + 32 && hl_at(s, u - P, (long long)j * 256, &o));
+            hl_tb[r][i][0] = hl_vb[r][i] ? o.r : 0; hl_tb[r][i][1] = hl_vb[r][i] ? o.g : 0; hl_tb[r][i][2] = hl_vb[r][i] ? o.b : 0;
+        }
+    }
+    for (int g = 0; g < 5; g++) { lo[g] = nu; hi[g] = -1; }   /* each part's samples [lo, hi] and margin */
+    for (int i = 0; i < nu; i++) { int g = hl_seg(s, u0 + i * HL_US); if (i < lo[g]) lo[g] = i; hi[g] = i; }
+    for (int g = 0; g < 5; g++) mg[g] = g == 2 ? 1 : clampi((hi[g] - lo[g]) / 2, 0, 5);
+    /* the smoothed lights (+-4 samples within the part, +-2 rows within the row's class): A's everywhere, B's where it
+       shows (half the window at least, off the part's ends), and their ratio there */
+    for (int r = 0; r < HL_NJ; r++)
+        for (int i = 0; i < nu; i++) {
+            int g = hl_seg(s, u0 + i * HL_US), sa[3] = { 0, 0, 0 }, sb[3] = { 0, 0, 0 }, na = 0, nb = 0;
+            for (int r2 = r - 2; r2 <= r + 2; r2++) {
+                if (r2 < 0 || r2 >= HL_NJ || hl_rcls(r2 + HL_PA0) != hl_rcls(r + HL_PA0)) continue;
+                for (int i2 = i - 4; i2 <= i + 4; i2++) {
+                    if (i2 < lo[g] || i2 > hi[g]) continue;
+                    for (int c = 0; c < 3; c++) sa[c] += hl_ta[r2][i2][c];
+                    na++;
+                    if (hl_vb[r2][i2]) { for (int c = 0; c < 3; c++) sb[c] += hl_tb[r2][i2][c]; nb++; }
+                }
+            }
+            hl_ms[r][i] = (unsigned char)(nb * 2 >= na && nb > 0 && i - lo[g] >= mg[g] && hi[g] - i >= mg[g]);
+            for (int c = 0; c < 3; c++) {
+                hl_la[r][i][c] = na ? sa[c] / na : 0;
+                hl_rho[0][r][i][c] = (short)(hl_ms[r][i] ? clampi((sb[c] / nb + 8) * 256 / (hl_la[r][i][c] + 8), 8, 1024) : 256);
+            }
+        }
+    /* the pane (its rows): B's level by the edge (the mean of its two brightest texels there, where the edge is on
+       the pane) over A's linear light (fitted on the pane's flat part), held flat across the pane; on the rows where
+       the edge is past the pane, B's level over A's held from the nearest row; smoothed over 9 rows */
+    {
+        int f0 = (HL_UBAR[s] + 320 - u0 + HL_US - 1) / HL_US, f1 = (HL_UPE[s] - 640 - u0) / HL_US, mid = (f0 + f1) / 2;
+        for (int r = HL_PN0 - HL_PA0; r < HL_PN1 - HL_PA0; r++) {
+            int ue = hl_ke[r + HL_PA0] + P, b1 = -1, b2 = -1, l1 = -1, l2 = -1;
+            for (int c = 0; c < 3; c++) {                 /* (least squares over the row and the 2 above and below) */
+                long long sx = 0, sy = 0, sxx = 0, sxy = 0, n = 0, den, b;
+                for (int r2 = r - 2; r2 <= r + 2; r2++) {
+                    if (r2 < HL_PN0 - HL_PA0 || r2 >= HL_PN1 - HL_PA0) continue;
+                    for (int i = f0; i <= f1; i++) { long long x = i - f0, y = hl_ta[r2][i][c]; sx += x; sy += y; sxx += x * x; sxy += x * y; n++; }
+                }
+                den = n * sxx - sx * sx; b = den ? (n * sxy - sx * sy) * 256 / den : 0;
+                fb[r][c] = (int)b; fa[r][c] = (int)((sy * 256 - b * sx) / n / 256);
+            }
+            for (int i = 0; i < nu; i++) {                /* B's two brightest texels on the pane by the edge */
+                int u = u0 + i * HL_US, l;
+                if (!hl_vb[r][i] || u < ue + 64 || u > HL_UPE[s] + 256) continue;
+                l = hl_tb[r][i][0] * 2 + hl_tb[r][i][1] * 5 + hl_tb[r][i][2];
+                if (l > l1) { b2 = b1; l2 = l1; b1 = i; l1 = l; } else if (l > l2) { b2 = i; l2 = l; }
+            }
+            qv[r] = ue <= HL_UPE[s] && b2 >= 0;
+            if (qv[r]) for (int c = 0; c < 3; c++) {
+                int lb = (hl_tb[r][b1][c] + hl_tb[r][b2][c]) / 2, la = fa[r][c] + fb[r][c] * (mid - f0) / 256;
+                q[r][c] = clampi((lb + 8) * 256 / (la + 8), 8, 1024);
+            }
+        }
+        for (int r = HL_PN0 - HL_PA0; r < HL_PN1 - HL_PA0; r++) {
+            int best = -1;
+            if (qv[r]) continue;
+            for (int d = 1; d < HL_NJ && best < 0; d++) {
+                if (r - d >= HL_PN0 - HL_PA0 && qv[r - d]) best = r - d;
+                else if (r + d < HL_PN1 - HL_PA0 && qv[r + d]) best = r + d;
+            }
+            for (int c = 0; c < 3; c++) q[r][c] = best >= 0 ? q[best][c] : 256;
+        }
+        for (int r = HL_PN0 - HL_PA0; r < HL_PN1 - HL_PA0; r++)
+            for (int c = 0; c < 3; c++) {
+                int sum = 0, n = 0;
+                for (int r2 = r - 4; r2 <= r + 4; r2++) if (r2 >= HL_PN0 - HL_PA0 && r2 < HL_PN1 - HL_PA0) { sum += q[r2][c]; n++; }
+                qs[r][c] = sum / n;
+            }
+    }
+    memcpy(hl_md, hl_ms, sizeof hl_md);
+    /* held over each part from where it was measured: from the nearest row of the same class measured there (the
+       light of a part varies little down the wall), else along the row (the nearest measured sample), else from the
+       nearest row of the same class that has one */
+    for (int r = 0; r < HL_NJ; r++)
+        for (int i = 0; i < nu; i++) {
+            int best = -1;
+            if (hl_ms[r][i]) continue;
+            for (int d = 1; d < HL_NJ && best < 0; d++) {
+                if (r - d >= 0 && hl_ms[r - d][i] && hl_rcls(r - d + HL_PA0) == hl_rcls(r + HL_PA0)) best = r - d;
+                else if (r + d < HL_NJ && hl_ms[r + d][i] && hl_rcls(r + d + HL_PA0) == hl_rcls(r + HL_PA0)) best = r + d;
+            }
+            if (best < 0) continue;
+            for (int c = 0; c < 3; c++)                   /* (the inner shadow's: as B's pane's level goes) */
+                hl_rho[0][r][i][c] = (short)(i >= lo[2] && i <= hi[2] && hl_rcls(r + HL_PA0) == 1 ?
+                    clampi(hl_rho[0][best][i][c] * qs[r][c] / (qs[best][c] > 8 ? qs[best][c] : 8), 8, 1024) : hl_rho[0][best][i][c]);
+            hl_vb[r][i] |= 2;
+        }
+    for (int r = 0; r < HL_NJ; r++) for (int i = 0; i < nu; i++) if (hl_vb[r][i] & 2) { hl_ms[r][i] = 1; hl_vb[r][i] &= 1; }
+    for (int g = 1; g < 5; g++) {
+        for (int r = 0; r < HL_NJ; r++) {
+            int any = 0;
+            for (int i = lo[g]; i <= hi[g]; i++) any |= hl_ms[r][i];
+            rowok[r] = (unsigned char)any;
+            if (!any) continue;
+            for (int i = lo[g]; i <= hi[g]; i++) {
+                int best = -1;
+                if (hl_ms[r][i]) continue;
+                for (int d = 1; d <= hi[g] - lo[g] && best < 0; d++) {
+                    if (i + d <= hi[g] && hl_ms[r][i + d]) best = i + d;
+                    else if (i - d >= lo[g] && hl_ms[r][i - d]) best = i - d;
+                }
+                for (int c = 0; c < 3; c++) hl_rho[0][r][i][c] = hl_rho[0][r][best][c];
+            }
+        }
+        for (int r = 0; r < HL_NJ; r++) {
+            int best = -1;
+            if (rowok[r]) continue;
+            for (int d = 1; d < HL_NJ && best < 0; d++) {
+                if (r + d < HL_NJ && rowok[r + d] && hl_rcls(r + d + HL_PA0) == hl_rcls(r + HL_PA0)) best = r + d;
+                else if (r - d >= 0 && rowok[r - d] && hl_rcls(r - d + HL_PA0) == hl_rcls(r + HL_PA0)) best = r - d;
+            }
+            if (best >= 0) for (int i = lo[g]; i <= hi[g]; i++) memcpy(hl_rho[0][r][i], hl_rho[0][best][i], sizeof hl_rho[0][r][i]);
+        }
+    }
+    {   /* the pane's ratio: B's level (qs over A's light at the middle) over A's light, flat */
+        int f0 = (HL_UBAR[s] + 320 - u0 + HL_US - 1) / HL_US, f1 = (HL_UPE[s] - 640 - u0) / HL_US, mid = (f0 + f1) / 2;
+        for (int r = HL_PN0 - HL_PA0; r < HL_PN1 - HL_PA0; r++)
+            for (int c = 0; c < 3; c++) {
+                int la = fa[r][c] + fb[r][c] * (mid - f0) / 256;
+                hl_lvl[r][c] = qs[r][c] * la / 256;
+                for (int i = lo[1]; i <= hi[1]; i++) {
+                    int x = clampi(i, f0, f1) - f0, l = fa[r][c] + fb[r][c] * x / 256;
+                    hl_rho[0][r][i][c] = (short)clampi(qs[r][c] * (la + 8) / (l > 8 ? l + 8 : 16), 8, 1024);
+                }
+            }
+        /* the pane's top and foot edges: its ratio and the frame's mixed over 6 rows (no row of an edge alone) */
+        for (int e = 0; e < 2; e++) {
+            int jb = (e ? HL_PN1 : HL_PN0) - HL_PA0;
+            for (int t = 0; t < 6; t++)
+                for (int i = lo[1]; i <= hi[1]; i++)
+                    for (int c = 0; c < 3; c++) {
+                        int a = hl_rho[0][jb - 1][i][c], b = hl_rho[0][jb][i][c];
+                        tmp[t][i][c] = (short)(a + (b - a) * (2 * t + 1) / 12);
+                    }
+            for (int t = 0; t < 6; t++)
+                if (jb - 3 + t >= 0 && jb - 3 + t < HL_NJ) memcpy(hl_rho[0][jb - 3 + t][lo[1]], tmp[t][lo[1]], sizeof(short) * 3 * (size_t)(hi[1] - lo[1] + 1));
+        }
+    }
+    /* the rim (a thin bright line, B's narrower): B's two brightest texels on it over A's, smoothed over 5 rows and
+       held flat across it; B's bar never shows: the rim's ratio too (front faces both), at most A's light */
+    for (int r = 0; r < HL_NJ; r++) {
+        int ba[2] = { -1, -1 }, bb[2] = { -1, -1 }, la[2] = { -1, -1 }, lb[2] = { -1, -1 };
+        for (int i = lo[4] - 4; i <= hi[4]; i++) {
+            int l = hl_ta[r][i][0] * 2 + hl_ta[r][i][1] * 5 + hl_ta[r][i][2];
+            if (i >= lo[4]) { if (l > la[0]) { ba[1] = ba[0]; la[1] = la[0]; ba[0] = i; la[0] = l; } else if (l > la[1]) { ba[1] = i; la[1] = l; } }
+            if (!hl_vb[r][i]) continue;
+            l = hl_tb[r][i][0] * 2 + hl_tb[r][i][1] * 5 + hl_tb[r][i][2];
+            if (l > lb[0]) { bb[1] = bb[0]; lb[1] = lb[0]; bb[0] = i; lb[0] = l; } else if (l > lb[1]) { bb[1] = i; lb[1] = l; }
+        }
+        for (int c = 0; c < 3; c++)
+            q[r][c] = bb[1] < 0 ? 256 : clampi((hl_tb[r][bb[0]][c] + hl_tb[r][bb[1]][c] + 16) * 256 / (hl_ta[r][ba[0]][c] + hl_ta[r][ba[1]][c] + 16), 8, 1024);
+    }
+    for (int r = 0; r < HL_NJ; r++)
+        for (int c = 0; c < 3; c++) {
+            int sum = 0, n = 0;
+            for (int r2 = r - 2; r2 <= r + 2; r2++) if (r2 >= 0 && r2 < HL_NJ) { sum += q[r2][c]; n++; }
+            for (int i = lo[4]; i <= hi[4]; i++) hl_rho[0][r][i][c] = (short)(sum / n);
+            for (int i = lo[0]; i <= hi[0]; i++) hl_rho[0][r][i][c] = (short)(sum / n < 256 ? sum / n : 256);
+        }
+    /* the frame's gold where B does not show on the pane's and the inner shadow's columns (the rounded corners by
+       the pane's top and foot, the bar's flare): the frame's ratio there (the bar's by the bar, the bevel's by the
+       bevel), not the pane's, by how gold A's light is (red over blue) */
+    for (int r = HL_PN0 - HL_PA0; r < HL_PN1 - HL_PA0; r++) {
+        short fbar[3], fbev[3];
+        memcpy(fbar, hl_rho[0][r][lo[0]], sizeof fbar); memcpy(fbev, hl_rho[0][r][lo[3] + mg[3]], sizeof fbev);
+        for (int i = lo[1]; i <= hi[2]; i++) {
+            int w = clampi((hl_la[r][i][0] - hl_la[r][i][2] - 25) * 256 / 50, 0, 256);
+            const short *f = i < (lo[1] + hi[1]) / 2 ? fbar : fbev;
+            if (hl_md[r][i] || !w) continue;
+            for (int c = 0; c < 3; c++) hl_rho[0][r][i][c] = (short)(hl_rho[0][r][i][c] + (f[c] - hl_rho[0][r][i][c]) * w / 256);
+        }
+    }
+    /* the pane's end and the inner shadow are measured two ways (B's level, B over A): their ratios meet smoothly
+       (+-1 column about the pane's end; a step there would draw a line down B's pane by the join) */
+    for (int r = 0; r < HL_NJ; r++) {
+        short sm[16][3];
+        int a0 = lo[2] - 6, a1 = lo[2] + 5;
+        for (int i = a0; i <= a1; i++)
+            for (int c = 0; c < 3; c++) {
+                int sum = 0;
+                for (int i2 = i - 4; i2 <= i + 4; i2++) sum += hl_rho[0][r][i2][c];
+                sm[i - a0][c] = (short)(sum / 9);
+            }
+        for (int i = a0; i <= a1; i++) memcpy(hl_rho[0][r][i], sm[i - a0], sizeof sm[0]);
+    }
+    /* the tint: each channel's ratio within -20 / +25 % of the luminance's (a ratio measured on one hue and held
+       over another, B's brown bevel over A's bluish inner shadow, would tint it) */
+    for (int r = 0; r < HL_NJ; r++)
+        for (int i = 0; i < nu; i++) {
+            short *p = hl_rho[0][r][i];
+            int pl = (p[0] * 2 + p[1] * 5 + p[2]) / 8;
+            for (int c = 0; c < 3; c++) p[c] = (short)clampi(p[c], pl * 205 / 256, pl * 320 / 256);
+        }
+    /* the panels further out: the trend damped (power 1.25, then 1.375; a brightening held, but not on the inner
+       shadow: B's lit pane reaching over it is B's own relief), at least HL_FLO of A's light */
+    for (int r = 0; r < HL_NJ; r++)
+        for (int i = 0; i < nu; i++)
+            for (int c = 0; c < 3; c++) {
+                int p = i >= lo[2] && i <= hi[2] && hl_rho[0][r][i][c] > 256 ? 256 : hl_rho[0][r][i][c], p4 = isqrt_i(isqrt_i(p * 256) * 256), p8 = isqrt_i(p4 * 256);
+                int pc = p >= 256 ? p : p * p4 / 256, pd = p >= 256 ? p : p * p4 / 256 * p8 / 256;
+                hl_rho[1][r][i][c] = (short)clampi(pc, HL_FLO, 1024);
+                hl_rho[2][r][i][c] = (short)clampi(pd, HL_FLO, 1024);
+            }
+#ifdef WS_BACKDROP_MAIN
+    if (getenv("WSB_HLDBG")) for (int r = 0; r < HL_NJ; r += 2) {
+        fprintf(stderr, "s%d j%3d:", s, r + HL_PA0);
+        for (int i = 0; i < nu; i += 2) fprintf(stderr, "%c%3d", hl_md[r][i] ? '*' : ' ', (hl_rho[0][r][i][0] * 2 + hl_rho[0][r][i][1] * 5 + hl_rho[0][r][i][2]) * 100 / 8 / 256);
+        fprintf(stderr, "\n");
+    }
+#endif
+}
+/* the light ratio of panel n (1: B) at unit offset u, rectified row jq (1/256), channel c */
+static int hl_rh(int s, int n, long long u, long long jq, int c)
+{
+    int t = n >= 3 ? 2 : n - 1, x = (int)(u - (HL_UE[s] - HL_UPER[s])), i = clampi(x / HL_US, 0, HL_NU - 2);
+    int fx = clampi(x - i * HL_US, 0, HL_US) * 256 / HL_US;
+    int y = (int)jq - HL_PA0 * 256, r = clampi(y >> 8, 0, HL_NJ - 1), r1 = r + 1 < HL_NJ ? r + 1 : r, fy = clampi(y - r * 256, 0, 256);
+    int a = hl_rho[t][r][i][c] + (hl_rho[t][r][i + 1][c] - hl_rho[t][r][i][c]) * fx / 256;
+    int b = hl_rho[t][r1][i][c] + (hl_rho[t][r1][i + 1][c] - hl_rho[t][r1][i][c]) * fx / 256;
+    return a + (b - a) * fy / 256;
+}
+static int hl_unit(int s, long long kg, long long jq, Rgb *o)
+{
+    long long kq = kg * HL_KS / 256, P = HL_UPER[s], kend = HL_UE[s], kk;
+    int n = 0, v[3];
+    if (jq < HL_PA0 * 256) jq = HL_PA0 * 256;
+    if (jq > HL_PA1 * 256 - 1) jq = HL_PA1 * 256 - 1;
+    kk = kq;
+    while (kk < kend - P) { kk += P; n++; }
+    if (kk > kend - 128) {                                /* (a rim meets the next bar: blended over half a column) */
+        Rgb a, b; int f = (int)((kk - (kend - 128)) * 2);
+        if (!hl_uv(s, kk, jq, &a)) return hl_uv(s, kk - P, jq, o);
+        if (!hl_uv(s, kk - P, jq, &b)) *o = a; else *o = mix(a, b, f);
+    } else if (!hl_uv(s, kk, jq, o)) return 0;
+    if (n < 1) return 1;
+    v[0] = o->r; v[1] = o->g; v[2] = o->b;
+    for (int c = 0; c < 3; c++) v[c] = v[c] * hl_rh(s, n, kk, jq, c) / 256;
+    if (n == 1) {                                         /* B: the rest to its edge texel, fading out */
+        int j0 = (int)(jq >> 8), fj = (int)(jq & 255), j1 = j0 + 1 < HL_PA1 ? j0 + 1 : j0;
+        int ke = hl_ke[j0] + (hl_ke[j1] - hl_ke[j0]) * fj / 256;
+        int w = clampi((int)((kk - (ke + P) + HL_FADE) * 256 / HL_FADE), 0, 256);
+        for (int c = 0; c < 3; c++) {
+            int eb = hl_eb[j0][c] + (hl_eb[j1][c] - hl_eb[j0][c]) * fj / 256;
+            int ea = (hl_ea[j0][c] + (hl_ea[j1][c] - hl_ea[j0][c]) * fj / 256) * hl_rh(s, 1, ke + P, jq, c) / 256;
+            v[c] += (eb - ea) * w / 256;
+            if (j0 >= HL_PN0 && j0 < HL_PN1 && kk >= HL_UPE[s] - 384 && kk < HL_UPE[s] + HL_SHW) {   /* (B's pane's end:
+                                                            no brighter than its pane or its edge texel; B's lit pane
+                                                            ends later than A's, so A's texels there meet B's ratio of
+                                                            the inner shadow while still lit) */
+                int cap = hl_lvl[j0 - HL_PA0][c] > eb ? hl_lvl[j0 - HL_PA0][c] : eb;
+                if (v[c] > cap) v[c] = cap;
+            }
+        }
+    }
+    o->r = clampi(v[0], 0, 255); o->g = clampi(v[1], 0, 255); o->b = clampi(v[2], 0, 255);
+    return 1;
+}
+static u16 hl_raw[PH][PW];
+static void gen_hl(int pad)
+{
+    long long kg, jq;
+    pal_make();
+    hl_kj(0, (long long)-(pad + 32) * 256, (long long)HL_HY, &kg, &jq);
+    vb_ow = clampi((int)(-kg * HL_KS / 256 / 256) + HL_KMIN + 4, 8, HL_NO);
+    if (!canvas_open(vb_ow)) return;
+    vb_srcmap = (int *)malloc(sizeof(int) * (size_t)vb_ow * PH);
+    if (!vb_srcmap) { canvas_close(); return; }
+    memcpy(hl_raw, pic, sizeof pic); memcpy(hl_p0, pic, sizeof pic);
+    vb_ex = TH_NONE; vb_exf = hl_exf;
+    for (int side = 0; side < 2; side++) {
+        hl_rectify(side);
+        canvas_clear(); cur_side = side;
+        for (int i = 0; i < vb_ow * PH; i++) vb_srcmap[i] = -1;
+        for (int i = 0; i < HL_NB; i++) {
+            VbBand b = HL_VB[i];
+            if (b.y1 <= b.y0) continue;
+            if (side) { short a = b.sx0; b.sx0 = (short)(PW - b.sx1); b.sx1 = (short)(PW - a); }
+            vb_quilt(side, &b, 1701 + 13 * i);
+        }
+        hl_mode = 2;                                      /* (crisper: the slats' and rails' edges as in the picture) */
+#ifdef WS_BACKDROP_MAIN
+        if (getenv("WSB_HLMODE")) hl_mode = atoi(getenv("WSB_HLMODE"));
+#endif
+        hl_light(side);
+        for (int X = 1; X <= pad; X++)
+            for (int y = 0; y < PH; y++) {
+                Rgb o = { 0, 0, 0 };
+                hl_kj(side, (long long)-X * 256, (long long)y * 256, &kg, &jq);
+                if (jq >= HL_PA0 * 256 && jq < HL_PA1 * 256) {   /* the panels: the unit, repeated */
+                    if (!hl_unit(side, kg, jq, &o)) o = rgb15(hl_p0[y][side ? PW - 1 : 0]);
+                } else if (!hl_src(side, kg, jq, &o)) {
+                    o = rgb15(hl_p0[y][side ? PW - 1 : 0]);
+#ifdef WS_BACKDROP_MAIN
+                    if (getenv("WSB_INFO")) fprintf(stderr, "side %d X %d y %d: no source (k %lld j %lld)\n", side, X, y, kg * HL_KS / 65536, jq >> 8);
+#endif
+                }
+                strip[(size_t)y * 2 * pad + (side ? pad + (X - 1) : pad - X)] = quant(o);
+            }
+        hl_mode = 0;
+    }
+    memcpy(pic, hl_raw, sizeof pic);
+    free(vb_srcmap); vb_srcmap = 0;
+    vb_ex = VB_EXCL; vb_exf = 0;
     canvas_close();
 }

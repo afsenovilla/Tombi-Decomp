@@ -30,6 +30,7 @@
     <string name="wings_missing">%1$s: archivos que no están en el disco: %2$s</string>
     <string name="wings_7z">%1$s: el .7z no contiene una imagen de disco (un .7z de archivos sueltos no vale: usa la imagen o un .zip)</string>
     <string name="opt_debug">Menú de depuración</string>
+    <string name="opt_showcoll">Ver colisiones</string>
     <string name="opt_secondscreen">Segunda pantalla: mapa y estado</string>
     <string name="opt_hudbottom">HUD en la pantalla inferior</string>
     <string name="opt_renderer">Renderizador</string>

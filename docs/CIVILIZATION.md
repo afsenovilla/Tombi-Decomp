@@ -1153,6 +1153,149 @@ assembled.
 
 Nothing derived from the disc, the FMV or the community files is committed. The palettes are rebuilt at every run.
 
+## Iron Town: findings of 2026-11-17 (a new picture was tried and parked)
+
+The user asked for the three town pictures to be redone "like the widescreen strips". Two approaches were tried on
+Iron Town (AREA17 s0) and rejected by the user; the work is parked. What was learnt is kept here.
+
+**What does not work.** (1) Carrying the flyover's bands on sideways (texture quilting and period copies, as for the
+room strips): endless strips, no town. (2) A 2D collage on a drawn plan (materials from the flyover, the page's
+cut-outs pasted on): better structure, still far from a real map. The real maps (Baccus Village, AREA05 s0) are
+complete pre-rendered 3D scenes; only a real 3D model rendered with one light could come close, which is days of work
+per town and was not started. Also rejected: copies of the dome as the other four houses (the user wants the
+current entrances kept: the real wall cut-out with the flyover's door).
+
+**Findings (mosaic = BUNMEI frames 61-91; picture px = mosaic + (196, 36) = world + (128, -40)).**
+- **The inner court is an octagon.** The walls leaving the two upper pillars (mosaic (40, 78) and (272, 78)) run
+  outwards and down at about 0.78 rows per column; the lower diagonal walls come back in at about 0.9. Carried on,
+  they meet at mosaic (-28, 132) and (340, 132), just outside the flyover: exactly on props 21 (world (48, 219)) and
+  22 (world (404, 211)). So those two props are the court's side corner posts, and the page's posts with a wall on
+  two sides (`corner_post_1` / `corner_post_2` below) are the likely drawings. H4 and H3 stand outside the octagon,
+  on the upper terraces; H5 and H2 at the sides of the two plazas (copper tiles west, paving east).
+- **The dotted dark lines of the flyover are the lift rails**, not video defects: the two rows of eight equal props
+  (anim 23, 63 px apart) at world y 302 and y 84 fall on the dotted lines at mosaic y 226-240 and y 8-22.
+  `tools/civ_rebuild.py` `destripe` removes them ("FMV stripes"); it should keep them.
+- **Symmetry.** Props and houses are laid out almost in mirror about world x 223 (gate, dome, castle door).
+- **Other props.** 5 / 6 sit on the outer fence either side of the gate; 7 / 10 at the foot of H5 / H2 (their doors
+  from the lawn); 11 / 12 are the two ring-and-chain wall blocks of the upper terrace; 13 the gate; 18 / 19 the
+  pillars at the plaza's edge; 20 the dome's roof.
+- **The outer outline is not known.** The flyover only shows a straight south front (fence and round gate); the
+  page has no diagonal fence segment.
+
+**Exterior pieces of SYSTEM/A08000 (x >= 384).** The layout file catalogues 12; there are 35. Rectangles are
+approximate (drawn by eye on the page; neighbours may touch), `x, y, w, h` in the page's 8 bpp view:
+
+| # | name | x, y, w, h | in the flyover? |
+|---|---|---|---|
+| 1 | `fence_a` | 388, 2, 160, 52 | in the flyover |
+| 2 | `fence_b` | 384, 58, 166, 52 | in the flyover |
+| 3 | `gate_ring` | 552, 0, 88, 56 | in the flyover |
+| 4 | `gate_leg` | 588, 56, 34, 54 | in the flyover |
+| 5 | `gate_left` | 640, 0, 96, 128 | in the flyover |
+| 6 | `gate_right` | 736, 0, 96, 128 | in the flyover |
+| 7 | `arch_door` | 832, 0, 34, 50 | in the flyover |
+| 8 | `dome_roof_a` | 772, 172, 50, 38 | in the flyover |
+| 9 | `dome_roof_b` | 772, 212, 38, 38 | in the flyover |
+| 10 | `vane` | 734, 128, 30, 72 | in the flyover |
+| 11 | `yard_wall_sw` | 386, 112, 88, 50 | in the flyover |
+| 12 | `yard_wall_arc` | 458, 112, 40, 48 | in the flyover |
+| 13 | `yard_wall_se1` | 580, 152, 24, 66 | in the flyover |
+| 14 | `yard_wall_se2` | 606, 152, 34, 80 | in the flyover |
+| 15 | `pillars_row` | 548, 112, 82, 40 | not in the flyover |
+| 16 | `pillars_tall` | 688, 214, 50, 42 | in the flyover |
+| 17 | `notch_wall_w` | 388, 160, 126, 44 | not in the flyover |
+| 18 | `notch_wall_e` | 772, 130, 50, 40 | not in the flyover |
+| 19 | `ring_post_w` | 512, 160, 36, 42 | not in the flyover |
+| 20 | `ring_post_e` | 548, 198, 52, 32 | not in the flyover |
+| 21 | `plant_1` | 540, 156, 40, 32 | not in the flyover |
+| 22 | `plant_2` | 514, 205, 34, 30 | not in the flyover |
+| 23 | `lamp_pole_1` | 645, 134, 17, 84 | not in the flyover |
+| 24 | `lamp_pole_2` | 666, 132, 16, 84 | not in the flyover |
+| 25 | `sign_rail_a` | 690, 128, 44, 36 | not in the flyover |
+| 26 | `sign_rail_b` | 640, 212, 38, 44 | not in the flyover |
+| 27 | `crank_wheel` | 824, 150, 34, 26 | not in the flyover |
+| 28 | `crank_lever` | 826, 128, 20, 22 | not in the flyover |
+| 29 | `corner_post_1` | 384, 200, 31, 43 | not in the flyover |
+| 30 | `corner_wall` | 416, 200, 56, 42 | in the flyover |
+| 31 | `corner_post_2` | 472, 192, 40, 60 | not in the flyover |
+| 32 | `slab_pillar_ne` | 848, 0, 48, 60 | in the flyover |
+| 33 | `mossy_wall_e` | 864, 64, 32, 60 | in the flyover |
+| 34 | `yard_wall_pair` | 688, 163, 40, 48 | in the flyover |
+| 35 | `post_wall` | 608, 216, 24, 40 | not in the flyover |
+
+Not in the flyover and unused by the current map: the lift machinery (`crank_wheel`, six rotation frames from
+(824, 150) on, and `crank_lever`, three frames from (826, 128)), the two `sign_rail` panels, `ring_post_w / e`,
+`notch_wall_e`. Two thin strips ((792, 212, 32, 4) and (864, 124, 32, 4)) were not identified.
+
+### Prop pivots: the convention of a working town, and Iron Town's props against the flyover (2026-11-17)
+
+The cut towns' scenery sprite tables (kind 0x3D) are lost, so which cut-out a prop draws and its offset from the
+placement point are not known. The Hidden Village (AREA19 s2, NPC set 0x11) works the same way and has its table, so
+its offsets show the convention. Per prop: the box of its first frame's parts around the placement point (part
+`dx, dy`, `w, h`; SPR_DATA[13], anim scripts at 0x801038CC):
+
+| prop | kind | size | dx | dy | reading |
+|---|---|---|---|---|---|
+| 0, 1, 2 (rooms 3, 2, 1) | 2 | 88-96 x 96-104 | -48/-56 .. 32/40 | -32/-40 .. 64/72 | a house's cover: the point is inside it, above its middle |
+| 3 | 0 | 72 x 48 | -40 .. 32 | -40 .. 8 | upright: the point is at its foot |
+| 4 | 1 | 40 x 40 | -24 .. 16 | -40 .. 0 | foot |
+| 5 | 0 | 24 x 32 | -16 .. 8 | -24 .. 8 | foot |
+| 6 | 0 | 120 x 120 | -64 .. 56 | -64 .. 56 | flat on the ground: centred |
+| 7 | 0 | 112 x 80 | -48 .. 64 | -64 .. 16 | foot |
+| 8 | 1 | 200 x 88 | -96 .. 104 | -96 .. -8 | foot (wide piece) |
+| 9, 10 | 1 | 120 x 160, 80 x 192 | -64 .. 56, -24 .. 56 | -96 .. 64, -112 .. 80 | tall pieces: the point is 64-80 above the bottom |
+| 11, 12, 13 | 1 | 40-64 x 88-120 | -14 .. 26, -32 .. 24, -16 .. 48 | -84 .. 4, -80 .. 8, -120 .. 0 | foot |
+
+So: offsets are multiples of 8 for most parts; the point is horizontally within about 16 px of the drawing's middle;
+vertically it is the object's foot (the Y-sort line) for upright things, the middle for flat ones and for house
+covers. It is not one fixed corner.
+
+Iron Town's props read against the flyover with that convention (mosaic coordinates, read off the frame by eye,
+about 5 px; piece names as in the table above):
+
+| prop (world) | mosaic | what stands there | likely piece | fit |
+|---|---|---|---|---|
+| 5 (125, 487), 6 (349, 487) | (57, 411), (281, 411) | the fence either side of the gate (rows 395-432) | `fence_a` / `fence_b` | x at the segment's middle; y 20 above its foot |
+| 13 (263, 457) | (195, 381) | the round gate (columns 105-205, rows 345-440) | the gate's right panel | 40 right of the gate's middle: the gate is drawn in two panels |
+| 18 (143, 283), 19 (295, 283) | (75, 207), (227, 207) | the low walls with the oval notch (rows 195-215) | `notch_wall_w` / `notch_wall_e` | middle, at the foot |
+| 8 (103, 340), 9 (344, 343) | (35, 264), (276, 267) | the cylinder balustrade (west), the railing (east) | `pillars_row` (west); east not on the page | x at the middle; y at the top |
+| 11 (148, 137), 12 (297, 127) | (80, 61), (229, 51) | the wall blocks with a ring and chain | `ring_post_w` / `ring_post_e` | middle, at the foot of the top face |
+| 20 (226, 211) | (158, 135) | the dome | `dome_roof_a / b` | x at the middle; y near the top (a cover, like the rooms) |
+| 21 (48, 219), 22 (404, 211) | (-20, 143), (336, 135) | outside the frame: the court's side corners | `corner_post_1 / 2` | from the walls' geometry, not seen |
+| 7 (-33, 432), 10 (473, 428) | (-101, 356), (405, 352) | outside the frame: the foot of H5 / H2 | unknown (a door piece?) | not seen |
+
+Not matched: props 14-17 (anims 16, 17, 13 is the gate), the room covers 0-4, and the two rail rows (anim 23).
+
+### Which page slice each prop draws from (2026-11-17)
+
+A prop's subtype picks its scenery def, and the def's `w1e` is added to every part's page word (FORMATS.md "SPR").
+In the Hidden Village every part's own page word is 128 (8 bpp, page 0), so `w1e` alone gives the page: 2 -> VRAM x
+128, 4 -> 256, 6 -> 384, 8 -> 512; a part's u, v then address a 256-texel slice from there. The cut towns' parts are
+lost, so their own page words are not known; with the same convention:
+
+- The pages' VRAM places (SYS reload lists): A06100 and A08000 at x 64, 448 words wide; A07600 at x 64, 320 wide,
+  A07601 at x 384, 128 wide. So in a page's 8 bpp view, VRAM x 128 is view column 128, x 256 is 384, x 384 is 640.
+- **Iron Town** (defs `w1e` 2, 4, 6, 8): subtype 0 (the five room props, anims 0-4) draws from view columns 128-383
+  (the hut interiors); subtype 1 (props 5-12, anims 5-12) from 384-639; subtype 2 (props 13-34, anims 13, 16-23) from
+  640-895. That agrees with every match made by eye: fence segments and ring posts in 384-639, gate panels, dome
+  roof and the east notch wall in 640-895.
+- It also settles some: props 19 / 20 (anims 21, 22; the court's side corners) are subtype 2, so they are the two
+  pillars with a diagonal wall of columns 848-895 (`slab_pillar_ne`, `mossy_wall_e`), not `corner_post_1 / 2`
+  (columns 384-511). The rail props (anim 23) are subtype 2: the thin strips at (792, 212) and (864, 124).
+- **The lifts are props 13 and 14** (list indices; anims 17 and 16, kind 1): they start on the two rail rows
+  ((83, 300) and (142, 82)), and they are the `wb8` 0xD / 0xE platforms of `topdownA17SceneryUpdate`. Their drawings are in
+  columns 640-895: most likely the two dark panels on a post (`sign_rail_a / b`), which are then lift platforms, not
+  signs.
+- **Prop 15** (anim 13, kind 2, at world (263, 457)) is the one whose anim takes `D_8009CFA1` (0..2): frames 13, 14,
+  15. The page has two full pictures of the round gate (columns 640-735 and 736-831): gate states, by progress.
+- **Scenery scripts.** Iron Town's 24 scenery anims are one still frame each (anim n = frame n, hold). Lumberjack
+  Town's anims 0-15 likewise; Stonetown's def points at Baccus Village's anim table (0x80102FA0).
+- **Lumberjack Town** (defs `w1e` 2, 8): props 0-11 (rooms and outdoor, anims 0-11) from A06100 view columns
+  128-383; props 12, 13 (anims 14, 15) from VRAM x 512, which is outside the town's page.
+- **Stonetown** (defs `w1e` 2, 6, 8): the four room props from A07600 columns 128-383; props 4 and 6 (anims 8, 9)
+  from VRAM x 384 = A07601 (the page with the "Stone the No.1" slab); prop 5 (anim 10, or 12 in the alternative
+  list: the clock) from VRAM x 512, outside the town's pages.
+
 ## Folkin's rough notes — verification
 
 Folkin (TCRF) left rough notes on the Civilization towns. Each claim was checked against the decompiled code and the

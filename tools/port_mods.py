@@ -71,6 +71,8 @@ i18n.add({
         "mod.infhealth": "Vitalidad infinita", "mod.infhealth.d": "Mantiene la vitalidad al máximo (4) en cada vblank.",
         "mod.nosaveheal": "Guardar no recupera la vida",
         "mod.nosaveheal.d": "Al cargar una partida guardada, Tombi conserva la vitalidad que tenía al guardar (el juego original la rellena al máximo en cada carga) (--no-save-heal).",
+        "mod.showcoll": "Ver colisiones",
+        "mod.showcoll.d": "Dibuja encima del juego los suelos (verde), techos (azul), paredes (rojo / magenta) y bloques (amarillo) del plano en el que está Tombi, y las cajas de choque: Tombi en blanco, enemigos en rojo, mecanismos en cian, objetos en amarillo (--show-collision).",
         "mod.debugmenu": "Menú de depuración", "mod.debugmenu.d": "En el juego: Select+L1+R1 o F1 abre un menú de depuración (atravesar paredes, volar, trucos, eventos, saltar a cualquier sala, info en pantalla, velocidad).",
         "mod.events": "Desbloquear todos los eventos",
         "mod.events.d": "Marca los %d eventos como completados al empezar (los objetos ligados a eventos desaparecen; útil para explorar)." % EVENT_COUNT,
@@ -109,6 +111,8 @@ i18n.add({
         "mod.infhealth": "Infinite vitality", "mod.infhealth.d": "Keeps the vitality at the maximum (4) every vblank.",
         "mod.nosaveheal": "Saving does not refill vitality",
         "mod.nosaveheal.d": "When a saved game is loaded, Tombi keeps the vitality he had when saving (the original game refills it to the maximum on every load) (--no-save-heal).",
+        "mod.showcoll": "Show collision",
+        "mod.showcoll.d": "Draws over the game the floors (green), ceilings (blue), walls (red / magenta) and blocks (yellow) of the plane Tombi stands in, and the hit boxes: Tombi white, enemies red, mechanisms cyan, items yellow (--show-collision).",
         "mod.debugmenu": "Debug menu", "mod.debugmenu.d": "In game: Select+L1+R1 or F1 opens a debug menu (noclip, fly, cheats, events, warp to any room, info overlay, speed).",
         "mod.events": "Unlock all events",
         "mod.events.d": "Marks all %d events as completed at the start (objects tied to events are gone; for exploring)." % EVENT_COUNT,
@@ -193,6 +197,10 @@ def args_debugmenu(s):
     return ["--debug-menu"] if s.get("debugmenu") else []
 
 
+def args_showcoll(s):
+    return ["--show-collision"] if s.get("showcoll") else []
+
+
 def args_events(s):
     return ["--poke", "g1:SCRIPT_FLAGS:FF:1x%d" % EVENT_COUNT] if s.get("events") else []
 
@@ -239,6 +247,7 @@ MODS = [
     ("nosaveheal", "mod.nosaveheal", "mod.nosaveheal.d", "check", args_nosaveheal),
     ("events", "mod.events", "mod.events.d", "check", args_events),
     ("debugmenu", "mod.debugmenu", "mod.debugmenu.d", "check", args_debugmenu),
+    ("showcoll", "mod.showcoll", "mod.showcoll.d", "check", args_showcoll),
     ("keys_on", "mod.keys", "mod.keys.d", "check+keys", args_keys),
 ]
 
@@ -248,7 +257,7 @@ MODS = [
 # the same names (port_version.h).  Not portable: --title-debug (its title-carousel hook, port/fixes.txt
 # titleDrawMenuCarousel, is PAL-only: the USA carousel is its own file) and the 50 / 60 Hz switch (NTSC: always 60).
 PORTABLE_MODS = frozenset(("skipintro", "keys_on", "areasel", "ap_on", "lives_on", "inflives", "infhealth", "events",
-                           "debugmenu", "nosaveheal"))
+                           "debugmenu", "nosaveheal", "showcoll"))
 
 
 def mod_args(settings, out_dir=None, allowed=None):
@@ -265,5 +274,5 @@ def mod_args(settings, out_dir=None, allowed=None):
 
 def default_settings():
     return {"skipintro": True, "hz60": True, "areasel": False, "titledebug": False, "area": 0, "section": 0, "ap_on": False, "ap": 10000,
-            "lives_on": False, "lives": 5, "inflives": False, "infhealth": False, "nosaveheal": False, "events": False, "debugmenu": False, "keys_on": False,
+            "lives_on": False, "lives": 5, "inflives": False, "infhealth": False, "nosaveheal": False, "events": False, "debugmenu": False, "showcoll": False, "keys_on": False,
             "keys": dict(DEFAULT_KEYS), "autostart": False, "prompts": "playstation", "civ_collision": False, "civ_route": False}

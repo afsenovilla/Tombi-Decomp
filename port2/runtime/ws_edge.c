@@ -149,18 +149,9 @@ typedef struct { u8 t[40]; } TR;          /* a triangle packet: flat 32 bytes, s
    room: its big apple tree planted where the path ends on the left, so the way is visibly closed. */
 static const struct { u8 area, section, end; s16 x0, x1, y1, z0, z1; u16 tp[2], clut; s16 dx, dy, dz, pad0, pad1; s16 tx, tz, slope; } PROPS[] = {
     /* (clut: 0 = any; pad0..pad1: the strip widths, in px, it is used for)
-       32:9: the whole tree, far enough out that its round crown stops at the pig house;
-       16:9 / 21:9: the strip is narrower than the crown, so only the trunk and its fork, under the tree line carried
-       on (21:9: a second one further out and back) */
-    /* a stand of trunks in the foreground (in front of the path, on the front slope), at their own size: the apple
-       tree's forked trunk (7eca) and the trunk of the tree by the thatched hut (7f0a) */
-    {0, 0, 0, 300, 380, -50,  50,  60, {0x12, 0x12}, 0x7eca,  -388,   5, -105,   1, 999},
-    {0, 0, 0, 815, 870, -30,  80,  86, {0x12, 0x12}, 0x7f0a,  -926, -16, -108,   1, 999},
-    {0, 0, 0, 300, 380, -50,  50,  60, {0x12, 0x12}, 0x7eca,  -463,  34, -125,   1, 999},
-    {0, 0, 0, 815, 870, -30,  80,  86, {0x12, 0x12}, 0x7f0a, -1011, -16, -123,  90, 999},
-    {0, 0, 0, 300, 380, -50,  50,  60, {0x12, 0x12}, 0x7eca,  -570,   2,  -75,  90, 999},
-    /* 21:9 and wider: a trunk further out and back, under the tree line carried on; 32:9: the whole tree too */
-    {0, 0, 0, 300, 380, -50,  50,  60, {0x12, 0x12}, 0x7eca,  -620,  18,  110,  90, 999},
+       32:9: the whole tree, far enough out that its round crown stops at the pig house.
+       (the stand of foreground trunks, the apple tree's 7eca and the hut tree's 7f0a, was dropped 2026-11-17: seen from
+       the back lane they were trunks standing in mid-air; the fence below closes the way on its own) */
     {0, 0, 0, 150, 520, -50, -10, 200, {0x12, 0x0d}, 0,       -760,   8,   40, 200, 999},
     /* the fence (page 0xe, its level stretch x 96..192 at z 45): carried on to the left behind the pig house, and
        turned (tx, tz: x and z change per 256 units along the source x, from dx, dz at x0; slope: y change per 256
@@ -171,8 +162,42 @@ static const struct { u8 area, section, end; s16 x0, x1, y1, z0, z1; u16 tp[2], 
     {0, 0, 0,  96, 192, -20,  45,  45, {0x0e, 0x0e}, 0x7d0d,  -388, -19,    0, 200, 999, 0, 0, 0},
     {0, 0, 0,  96, 192, -20,  45,  45, {0x0e, 0x0e}, 0x7d0d,  -484, -19,    0, 200, 999, 0, 0, 0},
     {0, 0, 0,  96, 192, -20,  45,  45, {0x0e, 0x0e}, 0x7d0d,    -2, -19,   48,   1, 999,   18, -256, -30},
+    /* Forest of 100 Flowers, right entrance (at a right end the box is in world x): the rock with the cave door (page
+       0xe, x 4050..4305, its front at z 45) stood again to its right, front flush with front (216 units of front
+       wall), so that the wall goes on where the 4:3 frame ended on it (the rock's entries follow the next comment) */
+    /* a copy has no door: over the dark stone the door stands in (x 4171..4219, y -417..-353) goes the wall's quad
+       left of it (x 4119..4171), 48 further and 3 nearer, once as it is and once 13 higher for the corner its slanted
+       top leaves (listed before the rock: of two polygons at one depth the drawer shows the first on top) */
+    {1, 1, 1, 4119, 4171, 0,  45,  56, {0x0e, 0x0e}, 0x780b,   264, -13,   -3,  60, 999, 0, 0, 0},
+    {1, 1, 1, 4119, 4171, 0,  45,  56, {0x0e, 0x0e}, 0x780b,   264,   0,   -3,  60, 999, 0, 0, 0},
+    {1, 1, 1, 4119, 4171, 0,  45,  56, {0x0e, 0x0e}, 0x780b,   480, -13,   -3, 200, 999, 0, 0, 0},
+    {1, 1, 1, 4119, 4171, 0,  45,  56, {0x0e, 0x0e}, 0x780b,   480,   0,   -3, 200, 999, 0, 0, 0},
+    {1, 1, 1, 4045, 4310, 0,  40, 400, {0x0e, 0x0e}, 0,        216,   0,    0,   1, 999, 0, 0, 0},
+    {1, 1, 1, 4045, 4310, 0,  40, 400, {0x0e, 0x0e}, 0,        432,   0,    0, 100, 999, 0, 0, 0},
+    /* the platform under it (the model ends at x 4347): its planks and its two fence rows (page 0x11, z -45 and 15)
+       repeat every 64 units; the straw front (the bevel and the skirt's top, z -89..-45) is 43 wide at its front edge
+       and is stood every 43, each copy lying over the slanted end of the one before */
+    {1, 1, 1, 4283, 4347, 0, -45,  45, {0x0c, 0x0c}, 0x78c9,    64,   0,    0,   1, 999, 0, 0, 0},
+    {1, 1, 1, 4283, 4347, 0, -45,  45, {0x0c, 0x0c}, 0x78c9,   128,   0,    0,  60, 999, 0, 0, 0},
+    {1, 1, 1, 4283, 4347, 0, -45,  45, {0x0c, 0x0c}, 0x78c9,   192,   0,    0, 200, 999, 0, 0, 0},
+    {1, 1, 1, 4283, 4347, 0, -45,  45, {0x0c, 0x0c}, 0x78c9,   256,   0,    0, 200, 999, 0, 0, 0},
+    /* (the planks' back row again under the copies' wall, 30 deeper: the wall's foot stands 2 above the planks at
+       x 4091..4123, and without the rock's own inside behind it the sky showed through that slit) */
+    {1, 1, 1, 4283, 4347, 0,  15,  45, {0x0c, 0x0c}, 0x78c9,    24,   0,   30,   1, 999, 0, 0, 0},
+    {1, 1, 1, 4283, 4347, 0,  15,  45, {0x0c, 0x0c}, 0x78c9,    88,   0,   30, 100, 999, 0, 0, 0},
+    {1, 1, 1, 4283, 4347, 0,  15,  45, {0x0c, 0x0c}, 0x78c9,   152,   0,   30, 100, 999, 0, 0, 0},
+    {1, 1, 1, 4283, 4347, 0,  15,  45, {0x0c, 0x0c}, 0x78c9,   216,   0,   30, 200, 999, 0, 0, 0},
+    {1, 1, 1, 4283, 4347, 0,  15,  45, {0x0c, 0x0c}, 0x78c9,   280,   0,   30, 200, 999, 0, 0, 0},
+    {1, 1, 1, 4283, 4347, 0, -45,  15, {0x11, 0x11}, 0x7dca,    64,   0,    0,   1, 999, 0, 0, 0},
+    {1, 1, 1, 4283, 4347, 0, -45,  15, {0x11, 0x11}, 0x7dca,   128,   0,    0,  60, 999, 0, 0, 0},
+    {1, 1, 1, 4283, 4347, 0, -45,  15, {0x11, 0x11}, 0x7dca,   192,   0,    0, 200, 999, 0, 0, 0},
+    {1, 1, 1, 4283, 4347, 0, -45,  15, {0x11, 0x11}, 0x7dca,   256,   0,    0, 200, 999, 0, 0, 0},
+    {1, 1, 1, 4283, 4347, 0, -89, -45, {0x0c, 0x0c}, 0x78c9,    43,   0,    0,   1, 999, 0, 0, 0},
+    {1, 1, 1, 4283, 4347, 0, -89, -45, {0x0c, 0x0c}, 0x78c9,    86,   0,    0,   1, 999, 0, 0, 0},
+    {1, 1, 1, 4283, 4347, 0, -89, -45, {0x0c, 0x0c}, 0x78c9,   129,   0,    0, 200, 999, 0, 0, 0},
+    {1, 1, 1, 4283, 4347, 0, -89, -45, {0x0c, 0x0c}, 0x78c9,   172,   0,    0, 200, 999, 0, 0, 0},
 };
-static int cur_area, cur_section;
+static int cur_area, cur_section, cur_props_only;
 typedef struct { u8 *blk; int size, nq; } Block;
 
 /* the ground carried on rises and falls gently like the rest of the room instead of running flat: a height offset
@@ -185,7 +210,7 @@ static float hump(float d, float period)                            /* 0 at d = 
 }
 static float wave(float d, float z)
 {
-    if (d <= 0) return 0;
+    if (d <= 0 || cur_props_only) return 0;
     float zz = z < 0 ? 0 : z > 500 ? 2.0f : z / 250.0f;
     float k = (0.85f + 0.15f * hump(z, 360.0f)) * (1.0f + zz);       /* far hills higher */
     return -(14.0f * hump(d, 300.0f) + 5.0f * hump(d, 170.0f)) * k;
@@ -265,6 +290,7 @@ static void build(const u8 *tbl, int s, Block *out, int reach)
             if (nc < MAXC) { Cand *c = &cs[nc++]; c->poly = i; c->e = e; c->x0 = ex0; c->x1 = a->x > b->x ? a->x : b->x; c->z0 = ez0; c->z1 = ez1; c->ground = ground && ez1 > ez0; }
         }
     }
+    if (cur_props_only) nc = 0;
     /* 2. where the room ends at each depth: the outermost ground edges (a ledge inside the room has the end's own
           ground further out at its depth).  Cards and risers count only at or past that line: a tree that stands
           inside the 4:3 picture keeps its outline. */
@@ -399,13 +425,21 @@ end:
 }
 
 /* the rooms looked at (area, section, ends: 1 = left, 2 = right) */
-static const struct { u8 area, section, ends; } ROOMS[] = {
-    {0, 0, 1},          /* Village of All Beginnings, the first room: its left end (the right end is the way on) */
+static const struct { u8 area, section, ends, props_only; } ROOMS[] = {
+    {0, 0, 1, 0},       /* Village of All Beginnings, the first room: its left end (the right end is the way on) */
+    {1, 1, 2, 1},       /* Forest of 100 Flowers, right entrance: its right end, the rock with the cave door on its
+                           platform (props_only: nothing is extruded, the PROPS entries are stood level; the generic
+                           rule would carry on the top of the wall behind the rock and miss the planks) */
 };
 static int room_ends(int area, int section)
 {
     if (port_ws_edge >= 2) return 3;
     for (unsigned i = 0; i < sizeof ROOMS / sizeof ROOMS[0]; i++) if (ROOMS[i].area == area && ROOMS[i].section == section) return ROOMS[i].ends;
+    return 0;
+}
+static int room_props_only(int area, int section)
+{
+    for (unsigned i = 0; i < sizeof ROOMS / sizeof ROOMS[0]; i++) if (ROOMS[i].area == area && ROOMS[i].section == section) return ROOMS[i].props_only;
     return 0;
 }
 
@@ -424,7 +458,7 @@ void port_ws_edge_blocks(char *list, const u8 *tbl, int area, int section)
     for (int i = 0; i < n; i++) key = (key ^ (u32)off[i]) * 16777619u;
     for (int i = 0; i < 64; i++) key = (key ^ tbl[off[0] + i]) * 16777619u;
     if (key != cur_key || tbl != cur_tbl || reach != cur_reach || area != cur_area || section != cur_section) {
-        cur_key = key; cur_tbl = tbl; cur_reach = reach; cur_area = area; cur_section = section;
+        cur_key = key; cur_tbl = tbl; cur_reach = reach; cur_area = area; cur_section = section; cur_props_only = room_props_only(area, section);
         build(tbl, 1, &blocks[0], reach);
         build(tbl, -1, &blocks[1], reach);
     }

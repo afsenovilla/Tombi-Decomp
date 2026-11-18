@@ -920,9 +920,12 @@ void port_cc_sign(void *obj, int area, int section) {
     int i;
     if (port_verbose > 1) port_printf("[port] --cut-content: sign AREA%02d s%d subtype %d at %d,%d,%d\n", area, section, o[3], *(short *)(o + 0x12), *(short *)(o + 0x16), *(short *)(o + 0x1a));
     if (area == 5 && (o[3] == 19 || o[3] == 20) && *(short *)(o + 0x16) == -144 && *(short *)(o + 0x1a) == 90) {
-        /* AREA05 s1 notice board: from the unreachable depth-90 spot onto the ground under the board */
-        *(short *)(o + 0x16) = -60; *(short *)(o + 0x1a) = 0;
-        if (port_verbose) port_printf("[port] --cut-content: AREA05 notice board (subtype %d) moved to %d,-60,0\n", o[3], *(short *)(o + 0x12));
+        /* AREA05 s1 notice board: its sign is at depth 90 and the ledge it stands on is walked at depth 144, out of
+           the sign's reach (|dz| 54 > 45).  Moved to depth 117, so Tomba reads it standing by the board, on the ledge
+           (up to 2026-11-17 it was moved down to the ground under the board and read from the lower lane: "it is read
+           from below instead of from above", the user) */
+        *(short *)(o + 0x1a) = 117;
+        if (port_verbose) port_printf("[port] --cut-content: AREA05 notice board (subtype %d) at %d,%d moved to depth 117\n", o[3], *(short *)(o + 0x12), *(short *)(o + 0x16));
         return;
     }
     for (i = 0; port_cc_saves[i].area >= 0; i++) {
@@ -994,6 +997,14 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--debug-menu")) { extern int port_debug_menu; port_debug_menu = 1; }   /* runtime/debugmenu.c */
         else if (!strcmp(a, "--ws-backdrop") && v) { extern int port_ws_backdrop_on; const char *m = argv[++i]; port_ws_backdrop_on = !strcmp(m, "on") ? 3 : !strcmp(m, "mirror") ? 2 : !strcmp(m, "approved") ? 1 : 0; }   /* runtime/ws_backdrop.c: default = the approved rooms, on = every room (previews too), mirror = AREA02 s5's first preview */
         else if (!strcmp(a, "--ws-backdrop-rooms") && v) { extern const char *port_ws_backdrop_rooms; port_ws_backdrop_rooms = argv[++i]; }   /* exactly these rooms: A:S,A:S,... (decimal) or all */
+        else if (!strcmp(a, "--ws-room3d") && v) { extern int port_ws_room3d_on; const char *m = argv[++i]; port_ws_room3d_on = !strcmp(m, "on") ? 3 : !strcmp(m, "off") ? 0 : 1; }   /* runtime/ws_room3d.c: default = the approved rooms, on = every room of its table */
+        else if (!strcmp(a, "--ws-room3d-rooms") && v) { extern const char *port_ws_room3d_rooms; port_ws_room3d_rooms = argv[++i]; }   /* exactly these rooms: A:S,A:S,... (decimal) or all */
+        else if (!strcmp(a, "--ws-pigs") && v) { extern int port_ws_pigs_on; const char *m = argv[++i]; port_ws_pigs_on = !strcmp(m, "on") ? 3 : !strcmp(m, "off") ? 0 : 1; }   /* runtime/ws_pigs.c: the Evil Pig rooms past their model's ends; on = previews too */
+        else if (!strcmp(a, "--ws-trick") && v) { extern int port_ws_trick_on; const char *m = argv[++i]; port_ws_trick_on = !strcmp(m, "on") ? 3 : !strcmp(m, "off") ? 0 : 1; }   /* runtime/ws_trick.c: Trick Village's left end carried on; on = previews too */
+        else if (!strcmp(a, "--ws-trick-rooms") && v) { extern const char *port_ws_trick_rooms; port_ws_trick_rooms = argv[++i]; }   /* exactly these rooms: A:S,A:S,... (decimal) or all */
+        else if (!strcmp(a, "--ws-pigs-rooms") && v) { extern const char *port_ws_pigs_rooms; port_ws_pigs_rooms = argv[++i]; }   /* exactly these rooms: A:S,A:S,... (decimal) or all */
+        else if (!strcmp(a, "--ws-topdown-gen") && v) { extern int port_ws_topdown_gen; const char *m = argv[++i]; port_ws_topdown_gen = !strcmp(m, "on") ? 3 : !strcmp(m, "off") ? 0 : 1; }   /* runtime/ws_topdown_gen.inc: top-down map margins; default = the approved rooms, on = previews too */
+        else if (!strcmp(a, "--ws-exits") && v) { extern int port_ws_exits; port_ws_exits = strcmp(argv[++i], "off") != 0; }   /* runtime/ws_exits.c */
         else if (!strcmp(a, "--ws-edge") && v) { extern int port_ws_edge; const char *m = argv[++i]; port_ws_edge = !strcmp(m, "off") ? 0 : !strcmp(m, "all") ? 2 : 1; }   /* runtime/ws_edge.c */
         else if (!strcmp(a, "--hud-bottom")) { extern int port_hud_bottom; port_hud_bottom = 1; }   /* runtime/panel_hud.c */
         else if (!strcmp(a, "--second-screen")) { extern int port_panel_on, port_panel_window; port_panel_on = port_panel_window = 1; }   /* runtime/panel.c */
@@ -1033,6 +1044,7 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--civ-line") && v) port_civ_line = atoi(argv[++i]);
         else if (!strcmp(a, "--civ-maps") && v) { port_civ_maps_dir = argv[++i]; port_printf("[port] --civ-maps %s\n", port_civ_maps_dir); }
         else if (!strcmp(a, "--civ-collision")) port_civ_collision = 1;
+        else if (!strcmp(a, "--show-collision")) { extern int port_show_collision; port_show_collision = 1; }
         else if (!strcmp(a, "--civ-spawn") && v) { port_civ_spawn_set = sscanf(argv[++i], "%d,%d", &port_civ_spawn_x, &port_civ_spawn_y) == 2; }
         else if (!strcmp(a, "--lang") && v) { port_lang = atoi(argv[++i]); if (port_lang < 0 || port_lang > 8) return usage(argv[0]); }
         else if (!strcmp(a, "--frames") && v) port_max_frames = atoi(argv[++i]);
