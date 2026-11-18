@@ -32,11 +32,39 @@ Download `tombi-port-<ver>-windows-x64.exe`, `-linux-x64.tar.gz`, `-android.apk`
 (Tombi! PAL Rev 1, `SCES-01331` or `SCES-01330`). Both PAL discs carry all nine languages (EN FR DE IT NL ES PT SV DA),
 so either one gives you every language. Details: [docs/PORT.md](docs/PORT.md).
 
-**Nintendo 3DS** (homebrew; New 3DS / New 2DS recommended, the Old 3DS runs it too): put the `.3dsx` in `sdmc:/3ds/`
-(Homebrew Launcher) or install the `.cia`, and copy your disc image (`.bin`/`.cue`, `.iso` or `.chd`) to `sdmc:/3ds/tombi/`.
-The start screen (shown the first time, or with L held at boot) sets the language, movies, speed and picture (4:3,
-wide 5:3 on the top screen, or experimental stereoscopic 3D); the bottom screen is the touch panel (status, events,
-map, items).
+### Nintendo 3DS
+
+<img src="docs/qr_3ds_cia.png" alt="QR code: the latest tombi-3ds.cia, for FBI" width="160" align="right">
+
+The port runs natively on the 3DS family as homebrew (New 3DS / New 2DS XL recommended; the Old 3DS / 2DS runs it
+too, with a few things turned down).
+
+**Install**
+- **FBI**: *Remote Install > Scan QR Code* and scan the code on the right; it always points at the latest release's
+  `tombi-3ds.cia` (`https://github.com/afsenovilla/Tombi-Decomp/releases/latest/download/tombi-3ds.cia`). The title
+  then sits on the HOME Menu.
+- **Homebrew Launcher**: copy `tombi-port-<ver>-3ds.3dsx` to `sdmc:/3ds/`.
+- Then copy your own disc image (Tombi! PAL, `SCES-01331` / `SCES-01330`; `.bin`+`.cue`, `.iso` or `.chd`) to
+  `sdmc:/3ds/tombi/`. The port takes the image it finds there (or lets you pick one from the SD card when there is
+  none) and remembers it; hold SELECT at boot to pick another.
+
+**What is special on the 3DS**
+- **Stereoscopic 3D** (experimental): the game's own picture for one eye, the same scene drawn again for the other
+  with each polygon at its depth (taken from the PlayStation's geometry unit), so the world goes into the screen and
+  things in front of the camera come out of it. The 3D slider sets the depth; flat screens (menus, maps) stay flat.
+- **Two screens**: the top screen is the game with nothing over it; the bottom screen is a touch panel drawn with
+  the game's own graphics (vitality, AP and lives, the event list, the area map, the items to look at and use), the
+  same panel as on dual-screen Android handhelds.
+- **Widescreen 5:3**: the whole 400-pixel top screen, with the same widescreen work as the PC (side strips of
+  pre-rendered rooms, widened scenery and culls, the top-down maps filled to the edge).
+- **The start screen** (the first time, or with L held at boot): language, movies, speed (60 Hz / the PAL 50 Hz) and
+  picture (4:3, wide, 3D), drawn like the game's own OPTIONS screen with its graphics, music and cursor sound, all
+  read from your disc at run time. The improved Spanish translation is built in and prepared on the SD card once.
+- **Saves**: the game's memory card is `sdmc:/3ds/tombi/tombi_mc0.mcd`, the same file as on PC and Android, so a
+  save moves between them by copying it; it stays on the SD card when the title is uninstalled.
+- **New vs Old 3DS**: on a New 3DS everything is on (its faster clock and L2 cache, 44.1 kHz sound with reverb, the
+  panel's map tab). An Old 3DS mixes the sound at 22 kHz without reverb on its second core, leaves out the panel's
+  map tab, and draws fewer frames when it falls behind, so the game keeps its speed.
 
 ## Progress
 

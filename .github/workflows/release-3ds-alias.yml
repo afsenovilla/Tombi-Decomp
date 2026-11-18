@@ -1,0 +1,27 @@
+name: 3DS QR asset of the latest release
+
+# Adds (or replaces) tombi-3ds.cia, a copy of the latest release's tombi-port-<ver>-3ds.cia under a fixed name, to that
+# release: the README's QR code for FBI (Remote Install > Scan QR Code) points at releases/latest/download/tombi-3ds.cia.
+# release.yml uploads it itself since v0.7.0's next release; this is for a release published before that (v0.7.0).
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  alias:
+    runs-on: ubuntu-24.04
+    env:
+      GH_TOKEN: ${{ github.token }}
+      R: ${{ github.repository }}
+    steps:
+      - name: Copy the .cia under its fixed name
+        run: |
+          TAG=$(gh api "repos/$R/releases/latest" --jq .tag_name)
+          NAME=$(gh api "repos/$R/releases/latest" --jq '.assets[].name' | grep -E -- '-3ds\.cia$' | grep -v '^tombi-3ds\.cia$' | head -n1)
+          [ -n "$NAME" ] || { echo "::error::$TAG has no -3ds.cia"; exit 1; }
+          mkdir a && gh release download "$TAG" -R "$R" -p "$NAME" -D a
+          cp "a/$NAME" a/tombi-3ds.cia
+          gh release upload "$TAG" -R "$R" a/tombi-3ds.cia --clobber
+          echo "$TAG: $NAME -> tombi-3ds.cia"
