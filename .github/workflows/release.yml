@@ -22,7 +22,7 @@ on:
         type: boolean
         default: false
       version:
-        description: "version X.Y.Z (optional; default: latest patch + 1, e.g. 0.0.N)"
+        description: "version X.Y.Z or X.Y.Z-word (e.g. 0.7.2-fix; optional; default: latest patch + 1, e.g. 0.0.N)"
         type: string
         default: ""
       n3ds_run:
@@ -66,7 +66,7 @@ jobs:
           IN="${{ inputs.version }}"; IN=${IN#v}; IN=${IN:-$FILEVER}
           [ -z "$FILEVER" ] || [ "$IN" = "$FILEVER" ] || echo "::warning::version $IN differs from VERSION ($FILEVER): the APK shows v$FILEVER"
           if [ -n "$IN" ]; then
-            [[ "$IN" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::version '$IN' is not X.Y.Z"; exit 1; }
+            [[ "$IN" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-z0-9]+)?$ ]] || { echo "::error::version '$IN' is not X.Y.Z or X.Y.Z-word"; exit 1; }
             [ "$IN" != "$LAST" ] && [ "$(printf '%s\n%s\n' "$LAST" "$IN" | sort -V | tail -n1)" = "$IN" ] || { echo "::error::version $IN must be greater than $LAST"; exit 1; }
             VER=$IN
           else IFS=. read -r a b c <<< "$LAST"; VER="$a.$b.$((c + 1))"; fi
