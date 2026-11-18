@@ -88,7 +88,7 @@ static void decode_block(Voice *v) {
 }
 
 /* one envelope step for a phase: exp / decreasing / shift / step per the SPU's rate rules */
-static inline __attribute__((always_inline)) void env_tick(Voice *v, int exp, int dec, int shift, int step) {
+static void env_tick(Voice *v, int exp, int dec, int shift, int step) {
     if (v->env_wait > 0) { v->env_wait--; return; }
     int s = dec ? -8 + step : 7 - step;
     int wait = 1 << (shift > 11 ? shift - 11 : 0);
@@ -100,7 +100,7 @@ static inline __attribute__((always_inline)) void env_tick(Voice *v, int exp, in
     if (v->env_level > 0x7FFF) v->env_level = 0x7FFF;
     if (v->env_level < 0) v->env_level = 0;
 }
-static inline void env_step(Voice *v) {
+static void env_step(Voice *v) {
     u16 a1 = v->adsr1, a2 = v->adsr2;
     switch (v->env_phase) {
     case ENV_ATTACK:
@@ -178,18 +178,13 @@ static int rev_delay, rev_feedback;
 static int rev_in_l, rev_in_r, rev_cnt, rev_out_l, rev_out_r, rev_prev_l, rev_prev_r;
 
 static int rev_rd(int units, int back) {          /* sample at the register address (8-byte units), `back` samples earlier */
-    /* (32 bits hold it: 16-bit units, a position inside the buffer; and it is nearly always in range already: the
-       64-bit modulo this was is a library call on 32-bit ARM, ten of them a sample) */
-    int a = (int)rev_pos + units * 8 - back * 2;
-    /* (one wrap nearly always: a division is a library call on the 3DS's ARM11, a dozen of them a reverb cycle) */
-    if (a >= (int)rev_bytes) a -= (int)rev_bytes; else if (a < 0) a += (int)rev_bytes;
-    if ((unsigned)a >= rev_bytes) { a %= (int)rev_bytes; if (a < 0) a += (int)rev_bytes; }
+    long long a = ((long long)rev_pos + (long long)units * 8 - (long long)back * 2) % (long long)rev_bytes;
+    if (a < 0) a += rev_bytes;
     return rev_buf[a >> 1];
 }
 static void rev_wr(int units, int val) {
-    int a = (int)rev_pos + units * 8;
-    if (a >= (int)rev_bytes) a -= (int)rev_bytes; else if (a < 0) a += (int)rev_bytes;
-    if ((unsigned)a >= rev_bytes) { a %= (int)rev_bytes; if (a < 0) a += (int)rev_bytes; }
+    long long a = ((long long)rev_pos + (long long)units * 8) % (long long)rev_bytes;
+    if (a < 0) a += rev_bytes;
     rev_buf[a >> 1] = val > 32767 ? 32767 : val < -32768 ? -32768 : val;
 }
 #define RV(i) ((int)(s16)rev[i])
@@ -311,14 +306,8 @@ static void xa_next(int *l, int *r) {
         return;
     }
     const s16 *c = xa_fifo[xa_r % XA_FIFO], *n = avail > 1 ? xa_fifo[(xa_r + 1) % XA_FIFO] : c;
-#ifdef __3DS__   /* (no divide instruction: two 64-bit divisions a sample were a routine call each; the phase to 15 bits) */
-    { const int f = (int)(((unsigned)xa_phase << 15) / RATE);
-      *l = c[0] + (((n[0] - c[0]) * f) >> 15);
-      *r = c[1] + (((n[1] - c[1]) * f) >> 15); }
-#else
     *l = c[0] + (int)(((long long)(n[0] - c[0]) * xa_phase) / RATE);
     *r = c[1] + (int)(((long long)(n[1] - c[1]) * xa_phase) / RATE);
-#endif
     xa_phase += xa_rate;
     while (xa_phase >= RATE) { xa_phase -= RATE; if (xa_w - xa_r) xa_r++; }
 }
@@ -329,91 +318,7 @@ void port_sound_cd_mute(int mute) { cd_muted = mute; }
 int port_sound_xa_stats(int *underruns) { *underruns = xa_underruns; return xa_sectors; }
 
 /* ------------------------------------------------------------------------------------------- mixer */
-/* --audio-half (an Old 3DS, whose second core cannot mix 44100 samples a second): one sample out for two of the SPU's:
-   every voice steps twice per sample (pitch, envelope), the reverb, 22050 Hz as on the console, runs on each one, and
-   the device is opened at 22050 Hz.  Half the work a second for the top octave. */
-int port_sound_half;
-int port_sound_dry;                      /* --audio-dry: no reverb (an Old 3DS: a good part of the mixer's time) */
-/* The same mix a voice at a time (no reverb to feed: --audio-dry, or the reverb off): each voice runs its n samples in
-   a row into two sums, then the CD audio and the master volume per sample.  The sums are what mix() adds up sample by
-   sample, so the output is the same; a voice's fields stay in the cache and its loop is short, which is most of the
-   mixer's time on the 3DS's ARM11. */
-static void mix_voices(s16 *out, int n) {
-    static int accl[2048], accr[2048];
-    const int half = port_sound_half;
-    memset(accl, 0, (size_t)n * sizeof accl[0]); memset(accr, 0, (size_t)n * sizeof accr[0]);
-    for (int k = 0; k < NVOICES; k++) {
-        Voice *v = &voices[k];
-        if (v->env_phase == ENV_OFF) continue;
-        const int step = v->pitch << half, vl = v->vol_l, vr = v->vol_r;
-        int counter = v->counter, prev = v->prev;
-        const s16 *buf = v->buf;
-        for (int i = 0; i < n; i++) {
-            {   /* a run of samples inside the block, the envelope waiting: its level does not change and nothing of
-                   the voice is read or written but the counter (the same sums as the general step below, which
-                   takes over at the block's last sample or when the envelope is due) */
-                const int per = 1 + half, lev = v->env_level, last = (28 << 12) - step;
-                /* (a sustain that has reached its end, full level going up or nothing going down, steps for ever
-                   without changing the level: only its wait counter turns, P steps a turn, and is set once after
-                   the run) */
-                int steady = 0, P = 1;
-                if (v->env_phase == ENV_SUSTAIN) {
-                    const int a2 = v->adsr2, dec = (a2 >> 14) & 1, sh = (a2 >> 8) & 31;
-                    if (dec ? lev == 0 : lev == 0x7FFF) { steady = 1; P = 1 << (sh > 11 ? sh - 11 : 0); if ((a2 >> 15) && !dec) P <<= 2; }
-                }
-                int run = steady ? n - i : v->env_wait / per, done = 0;
-                if (run > n - i) run = n - i;
-                while (done < run && counter < last && counter >= 1 << 12) {
-                    const int idx = counter >> 12, fr = counter & 0xFFF;
-                    const int a = buf[idx - 1], b = buf[idx];
-                    int s = a + (((b - a) * fr) >> 12);
-                    s = (s * lev) >> 15;
-                    accl[i] += (s * vl) >> 14; accr[i] += (s * vr) >> 14;
-                    counter += step; i++; done++;
-                }
-                if (steady) { const int k = done * per, w = v->env_wait; v->env_wait = w >= k ? w - k : (P - 1) - ((k - w - 1) & (P - 1)); }
-                else v->env_wait -= done * per;
-                if (i >= n) break;
-            }
-            int idx = counter >> 12, fr = counter & 0xFFF;
-            int a = idx == 0 ? prev : buf[idx - 1], b = buf[idx];
-            int s = a + (((b - a) * fr) >> 12);
-            s = (s * v->env_level) >> 15;
-            accl[i] += (s * vl) >> 14; accr[i] += (s * vr) >> 14;
-            /* (an envelope that is waiting only counts down: nothing else in env_step changes then) */
-            if (v->env_wait > half) v->env_wait -= 1 + half;
-            else { env_step(v); if (half) env_step(v); }
-            counter += step;
-            while (counter >= 28 << 12 && v->env_phase != ENV_OFF) {
-                u8 fl = spu_ram[(v->cur & (SPU_RAM_SIZE - 16)) + 1];
-                counter -= 28 << 12;
-                prev = buf[27];
-                if (fl & 1) {                         /* loop end: jump to the loop address, or stop */
-                    v->cur = v->loop;
-                    if (!(fl & 2)) { v->env_phase = ENV_OFF; v->env_level = 0; v->owner = -1; break; }
-                } else v->cur = (v->cur + 16) & (SPU_RAM_SIZE - 1);
-                decode_block(v);
-            }
-            if (v->env_phase == ENV_OFF) break;
-        }
-        v->counter = counter; v->prev = prev;
-    }
-    for (int i = 0; i < n; i++) {
-        int l = accl[i], r = accr[i];
-        if (xa_w != xa_r || xa_primed) {
-            int cl, cr;
-            xa_next(&cl, &cr);
-            if (half) xa_next(&cl, &cr);
-            if (!cd_muted) { l += (cl * cd_l) >> 15; r += (cr * cd_r) >> 15; }
-        }
-        l = (l * main_l) >> 14; r = (r * main_r) >> 14;
-        out[2 * i] = l > 32767 ? 32767 : l < -32768 ? -32768 : l;
-        out[2 * i + 1] = r > 32767 ? 32767 : r < -32768 ? -32768 : r;
-    }
-}
 static void mix(s16 *out, int n) {
-    const int half = port_sound_half;
-    if ((port_sound_dry || !rev_on) && n <= 2048) { mix_voices(out, n); return; }
     for (int i = 0; i < n; i++) {
         int l = 0, r = 0, wl = 0, wr = 0;
         for (int k = 0; k < NVOICES; k++) {
@@ -427,8 +332,7 @@ static void mix(s16 *out, int n) {
             l += sl; r += sr;
             if (rev_voices & (1u << k)) { wl += sl; wr += sr; }
             env_step(v);
-            if (half) env_step(v);
-            v->counter += v->pitch << half;
+            v->counter += v->pitch;
             while (v->counter >= 28 << 12 && v->env_phase != ENV_OFF) {
                 u8 fl = spu_ram[(v->cur & (SPU_RAM_SIZE - 16)) + 1];
                 v->counter -= 28 << 12;
@@ -443,16 +347,11 @@ static void mix(s16 *out, int n) {
         if (xa_w != xa_r || xa_primed) {
             int cl, cr;
             xa_next(&cl, &cr);
-            if (half) xa_next(&cl, &cr);
             if (!cd_muted) { l += (cl * cd_l) >> 15; r += (cr * cd_r) >> 15; }
         }
-        if (rev_on && !port_sound_dry) {
+        if (rev_on) {
             rev_in_l += wl; rev_in_r += wr;
-            if (half) {
-                rev_step(clamp16(rev_in_l), clamp16(rev_in_r));
-                rev_in_l = rev_in_r = 0;
-                l += rev_out_l; r += rev_out_r;
-            } else if (++rev_cnt == 2) {
+            if (++rev_cnt == 2) {
                 rev_prev_l = rev_out_l; rev_prev_r = rev_out_r;
                 rev_step(clamp16(rev_in_l / 2), clamp16(rev_in_r / 2));
                 rev_in_l = rev_in_r = 0; rev_cnt = 0;
@@ -474,8 +373,8 @@ static void wav_header(u8 *h, u32 data) {
     static const u8 t[44] = { 'R','I','F','F',0,0,0,0,'W','A','V','E','f','m','t',' ',16,0,0,0,1,0,2,0,
                               0x44,0xAC,0,0, 0x10,0xB1,2,0, 4,0,16,0, 'd','a','t','a',0,0,0,0 };
     for (int i = 0; i < 44; i++) h[i] = t[i];
-    u32 riff = data + 36, rate = RATE >> port_sound_half, bps = rate * 4;
-    for (int i = 0; i < 4; i++) { h[4 + i] = riff >> (8 * i); h[40 + i] = data >> (8 * i); h[24 + i] = rate >> (8 * i); h[28 + i] = bps >> (8 * i); }
+    u32 riff = data + 36;
+    for (int i = 0; i < 4; i++) { h[4 + i] = riff >> (8 * i); h[40 + i] = data >> (8 * i); }
 }
 void port_audio_close(void) {
     LOCK();
@@ -940,92 +839,32 @@ static void wav_out(const s16 *buf, int n) {
 }
 /* n stereo frames of audio time: the sequencer ticks every TICK_SAMPLES of them */
 static void render(s16 *dst, int n) {
-    samples_second += n << port_sound_half;
+    samples_second += n;
     while (n > 0) {
         if (tick_left <= 0) {
             for (int i = 0; i < NSEQ; i++) if (seqs[i].used && seqs[i].playing) seq_tick(i, &seqs[i]);
-            tick_left += TICK_SAMPLES >> port_sound_half;
+            tick_left += TICK_SAMPLES;
         }
         int k = n < tick_left ? n : tick_left;
         mix(dst, k);
         wav_out(dst, k);
-        dst += 2 * k; n -= k; tick_left -= k; samples_total += k << port_sound_half;
+        dst += 2 * k; n -= k; tick_left -= k; samples_total += k;
     }
 }
 void port_sound_pulled(int on) { pulled = on; }
-/* A mixer thread (the Old 3DS: n3ds/pica_c3d.c starts it on the second core): it keeps a ring of mixed samples ahead of
-   the device, a piece at a time under the device lock, and the device's callback only copies.  The callback runs on
-   the game's core there, and mixing in it took 11 ms of every 16.7. */
-#define RING 4096                                   /* frames, a power of two */
-static s16 ring[2 * RING];
-static volatile unsigned ring_w, ring_r;
-static volatile int mixer_thread;
-static unsigned long long ring_under;               /* frames the callback found missing */
-unsigned long long port_sound_underruns(void) { unsigned long long n = ring_under; ring_under = 0; return n; }
-volatile int port_sound_mixer_quit;                 /* the way out: the thread ends (n3ds/pica_c3d.c port_n3ds_threads_stop) */
-void port_sound_mixer_run(void) {                   /* (returns when the program closes) */
-    extern void port_sleep_us(unsigned long long);
-    static s16 piece[2 * 64];
-    mixer_thread = 1;
-    for (;;) {
-        if (port_sound_mixer_quit) { mixer_thread = 0; return; }
-        if (!mixer_thread) { port_sleep_us(200000); continue; }           /* (given up: the callback mixes, port_sound_pull) */
-        if (ring_w - ring_r > 1536u) { port_sleep_us(2000); continue; }   /* (~70 ms ahead at 22050 Hz) */
-        /* (short pieces: the lock is the game thread's too, and this core gives the program a share of its time,
-           so a piece's hold can last several times its own work) */
-        LOCK();
-        if (mixer_thread) render(piece, 64);
-#ifdef __3DS__   /* (runtime/sdl.c's: it only yields there; the wasm2c build has no runtime/sdl.c) */
-        { extern void port_audio_yield(void); port_audio_yield(); }   /* (the game thread first, if it waits for the lock: the lock is held here, as in the callback) */
-#endif
-        UNLOCK();
-        unsigned w = ring_w;
-        for (int i = 0; i < 64; i++) { ring[2 * ((w + i) & (RING - 1))] = piece[2 * i]; ring[2 * ((w + i) & (RING - 1)) + 1] = piece[2 * i + 1]; }
-        ring_w = w + 64;
-    }
-}
 int port_sound_pull(short *dst, int frames) {       /* the audio device's callback (holds the device lock) */
-    extern unsigned long long port_time_us(void), port_prof_sound_us;
-    unsigned long long t0 = port_time_us();
     int done = 0;
-    if (mixer_thread) {
-        unsigned r = ring_r, have = ring_w - r, n = have < (unsigned)frames ? have : (unsigned)frames;
-        for (unsigned i = 0; i < n; i++) { dst[2 * i] = ring[2 * ((r + i) & (RING - 1))]; dst[2 * i + 1] = ring[2 * ((r + i) & (RING - 1)) + 1]; }
-        ring_r = r + n;
-        if (n < (unsigned)frames) { memset(dst + 2 * n, 0, (size_t)(frames - (int)n) * 4); ring_under += (unsigned)frames - n; }
-        {   /* the thread cannot keep up (its core's share is the system's to give): after three seconds in a row with
-               more than a twentieth of the samples missing the callback mixes again, as without the thread */
-            static unsigned asked, missing, bad;
-            asked += (unsigned)frames; missing += (unsigned)frames - n;
-            if (asked >= 22050u) {
-                bad = missing * 20u > asked && ring_w > 44100u ? bad + 1 : 0;   /* (not while the ring first fills) */
-                asked = missing = 0;
-                if (bad >= 3) { mixer_thread = 0; port_printf("[port] sound: the mixer thread fell behind: the device's callback mixes again\n"); }
-            }
-        }
-        port_prof_sound_us += port_time_us() - t0;
-        return frames;
-    }
     while (frames > 0) {
-#ifdef __3DS__
-        int k = frames < 128 ? frames : 128;   /* (short pieces: the game thread gets the lock between them) */
-#else
         int k = frames < 2048 ? frames : 2048;
-#endif
         render(out, k);
         memcpy(dst, out, k * 4);
         dst += 2 * k; frames -= k; done += k;
-#ifdef __3DS__
-        { extern void port_audio_yield(void); if (frames > 0) port_audio_yield(); }
-#endif
     }
-    port_prof_sound_us += port_time_us() - t0;       /* (the fps line's "sound": here the callback's time, on its thread) */
     return done;
 }
 void port_sound_vblank(void) {                       /* no device: 44100/hz samples per vblank, whatever the wall clock does */
     if (pulled) return;
     int n = RATE / port_hz + (port_frame % port_hz < RATE % port_hz);
-    n >>= port_sound_half;
     while (n > 0) {
         int k = n < 2048 ? n : 2048;
         render(out, k);

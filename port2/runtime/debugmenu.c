@@ -242,25 +242,6 @@ static const u8 font[64][7] = {   /* ASCII 32..95, 5x7, bit 4 = left column */
     {31,4,4,4,4,4,4}, {17,17,17,17,17,17,14}, {17,17,17,17,17,10,4}, {17,17,17,21,21,21,10}, {17,17,10,4,10,17,17},
     {17,17,17,10,4,4,4}, {31,1,2,4,8,16,31}, {14,8,8,8,8,8,14}, {0,16,8,4,2,1,0}, {14,2,2,2,2,2,14}, {4,10,17,0,0,0,0},
     {0,0,0,0,0,0,31}};
-/* (the same letters for the 3DS's progress screen, n3ds/pica_c3d.c: the 7 rows of a character, lower case as capitals) */
-const unsigned char *port_font5x7(int c) {
-    /* (Latin-1 codes of the accented letters Spanish needs: the capital itself here, its mark from port_font5x7_mark,
-       which the caller draws in the two rows above the letter) */
-    static const char base[] = "AEIOUN"; static const u8 code[6] = { 0xC1, 0xC9, 0xCD, 0xD3, 0xDA, 0xD1 };
-    c &= 255;
-    if (c >= 0xE0) c -= 32;                    /* (lower case accented -> its capital) */
-    for (int i = 0; i < 6; i++) if (c == code[i]) c = base[i];
-    if (c >= 'a' && c <= 'z') c -= 32;
-    return font[c >= 32 && c <= 95 ? c - 32 : 0];
-}
-/* the two rows of the mark over an accented letter (0: none): the upper one in bits 5..9, the lower in bits 0..4 */
-int port_font5x7_mark(int c) {
-    c &= 255;
-    if (c >= 0xE0) c -= 32;
-    if (c == 0xD1) return 13 << 5 | 22;                                                    /* a tilde */
-    if (c == 0xC1 || c == 0xC9 || c == 0xCD || c == 0xD3 || c == 0xDA) return 2 << 5 | 4;   /* an acute */
-    return 0;
-}
 extern int port_gpu_overlay_fill(int x, int y, int w, int h, u16 c);   /* shims/gpu.c: display-relative; 0 = no frame */
 extern void port_gpu_overlay_end(void);
 static void text(int x, int y, const char *s, u16 col) {

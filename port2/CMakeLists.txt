@@ -15,10 +15,6 @@
 #   -> build/port2-win/tombi2.exe (needs SDL2.dll from the same SDL2 folder next to it)
 cmake_minimum_required(VERSION 3.16)
 project(tombi_port2 C ASM)
-if(NINTENDO_3DS)   # devkitARM's gcc defaults to C23 (bool / false keywords, f() without arguments): C17, as the other builds
-  set(CMAKE_C_STANDARD 17)
-  set(CMAKE_C_EXTENSIONS ON)
-endif()
 
 set(ROOT ${CMAKE_CURRENT_SOURCE_DIR}/..)
 set(GEN ${CMAKE_CURRENT_BINARY_DIR}/gen)
@@ -87,11 +83,6 @@ if(ANDROID)
   endif()
   set(PORT2_GEN_ENV ${CMAKE_COMMAND} -E env PORT2_ARCH=arm
       PORT2_LIBC=${CMAKE_SYSROOT}/usr/lib/arm-linux-androideabi/${ANDROID_PLATFORM_LEVEL}/libc.so)
-elseif(NINTENDO_3DS)
-  # Nintendo 3DS (port2/n3ds, docs/PORT.md "Nintendo 3DS"; devkitPro's 3DS.cmake toolchain): ARM11 = ARMv6K (no
-  # movw / movt in the thunks), newlib's static libc
-  set(PORT2_GEN_ENV ${CMAKE_COMMAND} -E env PORT2_ARCH=arm PORT2_ARMV6=1
-      PORT2_LIBC=$ENV{DEVKITARM}/arm-none-eabi/lib/armv6k/fpu/libc.a:$ENV{DEVKITARM}/arm-none-eabi/lib/armv6k/fpu/libsysbase.a:$ENV{DEVKITARM}/arm-none-eabi/lib/armv6k/fpu/libm.a:$ENV{DEVKITPRO}/libctru/lib/libctru.a:$ENV{DEVKITPRO}/libctru/lib/libcitro3d.a:$ENV{DEVKITPRO}/portlibs/3ds/lib/libSDL2.a)
 endif()
 
 # the game version (docs/PORT_VERSIONS_PLAN.md U1, port/tools/portver.py): empty = PAL SCES-01331 (the default build),
@@ -149,9 +140,6 @@ if(ANDROID)
     message(FATAL_ERROR "port2's native build needs a 32-bit target (armeabi-v7a); arm64-v8a is the wasm2c build above")
   endif()
   set(PORT2_ARCH_FLAGS -marm -fPIC -fno-omit-frame-pointer)
-elseif(NINTENDO_3DS)
-  # (3DS.cmake adds -march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft); A32 code for the null-page emulation
-  set(PORT2_ARCH_FLAGS -marm -fno-omit-frame-pointer)
 else()
 set(PORT2_ARCH_FLAGS -m32 -march=i686 -fno-pic -fno-pie -fno-omit-frame-pointer)
 endif()
@@ -160,20 +148,11 @@ if(WIN32)
   # C99 printf (%lld) from mingw's own stdio for the runtime only: the game's printf must stay the shim of libc.c
   set(PORT2_RT_FLAGS -D__USE_MINGW_ANSI_STDIO=1)
 endif()
-# The game's own C at -O1 everywhere but the 3DS: its ARM11 (268 MHz on an Old 3DS) spends 10 ms a frame in it at -O1.
-# -O2 gave the same frames and sound on the PC over the debug-select runs (PORT2_GAME_OPT=-O2 tries it elsewhere).
-if(NINTENDO_3DS)
-  set(PORT2_GAME_OPT "-O2" CACHE STRING "optimisation level of the game's C")
-else()
-  set(PORT2_GAME_OPT "-O1" CACHE STRING "optimisation level of the game's C")
-endif()
-set(PORT2_GAME_FLAGS ${PORT2_GAME_OPT} -w -funsigned-char -fwrapv -fno-strict-aliasing -fno-delete-null-pointer-checks
+set(PORT2_GAME_FLAGS -O1 -w -funsigned-char -fwrapv -fno-strict-aliasing -fno-delete-null-pointer-checks
     -fno-builtin -DSKIP_ASM -D_LANGUAGE_C -DMIPSEL)
 if(ANDROID)    # (the NDK's clang makes these errors by default; gcc warns, and -w silences them on the PC builds)
   list(APPEND PORT2_GAME_FLAGS -Wno-error=implicit-function-declaration -Wno-error=int-conversion
        -Wno-error=incompatible-function-pointer-types -Wno-error=implicit-int -Wno-error=return-type)
-elseif(NINTENDO_3DS)   # (gcc 14 and later make them errors too; -fpermissive turns them back into warnings)
-  list(APPEND PORT2_GAME_FLAGS -fpermissive)
 endif()
 
 # (another version: its macro, VERSION_<SERIAL>, picks the version's #if branches of the shared C; sources.cmake)
@@ -201,21 +180,6 @@ endif()
 # the runtime, the shims and the tables gen_port wrote at configure time (funcmap.c: retail address -> native
 # function, the overlay set, the areas and their signature words)
 file(GLOB PORT2_RT ${CMAKE_CURRENT_SOURCE_DIR}/runtime/*.c ${CMAKE_CURRENT_SOURCE_DIR}/shims/*.c)
-if(NINTENDO_3DS)   # the 3DS entry point (main: SD card paths, then the port's main as port_main); the citro3d renderer
-  list(APPEND PORT2_RT ${CMAKE_CURRENT_SOURCE_DIR}/n3ds/main_3ds.c ${CMAKE_CURRENT_SOURCE_DIR}/n3ds/pica_c3d.c
-       ${CMAKE_CURRENT_SOURCE_DIR}/n3ds/launcher_ui.c ${CMAKE_CURRENT_SOURCE_DIR}/n3ds/launcher_font.c)
-  # its vertex shader (picasso), embedded as pica_vsh_shbin[] (pica_vsh_shbin.h)
-  ctr_add_shader_library(pica_vsh ${CMAKE_CURRENT_SOURCE_DIR}/n3ds/pica.v.pica)
-  dkp_add_embedded_binary_library(pica_vsh_bin pica_vsh)
-  # the improved Spanish translation's compiled patch, in the program (a 3DS has no launcher to hand it over):
-  # n3ds/main_3ds.c writes it next to the disc image and passes it as --text-patch when that language is chosen
-  add_custom_command(OUTPUT ${GEN}/es_tpatch.c
-                     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/bin2c.py ${ROOT}/patches/es_mejorada.tpatch ${GEN}/es_tpatch.c port_es_tpatch
-                     DEPENDS ${ROOT}/patches/es_mejorada.tpatch ${CMAKE_CURRENT_SOURCE_DIR}/tools/bin2c.py
-                     COMMENT "The improved Spanish translation's patch as a C array")
-  set_source_files_properties(${GEN}/es_tpatch.c PROPERTIES GENERATED TRUE)
-  list(APPEND PORT2_RT ${GEN}/es_tpatch.c)
-endif()
 # build id (git short sha, "+" when the tree is modified): the first log line says which checkout the binary is from
 add_custom_command(OUTPUT ${GEN}/build_id.stamp
                    COMMAND ${CMAKE_COMMAND} -DSRC=${ROOT} -DOUT=${GEN}/build_id.c -P ${ROOT}/port/cmake/build_id.cmake
@@ -231,10 +195,6 @@ target_compile_definitions(port2chd PRIVATE ZSTD_DISABLE_ASM)
 target_compile_options(port2chd PRIVATE ${PORT2_ARCH_FLAGS} -O2 -w)
 add_library(port2rt OBJECT ${PORT2_RT} ${GEN}/funcmap.c ${GEN}/build_id.c)
 add_dependencies(port2rt port2_build_id)
-if(NINTENDO_3DS)
-  add_dependencies(port2rt pica_vsh_bin)
-  target_include_directories(port2rt PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/.dkp-generated/pica_vsh_bin ${CMAKE_CURRENT_SOURCE_DIR}/shims)
-endif()
 target_include_directories(port2rt PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_include_directories(port2rt PRIVATE ${GEN}/version)      # port_version.h (gen2.py: the version's layout)
 target_include_directories(port2rt PRIVATE ${CHDR_DIR}/include)
@@ -243,18 +203,12 @@ target_compile_options(port2rt PRIVATE ${PORT2_ARCH_FLAGS} ${PORT2_RT_FLAGS} -O2
 # the runtime's float math (the software rasteriser's attribute gradients, shims/gpu.c) rounds the same on every build:
 # IEEE single / double, no fused multiply-adds; on 32-bit x86 SSE2 instead of the x87's 80-bit intermediates (which
 # put a few texels per frame elsewhere than the ARM and the 64-bit wasm2c builds do)
-if(NOT ANDROID AND NOT NINTENDO_3DS)
+if(NOT ANDROID)
   target_compile_options(port2rt PRIVATE -msse2 -mfpmath=sse)
-endif()
-if(NINTENDO_3DS)
-  # -fPIC: a .3dsx relocation is an offset inside the program image, so a constant "symbol + offset" that points
-  # outside it (port_ram - 0x80000000, folded from retail-address arithmetic) cannot be loaded; position-independent
-  # code takes the symbol from the GOT and adds the offset at run time (n3ds/check_3dsx.py checks the result)
-  target_compile_options(port2rt PRIVATE -fpermissive -fPIC -ftls-model=local-exec)   # (thread locals: a static program)
 endif()
 # the Spanish redraws generator must round like Pillow / Python (byte-identical to tools/gfx_es): no fused multiply-adds,
 # and on 32-bit x86 SSE2 doubles instead of the x87's 80-bit intermediates
-if(ANDROID OR NINTENDO_3DS)
+if(ANDROID)
   set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/shims/gfx_es.c PROPERTIES COMPILE_OPTIONS "-ffp-contract=off;-fno-math-errno")
 else()
   set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/shims/gfx_es.c PROPERTIES COMPILE_OPTIONS "-ffp-contract=off;-fno-math-errno;-msse2;-mfpmath=sse")
@@ -277,10 +231,6 @@ if(ANDROID)
   file(COPY ${sdlhdrs} DESTINATION ${GEN}/sdlinc/SDL2)
   target_include_directories(port2rt PRIVATE ${GEN}/sdlinc)
   set(PORT2_SDL2 SDL2 log android dl m)
-elseif(NINTENDO_3DS)
-  # SDL2's 3DS port from devkitPro's portlibs (dkp-pacman -S 3ds-sdl): window (top screen), buttons, audio (ndsp)
-  target_include_directories(port2rt PRIVATE $ENV{DEVKITPRO}/portlibs/3ds/include)
-  set(PORT2_SDL2 -L$ENV{DEVKITPRO}/portlibs/3ds/lib -lSDL2 -lcitro3d -lctru -lm)
 elseif(WIN32)
   # -DPORT_SDL2_MINGW=DIR names the i686-w64-mingw32 folder of SDL2-devel-2.30.x-mingw.tar.gz (never vendored:
   # .github/workflows/port2-exe.yml downloads it); tombi2.exe needs its bin/SDL2.dll next to it
@@ -322,7 +272,7 @@ endif()
 # 3. resolve the rest against the retail symbol table: data image (from the user's MAIN0.EXE/X000.BIN), aliases,
 #    stubs.  All three are generated into the build dir; data.c is game data and never leaves it.
 file(GENERATE OUTPUT ${GEN}/objects.txt
-     CONTENT "$<JOIN:${PORT2_GAME_OBJS},\n>\n$<JOIN:$<TARGET_OBJECTS:port2rt>,\n>\n$<JOIN:$<TARGET_OBJECTS:port2chd>,\n>\n$<$<BOOL:${NINTENDO_3DS}>:$<JOIN:$<TARGET_OBJECTS:pica_vsh_bin>,\n>\n>")
+     CONTENT "$<JOIN:${PORT2_GAME_OBJS},\n>\n$<JOIN:$<TARGET_OBJECTS:port2rt>,\n>\n$<JOIN:$<TARGET_OBJECTS:port2chd>,\n>\n")
 add_custom_command(OUTPUT ${GEN}/syms.ld ${GEN}/stubs.c ${GEN}/data.c ${GEN}/thunks.S ${GEN}/addrmap.c ${GEN}/report.txt
                    COMMAND ${PORT2_GEN_ENV} ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/gen2.py link ${GEN} ${CMAKE_NM} ${GEN}/objects.txt
                    DEPENDS ${PORT2_GAME_TARGETS} port2rt port2chd $<TARGET_OBJECTS:port2chd> ${PORT2_GAME_OBJS} $<TARGET_OBJECTS:port2rt>
@@ -376,16 +326,6 @@ if(WIN32)
   target_link_options(tombi2 PRIVATE -m32 -mconsole -static-libgcc -Wl,--image-base,0x400000 -Wl,--disable-dynamicbase
                       -Wl,--stack,16777216 ${GEN}/syms.ld)
   target_link_libraries(tombi2 PRIVATE ${PORT2_SDL2})
-elseif(NINTENDO_3DS)
-  target_sources(tombi2 PRIVATE $<TARGET_OBJECTS:pica_vsh_bin>)
-  # 3dsx.specs (3DS.cmake) links the program at 0x00100000, the same base as the i386 build: the image is below 16 MB
-  target_link_options(tombi2 PRIVATE ${GEN}/syms.ld)
-  target_link_libraries(tombi2 PRIVATE ${PORT2_SDL2})
-  # tombi.3dsx / tombi.elf, "Tombi!" in the Homebrew Launcher (libctru's default icon: no game graphics are shipped)
-  set_target_properties(tombi2 PROPERTIES OUTPUT_NAME tombi)
-  ctr_generate_smdh(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/tombi.smdh NAME "Tombi!" DESCRIPTION "Native port (PAL disc)"
-                    AUTHOR "Tombi-Decomp" ICON ${CMAKE_CURRENT_SOURCE_DIR}/n3ds/icon.png)   # (the owner's own drawing, 48 x 48)
-  ctr_create_3dsx(tombi2 SMDH ${CMAKE_CURRENT_BINARY_DIR}/tombi.smdh OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/tombi.3dsx)
 else()
 target_link_options(tombi2 PRIVATE -m32 -no-pie -Wl,-Ttext-segment=0x100000 -Wl,-z,noexecstack ${GEN}/syms.ld)
 target_link_libraries(tombi2 PRIVATE ${PORT2_SDL2} m pthread)

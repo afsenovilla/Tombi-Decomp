@@ -25,6 +25,10 @@ on:
         description: "version X.Y.Z (optional; default: latest patch + 1, e.g. 0.0.N)"
         type: string
         default: ""
+      n3ds_run:
+        description: "Nintendo 3DS: the 3ds.yml run (id) whose tombi-3ds artifact to publish (optional; default: the newest green run on master)"
+        type: string
+        default: ""
       migrate_dev:
         description: "only mark old build-* releases as pre-release 'dev build ...' (no new release)"
         type: boolean
@@ -111,8 +115,8 @@ jobs:
           gh run download "$run" -R "$R" -n tombi-port-android -D art/android
           echo "tombi-port-android <- run $run"
           # the Nintendo 3DS program of the newest green 3ds run (tombi.3dsx, tombi.cia when makerom built it)
-          run=""
-          for id in $(gh api "repos/$R/actions/workflows/3ds.yml/runs?branch=master&status=success&per_page=20" --jq '.workflow_runs[].id'); do
+          run="${{ inputs.n3ds_run }}"
+          [ -n "$run" ] || for id in $(gh api "repos/$R/actions/workflows/3ds.yml/runs?branch=master&status=success&per_page=20" --jq '.workflow_runs[].id'); do
             if gh api "repos/$R/actions/runs/$id/artifacts" --jq '.artifacts[] | select(.expired | not) | .name' | grep -qx "tombi-3ds"; then run=$id; break; fi
           done
           [ -n "$run" ] || { echo "::error::no artifact tombi-3ds"; exit 1; }

@@ -63,16 +63,9 @@ static void nl_spr(int n, int x0, int y0, int x1, int y1) {
     def(n, d);
     if (d[2] <= 0 || d[3] <= 0 || x1 <= x0 || y1 <= y0) return;
     for (int i = 0; i < 16; i++) pal[i] = nl_col(d[4], d[5], i);
-    /* u = d0 + (x - x0) * d2 / D stepped along the row (quotient and remainder carried: the same integers as the
-       division, which the 3DS's ARM11 does in software); v once per row */
-    int D = x1 - x0, qs = d[2] / D, rs = d[2] % D;
-    for (int y = y0; y < y1; y++) {
-        int v = d[1] + (y - y0) * d[3] / (y1 - y0), u = d[0], r = 0;
-        for (int x = x0; x < x1; x++) {
-            u32 c = pal[nl_px(u, v)];
-            if (c) pa_put(x, y, c);
-            u += qs; r += rs; if (r >= D) { r -= D; u++; }
-        }
+    for (int y = y0; y < y1; y++) for (int x = x0; x < x1; x++) {
+        u32 c = pal[nl_px(d[0] + (x - x0) * d[2] / (x1 - x0), d[1] + (y - y0) * d[3] / (y1 - y0))];
+        if (c) pa_put(x, y, c);
     }
 }
 /* the loading screen on the canvas; 0 when the panel shows the game (or the file is missing) */
@@ -85,23 +78,10 @@ int panel_loading_screen(void) {
     }
     if (nl_state < 0) return 0;
     int W = pa_cw, H = pa_ch, c = port_frame / 15 & 1, s = port_frame * 12 & 255;
-    /* the tiled background has two states (c) and changes with nothing else but the canvas size and the two tiles'
-       CLUT colours: each is drawn once into a cache and copied in after that (the 3DS draws the panel on its CPU) */
-    static u32 *bg[2], bg_pal[2][2][16]; static int bg_w, bg_h, bg_ok[2];
-    u32 pal[2][16]; int dd[6];
-    for (int k = 0; k < 2; k++) { def(k, dd); for (int i = 0; i < 16; i++) pal[k][i] = nl_col(dd[4], dd[5], i); }
-    if (bg_w != W || bg_h != H) {
-        for (int k = 0; k < 2; k++) { free(bg[k]); bg[k] = malloc((size_t)W * H * 4); bg_ok[k] = 0; }
-        bg_w = W; bg_h = H;
-    }
-    if (bg_ok[c] && !memcmp(bg_pal[c], pal, sizeof pal)) memcpy(pa_cv, bg[c], (size_t)W * H * 4);
-    else {
-        pa_fill(0, 0, W, H, 0xFF000000u);
-        for (int j = 0; j * 48 < H; j++) for (int i = 0; i * 48 < W; i++) {
-            int k = (i + j) & 1 ? 1 - c : c;
-            nl_spr(k, i * 48, j * 48, i * 48 + 48, j * 48 + 48);
-        }
-        if (bg[c]) { memcpy(bg[c], pa_cv, (size_t)W * H * 4); memcpy(bg_pal[c], pal, sizeof pal); bg_ok[c] = 1; }
+    pa_fill(0, 0, W, H, 0xFF000000u);
+    for (int j = 0; j * 48 < H; j++) for (int i = 0; i * 48 < W; i++) {
+        int k = (i + j) & 1 ? 1 - c : c;
+        nl_spr(k, i * 48, j * 48, i * 48 + 48, j * 48 + 48);
     }
     /* drawNowLoadingSprite(0xC0, 0xA0, 0, ..): pad = (u32)NEG_SIN_TABLE[s] >> 11 as a short; the logo keeps the game's
        distance to the bottom right corner of its 320 x 240 screen */

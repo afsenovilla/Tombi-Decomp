@@ -2,7 +2,17 @@
 
 Update this file whenever something lands or a task is decided. Newest first.
 
-## Since v0.7.1 (not released)
+## Since v0.7.2 (not released)
+
+## In v0.7.2 (released 2026-11-18): back to the state before v0.7
+
+- **v0.7.1 crashed on the 3DS too** (the user's dump: out of memory at start; the 28.7 MB image, +2.7 MB over the
+  build that ran, mostly the top-down map margin tables of ws_topdown_gen.inc). The user asked for the version
+  before 0.7 again: master's code is that of v0.6.1 (69a2420a; README, release.yml and STATUS kept), VERSION 0.7.2,
+  and the 3DS files are the Actions build the user runs (3ds.yml run 43647748843, branch commit 2409c2b2, image
+  26.0 MB), published through release.yml's new `n3ds_run` input. The 3DS work after it (launcher look, widescreen
+  strips, v0.7.0/0.7.1 merge) stays on the branch claude/wizardly-heisenberg-5fllxj and in git history; it comes
+  back only with an image at most ~26 MB and a test on the device first.
 
 - Pending (the user, 2026-11-18): the widescreen "officially supported / auto by default" change below moves to the
   next release; a **Saves** page on the 3DS start screen (list the card's saves, import from `sdmc:/3ds/tombi/import/`

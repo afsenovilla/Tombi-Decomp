@@ -326,9 +326,6 @@ static int es(void) { return port_lang == 5; }
 #endif
 enum { PAGE_MAP, PAGE_EVENTS, PAGE_SIDE, PAGE_ITEMS, NPAGES };
 static int page;
-/* --panel-no-map (an Old 3DS's default: the area map's tiles are more than it has time for): no map tab, and no
-   "show on the map" under an event; the status, events and items tabs stay */
-int port_panel_no_map;
 static const char *page_name(int p) {
     return p == PAGE_MAP ? T("Status", "Estado") : p == PAGE_EVENTS ? T("Events", "Eventos") : p == PAGE_ITEMS ? T("Items", "Objetos") : map_tab_name();
 }
@@ -433,10 +430,9 @@ static void header_draw(const char *title) {
     pa_outline = C_DARK;
     pa_text_fit(W / 2 - pa_text_w(16, title) / 2 < 30 ? 30 : W / 2 - pa_text_w(16, title) / 2, 4, 16, W - 60, title, C_WHITE, C_WOODE);
     pa_outline = 0;
-    int n = NPAGES - (port_panel_no_map ? 1 : 0), tw = (W - 16 * (n + 1)) / n;
-    for (int i = 0, c = 0; i < NPAGES; i++) {
-        if (port_panel_no_map && i == PAGE_SIDE) continue;
-        int x = 16 + c++ * (tw + 16);
+    int n = NPAGES, tw = (W - 16 * (n + 1)) / n;
+    for (int i = 0; i < n; i++) {
+        int x = 16 + i * (tw + 16);
         plank(x, 26, tw); hot(x, 26, tw, 24, HS_PAGE + i);
         plank_text(x + tw / 2, 30, page_name(i), i == page);
     }
@@ -743,90 +739,15 @@ static void panel_time_log(unsigned long long us) {
                 side_raster_n ? side_raster_us / side_raster_n / 1000 : 0, side_raster_n ? side_raster_us / side_raster_n / 10 % 100 : 0, cd);
     sum = mx = 0; n = 0; side_raster_n = 0; side_raster_us = 0;
 }
-#ifdef __3DS__
-/* the worker thread that draws the panel (n3ds/pica_c3d.c has the thread: libctru's headers define u32 too) */
-int port_n3ds_worker_start(void (*job)(void));   /* 1: a thread runs job() after each port_n3ds_worker_go() */
-void port_n3ds_worker_go(void);
-static volatile int pw_state;            /* 0 idle, 1 rendering, 2 a canvas is ready */
-/* (the worker's own renders timed: a line every 20, with --log-fps) */
-static void pw_job(void) {
-    extern unsigned long long port_time_us(void); extern int port_show_fps;
-    static unsigned long long sum, mx; static int n;
-    unsigned long long t0 = port_time_us();
-    render();
-    unsigned long long us = port_time_us() - t0;
-    pw_state = 2;
-    sum += us; if (us > mx) mx = us;
-    if (++n >= 20) { if (port_show_fps) port_printf("[panel] worker: %d renders, %llu ms each, the longest %llu (page %d)\n", n, sum / n / 1000, mx / 1000, page); sum = mx = 0; n = 0; }
-}
-static int n3ds_worker_ok(void) {
-    static int st;                        /* 0 not tried, 1 running, -1 none */
-    if (!st) st = port_n3ds_worker_start(pw_job) ? 1 : -1;
-    return st > 0;
-}
-#endif
 /* every vblank (shims/gpu.c port_gpu_vblank) while the panel is on */
 void panel_hud_update(void);      /* runtime/panel_hud.c: --hud-bottom */
 void port_panel_vblank(void) {
-#ifndef __3DS__
-    { void port_launcher_game_preview(const char *dir);   /* runtime/launcher_game.c */
-      static int done; const char *e = getenv("PORT_LAUNCHER_PREVIEW"); if (e && !done && port_frame > 10) { done = 1; port_launcher_game_preview(e); } }
-#endif
     panel_hud_update();
     int dump = port_panel_dump_dir && port_dump_every > 0 && port_frame % port_dump_every == 0;
     if (panel_script) script_step();
     if (hold_at == port_frame) { inq_push(1, 1, hold_x, hold_y); hold_at = -1; }
-#ifdef __3DS__
-    if (page == PAGE_SIDE && pw_state != 1) side_cache_work();   /* (not under a render in the worker thread) */
-#else
     if (page == PAGE_SIDE) side_cache_work();   /* the side map's tiles, a slice every vblank (panel_side.inc) */
-#endif
-#ifdef __3DS__
-    /* The 3DS draws the panel on its CPU (~50 ms a render in the emulator, three 60 Hz frames): a worker thread does it,
-       on another core where there is one (New 3DS; the Old 3DS's second core with the time the system grants), else in
-       the time the main thread sleeps.  The main thread only takes input and starts a render while the worker is
-       idle, and hands the finished canvas to the bottom screen: at most a render every fourth vblank. */
-    if (!dump && n3ds_worker_ok()) {
-        if (pw_state == 2) {
-            if (port_panel_window) port_panel_window_frame((const unsigned char *)pa_cv, pa_cw, pa_ch);
-            pw_state = 0;
-        }
-        /* a render when there is something to show: a touch or a button waiting (at the next vblank, not after the
-           render in hand and another), a list moving, else a refresh now and then: every fourth vblank, and on an
-           Old 3DS (--audio-half tells it) every 25th, half a second: its worker shares a third of a core with the
-           sound's mixer, and a panel drawn without pause kept every touch waiting for a render to end */
-        { extern int port_sound_half; static int idle;
-          /* An Old 3DS: a touch or a button is answered here and now, by the main thread: the worker's render waits
-             for the processor (15 to 50 ms measured, 90 in a busy room, for a few ms of work) and its picture for the
-             vblank after, and a tap took a tenth of a second or two to show.  (One frame of the game late per tap.) */
-          int now = 0;   /* (a finger moving is a move every vblank: those stay the worker's) */
-          for (int i = 0; i < inq_n; i++) if (!(inq[i].kind == 1 && inq[i].a == 2)) now = 1;
-          if (port_sound_half && now) {
-              extern void port_sleep_us(unsigned long long); extern unsigned long long port_time_us(void); extern int port_show_fps;
-              static unsigned long long sum, mx, wsum; static int n;
-              unsigned long long t0 = port_time_us();
-              while (pw_state == 1) port_sleep_us(500);   /* (the canvas is the worker's until its render ends) */
-              unsigned long long t1 = port_time_us();
-              pw_state = 0; idle = 0;
-              static unsigned long long psum;
-              inq_run(); render();
-              unsigned long long t2 = port_time_us();
-              if (port_panel_window) port_panel_window_frame((const unsigned char *)pa_cv, pa_cw, pa_ch);
-              unsigned long long us = port_time_us() - t1;
-              sum += us; wsum += t1 - t0; psum += port_time_us() - t2; if (us > mx) mx = us;
-              if (++n >= 2) { if (port_show_fps) port_printf("[panel] touches: %d answered at once, %llu.%llu ms each (the longest %llu; %llu.%llu of them to the screen), %llu.%llu ms waiting for the worker (page %d)\n", n, sum / n / 1000, sum / n / 100 % 10, mx / 1000, psum / n / 1000, psum / n / 100 % 10, wsum / n / 1000, wsum / n / 100 % 10, page); sum = mx = wsum = psum = 0; n = 0; }
-              return;
-          }
-          int due = inq_n > 0 || scr_busy() || ++idle >= (port_sound_half ? 25 : 4);
-          if (pw_state == 0 && due) { idle = 0; inq_run(); pw_state = 1; port_n3ds_worker_go(); } }
-        return;
-    }
-    { extern void port_sleep_us(unsigned long long); while (pw_state == 1) port_sleep_us(1000); }   /* (a dump, or no worker: here, as everywhere else) */
-    pw_state = 0;
-    if (!dump && (frames++ & 3) && !scr_busy()) return;
-#else
     if (!dump && (frames++ & 1) && !scr_busy()) return;   /* ~25 fps is plenty, every vblank while a list moves */
-#endif
     inq_run();
     { extern int port_show_fps; extern unsigned long long port_time_us(void);
       unsigned long long t0 = port_show_fps ? port_time_us() : 0;
@@ -835,7 +756,7 @@ void port_panel_vblank(void) {
 #ifdef __ANDROID__
     if (dump) upscale();
 #else
-    { extern int port_panel_canvas_out; if (dump || !port_panel_canvas_out) upscale(); }   /* (the 3DS shows the canvas itself) */
+    upscale();
 #endif
 #ifdef __ANDROID__
     if (port_panel_window) {

@@ -26,11 +26,7 @@ int port_ntsc;               /* the US build's 320x224 picture (--picture, port_
    local buffer and written with the raw write / WriteFile of port_log_write_raw (host_win32.c on Windows). */
 volatile int port_log_direct;
 unsigned long port_log_direct_tid;
-#if defined(__3DS__)
-/* (newlib's stdio reaches the SD card through its devoptab, not through the game's Psy-Q `write` stub) */
-static int log_is_direct(void) { return port_log_direct > 0; }
-static void port_log_write_raw(const char *s, int n) { fwrite(s, 1, n, stderr); fflush(stderr); }   /* (a report that must not be lost) */
-#elif !defined(_WIN32)
+#ifndef _WIN32
 #include <unistd.h>
 #include <sys/syscall.h>
 static int log_is_direct(void) { return port_log_direct > 0; }
@@ -46,20 +42,9 @@ void port_printf(const char *fmt, ...) {
         char buf[2048]; int n = vsnprintf(buf, sizeof buf, fmt, ap);
         if (n > (int)sizeof buf - 1) n = sizeof buf - 1;
         if (n > 0) port_log_write_raw(buf, n);
-    } else {
-        vfprintf(stderr, fmt, ap);
-#ifdef __3DS__
-        /* (the log is a file on the SD card there, and a write to it a request to the card's service, milliseconds each:
-           buffered (main), and written out a second apart at most; port_flush_log and the fault reports write at once) */
-        { extern unsigned long long port_time_us(void); static unsigned long long last; unsigned long long now = port_time_us();
-          if (now - last > 1000000ull) { last = now; fflush(stderr); } }
-#else
-        fflush(stderr);
-#endif
-    }
+    } else { vfprintf(stderr, fmt, ap); fflush(stderr); }
     va_end(ap);
 }
-int port_audio_main;   /* --audio-main (3DS): the sound is mixed in the device's callback, on the game's core, not by a thread on the second (runtime/sdl.c) */
 int port_exit_status = -1;   /* what port_fatal / port_quit exit with (android/loader.c reads it in its atexit handler) */
 static void exit_h(void *u) { (void)u; exit(1); }
 void port_fatal(const char *fmt, ...) {
@@ -96,7 +81,7 @@ static void quit_h(void *a) {
 }
 void port_quit(int code) { port_host_call(quit_h, &code); exit(code); }
 
-#if !defined(_WIN32) && !defined(__3DS__)    /* (Windows: runtime/host_win32.c; 3DS: n3ds/main_3ds.c) */
+#ifndef _WIN32    /* (Windows: runtime/host_win32.c) */
 unsigned long long port_time_us(void) {
     struct timespec ts; clock_gettime(CLOCK_MONOTONIC, &ts);
     return (unsigned long long)ts.tv_sec * 1000000ull + ts.tv_nsec / 1000;
@@ -345,7 +330,7 @@ static int usage(const char *argv0) {
                 "       [--renderer gl|soft] [--internal-res 1..4] [--fps N|auto|unlimited] [--dump-presents DIR[:FROM:TO]] [--realtime] [--hz 50|60] [--picture ntsc|pal] [--show-fps [1|2]] [--log-fps [1|2]] [--patch-tex FILE]... [--no-gfx-es] [--subscreen-labels item=..,event=..,status=..,exit=..,map=..,use=..|..,view=..,sort=..] [--text-patch FILE.tpatch|.tombipatch.json]... [--no-translation-file] [--patch-dir DIR] [--title-bg FILE] [--early-title PREPRE8_DIR] [--wings-glide JPDEMO_DIR --wings-pre9 PRE9_DIR]\n"
                 "       [--dump-frames DIR [--dump-every N] [--dump-from N] [--dump-vram]] [--dump-draws FILE] [--dump-textures DIR] [--texture-pack DIR] [--pad-script FRAME:BUTTONS[:LEN[xCOUNT/PERIOD]],...]\n"
                 "       [--poke FRAME:ADDR:VALUE[:SIZE[xCOUNT]]] [--poke-every INTERVAL:ADDR:VALUE[:SIZE]] [--menu FRAME:N] [--title FRAME:ID[:start]] [--movie FRAME:ID]\n"
-                "       [--dump-audio PATH] [--skip-movies] [--skip-intro] [--logo-only] [--audio-half] [--frameskip] [--title-debug] [--launcher-exit] [--debug-menu] [--log-events] [--second-screen] [--hud-bottom] [--dump-panel DIR] [--panel-size WxH] [--panel-input FRAME:ACTION,...] [--trace-cd] [--save-dir DIR] [-v]\n"
+                "       [--dump-audio PATH] [--skip-movies] [--skip-intro] [--title-debug] [--launcher-exit] [--debug-menu] [--log-events] [--second-screen] [--hud-bottom] [--dump-panel DIR] [--panel-size WxH] [--panel-input FRAME:ACTION,...] [--trace-cd] [--save-dir DIR] [-v]\n"
                 "  --subscreen-labels KEY=TEXT,... writes the Select sub-screen's tabs (item event status exit map) and leaf buttons (use view\n"
                 "         sort; | breaks the leaf's line) with --lang 5, in the disc's own lettering plus our letters for the rest (docs/PORT.md)\n"
                 "  --lang N plays in the language of EXE/MAINn.EXE: 0 English (default), 1 Francais, 2 Deutsch, 3 Italiano, 4 Nederlands,\n"
@@ -956,9 +941,6 @@ void *port_cc_sign_next(void *obj) {
 /* Android: libtombi.so is a shared library loaded by the small libmain.so (port2/android/loader.c: SDL_main reserves
    the low address range, android_dlopen_ext()s this library into it and calls port_main with the PC flags) */
 #define main port_main
-#elif defined(__3DS__)
-/* Nintendo 3DS: port2/n3ds/main_3ds.c is the entry point (the SD card's paths, the log file) and calls this */
-#define main port_main
 #endif
 int main(int argc, char **argv) {
     extern void port_pad_script(const char *), port_poke_add(const char *), port_poke_add_every(const char *, int),
@@ -1012,10 +994,6 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--panel-input") && v) { extern void port_panel_input_script(const char *); port_panel_input_script(argv[++i]); }
         else if (!strcmp(a, "--panel-size") && v) { extern void port_panel_size(int, int); int w = 0, h = 0; sscanf(argv[++i], "%dx%d", &w, &h); port_panel_size(w, h); }
         else if (!strcmp(a, "--title-debug")) port_title_debug = 1;   /* title carousel DEBUG entry: the area select */
-        else if (!strcmp(a, "--prompt-big")) { extern int port_prompt_big; port_prompt_big = i + 1 < argc && argv[i + 1][0] >= '1' && argv[i + 1][0] <= '6' && !argv[i + 1][1] ? atoi(argv[++i]) : 1; }   /* bold 8 x 10 letters on the button prompts (shims/prompts.c) */
-        else if (!strcmp(a, "--mdec-fast")) { extern int port_mdec_fast; port_mdec_fast = 1; }   /* the movies' inverse transform by a fast factorisation (shims/mdec.c) */
-        else if (!strcmp(a, "--audio-main")) port_audio_main = 1;   /* 3DS: no mixer thread on the second core (runtime/sdl.c) */
-        else if (!strcmp(a, "--panel-no-map")) { extern int port_panel_no_map; port_panel_no_map = 1; }   /* the second-screen panel without its map tab (runtime/panel.c) */
         else if (!strcmp(a, "--launcher-exit")) port_launcher_exit = 1;   /* QUIT entries (title, pause menu): back to the launcher */
         else if (!strcmp(a, "--civ-route")) {
             /* opt-in cut route (port only): the Civilization Town hub (AREA18 s1) exits 0/1/2 lead into the cut
@@ -1074,7 +1052,6 @@ int main(int argc, char **argv) {
             i++;
             if (!strcmp(argv[i], "gl") || !strcmp(argv[i], "opengl")) port_renderer = 1;
             else if (!strcmp(argv[i], "soft") || !strcmp(argv[i], "software")) port_renderer = 0;
-            else if (!strcmp(argv[i], "pica")) port_renderer = 2;    /* shims/gpu_pica.c: the 3DS renderer's model */
             else return usage(argv[0]);
         }
         else if (!strcmp(a, "--realtime")) port_realtime = 1;
@@ -1089,7 +1066,7 @@ int main(int argc, char **argv) {
         }
         else if (!strcmp(a, "--widescreen")) {      /* experimental (docs/PORT.md "Widescreen"): 16:9, 21:9, 32:9 or auto */
             extern int port_widescreen; port_widescreen = 53; port_ws_auto = 0;
-            if (v && (!strcmp(v, "16:9") || !strcmp(v, "21:9") || !strcmp(v, "32:9") || !strcmp(v, "auto") || !strcmp(v, "5:3"))) { const char *ws = argv[++i]; if (!strcmp(ws, "21:9")) port_widescreen = 120; else if (!strcmp(ws, "5:3")) port_widescreen = 40;   /* (400 columns: the 3DS's top screen) */ else if (!strcmp(ws, "32:9")) port_widescreen = 267; else if (!strcmp(ws, "auto")) port_ws_auto = 1; }
+            if (v && (!strcmp(v, "16:9") || !strcmp(v, "21:9") || !strcmp(v, "32:9") || !strcmp(v, "auto"))) { const char *ws = argv[++i]; if (!strcmp(ws, "21:9")) port_widescreen = 120; else if (!strcmp(ws, "32:9")) port_widescreen = 267; else if (!strcmp(ws, "auto")) port_ws_auto = 1; }
         }
         else if (!strcmp(a, "--display-size") && v) {   /* testing --widescreen auto: pretend the display is W x H */
             if (sscanf(argv[++i], "%dx%d", &port_ws_disp_w, &port_ws_disp_h) != 2) return usage(argv[0]);
@@ -1132,13 +1109,6 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--subscreen-labels") && v) { extern int port_subscreen_labels(const char *); if (!port_subscreen_labels(argv[++i])) return usage(argv[0]); }
         else if (!strcmp(a, "--skip-movies")) port_skip_movies = 1;
         else if (!strcmp(a, "--skip-intro")) port_skip_movies = 2;
-        else if (!strcmp(a, "--stereo")) { extern int port_stereo_on; port_stereo_on = 1; }   /* (experimental: the pica renderer's 3D, shims/gpu.c) */
-        else if (!strcmp(a, "--no-movies")) { extern int port_skip_all; port_skip_movies = 2; port_skip_all = 1; }   /* both: straight to the title screen, and no movie in the game either (the 3DS's "Movies: skip") */
-        else if (!strcmp(a, "--logo-only")) port_skip_movies = 3;       /* (the 3DS's default: n3ds/main_3ds.c) */
-        else if (!strcmp(a, "--audio-half")) { extern int port_sound_half; port_sound_half = 1; }   /* (shims/sound.c: an Old 3DS) */
-        else if (!strcmp(a, "--audio-dry")) { extern int port_sound_dry; port_sound_dry = 1; }
-        else if (!strcmp(a, "--lazy-clut") && i + 1 < argc) { extern int pica_lazy_clut; pica_lazy_clut = atoi(argv[++i]); }   /* (shims/gpu_pica.c) */
-        else if (!strcmp(a, "--frameskip")) { extern int port_frameskip; port_frameskip = 1; if (i + 1 < argc && !strcmp(argv[i + 1], "test")) { port_frameskip = 2; i++; } }
         else if (!strcmp(a, "--play-movies")) port_skip_movies = 0;     /* (the default now; kept for old scripts) */
         else if (!strcmp(a, "--poke") && v) port_poke_add(argv[++i]);
         else if (!strcmp(a, "--poke-every") && v) port_poke_add_every(argv[++i], 1);
@@ -1192,11 +1162,7 @@ int main(int argc, char **argv) {
     { extern int port_widescreen, port_renderer, port_ws_cull;
       port_ws_cull = port_widescreen; { extern int port_ws_xtra; const char *e = getenv("PORT_WSXTRA"); if (e && port_widescreen) port_ws_xtra = atoi(e); extern void port_primlog_init(void); port_primlog_init(); }
       (void)port_renderer; }
-#ifdef __3DS__
-    { static char logbuf[16384]; setvbuf(stderr, logbuf, _IOFBF, sizeof logbuf); }   /* (port_printf: written out once a second) */
-#else
     setvbuf(stderr, NULL, _IONBF, 0);     /* the launcher reads a pipe: every line must leave the process at once */
-#endif
     { extern const char port_build_id[], port_build_date[]; port_printf("[port2] build %s %s\n", port_build_id, port_build_date); }
     port_printf("[port2] native pointers, %d-bit: data image %p..%p, scratch %p, layout %s\n", (int)(sizeof(void *) * 8),
                 (void *)port_main0_image, (void *)port_x000_bss, (void *)port_scratch,
