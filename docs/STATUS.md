@@ -42,13 +42,12 @@ Update this file whenever something lands or a task is decided. Newest first.
     the Dwarf Village as before (PC, i386, soft renderer). Reached headless by leaving AREA02 s0 to the left
     (`--pad-script 1000:start,1300:circle:3,1700:left:500` from the debug select 2:0). Weak: the stone pattern
     repeats every 216 units; at 32:9 a crease between the copies shows against the sky.
-  - Open: the brick staircase (AREA09 s5), "Tomba hops going downhill" (device video, dashing in a grey suit). Not
-    reproduced on the PC. Measured 2026-11-17: the dash is Square with `GAME.area00_eventControl & 0x40`
+  - Closed (the user, 2026-11-18): the brick staircase (AREA09 s5), "Tomba hops going downhill". It was the suit
+    he wore, the reward of the red + blue quest, which makes Tomba run twice as fast: not the widescreen work, and
+    too narrow a case to pursue. What was measured: the dash is Square with `GAME.area00_eventControl & 0x40`
     (`--poke 1590:8009C984:40:1x8`, pad `left+square`); H / Y per frame while dashing down are the same in the port
-    (4:3 and 16:9, speed levels 0-3) and in the original code (tools/psxemu, same pokes): a straight diagonal, within
-    1 px. Soft and GL (xvfb) presents at `--fps 60` show no hop with the default costume. In the user's video the
-    sprite's x goes 210, 197, 183, 205, 192, 178 (a sawtooth, period 6 presents) only going down. Next: the same run
-    with his costume and his fps setting (ask which suit and whether 60 fps is on; app log), `--dump-presents`.
+    (4:3 and 16:9, speed levels 0-3) and in the original code (tools/psxemu, same pokes), a straight diagonal within
+    1 px. Not checked: whether the original game hops the same way with that suit.
 
 ## Parked (2026-11-17): new pictures for the cut Civilization towns
 
