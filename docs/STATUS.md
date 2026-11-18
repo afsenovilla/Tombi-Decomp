@@ -2,7 +2,14 @@
 
 Update this file whenever something lands or a task is decided. Newest first.
 
-## Since v0.6.1 (not released)
+## Since v0.7.0 (not released)
+
+- Pending (the user, 2026-11-18): the widescreen "officially supported / auto by default" change below moves to the
+  next release; a **Saves** page on the 3DS start screen (list the card's saves, import from `sdmc:/3ds/tombi/import/`
+  any format tools/save_import.py takes, export a save to .mcs, backups) was proposed, not started.
+
+## In v0.7.0 (released 2026-11-18)
+
 
 - **Nintendo 3DS: an official platform (2026-11-18, for v0.7.0).** The 3DS port (branch
   `claude/wizardly-heisenberg-5fllxj`, merged) ships in the release: `tombi-port-<ver>-3ds.3dsx` / `-3ds.cia` from
