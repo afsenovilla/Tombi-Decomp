@@ -47,14 +47,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include "port_runtime.h"
+#include "lazy_bss.h"
 
 typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32; typedef short s16; typedef int s32;
-#ifdef __3DS__
-/* The 3DS: not there.  Its tables made the title too large for the console's memory (v0.7.1 did not start). */
-int port_ws_pigs_on;
-const char *port_ws_pigs_rooms;
-void port_ws_pigs_blocks(char *list, const u8 *tbl, int area, int section) { (void)list; (void)tbl; (void)area; (void)section; }
-#else
 typedef long long s64;
 
 extern int port_ws_cull;
@@ -546,6 +541,7 @@ static void build_side(int side, int lim)
    +4, room for 88) and the area model's table */
 void port_ws_pigs_blocks(char *list, const u8 *tbl, int area, int section)
 {
+    if (!PORT_LAZY_OK()) return;            /* (the 3DS: its tables are not in the program, runtime/lazy_bss.h) */
     static const u8 *seen_tbl; static int seen_sec = -1, lo, hi, ylo, yhi;
     { static int once; if (!once) { once = 1; log_on = getenv("PORT_WS_PIGS_LOG") != 0; } }
     if (log_on && tbl) { extern int port_frame; s32 tt[3]; memcpy(tt, (const u8 *)PORT_SPAD(0xC0) + 0x14, 12); port_printf("[pigs] cam %d %d %d\n", port_frame, -(int)tt[0], -(int)tt[1]); }
@@ -593,4 +589,3 @@ void port_ws_pigs_blocks(char *list, const u8 *tbl, int area, int section)
     if (!blk_polys) return;
     ((u32 *)list)[2] = (u32)(unsigned long)blk; list[3] = 2;
 }
-#endif   /* (not the 3DS) */

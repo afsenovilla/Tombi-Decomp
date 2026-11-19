@@ -29,13 +29,9 @@
 #include <stdio.h>
 #include <string.h>
 #include "port_runtime.h"
+#include "lazy_bss.h"
 
 typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32; typedef short s16; typedef int s32;
-#ifdef __3DS__
-/* The 3DS: not there.  Its tables made the title too large for the console's memory (v0.7.1 did not start). */
-
-void port_ws_floor3d_blocks(char *list, const u8 *tbl, int area, int section) { (void)list; (void)tbl; (void)area; (void)section; }
-#else
 typedef long long s64;
 
 extern int port_ws_cull;
@@ -382,6 +378,7 @@ static void build_side(int side, int half)
    +4, room for 88) and the area model's table */
 void port_ws_floor3d_blocks(char *list, const u8 *tbl, int area, int section)
 {
+    if (!PORT_LAZY_OK()) return;            /* (the 3DS: its tables are not in the program, runtime/lazy_bss.h) */
     if (!port_ws_cull || !tbl || !room_enabled(area, section)) return;
     if (tbl[0] != 1 || (u8)list[3] != 1) return;                           /* one block, the whole room */
     s32 off; memcpy(&off, tbl + 4, 4);
@@ -418,4 +415,3 @@ void port_ws_floor3d_blocks(char *list, const u8 *tbl, int area, int section)
     if (!blk_polys) return;
     ((u32 *)list)[2] = (u32)(unsigned long)blk; list[3] = 2;
 }
-#endif   /* (not the 3DS) */

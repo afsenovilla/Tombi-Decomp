@@ -60,30 +60,13 @@
 #include <string.h>
 #ifndef WS_BACKDROP_MAIN
 #include "port_runtime.h"
+#include "lazy_bss.h"
+#else
+#define PORT_LAZY_OK() 1
 #endif
 
 typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32;
 
-#if defined(__3DS__) && !defined(WS_BACKDROP_MAIN)
-/* The 3DS: none of the picture strips.  Their generators keep their work in static tables, 35 MB of them, and a 3DS
-   title's code, data and bss must fit its 64 MB (an Old 3DS's whole application memory; past the code region on
-   both): with them the system's loader refused to start v0.7.0's title ("invalid address" in loader).  Every other
-   widescreen part stays (culls, room ends, 3D room walls, top-down maps).  The entry points shims/gpu.c and
-   runtime/main.c use, inert. */
-int port_ws_backdrop_on;
-int port_ws_backdrop_dy;
-int port_ws_backdrop_side = 3;
-const char *port_ws_backdrop_rooms;
-const u16 *port_ws_backdrop(const u16 *vram, int pad, int x, int y, int w, int h, int u, int v, int tx, int ty,
-                            int depth, int cx, int cy, int *rows)
-{
-    (void)vram; (void)pad; (void)x; (void)y; (void)w; (void)h; (void)u; (void)v; (void)tx; (void)ty; (void)depth; (void)cx; (void)cy; (void)rows;
-    return 0;
-}
-const u16 *port_ws_backdrop_over(int pad, int tx, int u, int v) { (void)pad; (void)tx; (void)u; (void)v; return 0; }
-const u16 *port_ws_backdrop_fix(int tx, int u, int v, int *x, int *w) { (void)tx; (void)u; (void)v; (void)x; (void)w; return 0; }
-int port_ws_island_fg(int tpage, int clut, int uv) { (void)tpage; (void)clut; (void)uv; return 0; }
-#else
 
 #define PW 320
 #define PH 224
@@ -95,6 +78,13 @@ static int shown_gl;                    /* the OpenGL renderer draws the frames 
 static u16 *strip; static int strip_pad; static u32 strip_sum;
 int port_ws_backdrop_on = 1;            /* 1: the approved rooms (default); --ws-backdrop off = 0, mirror = 2, on = 3 (main.c) */
 static int enabled = -1;                /* 0 off, 1 the approved rooms, 2 mirror (AREA02 s5), 3 every room */
+/* the 3DS: the generators' tables are not in the program (port2/tools/lazy_bss.py): on when they get their memory */
+static void enabled_init(void)
+{
+    const char *e = getenv("PORT_WS_BACKDROP");
+    enabled = e && *e >= '1' && *e <= '3' ? *e - '0' : port_ws_backdrop_on;
+    if (enabled && !PORT_LAZY_OK()) enabled = 0;
+}
 
 static int r5(u16 c) { return c & 31; } static int g5(u16 c) { return (c >> 5) & 31; } static int b5(u16 c) { return (c >> 10) & 31; }
 static int is_ivy(u16 c) { int r = r5(c), g = g5(c), b = b5(c); return g >= r + 2 && g >= b + 2; }
@@ -904,7 +894,7 @@ const u16 *port_ws_backdrop(const u16 *vram, int pad, int x, int y, int w, int h
                             int depth, int cx, int cy, int *rows)
 {
     const Room *r = 0;
-    if (enabled < 0) { const char *e = getenv("PORT_WS_BACKDROP"); enabled = e && *e >= '1' && *e <= '3' ? *e - '0' : port_ws_backdrop_on; }
+    if (enabled < 0) enabled_init();
     port_ws_backdrop_dy = 0; port_ws_backdrop_side = 3;
     if (enabled && pad > 0 && depth == 1 && cx == 128 && (cy == 510 || cy == 511)) {   /* AREA06 s1 / s2 (mm_take) */
         u8 *g = port_ram_ptr(PORT_A_GAME); int a = *(u16 *)(g + 0), sc = *(u16 *)(g + 2);
@@ -966,7 +956,11 @@ const u16 *port_ws_backdrop(const u16 *vram, int pad, int x, int y, int w, int h
         if (!r || !room_enabled(r)) return 0;
         room = r;
         if (!strip || strip_pad != pad || s != strip_sum || shown_gl != port_gpu_is_gl()) {
-            strip_sum = s; shown_gl = port_gpu_is_gl(); build(pad);
+            strip_sum = s; shown_gl = port_gpu_is_gl();
+            {   unsigned long long t0 = port_time_us();
+                build(pad);
+                port_printf("[wsbd] strips of AREA%02d s%d made in %u ms\n", a, sc, (unsigned)((port_time_us() - t0) / 1000));
+            }
             {   const char *e = getenv("PORT_WS_BACKDROP_DUMP");      /* research: the picture, raw 15-bit LE */
                 FILE *f = e ? fopen(e, "wb") : 0;
                 if (f) {
@@ -1004,7 +998,7 @@ int port_ws_island_fg(int tpage, int clut, int uv)
     extern int port_widescreen;
     u8 *g; int a, sc;
     if (port_widescreen <= 0 || !is_fg_face(tpage, clut, uv)) return 0;
-    if (enabled < 0) { const char *e = getenv("PORT_WS_BACKDROP"); enabled = e && *e >= '1' && *e <= '3' ? *e - '0' : port_ws_backdrop_on; }
+    if (enabled < 0) enabled_init();
     if (!enabled) return 0;
     g = port_ram_ptr(PORT_A_GAME); a = *(u16 *)(g + 0); sc = *(u16 *)(g + 2);
     for (int i = 0; i < NROOMS; i++)
@@ -1041,4 +1035,3 @@ int main(int argc, char **argv)
     return 0;
 }
 #endif
-#endif   /* (not the 3DS) */

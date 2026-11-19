@@ -6391,3 +6391,29 @@ package servers refuse the cloud container, so there is no libctru/citro3d build
   scale, / 255 by shifts), -> 50, full PAL speed (the loading mirror's tiled background cached; no upscale when the
   host shows the canvas).  Then ms/frame: game 2.5, draw ~5, panel ~4.4, sound ~3.4.  Panel dumps byte-identical
   through all of it.  Azahar's timing is not the console's: hardware numbers still to come.
+
+### Nintendo 3DS: memory, lazy tables
+
+A 3DS title's code + rodata + data + bss is loaded at 0x00100000 and must end below 0x04000000 (about 63 MB, on both
+models), and it comes out of the application memory: 64 MB on an Old 3DS, 124 MB on a New 3DS when the title runs
+as the .cia (port2/n3ds/tombi.rsf: `SystemModeExt: 124MB`, with the 804 MHz clock and the L2 cache; a .3dsx gets
+whatever the Homebrew Launcher's host title has).  What the program image leaves, libctru splits between the heap and
+the linear heap (the GPU's: the texture atlases, the staging arena): halves on an Old 3DS (about 20 MB each), the heap
+capped to 24 MB unless the linear one would pass 32 MB, so on a New 3DS 32 MB linear and the rest (about 66 MB) heap.
+The first log lines say what the console gave (`[3ds] New 3DS, title: application memory ...`).
+
+v0.7.0 (66 MB image: the widescreen generators' work tables) did not start; v0.7.1 (28.7 MB) ran out of heap at start
+on an Old 3DS.  Since then the big zero-initialised static arrays of the widescreen generators (runtime/ws_backdrop*,
+the top-down margins of ws_topdown_gen.inc, ws_pigs.c, ws_room3d.c, ws_trick.c, ws_floor3d.c) and of the GL renderer
+(shims/gpu_gl.c, never started on the 3DS) are not in the 3DS image: CMake (`PORT_LAZY_BSS`, on for the 3DS) builds
+those units from copies written by port2/tools/lazy_bss.py, in which each such array is a pointer to its array type
+and its name a macro for `(*pointer)` (same indexing, sizeof, decay), function-local ones through push_macro /
+pop_macro.  An array whose name is declared again in its scope (a local, a parameter, a member) is left static: the
+macro would catch it (the 3DS build compiles the copies with -Wshadow and 3ds.yml fails on such a warning about a
+moved pointer).  Each unit calls `PORT_LAZY_OK()` (runtime/lazy_bss.h) at its entry points; the first call places
+all the unit's arrays in one zeroed heap block (port_lazy_alloc: on the 3DS, n3ds/main_3ds.c, only on a New 3DS with
+16 MB of heap left after it; elsewhere calloc), and a unit without its block stays off.  So a New 3DS has every
+widescreen part (the picture strips' tables are 37 MB), an Old 3DS the ones without tables and more heap and linear
+memory than before.  A PC build with `-DPORT_LAZY_BSS=ON` (bss 62 MB -> 17.7 MB) drew 132 frames of 44 widescreen
+rooms (strips, top-down margins, Evil Pig rooms, 3D room walls and floors, Trick Village) byte-identical to the plain
+build.  n3ds/check_3dsx.py fails a 3DS image above 26 MB (the size of the build that ran on both models).

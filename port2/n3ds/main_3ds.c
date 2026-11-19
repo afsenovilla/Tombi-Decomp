@@ -17,6 +17,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <malloc.h>
 #include "launcher_ui.h"
 
 u32 __stacksize__ = 1024 * 1024;   /* the main thread runs the game's main loop (libctru's default is 32 KB) */
@@ -226,7 +227,9 @@ static int choose_lang(int code) {
     bool n3 = false; APT_CheckNew3DS(&n3);
     gfxInit(GSP_BGR8_OES, GSP_BGR8_OES, true);   /* (the screens in VRAM, which nothing uses yet: the linear memory is the renderer's) */
     gfxSetDoubleBuffering(GFX_TOP, false); gfxSetDoubleBuffering(GFX_BOTTOM, false);
-    static unsigned char top[400 * 240 * 3], bot[320 * 240 * 3];
+    /* (from the heap while the screen is up: 500 KB less in the program image) */
+    unsigned char *top = malloc(400 * 240 * 3), *bot = malloc(320 * 240 * 3);
+    if (!top || !bot) { free(top); free(bot); gfxExit(); return code; }
     /* (the disc opened for the OPTIONS screen's squares and letters, then closed again: the game opens it itself) */
     int game = (launch_image ? port_cd_open(launch_image) : port_cd_open_data(DIR_ "/data")) == 0 && port_launcher_game_begin();
     /* the touch buttons: Start (0), and on the game-look screen up, down, left, right (1-4) */
@@ -295,6 +298,7 @@ static int choose_lang(int code) {
     port_cd_close();
     screens_black();
     gfxExit();
+    free(top); free(bot);
     if (ok) opts_save();
     return ok ? codes[lang] : -1;
 }
@@ -316,6 +320,27 @@ static void dsp_component_for_emulators(void) {
     fprintf(stderr, "[3ds] no dspfirm.cdc, an emulator: ndsp gets an empty DSP component\n");
 }
 
+/* The heap's free bytes: what newlib's allocator holds free, and what is left of the heap above it */
+extern char *fake_heap_end;
+static size_t heap_free(void) {
+    struct mallinfo mi = mallinfo();
+    char *brk = sbrk(0);
+    return (size_t)mi.fordblks + (brk && brk < fake_heap_end ? (size_t)(fake_heap_end - brk) : 0);
+}
+/* runtime/lazy_bss.h: a unit's big tables (the widescreen generators: the picture strips, the top-down margins, the
+   Evil Pig / 3D room / Trick Village / 3D floor ends; port2/tools/lazy_bss.py), zeroed, from the heap.  Only on a New
+   3DS (124 MB: the heap is about 66 MB) and with 16 MB left over; an Old 3DS's heap (about 20 MB) is the game's, so
+   there those parts stay off, as in the builds that run there. */
+void *port_lazy_alloc(const char *what, size_t n) {
+    extern void port_printf(const char *fmt, ...);
+    bool n3 = false; APT_CheckNew3DS(&n3);
+    size_t fr = heap_free();
+    void *p = n3 && fr >= n + (16u << 20) ? calloc(1, n) : 0;
+    port_printf("[3ds] %s: %u KB of tables %s (%u KB of heap free before)\n", what, (unsigned)(n >> 10),
+                p ? "from the heap" : n3 ? "not given (too little heap): off" : "not given (an Old 3DS): off", (unsigned)(fr >> 10));
+    return p;
+}
+
 int main(int argc, char **argv) {
     (void)argc; (void)argv;
     osSetSpeedupEnable(true);                  /* New 3DS: 804 MHz and the L2 cache */
@@ -324,6 +349,15 @@ int main(int argc, char **argv) {
     chdir(DIR_);
     if (!freopen(DIR_ "/log.txt", "w", stderr)) { /* (no SD card: the log goes nowhere) */ }
     fprintf(stderr, "[3ds] %u KB of linear memory free at start\n", (unsigned)(linearSpaceFree() >> 10));
+    {   /* the title's memory (64 MB on an Old 3DS, 124 MB on a New one when the title runs as the .cia: tombi.rsf's
+           SystemModeExt; a .3dsx gets what the Homebrew Launcher was given) and how libctru split it */
+        extern u32 __ctru_heap_size, __ctru_linear_heap_size;
+        bool n3 = false; APT_CheckNew3DS(&n3);
+        fprintf(stderr, "[3ds] %s, %s: application memory %u KB; heap %u KB (%u KB free), linear %u KB; the program and the rest %u KB\n",
+                n3 ? "New 3DS" : "Old 3DS", envIsHomebrew() ? ".3dsx" : "title", (unsigned)(osGetMemRegionSize(MEMREGION_APPLICATION) >> 10),
+                (unsigned)(__ctru_heap_size >> 10), (unsigned)(heap_free() >> 10), (unsigned)(__ctru_linear_heap_size >> 10),
+                (unsigned)((osGetMemRegionSize(MEMREGION_APPLICATION) - __ctru_heap_size - __ctru_linear_heap_size) >> 10));
+    }
     dsp_component_for_emulators();
     static char image[512], extra[2048];
     static char *args[64];

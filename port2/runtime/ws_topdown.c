@@ -25,6 +25,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "port_runtime.h"
+#include "lazy_bss.h"
 #include "../shims/gpu_pica.h"
 
 typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32; typedef short s16;

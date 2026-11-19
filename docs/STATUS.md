@@ -4,6 +4,16 @@ Update this file whenever something lands or a task is decided. Newest first.
 
 ## Since v0.7.2 (not released)
 
+- **3DS memory (the user: the New 3DS in its 124 MB mode, and optimise everything).** tombi.rsf already asked for
+  124 MB (SystemModeExt) on a New 3DS; v0.7.0 failed on both models because a title's image must end below
+  0x04000000. Now the widescreen generators' and the GL renderer's big static tables are not in the 3DS image
+  (port2/tools/lazy_bss.py, PORT_LAZY_BSS, docs/PORT.md "Nintendo 3DS: memory, lazy tables"): a New 3DS gets them from
+  the heap (every widescreen part again: picture strips, top-down margins, Evil Pig / 3D room / Trick Village / 3D
+  floor ends), an Old 3DS leaves them off and has more heap / linear memory. The start screen's two frame buffers are
+  on the heap. PC check: the lazy build's frames of 44 widescreen rooms byte-identical. The log's first lines show the
+  console's memory and each unit's tables; `[wsbd] strips ... made in N ms` the strips' time. Not yet run on a console.
+- Panel: the vitality fruit's 1 showed as "01" (its texture cell took the 0's right half); fixed on every platform.
+
 ## In v0.7.2 (released 2026-11-18, after v0.7.2-fix)
 
 - **v0.7.1's code with a 3DS that fits (image 25.3 MB; not yet run on the device).** The 3DS image of v0.7.1 was 28.7 MB, 2.9 MB over the

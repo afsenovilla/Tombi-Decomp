@@ -30,6 +30,7 @@
 #include <SDL2/SDL_opengl.h>
 #endif
 #include "port_runtime.h"
+#include "../runtime/lazy_bss.h"
 #include "gpu_backend.h"
 /* GLSL for "return port_prompt_clut[i]" over entries lo..hi-1, as nested ifs */
 static int pclut_tree(char *o, int cap, int lo, int hi) {
@@ -896,6 +897,7 @@ int port_gl_hfr_busy(void) {
 
 /* ------------------------------------------------------------------ start / stop */
 static int gl_start(void) {
+    if (!PORT_LAZY_OK()) return -1;          /* (the 3DS: no GL, and its batch tables are not in the program) */
     if (port_window_gl_start() < 0) return -1;
     if (gl_load() < 0) return -1;
     const char *ren = (const char *)p_glGetString(GL_RENDERER), *ver = (const char *)p_glGetString(GL_VERSION);

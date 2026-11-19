@@ -73,14 +73,6 @@ static int tg_trim(const u8 *tim, const u8 *pic, int stride, int pw, int ph)
     return (w + 1) & ~1;
 }
 
-#ifdef __3DS__
-/* The 3DS: no generated margins (Hidden Village).  Their work tables (2.4 MB of bss) made the title too large for
-   its memory (v0.7.1 did not start); the trim above (Dwarf Village) needs no tables and stays. */
-static const u8 *tg_extend(const u8 *tim, const u8 *pic, int stride, int pw, int ph, int need)
-{
-    (void)tim; (void)pic; (void)stride; (void)pw; (void)ph; (void)need; return 0;
-}
-#else
 static u8 tgA[TG_MAXH][TG_SB], tgK[TG_MAXH][TG_SB];
 static u8 tgC[TG_MAXH][TG_CW], tgKC[TG_MAXH][TG_CW], tgKA[TG_MAXH][TG_CW], tgF[TG_MAXH][TG_CW];
 static int tgI[4][TG_MAXH + 1][TG_SB + 1];                /* integrals: class 0 / 1 / 2 counts, re-use counts */
@@ -351,6 +343,7 @@ static void tg_side(const u8 *pic, int stride, int pw, int H, int side, int nb)
    built once per picture (and again, from the first column on, when a wider frame asks for more). */
 static const u8 *tg_extend(const u8 *tim, const u8 *pic, int stride, int pw, int ph, int need)
 {
+    if (!PORT_LAZY_OK()) return 0;          /* (the 3DS: the tables below are not in the program, runtime/lazy_bss.h) */
     static const u8 *k_tim; static u32 k_hash; static int k_pw, k_ph, k_nb, k_need;
     if (need < 2 || need > TG_MAXM || (need & 1) || pw < TG_SB * 2 || pw > TG_MAXW || ph < 2 * TG_B || ph > TG_MAXH) return 0;
     u32 h = 2166136261u;
@@ -386,4 +379,3 @@ static const u8 *tg_extend(const u8 *tim, const u8 *pic, int stride, int pw, int
     }
     return tgE;
 }
-#endif   /* (not the 3DS) */
