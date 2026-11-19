@@ -353,10 +353,9 @@ int main(int argc, char **argv) {
            SystemModeExt; a .3dsx gets what the Homebrew Launcher was given) and how libctru split it */
         extern u32 __ctru_heap_size, __ctru_linear_heap_size;
         bool n3 = false; APT_CheckNew3DS(&n3);
-        fprintf(stderr, "[3ds] %s, %s: application memory %u KB; heap %u KB (%u KB free), linear %u KB; the program and the rest %u KB\n",
+        fprintf(stderr, "[3ds] %s, %s: application memory %u KB; heap %u KB (%u KB free), linear %u KB\n",
                 n3 ? "New 3DS" : "Old 3DS", envIsHomebrew() ? ".3dsx" : "title", (unsigned)(osGetMemRegionSize(MEMREGION_APPLICATION) >> 10),
-                (unsigned)(__ctru_heap_size >> 10), (unsigned)(heap_free() >> 10), (unsigned)(__ctru_linear_heap_size >> 10),
-                (unsigned)((osGetMemRegionSize(MEMREGION_APPLICATION) - __ctru_heap_size - __ctru_linear_heap_size) >> 10));
+                (unsigned)(__ctru_heap_size >> 10), (unsigned)(heap_free() >> 10), (unsigned)(__ctru_linear_heap_size >> 10));
     }
     dsp_component_for_emulators();
     static char image[512], extra[2048];
