@@ -13,14 +13,14 @@
    two game ticks per phase.
 
    Hooks (port/fixes.txt): port_wings_begin(o) at the start of topdownPlayerDropExitStep (substep 0 = the wings),
-   port_wings_draw(o, x, y, z) at the end of topdownDrawRotatedSprite (I0NFO2).  Everything is restored when the step ends or the
-   tables are reloaded by a room change (then nothing is written back). */
+   port_wings_draw(o, x, y, z) at the end of topdownDrawRotatedSprite (I0NFO2).  Everything is restored when the step
+   ends or the tables are reloaded by a room change (then nothing is written back). */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 extern int port_printf(const char *, ...);
-extern char *WPP_DATA[];          /* scratchpad: WPP_DATA[2] = the top-down player's frame table (uploadSpriteFrameToVram) */
+extern char *WPP_DATA[];   /* scratchpad: WPP_DATA[2] = the top-down player's frame table (uploadSpriteFrameToVram) */
 extern char *SPR_DATA[];          /* SPR_DATA[4] = the resident item / HUD sprite table (initItemObject) */
 extern void *NEXT_PRIM;
 extern char *CURRENT_OT;
@@ -43,10 +43,13 @@ const char *port_wings_pre9_dir;   /* --wings-pre9: the extracted PrePre Vol. 9 
    side-view Tomba (frames 282-284 of its orphan script 0x800124A8: kneeling with the fist raised overhead, WPP slot 0,
    the side-view player) */
 typedef struct {
-    const char *name, *wpp_file, *spr_file; const char **dir;
-    unsigned int table_off, expect_n, spr_off; int frames[3], slot, ticks;
+    const char *name, *wpp_file, *spr_file;
+    const char **dir;
+    unsigned int table_off, expect_n, spr_off;
+    int frames[3], slot, ticks;
     int hand_x[3], hand_y[3];                      /* top of the raised hand per frame (sprite px, measured) */
-    unsigned char wpp[3][1024], parts[3][16 * 8]; unsigned int wpp_len[3], part_n[3];
+    unsigned char wpp[3][1024], parts[3][16 * 8];
+    unsigned int wpp_len[3], part_n[3];
     int tried, loaded;
 } Set;
 static Set SETS[2] = {
@@ -54,8 +57,10 @@ static Set SETS[2] = {
     {"PrePre 9 side", "TOMBA/AREA01/A007.000", "TOMBA/AREA01/A008.GAM", &port_wings_pre9_dir, 0, 379, 0x14A0, {282, 283, 284}, 0, 10, {20, 21, 13}, {7, 7, 7}},
 };
 #define PRE9_FEATHER_PAGE "TOMBA/A00002.GAM"    /* 4 bpp, 256 px wide, 256 rows: the resident item page of PrePre 9 */
-#define JP_FEATHER_PAGE "SYSTEM/A00000.GAM"    /* the same page in the JP demo, 512 px wide; must hold the same feather */
-/* feather frames on that page (page px): x, y, w, h; retail keeps them at the same place of tpage 0x14 (VRAM 256,256) */
+/* the same page in the JP demo, 512 px wide; must hold the same feather */
+#define JP_FEATHER_PAGE "SYSTEM/A00000.GAM"
+/* feather frames on that page (page px): x, y, w, h; retail keeps them at the same place of tpage 0x14
+   (VRAM 256,256) */
 static const int FEATHER_RECT[3][4] = {{224, 104, 24, 24}, {200, 80, 24, 16}, {216, 64, 16, 16}};
 static unsigned char feather_px[3][24 * 24 / 2];
 static int feather_ok, feather_tried;
@@ -81,29 +86,59 @@ static int saved_d3c;
 extern unsigned char *PLAYER_EXT;
 
 static unsigned char *read_file(const char *dir, const char *name, long *len) {
-    char p[1024]; FILE *f; unsigned char *b;
+    char p[1024];
+    FILE *f;
+    unsigned char *b;
     snprintf(p, sizeof p, "%s/%s", dir, name);
     f = fopen(p, "rb");
-    if (!f) { port_printf("wings: cannot open %s\n", p); return 0; }
-    fseek(f, 0, SEEK_END); *len = ftell(f); fseek(f, 0, SEEK_SET);
+    if (!f) {
+        port_printf("wings: cannot open %s\n", p);
+        return 0;
+    }
+    fseek(f, 0, SEEK_END);
+    *len = ftell(f);
+    fseek(f, 0, SEEK_SET);
     b = malloc(*len + 16);
-    if (!b || fread(b, 1, *len, f) != (size_t)*len) { fclose(f); free(b); port_printf("wings: cannot read %s\n", p); return 0; }
+    if (!b || fread(b, 1, *len, f) != (size_t)*len) {
+        fclose(f);
+        free(b);
+        port_printf("wings: cannot read %s\n", p);
+        return 0;
+    }
     fclose(f);
     return b;
 }
 
 static unsigned int u32(const unsigned char *p) { return p[0] | p[1] << 8 | p[2] << 16 | p[3] << 24; }
-static void put32(unsigned char *p, unsigned int v) { p[0] = v; p[1] = v >> 8; p[2] = v >> 16; p[3] = v >> 24; }
+static void put32(unsigned char *p, unsigned int v) {
+    p[0] = v;
+    p[1] = v >> 8;
+    p[2] = v >> 16;
+    p[3] = v >> 24;
+}
 
 /* unpacks a GAM file; 0 if not a GAM (or, with want, not that size) */
 static unsigned char *read_gam(const char *dir, const char *name, unsigned int want, unsigned int *out_size) {
-    unsigned char *gam, *pg; long gl; unsigned int size;
-    gam = read_file(dir, name, &gl);
+    unsigned char *gam, *pg;
+    long gam_len;
+    unsigned int size;
+    gam = read_file(dir, name, &gam_len);
     if (!gam) return 0;
-    if (gl < 8 || memcmp(gam, "GAM", 3)) { port_printf("wings: %s/%s is not a GAM file\n", dir, name); free(gam); return 0; }
+    if (gam_len < 8 || memcmp(gam, "GAM", 3)) {
+        port_printf("wings: %s/%s is not a GAM file\n", dir, name);
+        free(gam);
+        return 0;
+    }
     size = u32(gam + 4);
-    if (want && size != want) { port_printf("wings: %s/%s unpacks to %u bytes, expected %u\n", dir, name, size, want); free(gam); return 0; }
-    if (size > (64u << 20)) { free(gam); return 0; }
+    if (want && size != want) {
+        port_printf("wings: %s/%s unpacks to %u bytes, expected %u\n", dir, name, size, want);
+        free(gam);
+        return 0;
+    }
+    if (size > (64u << 20)) {
+        free(gam);
+        return 0;
+    }
     pg = malloc(size + 1024);          /* a copy run can overshoot the size by up to 255 bytes */
     memset(pg, 0, size + 1024);
     lzDecompress(gam, pg);
@@ -114,55 +149,96 @@ static unsigned char *read_gam(const char *dir, const char *name, unsigned int w
 
 /* the three feather frames, cut from the PrePre 9 page and checked against the JP demo's copy; 1 when ready */
 static int load_feather(void) {
-    unsigned char *p9, *jp; int i, y, ok = 1;
+    unsigned char *p9, *jp;
+    int i, y, ok = 1;
     if (feather_tried) return feather_ok;
     feather_tried = 1;
-    if (!port_wings_dir || !port_wings_pre9_dir) { port_printf("wings: both --wings-glide JPDEMO_DIR and --wings-pre9 PRE9_DIR are needed\n"); return 0; }
+    if (!port_wings_dir || !port_wings_pre9_dir) {
+        port_printf("wings: both --wings-glide JPDEMO_DIR and --wings-pre9 PRE9_DIR are needed\n");
+        return 0;
+    }
     p9 = read_gam(port_wings_pre9_dir, PRE9_FEATHER_PAGE, 128 * 256, 0);
     if (!p9) return 0;
     jp = read_gam(port_wings_dir, JP_FEATHER_PAGE, 256 * 256, 0);
-    if (!jp) { free(p9); return 0; }
+    if (!jp) {
+        free(p9);
+        return 0;
+    }
     for (i = 0; i < 3; i++) {
-        int x0 = FEATHER_RECT[i][0], y0 = FEATHER_RECT[i][1], w = FEATHER_RECT[i][2] / 2, h = FEATHER_RECT[i][3];
+        int x0 = FEATHER_RECT[i][0],
+            y0 = FEATHER_RECT[i][1],
+            w = FEATHER_RECT[i][2] / 2,
+            h = FEATHER_RECT[i][3];
         for (y = 0; y < h; y++) {
             memcpy(feather_px[i] + y * w, p9 + (y0 + y) * 128 + x0 / 2, w);
             if (memcmp(feather_px[i] + y * w, jp + (y0 + y) * 256 + x0 / 2, w)) ok = 0;
         }
     }
-    free(p9); free(jp);
-    if (!ok) port_printf("wings: the feather of %s differs from the JP demo's: not the PrePre 9 / SLPM-80165 pages?\n", PRE9_FEATHER_PAGE);
+    free(p9);
+    free(jp);
+    if (!ok)
+        port_printf("wings: the feather of %s differs from the JP demo's: not the PrePre 9 / SLPM-80165 pages?\n",
+                    PRE9_FEATHER_PAGE);
     feather_ok = ok;
     return ok;
 }
 
 /* reads a set's three frames (WPP bytes and SPR parts) once; 1 when ready */
 static int load_set(Set *st) {
-    unsigned char *wpp, *spr; long wl; unsigned int n, i, size;
+    unsigned char *wpp, *spr;
+    long wpp_size;
+    unsigned int n, i, size;
     unsigned char *t;
     if (st->tried) return st->loaded;
     st->tried = 1;
     if (!load_feather()) return 0;
-    wpp = read_file(*st->dir, st->wpp_file, &wl);
+    wpp = read_file(*st->dir, st->wpp_file, &wpp_size);
     if (!wpp) return 0;
-    if (wl < (long)st->table_off + 8) { port_printf("wings: %s is too short\n", st->wpp_file); free(wpp); return 0; }
+    if (wpp_size < (long)st->table_off + 8) {
+        port_printf("wings: %s is too short\n", st->wpp_file);
+        free(wpp);
+        return 0;
+    }
     t = wpp + st->table_off;
     n = u32(t);
-    if (n != st->expect_n) { port_printf("wings: %s +0x%X holds %u frames, expected %u (not the expected disc?)\n", st->wpp_file, st->table_off, n, st->expect_n); free(wpp); return 0; }
+    if (n != st->expect_n) {
+        port_printf("wings: %s +0x%X holds %u frames, expected %u (not the expected disc?)\n", st->wpp_file,
+                    st->table_off, n, st->expect_n);
+        free(wpp);
+        return 0;
+    }
     for (i = 0; i < 3; i++) {
-        unsigned int a = u32(t + 4 + 4 * st->frames[i]), b = u32(t + 4 + 4 * (st->frames[i] + 1));
-        if (b < a || b - a > sizeof st->wpp[0] || b > (unsigned)(wl - st->table_off)) { port_printf("wings: frame %d of %s is bigger than expected\n", st->frames[i], st->wpp_file); free(wpp); return 0; }
-        memcpy(st->wpp[i], t + a, b - a); st->wpp_len[i] = b - a;
+        unsigned int a = u32(t + 4 + 4 * st->frames[i]),
+                     b = u32(t + 4 + 4 * (st->frames[i] + 1));
+        if (b < a || b - a > sizeof st->wpp[0] || b > (unsigned)(wpp_size - st->table_off)) {
+            port_printf("wings: frame %d of %s is bigger than expected\n", st->frames[i], st->wpp_file);
+            free(wpp);
+            return 0;
+        }
+        memcpy(st->wpp[i], t + a, b - a);
+        st->wpp_len[i] = b - a;
     }
     free(wpp);
     spr = read_gam(*st->dir, st->spr_file, 0, &size);
     if (!spr) return 0;
-    if (size < st->spr_off + 4 * (st->expect_n)) { port_printf("wings: %s is too short\n", st->spr_file); free(spr); return 0; }
+    if (size < st->spr_off + 4 * (st->expect_n)) {
+        port_printf("wings: %s is too short\n", st->spr_file);
+        free(spr);
+        return 0;
+    }
     /* SPR table: u16 parts, u16 offset per frame; a part is 16 bytes */
     for (i = 0; i < 3; i++) {
-        int k = st->frames[i]; unsigned char *tb = spr + st->spr_off;
-        unsigned int cnt = tb[4 * k] | tb[4 * k + 1] << 8, src = tb[4 * k + 2] | tb[4 * k + 3] << 8;
-        if (cnt == 0 || cnt > 8 || st->spr_off + src + 16 * cnt > size) { port_printf("wings: the SPR parts of frame %d of %s are not as expected\n", k, st->spr_file); free(spr); return 0; }
-        memcpy(st->parts[i], tb + src, 16 * cnt); st->part_n[i] = cnt;
+        int k = st->frames[i];
+        unsigned char *tb = spr + st->spr_off;
+        unsigned int cnt = tb[4 * k] | tb[4 * k + 1] << 8,
+                     src = tb[4 * k + 2] | tb[4 * k + 3] << 8;
+        if (cnt == 0 || cnt > 8 || st->spr_off + src + 16 * cnt > size) {
+            port_printf("wings: the SPR parts of frame %d of %s are not as expected\n", k, st->spr_file);
+            free(spr);
+            return 0;
+        }
+        memcpy(st->parts[i], tb + src, 16 * cnt);
+        st->part_n[i] = cnt;
     }
     free(spr);
     st->loaded = 1;
@@ -173,7 +249,8 @@ static int load_set(Set *st) {
 /* the area's retail tables (the set's WPP slot and the player's part table) copied with the three frames appended;
    the script then plays base_frame .. base_frame+2; 0 when they do not fit */
 static int compose(void *o, Set *st) {
-    unsigned char *rw = (unsigned char *)WPP_DATA[st->slot], *rs = (unsigned char *)(unsigned long)O_D3C(o);
+    unsigned char *rw = (unsigned char *)WPP_DATA[st->slot],
+                  *rs = (unsigned char *)(unsigned long)O_D3C(o);
     unsigned int n, i, total, send = 0, o2;
     if (!rw || !rs) return 0;
     n = u32(rw);
@@ -193,32 +270,47 @@ static int compose(void *o, Set *st) {
     put32(wpp_table_buf + 4 + 4 * (n + 3), o2);
     /* SPR: n entries of (u16 parts, u16 offset); the parts after the last entry's parts */
     for (i = 0; i < n; i++) {
-        unsigned int cnt = rs[4 * i] | rs[4 * i + 1] << 8, off = rs[4 * i + 2] | rs[4 * i + 3] << 8;
+        unsigned int cnt = rs[4 * i] | rs[4 * i + 1] << 8,
+                     off = rs[4 * i + 2] | rs[4 * i + 3] << 8;
         if (off + 16 * cnt > send) send = off + 16 * cnt;
     }
-    if (send < 4 * n || send + 12 + 16 * (st->part_n[0] + st->part_n[1] + st->part_n[2]) > SPR_MAX || send + 12 > 0xFFFF) return 0;
+    if (send < 4 * n || send + 12 + 16 * (st->part_n[0] + st->part_n[1] + st->part_n[2]) > SPR_MAX ||
+        send + 12 > 0xFFFF)
+        return 0;
     for (i = 0; i < n; i++) {   /* every offset moved by 12 (the three new entries) */
-        unsigned int cnt = rs[4 * i] | rs[4 * i + 1] << 8, off = (rs[4 * i + 2] | rs[4 * i + 3] << 8) + 12;
-        spr_table_buf[4 * i] = cnt; spr_table_buf[4 * i + 1] = cnt >> 8; spr_table_buf[4 * i + 2] = off; spr_table_buf[4 * i + 3] = off >> 8;
+        unsigned int cnt = rs[4 * i] | rs[4 * i + 1] << 8,
+                     off = (rs[4 * i + 2] | rs[4 * i + 3] << 8) + 12;
+        spr_table_buf[4 * i] = cnt;
+        spr_table_buf[4 * i + 1] = cnt >> 8;
+        spr_table_buf[4 * i + 2] = off;
+        spr_table_buf[4 * i + 3] = off >> 8;
     }
     memcpy(spr_table_buf + 4 * n + 12, rs + 4 * n, send - 4 * n);
     o2 = send + 12;
     for (i = 0; i < 3; i++) {
-        spr_table_buf[4 * (n + i)] = st->part_n[i]; spr_table_buf[4 * (n + i) + 1] = 0;
-        spr_table_buf[4 * (n + i) + 2] = o2; spr_table_buf[4 * (n + i) + 3] = o2 >> 8;
+        spr_table_buf[4 * (n + i)] = st->part_n[i];
+        spr_table_buf[4 * (n + i) + 1] = 0;
+        spr_table_buf[4 * (n + i) + 2] = o2;
+        spr_table_buf[4 * (n + i) + 3] = o2 >> 8;
         memcpy(spr_table_buf + o2, st->parts[i], 16 * st->part_n[i]);
         o2 += 16 * st->part_n[i];
     }
     base_frame = n;
-    wpp_table = wpp_table_buf; spr_table = spr_table_buf;
+    wpp_table = wpp_table_buf;
+    spr_table = spr_table_buf;
     /* the animation script: our frames 0 1 2 1, the set's ticks each, then jump back */
     {
         static const unsigned short seq[4] = {0, 1, 2, 1};
         for (i = 0; i < 4; i++) {
-            script[4 * i] = n + seq[i]; script[4 * i + 1] = 0; script[4 * i + 2] = 0;
+            script[4 * i] = n + seq[i];
+            script[4 * i + 1] = 0;
+            script[4 * i + 2] = 0;
             script[4 * i + 3] = st->ticks | (i == 3 ? 0x4000 : 0);
         }
-        { unsigned int a = (unsigned int)(unsigned long)script; memcpy(&script[16], &a, 4); }
+        {
+            unsigned int a = (unsigned int)(unsigned long)script;
+            memcpy(&script[16], &a, 4);
+        }
     }
     return 1;
 }
@@ -238,7 +330,9 @@ static void start(void *o, Set *st) {
     port_printf("wings: %s glide at b04 %d step %d state %d sub %d\n", st->name, O_B04(o), O_STEP(o),
                 ((unsigned char *)o)[6], O_SUBSTEP(o));
     {   /* the feather texels of the PrePre 9 page over retail's (tpage 0x14 = VRAM 256,256; same place, 4 bpp) */
-        typedef struct { short x, y, w, h; } R;
+        typedef struct {
+            short x, y, w, h;
+        } R;
         extern int LoadImage(void *, unsigned *);
         int i;
         for (i = 0; i < 3; i++) {
@@ -246,19 +340,29 @@ static void start(void *o, Set *st) {
             LoadImage(&r, (unsigned *)feather_px[i]);
         }
     }
-    if (!compose(o, st)) { port_printf("wings: the area's tables could not be extended (%s)\n", st->name); return; }
+    if (!compose(o, st)) {
+        port_printf("wings: the area's tables could not be extended (%s)\n", st->name);
+        return;
+    }
     cur = st;
-    saved_wpp = WPP_DATA[st->slot]; saved_d3c = O_D3C(o);
+    saved_wpp = WPP_DATA[st->slot];
+    saved_d3c = O_D3C(o);
     WPP_DATA[st->slot] = (char *)wpp_table;
     O_D3C(o) = (int)(unsigned long)spr_table;
     O_ANIM(o) = script;
     O_ANIMFRAME(o) = base_frame;       /* the index the next upload reads: one of ours */
     AnimLoadDuration(o);
-    active = 1; ticks = 0; player = o; want_b04 = O_B04(o); want_step = O_STEP(o);
+    active = 1;
+    ticks = 0;
+    player = o;
+    want_b04 = O_B04(o);
+    want_step = O_STEP(o);
 }
 
 /* topdownPlayerDropExitStep, state 0 (after the retail animation was set): take over when it is the Charity Wings */
-void port_wings_begin(void *o) { if (O_SUBSTEP(o) == 0) start(o, &SETS[0]); }
+void port_wings_begin(void *o) {
+    if (O_SUBSTEP(o) == 0) start(o, &SETS[0]);
+}
 /* topdownPlayerLandStep, state 0: the arrival in the next overhead area (the drop from the sky after the flight) gets
    the same glide until the feet touch the ground */
 void port_wings_land(void *o) { start(o, &SETS[0]); }
@@ -275,9 +379,12 @@ static void restore(void *o) {
     /* write back only what nobody else changed in the meantime (a room load replaces both) */
     if (cur && WPP_DATA[cur->slot] == (char *)wpp_table) WPP_DATA[cur->slot] = saved_wpp;
     if (o && O_D3C(o) == (int)(unsigned long)spr_table) O_D3C(o) = saved_d3c;
-    active = 0; player = 0; cur = 0;
+    active = 0;
+    player = 0;
+    cur = 0;
 }
 
+/* the GPU packet: tag, colour and code, then one vertex per row (x, y; u, v and the clut / tpage word) */
 typedef struct {
     unsigned int tag;
     unsigned char r0, g0, b0, code;
@@ -290,41 +397,78 @@ typedef struct {
 /* end of topdownDrawRotatedSprite / drawPlayerSpriteDefault: (x, y) = the projected player position, z = its
    ordering-table depth (otz) */
 void port_wings_draw(void *o, int x, int y, int z) {
-    int c, ph, ff, mirror, w, h, u0, v0, dx, dy, hx, hy, qx, qy, fx, fy, flip, d;
-    unsigned char *part, *fe; PolyFT4 *p; unsigned int *ot, v;
+    int our_frame, step_phase, feather_idx, mirror, w, h, u0, v0, dx, dy,
+        hand_px, hand_py, quill_px, quill_py, quad_x, quad_y, flip, ot_off;
+    unsigned char *part, *feather_spr;
+    PolyFT4 *p;
+    unsigned int *ot, v;
     if (!active || o != player || !cur) return;
-    if (O_B04(o) != want_b04 || O_STEP(o) != want_step || WPP_DATA[cur->slot] != (char *)wpp_table) { restore(o); return; }
-    c = *(unsigned short *)O_ANIM(o) - base_frame;      /* the script's frame -> 0..2 */
-    if (c < 0 || c > 2) c = 0;
-    ph = (ticks / TICKS_PER_PHASE) % 8; ticks++;
-    ff = PHASE[ph][0]; mirror = PHASE[ph][1];
+    if (O_B04(o) != want_b04 || O_STEP(o) != want_step || WPP_DATA[cur->slot] != (char *)wpp_table) {
+        restore(o);
+        return;
+    }
+    our_frame = *(unsigned short *)O_ANIM(o) - base_frame;      /* the script's frame -> 0..2 */
+    if (our_frame < 0 || our_frame > 2) our_frame = 0;
+    step_phase = (ticks / TICKS_PER_PHASE) % 8;
+    ticks++;
+    feather_idx = PHASE[step_phase][0];
+    mirror = PHASE[step_phase][1];
     /* the raised hand on screen: part 0 of our frame (dx, dy at +14/+15; w at +10) */
-    part = spr_table + (spr_table[4 * (base_frame + c) + 2] | spr_table[4 * (base_frame + c) + 3] << 8);
-    dx = (signed char)part[14]; dy = (signed char)part[15]; w = part[10];
-    if (cur->slot == 2) flip = (unsigned)((O_ANIMFRAME(o) & 7) - 3) < 3;      /* topdownDrawRotatedSprite mirrors facings 3, 4, 5 */
-    else flip = ((O_B9D(o) ? PLAYER_EXT[7] : O_ANIMFRAME(o)) & 1) != 0;       /* drawPlayerSpriteDefault: the facing bit */
-    hx = flip ? x - (dx + w) + (w - 1 - cur->hand_x[c]) : x + dx + cur->hand_x[c];
-    hy = y + dy + cur->hand_y[c];
+    part = spr_table + (spr_table[4 * (base_frame + our_frame) + 2] | spr_table[4 * (base_frame + our_frame) + 3] << 8);
+    dx = (signed char)part[14];
+    dy = (signed char)part[15];
+    w = part[10];
+    if (cur->slot == 2)   /* topdownDrawRotatedSprite mirrors facings 3, 4, 5 */
+        flip = (unsigned)((O_ANIMFRAME(o) & 7) - 3) < 3;
+    else                  /* drawPlayerSpriteDefault: the facing bit */
+        flip = ((O_B9D(o) ? PLAYER_EXT[7] : O_ANIMFRAME(o)) & 1) != 0;
+    hand_px = flip ? x - (dx + w) + (w - 1 - cur->hand_x[our_frame]) : x + dx + cur->hand_x[our_frame];
+    hand_py = y + dy + cur->hand_y[our_frame];
     /* the feather frame of the retail item table */
     if (!SPR_DATA[4]) return;
-    fe = (unsigned char *)SPR_DATA[4];
-    fe = fe + (fe[4 * FEATHER_FRAME[ff] + 2] | fe[4 * FEATHER_FRAME[ff] + 3] << 8);
-    u0 = fe[0]; v0 = fe[1]; w = fe[10]; h = fe[11];
-    qx = QUILL[ff][0]; qy = QUILL[ff][1];
-    if (mirror ^ flip) qx = w - 1 - qx;
-    fx = hx - qx; fy = hy - 1 - qy;
+    feather_spr = (unsigned char *)SPR_DATA[4];
+    feather_spr = feather_spr + (feather_spr[4 * FEATHER_FRAME[feather_idx] + 2] |
+                                 feather_spr[4 * FEATHER_FRAME[feather_idx] + 3] << 8);
+    u0 = feather_spr[0];
+    v0 = feather_spr[1];
+    w = feather_spr[10];
+    h = feather_spr[11];
+    quill_px = QUILL[feather_idx][0];
+    quill_py = QUILL[feather_idx][1];
+    if (mirror ^ flip) quill_px = w - 1 - quill_px;
+    quad_x = hand_px - quill_px;
+    quad_y = hand_py - 1 - quill_py;
     p = (PolyFT4 *)NEXT_PRIM;
     memset(p, 0, sizeof *p);
-    p->code = 0x2d; p->r0 = p->g0 = p->b0 = 0x80;
-    p->tpage = 0x14; p->clut = 0x7AD6;
-    if (mirror ^ flip) { p->u0 = u0 + w; p->u1 = u0; p->u2 = u0 + w; p->u3 = u0; }
-    else { p->u0 = u0; p->u1 = u0 + w; p->u2 = u0; p->u3 = u0 + w; }
-    p->v0 = p->v1 = v0; p->v2 = p->v3 = v0 + h;
-    p->x0 = fx; p->y0 = fy; p->x1 = fx + w; p->y1 = fy; p->x2 = fx; p->y2 = fy + h; p->x3 = fx + w; p->y3 = fy + h;
+    p->code = 0x2d;
+    p->r0 = p->g0 = p->b0 = 0x80;
+    p->tpage = 0x14;
+    p->clut = 0x7AD6;
+    if (mirror ^ flip) {
+        p->u0 = u0 + w;
+        p->u1 = u0;
+        p->u2 = u0 + w;
+        p->u3 = u0;
+    } else {
+        p->u0 = u0;
+        p->u1 = u0 + w;
+        p->u2 = u0;
+        p->u3 = u0 + w;
+    }
+    p->v0 = p->v1 = v0;
+    p->v2 = p->v3 = v0 + h;
+    p->x0 = quad_x;
+    p->y0 = quad_y;
+    p->x1 = quad_x + w;
+    p->y1 = quad_y;
+    p->x2 = quad_x;
+    p->y2 = quad_y + h;
+    p->x3 = quad_x + w;
+    p->y3 = quad_y + h;
     /* one ordering-table slot nearer than the player, so the feather is drawn over the hand (the game's otadd) */
-    d = (((signed char)O_B0F(o) - 1) + z) << 2;
-    if (d < 0) d = 0;
-    ot = (unsigned int *)(CURRENT_OT + 0x10 + d);
+    ot_off = (((signed char)O_B0F(o) - 1) + z) << 2;
+    if (ot_off < 0) ot_off = 0;
+    ot = (unsigned int *)(CURRENT_OT + 0x10 + ot_off);
     if ((unsigned)((char *)ot - CURRENT_OT) >= 0xca0) return;
     v = *ot;
     *ot = (unsigned int)(unsigned long)p;
