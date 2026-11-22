@@ -1,8 +1,8 @@
 /* Psy-Q library replacements (carried over from port/shims/psyq.c to the native-pointer port: function pointers
  * are native, the scratchpad and the task table are the data-image arrays).
- * Grouped like the Psy-Q libraries: libapi (BIOS: events, threads, critical sections), libetc (VSync,
- * callbacks), libgpu (VRAM transfers, ordering tables, environments), libgte (matrix helpers on the software
- * GTE), libcd (sector reads from the user's disc image), libspu/libsnd (silent stubs; the memory card is card.c, the MDEC is mdec.c).
+ * Grouped like the Psy-Q libraries: libapi (BIOS: events, threads, critical sections), libetc (VSync, callbacks),
+ * libgpu (VRAM transfers, ordering tables, environments), libgte (matrix helpers on the software GTE), libcd (sector
+ * reads from the user's disc image), libspu/libsnd (silent stubs; the memory card is card.c, the MDEC is mdec.c).
  * Every function here has the name of the Psy-Q unit it replaces, so gen2.py generates no stub for it. */
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,46 +16,68 @@
 #include "port_runtime.h"
 #include "port_chd.h"
 
-typedef unsigned char u8; typedef unsigned short u16; typedef short s16; typedef int s32; typedef unsigned int u32;
+typedef unsigned char u8;
+typedef unsigned short u16;
+typedef short s16;
+typedef int s32;
+typedef unsigned int u32;
 typedef struct { s16 x, y, w, h; } RECT;
 #ifdef __wasm__
 #include <string.h>          /* (wasm32: size_t is unsigned long) */
 #else
 void *memcpy(void *d, const void *s, unsigned int n);
 #endif
-typedef struct { s16 m[3][3]; s32 t[3]; } MATRIX;
+typedef struct {
+    s16 m[3][3];
+    s32 t[3];
+} MATRIX;
 typedef struct { s32 vx, vy, vz, pad; } VECTOR;
 typedef struct { s16 vx, vy, vz, pad; } SVECTOR;
 
 /* ================================================================== libapi / libetc */
-void *port_vsync_event_fn;          /* OpenEvent(RCntCNT3 / VBlank, ...) handler: the game's vblankHandler (set in card.c) */
+/* OpenEvent(RCntCNT3 / VBlank, ...) handler: the game's vblankHandler (set in card.c) */
+void *port_vsync_event_fn;
 static void (*vsync_cb)(void);
 int port_frame;
 int port_max_frames;
 static unsigned long long vblank_epoch_us;   /* absolute schedule: vblank n is due at epoch + n * 1e6 / hz */
 static unsigned vblank_n;
 int port_stall_frame, port_stall_ms;             /* --stall FRAME:MS (test hook): sleep MS ms before that vblank */
-int port_show_fps;                              /* --show-fps: log the measured vblank rate every second; 2: with a histogram of the inter-vblank intervals */
-unsigned long long port_prof_wait_us, port_prof_present_us, port_prof_panel_us, port_prof_sound_us;   /* the fps line's breakdown (port_prof_draw_us: gpu.c) */
-static unsigned vb_hist[12];                    /* ms buckets: <10,10-14,15-17,18-19,20-21,22-24,25-29,30-39,40-59,60-99,100-199,>=200 */
+/* --show-fps: log the measured vblank rate every second; 2: with a histogram of the inter-vblank intervals */
+int port_show_fps;
+/* the fps line's breakdown (port_prof_draw_us: gpu.c) */
+unsigned long long port_prof_wait_us, port_prof_present_us, port_prof_panel_us, port_prof_sound_us;
+/* ms buckets: <10,10-14,15-17,18-19,20-21,22-24,25-29,30-39,40-59,60-99,100-199,>=200 */
+static unsigned vb_hist[12];
 static unsigned long long vb_last_us, vb_max_us;
 static unsigned long long vb_total_n, vb_total_t0;
 static int vb_bucket(unsigned long long us) {
     unsigned ms = (unsigned)((us + 500) / 1000);   /* nearest ms */
-    return ms < 10 ? 0 : ms < 15 ? 1 : ms < 18 ? 2 : ms < 20 ? 3 : ms < 22 ? 4 : ms < 25 ? 5 : ms < 30 ? 6 : ms < 40 ? 7 : ms < 60 ? 8 : ms < 100 ? 9 : ms < 200 ? 10 : 11;
+    return ms < 10 ? 0 : ms < 15 ? 1 : ms < 18 ? 2 : ms < 20 ? 3 : ms < 22 ? 4 : ms < 25 ? 5 : ms < 30 ? 6
+           : ms < 40 ? 7 : ms < 60 ? 8 : ms < 100 ? 9 : ms < 200 ? 10 : 11;
 }
-static const char *const vb_names[12] = { "<10", "10-14", "15-17", "18-19", "20-21", "22-24", "25-29", "30-39", "40-59", "60-99", "100-199", ">=200" };
+static const char *const vb_names[12] = { "<10", "10-14", "15-17", "18-19", "20-21", "22-24", "25-29", "30-39",
+                                          "40-59", "60-99", "100-199", ">=200" };
 static void vb_hist_print(const char *when) {
-    char line[320]; int n = 0;
+    char line[320];
+    int n = 0;
     for (int i = 0; i < 12; i++) if (vb_hist[i]) {
-        const char *s = vb_names[i]; while (*s && n < 300) line[n++] = *s++;
+        const char *s = vb_names[i];
+        while (*s && n < 300) line[n++] = *s++;
         line[n++] = ':';
-        unsigned v = vb_hist[i]; char b[12]; int k = 0; do { b[k++] = '0' + v % 10; v /= 10; } while (v);
+        unsigned v = vb_hist[i];
+        char b[12];
+        int k = 0;
+        do {
+            b[k++] = '0' + v % 10;
+            v /= 10;
+        } while (v);
         while (k && n < 300) line[n++] = b[--k];
         line[n++] = ' ';
     }
     line[n] = 0;
-    port_printf("[port] vblank intervals (ms:count) %s: %s max %d.%d ms\n", when, line, (int)(vb_max_us / 1000), (int)(vb_max_us / 100 % 10));
+    port_printf("[port] vblank intervals (ms:count) %s: %s max %d.%d ms\n", when, line, (int)(vb_max_us / 1000),
+                (int)(vb_max_us / 100 % 10));
     for (int i = 0; i < 12; i++) vb_hist[i] = 0;
     vb_max_us = 0;
 }
@@ -64,19 +86,23 @@ static void vb_hist_print(const char *when) {
 void port_pacing_report(void) {
     if (port_realtime && vb_total_n > 1) {
         unsigned long long t = port_time_us() - vb_total_t0;
-        if (t) port_printf("[port] paced: %llu vblanks in %llu.%03llu s = %llu.%02llu vblank/s overall\n", vb_total_n, t / 1000000ull, t / 1000 % 1000,
-                           vb_total_n * 1000000ull / t, vb_total_n * 100000000ull / t % 100);
+        if (t)
+            port_printf("[port] paced: %llu vblanks in %llu.%03llu s = %llu.%02llu vblank/s overall\n", vb_total_n,
+                        t / 1000000ull, t / 1000 % 1000, vb_total_n * 1000000ull / t,
+                        vb_total_n * 100000000ull / t % 100);
         if (port_show_fps >= 2) vb_hist_print("at exit");
     }
 }
 int port_realtime = 0;               /* 0 = run as fast as possible (headless), 1 = paced at port_hz */
-int port_hz = PORT_DEFAULT_HZ; extern int port_hfr_fps;        /* vblanks per second when paced: 50 (PAL, default) or 60 (--hz 60; the NTSC versions' default) */
-/* The 60 Hz mode (docs/PORT.md "60 Hz mode"): the PAL game logic is the NTSC logic frame for frame, so --hz 60 plays at the
- * US/JP speed; the one PAL change for 50 Hz is the play-time clock (GAME.totalTimePlayed counts gameplay frames and the
- * PAL builds divide it by 50 * 60 / 50 * 3600: memCardDrawPlayTime, D0SPSUB2 0x800E999C, the ending's x013
- * updateSceneSequence; the US build divides by 60). Called by the five counters (gameplayMainHandler, areaMode2/4/5/6Handler,
- * #ifdef PORT2): at 60 Hz the counter skips every sixth tick, so it stays in 1/50 s: the PAL screens show real time and
- * a save keeps the same units whichever rate it was played at. */
+/* vblanks per second when paced: 50 (PAL, default) or 60 (--hz 60; the NTSC versions' default) */
+int port_hz = PORT_DEFAULT_HZ;
+extern int port_hfr_fps;
+/* The 60 Hz mode (docs/PORT.md "60 Hz mode"): the PAL game logic is the NTSC logic frame for frame, so --hz 60 plays at
+ * the US/JP speed; the one PAL change for 50 Hz is the play-time clock (GAME.totalTimePlayed counts gameplay frames and
+ * the PAL builds divide it by 50 * 60 / 50 * 3600: memCardDrawPlayTime, D0SPSUB2 0x800E999C, the ending's x013
+ * updateSceneSequence; the US build divides by 60). Called by the five counters (gameplayMainHandler,
+ * areaMode2/4/5/6Handler, #ifdef PORT2): at 60 Hz the counter skips every sixth tick, so it stays in 1/50 s: the PAL
+ * screens show real time and a save keeps the same units whichever rate it was played at. */
 int port_play_time_tick(void)
 {
     static int n;
@@ -94,21 +120,29 @@ static void call_psx(void *fn) { ((void (*)(void))fn)(); }
    --poke-every INTERVAL:ADDR:VALUE[:SIZE]: the same every INTERVAL vblanks (mods: infinite lives / vitality);
    stored as a negative frame.  A FRAME of gN counts from the first vblank of gameplay (the first area overlay load,
    after the new game's initGameConfig): the launcher's start-of-game mods, whenever the player starts. */
-static struct { int frame, size, count, ingame; u32 addr, value; } pokes[32];
+static struct {
+    int frame, size, count, ingame;
+    u32 addr, value;
+} pokes[32];
 static int game_start_frame = -1;
 extern int port_in_game;
 static int n_pokes;
 static u32 hexval(const char **p) {
-    u32 v = 0; const char *h = *p;
+    u32 v = 0;
+    const char *h = *p;
     if (h[0] == '0' && (h[1] | 32) == 'x') h += 2;
     for (; (*h >= '0' && *h <= '9') || ((*h | 32) >= 'a' && (*h | 32) <= 'f'); h++)
         v = v * 16 + (*h <= '9' ? *h - '0' : (*h | 32) - 'a' + 10);
-    *p = h; return v;
+    *p = h;
+    return v;
 }
 /* the retail data names the --poke forms NAME[+OFF] accept: their address in the version this build runs
    (gen/version/port_version.h, port/tools/portver.py), so a launcher's mods write the same field in every release */
 unsigned int port_addr_of_name(const char *n, int len) {
-    static const struct { const char *name; u32 addr; } names[] = {
+    static const struct {
+        const char *name;
+        u32 addr;
+    } names[] = {
         {"GAME", PORT_A_GAME}, {"GVARS", PORT_A_GVARS}, {"PLAYER", PORT_A_PLAYER}, {"SCRIPT_FLAGS", PORT_A_SCRIPT_FLAGS},
         {"IS_DEBUG_MODE_ENABLED", PORT_A_IS_DEBUG_MODE_ENABLED}};
     for (unsigned i = 0; i < sizeof names / sizeof names[0]; i++)
@@ -117,16 +151,25 @@ unsigned int port_addr_of_name(const char *n, int len) {
 }
 /* ADDR of a --poke: hex (8009C960), or NAME[+HEXOFF] (GAME+C) for a name of port_addr_of_name; *ok = 0 if unknown */
 static u32 poke_addr(const char **p, int *ok) {
-    const char *s = *p, *e = s; int named = 0;
+    const char *s = *p,
+               *e = s;
+    int named = 0;
     while ((*e >= '0' && *e <= '9') || ((*e | 32) >= 'a' && (*e | 32) <= 'z') || *e == '_') {
-        if (((*e | 32) >= 'g' && (*e | 32) <= 'z' && !(e == s + 1 && *s == '0' && (*e | 32) == 'x')) || *e == '_') named = 1;
+        if (((*e | 32) >= 'g' && (*e | 32) <= 'z' && !(e == s + 1 && *s == '0' && (*e | 32) == 'x')) || *e == '_')
+            named = 1;
         e++;
     }
     *ok = 1;
     if (!named) return hexval(p);
     u32 a = port_addr_of_name(s, (int)(e - s));
-    if (!a) { port_printf("[port] --poke: unknown name %.*s (ignored)\n", (int)(e - s), s); *ok = 0; }
-    if (*e == '+') { e++; a += hexval(&e); }
+    if (!a) {
+        port_printf("[port] --poke: unknown name %.*s (ignored)\n", (int)(e - s), s);
+        *ok = 0;
+    }
+    if (*e == '+') {
+        e++;
+        a += hexval(&e);
+    }
     *p = e;
     return a;
 }
@@ -144,21 +187,34 @@ void port_poke_add_every(const char *s, int every) {
     pokes[n_pokes].value = hexval(&s);
     pokes[n_pokes].size = *s == ':' ? s[1] - '0' : 1;
     pokes[n_pokes].count = 1;
-    if (*s == ':') { s += 2; if (*s == 'x') { int c = 0; s++; while (*s >= '0' && *s <= '9') c = c * 10 + *s++ - '0'; if (c > 0) pokes[n_pokes].count = c; } }
+    if (*s == ':') {
+        s += 2;
+        if (*s == 'x') {
+            int c = 0;
+            s++;
+            while (*s >= '0' && *s <= '9') c = c * 10 + *s++ - '0';
+            if (c > 0) pokes[n_pokes].count = c;
+        }
+    }
     n_pokes++;
 }
 void port_poke_add(const char *s) { port_poke_add_every(s, 0); }
 /* --dump-ram FRAME:PATH: write the 2 MB of RAM, then the 1 KB scratchpad, at the start of vblank FRAME */
-static int dump_ram_frame; static const char *dump_ram_path;
+static int dump_ram_frame;
+static const char *dump_ram_path;
 void port_dump_ram_add(const char *s) {
     int f = 0;
     while (*s >= '0' && *s <= '9') f = f * 10 + *s++ - '0';
     if (*s++ != ':') return;
-    dump_ram_frame = f; dump_ram_path = s;
+    dump_ram_frame = f;
+    dump_ram_path = s;
 }
 static void dump_ram(void) {      /* the 2 MB of RAM in retail order, then the 1 KB scratchpad (pointers are native) */
     FILE *f = fopen(dump_ram_path, "wb");
-    if (!f) { port_printf("[port] cannot write %s\n", dump_ram_path); return; }
+    if (!f) {
+        port_printf("[port] cannot write %s\n", dump_ram_path);
+        return;
+    }
     for (u32 a = 0x80000000u; a < 0x80200000u; a += 0x400) fwrite(port_ram_ptr(a), 1, 0x400, f);
     fwrite(port_scratch, 1, 0x400, f);
     fclose(f);
@@ -170,7 +226,8 @@ void port_menu_add(const char *s) {
     int f = 0;
     while (*s >= '0' && *s <= '9') f = f * 10 + *s++ - '0';
     if (*s++ != ':') return;
-    menu_frame = f; menu_id = 0;
+    menu_frame = f;
+    menu_id = 0;
     while (*s >= '0' && *s <= '9') menu_id = menu_id * 10 + *s++ - '0';
 }
 static void menu_open(void) {
@@ -179,21 +236,31 @@ static void menu_open(void) {
     for (int i = 0; i < 3; i++) {                   /* the task table: the entry running gameMainTask */
         u8 *t = (u8 *)port_hiram + i * 0x70;
         u32 entry = *(u32 *)(t + 0xC);
-        if (entry == (u32)gameMainTask) { task = (u32)t; break; }
+        if (entry == (u32)gameMainTask) {
+            task = (u32)t;
+            break;
+        }
     }
-    if (!task) { port_printf("[port] --menu: gameMainTask is not running\n"); return; }
+    if (!task) {
+        port_printf("[port] --menu: gameMainTask is not running\n");
+        return;
+    }
     u16 *w = (u16 *)(task + 0x48);
-    if (w[0] != 1 || w[1] != 1 || w[2] == 3) { port_printf("[port] --menu: task state %d/%d/%d is not gameplay, skipped\n", w[0], w[1], w[2]); return; }
+    if (w[0] != 1 || w[1] != 1 || w[2] == 3) {
+        port_printf("[port] --menu: task state %d/%d/%d is not gameplay, skipped\n", w[0], w[1], w[2]);
+        return;
+    }
     u32 saved = SPAD32(0x1D4);                /* TASK_C: openMenuScreen works on the current task */
     SPAD32(0x1D4) = task;
     openMenuScreen((short)menu_id);
     SPAD32(0x1D4) = saved;
     port_printf("[port] frame %d: menu screen %d opened\n", port_frame, menu_id);
 }
-/* --title FRAME:ID[:start|:done] (debug): spawn the event title banner of event ID of the current area at that frame, as an
-   event start would (spawnEventTitle = FUN_8005aa74; the letters' layout lists are language data: --lang tests).
+/* --title FRAME:ID[:start|:done] (debug): spawn the event title banner of event ID of the current area at that frame,
+   as an event start would (spawnEventTitle = FUN_8005aa74; the letters' layout lists are language data: --lang tests).
    ID may be 0xNN.  With ":start" the whole "event received" sequence runs: the event's flag is cleared and
-   setEventStarted(ID, 0, 0) plays banner, sub-screen message, jingle (sfx 0x2A) and icon, as a script would; with ":done"
+   setEventStarted(ID, 0, 0) plays banner, sub-screen message, jingle (sfx 0x2A) and icon, as a script would; with
+   ":done"
    the title is spawned as setEventComplete does (completed = 1: the letters regroup into the "completed" banner).
    It runs from the game loop (port/fixes.txt gameMainTask -> port_title_tick), not from the vblank: spawning the
    banner objects in the middle of a frame corrupted the object lists (side-view areas crashed in drawPlayerSprite). */
@@ -202,7 +269,8 @@ void port_title_add(const char *s) {
     int f = 0;
     while (*s >= '0' && *s <= '9') f = f * 10 + *s++ - '0';
     if (*s++ != ':') return;
-    title_frame = f; title_id = (int)strtol(s, (char **)&s, 0);
+    title_frame = f;
+    title_id = (int)strtol(s, (char **)&s, 0);
     title_start = !strcmp(s, ":start") ? 1 : !strcmp(s, ":done") ? 2 : 0;
 }
 /* Event titles of the rebuilt Civilization towns (--civ-test; port/fixes.txt spawnEventTitle).  The MAIN0 table that
@@ -215,73 +283,104 @@ void port_title_add(const char *s) {
 #include "port_event_titles.h"
 int port_civ_title_civ;                            /* set by the spawnEventTitle hook: in a rebuilt town */
 static signed char civ_title_recs[64 * 4 + 4];
-static const char *const civ_title90[9] = {        /* word lengths of text 90 per language (BFGIHSPWD), '/' = line break */
+/* word lengths of text 90 per language (BFGIHSPWD), '/' = line break */
+static const char *const civ_title90[9] = {
     "3 5/5", "3 5/10", "14/6", "8/10/4", "8/6 5", "10 2/4 5", "10 2/4 5", "6 1/12", "6 3/3 5 4" };
 signed char *port_civ_title(int event_id, unsigned char **src, signed char *p) {
-    extern unsigned char D_80080410[]; extern int port_lang;
+    extern unsigned char D_80080410[];
+    extern int port_lang;
     unsigned char *base = *(unsigned char **)((unsigned char *)port_scratch + 0x39C);
-    int idx = D_80080410[event_id], n = 0, k, nl = 0, ln[8], gaps[64], j;
-    const char *lay = 0;
-    int li = port_lang >= 0 && port_lang < 9 ? port_lang : 0, civ;
+    int idx = D_80080410[event_id],
+        n = 0,
+        k,
+        n_lines = 0,
+        line_end[8],
+        gaps[64],
+        j;
+    const char *word_list = 0;
+    int li = port_lang >= 0 && port_lang < 9 ? port_lang : 0,
+        civ;
     if (!base || idx != 0xFF) return p;               /* a real title: the engine's own list */
     civ = port_civ_title_civ;
     /* port-only titles (--cut-content / --civ-test): 0x4C -> text 90, 0x53 -> text 126 (both unreferenced on the disc),
        the others translated from the Japanese per-area lists (tools/port_event_titles.py, notes/secrets.md) */
-    if (event_id == 0x4C) { idx = 90; lay = civ_title90[li]; }
-    else if (event_id == 0x53) { idx = 126; lay = li == 0 ? "3 5/5 3" : li == 5 ? "5/7" : 0; }
-    else {
+    if (event_id == 0x4C) {
+        idx = 90;
+        word_list = civ_title90[li];
+    } else if (event_id == 0x53) {
+        idx = 126;
+        word_list = li == 0 ? "3 5/5 3" : li == 5 ? "5/7" : 0;
+    } else {
         for (k = 0; k < PORT_ET_N; k++) if (port_et_events[k] == event_id && port_et_tab[li][k].w) break;
-        if (k < PORT_ET_N) { *src = (unsigned char *)port_et_tab[li][k].w; lay = port_et_tab[li][k].lay; idx = -1; }
-        else if (!civ) return p;                      /* outside the rebuilt towns: the engine as it was */
+        if (k < PORT_ET_N) {
+            *src = (unsigned char *)port_et_tab[li][k].w;
+            word_list = port_et_tab[li][k].lay;
+            idx = -1;
+        } else if (!civ) return p;                      /* outside the rebuilt towns: the engine as it was */
         else idx = 1;
     }
-    if (idx >= 0) { unsigned char *off = base + *(unsigned short *)(base + 8);
-      *src = off + *(unsigned short *)(off + idx * 2); }
+    if (idx >= 0) {
+        unsigned char *off = base + *(unsigned short *)(base + 8);
+        *src = off + *(unsigned short *)(off + idx * 2);
+    }
     while (n < 64 && ((unsigned short *)*src)[n] != 0xFFFF) n++;
     if (!n) return 0;
     for (k = 0; k < n; k++) gaps[k] = 0;
-    if (lay) {                                        /* the language's words, if their letters add up to the text */
-        int w, tot = 0, a[64], na = 0, br[64];
-        for (const char *c = lay; *c; ) {
-            w = 0; while (*c >= '0' && *c <= '9') w = w * 10 + *c++ - '0';
-            br[na] = *c == '/'; a[na++] = w; tot += w; if (*c) c++;
+    if (word_list) {                                  /* the language's words, if their letters add up to the text */
+        int word, total = 0, word_len[64], n_words = 0, breaks[64];
+        for (const char *c = word_list; *c; ) {
+            word = 0;
+            while (*c >= '0' && *c <= '9') word = word * 10 + *c++ - '0';
+            breaks[n_words] = *c == '/';
+            word_len[n_words++] = word;
+            total += word;
+            if (*c) c++;
         }
-        if (tot == n) {
-            for (j = 0, k = 0; j < na; j++) {
-                if (j && !br[j - 1]) gaps[k] = 1;
-                if (j && br[j - 1]) ln[nl++] = k;
-                k += a[j];
+        if (total == n) {
+            for (j = 0, k = 0; j < n_words; j++) {
+                if (j && !breaks[j - 1]) gaps[k] = 1;
+                if (j && breaks[j - 1]) line_end[n_lines++] = k;
+                k += word_len[j];
             }
         }
     }
-    if (!nl && n > 11) ln[nl++] = (n + 1) / 2;        /* no word list: two halves */
-    ln[nl] = n;
-    { int start = 0, r = 0, o = 0;
-      for (int li = 0; li <= nl; li++) {
-          int end = ln[li], width = 0;
-          for (k = start; k < end; k++) width += 2 + (k > start ? gaps[k] : 0);
-          int col = -(width / 2), row = -2 * (nl - li) + (nl ? 0 : 0);
-          for (k = start; k < end; k++, r++) {
-              if (k > start) col += gaps[k];
-              int f = r < 6 ? 0x80 | r : 2 + r * 4 / n; if ((f & 0xF) > 5) f = 5;
-              civ_title_recs[o++] = 0; civ_title_recs[o++] = col; civ_title_recs[o++] = row; civ_title_recs[o++] = f;
-              col += 2;
-          }
-          start = end;
-      }
-      civ_title_recs[o] = -1; }
-    port_printf("[port] civ: event 0x%02X title from text %d (%d letters, %d lines)\n", event_id, idx, n, nl + 1);
+    if (!n_lines && n > 11) line_end[n_lines++] = (n + 1) / 2;        /* no word list: two halves */
+    line_end[n_lines] = n;
+    {
+        int start = 0, r = 0, o = 0;
+        for (int li = 0; li <= n_lines; li++) {
+            int end = line_end[li],
+                width = 0;
+            for (k = start; k < end; k++) width += 2 + (k > start ? gaps[k] : 0);
+            int col = -(width / 2),
+                row = -2 * (n_lines - li) + (n_lines ? 0 : 0);
+            for (k = start; k < end; k++, r++) {
+                if (k > start) col += gaps[k];
+                int f = r < 6 ? 0x80 | r : 2 + r * 4 / n;
+                if ((f & 0xF) > 5) f = 5;
+                civ_title_recs[o++] = 0;
+                civ_title_recs[o++] = col;
+                civ_title_recs[o++] = row;
+                civ_title_recs[o++] = f;
+                col += 2;
+            }
+            start = end;
+        }
+        civ_title_recs[o] = -1;
+    }
+    port_printf("[port] civ: event 0x%02X title from text %d (%d letters, %d lines)\n", event_id, idx, n, n_lines + 1);
     return civ_title_recs;
 }
-/* Free-form event titles (port only; docs/PORT.md "Free-form event titles").  spawnEventTitle makes one tile per record of
-   the title's layout list (overlay data, fixed size: a translation could not be longer than the original) and the
+/* Free-form event titles (port only; docs/PORT.md "Free-form event titles").  spawnEventTitle makes one tile per record
+   of the title's layout list (overlay data, fixed size: a translation could not be longer than the original) and the
    "completed" banner from two tables of the executable (K letters, padded with tiles to only 6 in MAIN0's code, so
    "¡SUPERADO!" lost its last letters, and the padded tiles that came from the hidden row 40 had not settled when they
    stopped: "DO" a few px low).  The port lays the tiles out itself:
    - title: the letters of the text.  A text longer than its list carries a layout tail after its letters (written by
-     tools/text_core.py: 0xFFF1, then one word per letter after the first: spaces before it, 0x100 = line break); without
-     one the list gives the places (its hidden records, row >= 40, are no letters).  Lines are centred, a letter is 20 px,
-     a space 10 px, lines 28 px apart upwards from the origin, and a line wider than 310 px wraps at its spaces.
+     tools/text_core.py: 0xFFF1, then one word per letter after the first: spaces before it, 0x100 = line break);
+     without one the list gives the places (its hidden records, row >= 40, are no letters).  Lines are centred, a letter
+     is 20 px, a space 10 px, lines 28 px apart upwards from the origin, and a line wider than 310 px wraps at its
+     spaces.
    - banner (completed = 1): CFNT999 text 0 when it carries a tail (longer than the tables), else the tables' shown
      entries; always one baseline (y 0), centred.  As many tiles as the longer of the two; a tile without a title letter
      is the original's padding tile (type 2, starts at the origin), one without a banner letter leaves the screen.
@@ -289,16 +388,26 @@ signed char *port_civ_title(int event_id, unsigned char **src, signed char *p) {
 enum { TT_G, TT_X, TT_Y, TT_HAS, TT_BG, TT_BX, TT_BY, TT_FLAG, PORT_TT_N };
 #define PORT_TT_MAX 64
 #define TT_TAIL 0xFFF1
-#define TT_MAXCOL 31                                  /* 310 px: the widest original line ("Fruta deliciosa", 15 letters + 1 space) */
-static int tt_words(const unsigned short *w, int max) { int n = 0; while (n < max && w[n] != 0xFFFF && w[n] != 0xFFFE) n++; return n; }
+/* 310 px: the widest original line ("Fruta deliciosa", 15 letters + 1 space) */
+#define TT_MAXCOL 31
+static int tt_words(const unsigned short *w, int max) {
+    int n = 0;
+    while (n < max && w[n] != 0xFFFF && w[n] != 0xFFFE) n++;
+    return n;
+}
 /* letters + gap codes from a dialogue with a layout tail: returns the letter count (0 without a tail) */
 static int tt_tail(const unsigned short *w, unsigned short *g, short *gap) {
-    int n = tt_words(w, 256), t, k;
+    int n = tt_words(w, 256),
+        t,
+        k;
     for (t = 0; t < n && w[t] != TT_TAIL; t++) ;
     if (t >= n) return 0;
     int m = n - t;                                     /* marker + (letters - 1) codes */
     if (m > PORT_TT_MAX || m > t + 1) return 0;
-    for (k = 0; k < m; k++) { g[k] = w[k] & 0xFFF; gap[k] = k ? (short)w[t + k] : 0; }
+    for (k = 0; k < m; k++) {
+        g[k] = w[k] & 0xFFF;
+        gap[k] = k ? (short)w[t + k] : 0;
+    }
     return m;
 }
 /* places n letters (gap[k]: spaces before letter k, 0x100 = line break) on centred lines, wrapping at maxcol */
@@ -316,8 +425,14 @@ static void tt_place(int n, const short *gap, short *px, short *py, int maxcol) 
             if (g2[j]) lastws = j;
             if (w + add > maxcol) {
                 int b = lastws > ls ? lastws : j;      /* break at the last word start, or inside a too-long word */
-                start[nl++] = b; ls = b; lastws = -1;
-                w = 2; for (int q = b + 1; q <= j; q++) { w += 2 + g2[q]; if (g2[q]) lastws = q; }
+                start[nl++] = b;
+                ls = b;
+                lastws = -1;
+                w = 2;
+                for (int q = b + 1; q <= j; q++) {
+                    w += 2 + g2[q];
+                    if (g2[q]) lastws = q;
+                }
                 continue;
             }
             w += add;
@@ -326,20 +441,32 @@ static void tt_place(int n, const short *gap, short *px, short *py, int maxcol) 
     }
     start[nl] = n;
     for (int li = 0; li < nl; li++) {
-        int a = start[li], b = start[li + 1], w = 0;
+        int a = start[li],
+            b = start[li + 1],
+            w = 0;
         for (k = a; k < b; k++) w += 2 + (k > a ? g2[k] : 0);
-        int col = -(w / 2), row = -2 * (nl - 1 - li);
+        int col = -(w / 2),
+            row = -2 * (nl - 1 - li);
         for (k = a; k < b; k++) {
             if (k > a) col += g2[k];
-            px[k] = col * 10; py[k] = row * 14;
+            px[k] = col * 10;
+            py[k] = row * 14;
             col += 2;
         }
     }
 }
 int port_title_layout(int completed, const signed char *p, const unsigned char *src, short *out) {
-    extern unsigned short D_800804E0[]; extern struct { unsigned short x, y; } D_800804EC[];
-    extern int port_title_k; extern unsigned short port_title_e0[16]; extern struct { unsigned short x, y; } port_title_ec[16];
-    unsigned short tg[PORT_TT_MAX], bg[PORT_TT_MAX]; short gap[PORT_TT_MAX], tx[PORT_TT_MAX], ty[PORT_TT_MAX], bx[PORT_TT_MAX], by[PORT_TT_MAX];
+    extern unsigned short D_800804E0[];
+    extern struct {
+        unsigned short x, y;
+    } D_800804EC[];
+    extern int port_title_k;
+    extern unsigned short port_title_e0[16];
+    extern struct {
+        unsigned short x, y;
+    } port_title_ec[16];
+    unsigned short tg[PORT_TT_MAX], bg[PORT_TT_MAX];
+    short gap[PORT_TT_MAX], tx[PORT_TT_MAX], ty[PORT_TT_MAX], bx[PORT_TT_MAX], by[PORT_TT_MAX];
     int nt = 0, nb = 0, k;
     const unsigned short *w = (const unsigned short *)src;
     int ff = 0;
@@ -347,17 +474,26 @@ int port_title_layout(int completed, const signed char *p, const unsigned char *
     else if (p) {
         for (k = 0; p[4 * k] != -1 && k < PORT_TT_MAX; k++) {
             if (p[4 * k + 2] >= 40) continue;          /* a hidden record (title shorter than its list): no letter */
-            tg[nt] = w[k] & 0xFFF; tx[nt] = p[4 * k + 1] * 10; ty[nt] = p[4 * k + 2] * 14; nt++;
+            tg[nt] = w[k] & 0xFFF;
+            tx[nt] = p[4 * k + 1] * 10;
+            ty[nt] = p[4 * k + 2] * 14;
+            nt++;
         }
     } else {
         nt = tt_words(w, PORT_TT_MAX);
-        for (k = 0; k < nt; k++) { tg[k] = w[k] & 0xFFF; gap[k] = 0; }
+        for (k = 0; k < nt; k++) {
+            tg[k] = w[k] & 0xFFF;
+            gap[k] = 0;
+        }
         tt_place(nt, gap, tx, ty, TT_MAXCOL);
     }
     if (completed == 1) {
         unsigned char *base = *(unsigned char **)((unsigned char *)port_scratch + 0x39C);
         const unsigned short *d0 = 0;
-        if (base) { unsigned char *off = base + *(unsigned short *)(base + 8); d0 = (const unsigned short *)(off + *(unsigned short *)off); }
+        if (base) {
+            unsigned char *off = base + *(unsigned short *)(base + 8);
+            d0 = (const unsigned short *)(off + *(unsigned short *)off);
+        }
         if (d0 && (nb = tt_tail(d0, bg, gap)) > 0) {
             for (k = 1; k < nb; k++) gap[k] &= 0xFF;   /* one line: a break is a space */
             tt_place(nb, gap, bx, by, TT_MAXCOL);
@@ -365,13 +501,21 @@ int port_title_layout(int completed, const signed char *p, const unsigned char *
             int K = port_title_k ? port_title_k : 6;
             for (k = 0; k < K && nb < PORT_TT_MAX; k++) {
                 unsigned short gid = port_title_k ? port_title_e0[k] : D_800804E0[k];
-                short x = (short)(port_title_k ? port_title_ec[k].x : D_800804EC[k].x), y = (short)(port_title_k ? port_title_ec[k].y : D_800804EC[k].y);
+                short x = (short)(port_title_k ? port_title_ec[k].x : D_800804EC[k].x),
+                      y = (short)(port_title_k ? port_title_ec[k].y : D_800804EC[k].y);
                 if (y == 400) continue;                /* a letter the banner does not show (shorter text) */
-                bg[nb] = gid; bx[nb] = x; by[nb] = 0; nb++;
+                bg[nb] = gid;
+                bx[nb] = x;
+                by[nb] = 0;
+                nb++;
             }
             if (nb) {                                  /* centred on x 0 */
-                int lo = bx[0], hi = bx[0];
-                for (k = 1; k < nb; k++) { if (bx[k] < lo) lo = bx[k]; if (bx[k] > hi) hi = bx[k]; }
+                int lo = bx[0],
+                    hi = bx[0];
+                for (k = 1; k < nb; k++) {
+                    if (bx[k] < lo) lo = bx[k];
+                    if (bx[k] > hi) hi = bx[k];
+                }
                 int sh = (lo + hi) / 2;
                 for (k = 0; k < nb; k++) bx[k] -= sh;
             }
@@ -382,12 +526,17 @@ int port_title_layout(int completed, const signed char *p, const unsigned char *
     for (k = 0; k < n; k++) {
         short *o = out + k * PORT_TT_N;
         o[TT_HAS] = k < nt;
-        o[TT_G] = k < nt ? tg[k] : 0; o[TT_X] = k < nt ? tx[k] : 0; o[TT_Y] = k < nt ? ty[k] : 0;
+        o[TT_G] = k < nt ? tg[k] : 0;
+        o[TT_X] = k < nt ? tx[k] : 0;
+        o[TT_Y] = k < nt ? ty[k] : 0;
         o[TT_BG] = k < nb ? bg[k] : nb ? bg[0] : tg[0];
-        o[TT_BX] = k < nb ? bx[k] : 0; o[TT_BY] = k < nb ? by[k] : 0;
+        o[TT_BX] = k < nb ? bx[k] : 0;
+        o[TT_BY] = k < nb ? by[k] : 0;
         o[TT_FLAG] = k < nb ? 0x80 | (k & 0x7F) : 2;  /* bit 7: becomes a banner letter (l8Type01MoveStep step 6) */
     }
-    if (port_verbose) port_printf("[port] event title: %d letters%s, banner %d letters%s, %d tiles\n", nt, ff ? " (free-form)" : "", nb, completed == 1 ? "" : " (not completed)", n);
+    if (port_verbose)
+        port_printf("[port] event title: %d letters%s, banner %d letters%s, %d tiles\n", nt, ff ? " (free-form)" : "",
+                    nb, completed == 1 ? "" : " (not completed)", n);
     return n;
 }
 void port_title_tick(void) {
@@ -395,10 +544,12 @@ void port_title_tick(void) {
     title_due = 0;
     if (title_start == 2) {
         extern void FUN_8005aa74(int, int, int, int);
-        FUN_8005aa74(title_id, 1, 1, 0);           /* as setEventComplete does: the title, then the "completed" banner */
+        /* as setEventComplete does: the title, then the "completed" banner */
+        FUN_8005aa74(title_id, 1, 1, 0);
         port_printf("[port] frame %d: event title 0x%02X spawned completed\n", port_frame, title_id);
     } else if (title_start) {
-        extern unsigned char SCRIPT_FLAGS[]; extern unsigned char setEventStarted(int, int, int);
+        extern unsigned char SCRIPT_FLAGS[];
+        extern unsigned char setEventStarted(int, int, int);
         SCRIPT_FLAGS[title_id] = 0;
         setEventStarted(title_id, 0, 0);
         port_printf("[port] frame %d: event 0x%02X started (setEventStarted)\n", port_frame, title_id);
@@ -414,16 +565,20 @@ void port_movie_add(const char *s) {
     int f = 0;
     while (*s >= '0' && *s <= '9') f = f * 10 + *s++ - '0';
     if (*s++ != ':') return;
-    movie_frame = f; movie_id = 0;
+    movie_frame = f;
+    movie_id = 0;
     while (*s >= '0' && *s <= '9') movie_id = movie_id * 10 + *s++ - '0';
 }
-/* --test-item FRAME:ID[:B] (debug): the item popup printInfoMessage(ID, B) (B = 0 obtained by default) at that vblank */
+/* --test-item FRAME:ID[:B] (debug): the item popup printInfoMessage(ID, B) (B = 0 obtained by default) at that
+   vblank */
 static int item_frame, item_id, item_b;
 void port_test_item_add(const char *s) {
     int f = 0;
     while (*s >= '0' && *s <= '9') f = f * 10 + *s++ - '0';
     if (*s++ != ':') return;
-    item_frame = f; item_id = 0; item_b = 0;
+    item_frame = f;
+    item_id = 0;
+    item_b = 0;
     while (*s >= '0' && *s <= '9') item_id = item_id * 10 + *s++ - '0';
     if (*s++ == ':') while (*s >= '0' && *s <= '9') item_b = item_b * 10 + *s++ - '0';
 }
@@ -434,150 +589,270 @@ void port_test_message_add(const char *s) {
     int f = 0;
     while (*s >= '0' && *s <= '9') f = f * 10 + *s++ - '0';
     if (*s++ != ':') return;
-    msg_frame = f; msg_k = 0; msg_l = 0;
+    msg_frame = f;
+    msg_k = 0;
+    msg_l = 0;
     while (*s >= '0' && *s <= '9') msg_k = msg_k * 10 + *s++ - '0';
     if (*s++ == ':') while (*s >= '0' && *s <= '9') msg_l = msg_l * 10 + *s++ - '0';
 }
-void port_poke_reset(void) { n_pokes = 0; dump_ram_path = 0; menu_frame = 0; title_frame = 0; movie_frame = 0; item_frame = 0; msg_frame = 0; }
+void port_poke_reset(void) {
+    n_pokes = 0;
+    dump_ram_path = 0;
+    menu_frame = 0;
+    title_frame = 0;
+    movie_frame = 0;
+    item_frame = 0;
+    msg_frame = 0;
+}
 void port_vblank(void) {
-    { extern int port_frameskip, port_skip_draw; if (port_frameskip == 2) port_skip_draw = port_frame & 1; }   /* (--frameskip test: every other frame) */
+    /* (--frameskip test: every other frame) */
+    {
+        extern int port_frameskip, port_skip_draw;
+        if (port_frameskip == 2) port_skip_draw = port_frame & 1;
+    }
     if (port_stall_frame && port_frame + 1 == port_stall_frame) port_sleep_us((unsigned long long)port_stall_ms * 1000);
     if (port_realtime) {
         /* absolute schedule from one epoch (no relative sleeps: their rounding would accumulate into a faster or
            slower game).  Late by more than one period (a slow frame, the viewer pipe blocked): the schedule is
            re-anchored to now, so at most one vblank runs without waiting and the game drops to real time instead of
            running a burst of fast frames to catch up. */
-        unsigned long long now = port_time_us(), period = 1000000ull / (unsigned)port_hz;
-        if (!vblank_epoch_us) { vblank_epoch_us = now; vblank_n = 0; }
+        unsigned long long now = port_time_us(),
+                           period = 1000000ull / (unsigned)port_hz;
+        if (!vblank_epoch_us) {
+            vblank_epoch_us = now;
+            vblank_n = 0;
+        }
         vblank_n++;
         unsigned long long due = vblank_epoch_us + (unsigned long long)vblank_n * 1000000ull / (unsigned)port_hz;
         {   /* --frameskip: behind the clock, the next frame is not drawn (three in a row at most); then the
                schedule is only given up when four periods late, or the frames skipped would win nothing back */
-            extern int port_frameskip, port_skip_draw; static int run;
-            if (port_frameskip == 1) { if (now > due + period / 8 && run < 3) { port_skip_draw = 1; run++; } else { port_skip_draw = 0; run = 0; } }
-            if (port_frameskip == 1 && now <= due + 4 * period) { if (due > now) { port_sleep_until_us(due); port_prof_wait_us += port_time_us() - now; } goto paced; }
+            extern int port_frameskip, port_skip_draw;
+            static int run;
+            if (port_frameskip == 1) {
+                if (now > due + period / 8 && run < 3) {
+                    port_skip_draw = 1;
+                    run++;
+                } else {
+                    port_skip_draw = 0;
+                    run = 0;
+                }
+            }
+            if (port_frameskip == 1 && now <= due + 4 * period) {
+                if (due > now) {
+                    port_sleep_until_us(due);
+                    port_prof_wait_us += port_time_us() - now;
+                }
+                goto paced;
+            }
         }
-        if (now > due + period) { vblank_epoch_us = now - (unsigned long long)vblank_n * 1000000ull / (unsigned)port_hz; due = now;
-                                  if (port_hfr_fps) { extern void port_hfr_wait(unsigned long long, unsigned long long, int); port_hfr_wait(due, period, 1); } }
-        else if (port_hfr_fps) { extern void port_hfr_wait(unsigned long long, unsigned long long, int); port_hfr_wait(due, period, 1); port_prof_wait_us += port_time_us() - now; }
-        else if (due > now) { port_sleep_until_us(due); port_prof_wait_us += port_time_us() - now; }
+        if (now > due + period) {
+            vblank_epoch_us = now - (unsigned long long)vblank_n * 1000000ull / (unsigned)port_hz;
+            due = now;
+            if (port_hfr_fps) {
+                extern void port_hfr_wait(unsigned long long, unsigned long long, int);
+                port_hfr_wait(due, period, 1);
+            }
+        }
+        else if (port_hfr_fps) {
+            extern void port_hfr_wait(unsigned long long, unsigned long long, int);
+            port_hfr_wait(due, period, 1);
+            port_prof_wait_us += port_time_us() - now;
+        } else if (due > now) {
+            port_sleep_until_us(due);
+            port_prof_wait_us += port_time_us() - now;
+        }
     paced:
         {
             unsigned long long t = port_time_us();
             if (!vb_total_t0) vb_total_t0 = t;
             vb_total_n++;
-            if (vb_last_us) { unsigned long long d = t - vb_last_us; vb_hist[vb_bucket(d)]++; if (d > vb_max_us) vb_max_us = d; }
+            if (vb_last_us) {
+                unsigned long long d = t - vb_last_us;
+                vb_hist[vb_bucket(d)]++;
+                if (d > vb_max_us) vb_max_us = d;
+            }
             vb_last_us = t;
         }
         if (port_show_fps) {
-            static unsigned long long t0; static int n0;
+            static unsigned long long t0;
+            static int n0;
             unsigned long long t = port_time_us();
-            if (!t0) { t0 = t; n0 = port_frame; }
-            else if (t - t0 >= 1000000ull) {
+            if (!t0) {
+                t0 = t;
+                n0 = port_frame;
+            } else if (t - t0 >= 1000000ull) {
                 extern int port_sound_samples_last_second(void);
-                int smp = port_sound_samples_last_second();
+                int audio_rate = port_sound_samples_last_second();
                 /* ms per frame: game = everything that is not one of the three timed parts (the game's own code,
                    the shims, the fault emulation); draw = DrawOTag (gpu.c); present = the frame readout + SDL
                    upload/present (blocks on the display's vsync when the driver honours PRESENTVSYNC); wait = the
                    pacing sleep.  lowmem = emulated null-page accesses this second (lowmem.c), top 3 sites when > 0. */
-                int nf = port_frame - n0; if (nf < 1) nf = 1;
-                unsigned long long tot = t - t0, other = port_prof_draw_us + port_prof_wait_us + port_prof_present_us;
-                unsigned long long game = tot > other ? tot - other : 0;
-                char low[256]; port_low_second(low, sizeof low);
+                int n_frames = port_frame - n0;
+                if (n_frames < 1) n_frames = 1;
+                unsigned long long elapsed_us = t - t0,
+                                   other = port_prof_draw_us + port_prof_wait_us + port_prof_present_us;
+                unsigned long long game = elapsed_us > other ? elapsed_us - other : 0;
+                char low[256];
+                port_low_second(low, sizeof low);
                 if (port_hfr_fps) {   /* --fps: the presents of this second, and how many of them were interpolated */
-                    extern void port_hfr_second(char *, int); size_t n = strlen(low); port_hfr_second(low + n, (int)(sizeof low - n));
+                    extern void port_hfr_second(char *, int);
+                    size_t n = strlen(low);
+                    port_hfr_second(low + n, (int)(sizeof low - n));
                 }
-                /* (the present's part of the panel, --second-screen, and the sound mixer, inside game, are also given on their own) */
+                /* (the present's part of the panel, --second-screen, and the sound mixer, inside game, are also given
+                   on their own) */
                 game = game > port_prof_sound_us ? game - port_prof_sound_us : 0;
-                port_printf("[port] fps: %d.%02d vblank/s (frame %d, %d audio samples/s) ms/frame: game %llu.%llu draw %llu.%llu present %llu.%llu (panel %llu.%llu) sound %llu.%llu wait %llu.%llu;%s\n",
-                            (int)(nf * 100000000ull / tot / 100), (int)(nf * 100000000ull / tot % 100), port_frame, smp,
-                            game / nf / 1000, game / nf / 100 % 10, port_prof_draw_us / nf / 1000, port_prof_draw_us / nf / 100 % 10,
-                            port_prof_present_us / nf / 1000, port_prof_present_us / nf / 100 % 10, port_prof_panel_us / nf / 1000, port_prof_panel_us / nf / 100 % 10,
-                            port_prof_sound_us / nf / 1000, port_prof_sound_us / nf / 100 % 10, port_prof_wait_us / nf / 1000, port_prof_wait_us / nf / 100 % 10, low);
-                port_prof_draw_us = port_prof_wait_us = port_prof_present_us = port_prof_panel_us = port_prof_sound_us = 0;
+                port_printf("[port] fps: %d.%02d vblank/s (frame %d, %d audio samples/s) ms/frame: game %llu.%llu "
+                            "draw %llu.%llu present %llu.%llu (panel %llu.%llu) sound %llu.%llu wait %llu.%llu;%s\n",
+                            (int)(n_frames * 100000000ull / elapsed_us / 100),
+                            (int)(n_frames * 100000000ull / elapsed_us % 100), port_frame, audio_rate,
+                            game / n_frames / 1000, game / n_frames / 100 % 10, port_prof_draw_us / n_frames / 1000,
+                            port_prof_draw_us / n_frames / 100 % 10, port_prof_present_us / n_frames / 1000,
+                            port_prof_present_us / n_frames / 100 % 10, port_prof_panel_us / n_frames / 1000,
+                            port_prof_panel_us / n_frames / 100 % 10, port_prof_sound_us / n_frames / 1000,
+                            port_prof_sound_us / n_frames / 100 % 10, port_prof_wait_us / n_frames / 1000,
+                            port_prof_wait_us / n_frames / 100 % 10, low);
+                port_prof_draw_us = port_prof_wait_us = port_prof_present_us = port_prof_panel_us
+                    = port_prof_sound_us = 0;
                 if (port_show_fps >= 2) vb_hist_print("this second");
-                t0 = t; n0 = port_frame;
+                t0 = t;
+                n0 = port_frame;
             }
         }
     }
-    else if (port_hfr_fps) { extern void port_hfr_wait(unsigned long long, unsigned long long, int); port_hfr_wait(0, 1000000ull / (unsigned)port_hz, 0); }
+    else if (port_hfr_fps) {
+        extern void port_hfr_wait(unsigned long long, unsigned long long, int);
+        port_hfr_wait(0, 1000000ull / (unsigned)port_hz, 0);
+    }
     port_frame++;
     if (port_in_game && game_start_frame < 0) game_start_frame = port_frame;
     for (int i = 0; i < n_pokes; i++)
-        if (pokes[i].ingame ? game_start_frame >= 0 && port_frame == game_start_frame + pokes[i].frame : pokes[i].frame == port_frame || (pokes[i].frame < 0 && port_frame % -pokes[i].frame == 0)) {
-            u32 a = pokes[i].addr, v = pokes[i].value;
+        /* due now: in-game pokes count from the game's start, a negative frame repeats every -frame vblanks */
+        if (pokes[i].ingame ? game_start_frame >= 0 && port_frame == game_start_frame + pokes[i].frame
+                            : pokes[i].frame == port_frame
+                                  || (pokes[i].frame < 0 && port_frame % -pokes[i].frame == 0)) {
+            u32 a = pokes[i].addr,
+                v = pokes[i].value;
             for (int k = 0; k < pokes[i].count; k++, a += pokes[i].size)   /* SIZExCOUNT: consecutive values */
-                { void *p = port_ram_ptr(a); if (!p) continue;
-                  if (pokes[i].size == 4) *(u32 *)p = v; else if (pokes[i].size == 2) *(u16 *)p = v; else *(u8 *)p = v; }
+            {
+                void *p = port_ram_ptr(a);
+                if (!p) continue;
+                if (pokes[i].size == 4) *(u32 *)p = v;
+                else if (pokes[i].size == 2) *(u16 *)p = v;
+                else *(u8 *)p = v;
+            }
         }
-    { extern void port_sweep_vblank(void); port_sweep_vblank(); }   /* --sweep-x (runtime/ws_poplog.c) */
-    { extern void port_ws_heap_vblank(void); port_ws_heap_vblank(); }   /* the widescreen tables of the last room go (runtime/ws_heap.c) */
+    /* --sweep-x (runtime/ws_poplog.c) */
+    {
+        extern void port_sweep_vblank(void);
+        port_sweep_vblank();
+    }
+    /* the widescreen tables of the last room go (runtime/ws_heap.c) */
+    {
+        extern void port_ws_heap_vblank(void);
+        port_ws_heap_vblank();
+    }
     port_trace("vblank", port_frame);
-    { extern void port_ovl_snapshot(void); port_ovl_snapshot(); }
+    {
+        extern void port_ovl_snapshot(void);
+        port_ovl_snapshot();
+    }
     if (dump_ram_path && port_frame == dump_ram_frame) dump_ram();
     if (menu_frame && port_frame == menu_frame) menu_open();
-    if (item_frame && port_frame == item_frame) { extern void *printInfoMessage(int, int); printInfoMessage(item_id, item_b); port_printf("[port] frame %d: item popup %d/%d\n", port_frame, item_id, item_b); }
+    if (item_frame && port_frame == item_frame) {
+        extern void *printInfoMessage(int, int);
+        printInfoMessage(item_id, item_b);
+        port_printf("[port] frame %d: item popup %d/%d\n", port_frame, item_id, item_b);
+    }
     if (title_frame && port_frame == title_frame) title_due = 1;
-    if (msg_frame && port_frame == msg_frame) { extern void *showMessageBox(short, short, int, int); showMessageBox(msg_k, msg_l, 0xa0, 0x8c); port_printf("[port] frame %d: message box %d/%d\n", port_frame, msg_k, msg_l); }
+    if (msg_frame && port_frame == msg_frame) {
+        extern void *showMessageBox(short, short, int, int);
+        showMessageBox(msg_k, msg_l, 0xa0, 0x8c);
+        port_printf("[port] frame %d: message box %d/%d\n", port_frame, msg_k, msg_l);
+    }
     if (movie_frame && port_frame == movie_frame) {
         extern void FUN_800171b8(int, void *), FUN_8001f4bc(void), moviePlayerTask(void);
-        SPAD8(0x1C6) = 2; FUN_8001f4bc(); SPAD8(0x1CC) = 1; SPAD8(0x1CD) = (unsigned char)movie_id;
+        SPAD8(0x1C6) = 2;
+        FUN_8001f4bc();
+        SPAD8(0x1CC) = 1;
+        SPAD8(0x1CD) = (unsigned char)movie_id;
         FUN_800171b8(1, (void *)moviePlayerTask);
         port_printf("[port] frame %d: movie %d started (--movie)\n", port_frame, movie_id);
     }
     port_pad_vblank();
-    { extern void port_st_vblank(void); port_st_vblank(); }
+    {
+        extern void port_st_vblank(void);
+        port_st_vblank();
+    }
     if (port_vsync_event_fn) call_psx(port_vsync_event_fn);
     if (vsync_cb) call_psx((void *)vsync_cb);
     /* sound first: with both pipes on, a player that interleaves audio and video by timestamp finds the
        audio of this vblank already buffered while it reads the (larger) video frame */
-    { unsigned long long t0 = port_time_us(); port_sound_vblank(); port_prof_sound_us += port_time_us() - t0; }
-    { unsigned long long t0 = port_time_us(); port_gpu_vblank(); port_prof_present_us += port_time_us() - t0; }
+    {
+        unsigned long long t0 = port_time_us();
+        port_sound_vblank();
+        port_prof_sound_us += port_time_us() - t0;
+    }
+    {
+        unsigned long long t0 = port_time_us();
+        port_gpu_vblank();
+        port_prof_present_us += port_time_us() - t0;
+    }
     {   /* -v: report area / section changes and (every 50 frames) where the player is */
         static int last = -1;
-        int cur = *(u16 *)PORT_M0(0x8009C960u) << 16 | *(u16 *)PORT_M0(0x8009C962u);
+        int area_sec = *(u16 *)PORT_M0(0x8009C960u) << 16 | *(u16 *)PORT_M0(0x8009C962u);
         u8 *hp = *(u8 **)(PORT_M0(0x800A6038u) + 0x40);
         int px = port_is_ram_ptr(hp) ? *(s16 *)(hp + 2) : -1;
         int py = *(s16 *)(PORT_M0(0x800A6038u) + 0x16);
-        if (port_verbose && (cur != last || port_verbose >= 3 || port_frame % (port_verbose >= 2 ? 10 : 50) == 0))
-            port_printf("[port] frame %d: area %d section %d, player at %d,%d%s", port_frame, cur >> 16, cur & 0xFFFF,
-                        px, py, cur != last ? " (changed)" : "");
+        if (port_verbose && (area_sec != last || port_verbose >= 3 || port_frame % (port_verbose >= 2 ? 10 : 50) == 0))
+            port_printf("[port] frame %d: area %d section %d, player at %d,%d%s", port_frame, area_sec >> 16,
+                        area_sec & 0xFFFF, px, py, area_sec != last ? " (changed)" : "");
         if (port_verbose >= 3) {   /* -v -v -v: mode.step.state, air state (ac), velY, and the held/bitten object */
-            u8 *pl = PORT_M0(0x800A6038u);
-            u8 *held = *(u8 **)(pl + 0xE4);
-            port_printf(" %d.%d.%d ac=%d vy=%d g=%x 9e=%d", pl[4], pl[5], pl[6], pl[0xAC], *(s16 *)(pl + 0x7E),
-                        port_is_ram_ptr(*(u8 **)PORT_M0(0x8009F0ECu)) ? 0x80000000u + (u32)(*(u8 **)PORT_M0(0x8009F0ECu) - (u8 *)port_ram) : *(u32 *)PORT_M0(0x8009F0ECu), pl[0x9E]);
-            if (pl[0xAC] == 2 && port_is_ram_ptr(held)) {
-                u8 *hh = *(u8 **)(held + 0x40);
-                port_printf(" held=%02x@%d,%d", *(u8 *)(held + 2), port_is_ram_ptr(hh) ? *(s16 *)(hh + 2) : -1, *(s16 *)(held + 0x16));
+            u8 *player_obj = PORT_M0(0x800A6038u);
+            u8 *held = *(u8 **)(player_obj + 0xE4);
+            port_printf(" %d.%d.%d ac=%d vy=%d g=%x 9e=%d", player_obj[4], player_obj[5], player_obj[6],
+                        player_obj[0xAC], *(s16 *)(player_obj + 0x7E),
+                        port_is_ram_ptr(*(u8 **)PORT_M0(0x8009F0ECu))
+                            ? 0x80000000u + (u32)(*(u8 **)PORT_M0(0x8009F0ECu) - (u8 *)port_ram)
+                            : *(u32 *)PORT_M0(0x8009F0ECu),
+                        player_obj[0x9E]);
+            if (player_obj[0xAC] == 2 && port_is_ram_ptr(held)) {
+                u8 *held_pos = *(u8 **)(held + 0x40);
+                port_printf(" held=%02x@%d,%d", *(u8 *)(held + 2),
+                            port_is_ram_ptr(held_pos) ? *(s16 *)(held_pos + 2) : -1, *(s16 *)(held + 0x16));
             }
         }
-        if (port_verbose >= 3) {   /* ... and the active category-2 type-2 objects (AREA00: koma pigs): x,y mode.step.state ac */
-            u8 *lst = PORT_M0(0x800A6610u);   /* the layer list (initLayer1DrawList): entries grow downwards from the base */
+        /* ... and the active category-2 type-2 objects (AREA00: koma pigs): x,y mode.step.state ac */
+        if (port_verbose >= 3) {
+            /* the layer list (initLayer1DrawList): entries grow downwards from the base */
+            u8 *layer_list = PORT_M0(0x800A6610u);
             for (int i = 1; i < 64; i++) {
-                u8 *b = *(u8 **)(lst - 4 * i);
+                u8 *b = *(u8 **)(layer_list - 4 * i);
                 if (!port_is_ram_ptr(b)) break;
-                u8 *qh = *(u8 **)(b + 0x40);
+                u8 *pig_pos = *(u8 **)(b + 0x40);
                 if ((b[0] & 1) && b[2] == 2)
-                    port_printf(" pig@%d,%d %d.%d.%d ac=%d", port_is_ram_ptr(qh) ? *(s16 *)(qh + 2) : -1,
+                    port_printf(" pig@%d,%d %d.%d.%d ac=%d", port_is_ram_ptr(pig_pos) ? *(s16 *)(pig_pos + 2) : -1,
                                 *(s16 *)(b + 0x16), b[4], b[5], b[6], b[0xAC]);
             }
         }
-        if (port_verbose && (cur != last || port_verbose >= 3 || port_frame % (port_verbose >= 2 ? 10 : 50) == 0))
+        if (port_verbose && (area_sec != last || port_verbose >= 3 || port_frame % (port_verbose >= 2 ? 10 : 50) == 0))
             port_printf("\n");
-        last = cur;
+        last = area_sec;
     }
     if (port_frame % 100 == 0) {
         extern int port_cd_stats(int *);
         extern int port_gpu_lists(void), port_gpu_packets(void);
-        int secs, reads = port_cd_stats(&secs);
+        int n_sectors,
+            reads = port_cd_stats(&n_sectors);
         port_printf("[port] frame %d: %d CD reads (%d sectors), %d ordering tables drawn (%d packets); tasks:",
-                    port_frame, reads, secs, port_gpu_lists(), port_gpu_packets());
+                    port_frame, reads, n_sectors, port_gpu_lists(), port_gpu_packets());
         for (int i = 0; i < 3; i++) {
             u8 *t = (u8 *)port_hiram + i * 0x70;
             void *entry = *(void **)(t + 0xC);
-            unsigned long off = 1; const char *nm = entry ? port_sym_near(entry, &off) : "-";
-            port_printf(" [%d st=%d %s step=%d.%d]", i, *(s16 *)t, off ? "-" : nm, *(u16 *)(t + 0x48), *(u16 *)(t + 0x4A));
+            unsigned long off = 1;
+            const char *sym_name = entry ? port_sym_near(entry, &off) : "-";
+            port_printf(" [%d st=%d %s step=%d.%d]", i, *(s16 *)t, off ? "-" : sym_name, *(u16 *)(t + 0x48),
+                        *(u16 *)(t + 0x4A));
         }
         port_printf(" gameState=%02x, overlay %s\n", SPAD8(0x1CC), port_resident_overlay());
     }
@@ -585,8 +860,14 @@ void port_vblank(void) {
         port_printf("[port] reached %d frames, stopping\n", port_frame);
         port_stub_report();
         port_pacing_report();
-        { extern void port_low_report(void); port_low_report(); }
-        { extern void port_audio_close(void); port_audio_close(); }
+        {
+            extern void port_low_report(void);
+            port_low_report();
+        }
+        {
+            extern void port_audio_close(void);
+            port_audio_close();
+        }
         port_quit(0);
     }
 }
@@ -598,8 +879,14 @@ int EnableEvent(int ev) { return 1; }
 int DisableEvent(int ev) { return 1; }
 int WaitEvent(int ev) { return 1; }
 int OpenTh(void *fn, u32 sp, u32 gp) { return port_thread_open(fn); }
-int ChangeTh(int h) { port_thread_change(h); return 1; }
-int CloseTh(int h) { port_thread_close(h); return 1; }
+int ChangeTh(int h) {
+    port_thread_change(h);
+    return 1;
+}
+int CloseTh(int h) {
+    port_thread_close(h);
+    return 1;
+}
 void FlushCache(void) {}
 u32 GetGp(void) { return 0; }
 void SysEnqIntRP(int p, void *q) {}
@@ -611,8 +898,15 @@ void InitHeap(void *p, u32 n) {}
 int ResetCallback(void) { return 0; }
 int StopCallback(void) { return 0; }
 int RestartCallback(void) { return 0; }
-int VSyncCallback(void (*f)(void)) { if (f && port_verbose) port_printf("[port] VSyncCallback(%p) registered\n", (void *)f); vsync_cb = f; return 0; }
-int VSyncCallbacks(int n, void (*f)(void)) { if (n == 0) vsync_cb = f; return 0; }
+int VSyncCallback(void (*f)(void)) {
+    if (f && port_verbose) port_printf("[port] VSyncCallback(%p) registered\n", (void *)f);
+    vsync_cb = f;
+    return 0;
+}
+int VSyncCallbacks(int n, void (*f)(void)) {
+    if (n == 0) vsync_cb = f;
+    return 0;
+}
 int DMACallback(int ch, void *f) { return 0; }
 int InterruptCallback(int n, void *f) { return 0; }
 int CdRemove(void) { return 0; }
@@ -626,10 +920,14 @@ int VSync(int mode) {
     static int last;
     port_trace("VSync", mode);
     if (mode < 0) return port_frame;
-    if (mode == 1) { int r = port_frame - last; return r; }
+    if (mode == 1) {
+        int r = port_frame - last;
+        return r;
+    }
     int n = mode == 0 ? 1 : mode;
     for (int i = 0; i < n; i++) port_vblank();
-    int r = port_frame - last; last = port_frame;
+    int r = port_frame - last;
+    last = port_frame;
     return r;
 }
 
@@ -645,28 +943,55 @@ unsigned long port_gte_mfc2(int r);
 void port_gte_op(unsigned long op);
 #define PK(a, b) (((u32)(u16)(a)) | ((u32)(u16)(b) << 16))
 static void load_matrix(int base, MATRIX *m) {
-    port_gte_ctc2(base, PK(m->m[0][0], m->m[0][1])); port_gte_ctc2(base + 1, PK(m->m[0][2], m->m[1][0]));
-    port_gte_ctc2(base + 2, PK(m->m[1][1], m->m[1][2])); port_gte_ctc2(base + 3, PK(m->m[2][0], m->m[2][1]));
+    port_gte_ctc2(base, PK(m->m[0][0], m->m[0][1]));
+    port_gte_ctc2(base + 1, PK(m->m[0][2], m->m[1][0]));
+    port_gte_ctc2(base + 2, PK(m->m[1][1], m->m[1][2]));
+    port_gte_ctc2(base + 3, PK(m->m[2][0], m->m[2][1]));
     port_gte_ctc2(base + 4, (u16)m->m[2][2]);
 }
-void InitGeom(void) { port_gte_ctc2(29, 0x155); port_gte_ctc2(30, 0x100); port_gte_ctc2(26, 1000);
-                      port_gte_ctc2(27, -0x1062); port_gte_ctc2(28, 0x1400000); }
+void InitGeom(void) {
+    port_gte_ctc2(29, 0x155);
+    port_gte_ctc2(30, 0x100);
+    port_gte_ctc2(26, 1000);
+    port_gte_ctc2(27, -0x1062);
+    port_gte_ctc2(28, 0x1400000);
+}
 void SetGeomScreen(int h) { port_gte_ctc2(26, h); }
-void SetGeomOffset(int x, int y) { port_gte_ctc2(24, x << 16); port_gte_ctc2(25, y << 16); }
+void SetGeomOffset(int x, int y) {
+    port_gte_ctc2(24, x << 16);
+    port_gte_ctc2(25, y << 16);
+}
 void SetRotMatrix(MATRIX *m) { load_matrix(0, m); }
 void SetLightMatrix(MATRIX *m) { load_matrix(8, m); }
 void SetColorMatrix(MATRIX *m) { load_matrix(16, m); }
-void SetTransMatrix(MATRIX *m) { port_gte_ctc2(5, m->t[0]); port_gte_ctc2(6, m->t[1]); port_gte_ctc2(7, m->t[2]); }
-void SetBackColor(int r, int g, int b) { port_gte_ctc2(13, r << 4); port_gte_ctc2(14, g << 4); port_gte_ctc2(15, b << 4); }
-void SetFarColor(int r, int g, int b) { port_gte_ctc2(21, r << 4); port_gte_ctc2(22, g << 4); port_gte_ctc2(23, b << 4); }
+void SetTransMatrix(MATRIX *m) {
+    port_gte_ctc2(5, m->t[0]);
+    port_gte_ctc2(6, m->t[1]);
+    port_gte_ctc2(7, m->t[2]);
+}
+void SetBackColor(int r, int g, int b) {
+    port_gte_ctc2(13, r << 4);
+    port_gte_ctc2(14, g << 4);
+    port_gte_ctc2(15, b << 4);
+}
+void SetFarColor(int r, int g, int b) {
+    port_gte_ctc2(21, r << 4);
+    port_gte_ctc2(22, g << 4);
+    port_gte_ctc2(23, b << 4);
+}
 
 /* rsin/rcos: 4096 = 1.0 over a 4096-step circle; table built once with a Taylor series (no libm) */
 static s16 sintab[1025];
 static void sin_init(void) {
     if (sintab[1024]) return;
     for (int i = 0; i <= 1024; i++) {
-        double x = i * (3.14159265358979323846 / 2048.0), t = x, s = x;
-        for (int k = 1; k < 12; k++) { t *= -x * x / ((2 * k) * (2 * k + 1)); s += t; }
+        double x = i * (3.14159265358979323846 / 2048.0),
+               t = x,
+               s = x;
+        for (int k = 1; k < 12; k++) {
+            t *= -x * x / ((2 * k) * (2 * k + 1));
+            s += t;
+        }
         sintab[i] = (s16)(s * 4096.0 + 0.5);
     }
 }
@@ -681,53 +1006,84 @@ int rsin(int a) {
 int rcos(int a) { return rsin(a + 1024); }
 int ratan2(int y, int x) {
     /* binary search on the angle: monotone in the first octant */
-    int neg_y = y < 0, neg_x = x < 0, swap;
-    unsigned ay = neg_y ? -y : y, ax = neg_x ? -x : x;
+    int neg_y = y < 0,
+        neg_x = x < 0,
+        swap;
+    unsigned ay = neg_y ? -y : y,
+             ax = neg_x ? -x : x;
     if (!ax && !ay) return 0;
     swap = ay > ax;
-    unsigned num = swap ? ax : ay, den = swap ? ay : ax;        /* ratio <= 1 */
+    /* ratio <= 1 */
+    unsigned num = swap ? ax : ay,
+             den = swap ? ay : ax;
     int lo = 0, hi = 512;                                        /* 0..45 degrees */
     while (lo < hi) {
         int m = (lo + hi + 1) / 2;
-        if ((long long)rsin(m) * den <= (long long)rcos(m) * num) lo = m; else hi = m - 1;
+        if ((long long)rsin(m) * den <= (long long)rcos(m) * num) lo = m;
+        else hi = m - 1;
     }
     int a = swap ? 1024 - lo : lo;
     if (neg_x) a = 2048 - a;
     if (neg_y) a = -a;
     return a;
 }
-static u32 isqrt(u32 v) { u32 r = 0, b = 1u << 30; while (b > v) b >>= 2;
-    while (b) { if (v >= r + b) { v -= r + b; r = (r >> 1) + b; } else r >>= 1; b >>= 2; } return r; }
+static u32 isqrt(u32 v) {
+    u32 r = 0,
+        b = 1u << 30;
+    while (b > v) b >>= 2;
+    while (b) {
+        if (v >= r + b) {
+            v -= r + b;
+            r = (r >> 1) + b;
+        } else r >>= 1;
+        b >>= 2;
+    }
+    return r;
+}
 int SquareRoot0(int v) { return isqrt((u32)v); }
 int csqrt(int v) { return (int)isqrt((u32)v << 12 >> 0) ; }  /* fixed 20.12 */
 
 MATRIX *RotMatrixX(int r, MATRIX *m) {
-    int s = rsin(r), c = rcos(r);
+    int s = rsin(r),
+        c = rcos(r);
     for (int i = 0; i < 3; i++) {
-        int a = m->m[1][i], b = m->m[2][i];
-        m->m[1][i] = (c * a - s * b) >> 12; m->m[2][i] = (s * a + c * b) >> 12;
+        int a = m->m[1][i],
+            b = m->m[2][i];
+        m->m[1][i] = (c * a - s * b) >> 12;
+        m->m[2][i] = (s * a + c * b) >> 12;
     }
     return m;
 }
 MATRIX *RotMatrixY(int r, MATRIX *m) {
-    int s = rsin(r), c = rcos(r);
+    int s = rsin(r),
+        c = rcos(r);
     for (int i = 0; i < 3; i++) {
-        int a = m->m[0][i], b = m->m[2][i];
-        m->m[0][i] = (c * a + s * b) >> 12; m->m[2][i] = (-s * a + c * b) >> 12;
+        int a = m->m[0][i],
+            b = m->m[2][i];
+        m->m[0][i] = (c * a + s * b) >> 12;
+        m->m[2][i] = (-s * a + c * b) >> 12;
     }
     return m;
 }
 MATRIX *RotMatrixZ(int r, MATRIX *m) {
-    int s = rsin(r), c = rcos(r);
+    int s = rsin(r),
+        c = rcos(r);
     for (int i = 0; i < 3; i++) {
-        int a = m->m[0][i], b = m->m[1][i];
-        m->m[0][i] = (c * a - s * b) >> 12; m->m[1][i] = (s * a + c * b) >> 12;
+        int a = m->m[0][i],
+            b = m->m[1][i];
+        m->m[0][i] = (c * a - s * b) >> 12;
+        m->m[1][i] = (s * a + c * b) >> 12;
     }
     return m;
 }
 MATRIX *RotMatrix(SVECTOR *r, MATRIX *m) {
     /* Psy-Q RotMatrix: M = Rx * Ry * Rz applied as rotate Z, then Y, then X */
-    int sx = rsin(r->vx), cx = rcos(r->vx), sy = rsin(r->vy), cy = rcos(r->vy), sz = rsin(r->vz), cz = rcos(r->vz);
+    int sx = rsin(r->vx),
+        cx = rcos(r->vx),
+        sy = rsin(r->vy),
+        cy = rcos(r->vy),
+        sz = rsin(r->vz),
+        cz = rcos(r->vz);
     m->m[0][0] = (cy * cz) >> 12;
     m->m[0][1] = -(cy * sz) >> 12;
     m->m[0][2] = sy;
@@ -748,7 +1104,8 @@ MATRIX *MulMatrix0(MATRIX *a, MATRIX *b, MATRIX *c) {
     s16 t[3][3];
     load_matrix(0, a);
     for (int j = 0; j < 3; j++) {
-        port_gte_mtc2(0, PK(b->m[0][j], b->m[1][j])); port_gte_mtc2(1, (u16)b->m[2][j]);
+        port_gte_mtc2(0, PK(b->m[0][j], b->m[1][j]));
+        port_gte_mtc2(1, (u16)b->m[2][j]);
         port_gte_op(0x00486012);   /* MVMVA sf=1 mx=RT v=V0 cv=none */
         for (int i = 0; i < 3; i++) t[i][j] = (s16)port_gte_mfc2(9 + i);
     }
@@ -768,51 +1125,80 @@ MATRIX *ScaleMatrix(MATRIX *m, VECTOR *v) {
    retail code starts with ctc2 0-4) and leave it there: keep that side effect */
 VECTOR *ApplyMatrix(MATRIX *m, SVECTOR *v, VECTOR *r) {
     load_matrix(0, m);
-    s32 x = v->vx, y = v->vy, z = v->vz;
+    s32 x = v->vx,
+        y = v->vy,
+        z = v->vz;
     r->vx = (m->m[0][0] * x + m->m[0][1] * y + m->m[0][2] * z) >> 12;
     r->vy = (m->m[1][0] * x + m->m[1][1] * y + m->m[1][2] * z) >> 12;
     r->vz = (m->m[2][0] * x + m->m[2][1] * y + m->m[2][2] * z) >> 12;
     return r;
 }
 SVECTOR *ApplyMatrixSV(MATRIX *m, SVECTOR *v, SVECTOR *r) {
-    VECTOR t; ApplyMatrix(m, v, &t); r->vx = t.vx; r->vy = t.vy; r->vz = t.vz; return r;
+    VECTOR t;
+    ApplyMatrix(m, v, &t);
+    r->vx = t.vx;
+    r->vy = t.vy;
+    r->vz = t.vz;
+    return r;
 }
 VECTOR *ApplyMatrixLV(MATRIX *m, VECTOR *v, VECTOR *r) {
     load_matrix(0, m);
-    long long x = v->vx, y = v->vy, z = v->vz;
+    long long x = v->vx,
+              y = v->vy,
+              z = v->vz;
     r->vx = (s32)((m->m[0][0] * x + m->m[0][1] * y + m->m[0][2] * z) >> 12);
     r->vy = (s32)((m->m[1][0] * x + m->m[1][1] * y + m->m[1][2] * z) >> 12);
     r->vz = (s32)((m->m[2][0] * x + m->m[2][1] * y + m->m[2][2] * z) >> 12);
     return r;
 }
 VECTOR *ApplyRotMatrix(SVECTOR *v, VECTOR *r) {
-    port_gte_mtc2(0, PK(v->vx, v->vy)); port_gte_mtc2(1, (u16)v->vz);
+    port_gte_mtc2(0, PK(v->vx, v->vy));
+    port_gte_mtc2(1, (u16)v->vz);
     port_gte_op(0x00486012);   /* MVMVA sf=1 mx=RT v=V0 cv=none */
-    r->vx = (s32)port_gte_mfc2(25); r->vy = (s32)port_gte_mfc2(26); r->vz = (s32)port_gte_mfc2(27);
+    r->vx = (s32)port_gte_mfc2(25);
+    r->vy = (s32)port_gte_mfc2(26);
+    r->vz = (s32)port_gte_mfc2(27);
     return r;
 }
 int RotTransPers(SVECTOR *v, s32 *sxy, s32 *p, s32 *flag) {
-    port_gte_mtc2(0, PK(v->vx, v->vy)); port_gte_mtc2(1, (u16)v->vz);
+    port_gte_mtc2(0, PK(v->vx, v->vy));
+    port_gte_mtc2(1, (u16)v->vz);
     port_gte_op(0x00180001);
-    *sxy = (s32)port_gte_mfc2(14); *p = (s32)port_gte_mfc2(8); *flag = (s32)port_gte_cfc2(31);
+    *sxy = (s32)port_gte_mfc2(14);
+    *p = (s32)port_gte_mfc2(8);
+    *flag = (s32)port_gte_cfc2(31);
     return (s32)port_gte_mfc2(19) >> 2;
 }
 
 /* ================================================================== libcd (reads the user's disc image) */
-static FILE *cd_fp; static int cd_raw;
-static int port_pread(FILE *f, void *buf, int n, long long off) { if (fseeko(f, off, SEEK_SET)) return -1; return (int)fread(buf, 1, n, f); }
+static FILE *cd_fp;
+static int cd_raw;
+static int port_pread(FILE *f, void *buf, int n, long long off) {
+    if (fseeko(f, off, SEEK_SET)) return -1;
+    return (int)fread(buf, 1, n, f);
+}
 static int port_last_error(void) { return errno; }
 static int cd_pos;                     /* next LBA */
 static void *cd_ready_cb, *cd_sync_cb, *cd_read_cb;
 static u8 cd_mode = 0x80;
-static u8 cd_filter_file, cd_filter_chan;        /* CdlSetfilter: the XA file / channel played when cd_mode has CdlModeSF */
+/* CdlSetfilter: the XA file / channel played when cd_mode has CdlModeSF */
+static u8 cd_filter_file, cd_filter_chan;
 /* A `.cue` names the data track's `.bin` (FILE "name" BINARY, relative to the cue): resolve it, else
    the path is the image itself. */
 static char cd_bin_path[1024];
-static int cd_ieq(const char *a, const char *b) { while (*a && *b && (*a | 32) == (*b | 32)) a++, b++; return !*a && !*b; }
-static int cd_iends(const char *a, const char *e) { size_t n = strlen(a), m = strlen(e); return n >= m && cd_ieq(a + n - m, e); }
+static int cd_ieq(const char *a, const char *b) {
+    while (*a && *b && (*a | 32) == (*b | 32)) a++, b++;
+    return !*a && !*b;
+}
+static int cd_iends(const char *a, const char *e) {
+    size_t n = strlen(a),
+           m = strlen(e);
+    return n >= m && cd_ieq(a + n - m, e);
+}
 static const char *cd_cue_fallback(const char *dir, const char *cuename, const char *want) {
-    static char found[512]; char stem[512], only[512] = ""; int nimg = 0, hit = 0;
+    static char found[512];
+    char stem[512], only[512] = "";
+    int nimg = 0, hit = 0;
     snprintf(stem, sizeof stem, "%s", cuename);
     if (strlen(stem) > 4) strcpy(stem + strlen(stem) - 4, ".bin");
     DIR *d = opendir(dir);
@@ -820,17 +1206,31 @@ static const char *cd_cue_fallback(const char *dir, const char *cuename, const c
     struct dirent *e;
     while ((e = readdir(d))) {
         const char *n = e->d_name;
-        if (cd_ieq(n, want)) { snprintf(found, sizeof found, "%s", n); hit = 2; break; }
-        if (cd_ieq(n, stem) && hit < 1) { snprintf(found, sizeof found, "%s", n); hit = 1; }
-        if (cd_iends(n, ".bin") || cd_iends(n, ".img") || cd_iends(n, ".iso")) { nimg++; snprintf(only, sizeof only, "%s", n); }
+        if (cd_ieq(n, want)) {
+            snprintf(found, sizeof found, "%s", n);
+            hit = 2;
+            break;
+        }
+        if (cd_ieq(n, stem) && hit < 1) {
+            snprintf(found, sizeof found, "%s", n);
+            hit = 1;
+        }
+        if (cd_iends(n, ".bin") || cd_iends(n, ".img") || cd_iends(n, ".iso")) {
+            nimg++;
+            snprintf(only, sizeof only, "%s", n);
+        }
     }
     closedir(d);
     if (hit) return found;
-    if (nimg == 1) { snprintf(found, sizeof found, "%s", only); return found; }
+    if (nimg == 1) {
+        snprintf(found, sizeof found, "%s", only);
+        return found;
+    }
     return 0;
 }
 static const char *cd_resolve_cue(const char *path) {
-    int n = 0; while (path[n]) n++;
+    int n = 0;
+    while (path[n]) n++;
     if (n < 4 || (path[n - 4] != '.') || ((path[n - 3] | 32) != 'c') || ((path[n - 2] | 32) != 'u') ||
         ((path[n - 1] | 32) != 'e')) return path;
     FILE *f = fopen(path, "rb");
@@ -845,27 +1245,45 @@ static const char *cd_resolve_cue(const char *path) {
         if ((i == 0 || cue[i - 1] == '\n' || cue[i - 1] == ' ' || cue[i - 1] == '\t') &&
             (cue[i] | 32) == 'f' && (cue[i + 1] | 32) == 'i' && (cue[i + 2] | 32) == 'l' && (cue[i + 3] | 32) == 'e' &&
             (cue[i + 4] == ' ' || cue[i + 4] == '\t')) {
-            int j = i + 5; while (cue[j] == ' ' || cue[j] == '\t') j++;
-            char name[512]; int k = 0;
-            if (cue[j] == '"') { j++; while (cue[j] && cue[j] != '"' && k < 511) name[k++] = cue[j++]; }
-            else while (cue[j] && cue[j] != ' ' && cue[j] != '\t' && cue[j] != '\r' && cue[j] != '\n' && k < 511) name[k++] = cue[j++];
+            int j = i + 5;
+            while (cue[j] == ' ' || cue[j] == '\t') j++;
+            char name[512];
+            int k = 0;
+            if (cue[j] == '"') {
+                j++;
+                while (cue[j] && cue[j] != '"' && k < 511) name[k++] = cue[j++];
+            } else
+                while (cue[j] && cue[j] != ' ' && cue[j] != '\t' && cue[j] != '\r' && cue[j] != '\n' && k < 511)
+                    name[k++] = cue[j++];
             name[k] = 0;
             if (!k) break;
-            int dir = n; while (dir > 0 && path[dir - 1] != '/' && path[dir - 1] != '\\') dir--;    /* directory of the cue */
+            /* directory of the cue */
+            int dir = n;
+            while (dir > 0 && path[dir - 1] != '/' && path[dir - 1] != '\\') dir--;
             int o = 0;
             int absolute = name[0] == '/' || name[0] == '\\' || (name[0] && name[1] == ':');   /* C:\... on Windows */
             if (!absolute) for (int q = 0; q < dir && o < 1000; q++) cd_bin_path[o++] = path[q];
             for (int q = 0; name[q] && o < 1020; q++) cd_bin_path[o++] = name[q];
             cd_bin_path[o] = 0;
             FILE *t = fopen(cd_bin_path, "rb");
-            if (t) { fclose(t); port_printf("[port] cue sheet %s -> %s\n", path, cd_bin_path); return cd_bin_path; }
+            if (t) {
+                fclose(t);
+                port_printf("[port] cue sheet %s -> %s\n", path, cd_bin_path);
+                return cd_bin_path;
+            }
             /* the FILE name does not match a file next to the cue (a renamed .bin, "Tombi!.bin" vs "Tombi.bin", another
                case, a copy the Android launcher saved under its display name): the same name in another case, else
                <cue name>.bin, else the only .bin / .img / .iso in the cue's folder */
-            char want[512]; snprintf(want, sizeof want, "%s", name);
-            { int b = (int)strlen(want); while (b > 0 && want[b - 1] != '/' && want[b - 1] != '\\') b--; memmove(want, want + b, strlen(want + b) + 1); }
-            char dirp[1024]; snprintf(dirp, sizeof dirp, "%.*s", dir ? dir : 1, dir ? path : ".");
-            const char *alt = cd_cue_fallback(dirp, path + dir, want);
+            char want[512];
+            snprintf(want, sizeof want, "%s", name);
+            {
+                int b = (int)strlen(want);
+                while (b > 0 && want[b - 1] != '/' && want[b - 1] != '\\') b--;
+                memmove(want, want + b, strlen(want + b) + 1);
+            }
+            char dir_buf[1024];
+            snprintf(dir_buf, sizeof dir_buf, "%.*s", dir ? dir : 1, dir ? path : ".");
+            const char *alt = cd_cue_fallback(dir_buf, path + dir, want);
             if (alt) {
                 snprintf(cd_bin_path, sizeof cd_bin_path, "%.*s%s", dir, path, alt);
                 port_printf("[port] cue sheet %s: FILE \"%s\" not found, using %s\n", path, name, cd_bin_path);
@@ -891,8 +1309,14 @@ int port_trace_cd;                     /* --trace-cd: every Setloc and read */
    sector is synthesised (zero header and subheader, the data at +12), and a sector past the end of a file or
    outside every range reads as zeros (logged once per request).  cd_raw is set: the St ring asks for raw
    sectors and skips audio by submode exactly as with a raw image. */
-typedef struct { int lba, sectors, stored; unsigned bytes; char *path; FILE *fp; } CdRange;
-static CdRange *cd_ranges; static int cd_nranges;
+typedef struct {
+    int lba, sectors, stored;
+    unsigned bytes;
+    char *path;
+    FILE *fp;
+} CdRange;
+static CdRange *cd_ranges;
+static int cd_nranges;
 static char cd_data_dir[1024];
 static int cd_data;                    /* 1: reads come from the data/ folder, not from cd_fp */
 static int cd_data_open_count;
@@ -902,7 +1326,8 @@ static const char *port_data_fullpath(const char *rel) {
     return buf;
 }
 static CdRange *cd_range_of(int lba) {
-    int lo = 0, hi = cd_nranges - 1;
+    int lo = 0,
+        hi = cd_nranges - 1;
     while (lo <= hi) {
         int m = (lo + hi) / 2;
         if (lba < cd_ranges[m].lba) hi = m - 1;
@@ -912,14 +1337,22 @@ static CdRange *cd_range_of(int lba) {
     return 0;
 }
 /* at most 8 files open at a time (the game alternates between a handful: the area, the load lists, a movie) */
-static CdRange *cd_open_ranges[8]; static int cd_open_next;
+static CdRange *cd_open_ranges[8];
+static int cd_open_next;
 static FILE *cd_range_file(CdRange *r) {
     if (r->fp) return r->fp;
     CdRange *old = cd_open_ranges[cd_open_next];
-    if (old && old->fp) { fclose(old->fp); old->fp = 0; }
+    if (old && old->fp) {
+        fclose(old->fp);
+        old->fp = 0;
+    }
     r->fp = fopen(port_data_fullpath(r->path), "rb");
-    if (!r->fp) { port_printf("[port] data: cannot open %s (os error %d)\n", port_data_fullpath(r->path), port_last_error()); return 0; }
-    cd_open_ranges[cd_open_next] = r; cd_open_next = (cd_open_next + 1) % 8;
+    if (!r->fp) {
+        port_printf("[port] data: cannot open %s (os error %d)\n", port_data_fullpath(r->path), port_last_error());
+        return 0;
+    }
+    cd_open_ranges[cd_open_next] = r;
+    cd_open_next = (cd_open_next + 1) % 8;
     cd_data_open_count++;
     return r->fp;
 }
@@ -929,9 +1362,12 @@ int port_cd_open_data(const char *dir) {
     if (!f) return -1;
     static char line[1200];
     if (!fgets(line, sizeof line, f) || strncmp(line, "tombi-data ", 11)) {
-        port_printf("[port] data: %s is not a tombi-data manifest\n", port_data_fullpath("manifest.txt")); fclose(f); return -1;
+        port_printf("[port] data: %s is not a tombi-data manifest\n", port_data_fullpath("manifest.txt"));
+        fclose(f);
+        return -1;
     }
-    int cap = 0; char sha[48] = "", boot_sha[48] = "", serial[32] = "", boot[64] = "";
+    int cap = 0;
+    char sha[48] = "", boot_sha[48] = "", serial[32] = "", boot[64] = "";
     cd_nranges = 0;
     while (fgets(line, sizeof line, f)) {
         if (!strncmp(line, "sectors ", 8)) cd_sector_count = atoi(line + 8);
@@ -940,44 +1376,74 @@ int port_cd_open_data(const char *dir) {
         else if (!strncmp(line, "serial ", 7)) { sscanf(line + 7, "%31s", serial); }
         else if (!strncmp(line, "boot ", 5)) { sscanf(line + 5, "%63s", boot); }
         else if (!strncmp(line, "file ", 5)) {
-            int lba, n, stored; unsigned bytes; char path[1024];
+            int lba, n, stored;
+            unsigned bytes;
+            char path[1024];
             if (sscanf(line + 5, "%d %d %d %u %1023[^\r\n]", &lba, &n, &stored, &bytes, path) != 5) continue;
-            if (stored != 2048 && stored != 2352) { port_printf("[port] data: manifest: unsupported sector size %d for %s\n", stored, path); continue; }
-            if (cd_nranges == cap) { cap = cap ? cap * 2 : 256; cd_ranges = realloc(cd_ranges, cap * sizeof *cd_ranges); }
+            if (stored != 2048 && stored != 2352) {
+                port_printf("[port] data: manifest: unsupported sector size %d for %s\n", stored, path);
+                continue;
+            }
+            if (cd_nranges == cap) {
+                cap = cap ? cap * 2 : 256;
+                cd_ranges = realloc(cd_ranges, cap * sizeof *cd_ranges);
+            }
             CdRange *r = &cd_ranges[cd_nranges++];
-            r->lba = lba; r->sectors = n; r->stored = stored; r->bytes = bytes; r->fp = 0;
-            r->path = malloc(strlen(path) + 1); strcpy(r->path, path);
+            r->lba = lba;
+            r->sectors = n;
+            r->stored = stored;
+            r->bytes = bytes;
+            r->fp = 0;
+            r->path = malloc(strlen(path) + 1);
+            strcpy(r->path, path);
         }
     }
     fclose(f);
     /* sorted by LBA (the manifest is written sorted; make sure, bsearch depends on it) */
     for (int i = 1; i < cd_nranges; i++) for (int j = i; j > 0 && cd_ranges[j].lba < cd_ranges[j - 1].lba; j--) {
-        CdRange t = cd_ranges[j]; cd_ranges[j] = cd_ranges[j - 1]; cd_ranges[j - 1] = t;
+        CdRange t = cd_ranges[j];
+        cd_ranges[j] = cd_ranges[j - 1];
+        cd_ranges[j - 1] = t;
     }
-    if (!cd_nranges) { port_printf("[port] data: %s lists no file\n", port_data_fullpath("manifest.txt")); return -1; }
-    cd_data = 1; cd_raw = 1; cd_image_path = cd_data_dir;
+    if (!cd_nranges) {
+        port_printf("[port] data: %s lists no file\n", port_data_fullpath("manifest.txt"));
+        return -1;
+    }
+    cd_data = 1;
+    cd_raw = 1;
+    cd_image_path = cd_data_dir;
     if (!cd_sector_count) cd_sector_count = cd_ranges[cd_nranges - 1].lba + cd_ranges[cd_nranges - 1].sectors;
     cd_image_size = (long long)cd_sector_count * 2352;
     /* the game version of the folder: the boot executable's sha1 (tools/extract_data.py; an older manifest has
        MAIN0's only).  This binary is one version's (its data image and every address come from that version's
        executable): a folder of another known version is refused, an unknown one is only warned about, as before */
     if (!boot_sha[0]) snprintf(boot_sha, sizeof boot_sha, "%s", sha);
-    {   static const struct { const char *sha1, *serial, *name; } known[] = {
+    {
+        static const struct {
+            const char *sha1, *serial, *name;
+        } known[] = {
             {"bec8dc5f4116f5e497f2337eef8c523ff6dee8fc", "SCES-01331", "Tombi! (PAL)"},
             {"81cbc79f0230aeb4252e058039f47ac95a777f5a", "SCUS-94236", "Tomba! (USA)"},
             {"07d577698ad31ec1a69b9d7b80a7c3f90b650888", "SLPS-01144", "Ore! Tomba (Japan)"}};
         for (int i = 0; i < (int)(sizeof known / sizeof known[0]); i++)
             if (!strcmp(boot_sha, known[i].sha1) && strcmp(known[i].sha1, PORT_BOOT_SHA1))
-                port_fatal("%s holds the disc %s %s, but this build of the port runs %s only (its executable %s): use the "
-                           "port's %s build, or extract a %s disc (tools/extract_data.py)", cd_data_dir, known[i].serial,
-                           known[i].name, PORT_VERSION_SERIAL, PORT_BOOT_FILE, known[i].serial, PORT_VERSION_SERIAL);
+                port_fatal("%s holds the disc %s %s, but this build of the port runs %s only (its executable %s): use "
+                           "the port's %s build, or extract a %s disc (tools/extract_data.py)", cd_data_dir,
+                           known[i].serial, known[i].name, PORT_VERSION_SERIAL, PORT_BOOT_FILE, known[i].serial,
+                           PORT_VERSION_SERIAL);
     }
-    port_printf("[port] data: %s (%d files, from manifest; %d sectors, %s sha1 %.8s%s%s)\n", cd_data_dir, cd_nranges, cd_sector_count,
-                PORT_VERSION_PAL ? "MAIN0" : boot[0] ? boot : "boot", boot_sha, serial[0] ? ", " : "", serial);
+    port_printf("[port] data: %s (%d files, from manifest; %d sectors, %s sha1 %.8s%s%s)\n", cd_data_dir, cd_nranges,
+                cd_sector_count, PORT_VERSION_PAL ? "MAIN0" : boot[0] ? boot : "boot", boot_sha, serial[0] ? ", " : "",
+                serial);
     if (strcmp(boot_sha, PORT_BOOT_SHA1))
-        port_printf("[port] warning: NOT the release this build runs (%s, %s sha1 %.8s)\n", PORT_VERSION_SERIAL, PORT_BOOT_FILE, PORT_BOOT_SHA1);
+        port_printf("[port] warning: NOT the release this build runs (%s, %s sha1 %.8s)\n", PORT_VERSION_SERIAL,
+                    PORT_BOOT_FILE, PORT_BOOT_SHA1);
     /* self-check: the game executable must be there (the port's own image was built from it) */
-    { FILE *m = fopen(port_data_fullpath(PORT_BOOT_FILE), "rb"); if (!m) port_printf("[port] warning: %s has no %s\n", cd_data_dir, PORT_BOOT_FILE); else fclose(m); }
+    {
+        FILE *m = fopen(port_data_fullpath(PORT_BOOT_FILE), "rb");
+        if (!m) port_printf("[port] warning: %s has no %s\n", cd_data_dir, PORT_BOOT_FILE);
+        else fclose(m);
+    }
     return 0;
 }
 static int cd_data_read_sector(int lba, u8 *d, int bytes) {
@@ -987,26 +1453,34 @@ static int cd_data_read_sector(int lba, u8 *d, int bytes) {
     if (r->stored == 2352) {
         long long off = sec * 2352 + (bytes == 2048 ? 24 : 12);
         if (off + bytes > (long long)r->bytes) return -2;
-        FILE *f = cd_range_file(r); if (!f) return -1;
+        FILE *f = cd_range_file(r);
+        if (!f) return -1;
         int got = port_pread(f, d, bytes, off);
         if (got < 0 || (got < bytes && ferror(f))) return -1;
         clearerr(f);
-        if (got < bytes) memset(d + (got > 0 ? got : 0), 0, bytes - (got > 0 ? got : 0));   /* shrunk file: zero padding */
+        /* shrunk file: zero padding */
+        if (got < bytes) memset(d + (got > 0 ? got : 0), 0, bytes - (got > 0 ? got : 0));
         return 0;
     }
     /* stored as 2048-byte user data: the whole last sector exists on the disc as data + zero padding */
     long long off = sec * 2048;
-    int avail = off >= (long long)r->bytes ? 0 : (int)((long long)r->bytes - off > 2048 ? 2048 : (long long)r->bytes - off);
+    int avail = off >= (long long)r->bytes ? 0
+                : (int)((long long)r->bytes - off > 2048 ? 2048 : (long long)r->bytes - off);
     u8 *user = bytes == 2048 ? d : d + 12;
     if (bytes != 2048) memset(d, 0, bytes);
     /* the file on disk may be shorter than the manifest says (a patched file that shrank, e.g. a WFM with fewer
        glyphs): the disc would still deliver whole sectors, so a short read is zero padding, not a failure */
     if (avail) {
-        FILE *f = cd_range_file(r); if (!f) return -1;
+        FILE *f = cd_range_file(r);
+        if (!f) return -1;
         int got = port_pread(f, user, avail, off);
-        if (got < 0) { if (ferror(f)) return -1; got = 0; }
+        if (got < 0) {
+            if (ferror(f)) return -1;
+            got = 0;
+        }
         if (got < avail && ferror(f)) return -1;
-        clearerr(f); avail = got;
+        clearerr(f);
+        avail = got;
     }
     if (avail < 2048) memset(user + avail, 0, 2048 - avail);
     return 0;
@@ -1020,8 +1494,14 @@ int port_cd_open(const char *path) {
     path = cd_resolve_cue(path);
     if (cd_iends(path, ".chd")) {
         char err[256] = "";
-        if (port_chd_open(path, &cd_sector_count, err, sizeof err)) { port_printf("[port] %s: %s\n", path, err); return -1; }
-        cd_chd = 1; cd_raw = 1; cd_image_path = path; cd_image_size = (long long)cd_sector_count * 2352;
+        if (port_chd_open(path, &cd_sector_count, err, sizeof err)) {
+            port_printf("[port] %s: %s\n", path, err);
+            return -1;
+        }
+        cd_chd = 1;
+        cd_raw = 1;
+        cd_image_path = path;
+        cd_image_size = (long long)cd_sector_count * 2352;
         port_printf("[port] disc image %s: CHD, %d raw 2352 sectors\n", path, cd_sector_count);
         u8 sec[2048];
         if (port_cd_read_sectors(16, 1, sec, 2048) || sec[0] != 1 || sec[1] != 'C' || sec[2] != 'D')
@@ -1038,31 +1518,52 @@ int port_cd_open(const char *path) {
     static const u8 sync[12] = { 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0 };
     int has_sync = 1;
     for (int i = 0; i < 12; i++) if (head[i] != sync[i]) has_sync = 0;
-    int has_pvd = port_pread(cd_fp, pvd, 8, 16 * 2048) == 8 && pvd[1] == 'C' && pvd[2] == 'D' && pvd[3] == '0' && pvd[4] == '0' && pvd[5] == '1';
+    int has_pvd = port_pread(cd_fp, pvd, 8, 16 * 2048) == 8 && pvd[1] == 'C' && pvd[2] == 'D' && pvd[3] == '0'
+                  && pvd[4] == '0' && pvd[5] == '1';
     /* sizes stay below 2^32 (a CD is at most ~800 MB); the freestanding runtime has no 64-bit division helper */
     unsigned size32 = n > 0xFFFFFFFFll ? 0xFFFFFFFFu : (unsigned)n;
     unsigned rest = size32 % 2352;
     cd_raw = has_sync ? 1 : has_pvd ? 0 : rest == 0;
     cd_sector_count = (int)(size32 / (cd_raw ? 2352 : 2048));
     port_printf("[port] disc image %s: %lld bytes, %s sectors (%d), %s\n", path, n, cd_raw ? "raw 2352" : "cooked 2048",
-                cd_sector_count, has_sync ? "sync pattern found" : has_pvd ? "ISO9660 PVD at 16*2048" : cd_raw ? "no sync pattern: size is a multiple of 2352" : "no sync pattern, no PVD: assumed cooked");
-    if (cd_raw && rest) port_printf("[port] warning: %u trailing bytes beyond the last raw sector (several tracks in one file?)\n", rest);
+                cd_sector_count, has_sync ? "sync pattern found"
+                                 : has_pvd ? "ISO9660 PVD at 16*2048"
+                                 : cd_raw ? "no sync pattern: size is a multiple of 2352"
+                                          : "no sync pattern, no PVD: assumed cooked");
+    if (cd_raw && rest)
+        port_printf("[port] warning: %u trailing bytes beyond the last raw sector (several tracks in one file?)\n",
+                    rest);
     /* self-check: sector 16 is the primary volume descriptor */
     u8 sec[2048];
-    if (port_cd_read_sectors(16, 1, sec, 2048) || sec[0] != 1 || sec[1] != 'C' || sec[2] != 'D' || sec[3] != '0' || sec[4] != '0' || sec[5] != '1')
-        port_printf("[port] warning: sector 16 of %s is not an ISO9660 primary volume descriptor (%02x %02x %02x %02x %02x %02x): "
-                    "wrong sector size or not a data track image\n", path, sec[0], sec[1], sec[2], sec[3], sec[4], sec[5]);
+    if (port_cd_read_sectors(16, 1, sec, 2048) || sec[0] != 1 || sec[1] != 'C' || sec[2] != 'D' || sec[3] != '0'
+        || sec[4] != '0' || sec[5] != '1')
+        port_printf("[port] warning: sector 16 of %s is not an ISO9660 primary volume descriptor (%02x %02x %02x %02x "
+                    "%02x %02x): wrong sector size or not a data track image\n", path, sec[0], sec[1], sec[2], sec[3],
+                    sec[4], sec[5]);
     else if (port_verbose || port_trace_cd) port_printf("[port] disc self-check: PVD ok, volume \"%.32s\"\n", sec + 40);
     return 0;
 }
 /* the disc closed again (the 3DS start screen reads the game's pictures from it before the game opens it itself) */
 void port_cd_close(void) {
-    if (cd_fp) { fclose(cd_fp); cd_fp = 0; }
-    if (cd_chd) { port_chd_close(); cd_chd = 0; }
+    if (cd_fp) {
+        fclose(cd_fp);
+        cd_fp = 0;
+    }
+    if (cd_chd) {
+        port_chd_close();
+        cd_chd = 0;
+    }
     if (cd_data) {
-        for (int i = 0; i < cd_nranges; i++) { if (cd_ranges[i].fp) fclose(cd_ranges[i].fp); free(cd_ranges[i].path); }
-        free(cd_ranges); cd_ranges = 0; cd_nranges = 0; cd_data = 0;
-        memset(cd_open_ranges, 0, sizeof cd_open_ranges); cd_open_next = 0;
+        for (int i = 0; i < cd_nranges; i++) {
+            if (cd_ranges[i].fp) fclose(cd_ranges[i].fp);
+            free(cd_ranges[i].path);
+        }
+        free(cd_ranges);
+        cd_ranges = 0;
+        cd_nranges = 0;
+        cd_data = 0;
+        memset(cd_open_ranges, 0, sizeof cd_open_ranges);
+        cd_open_next = 0;
     }
     cd_sector_count = 0;
 }
@@ -1075,7 +1576,10 @@ int port_cd_read_sectors(int lba, int count, void *dst, int bytes) {
     /* text patches in memory: their sectors from the rebuilt files, runs of the others from the disc / data */
     u8 *d = dst;
     for (int i = 0; i < count;) {
-        if (port_tpatch_sector(lba + i, d + (size_t)i * bytes, bytes)) { i++; continue; }
+        if (port_tpatch_sector(lba + i, d + (size_t)i * bytes, bytes)) {
+            i++;
+            continue;
+        }
         int j = i + 1;
         while (j < count && !port_tpatch_sector(lba + j, d + (size_t)j * bytes, bytes)) j++;
         if (cd_read_sectors_base(lba + i, j - i, d + (size_t)i * bytes, bytes)) return -1;
@@ -1089,58 +1593,90 @@ static int cd_read_sectors_base(int lba, int count, void *dst, int bytes) {
         int holes = 0;
         for (int i = 0; i < count; i++, d += bytes) {
             int rc = cd_data_read_sector(lba + i, d, bytes);
-            if (port_trace_cd) port_printf("[port] cd: lba %d (%d/%d) %d bytes from data/%s -> %s\n", lba + i, i + 1, count, bytes,
-                                           cd_range_of(lba + i) ? cd_range_of(lba + i)->path : "(no file)", rc == 0 ? "ok" : rc == -2 ? "zeros" : "FAILED");
-            if (rc == -1) { port_printf("[port] CD read failed: lba %d, %d bytes from %s/%s (os error %d)\n", lba + i, bytes, cd_data_dir,
-                                        cd_range_of(lba + i)->path, port_last_error()); return -1; }
-            if (rc == -2) { memset(d, 0, bytes); holes++; }
+            if (port_trace_cd)
+                port_printf("[port] cd: lba %d (%d/%d) %d bytes from data/%s -> %s\n", lba + i, i + 1, count, bytes,
+                            cd_range_of(lba + i) ? cd_range_of(lba + i)->path : "(no file)",
+                            rc == 0 ? "ok" : rc == -2 ? "zeros" : "FAILED");
+            if (rc == -1) {
+                port_printf("[port] CD read failed: lba %d, %d bytes from %s/%s (os error %d)\n", lba + i, bytes,
+                            cd_data_dir, cd_range_of(lba + i)->path, port_last_error());
+                return -1;
+            }
+            if (rc == -2) {
+                memset(d, 0, bytes);
+                holes++;
+            }
         }
-        if (holes) port_printf("[port] data: %d of %d sectors from lba %d are outside every file of the manifest (%d sectors): read as zeros\n",
-                               holes, count, lba, cd_sector_count);
+        if (holes)
+            port_printf("[port] data: %d of %d sectors from lba %d are outside every file of the manifest (%d "
+                        "sectors): read as zeros\n", holes, count, lba, cd_sector_count);
         return 0;
     }
     if (cd_chd) {
         for (int i = 0; i < count; i++, d += bytes) {
             u8 raw[2352];
             int rc = port_chd_read_raw(lba + i, raw);
-            if (port_trace_cd) port_printf("[port] cd: lba %d (%d/%d) %d bytes from chd -> %s\n", lba + i, i + 1, count, bytes, rc ? "FAILED" : "ok");
-            if (rc) { port_printf("[port] CD read failed: lba %d of %s (%d sectors)%s\n", lba + i, cd_image_path, cd_sector_count,
-                                  rc == -2 ? ": beyond the end of the image" : ": chd decode error"); return -1; }
+            if (port_trace_cd)
+                port_printf("[port] cd: lba %d (%d/%d) %d bytes from chd -> %s\n", lba + i, i + 1, count, bytes,
+                            rc ? "FAILED" : "ok");
+            if (rc) {
+                port_printf("[port] CD read failed: lba %d of %s (%d sectors)%s\n", lba + i, cd_image_path,
+                            cd_sector_count, rc == -2 ? ": beyond the end of the image" : ": chd decode error");
+                return -1;
+            }
             memcpy(d, raw + (bytes == 2048 ? 24 : 12), bytes);
         }
         return 0;
     }
-    if (!cd_fp) { port_printf("[port] CD read of lba %d: no disc image open\n", lba); return -1; }
+    if (!cd_fp) {
+        port_printf("[port] CD read of lba %d: no disc image open\n", lba);
+        return -1;
+    }
     /* Sectors come from a read-ahead of 32 (75 KB of the image in one read): a read is a request to the SD card's
        service on a 3DS, milliseconds each, and the game asks sector by sector: an overlay is 170 of them (its menu
        took a second to open and to close), a movie 10 a frame (most of the 160 ms a frame took there).  What the
        read-ahead cannot give (the image's end, an error) falls to the loop below, which reports it. */
     if (!port_trace_cd) {
-        static u8 ra[32 * 2352]; static int ra_lba = -1, ra_n; static FILE *ra_fp;
-        const int ss = cd_raw ? 2352 : 2048, skip = cd_raw ? (bytes == 2048 ? 24 : 12) : 0;
+        static u8 ra[32 * 2352];
+        static int ra_lba = -1, ra_n;
+        static FILE *ra_fp;
+        const int ss = cd_raw ? 2352 : 2048,
+                  skip = cd_raw ? (bytes == 2048 ? 24 : 12) : 0;
         int i = 0;
-        if (ra_fp != cd_fp) { ra_fp = cd_fp; ra_lba = -1; ra_n = 0; }
+        if (ra_fp != cd_fp) {
+            ra_fp = cd_fp;
+            ra_lba = -1;
+            ra_n = 0;
+        }
         while (i < count && bytes <= ss - skip) {
             int l = lba + i;
             if (ra_lba < 0 || l < ra_lba || l >= ra_lba + ra_n) {
                 int got = port_pread(cd_fp, ra, 32 * ss, (long long)l * ss);
-                ra_lba = l; ra_n = got > 0 ? got / ss : 0;
-                if (!ra_n) { ra_lba = -1; break; }
+                ra_lba = l;
+                ra_n = got > 0 ? got / ss : 0;
+                if (!ra_n) {
+                    ra_lba = -1;
+                    break;
+                }
             }
             memcpy(d + (size_t)i * bytes, ra + (size_t)(l - ra_lba) * ss + skip, bytes);
             i++;
         }
         if (i == count) return 0;
-        lba += i; count -= i; d += (size_t)i * bytes;
+        lba += i;
+        count -= i;
+        d += (size_t)i * bytes;
     }
     for (int i = 0; i < count; i++) {
         long long off = cd_raw ? (long long)(lba + i) * 2352 + (bytes == 2048 ? 24 : 12) : (long long)(lba + i) * 2048;
         int got = port_pread(cd_fp, d, bytes, off);
-        if (port_trace_cd) port_printf("[port] cd: lba %d (%d/%d) %d bytes at offset %lld -> %d%s\n", lba + i, i + 1, count, bytes, off, got,
-                                       got == bytes ? "" : " FAILED");
+        if (port_trace_cd)
+            port_printf("[port] cd: lba %d (%d/%d) %d bytes at offset %lld -> %d%s\n", lba + i, i + 1, count, bytes,
+                        off, got, got == bytes ? "" : " FAILED");
         if (got != bytes) {
-            port_printf("[port] CD read failed: lba %d, %d bytes at offset %lld of %s (%lld bytes = %d sectors of %d), got %d (os error %d)%s\n",
-                        lba + i, bytes, off, cd_image_path, cd_image_size, cd_sector_count, cd_raw ? 2352 : 2048, got, port_last_error(),
+            port_printf("[port] CD read failed: lba %d, %d bytes at offset %lld of %s (%lld bytes = %d sectors of "
+                        "%d), got %d (os error %d)%s\n", lba + i, bytes, off, cd_image_path, cd_image_size,
+                        cd_sector_count, cd_raw ? 2352 : 2048, got, port_last_error(),
                         lba + i >= cd_sector_count ? ": beyond the end of the image" : "");
             return -1;
         }
@@ -1157,9 +1693,11 @@ static int cd_dir_find(int lba, int size, const char *name, int *elba, int *esiz
         if (port_cd_read_sectors(lba + s, 1, sec, 2048)) return 0;
         int p = 0;
         while (p < 2048 && sec[p]) {
-            int len = sec[p], nl = sec[p + 32];
+            int len = sec[p],
+                nl = sec[p + 32];
             const u8 *nm = sec + p + 33;
-            int k = nl; if (k >= 2 && nm[k - 2] == ';') k -= 2;
+            int k = nl;
+            if (k >= 2 && nm[k - 2] == ';') k -= 2;
             if (k == n && !memcmp(nm, name, n)) {
                 *elba = sec[p + 2] | sec[p + 3] << 8 | sec[p + 4] << 16 | sec[p + 5] << 24;
                 *esize = sec[p + 10] | sec[p + 11] << 8 | sec[p + 12] << 16 | sec[p + 13] << 24;
@@ -1173,32 +1711,54 @@ static int cd_dir_find(int lba, int size, const char *name, int *elba, int *esiz
 }
 unsigned char *port_cd_read_named(const char *path, unsigned *size) {
     *size = 0;
-    { unsigned char *t = port_tpatch_named(path, size); if (t) return t; }
+    {
+        unsigned char *t = port_tpatch_named(path, size);
+        if (t) return t;
+    }
     if (cd_data) {
         FILE *f = fopen(port_data_fullpath(path), "rb");
         if (!f) return 0;
-        fseeko(f, 0, SEEK_END); long long n = ftello(f); fseeko(f, 0, SEEK_SET);
-        if (n <= 0 || n > 0x4000000) { fclose(f); return 0; }
+        fseeko(f, 0, SEEK_END);
+        long long n = ftello(f);
+        fseeko(f, 0, SEEK_SET);
+        if (n <= 0 || n > 0x4000000) {
+            fclose(f);
+            return 0;
+        }
         unsigned char *d = malloc((size_t)n + 4);
-        if (!d || (long long)fread(d, 1, (size_t)n, f) != n) { free(d); fclose(f); return 0; }
-        fclose(f); *size = (unsigned)n; return d;
+        if (!d || (long long)fread(d, 1, (size_t)n, f) != n) {
+            free(d);
+            fclose(f);
+            return 0;
+        }
+        fclose(f);
+        *size = (unsigned)n;
+        return d;
     }
     if (!cd_fp && !cd_chd) return 0;
     u8 pvd[2048];
     if (port_cd_read_sectors(16, 1, pvd, 2048)) return 0;
-    int lba = pvd[158] | pvd[159] << 8 | pvd[160] << 16 | pvd[161] << 24, sz = pvd[166] | pvd[167] << 8 | pvd[168] << 16 | pvd[169] << 24, isdir = 1;
+    int lba = pvd[158] | pvd[159] << 8 | pvd[160] << 16 | pvd[161] << 24,
+        sz = pvd[166] | pvd[167] << 8 | pvd[168] << 16 | pvd[169] << 24,
+        isdir = 1;
     char comp[64];
     while (*path) {
-        const char *e = strchr(path, '/'); int n = e ? (int)(e - path) : (int)strlen(path);
+        const char *e = strchr(path, '/');
+        int n = e ? (int)(e - path) : (int)strlen(path);
         if (n <= 0 || n >= (int)sizeof comp || !isdir) return 0;
-        memcpy(comp, path, n); comp[n] = 0;
+        memcpy(comp, path, n);
+        comp[n] = 0;
         if (!cd_dir_find(lba, sz, comp, &lba, &sz, &isdir)) return 0;
-        path += n; if (*path == '/') path++;
+        path += n;
+        if (*path == '/') path++;
     }
     if (isdir || sz <= 0 || sz > 0x4000000) return 0;
     int sectors = (sz + 2047) / 2048;
     unsigned char *d = malloc((size_t)sectors * 2048 + 4);
-    if (!d || port_cd_read_sectors(lba, sectors, d, 2048)) { free(d); return 0; }
+    if (!d || port_cd_read_sectors(lba, sectors, d, 2048)) {
+        free(d);
+        return 0;
+    }
     *size = (unsigned)sz;
     return d;
 }
@@ -1218,43 +1778,72 @@ static void cd_check_loc(const u8 *param, int lba) {
     unsigned off = (unsigned)(param - FILE_LINKS);
     int in_table = off < 1119 * 8 && (off & 7) == 0;
     cd_last_id = in_table ? (int)(off / 8) : -1;
-    if (port_trace_cd) port_printf("[port] cd: Setloc %02x:%02x:%02x -> lba %d (%s %u)\n", param[0], param[1], param[2], lba,
-                                   in_table ? "FILE_LINKS id" : "param at", in_table ? off / 8 : (unsigned)(unsigned long)param);
+    if (port_trace_cd)
+        port_printf("[port] cd: Setloc %02x:%02x:%02x -> lba %d (%s %u)\n", param[0], param[1], param[2], lba,
+                    in_table ? "FILE_LINKS id" : "param at", in_table ? off / 8 : (unsigned)(unsigned long)param);
     if (lba >= 0 && lba < cd_sector_count) return;
     if (cd_bad_locs++ > 20) return;
-    port_printf("[port] CD Setloc %02x:%02x:%02x = lba %d is outside the image (%d sectors): ", param[0], param[1], param[2], lba, cd_sector_count);
-    if (in_table) port_printf("FILE_LINKS[%u] (a load record with that file id is garbage: KUSEG/page-0 reads?)\n", off / 8);
+    port_printf("[port] CD Setloc %02x:%02x:%02x = lba %d is outside the image (%d sectors): ", param[0], param[1],
+                param[2], lba, cd_sector_count);
+    if (in_table)
+        port_printf("FILE_LINKS[%u] (a load record with that file id is garbage: KUSEG/page-0 reads?)\n", off / 8);
     else port_printf("the parameter is at %p, not in FILE_LINKS (a corrupt CdlLOC)\n", param);
 }
 int CdControl(u8 com, u8 *param, u8 *result) {
     port_trace("CdControl", com);
-    if ((com == 2 /* Setloc */ || com == 0x15 || com == 0x16) && param) { cd_pos = loc_to_lba(param); cd_check_loc(param, cd_pos); }
+    if ((com == 2 /* Setloc */ || com == 0x15 || com == 0x16) && param) {
+        cd_pos = loc_to_lba(param);
+        cd_check_loc(param, cd_pos);
+    }
     if (com == 14 /* Setmode */ && param) cd_mode = param[0];
-    if (com == 0x13 /* Setfilter */ && param) { cd_filter_file = param[0]; cd_filter_chan = param[1]; }
+    if (com == 0x13 /* Setfilter */ && param) {
+        cd_filter_file = param[0];
+        cd_filter_chan = param[1];
+    }
     if (com == 0x0B /* Mute */) port_sound_cd_mute(1);
     if (com == 0x0C /* Demute */) port_sound_cd_mute(0);
-    if (com == 9 /* Pause */ || com == 8 /* Stop */) { extern void port_st_stop(void); port_st_stop(); }
+    if (com == 9 /* Pause */ || com == 8 /* Stop */) {
+        extern void port_st_stop(void);
+        port_st_stop();
+    }
     if (result) result[0] = 0x02;
     if ((com == 6 /* ReadN */ || com == 0x1B /* ReadS */) && cd_ready_cb) cd_readn();
     return 1;
 }
 int CdControlF(u8 com, u8 *param) { return CdControl(com, param, 0); }
 int CdControlB(u8 com, u8 *param, u8 *result) { return CdControl(com, param, result); }
-int CdSync(int mode, u8 *result) { if (result) result[0] = 0x02; return 2; /* CdlComplete */ }
+int CdSync(int mode, u8 *result) {
+    if (result) result[0] = 0x02;
+    return 2; /* CdlComplete */
+}
 int CdReady(int mode, u8 *result) { return 2; }
-void *CdSyncCallback(void *f) { void *o = cd_sync_cb; cd_sync_cb = f; return o; }
-void *CdReadyCallback(void *f) { void *o = cd_ready_cb; cd_ready_cb = f; return o; }
-void *CdReadCallback(void *f) { void *o = cd_read_cb; cd_read_cb = f; return o; }
+void *CdSyncCallback(void *f) {
+    void *o = cd_sync_cb;
+    cd_sync_cb = f;
+    return o;
+}
+void *CdReadyCallback(void *f) {
+    void *o = cd_ready_cb;
+    cd_ready_cb = f;
+    return o;
+}
+void *CdReadCallback(void *f) {
+    void *o = cd_read_cb;
+    cd_read_cb = f;
+    return o;
+}
 static int cd_reads, cd_sectors;
 /* A load list (SYS/LD0SYS.BIN, SYS/LD0ARnn.BIN: FILE_LINKS ids 0..19, read into MAIN0's data) and an overlay (an
    area X0nn or a SYSTEM file into the overlay region) carry retail pointers: they become native.  Everything else
    (assets, compressed files in the load buffers) is left as it is. */
 static void cd_after_read(u8 *buf, int n) {
-    u8 *lo = (u8 *)port_ram, *hi = lo + (PORT_OVL_END - 0x80000000u);
+    u8 *lo = (u8 *)port_ram,
+       *hi = lo + (PORT_OVL_END - 0x80000000u);
     u8 *olo = (u8 *)port_x000_image;
     if ((buf >= lo && buf < hi) && (cd_last_id >= 0 && cd_last_id < 20 || buf >= olo)) {
         if (buf + n > hi) n = hi - buf;
-        if (port_lang && buf >= olo) {          /* the language's overlay over its MAIN0 twin, which may be longer than the read */
+        /* the language's overlay over its MAIN0 twin, which may be longer than the read */
+        if (port_lang && buf >= olo) {
             int c = port_lang_overlay_loaded(buf, n, cd_last_id);
             if (c > n) n = c;
         }
@@ -1264,10 +1853,17 @@ static void cd_after_read(u8 *buf, int n) {
 int CdRead(int sectors, u32 *buf, int mode) {
     int bytes = (mode & 0x20) ? 2340 : 2048;
     port_trace("CdRead", sectors);
-    if (port_verbose || port_trace_cd) port_printf("[port] CdRead lba %d, %d sectors -> %p (frame %d)\n", cd_pos, sectors, buf, port_frame);
-    if ((u8 *)buf == (u8 *)0x80000000u || !buf) buf = (u32 *)port_x000_image;   /* G?OVER's record: addr 0 = the overlay buffer */
-    if (port_cd_read_sectors(cd_pos, sectors, buf, bytes)) { port_printf("[port] CdRead failed at lba %d (frame %d)\n", cd_pos, port_frame); return 0; }
-    cd_pos += sectors; cd_reads++; cd_sectors += sectors;
+    if (port_verbose || port_trace_cd)
+        port_printf("[port] CdRead lba %d, %d sectors -> %p (frame %d)\n", cd_pos, sectors, buf, port_frame);
+    /* G?OVER's record: addr 0 = the overlay buffer */
+    if ((u8 *)buf == (u8 *)0x80000000u || !buf) buf = (u32 *)port_x000_image;
+    if (port_cd_read_sectors(cd_pos, sectors, buf, bytes)) {
+        port_printf("[port] CdRead failed at lba %d (frame %d)\n", cd_pos, port_frame);
+        return 0;
+    }
+    cd_pos += sectors;
+    cd_reads++;
+    cd_sectors += sectors;
     cd_after_read((u8 *)buf, sectors * bytes);
     return 1;
 }
@@ -1276,7 +1872,8 @@ int CdRead(int sectors, u32 *buf, int mode) {
    ends the read with CdReadyCallback(0) + CdControlF(CdlPause).  The port delivers the whole file at once, inside the
    ReadN command. */
 static u8 cd_sector_buf[2340];
-static u8 *cd_gs_first; static int cd_gs_bytes;
+static u8 *cd_gs_first;
+static int cd_gs_bytes;
 int CdGetSector(void *madr, int size) {
     if (size < 0 || size > (int)sizeof cd_sector_buf / 4) size = sizeof cd_sector_buf / 4;
     memcpy(madr, cd_sector_buf, (size_t)size * 4);
@@ -1285,9 +1882,11 @@ int CdGetSector(void *madr, int size) {
     return 1;
 }
 static void cd_readn(void) {
-    int n = 0, bytes = (cd_mode & 0x20) ? 2340 : 2048;
+    int n = 0,
+        bytes = (cd_mode & 0x20) ? 2340 : 2048;
     void (*cb)(unsigned char);
-    cd_gs_first = 0; cd_gs_bytes = 0;
+    cd_gs_first = 0;
+    cd_gs_bytes = 0;
     if (port_verbose || port_trace_cd) port_printf("[port] CdlReadN lba %d (frame %d)\n", cd_pos, port_frame);
     while ((cb = (void (*)(unsigned char))cd_ready_cb) != 0 && n < 0x10000) {
         if (port_cd_read_sectors(cd_pos, 1, cd_sector_buf, bytes)) {
@@ -1295,16 +1894,21 @@ static void cd_readn(void) {
             cb(5 /* CdlDiskError */);
             break;
         }
-        cd_pos++; n++;
+        cd_pos++;
+        n++;
         cb(1 /* CdlDataReady */);
     }
-    cd_reads++; cd_sectors += n;
+    cd_reads++;
+    cd_sectors += n;
     if (cd_gs_first) cd_after_read(cd_gs_first, cd_gs_bytes);
 }
 int CdReadSync(int mode, u8 *result) { return 0; }
 int CdReadBreak(void) { return 0; }
 int CdMix(void *att) { return 1; }
-int port_cd_stats(int *sectors) { *sectors = cd_sectors; return cd_reads; }
+int port_cd_stats(int *sectors) {
+    *sectors = cd_sectors;
+    return cd_reads;
+}
 /* ------------------------------------------------------------------ streaming (movies): the St* ring
  * The ring of StSetRing(addr, n) has the real library's layout, so the game's own reader (MovieDecodeFrame,
  * StHEADER fields) works on it: n 32-byte sector headers at addr, then n data slots of 2016 bytes (a video
@@ -1321,40 +1925,70 @@ int port_cd_stats(int *sectors) { *sectors = cd_sectors; return cd_reads; }
  * frames before that.  --skip-movies: StGetNext at once reports a frame past the end of every movie, so
  * moviePlayerTask takes its "movie finished" path (CdMix, StUnSetRing, exitTask) without playing. */
 int port_skip_all;        /* --no-movies: --skip-intro, and the game's own movies skipped too */
-int port_skip_movies;     /* 1 = every movie (--skip-movies), 2 = only those before gameplay starts (--skip-intro: logos, title movie) */
+/* 1 = every movie (--skip-movies), 2 = only those before gameplay starts (--skip-intro: logos, title movie) */
+int port_skip_movies;
 int port_in_game;         /* set by the overlay loader on the first area overlay (runtime/ovl.c) */
-typedef struct { u16 id, type, secCount, nSectors; u32 frameCount, frameSize; u16 width, height; u16 nCodes, magic, q, version; u32 zero; } StHEADER;
+typedef struct {
+    u16 id, type, secCount, nSectors;
+    u32 frameCount, frameSize;
+    u16 width, height;
+    u16 nCodes, magic, q, version;
+    u32 zero;
+} StHEADER;
 #define ST_SLOT 2016
-static StHEADER *st_ring; static int st_ring_n;
+static StHEADER *st_ring;
+static int st_ring_n;
 static u8 *st_slot(int i) { return (u8 *)st_ring + st_ring_n * 32 + i * ST_SLOT; }
-static int st_wr, st_frame_start, st_rd;       /* the writer's slot, the slot of the frame it assembles, the reader's slot */
+/* the writer's slot, the slot of the frame it assembles, the reader's slot */
+static int st_wr, st_frame_start, st_rd;
 static int st_active, st_ended, st_lba, st_misses, st_frames;
-static int st_full, st_start_vblank, st_handed, st_start_lba;   /* vblanks the ring was full (the game not taking frames), the start frame, frames handed out: the pace line of port_st_stop */
+/* vblanks the ring was full (the game not taking frames), the start frame, frames handed out: the pace line of
+   port_st_stop */
+static int st_full, st_start_vblank, st_handed, st_start_lba;
 static int st_budget;                          /* sectors due, in 1/port_hz sector units */
-static u32 st_start_frame, st_end_frame; static int st_mask;
-static int st_chunk_expect; static u32 st_cur_frame;
-static u8 st_pending[2340]; static int st_have_pending;   /* a sector read but not placed yet (the ring was full) */
+static u32 st_start_frame, st_end_frame;
+static int st_mask;
+static int st_chunk_expect;
+static u32 st_cur_frame;
+/* a sector read but not placed yet (the ring was full) */
+static u8 st_pending[2340];
+static int st_have_pending;
 static void (*st_cb_ready)(void), (*st_cb_end)(void);
-static struct { u32 *addr; int w, h, bytes; } st_last;      /* the frame StGetNext handed out, for DecDCTvlc */
-static struct { u16 id, type, secCount, nSectors; u32 frameCount, frameSize; u16 width, height; } fake_st_header;
+/* the frame StGetNext handed out, for DecDCTvlc */
+static struct {
+    u32 *addr;
+    int w, h, bytes;
+} st_last;
+static struct {
+    u16 id, type, secCount, nSectors;
+    u32 frameCount, frameSize;
+    u16 width, height;
+} fake_st_header;
 static u32 fake_st_frame[16];
 
 static void st_log_sector(const StHEADER *h) {
     if (port_verbose >= 2 || port_trace_cd)
-        port_printf("[port] st: lba %d frame %u chunk %u/%u %ux%u v%u q%u size %u (frame %d)\n", st_lba - 1, h->frameCount, h->secCount,
-                    h->nSectors, h->width, h->height, h->version, h->q, h->frameSize, port_frame);
+        port_printf("[port] st: lba %d frame %u chunk %u/%u %ux%u v%u q%u size %u (frame %d)\n", st_lba - 1,
+                    h->frameCount, h->secCount, h->nSectors, h->width, h->height, h->version, h->q, h->frameSize,
+                    port_frame);
 }
 /* place one sector in the ring: 1 = consumed (placed or skipped), 0 = the ring is full (kept pending) */
 static int st_deliver(void) {
     if (!st_have_pending) {
         int bytes = cd_raw ? 2340 : 2048;
-        if (port_cd_read_sectors(st_lba, 1, st_pending, bytes)) { st_ended = 1; return 0; }
+        if (port_cd_read_sectors(st_lba, 1, st_pending, bytes)) {
+            st_ended = 1;
+            return 0;
+        }
         st_lba++;
         st_have_pending = 1;
         if (cd_raw) {
-            u8 submode = st_pending[6];               /* 4-byte header, 8-byte subheader: file, channel, submode, coding */
-            if (submode & 0x24) {                     /* Form 2 / audio: XA, to the CD input of the SPU, not to the ring */
-                if ((submode & 4) && (!(cd_mode & 0x08) || (st_pending[4] == cd_filter_file && st_pending[5] == cd_filter_chan)))
+            /* 4-byte header, 8-byte subheader: file, channel, submode, coding */
+            u8 submode = st_pending[6];
+            /* Form 2 / audio: XA, to the CD input of the SPU, not to the ring */
+            if (submode & 0x24) {
+                if ((submode & 4)
+                    && (!(cd_mode & 0x08) || (st_pending[4] == cd_filter_file && st_pending[5] == cd_filter_chan)))
                     port_sound_xa_sector(st_pending[7], st_pending + 12);
                 st_have_pending = 0;
                 return 1;
@@ -1365,18 +1999,33 @@ static int st_deliver(void) {
     const StHEADER *h = (const StHEADER *)sec;
     if (h->id != 0x160 || h->type != 0x8001 || h->nSectors == 0 || h->secCount >= h->nSectors) {
         st_have_pending = 0;
-        if (++st_misses > 64) { st_ended = 1; port_sound_xa_end(); if (port_verbose) port_printf("[port] st: stream ended at lba %d (%d frames)\n", st_lba, st_frames); }
+        if (++st_misses > 64) {
+            st_ended = 1;
+            port_sound_xa_end();
+            if (port_verbose) port_printf("[port] st: stream ended at lba %d (%d frames)\n", st_lba, st_frames);
+        }
         return 1;
     }
     st_misses = 0;
     if (st_mask) {                                    /* StSetStream: discard up to the start frame */
-        if (h->frameCount != st_start_frame) { st_have_pending = 0; return 1; }
+        if (h->frameCount != st_start_frame) {
+            st_have_pending = 0;
+            return 1;
+        }
         st_mask = 0;
     }
-    if (st_end_frame && h->frameCount >= st_end_frame) { st_have_pending = 0; st_ended = 1; return 1; }
+    if (st_end_frame && h->frameCount >= st_end_frame) {
+        st_have_pending = 0;
+        st_ended = 1;
+        return 1;
+    }
     if (h->secCount == 0) {
         int need = h->nSectors;
-        if (need > st_ring_n - 1) { st_have_pending = 0; port_printf("[port] st: a frame of %d sectors does not fit the ring of %d\n", need, st_ring_n); return 1; }
+        if (need > st_ring_n - 1) {
+            st_have_pending = 0;
+            port_printf("[port] st: a frame of %d sectors does not fit the ring of %d\n", need, st_ring_n);
+            return 1;
+        }
         if (st_ring_n - st_wr - 1 < need) {           /* does not fit before the end: mark the wrap, start at 0 */
             if (st_ring[st_wr].id != 0) return 0;
             for (int i = 0; i < need; i++) if (st_ring[i].id != 0) return 0;
@@ -1384,18 +2033,24 @@ static int st_deliver(void) {
             st_wr = 0;
         } else
             for (int i = 0; i < need; i++) if (st_ring[st_wr + i].id != 0) return 0;
-        st_frame_start = st_wr; st_chunk_expect = 0; st_cur_frame = h->frameCount;
+        st_frame_start = st_wr;
+        st_chunk_expect = 0;
+        st_cur_frame = h->frameCount;
     } else if (h->secCount != st_chunk_expect || h->frameCount != st_cur_frame) {
         /* out of sequence (a sector lost): drop the frame being assembled */
         for (int i = st_frame_start; i < st_wr; i++) st_ring[i].id = 0;
-        st_wr = st_frame_start; st_chunk_expect = 0; st_have_pending = 0;
+        st_wr = st_frame_start;
+        st_chunk_expect = 0;
+        st_have_pending = 0;
         return 1;
     }
     st_log_sector(h);
     memcpy(&st_ring[st_wr], h, 32);
     memcpy(st_slot(st_wr), sec + 32, ST_SLOT);
     st_ring[st_wr].id = 3;
-    st_wr++; st_chunk_expect++; st_have_pending = 0;
+    st_wr++;
+    st_chunk_expect++;
+    st_have_pending = 0;
     if (h->secCount == h->nSectors - 1) {              /* the frame is complete */
         st_ring[st_frame_start].id = 2;
         st_frames++;
@@ -1412,17 +2067,23 @@ void port_st_vblank(void) {
 #ifdef __3DS__
     {   /* by the clock, not by the vblank: the decoder takes more than a vblank's time there, and a movie fed per
            vblank would play in slow motion (6.7 s of logo in 16); late frames are dropped, as the drive drops them */
-        static unsigned long long last; unsigned long long now = port_time_us(), dt = last && now - last < 200000 ? now - last : 1000000ull / (unsigned)port_hz;
+        static unsigned long long last;
+        unsigned long long now = port_time_us(),
+                           dt = last && now - last < 200000 ? now - last : 1000000ull / (unsigned)port_hz;
         last = now;
         st_budget += (int)(((cd_mode & 0x80) ? 150 : 75) * dt * (unsigned)port_hz / 1000000ull);
     }
 #else
     st_budget += (cd_mode & 0x80) ? 150 : 75;         /* sectors per second: 75 at single speed, 150 at double */
 #endif
-    int cap = port_hz * st_ring_n;                     /* a full ring's worth at most: the drive would have dropped the rest */
+    /* a full ring's worth at most: the drive would have dropped the rest */
+    int cap = port_hz * st_ring_n;
     if (st_budget > cap) st_budget = cap;
     while (st_budget >= port_hz && !st_ended) {
-        if (!st_deliver()) { st_full++; break; }
+        if (!st_deliver()) {
+            st_full++;
+            break;
+        }
         st_budget -= port_hz;
     }
 }
@@ -1430,17 +2091,28 @@ void port_st_vblank(void) {
    the first stream of the session, the developer's logo (LOGO.STR, 6.7 s) */
 static int st_count;
 static int st_skipped(void) {
-    return port_skip_all || port_skip_movies == 1 || (port_skip_movies == 2 && !port_in_game) || (port_skip_movies == 3 && st_count > 1);
+    return port_skip_all || port_skip_movies == 1 || (port_skip_movies == 2 && !port_in_game)
+           || (port_skip_movies == 3 && st_count > 1);
 }
 int CdRead2(int mode) {
     u8 param = (u8)mode;
     st_count++;
     CdControl(14, &param, 0);
-    st_active = 1; st_ended = 0; st_lba = cd_pos; st_misses = 0; st_budget = 0; st_have_pending = 0; st_frames = 0;
-    st_full = 0; st_handed = 0; st_start_vblank = port_frame; st_start_lba = cd_pos;
+    st_active = 1;
+    st_ended = 0;
+    st_lba = cd_pos;
+    st_misses = 0;
+    st_budget = 0;
+    st_have_pending = 0;
+    st_frames = 0;
+    st_full = 0;
+    st_handed = 0;
+    st_start_vblank = port_frame;
+    st_start_lba = cd_pos;
     port_sound_xa_reset();
-    if (port_verbose) port_printf("[port] st: stream started at lba %d, mode %03x, ring %d sectors (frame %d)%s\n", st_lba, mode, st_ring_n, port_frame,
-                                  st_skipped() ? ", skipped (--skip-movies/--skip-intro)" : "");
+    if (port_verbose)
+        port_printf("[port] st: stream started at lba %d, mode %03x, ring %d sectors (frame %d)%s\n", st_lba, mode,
+                    st_ring_n, port_frame, st_skipped() ? ", skipped (--skip-movies/--skip-intro)" : "");
     return 1;
 }
 /* StUnSetRing / the end of a movie: one line with the pace, so a log from another machine says whether a slow movie
@@ -1448,36 +2120,58 @@ int CdRead2(int mode) {
    per frame of these 15 fps files, 1.7 of the 30 fps ones */
 void port_st_stop(void) {
     if (st_active)
-        port_printf("[port] st: stream stopped at frame %d: %d frames handed out in %d vblanks (%d sectors read, ring full on %d vblanks, mode %02x, %d/s)\n",
-                    port_frame, st_handed, port_frame - st_start_vblank, st_lba - st_start_lba, st_full, cd_mode, (cd_mode & 0x80) ? 150 : 75);
+        port_printf("[port] st: stream stopped at frame %d: %d frames handed out in %d vblanks (%d sectors read, ring "
+                    "full on %d vblanks, mode %02x, %d/s)\n", port_frame, st_handed, port_frame - st_start_vblank,
+                    st_lba - st_start_lba, st_full, cd_mode, (cd_mode & 0x80) ? 150 : 75);
     if (st_active) {
-        extern unsigned long long port_mdec_us[2]; extern unsigned port_mdec_n[2];
+        extern unsigned long long port_mdec_us[2];
+        extern unsigned port_mdec_n[2];
         const unsigned nf = port_mdec_n[0] ? port_mdec_n[0] : 1;
-        port_printf("[port] st: decoding: %u frames, ms each: %llu.%llu the codes (DecDCTvlc), %llu.%llu the pictures (%u words)\n", port_mdec_n[0],
-                    port_mdec_us[0] / nf / 1000, port_mdec_us[0] / nf / 100 % 10, port_mdec_us[1] / nf / 1000, port_mdec_us[1] / nf / 100 % 10, port_mdec_n[1] / nf);
-        port_mdec_us[0] = port_mdec_us[1] = 0; port_mdec_n[0] = port_mdec_n[1] = 0;
+        port_printf("[port] st: decoding: %u frames, ms each: %llu.%llu the codes (DecDCTvlc), %llu.%llu the pictures "
+                    "(%u words)\n", port_mdec_n[0], port_mdec_us[0] / nf / 1000, port_mdec_us[0] / nf / 100 % 10,
+                    port_mdec_us[1] / nf / 1000, port_mdec_us[1] / nf / 100 % 10, port_mdec_n[1] / nf);
+        port_mdec_us[0] = port_mdec_us[1] = 0;
+        port_mdec_n[0] = port_mdec_n[1] = 0;
     }
-    st_active = 0; port_sound_xa_end();
+    st_active = 0;
+    port_sound_xa_end();
 }
 static void st_stop(void) { port_st_stop(); }
 void StClearRing(void);
-void StSetRing(void *a, int n) { st_ring = (StHEADER *)a; st_ring_n = n; StClearRing(); }
+void StSetRing(void *a, int n) {
+    st_ring = (StHEADER *)a;
+    st_ring_n = n;
+    StClearRing();
+}
 void StClearRing(void) {
     if (st_ring) for (int i = 0; i < st_ring_n; i++) st_ring[i].id = 0;
-    st_wr = st_frame_start = st_rd = 0; st_ended = 0; st_budget = 0; st_have_pending = 0; st_chunk_expect = 0;
+    st_wr = st_frame_start = st_rd = 0;
+    st_ended = 0;
+    st_budget = 0;
+    st_have_pending = 0;
+    st_chunk_expect = 0;
     st_last.addr = 0;
 }
 void StUnSetRing(void) { st_stop(); }
 void StSetStream(int mode, u32 start, u32 end, void *f1, void *f2) {
     (void)mode;
-    st_mask = 1; st_start_frame = start; st_end_frame = end;
-    st_cb_ready = (void (*)(void))f1; st_cb_end = (void (*)(void))f2;
+    st_mask = 1;
+    st_start_frame = start;
+    st_end_frame = end;
+    st_cb_ready = (void (*)(void))f1;
+    st_cb_end = (void (*)(void))f2;
 }
-void StSetMask(u32 mask, u32 start, u32 end) { st_mask = (int)mask; st_start_frame = start; st_end_frame = end; }
+void StSetMask(u32 mask, u32 start, u32 end) {
+    st_mask = (int)mask;
+    st_start_frame = start;
+    st_end_frame = end;
+}
 static int st_end_header(void **a, void **b) {
     fake_st_header.frameCount = 0x7FFFFFFF;
-    fake_st_header.width = 320; fake_st_header.height = 240;
-    *a = fake_st_frame; *b = &fake_st_header;
+    fake_st_header.width = 320;
+    fake_st_header.height = 240;
+    *a = fake_st_frame;
+    *b = &fake_st_header;
     if (st_cb_end) st_cb_end();
     return 0;
 }
@@ -1487,18 +2181,27 @@ int StGetNext(void **a, void **b) {
         return st_end_header(a, b);
     }
     for (;;) {
-        if (st_ring[st_rd].id == 1) { st_ring[st_rd].id = 0; st_rd = 0; }
+        if (st_ring[st_rd].id == 1) {
+            st_ring[st_rd].id = 0;
+            st_rd = 0;
+        }
         if (st_ring[st_rd].id == 2) {
             st_ring[st_rd].id = 4;
-            *a = st_slot(st_rd); *b = &st_ring[st_rd];
-            st_last.addr = (u32 *)*a; st_last.w = st_ring[st_rd].width; st_last.h = st_ring[st_rd].height;
-            st_last.bytes = st_ring[st_rd].nSectors * ST_SLOT; st_handed++;
-            if ((int)st_ring[st_rd].frameSize > 0 && (int)st_ring[st_rd].frameSize < st_last.bytes) st_last.bytes = st_ring[st_rd].frameSize;
+            *a = st_slot(st_rd);
+            *b = &st_ring[st_rd];
+            st_last.addr = (u32 *)*a;
+            st_last.w = st_ring[st_rd].width;
+            st_last.h = st_ring[st_rd].height;
+            st_last.bytes = st_ring[st_rd].nSectors * ST_SLOT;
+            st_handed++;
+            if ((int)st_ring[st_rd].frameSize > 0 && (int)st_ring[st_rd].frameSize < st_last.bytes)
+                st_last.bytes = st_ring[st_rd].frameSize;
             return 0;
         }
         if (!st_active || st_ended) {
-            if (port_verbose) port_printf("[port] st: no more frames (%s), StGetNext reports the last frame (frame %d)\n",
-                                          st_active ? "stream ended" : "no stream", port_frame);
+            if (port_verbose)
+                port_printf("[port] st: no more frames (%s), StGetNext reports the last frame (frame %d)\n",
+                            st_active ? "stream ended" : "no stream", port_frame);
             return st_end_header(a, b);
         }
         port_vblank();              /* the drive keeps reading while the game spins here */
@@ -1516,9 +2219,16 @@ int StFreeRing(void *base) {
 }
 /* the size of the frame DecDCTvlc is decoding (mdec.c): 0 when bs is not the frame StGetNext handed out */
 int port_st_frame_dims(const void *bs, int *w, int *h, int *bytes) {
-    if (bs == (const void *)fake_st_frame) { *w = *h = 0; *bytes = sizeof fake_st_frame; return 1; }   /* the end placeholder: no picture */
+    /* the end placeholder: no picture */
+    if (bs == (const void *)fake_st_frame) {
+        *w = *h = 0;
+        *bytes = sizeof fake_st_frame;
+        return 1;
+    }
     if (!st_last.addr || bs != (const void *)st_last.addr) return 0;
-    *w = st_last.w; *h = st_last.h; *bytes = st_last.bytes;
+    *w = st_last.w;
+    *h = st_last.h;
+    *bytes = st_last.bytes;
     return 1;
 }
 /* (MDEC: shims/mdec.c) */
