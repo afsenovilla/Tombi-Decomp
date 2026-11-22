@@ -32,42 +32,42 @@ typedef unsigned int u32;
 #define D94  0x94      /* second linked object (func_80132BB8 only) */
 
 /* moves the edge pairs of the branch and its linked objects by step (direction 2: wb6/wc6, 3: wbe/wce) */
-static void bend(u8 *o, u8 *link, u8 *link2, int dir, int step)
+static void bend(u8 *o, u8 *link, u8 *link2, int dir, int bend_step)
 {
     if (dir == 2) {
-        F16(link, 0xC6) += step;
-        F16(o, 0xB6) += step;
-        F16(o, 0xC6) += step;
+        F16(link, 0xC6) += bend_step;
+        F16(o, 0xB6) += bend_step;
+        F16(o, 0xC6) += bend_step;
         if (link2) {
-            F16(link2, 0xB6) += step;
-            F16(link2, 0xC6) += step;
+            F16(link2, 0xB6) += bend_step;
+            F16(link2, 0xC6) += bend_step;
         }
     } else if (dir == 3) {
-        F16(link, 0xCE) += step;
-        F16(o, 0xBE) += step;
-        F16(o, 0xCE) += step;
+        F16(link, 0xCE) += bend_step;
+        F16(o, 0xBE) += bend_step;
+        F16(o, 0xCE) += bend_step;
         if (link2) {
-            F16(link2, 0xBE) += step;
-            F16(link2, 0xCE) += step;
+            F16(link2, 0xBE) += bend_step;
+            F16(link2, 0xCE) += bend_step;
         }
     }
 }
 
 static void wooden_branch_step(u8 *o, int two_links)
 {
-    u8 state = F8(o, ST);
+    u8 step_state = F8(o, ST);
     s16 w;
-    switch (state) {
+    switch (step_state) {
     case 0:
         if (F8(o, B69)) {
             F8(o, B6B) = F8(o, B69);
             S16(o, W20) = 0;
-            F8(o, ST) = state + 1;
+            F8(o, ST) = step_state + 1;
         }
         break;
     case 1:
         if (F8(o, B69) == 0) {
-            F8(o, ST) = state + 1;
+            F8(o, ST) = step_state + 1;
             break;
         }
         w = S16(o, W20);
@@ -77,7 +77,7 @@ static void wooden_branch_step(u8 *o, int two_links)
         }
         break;
     case 2:
-        F8(o, ST) = state + 1;
+        F8(o, ST) = step_state + 1;
         break;
     case 3:
         w = S16(o, W20);

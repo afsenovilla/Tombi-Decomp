@@ -64,19 +64,19 @@ static int et_tried, et_frame = -100;
 static unsigned char *et_read(const char *dir, const char *sub, const char *name, long *len) {
     char path[1024];
     FILE *f;
-    unsigned char *buf;
+    unsigned char *file_buf;
     snprintf(path, sizeof path, "%s%s%s", dir, sub, name);
     if (!(f = fopen(path, "rb"))) return 0;
     fseek(f, 0, SEEK_END);
     *len = ftell(f);
     fseek(f, 0, SEEK_SET);
-    buf = malloc(*len > 0 ? *len : 1);
-    if (buf && fread(buf, 1, *len, f) != (size_t)*len) {
-        free(buf);
-        buf = 0;
+    file_buf = malloc(*len > 0 ? *len : 1);
+    if (file_buf && fread(file_buf, 1, *len, f) != (size_t)*len) {
+        free(file_buf);
+        file_buf = 0;
     }
     fclose(f);
-    return buf;
+    return file_buf;
 }
 static int et_load(void) {
     static const char *subs[] = {"/", "/SYSTEM/", "/TOMBA/SYSTEM/", "/fs/TOMBA/SYSTEM/"};
@@ -105,13 +105,13 @@ static int et_load(void) {
                 }
                 left--;
                 if (flags & 1) {
-                    unsigned off, run;
+                    unsigned off, copy_len;
                     if (in_pos + 2 > gam_len) break;
                     off = gam[in_pos];
-                    run = gam[in_pos + 1];
+                    copy_len = gam[in_pos + 1];
                     in_pos += 2;
                     if (!off || off > out_pos) break;
-                    while (run-- && out_pos < size) {
+                    while (copy_len-- && out_pos < size) {
                         et_page[out_pos] = et_page[out_pos - off];
                         out_pos++;
                     }

@@ -73,7 +73,8 @@ void port_low_second(char *buf, int size) {
         low_sites[best].seen = low_sites[best].n;
         unsigned long off;
         const char *sym = port_sym_near((void *)low_sites[best].eip, &off);
-        k += snprintf(buf + k, size - k, "%s%s+0x%lx->%lx:%lu", t ? " " : " top ", sym, off, low_sites[best].first, best_n);
+        k += snprintf(buf + k, size - k, "%s%s+0x%lx->%lx:%lu", t ? " " : " top ", sym, off, low_sites[best].first,
+                      best_n);
     }
     for (int i = 0; i < low_nsites; i++) low_sites[i].seen = low_sites[i].n;
     inside = 0;

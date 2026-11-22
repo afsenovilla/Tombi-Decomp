@@ -523,7 +523,7 @@ extern int MulNegSin(int a, int b);
 void port_lx_title_dots(int c, int idx, int pal) {
     extern unsigned short *port_vram(void);
     extern int GetGraphType(void);
-    const unsigned short *vram = port_vram();
+    const unsigned short *vram_px = port_vram();
     const TGLY *g = &TITLE_FONT[c];
     int b8 = GetGraphType() == 1 || GetGraphType() == 2;          /* tpage 0x86 (8 bpp) instead of 0x26 (4 bpp) */
     int used[256] = {0}, x, y, X,
@@ -532,11 +532,11 @@ void port_lx_title_dots(int c, int idx, int pal) {
         edge_lum = 1 << 30, fill_lum = -1;
     for (y = 0; y < g->h; y++) for (x = 0; x < gw; x++) {
         int u = g->u + x,
-            w = vram[(g->v + y) * 1024 + 384 + (b8 ? u / 2 : u / 4)];
+            w = vram_px[(g->v + y) * 1024 + 384 + (b8 ? u / 2 : u / 4)];
         used[b8 ? (w >> (8 * (u & 1))) & 255 : (w >> (4 * (u & 3))) & 15] = 1;
     }
     for (int i = 1; i < 256; i++) if (used[i]) {
-        unsigned short v = vram[(0x1E0 + pal) * 1024 + 336 + i];
+        unsigned short v = vram_px[(0x1E0 + pal) * 1024 + 336 + i];
         int lum = (v & 31) * 3 + ((v >> 5) & 31) * 6 + ((v >> 10) & 31);
         if (!v) continue;
         if (lum < edge_lum) {
