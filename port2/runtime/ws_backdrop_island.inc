@@ -80,7 +80,7 @@ static int is_lump(int X)
 {
     /* centre, half width, height */
     static const signed char LUMPS[6][3] = { { 13, 12, 5 }, { 34, 11, 7 },  { 57, 13, 4 },
-                                         { 80, 12, 6 }, { 103, 12, 5 }, { 125, 11, 7 } };
+                                             { 80, 12, 6 }, { 103, 12, 5 }, { 125, 11, 7 } };
     int x = (X - 1) % 136 + 1,
         highest = 0;
     for (int i = 0; i < 6; i++) {

@@ -220,9 +220,9 @@ static const u16 *lk_take(const u16 *vram, int pad, int x, int *rows)
         if (need_right)
             for (int c = 0; c < pad; c++) {
                 int right_col = 320 + c - (x - 256); /* the picture's column at the right strip's column c */
-                row[pad + c] = right_col < LK_W             ? lk_tex(vram, right_col, j)
+                row[pad + c] = right_col < LK_W                 ? lk_tex(vram, right_col, j)
                                : right_col - LK_W < lk_ext_w[1] ? lk_ext[1][(size_t)j * lk_ext_w[1] + right_col - LK_W]
-                                                    : 0;
+                                                                : 0;
             }
     }
     port_ws_backdrop_dy = 12 + top;

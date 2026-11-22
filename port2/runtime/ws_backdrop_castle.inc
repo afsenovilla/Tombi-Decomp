@@ -185,7 +185,8 @@ static void ic_prof(int side, int *profile, int n)
         if (last < 0)
             for (int k = 0; k < i; k++) edge_lum[k] = edge_lum[i];
         else
-            for (int k = last + 1; k < i; k++) edge_lum[k] = edge_lum[last] + (edge_lum[i] - edge_lum[last]) * (k - last) / (i - last);
+            for (int k = last + 1; k < i; k++)
+                edge_lum[k] = edge_lum[last] + (edge_lum[i] - edge_lum[last]) * (k - last) / (i - last);
         last = i;
     }
     for (int k = last + 1; k < n; k++) edge_lum[k] = last >= 0 ? edge_lum[last] : 120;
@@ -225,7 +226,10 @@ static void ic_gen(u16 *ext, int pad)
         for (int y = 0; y < IC_H; y++) {
             int sky_lum = (ic_sky[y][0] * 3 + ic_sky[y][1] * 6 + ic_sky[y][2]) / 10,
                 k = ic_k[y][edge_x];
-            edge_cloud[y] = (k == 4 || k == 8) ? clampi((ic_l[y][edge_x] - sky_lum) * 256 / (236 - sky_lum > 1 ? 236 - sky_lum : 1), 0, 256) : 0;
+            edge_cloud[y] =
+                (k == 4 || k == 8)
+                    ? clampi((ic_l[y][edge_x] - sky_lum) * 256 / (236 - sky_lum > 1 ? 236 - sky_lum : 1), 0, 256)
+                    : 0;
         }
         for (int y = 0; y < IC_H; y++) {
             int cloud = 0,
@@ -265,7 +269,8 @@ static void ic_gen(u16 *ext, int pad)
                         grain = (noise(j + side * 900, y, 3, 2, 9) - 128) * 14 / 128,
                         gain = 256;
                     if (y < grass_top + (noise(j + side * 50, 0, 5, 1, 12) - 128) / 64) continue;
-                    if (grass_n && grass_lum > 0 && j < 30) gain = 256 + (grass_sum / grass_n - grass_lum) * 256 / grass_lum * (30 - j) / 30;
+                    if (grass_n && grass_lum > 0 && j < 30)
+                        gain = 256 + (grass_sum / grass_n - grass_lum) * 256 / grass_lum * (30 - j) / 30;
                     for (int k = 0; k < 3; k++) p[k] = clampi((ic_grow[yy][k] + grain) * gain / 256, 0, 255);
                 }
             }
