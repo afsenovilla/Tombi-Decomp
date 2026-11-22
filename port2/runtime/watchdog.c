@@ -4,7 +4,8 @@
  * stack) and the last shim calls (port_trace ring), and lets it run on.  A silent hang on a user's machine then
  * leaves a conclusive log.  Win32: SuspendThread + GetThreadContext on the game thread.  POSIX: SIGUSR1 to the
  * game thread, whose handler reads the ucontext.  The watchdog's lines go to stderr without the CRT stream
- * (port_log_direct, runtime/main.c), so a game thread stopped inside its own fprintf cannot block the report.  --stall FRAME:MS (shims/psyq.c) is the test: a stall longer than 3 s fires it. */
+ * (port_log_direct, runtime/main.c), so a game thread stopped inside its own fprintf cannot block the report.
+ * --stall FRAME:MS (shims/psyq.c) is the test: a stall longer than 3 s fires it. */
 #define _GNU_SOURCE
 #include <string.h>
 #include <stdio.h>
@@ -22,11 +23,17 @@
 
 /* ---- the trace ring: the last shim calls, newest last */
 #define TRACE_N 16
-static struct { const char *what; int arg; int frame; } trace[TRACE_N];
+static struct {
+    const char *what;
+    int arg;
+    int frame;
+} trace[TRACE_N];
 static volatile unsigned trace_n;
 void port_trace(const char *what, int arg) {
     unsigned i = trace_n % TRACE_N;
-    trace[i].what = what; trace[i].arg = arg; trace[i].frame = port_frame;
+    trace[i].what = what;
+    trace[i].arg = arg;
+    trace[i].frame = port_frame;
     __sync_synchronize();
     trace_n++;
 }
@@ -39,9 +46,13 @@ const char *port_trace_last(int *arg, int *frame) {
     return trace[i].what;
 }
 static void trace_print(void) {
-    unsigned n = trace_n, from = n > TRACE_N ? n - TRACE_N : 0;
+    unsigned n = trace_n,
+             from = n > TRACE_N ? n - TRACE_N : 0;
     port_printf("[port2] watchdog: last shim calls (oldest first):");
-    for (unsigned k = from; k < n; k++) { unsigned i = k % TRACE_N; port_printf(" %s(%d)@%d", trace[i].what, trace[i].arg, trace[i].frame); }
+    for (unsigned k = from; k < n; k++) {
+        unsigned i = k % TRACE_N;
+        port_printf(" %s(%d)@%d", trace[i].what, trace[i].arg, trace[i].frame);
+    }
     port_printf("\n");
 }
 
@@ -50,8 +61,9 @@ static void yield_sites_print(void) {
         if (!port_thread_used(n)) continue;
         port_printf(" task %d yields from", n);
         for (int k = 0; k < 4 && port_thread_yield_site[n][k]; k++) {
-            unsigned long off; const char *nm = port_sym_near((void *)port_thread_yield_site[n][k], &off);
-            port_printf(" %08lx(%s+0x%lx)", port_thread_yield_site[n][k], nm, off);
+            unsigned long off;
+            const char *sym = port_sym_near((void *)port_thread_yield_site[n][k], &off);
+            port_printf(" %08lx(%s+0x%lx)", port_thread_yield_site[n][k], sym, off);
         }
         port_printf(";");
     }
@@ -62,18 +74,26 @@ static void yield_sites_print(void) {
    where every task last yielded, and the null-page emulation count (a count that still grows = the game thread
    is alive but spinning through the fault handler). */
 static void report_stuck(int secs) {
-    int arg = 0, fr = 0; const char *last = port_trace_last(&arg, &fr);
-    port_printf("[port2] watchdog: main thread stuck for %d s (no vblank since frame %d): thread %d, last shim call %s(%d)@%d, lowmem %lu (%lu writes);",
-                secs, port_frame, port_thread_current(), last ? last : "-", arg, fr, port_low_count, port_low_writes);
+    int arg = 0, call_frame = 0;
+    const char *last = port_trace_last(&arg, &call_frame);
+    port_printf("[port2] watchdog: main thread stuck for %d s (no vblank since frame %d): thread %d, "
+                "last shim call %s(%d)@%d, lowmem %lu (%lu writes);",
+                secs, port_frame, port_thread_current(), last ? last : "-", arg, call_frame,
+                port_low_count, port_low_writes);
     yield_sites_print();
     port_printf("\n");
     port_flush_log();
 }
 static void report(unsigned long eip, unsigned long esp, unsigned long ebp) {
-    unsigned long off; const char *nm = port_sym_near((void *)eip, &off);
-    if (off > 0x100000ul) { nm = "outside the game code: libc/SDL/OS"; off = 0; }
-    port_printf("[port2] watchdog: no vblank for %d s at frame %d: eip=%08lx (%s+0x%lx) esp=%08lx ebp=%08lx thread %d; stack:",
-                port_watchdog_seconds, port_frame, eip, nm, off, esp, ebp, port_thread_current());
+    unsigned long off;
+    const char *sym = port_sym_near((void *)eip, &off);
+    if (off > 0x100000ul) {
+        sym = "outside the game code: libc/SDL/OS";
+        off = 0;
+    }
+    port_printf("[port2] watchdog: no vblank for %d s at frame %d: "
+                "eip=%08lx (%s+0x%lx) esp=%08lx ebp=%08lx thread %d; stack:",
+                port_watchdog_seconds, port_frame, eip, sym, off, esp, ebp, port_thread_current());
     port_dump_stack(esp);
     port_printf("\n");
     trace_print();
@@ -98,7 +118,8 @@ static unsigned progress_sig(void) {
     return h;
 }
 static void report_progress(int frames, unsigned switches) {
-    port_printf("[port2] watchdog: no game progress for %d s (frame %d: %d vblanks ran, %u task switches, every task yields from the same place and every DrawOTag draws the same list, signature %08x); thread %d;",
+    port_printf("[port2] watchdog: no game progress for %d s (frame %d: %d vblanks ran, %u task switches, every task "
+                "yields from the same place and every DrawOTag draws the same list, signature %08x); thread %d;",
                 port_watchdog_seconds, port_frame, frames, switches, port_ot_signature, port_thread_current());
     yield_sites_print();
     port_printf(" scratch: vbl %u/%u drawsync %u pause %04x mode %d; pad %04x (game reads %04x); lowmem %lu\n",
@@ -111,24 +132,39 @@ static void report_progress(int frames, unsigned switches) {
    caller stops the game thread for the eip report), 0 = nothing to do (the "no progress" report, if due, was
    printed here) */
 static int wd_tick(void) {
-    static int last = -1, still = 0, stuck = 0, pstill = 0, pframe = -1; static unsigned psig, pswitch;
+    static int last_frame = -1,
+               still_secs = 0,
+               stuck_secs = 0,
+               progress_still = 0,
+               progress_frame = -1;
+    static unsigned last_sig, progress_switches;
     int f = port_frame;
-    if (f == last) {
-        pstill = 0;
-        still++; stuck++;
-        if (still < port_watchdog_seconds || wd_fired >= 3) return 0;
-        still = 0; wd_fired++;
-        report_stuck(stuck);
+    if (f == last_frame) {
+        progress_still = 0;
+        still_secs++;
+        stuck_secs++;
+        if (still_secs < port_watchdog_seconds || wd_fired >= 3) return 0;
+        still_secs = 0;
+        wd_fired++;
+        report_stuck(stuck_secs);
         return 1;
     }
-    last = f; still = 0; stuck = 0;
+    last_frame = f;
+    still_secs = 0;
+    stuck_secs = 0;
     unsigned sig = progress_sig();
-    if (sig == psig && pframe >= 0) {
-        if (++pstill >= port_watchdog_seconds && wd_fired < 3) {
-            wd_fired++; pstill = 0;
-            report_progress(f - pframe, port_thread_switches - pswitch);
+    if (sig == last_sig && progress_frame >= 0) {
+        if (++progress_still >= port_watchdog_seconds && wd_fired < 3) {
+            wd_fired++;
+            progress_still = 0;
+            report_progress(f - progress_frame, port_thread_switches - progress_switches);
         }
-    } else { pstill = 0; psig = sig; pframe = f; pswitch = port_thread_switches; }
+    } else {
+        progress_still = 0;
+        last_sig = sig;
+        progress_frame = f;
+        progress_switches = port_thread_switches;
+    }
     return 0;
 }
 
@@ -136,12 +172,18 @@ static int wd_tick(void) {
 static HANDLE game_thread;
 static DWORD WINAPI wd_main(void *arg) {
     (void)arg;
-    port_log_direct_tid = GetCurrentThreadId();   /* this thread's log lines bypass the CRT stream: no lock to wait for */
+    /* this thread's log lines bypass the CRT stream: no lock to wait for */
+    port_log_direct_tid = GetCurrentThreadId();
     for (;;) {
         Sleep(1000);
         if (!wd_tick()) continue;
-        CONTEXT c; memset(&c, 0, sizeof c); c.ContextFlags = CONTEXT_CONTROL | CONTEXT_INTEGER;
-        if (SuspendThread(game_thread) == (DWORD)-1) { port_printf("[port2] watchdog: SuspendThread failed (%lu)\n", GetLastError()); continue; }
+        CONTEXT c;
+        memset(&c, 0, sizeof c);
+        c.ContextFlags = CONTEXT_CONTROL | CONTEXT_INTEGER;
+        if (SuspendThread(game_thread) == (DWORD)-1) {
+            port_printf("[port2] watchdog: SuspendThread failed (%lu)\n", GetLastError());
+            continue;
+        }
         if (GetThreadContext(game_thread, &c)) report(c.Eip, c.Esp, c.Ebp);
         else port_printf("[port2] watchdog: GetThreadContext failed (%lu)\n", GetLastError());
         ResumeThread(game_thread);
@@ -149,9 +191,13 @@ static DWORD WINAPI wd_main(void *arg) {
     return 0;
 }
 void port_watchdog_start(void) {
-    DuplicateHandle(GetCurrentProcess(), GetCurrentThread(), GetCurrentProcess(), &game_thread, 0, FALSE, DUPLICATE_SAME_ACCESS);
+    DuplicateHandle(GetCurrentProcess(), GetCurrentThread(), GetCurrentProcess(), &game_thread, 0, FALSE,
+                    DUPLICATE_SAME_ACCESS);
     HANDLE h = CreateThread(0, 65536, wd_main, 0, 0, 0);
-    if (h) CloseHandle(h); else port_printf("[port2] watchdog: CreateThread failed (%lu)\n", GetLastError());
+    if (h)
+        CloseHandle(h);
+    else
+        port_printf("[port2] watchdog: CreateThread failed (%lu)\n", GetLastError());
 }
 #elif defined(__3DS__)
 void port_watchdog_start(void) { (void)wd_tick; }
@@ -159,7 +205,9 @@ void port_watchdog_start(void) { (void)wd_tick; }
 static pthread_t game_thread;
 /* runs on the game thread, wherever it was interrupted (inside a lock or an fprintf too: hence the direct log path) */
 static void on_usr1(int sig, siginfo_t *info, void *ucv) {
-    ucontext_t *uc = ucv; (void)sig; (void)info;
+    ucontext_t *uc = ucv;
+    (void)sig;
+    (void)info;
     port_log_direct++;
 #if defined(__arm__)
     report(uc->uc_mcontext.arm_pc, uc->uc_mcontext.arm_sp, uc->uc_mcontext.arm_fp);
@@ -172,7 +220,8 @@ static void *wd_main(void *arg) {
     (void)arg;
     for (;;) {
         sleep(1);
-        port_log_direct++;        /* the host thread's own lines never wait for the stream lock the game thread may hold */
+        /* the host thread's own lines never wait for the stream lock the game thread may hold */
+        port_log_direct++;
         int stalled = wd_tick();
         port_log_direct--;
         if (stalled) pthread_kill(game_thread, SIGUSR1);
@@ -180,8 +229,10 @@ static void *wd_main(void *arg) {
     return 0;
 }
 void port_watchdog_start(void) {
-    struct sigaction sa; memset(&sa, 0, sizeof sa);
-    sa.sa_sigaction = on_usr1; sa.sa_flags = SA_SIGINFO | SA_RESTART;
+    struct sigaction sa;
+    memset(&sa, 0, sizeof sa);
+    sa.sa_sigaction = on_usr1;
+    sa.sa_flags = SA_SIGINFO | SA_RESTART;
     sigaction(SIGUSR1, &sa, 0);
     game_thread = pthread_self();
     pthread_t t;

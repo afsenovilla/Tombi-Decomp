@@ -158,10 +158,7 @@ static void ncc(int n) {
     MAC2 = sum3_12(M16HI(9) * x, M16LO(10) * y, M16HI(10) * z);
     MAC3 = sum3_12(M16LO(11) * x, M16HI(11) * y, M16LO(12) * z);
     set_ir0();
-    /* (0 .. 0x7FFF) */
-    s32 a = IR1,
-        b = IR2,
-        d = IR3;
+    s32 a = IR1, b = IR2, d = IR3;   /* (0 .. 0x7FFF) */
     MAC1 = (s32)((u32)C[13] + (u32)sum3_12(M16LO(16) * a, M16HI(16) * b, M16LO(17) * d));
     MAC2 = (s32)((u32)C[14] + (u32)sum3_12(M16HI(17) * a, M16LO(18) * b, M16HI(18) * d));
     MAC3 = (s32)((u32)C[15] + (u32)sum3_12(M16LO(19) * a, M16HI(19) * b, M16LO(20) * d));
@@ -197,9 +194,7 @@ static void mvmva(u32 op) {
         y = VY(v);
         z = VZ(v);
     }
-    u32 t1 = 0,
-        t2 = 0,
-        t3 = 0;
+    u32 t1 = 0, t2 = 0, t3 = 0;
     if (cv == 0) {
         t1 = (u32)C[5];
         t2 = (u32)C[6];

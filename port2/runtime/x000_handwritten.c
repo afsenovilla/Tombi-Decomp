@@ -12,9 +12,13 @@
  * (d90, and d94 for the first one) edge pairs (wb6/wc6 for direction 2, wbe/wce for 3) by one; state 2 goes to
  * 3; state 3 counts w20 down and moves them back every 4th step, then returns to state 0. */
 #include "port_runtime.h"
-#if PORT_VERSION_PAL     /* PAL units translated by hand, bound by their PAL addresses (gen_port handwritten_port2_funcs) */
+/* PAL units translated by hand, bound by their PAL addresses (gen_port handwritten_port2_funcs) */
+#if PORT_VERSION_PAL
 
-typedef unsigned char u8; typedef short s16; typedef unsigned short u16; typedef unsigned int u32;
+typedef unsigned char u8;
+typedef short s16;
+typedef unsigned short u16;
+typedef unsigned int u32;
 #define F8(o, off)  (*(u8 *)((u8 *)(o) + (off)))
 #define S16(o, off) (*(s16 *)((u8 *)(o) + (off)))
 #define F16(o, off) (*(u16 *)((u8 *)(o) + (off)))
@@ -27,29 +31,45 @@ typedef unsigned char u8; typedef short s16; typedef unsigned short u16; typedef
 #define D90  0x90      /* linked object */
 #define D94  0x94      /* second linked object (func_80132BB8 only) */
 
-static void bend(u8 *o, u8 *p3, u8 *p5, int dir, int d)
+/* moves the edge pairs of the branch and its linked objects by step (direction 2: wb6/wc6, 3: wbe/wce) */
+static void bend(u8 *o, u8 *link, u8 *link2, int dir, int step)
 {
     if (dir == 2) {
-        F16(p3, 0xC6) += d;
-        F16(o, 0xB6) += d; F16(o, 0xC6) += d;
-        if (p5) { F16(p5, 0xB6) += d; F16(p5, 0xC6) += d; }
+        F16(link, 0xC6) += step;
+        F16(o, 0xB6) += step;
+        F16(o, 0xC6) += step;
+        if (link2) {
+            F16(link2, 0xB6) += step;
+            F16(link2, 0xC6) += step;
+        }
     } else if (dir == 3) {
-        F16(p3, 0xCE) += d;
-        F16(o, 0xBE) += d; F16(o, 0xCE) += d;
-        if (p5) { F16(p5, 0xBE) += d; F16(p5, 0xCE) += d; }
+        F16(link, 0xCE) += step;
+        F16(o, 0xBE) += step;
+        F16(o, 0xCE) += step;
+        if (link2) {
+            F16(link2, 0xBE) += step;
+            F16(link2, 0xCE) += step;
+        }
     }
 }
 
 static void wooden_branch_step(u8 *o, int two_links)
 {
-    u8 st = F8(o, ST);
+    u8 state = F8(o, ST);
     s16 w;
-    switch (st) {
+    switch (state) {
     case 0:
-        if (F8(o, B69)) { F8(o, B6B) = F8(o, B69); S16(o, W20) = 0; F8(o, ST) = st + 1; }
+        if (F8(o, B69)) {
+            F8(o, B6B) = F8(o, B69);
+            S16(o, W20) = 0;
+            F8(o, ST) = state + 1;
+        }
         break;
     case 1:
-        if (F8(o, B69) == 0) { F8(o, ST) = st + 1; break; }
+        if (F8(o, B69) == 0) {
+            F8(o, ST) = state + 1;
+            break;
+        }
         w = S16(o, W20);
         if (w < 32) {
             S16(o, W20) = w + 4;
@@ -57,11 +77,14 @@ static void wooden_branch_step(u8 *o, int two_links)
         }
         break;
     case 2:
-        F8(o, ST) = st + 1;
+        F8(o, ST) = state + 1;
         break;
     case 3:
         w = S16(o, W20);
-        if (w == 0) { F8(o, ST) = 0; break; }
+        if (w == 0) {
+            F8(o, ST) = 0;
+            break;
+        }
         S16(o, W20) = --w;
         if (w & 3) break;
         bend(o, P32(o, D90), two_links ? P32(o, D94) : 0, F8(o, B6B), -1);
