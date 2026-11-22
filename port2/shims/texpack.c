@@ -708,13 +708,13 @@ static void pack_add(u64 key, const char *path) {
     if (pack_count * 2 >= pack_cap) {
         /* grow (double) and re-insert the old entries */
         u32 old_cap = pack_cap;
-        PackEnt *old = pack_ents;
+        PackEnt *old_ents = pack_ents;
         pack_cap = old_cap ? old_cap * 2 : 1024;
         pack_ents = calloc(pack_cap, sizeof *pack_ents);
         pack_count = 0;
         for (u32 i = 0; i < old_cap; i++)
-            if (old[i].path) pack_add(old[i].key, old[i].path);
-        free(old);
+            if (old_ents[i].path) pack_add(old_ents[i].key, old_ents[i].path);
+        free(old_ents);
     }
     if (pack_find(key)) return;                        /* the first file found wins */
     u32 slot_mask = pack_cap - 1,

@@ -34,11 +34,11 @@ static int seen_add(u64 h) {               /* 1 when h was new */
             if (old_set[i]) seen_add(old_set[i]);
         free(old_set);
     }
-    u32 mask = seen_cap - 1,
-        i = (u32)(h ^ (h >> 29)) & mask;
+    u32 slot_mask = seen_cap - 1,
+        i = (u32)(h ^ (h >> 29)) & slot_mask;
     while (seen_set[i]) {
         if (seen_set[i] == h) return 0;
-        i = (i + 1) & mask;
+        i = (i + 1) & slot_mask;
     }
     seen_set[i] = h;
     seen_count++;
@@ -73,22 +73,22 @@ void port_drawdump(const u16 *vram, int tx, int ty, int depth, int cx, int cy, i
         for (int x = 0; x < w; x++) {
             int u = (u0 + x) & 255,
                 v = (v0 + y) & 255;
-            u16 texel;
+            u16 texel_val;
             if (depth == 0)
-                texel = (vram[((ty + v) & 511) * 1024 + ((tx + (u >> 2)) & 1023)] >> ((u & 3) * 4)) & 15;
+                texel_val = (vram[((ty + v) & 511) * 1024 + ((tx + (u >> 2)) & 1023)] >> ((u & 3) * 4)) & 15;
             else if (depth == 1)
-                texel = (vram[((ty + v) & 511) * 1024 + ((tx + (u >> 1)) & 1023)] >> ((u & 1) * 8)) & 255;
+                texel_val = (vram[((ty + v) & 511) * 1024 + ((tx + (u >> 1)) & 1023)] >> ((u & 1) * 8)) & 255;
             else
-                texel = vram[((ty + v) & 511) * 1024 + ((tx + u) & 1023)];
-            tex[y * w + x] = texel;
+                texel_val = vram[((ty + v) & 511) * 1024 + ((tx + u) & 1023)];
+            tex[y * w + x] = texel_val;
         }
     for (int i = 0; i < pal_count; i++) pal[i] = vram[(cy & 511) * 1024 + ((cx + i) & 1023)];
     u32 hdr[6] = { (u32)tx | (u32)ty << 16, (u32)depth | (u32)kind << 8 | (u32)semi << 16, (u32)cx | (u32)cy << 16,
                    (u32)u0 | (u32)v0 << 16, (u32)w | (u32)h << 16, (u32)tpage | (u32)clut << 16 };
-    u64 key = fnv(0xCBF29CE484222325ull, hdr, sizeof hdr);
-    key = fnv(key, pal, pal_count * 2);
-    key = fnv(key, tex, w * h * 2);
-    if (!seen_add(key)) return;
+    u64 rec_key = fnv(0xCBF29CE484222325ull, hdr, sizeof hdr);
+    rec_key = fnv(rec_key, pal, pal_count * 2);
+    rec_key = fnv(rec_key, tex, w * h * 2);
+    if (!seen_add(rec_key)) return;
     const u8 *game = port_ram_ptr(0x8009C960u);
     u16 area = *(const u16 *)(game + 0x948),
         sect = *(const u16 *)(game + 0x94A);

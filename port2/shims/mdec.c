@@ -381,9 +381,9 @@ int DecDCToutSync(int mode) {
     return 0;
 }
 void *DecDCToutCallback(void *f) {
-    void *old = (void *)out_cb;
+    void *prev_cb = (void *)out_cb;
     out_cb = (void (*)(void))f;
-    return old;
+    return prev_cb;
 }
 void *DecDCTinCallback(void *f) {
     (void)f;
