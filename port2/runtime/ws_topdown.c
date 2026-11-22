@@ -27,7 +27,10 @@
 #include "port_runtime.h"
 #include "../shims/gpu_pica.h"
 
-typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32; typedef short s16;
+typedef unsigned char u8;
+typedef unsigned short u16;
+typedef unsigned int u32;
+typedef short s16;
 typedef struct { s16 x, y, w, h; } RECT;
 
 extern int port_widescreen, port_ws_cull;
@@ -47,14 +50,20 @@ typedef struct {
 } Rect;
 typedef struct {
     int used;
-    const u8 *pic; int stride, pw, ph;    /* picture pixels, bytes per row, size (px) */
+    const u8 *pic;                        /* picture pixels, bytes per row, size (px) */
+    int stride, pw, ph;
     int px0, py0;                         /* picture px at the window's top left */
     int ww;                               /* window width (px) */
-    int n; Rect r[MAXR];
-    struct { int k, ri, du, dw, j0, j1, tx, ty, u, v, cx, cy; } up[5 * MAXR]; int nup;   /* uploads per batch (k = -2..2); tx..cy: the strip SPRT's texels (the pica path) */
+    int n;
+    Rect r[MAXR];
+    /* uploads per batch (k = -2..2); tx..cy: the strip SPRT's texels (the pica path) */
+    struct { int k, ri, du, dw, j0, j1, tx, ty, u, v, cx, cy; } up[5 * MAXR];
+    int nup;
     int pica;                             /* the strips go to the pica backend's own slots, not into VRAM (below) */
-    u16 (*save)[256 * 256 / 2 + 8 * 128]; int saved[MAXR];   /* save: MAXR rows, allocated the first time the VRAM path
-                                          needs them (the pica path of the 3DS never does: not in its program image) */
+    /* save: MAXR rows, allocated the first time the VRAM path needs them (the pica path of the 3DS never does: not
+       in its program image) */
+    u16 (*save)[256 * 256 / 2 + 8 * 128];
+    int saved[MAXR];
 } Slot;
 static Slot slots[SLOTS];
 static int slot_next;
@@ -62,6 +71,7 @@ static int slot_next;
 static u32 rd32(const u8 *p) { return p[0] | p[1] << 8 | p[2] << 16 | (u32)p[3] << 24; }
 static u16 rd16(const u8 *p) { return (u16)(p[0] | p[1] << 8); }
 
+/* uploads batch k's pieces of the picture into the game's VRAM rects (first saving what the game put there) */
 static void upload(Slot *s, int k)
 {
     static u16 buf[256 * 288];
@@ -70,14 +80,16 @@ static void upload(Slot *s, int k)
         Rect *r = &s->r[s->up[i].ri];
         int du = s->up[i].du, dw = s->up[i].dw, j0 = s->up[i].j0, j1 = s->up[i].j1;
         if (!s->saved[s->up[i].ri]) {     /* what the game uploaded there, put back by the last marker */
-            const u16 *v = port_vram();
+            const u16 *vram = port_vram();
             if (!s->save && !(s->save = calloc(MAXR, sizeof s->save[0]))) continue;
-            for (int j = 0; j < r->h; j++) memcpy(&s->save[s->up[i].ri][j * r->w], v + (r->y + j) * 1024 + r->x, (size_t)r->w * 2);
+            for (int j = 0; j < r->h; j++)
+                memcpy(&s->save[s->up[i].ri][j * r->w], vram + (r->y + j) * 1024 + r->x, (size_t)r->w * 2);
             s->saved[s->up[i].ri] = 1;
         }
         int pcol = s->px0 + r->ex + k * s->ww + du;
         for (int j = j0; j < j1; j++)
-            memcpy((u8 *)buf + (size_t)(j - j0) * dw, s->pic + (size_t)(s->py0 + r->ey + j) * s->stride + pcol, (size_t)dw);
+            memcpy((u8 *)buf + (size_t)(j - j0) * dw, s->pic + (size_t)(s->py0 + r->ey + j) * s->stride + pcol,
+                   (size_t)dw);
         RECT rc = { (s16)(r->x + du / 2), (s16)(r->y + j0), (s16)(dw / 2), (s16)(j1 - j0) };
         LoadImage(&rc, (u32 *)buf);
     }
@@ -87,24 +99,41 @@ static void upload(Slot *s, int k)
 static void mark(u32 id)
 {
     Slot *s = &slots[(id >> 3) % SLOTS];
-    int b = id & 7;
+    int batch = id & 7;
     if (!s->used) return;
-    if (s->pica) {   /* the pica backend (the 3DS): the strips' pieces go to slots of its own, the game's VRAM is left alone */
-        if (b < 5) {
-            PicaStrip e[2 * MAXR]; int n = 0;
+    /* the pica backend (the 3DS): the strips' pieces go to slots of its own, the game's VRAM is left alone */
+    if (s->pica) {
+        if (batch < 5) {
+            PicaStrip pieces[2 * MAXR];
+            int n = 0;
             for (int i = 0; i < s->nup && n < 2 * MAXR; i++) {
-                if (s->up[i].k != b - 2) continue;
+                if (s->up[i].k != batch - 2) continue;
                 Rect *r = &s->r[s->up[i].ri];
-                e[n].pic = s->pic; e[n].stride = s->stride; e[n].col = s->px0 + r->ex + s->up[i].k * s->ww + s->up[i].du;
-                e[n].row = s->py0 + r->ey + s->up[i].j0; e[n].w = s->up[i].dw; e[n].h = s->up[i].j1 - s->up[i].j0;
-                e[n].tx = s->up[i].tx; e[n].ty = s->up[i].ty; e[n].u = s->up[i].u; e[n].v = s->up[i].v; e[n].cx = s->up[i].cx; e[n].cy = s->up[i].cy;
+                pieces[n].pic = s->pic;
+                pieces[n].stride = s->stride;
+                pieces[n].col = s->px0 + r->ex + s->up[i].k * s->ww + s->up[i].du;
+                pieces[n].row = s->py0 + r->ey + s->up[i].j0;
+                pieces[n].w = s->up[i].dw;
+                pieces[n].h = s->up[i].j1 - s->up[i].j0;
+                pieces[n].tx = s->up[i].tx;
+                pieces[n].ty = s->up[i].ty;
+                pieces[n].u = s->up[i].u;
+                pieces[n].v = s->up[i].v;
+                pieces[n].cx = s->up[i].cx;
+                pieces[n].cy = s->up[i].cy;
                 n++;
             }
-            pica_ws_strips(b < 2 ? 0 : 1, n, e);
-        } else { pica_ws_strips_end(); s->used = 0; }
+            pica_ws_strips(batch < 2 ? 0 : 1, n, pieces);
+        } else {
+            pica_ws_strips_end();
+            s->used = 0;
+        }
         return;
     }
-    if (b < 5) { upload(s, b - 2); return; }
+    if (batch < 5) {
+        upload(s, batch - 2);
+        return;
+    }
     /* the game's pixels back, only where a strip went (the rest of its window was never touched: putting it all back
        made every texture cache cell of it look written, a cost a 3DS feels) */
     static u16 buf[256 * 288];
@@ -113,9 +142,12 @@ static void mark(u32 id)
         if (!s->saved[ri]) continue;
         Rect *r = &s->r[ri];
         int dup = 0;   /* (the same strip twice: k = +-1 and +-2 can share one) */
-        for (int q = 0; q < i; q++) dup |= s->up[q].ri == ri && s->up[q].du == du && s->up[q].dw == dw && s->up[q].j0 == j0 && s->up[q].j1 == j1;
+        for (int q = 0; q < i; q++)
+            dup |= s->up[q].ri == ri && s->up[q].du == du && s->up[q].dw == dw && s->up[q].j0 == j0
+                   && s->up[q].j1 == j1;
         if (dup) continue;
-        for (int j = j0; j < j1; j++) memcpy(buf + (size_t)(j - j0) * (dw / 2), &s->save[ri][j * r->w + du / 2], (size_t)dw);
+        for (int j = j0; j < j1; j++)
+            memcpy(buf + (size_t)(j - j0) * (dw / 2), &s->save[ri][j * r->w + du / 2], (size_t)dw);
         RECT rc = { (s16)(r->x + du / 2), (s16)(r->y + j0), (s16)(dw / 2), (s16)(j1 - j0) };
         LoadImage(&rc, (u32 *)buf);
     }
@@ -126,7 +158,13 @@ static void mark(u32 id)
 #include "ws_heap.h"
 #include "ws_topdown_gen.inc"
 
-static char *prim(int size) { char *p = NEXT_PRIM; NEXT_PRIM += size; return p; }
+/* room for a packet at NEXT_PRIM */
+static char *prim(int size)
+{
+    char *p = NEXT_PRIM;
+    NEXT_PRIM += size;
+    return p;
+}
 static void link_prim(u32 *ot, char *p)          /* addPrim: keeps the packet's length byte */
 {
     *(u32 *)p = (*(u32 *)p & 0xFF000000u) | (*ot & 0xFFFFFF);
@@ -140,10 +178,10 @@ static void link_prim(u32 *ot, char *p)          /* addPrim: keeps the packet's 
    RTPS / RTPT screen X, so their own culls see the moved position), the map through its packets below.  dx puts the
    wide frame's edge on the picture's edge; a picture narrower than the wide frame (but at least 4:3 wide) is centred.
    The game's camera, logic and 4:3 picture are untouched; message boxes (2D packets) stay put, except a balloon that
-   follows its speaker (below); the pause menu, fades and HUD come after port_ws_topdown_end.  The culls (port_ws_cull, PORT_WSX) keep pad + |dx| columns, so what enters
-   from the far edge is there.  dx follows the camera of the frame being drawn: picture column c lies at screen x
-   K - SCREEN_ORIGIN_X + c, with K and the picture width taken from the previous map draw (the room's map must have
-   drawn in the previous scene draw, else dx = 0). */
+   follows its speaker (below); the pause menu, fades and HUD come after port_ws_topdown_end.  The culls
+   (port_ws_cull, PORT_WSX) keep pad + |dx| columns, so what enters from the far edge is there.  dx follows the camera
+   of the frame being drawn: picture column c lies at screen x K - SCREEN_ORIGIN_X + c, with K and the picture width
+   taken from the previous map draw (the room's map must have drawn in the previous scene draw, else dx = 0). */
 extern int port_gte_dx;                           /* runtime/gte.c */
 static int td_seq, td_hook_seq = -100, td_K, td_pw, td_dx, td_cull = -1, td_slack;
 void port_ws_topdown_begin(void)
@@ -179,43 +217,60 @@ void port_ws_overhead_map(void *o, int n, int row_off)
     if (pad <= 0 || !port_ws_cull || n < 1 || n > MAXR) return;
     char *first = NEXT_PRIM - (0xC + n * 0x20);
     int dx = td_dx;
-    for (int i = 0; i < n; i++) if ((rd32((u8 *)first + 0x10 + i * 0x20) >> 24) != 0x65) return;
+    for (int i = 0; i < n; i++)
+        if ((rd32((u8 *)first + 0x10 + i * 0x20) >> 24) != 0x65) return;
     for (int i = 0; i < n; i++)                     /* the frame inside the picture: the map moves with the objects */
         *(s16 *)(first + 0x14 + i * 0x20) = (s16)(*(s16 *)(first + 0x14 + i * 0x20) + dx);
     {   /* The 3DS (and PORT_WS_NO_WINDOWS=1 on a PC to see it): not the windows beside the game's.  Its wide frame
            is 40 columns a side, of which the game's window has 32 already; the two more windows were three map
            uploads into the same VRAM a frame, each a texture decode there (Baccus at 30 vblank/s, 22 ms a frame
            decoding, on an Old 3DS) */
-        static int off = -1; if (off < 0) { const char *e = getenv("PORT_WS_NO_WINDOWS"); off = e && *e == '1'; }
-        if (off) return;
+        static int no_windows = -1;
+        if (no_windows < 0) {
+            const char *e = getenv("PORT_WS_NO_WINDOWS");
+            no_windows = e && *e == '1';
+        }
+        if (no_windows) return;
     }
     port_ot_mark_fn = mark;
-    const u8 *tim = *(const u8 **)port_ram_ptr(0x1F800394u), *map = *(const u8 **)port_ram_ptr(0x1F800390u);
+    const u8 *tim = *(const u8 **)port_ram_ptr(0x1F800394u),
+             *map = *(const u8 **)port_ram_ptr(0x1F800390u);
     if (!tim || !map) return;
     if (rd32(tim) != 0x10 || (rd32(tim + 4) & 0xF) != 9 || rd32(tim + 8) != 0x20C) return;   /* 8 bpp TIM with CLUT */
-    int pw = rd16(tim + 0x21C) * 2, ph = rd16(tim + 0x21E), wt = rd16(map) >> 2;
-    int stride = wt * 32;
-    if (pw < 64 || ph < 64 || stride < pw || stride > pw + 64 || (port_is_ram_ptr(tim) && !port_is_ram_ptr(tim + 0x220 + (size_t)stride * ph - 1))) return;
+    int pw = rd16(tim + 0x21C) * 2, ph = rd16(tim + 0x21E), width_tiles = rd16(map) >> 2;
+    int stride = width_tiles * 32;
+    if (pw < 64 || ph < 64 || stride < pw || stride > pw + 64
+        || (port_is_ram_ptr(tim) && !port_is_ram_ptr(tim + 0x220 + (size_t)stride * ph - 1))) return;
     const u8 *pic = tim + 0x220;
     int gen = tg_room();                             /* ws_topdown_gen.inc: previews, 0 unless approved / asked for */
     td_slack = 0;
     if (gen == TG_TRIM) {
         /* the game's camera stops with the 4:3 view's edge on the padded width, a column or two past the picture */
         int w = tg_trim(tim, pic, stride, pw, ph);
-        if (w < pw) { pw = w; td_slack = 2; }
+        if (w < pw) {
+            pw = w;
+            td_slack = 2;
+        }
     }
 
-    const u8 *ob = (const u8 *)o;
-    int d30 = *(const int *)(ob + 0x30), d34 = *(const int *)(ob + 0x34), b0f = (signed char)ob[0x0F];
-    int xt = (s16)(d30 >> 5), yt = (s16)((unsigned)d34 >> 5);        /* topdownBuildVisibleTileList */
-    if (xt > 0) xt--;
-    if (yt > 0) yt--;
+    const u8 *obj = (const u8 *)o;
+    int d30 = *(const int *)(obj + 0x30), d34 = *(const int *)(obj + 0x34), b0f = (signed char)obj[0x0F];
+    int tile_x = (s16)(d30 >> 5), tile_y = (s16)((unsigned)d34 >> 5);        /* topdownBuildVisibleTileList */
+    if (tile_x > 0) tile_x--;
+    if (tile_y > 0) tile_y--;
 
     Slot *s = &slots[slot_next];                    /* (a slot whose list was never drawn has saved nothing) */
     for (int i = 0; i < MAXR; i++) s->saved[i] = 0;
-    memset(s->up, 0, sizeof s->up); s->nup = 0; s->n = n; s->used = 0;
-    s->pic = pic; s->stride = stride; s->pw = pw; s->ph = ph;
-    s->px0 = xt * 32; s->py0 = yt * 32 + row_off;
+    memset(s->up, 0, sizeof s->up);
+    s->nup = 0;
+    s->n = n;
+    s->used = 0;
+    s->pic = pic;
+    s->stride = stride;
+    s->pw = pw;
+    s->ph = ph;
+    s->px0 = tile_x * 32;
+    s->py0 = tile_y * 32 + row_off;
     const u8 *sp0 = (const u8 *)first + 0xC;
     int X = (s16)rd16(sp0 + 8), Y = (s16)rd16(sp0 + 10), ww = 0;
     for (int i = 0; i < n; i++) {
@@ -225,20 +280,33 @@ void port_ws_overhead_map(void *o, int n, int row_off)
         Rect *r = &s->r[i];
         int u = sp[12], v = sp[13], w = rd16(sp + 16), h = rd16(sp + 18);
         if ((u | w) & 1 || u + w > 256 || v + h > 256 || (w / 2) * h > (int)(sizeof s->save[0] / 2)) return;
-        r->x = (e1 & 15) * 64 + u / 2; r->y = ((e1 >> 4) & 1) * 256 + v; r->w = w / 2; r->h = h;
-        r->ex = (s16)rd16(sp + 8) - X; r->ey = (s16)rd16(sp + 10) - Y;
+        r->x = (e1 & 15) * 64 + u / 2;
+        r->y = ((e1 >> 4) & 1) * 256 + v;
+        r->w = w / 2;
+        r->h = h;
+        r->ex = (s16)rd16(sp + 8) - X;
+        r->ey = (s16)rd16(sp + 10) - Y;
         if (r->ex < 0 || r->ey < 0 || r->y + h > 512) return;
         if (r->ex + w > ww) ww = r->ex + w;
     }
     s->ww = ww;
     /* the window the game uploaded must be the picture at (px0, py0): its first row in VRAM, where it lies inside */
     {
-        const u16 *v = port_vram(); Rect *r = &s->r[0]; int ok = 1, row = s->py0;
+        const u16 *v = port_vram();
+        Rect *r = &s->r[0];
+        int ok = 1, row = s->py0;
         if (row >= 0 && row < ph && s->px0 >= 0 && s->px0 + r->w * 2 <= pw)
             ok = !memcmp(v + r->y * 1024 + r->x, pic + (size_t)row * stride + s->px0, (size_t)r->w * 2);
-        if (!ok) { if (!said++) port_printf("[ws] top-down map: VRAM window is not picture (%d, %d); side strips off\n", s->px0, s->py0); return; }
+        if (!ok) {
+            if (!said++)
+                port_printf("[ws] top-down map: VRAM window is not picture (%d, %d); side strips off\n", s->px0,
+                            s->py0);
+            return;
+        }
     }
-    td_K = X - dx - s->px0 + *(const s16 *)port_ram_ptr(0x1F800176u); td_pw = pw; td_hook_seq = td_seq;
+    td_K = X - dx - s->px0 + *(const s16 *)port_ram_ptr(0x1F800176u);
+    td_pw = pw;
+    td_hook_seq = td_seq;
 
     /* the game's own window past the picture's right / bottom edge holds the wrapped next row (or what follows the
        picture): never seen on 4:3, where the camera stops at the edge, but inside the wide strips.  Cut it there. */
@@ -246,36 +314,47 @@ void port_ws_overhead_map(void *o, int n, int row_off)
         Rect *r = &s->r[i];
         u8 *sp = (u8 *)first + 0xC + i * 0x20;
         int over = s->px0 + r->ex + r->w * 2 - pw, pr = s->py0 + r->ey, h = rd16(sp + 18);
-        if (over > 0) { int w = r->w * 2 - ((over + 1) & ~1); *(u16 *)(sp + 16) = (u16)(w > 0 ? w : 0); }
+        if (over > 0) {
+            int w = r->w * 2 - ((over + 1) & ~1);
+            *(u16 *)(sp + 16) = (u16)(w > 0 ? w : 0);
+        }
         if (pr + h > ph) *(u16 *)(sp + 18) = (u16)(ph - pr > 0 ? ph - pr : 0);
     }
 
     /* a picture narrower than the wide frame, with a generated margin: the side windows upload from the widened
        picture (the game's own window is the picture itself; dx still centres the picture, so both margins show the
        same width) */
-    int mg = 0, opw = pw;                           /* margin columns per side, the picture's own width */
+    int margin_cols = 0, own_pw = pw;               /* margin columns per side, the picture's own width */
     if (gen == TG_MARGIN && pw >= 320 && pw < 320 + 2 * pad) {
         int need = ((320 + 2 * pad - pw + 1) / 2 + 1) & ~1;
         if (need > TG_MAXM) need = TG_MAXM;
         const u8 *e = tg_extend(tim, pic, stride, pw, ph, need);
-        if (e) { s->pic = e; s->px0 += need; pw += 2 * need; s->stride = s->pw = pw; mg = need; }
+        if (e) {
+            s->pic = e;
+            s->px0 += need;
+            pw += 2 * need;
+            s->stride = s->pw = pw;
+            margin_cols = need;
+        }
     }
 
     /* the batches: the window moved k widths, each SPRT clipped to the wide frame [-pad, 320 + pad) and the picture */
-    char *pk[2 + 5 * (1 + 2 * MAXR)]; int np = 0, any = 0;
+    char *packets[2 + 5 * (1 + 2 * MAXR)];
+    int packet_count = 0, any = 0;
     for (int k = -2; k <= 2; k++) {
-        if (!k && !mg) continue;                    /* k = 0 (margin only): the right margin inside the game's window */
+        if (!k && !margin_cols) continue;           /* k = 0 (margin only): the right margin inside the game's window */
         int mark_at = -1;
         for (int i = 0; i < n; i++) {
             Rect *r = &s->r[i];
             int sx0 = X + r->ex + k * ww, a = sx0, b = sx0 + r->w * 2;
-            int pc = s->px0 + r->ex + k * ww;                       /* picture column of sx0 */
+            int pic_col = s->px0 + r->ex + k * ww;                   /* picture column of sx0 */
             if (a < -pad) a = -pad;
             if (b > 320 + pad) b = 320 + pad;
-            if (a < sx0 - pc) a = sx0 - pc;                          /* picture column 0 */
-            if (b > sx0 - pc + pw) b = sx0 - pc + pw;
-            if (!k && a < sx0 - pc + mg + opw) a = sx0 - pc + mg + opw;
-            a = sx0 + ((a - sx0) & ~1); b = sx0 + ((b - sx0 + 1) & ~1);
+            if (a < sx0 - pic_col) a = sx0 - pic_col;                /* picture column 0 */
+            if (b > sx0 - pic_col + pw) b = sx0 - pic_col + pw;
+            if (!k && a < sx0 - pic_col + margin_cols + own_pw) a = sx0 - pic_col + margin_cols + own_pw;
+            a = sx0 + ((a - sx0) & ~1);
+            b = sx0 + ((b - sx0 + 1) & ~1);
             if (b - a < 2) continue;
             int j0 = 0, j1 = r->h, pr = s->py0 + r->ey;
             if (pr + j0 < 0) j0 = -pr;
@@ -283,37 +362,65 @@ void port_ws_overhead_map(void *o, int n, int row_off)
             if (j1 <= j0) continue;
             if (mark_at < 0) {
                 char *m = prim(12);
-                ((u32 *)m)[0] = 2u << 24; ((u32 *)m)[1] = OT_MARK; ((u32 *)m)[2] = (u32)(slot_next * 8 + k + 2);
-                pk[np++] = m; mark_at = np;
+                ((u32 *)m)[0] = 2u << 24;
+                ((u32 *)m)[1] = OT_MARK;
+                ((u32 *)m)[2] = (u32)(slot_next * 8 + k + 2);
+                packets[packet_count++] = m;
+                mark_at = packet_count;
             }
             int q = s->nup++;
-            s->up[q].k = k; s->up[q].ri = i; s->up[q].du = a - sx0; s->up[q].dw = b - a; s->up[q].j0 = j0; s->up[q].j1 = j1;
-            const char *gsp = first + 0xC + i * 0x20;
-            {   const u32 e1 = rd32((const u8 *)gsp + 0x14 + 4); const u16 cl = rd16((const u8 *)gsp + 14);
-                s->up[q].tx = (int)(e1 & 15) * 64; s->up[q].ty = (int)((e1 >> 4) & 1) * 256;
-                s->up[q].u = ((const u8 *)gsp)[12] + (a - sx0); s->up[q].v = ((const u8 *)gsp)[13] + j0;
-                s->up[q].cx = (cl & 63) * 16; s->up[q].cy = (cl >> 6) & 511; }
+            s->up[q].k = k;
+            s->up[q].ri = i;
+            s->up[q].du = a - sx0;
+            s->up[q].dw = b - a;
+            s->up[q].j0 = j0;
+            s->up[q].j1 = j1;
+            const char *game_sprt = first + 0xC + i * 0x20;
+            {
+                const u32 e1 = rd32((const u8 *)game_sprt + 0x14 + 4);
+                const u16 clut = rd16((const u8 *)game_sprt + 14);
+                s->up[q].tx = (int)(e1 & 15) * 64;
+                s->up[q].ty = (int)((e1 >> 4) & 1) * 256;
+                s->up[q].u = ((const u8 *)game_sprt)[12] + (a - sx0);
+                s->up[q].v = ((const u8 *)game_sprt)[13] + j0;
+                s->up[q].cx = (clut & 63) * 16;
+                s->up[q].cy = (clut >> 6) & 511;
+            }
             char *dm = prim(12), *sp = prim(0x14);
-            memcpy(dm, gsp + 0x14, 12); memcpy(sp, gsp, 0x14);
-            *(s16 *)(sp + 8) = (s16)a; *(s16 *)(sp + 10) = (s16)(Y + r->ey + j0);
-            sp[12] = (u8)(sp[12] + (a - sx0)); sp[13] = (u8)(sp[13] + j0);
-            *(u16 *)(sp + 16) = (u16)(b - a); *(u16 *)(sp + 18) = (u16)(j1 - j0);
-            pk[np++] = dm; pk[np++] = sp; any = 1;
+            memcpy(dm, game_sprt + 0x14, 12);
+            memcpy(sp, game_sprt, 0x14);
+            *(s16 *)(sp + 8) = (s16)a;
+            *(s16 *)(sp + 10) = (s16)(Y + r->ey + j0);
+            sp[12] = (u8)(sp[12] + (a - sx0));
+            sp[13] = (u8)(sp[13] + j0);
+            *(u16 *)(sp + 16) = (u16)(b - a);
+            *(u16 *)(sp + 18) = (u16)(j1 - j0);
+            packets[packet_count++] = dm;
+            packets[packet_count++] = sp;
+            any = 1;
         }
     }
     if (!any) return;
     char *m = prim(12);
-    ((u32 *)m)[0] = 2u << 24; ((u32 *)m)[1] = OT_MARK; ((u32 *)m)[2] = (u32)(slot_next * 8 + 7);
-    pk[np++] = m;
+    ((u32 *)m)[0] = 2u << 24;
+    ((u32 *)m)[1] = OT_MARK;
+    ((u32 *)m)[2] = (u32)(slot_next * 8 + 7);
+    packets[packet_count++] = m;
     {   /* the pica backend takes the strips into its own slots (one per side: windows one width away only) */
-        extern int port_renderer; int far = 0;
+        extern int port_renderer;
+        int far = 0;
         for (int q = 0; q < s->nup; q++) far |= s->up[q].k < -1 || s->up[q].k > 1;
-        static int vram_way = -1; if (vram_way < 0) { const char *e = getenv("PORT_WS_VRAM_STRIPS"); vram_way = e && *e == '1'; }
-        s->pica = port_renderer == 2 && !far && !vram_way;   /* (PORT_WS_VRAM_STRIPS=1: the VRAM way, to compare on a PC) */
+        static int vram_way = -1;
+        if (vram_way < 0) {
+            const char *e = getenv("PORT_WS_VRAM_STRIPS");
+            vram_way = e && *e == '1';
+        }
+        /* (PORT_WS_VRAM_STRIPS=1: the VRAM way, to compare on a PC) */
+        s->pica = port_renderer == 2 && !far && !vram_way;
     }
     s->used = 1;
     slot_next = (slot_next + 1) % SLOTS;
-    /* link so that pk[0] runs first and the last marker runs just before the game's own map packets */
+    /* link so that packets[0] runs first and the last marker runs just before the game's own map packets */
     u32 *ot = (u32 *)(CURRENT_OT + 0xC90) + b0f;
-    for (int i = np - 1; i >= 0; i--) link_prim(ot, pk[i]);
+    for (int i = packet_count - 1; i >= 0; i--) link_prim(ot, packets[i]);
 }
