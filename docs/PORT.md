@@ -6391,3 +6391,53 @@ package servers refuse the cloud container, so there is no libctru/citro3d build
   scale, / 255 by shifts), -> 50, full PAL speed (the loading mirror's tiled background cached; no upscale when the
   host shows the canvas).  Then ms/frame: game 2.5, draw ~5, panel ~4.4, sound ~3.4.  Panel dumps byte-identical
   through all of it.  Azahar's timing is not the console's: hardware numbers still to come.
+
+## Widescreen tables on the heap (2026-11-22)
+
+The widescreen generators (the picture strips of `runtime/ws_backdrop.c` and its `ws_backdrop_*.inc`, the Evil Pig
+rooms `ws_pigs.c`, `ws_room3d.c`, `ws_trick.c`, `ws_floor3d.c`, the Hidden Village's top-down margins in
+`ws_topdown_gen.inc`) kept their work in static tables: 43 MB of bss, which a 3DS title cannot carry (its code, data
+and bss come out of the console's application memory; v0.7.0 at 66 MB did not start, so these modules were inert on
+the 3DS from v0.7.1 to v0.7.2).  `runtime/ws_heap.c` (`ws_heap.h`) now keeps them on the heap only while a room uses
+them, on every platform (the PC tests cover the 3DS code path):
+
+- A table that was `static T name[N][M]` is `static T (*name)[M]`; a function-local static table became a file-scope
+  pointer `func__name` with a local `T (*const name)[M] = func__name` (the function's body is unchanged).  1 KB and
+  larger in ws_backdrop (239 tables: bss 39.0 MB -> 48 KB), the polygon / packet tables and the model blocks of the
+  other modules (their bss: a few KB each), every top-down margin table but the 512-byte `tgSet`.
+- Each entry point first asks for the tables its code touches: `if (!ws_need_X()) return;`, the lists at the end of
+  ws_backdrop.c's includes (`ws_need_grab`, `ws_need_gen_hl`, `ws_need_tw_build`, ...; `ROOM_TABS` / `GEN_TABS` in
+  the small modules).  `python3 tools/ws_heap_check.py` checks the lists against the call graph (a function counts
+  as reached where its name appears in a body); **run it after adding a table or a call to a generator**: a table
+  missing from a list is a NULL pointer, in that room only.  `--lists` prints what the call graph asks for.
+- Owners: `WS_GEN`, the work of one generation, freed when the call into the module returns (`port_ws_backdrop`,
+  `port_ws_pigs_blocks`, ...); `WS_ROOM`, what later frames read (the room's picture taken from VRAM: `pic`,
+  `tw_pic`, `mm_src`, `ck_src`, `im_src`, the pier's layers, the castle's; the lake's and the island's whole set,
+  which builds in steps as the camera looks past each end; the model blocks the game draws; the widened top-down
+  picture), freed when GAME area / section changes (`port_ws_heap_vblank`, from `VSync` in shims/psyq.c), a few
+  vblanks late (the last ordering table of the old room is drawn after that vblank).  Before they go, every module's
+  reset hook (`ws_on_room`) drops what depends on them: the strip buffers and their sums (`strip_sum`, `tw_sum`,
+  `mm_sum`, ...), the done flags (`lk_made`, `is_up`, `pr_have_layers`), the model keys (`have_key`), the margins'
+  picture key; so a room is made again on the way back (the same strips: the generators depend only on the picture
+  and the width).  The camera ranges the pigs / trick modules learn ("wherever the camera has been") are not tables
+  and stay as before.
+- Out of memory: `ws_need` fails, `ws_heap_failed` is set and logged once ("[ws] heap: out of memory ..."), and every
+  widescreen extension of that room stays off until the room changes.  `-v` logs each generation (`[ws] strips
+  AREAaa sN: T ms, heap peak K KB`) and each room's peak when it is left.
+- `PORT_WS_HEAP_POISON=1` (research, not in the wasm2c build) fills new tables with 0xA5 instead of zeroes: frames
+  identical with it show that no code reads a table before writing it, so freeing and making a table again changes
+  nothing.
+
+Peak of the tables (16:9; the strip buffers and the generators' own malloc'd canvases come on top, as before) and the
+generation time on the PC (i386, one core): green tower AREA16 s4 10.8 MB / 0.36 s (0.49 s at 21:9); Singing Rock
+beach and the mermaid AREA06 s1 / s2 7.6 MB / 0.13 s; the Lake AREA09 s1 6.6 MB / 0.02 s; Baccus Pier AREA08 s1 / s3
+5.0 MB / 0.01 s; Underground Prison AREA02 s2 3.2 MB / 0.19 s; gears AREA16 s3 / s6 2.8 MB; rock wall AREA09 s4
+2.4 MB / 0.36 s; Hidden Village margins AREA19 s2 2.4 MB; Iron Castle hall AREA17 s3 / s4 2.1 MB; bell tower AREA16
+s5 2.1 MB / 0.09 s; staircase wall AREA09 s5 1.4 MB / 1.7 s; treasure hall AREA09 s3 1.4 MB / 0.13 s; Dwarf Village
+AREA02 s1 1.0 MB / 0.38 s, in blossom AREA19 s1 0.7 MB / 2.0 s; the cave with the tower AREA11 s2 0.7 MB / 0.6 s;
+every other room below 1 MB and 0.1 s; Evil Pig rooms 0.4 MB, room3d 0.26 MB, trick 0.25 MB, floor3d 0.15 MB.
+
+On the 3DS the rooms of `N3DS_OFF` (ws_backdrop.c: AREA19 s1, AREA09 s5, AREA11 s2, AREA02 s1, AREA09 s4, AREA16 s4,
+the ones above 0.3 s on a PC, 10 s to a minute on an Old 3DS) keep their strips off; everything else is on.  The
+3DS image grows by the code of these modules: +0.56 MB measured on clang armv6k objects (not devkitARM), against
+25.26 MB for the last build and check_3dsx.py's 26 MB.  Not run on a console yet.

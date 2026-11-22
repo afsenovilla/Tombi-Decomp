@@ -67,9 +67,9 @@
 #define MM_NPH 4
 #define MB_NMAP 6                                         /* the bands' maps (mb_band) */
 static void gen_mm(int pad) { (void)pad; }              /* (the table's gen: mm_take makes the strips) */
-static u16 mm_src[MM_NPH][PH][MM_W];                     /* s2: the picture with each phase's quads; s1: [0] */
+static u16 (*mm_src)[PH][MM_W];                     /* s2: the picture with each phase's quads; s1: [0] */
 static int mm_w, mm_ph;                                  /* the picture's columns; the phase being made */
-static u16 mm_clut[256]; static u16 mm_qc[32768]; static u8 mm_qh[32768];
+static u16 mm_clut[256]; static u16 (*mm_qc); static u8 (*mm_qh);
 static Rgb *mm_cv; static int mm_cw;                     /* the canvas: [side][y][X - 1] */
 
 static Rgb mm_px(int x, int y) { return rgb15(mm_src[mm_ph][clampi(y, 0, PH - 1)][clampi(x, 0, mm_w - 1)]); }
@@ -139,11 +139,11 @@ static int mm_lp(int cls, int x, int y, int R, int r, int y0, int y1, int *o)
  * mq_bx / mq_by / mq_bp each block's place and window: a layer whose space is not the picture's puts a block's texels
  * back as one piece of the picture (a column never slides against the next one). */
 #define MQ_MB 48                                          /* a block's most columns / rows, the overlaps included */
-static Rgb mq_s[PH][MQ_SW], mq_l[PH][MQ_SW]; static u8 mq_k[PH][MQ_SW]; static int mq_sw, mq_tw, mq_nx;   /* (mq_l: mq_s smoothed,
+static Rgb (*mq_s)[MQ_SW], (*mq_l)[MQ_SW]; static u8 (*mq_k)[MQ_SW]; static int mq_sw, mq_tw, mq_nx;   /* (mq_l: mq_s smoothed,
                                                              5 x 3; mq_nx: the columns wanted) */
-static int mq_bad[PH + 1][MQ_SW + 1];
+static int (*mq_bad)[MQ_SW + 1];
 #define MQ_NB 1024
-static short *mq_bmap, mq_bx[MQ_NB], mq_by[MQ_NB]; static int mq_bp[MQ_NB];   /* a texel's block; a block's window: where its first
+static short *mq_bmap, (*mq_bx), (*mq_by); static int (*mq_bp);   /* a texel's block; a block's window: where its first
                                                              column and row go (the column counted as the source's:
                                                              mq_sw is X = 1 on the right, -X on the left) and where
                                                              it is from */
@@ -171,9 +171,10 @@ static int mq_getl(int side, const int *map, int wx, int y, Rgb *c)
     return 1;
 }
 /* the cheapest path through e: n steps of m places each (vert: a step is a row, a place a column) */
+static int (*mq_cut__E)[MQ_MB];
 static void mq_cut(int e[MQ_MB][MQ_MB], int n, int m, int vert, int *path)
 {
-    static int E[MQ_MB][MQ_MB];
+    int (*const E)[MQ_MB] = mq_cut__E;
     int p = 0;
     for (int i = 0; i < n; i++)
         for (int q = 0; q < m; q++) {
@@ -194,10 +195,17 @@ static void mq_cut(int e[MQ_MB][MQ_MB], int n, int m, int vert, int *path)
 #define MQ_PJ 40000                                       /* a step of their place between two rows costs this */
 #define MQ_PRE0 4
 static int mq_prec(int pre, int j) { return j < MQ_PRE0 ? 40000 * (MQ_PRE0 - j) : pre * (j - MQ_PRE0); }
+static int (*mq_quilt__e)[MQ_MB];
+static int (*mq_quilt__errs);
+static int (*mq_quilt__picks);
+static int (*mq_quilt__pe)[MQ_PL + 1];
+static int (*mq_quilt__ev)[MQ_MB];
+typedef struct { short j, y; Rgb c, l; } MqOv;
+static MqOv (*mq_quilt__ov);
 static void mq_quilt(int side, const MqBand *b, int seed, int *map)
 {
-    static int e[MQ_MB][MQ_MB], errs[PH * MQ_SW], picks[512];
-    static struct { short j, y; Rgb c, l; } ov[MQ_MB * MQ_MB];
+    int (*const e)[MQ_MB] = mq_quilt__e, (*const errs) = mq_quilt__errs, (*const picks) = mq_quilt__picks;
+    MqOv (*const ov) = mq_quilt__ov;
     int W = b->BW + b->OV, nb = 0, np = 0;
     for (int y = 0; y < PH; y++)
         for (int x = 0; x < mq_sw; x++) mq_bad[y + 1][x + 1] = mq_bad[y][x + 1] + mq_bad[y + 1][x] - mq_bad[y][x] + !(mq_k[y][x] & 1);
@@ -212,7 +220,7 @@ static void mq_quilt(int side, const MqBand *b, int seed, int *map)
         /* the picture's columns that go on first: on every row the OV columns that follow the place, OV to OV + MQ_PL
            columns in, where the picture's last 3 columns are found again (so the row goes on as it does there); the
            place changes from a row to the next only where that pays MQ_PJ (few, well placed steps) */
-        static int pe[PH][MQ_PL + 1]; static short lag[PH];
+        int (*const pe)[MQ_PL + 1] = mq_quilt__pe; static short lag[PH];
         int l = 0, seg = -1;
         for (int y = b->y0; y < b->y1; y++)
             for (int q = 0; q <= MQ_PL; q++) {
@@ -286,7 +294,7 @@ static void mq_quilt(int side, const MqBand *b, int seed, int *map)
             for (int sy = lo; sy <= hi && pick < 0; sy++)
                 for (int sx = 0; sx + W <= mq_sw; sx += st) { int er = errs[(sy - lo) * MQ_SW + sx]; if (er >= 0 && er <= (X0 <= 1 + b->OV ? mn : mn + mn / 8) && k-- == 0) { pick = sy * MQ_SW + sx; break; } }
             {   int sx = pick % MQ_SW, sy = pick / MQ_SW, vc[MQ_MB], tc[MQ_MB], j0 = side ? 0 : b->BW, ot = yb - ya;
-                static int ev[MQ_MB][MQ_MB];
+                int (*const ev)[MQ_MB] = mq_quilt__ev;
                 if (np < 512) picks[np++] = pick;
                 if (nb < MQ_NB) { mq_bx[nb] = (short)wx0; mq_by[nb] = (short)ya; mq_bp[nb] = pick; }
                 for (int y = 0; y < H; y++)
@@ -339,7 +347,7 @@ static int mb_arc(const MbBand *b, int x, int y)
 {
     return b->acx ? b->acy + isqrt_i((x - b->acx) * (x - b->acx) + (y - b->acy) * (y - b->acy) - b->acx * b->acx) : y;
 }
-static int mb_ii[4][PH + 1][MQ_SW + 1];                   /* the class' texels summed (r, g, b, count) */
+static int (*mb_ii)[PH + 1][MQ_SW + 1];                   /* the class' texels summed (r, g, b, count) */
 static int mb_x0;                                         /* the picture's column of the source's first */
 static int mb_box(int x, int y, int R, int r, int y0, int y1, int *o)   /* the mean (x 16) round source texel (x, y) */
 {
@@ -349,15 +357,21 @@ static int mb_box(int x, int y, int R, int r, int y0, int y1, int *o)   /* the m
     if (n) for (int c = 0; c < 3; c++) o[c] = (mb_ii[c][yb][xb] - mb_ii[c][ya][xb] - mb_ii[c][yb][xa] + mb_ii[c][ya][xa]) * 16 / n;
     return n;
 }
+static int (*mb_band__tn)[3];
+static int (*mb_band__tf)[3];
+static int (*mb_band__jc)[3];
+static Rgb (*mb_band__dt)[MQ_SW + 8];
+static Rgb (*mb_band__sh)[MQ_SW];
+static u8 (*mb_band__shk)[MQ_SW];
 static void mb_band(int side, const MbBand *b, int slot)
 {
-    static int tn[PH][3], tf[PH][3], jc[PH][3];
-    static Rgb dt[PH][MQ_SW + 8], sh[PH][MQ_SW]; static u8 shk[PH][MQ_SW];
+    int (*const tn)[3] = mb_band__tn, (*const tf)[3] = mb_band__tf, (*const jc)[3] = mb_band__jc;
+    Rgb (*const dt)[MQ_SW + 8] = mb_band__dt, (*const sh)[MQ_SW] = mb_band__sh; u8 (*const shk)[MQ_SW] = mb_band__shk;
     int ye = b->ye ? b->ye : b->y1 - 1, *map = mb_map[slot], ya = b->sy0 < b->y0 ? b->sy0 : b->y0, yz = b->sy1 > b->y1 ? b->sy1 : b->y1;
     MqBand q = { b->y0, b->acx ? PH : b->y1, b->BW, b->BH, b->OV, b->OT, b->dy, b->step, b->wl, b->pre };
     mq_sw = mm_w - b->in < MQ_SW ? mm_w - b->in : MQ_SW; mq_tw = mb_tw; mq_nx = mm_cw + 4; mq_bmap = 0;
     mb_x0 = side ? mm_w - b->in - mq_sw : b->in;
-    memset(mq_k, 0, sizeof mq_k);
+    memset(mq_k, 0, (sizeof *mq_k * (PH)));
     for (int y = 0; y < PH; y++)
         for (int x = 0; x < mq_sw; x++) {
             Rgb c = mm_px(mb_x0 + x, y); int k = y >= ya && y < yz && mm_is(b->cls, c);
@@ -379,7 +393,7 @@ static void mb_band(int side, const MbBand *b, int slot)
     for (int y = 0; y < PH; y++)                         /* (the other texels: no detail) */
         for (int x = 0; x < mq_sw; x++) if (!mq_k[y][x]) mq_s[y][x] = (Rgb){ 0, 0, 0 };
     if (b->acx) {                                        /* the arcs laid level: row v is the arc that meets the edge on row v */
-        memcpy(sh, mq_s, sizeof sh); memcpy(shk, mq_k, sizeof shk); memset(mq_k, 0, sizeof mq_k);
+        memcpy(sh, mq_s, (sizeof *sh * (PH))); memcpy(shk, mq_k, (sizeof *shk * (PH))); memset(mq_k, 0, (sizeof *mq_k * (PH)));
         for (int v = b->y0; v < PH; v++)
             for (int x = 0; x < mq_sw; x++) {
                 int dx = side ? mq_sw - 1 - x : x, k, y;
@@ -478,15 +492,16 @@ static int mm2_rock(Rgb c) { return c.r >= c.b; }
    are the picture's own texels' */
 #define M2_TW 64
 #define M2_MW 44                                          /* the mound's flank: the picture's first columns */
-static short m2_mb[PH * M2_TW], m2_fb[PH * M2_TW], m2_mt[MQ_NB][2], m2_ft[MQ_NB][2], m2_top[M2_MW];
+static short m2_top[M2_MW], (*m2_mb), (*m2_fb), (*m2_mt)[2], (*m2_ft)[2];
 static int m2_ts(int x) { return (215 * 16 - x * 44 / 10 + 8) / 16; }        /* the mound's top line: its row at column x */
 static int m2_td(int X) { return (215 * 16 + X * 44 / 10 + X * X / 16 + 8) / 16; }   /* and X columns out of the picture */
 static int m2_fe16(int X) { return (X > 24 ? (X - 24) * (X - 24) * 16 / 80 : 0) + (X > 40 ? (X - 40) * (X - 40) * 4 : 0); }   /* the
                                                              flat rock's top, rows (x 16) under its level: its end (as
                                                              its other end in the picture: 5 rows in 20 columns, then down) */
+static int (*mm2_gen__map);
 static void mm2_gen(void)
 {
-    static int map[PH * M2_TW];
+    int (*const map) = mm2_gen__map;
     static const MqBand BM = { 8, 17, 8, 9, 6, 0, 0, 1, 2, 800, 1 }, BF = { 214, PH, 10, 10, 6, 0, 0, 1, 2, 800, 1 };
     for (int i = 0; i < 3; i++) mb_band(0, &MM2_B[i], i);
     for (int i = 3; i < 5; i++) mb_band(1, &MM2_B[i], i);
@@ -498,7 +513,7 @@ static void mm2_gen(void)
         m2_top[x] = (short)y;
     }
     if (!mm_ph) {
-        memset(mq_k, 0, sizeof mq_k); for (int i = 0; i < PH * M2_TW; i++) map[i] = -1;
+        memset(mq_k, 0, (sizeof *mq_k * (PH))); for (int i = 0; i < PH * M2_TW; i++) map[i] = -1;
         mq_sw = 48; mq_tw = M2_TW; mq_nx = 40; mq_bmap = m2_mb;
         for (int v = 0; v < 32; v++)
             for (int x = 0; x < M2_MW; x++) {
@@ -528,7 +543,7 @@ static void mm2_gen(void)
     }
     /* the flat rock in the right corner: level, then its end */
     if (!mm_ph) {
-        memset(mq_k, 0, sizeof mq_k); for (int i = 0; i < PH * M2_TW; i++) map[i] = -1;
+        memset(mq_k, 0, (sizeof *mq_k * (PH))); for (int i = 0; i < PH * M2_TW; i++) map[i] = -1;
         mq_sw = 64; mq_tw = M2_TW; mq_nx = 48; mq_bmap = m2_fb;
         for (int y = 200; y < PH; y++)
             for (int x = 0; x < 64; x++) { mq_s[y][x] = mm_px(PW - 64 + x, y); if (x >= 20 && y >= 214 && mm2_rock(mq_s[y][x])) mq_k[y][x] = 3; }
@@ -576,14 +591,14 @@ static const MbBand MM1_BF = { MM1_SAND, PH, MC_ANY, 540, 640, MM1_SAND + 1, PH,
 #define MP_GW 12                                          /* columns over which the strip gets its grain where the edge is smooth */
 #define MP_NH 15
 #define MP_FH 26
-static Rgb mp_a[PH][MP_TW], mp_n[MP_NH][MP_TW], mp_f[MP_FH][MP_TW], mp_nt[MP_NH];
-static short mp_ab[PH * MP_TW], mp_fbk[PH * MP_TW], mp_lb[PH * MP_TW], mp_lt[MQ_NB];   /* A's, F's and L's blocks; L's move */
-static Rgb mp_l[PH][MP_TW];
-static short mp_at[MQ_NB][2], mp_fu[MQ_NB][2];            /* a block of A: its texels' move (columns, rows); of F: its
+static Rgb mp_nt[MP_NH], (*mp_a)[MP_TW], (*mp_n)[MP_TW], (*mp_f)[MP_TW];
+static short (*mp_ab), (*mp_fbk), (*mp_lb), (*mp_lt);   /* A's, F's and L's blocks; L's move */
+static Rgb (*mp_l)[MP_TW];
+static short (*mp_at)[2], (*mp_fu)[2];            /* a block of A: its texels' move (columns, rows); of F: its
                                                              move in columns, its source's column */
-static Rgb mp_al[PH][MP_TW]; static short mp_ak[PH];     /* A smoothed (5 x 3); its grain at the join against the picture's (x 256) */
-static Rgb mp_ac[PH], mp_fc[MP_FH], mp_lc[PH];                      /* the join's tone: the picture's last columns less the layer's first ones */
-static int mp_fd[MQ_NB];                                  /* F: the block's rows down from where they go (x 16) */
+static Rgb (*mp_al)[MP_TW]; static short mp_ak[PH];     /* A smoothed (5 x 3); its grain at the join against the picture's (x 256) */
+static Rgb mp_fc[MP_FH], (*mp_ac), (*mp_lc);                      /* the join's tone: the picture's last columns less the layer's first ones */
+static int (*mp_fd);                                  /* F: the block's rows down from where they go (x 16) */
 static short mp_ft[MP_FW], mp_fb[MP_FW];                  /* the foot's rim and the sand's first row, u columns in */
 static int mp_slope(int v) { return v < 64 ? 148 - v * 15 / 64 : v < MP_LIP ? 133 - (v - 64) * 25 / 99 : 108; }   /* rows per
                                                              column (x 256) the strata rise to the right by, at edge row v */
@@ -623,10 +638,11 @@ static Rgb mp_toned(Rgb c, Rgb d, int X)                 /* c with the join's to
     int q = X >= MP_JW ? 256 : X * 256 / MP_JW, w = 256 - q * q / 256 * (768 - 2 * q) / 256;
     return (Rgb){ clampi(c.r + d.r * w / 256, 0, 255), clampi(c.g + d.g * w / 256, 0, 255), clampi(c.b + d.b * w / 256, 0, 255) };
 }
-static void mp_clear(int *map) { memset(mq_k, 0, sizeof mq_k); for (int i = 0; i < PH * MP_TW; i++) map[i] = -1; mq_tw = MP_TW; mq_nx = MP_NX; }
+static void mp_clear(int *map) { memset(mq_k, 0, (sizeof *mq_k * (PH))); for (int i = 0; i < PH * MP_TW; i++) map[i] = -1; mq_tw = MP_TW; mq_nx = MP_NX; }
+static int (*mp_gen__map);
 static void mp_gen(void)
 {
-    static int map[PH * MP_TW];
+    int (*const map) = mp_gen__map;
     static const MqBand BL = { MP_L0, MP_LIP, 12, MP_LIP - MP_L0, 8, 0, 0, 1, 4, 300, 1 };
     static const MqBand BA = { 0, 200, 18, 14, 14, 5, 5, 2, 8, 300 }, BN = { 0, MP_NH, 8, 8, 4, 3, 1, 1, 0, 0 }, BF = { 0, MP_FH, 10, 9, 8, 3, 2, 1, 4, 800 };
     for (int u = 0; u < MP_FW; u++) {
@@ -756,9 +772,10 @@ static Rgb mp_px(int X, int y, int ol)
         return mix(mp_toned(f, mp_fc[vf16 / 16], X), n, clampi(ft - y * 16, 0, 16) * 16);
     }
 }
+static int (*mm1_gen__sand)[3];
 static void mm1_gen(void)
 {
-    static int sand[PH][3];                              /* the sand at the edge against the sand copied next to it,
+    int (*const sand)[3] = mm1_gen__sand;                              /* the sand at the edge against the sand copied next to it,
                                                             per row (x 16; above the foot's underside: fading out) */
     for (int y = PH - 1; y >= 181; y--) {
         int a[3], b[3];
@@ -816,10 +833,10 @@ static void mm_grab(const u16 *vram, int sc)
         for (int i = 0; i < 256; i++) mm_clut[i] = vram[(size_t)510 * 1024 + 128 + i];
         for (int y = 0; y < PH; y++) for (int x = 0; x < MM_W; x++) mm_src[0][y][x] = tex8(vram, 576, x, y, 128, 510);
     }
-    memset(mm_qh, 0, sizeof mm_qh);
+    memset(mm_qh, 0, (sizeof *mm_qh * (32768)));
     {   const char *e = getenv("PORT_WS_BACKDROP_DUMP");      /* research: the CLUT, then the pictures (raw 15-bit LE, MM_W columns) */
         FILE *f = e ? fopen(e, "wb") : 0;
-        if (f) { fwrite(mm_clut, 1, sizeof mm_clut, f); fwrite(mm_src, 1, sc == 2 ? sizeof mm_src : sizeof mm_src[0], f); fclose(f); }
+        if (f) { fwrite(mm_clut, 1, sizeof mm_clut, f); fwrite(mm_src, 1, sc == 2 ? (sizeof *mm_src * (MM_NPH)) : sizeof mm_src[0], f); fclose(f); }
     }
 }
 /* the picture's pages and CLUT, sampled (every 8th row): has the picture changed */
@@ -832,6 +849,7 @@ static u32 mm_check(const u16 *vram, int sc)
 }
 static int mm_build(const u16 *vram, int pad, int sc)
 {
+    if (!ws_need_mm_build()) return 0;
     int nph = sc == 2 ? MM_NPH : 1;
     mm_grab(vram, sc);
     free(mm_strip); free(mm_buf); mm_buf = 0;
@@ -871,6 +889,7 @@ static int mm2_phase(void)
 /* a 256-column sprite of CLUT (128, 510 / 511) at frame (x, y) in section sc: the strips when it is that picture's */
 static const u16 *mm_take(const u16 *vram, int pad, int sc, int x, int y, int w, int h, int u, int v, int tx, int ty, int cy, int *rows)
 {
+    if (!ws_need_mm_take()) return 0;
     u32 s;
     if (y != 16 || w != 256 || h != PH || u || v || ty) return 0;
     if (sc == 2 ? x != 0 || tx != 128 || cy != 511 : tx != 576 || cy != 510) return 0;

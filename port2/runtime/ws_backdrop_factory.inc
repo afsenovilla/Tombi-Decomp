@@ -38,9 +38,9 @@
 #define LF_PER 76                                         /* the deck's period */
 #define LF_NS 1024
 static int (*lf_cv)[3]; static int lf_pad;
-static u8 lf_fm[LF_D][PW];                                /* 1: foliage */
-static short lf_sx[LF_NS], lf_sy[LF_NS]; static int lf_sl[LF_NS], lf_ns;   /* the windows, their mean tone x 16 */
-static int lf_ramp[256][3], lf_lo, lf_hi;
+static u8 (*lf_fm)[PW];                                /* 1: foliage */
+static short (*lf_sx), (*lf_sy); static int lf_ns, (*lf_sl);   /* the windows, their mean tone x 16 */
+static int lf_lo, lf_hi, (*lf_ramp)[3];
 static int lf_etop;                                      /* the first foliage row at the picture's left edge */
 static short *lf_T; static int *lf_Z; static int lf_wd;  /* the crowns' tone (-1: sky) and height */
 
@@ -48,11 +48,14 @@ static int *lf_px(int j, int y) { return lf_cv[(size_t)y * lf_pad + j]; }
 static void lf_set(int j, int y, Rgb c) { int *p = lf_px(j, y); p[0] = c.r; p[1] = c.g; p[2] = c.b; }
 static int lf_cmp(const void *a, const void *b) { return *(const int *)a - *(const int *)b; }
 
+static int (*lf_sources__sum)[3];
+static int (*lf_sources__cnt);
+static int (*lf_sources__srt);
 static void lf_sources(void)
 {
     static const short RECT[4][4] = { { 116, 38, 137, 95 }, { 100, 38, 116, 57 }, { 0, 92, 12, 118 }, { 248, 36, 296, 52 } };
-    static int sum[256][3], cnt[256], srt[LF_NS];
-    memset(sum, 0, sizeof sum); memset(cnt, 0, sizeof cnt);
+    int (*const sum)[3] = lf_sources__sum, (*const cnt) = lf_sources__cnt, (*const srt) = lf_sources__srt;
+    memset(sum, 0, (sizeof *sum * (256))); memset(cnt, 0, (sizeof *cnt * (256)));
     for (int y = 0; y < LF_D; y++)
         for (int x = 0; x < PW; x++) {
             Rgb c = rgb15(pic[y][x]);
@@ -226,7 +229,7 @@ static Rgb lf_ground(int y, int u)                        /* the deck's front an
 static u16 lf_fix[PH][2];
 /* the lit sand (a texel 12 rows further down) with the tone the picture's sand has on row y in front of the door
    (the open door's columns 311-317, clean sand; the door is in pic as an over piece), per channel */
-static int lf_dt[PH][3], lf_lt[3];
+static int lf_lt[3], (*lf_dt)[3];
 static void lf_door_tone(void)
 {
     int n = 0;
@@ -259,6 +262,7 @@ static void lf_fix_make(void)
 
 static void gen_lf(int pad)
 {
+    if (!ws_need_gen_lf()) return;
     lf_door_tone(); lf_fix_make();
     lf_cv = calloc((size_t)PH * (size_t)pad, sizeof *lf_cv); lf_pad = pad; lf_wd = pad + LF_PS + LF_OV;
     lf_T = malloc(sizeof(short) * (size_t)LF_D * lf_wd); lf_Z = malloc(sizeof(int) * (size_t)LF_D * lf_wd);

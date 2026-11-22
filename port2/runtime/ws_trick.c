@@ -50,14 +50,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include "port_runtime.h"
+#include "ws_heap.h"
 
 typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32; typedef short s16; typedef int s32;
-#ifdef __3DS__
-/* The 3DS: not there.  Its tables made the title too large for the console's memory (v0.7.1 did not start). */
-int port_ws_trick_on;
-const char *port_ws_trick_rooms;
-void port_ws_trick_blocks(char *list, const u8 *tbl, int area, int section) { (void)list; (void)tbl; (void)area; (void)section; }
-#else
 
 extern int port_ws_cull, port_verbose;
 extern unsigned long port_gte_cfc2(int);
@@ -105,13 +100,19 @@ typedef struct { u16 clut, tpage; u8 cmd, nv, gour, pad; u32 col[4]; Vx v[4]; s1
 #define H 544
 #define NEAR 400                          /* how far right of the 4:3 frame's left edge (camera at its limit) a polygon is still read */
 
-static Poly ps[MAXP]; static int np;
-static u8 ft4[MAXQ][40], gt4[MAXQ][52]; static int n4, g4;
+static Poly (*ps); static int np;
+static u8 (*ft4)[40], (*gt4)[52]; static int n4, g4;
 /* One end at a time: the right end is the left end of the mirrored model (sgn = -1: every x read is negated, and
    negated again when written, so `lo`, x43() and the sweep "to the left" below are the same code for both). */
-static struct { u8 blk[16 + MAXQ * (40 + 52) + 16]; u32 key; int have_key, polys, lo; } ends[2];
+#define BLK (16 + MAXQ * (40 + 52) + 16)
+static struct { u8 *blk; u32 key; int have_key, polys, lo; } ends[2];
 static const u8 *seen_tbl; static int seen_sec = -1, lo, sgn = 1, blk_polys;
 static u8 *blk;
+/* the tables on the heap (ws_heap.h): both ends' blocks while the room is shown (the game draws them), the model's
+   polygons and the packets while an end is made */
+static const WsTab ROOM_TABS[] = { WS_T(ends[0].blk, BLK), WS_T(ends[1].blk, BLK) };
+static const WsTab GEN_TABS[] = { WS_T(ps, MAXP), WS_T(ft4, MAXQ), WS_T(gt4, MAXQ) };
+static void trick_reset(void) { ends[0].have_key = ends[1].have_key = 0; blk = 0; }   /* (the room changed: the blocks go) */
 
 static const u8 RING3[3] = {0, 1, 2}, RING4[4] = {0, 1, 3, 2};
 static int iabs(int a) { return a < 0 ? -a : a; }
@@ -589,7 +590,15 @@ pack:
 
 /* called from port_ws_area_model_link with the game's (merged) block list of this frame (list[3] = count, u32
    pointers from +4, room for 88) and the area model's table */
+static void blocks(char *list, const u8 *tbl, int area, int section);
 void port_ws_trick_blocks(char *list, const u8 *tbl, int area, int section)
+{
+    if (ws_heap_failed) return;
+    ws_on_room(trick_reset);
+    blocks(list, tbl, area, section);
+    ws_free(WS_GEN);
+}
+static void blocks(char *list, const u8 *tbl, int area, int section)
 {
     if (!port_ws_cull || !tbl) return;
     int on[2], rel[2], wal[2];
@@ -602,6 +611,7 @@ void port_ws_trick_blocks(char *list, const u8 *tbl, int area, int section)
     s16 m[9]; s32 t[3]; memcpy(m, c, 18); memcpy(t, c + 0x14, 12);
     for (int i = 0; i < 9; i++) if (m[i] != ((i % 4) ? 0 : 4096)) return;
     if ((int)(u16)port_gte_cfc2(26) != H || (int)((s32)port_gte_cfc2(24) >> 16) != 160 || t[2] != H) return;
+    if (!ws_need(WS_ROOM, ROOM_TABS, WS_NT(ROOM_TABS))) return;
     /* the camera's limit at each end: CAMERA_SCROLL minX / maxX, and wherever the camera has been in this room */
     const u8 *cs = (const u8 *)port_ram_ptr(0x800A4550u);
     s16 minx, maxx; memcpy(&minx, cs + 0x2C, 2); memcpy(&maxx, cs + 0x2E, 2);
@@ -622,6 +632,7 @@ void port_ws_trick_blocks(char *list, const u8 *tbl, int area, int section)
         for (int i = 0; i < 4 && i < n; i++) for (int k = 0; k < 256; k++) key = (key ^ tbl[off[i] + k]) * 16777619u;
         key = (key ^ (u32)port_ws_cull) * 16777619u; key = (key ^ (u32)(lo + 16384)) * 16777619u;
         if (!ends[e].have_key || key != ends[e].key) {
+            if (!ws_need(WS_GEN, GEN_TABS, WS_NT(GEN_TABS))) return;
             ends[e].have_key = 1; ends[e].key = key; blk_polys = 0;
             room_relief = rel[e]; room_wall = wal[e];
             if (parse(tbl)) build();
@@ -633,4 +644,3 @@ void port_ws_trick_blocks(char *list, const u8 *tbl, int area, int section)
         ((u32 *)list)[1 + cnt] = (u32)(unsigned long)blk; list[3] = (char)(cnt + 1);
     }
 }
-#endif   /* (not the 3DS) */

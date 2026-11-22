@@ -49,10 +49,12 @@ static void hist_stat(const Hist *h, int *mean16, int *dev16)
    0.75..1.5.  pic_reg returns 0 for texels to leave out (objects by the edge). */
 typedef int (*PicReg)(int side, int x, int y);
 #define NREG 12
+static Hist (*balance_regions__hp);
+static Hist (*balance_regions__hs);
 static void balance_regions(int side, PicReg pic_reg, int both)
 {
-    static Hist hp[NREG], hs[NREG]; int mp[NREG], dp[NREG], ms[NREG], ds[NREG], k[NREG];
-    memset(hp, 0, sizeof hp); memset(hs, 0, sizeof hs);
+    Hist (*const hp) = balance_regions__hp, (*const hs) = balance_regions__hs; int mp[NREG], dp[NREG], ms[NREG], ds[NREG], k[NREG];
+    memset(hp, 0, (sizeof *hp * (NREG))); memset(hs, 0, (sizeof *hs * (NREG)));
     for (int sd = 0; sd < 2; sd++)
         for (int X = -31; X <= 0; X++)
             for (int y = 0; y < PH; y++) {
@@ -186,9 +188,9 @@ static const A5Fence A5_FEN[2] = { { -12, 80, 102 }, { 296, 80, 103 } };   /* (l
 typedef struct { short kind, cx, ty, wk; } A5ETree;      /* kind 0 far, 1 hazy, 2 near; centre column, top row, w x16 */
 static const A5ETree A5_ETREE[2] = { { 2, 12, 3, 9 }, { 1, 309, 1, 9 } };
 
-static Ramp A5_rrow[2][PH];                              /* per-row ramps (fence, wall top / foot, path) */
+static Ramp (*A5_rrow)[PH];                              /* per-row ramps (fence, wall top / foot, path) */
 static Ramp A5_rsky[2], A5_rnear, A5_rhaze, A5_rpost, A5_rmortar, A5_rbush;
-static Rgb A5_stc[256]; static int A5_nst, A5_sta[257]; /* the picture's stone colours, their areas (cumulative) */
+static Rgb (*A5_stc); static int A5_nst, (*A5_sta); /* the picture's stone colours, their areas (cumulative) */
 static int A5_thr;                                       /* stone / mortar threshold (luminance) */
 static int A5_lk[2];
 static Rgb A5_cblue, A5_cwarm; static int A5_pblue, A5_pwarm;   /* the pale blue / warm stones: colour, share (/1000) */                                     /* the stones' length per side (x 256) */
@@ -263,9 +265,11 @@ static int otsu(const int *h)
 
 /* the picture's stones next to both edges: 4-connected bright cores in rows 104-180, columns 0-69 from each edge */
 #define A5_SW 70
+static u8 (*a5_stones__m)[77][A5_SW];
+static short (*a5_stones__stk);
 static void a5_stones(void)
 {
-    static u8 m[2][77][A5_SW]; static short stk[77 * A5_SW * 2]; int hist[256];
+    u8 (*const m)[77][A5_SW] = a5_stones__m; short (*const stk) = a5_stones__stk; int hist[256];
     memset(hist, 0, sizeof hist); A5_nst = 0; A5_sta[0] = 0;
     for (int s = 0; s < 2; s++) for (int y = 104; y < 181; y++) for (int i = 0; i < A5_SW; i++) {
         Rgb k = a5p(s, i, y); int ob = 0;
@@ -948,6 +952,7 @@ static void a5_soften(int side, int y0, int y1)
 
 static void gen_a5(int pad)
 {
+    if (!ws_need_gen_a5()) return;
     pal_make(); a5_analyse();
     if (!A5_rsky[0].ok || !A5_rsky[1].ok || !A5_rnear.ok || !A5_rhaze.ok || !A5_rpost.ok || !A5_rmortar.ok || !A5_rbush.ok
         || !canvas_open(pad)) return;
@@ -1116,7 +1121,7 @@ static const VbBand VB_BANDS[2][5] = {          /* (in the order they are made: 
       { 137, 156, 143, 156, 150, 216, 16, 5, 4, 0, 0, VB_LEDGE, 0, 0 },
       { 156, 181, 156, 181, 150, 216, 16, 5, 4, 0, 0, VB_BANK, 1, 0 },
       { 181, PH, 181, 198, 0, 262, 16, 5, 4, 0, 1, VB_GROUND, 0, 0 } } };
-static Ramp VB_rc[3], VB_rf[3];
+static Ramp (*VB_rc), (*VB_rf);
 static int VB_share[4];                                  /* the classes' shares of the canopy (cumulative, /256) */
 static int VB_L[3];                                      /* the light (x 256) */
 static int VB_a[VB_NPS], VB_b[VB_NPS], VB_n[VB_NPS], VB_m[VB_NPS], VB_hi[VB_NPS];   /* each sphere's shading: L = a + b (n . light) / 256;
@@ -1186,10 +1191,11 @@ static int vb_srow(const VbBand *b, int y)               /* a row of the band's 
 }
 /* the band's horizontal period next to the edge (autocorrelation of each row's luminance minus its mean over the
    window's columns), 0 if none is clear */
+static int (*vb_period__L)[40];
 static int vb_period(int side, const VbBand *b)
 {
     int x0 = b->sx0, w = b->sx1 - b->sx0 < 40 ? b->sx1 - b->sx0 : 40, best = 0, bc = 0, ok[PH]; long long den = 0;
-    static int L[PH][40];
+    int (*const L)[40] = vb_period__L;
     for (int y = b->ry0; y < b->ry1; y++) {
         int s = 0; ok[y] = 1;
         for (int i = 0; i < w; i++) { if (vb_excl(x0 + i, y)) ok[y] = 0; L[y][i] = lum(rgb15(pic[y][x0 + i])); s += L[y][i]; }
@@ -1212,7 +1218,7 @@ static int vb_period(int side, const VbBand *b)
    (one column per row, path[y - ya]) when vert, else horizontal (one row per column, path[j]) */
 #define VB_MAXH 128
 #define VB_MAXW 40
-static int vb_E[VB_MAXH][VB_MAXW];
+static int (*vb_E)[VB_MAXW];
 static void vb_cutpath(int e[VB_MAXH][VB_MAXW], int rows, int w, int vert, int *path)
 {
     int (*E)[VB_MAXW] = vb_E, n = vert ? rows : w, m = vert ? w : rows;   /* n steps, m positions each */
@@ -1253,12 +1259,17 @@ static int vb_hole(const VbBand *b, int x, int y)
 {
     return (b->st & VBB_OUTL) && vb_excl(x, y) && x >= 0 && x < PW && vb_hs[x] >= 0 && y < vb_hs[x];
 }
+static int (*vb_quilt__err);
+static int (*vb_quilt__em)[VB_MAXW];
+static Rgb (*vb_quilt__win)[VB_MAXW];
+static u8 (*vb_quilt__pm)[VB_MAXW];
+static int (*vb_quilt__ev)[VB_MAXW];
 static void vb_quilt(int side, const VbBand *b, int seed)
 {
     int W = b->B + b->OV, ytop = b->y0 - b->OT, ybot = b->y1 + b->OB, H = ybot - ytop, per = b->per ? vb_period(side, b) : 0;
     int pos = side ? PW : -1, nb = 0, used[3] = { -999, -999, -999 }, nd = 2 * b->dy + 1, ncand = (b->sx1 - b->sx0 - W + 1) * nd;
-    static int err[320 * 128], em[VB_MAXH][VB_MAXW], vcut[VB_MAXH], tcut[VB_MAXW], bcut[VB_MAXW];
-    static Rgb win[VB_MAXH][VB_MAXW]; static u8 pm[VB_MAXH][VB_MAXW];
+    static int vcut[VB_MAXH], tcut[VB_MAXW], bcut[VB_MAXW]; int (*const err) = vb_quilt__err, (*const em)[VB_MAXW] = vb_quilt__em;
+    Rgb (*const win)[VB_MAXW] = vb_quilt__win; u8 (*const pm)[VB_MAXW] = vb_quilt__pm;
     if (H > VB_MAXH || W > VB_MAXW || ncand <= 0 || ncand > 320 * 128) return;
     if (b->st & VBB_OUTL) for (int x = 0; x < PW; x++) vb_hs[x] = (short)vb_hcol(side, x);
     if (b->mr > 0) {                                     /* the trunk cut by the edge goes on: the picture's last k
@@ -1402,7 +1413,7 @@ static void vb_quilt(int side, const VbBand *b, int seed)
             /* the vertical cut through the overlap columns (rows y0..y1): the new block on the outer side */
             for (int y = 0; y < H; y++) vcut[y] = side ? -1 : W;
             if (!first) {
-                static int ev[VB_MAXH][VB_MAXW]; int path[VB_MAXH];
+                int (*const ev)[VB_MAXW] = vb_quilt__ev; int path[VB_MAXH];
                 for (int y = b->y0; y < b->y1; y++) for (int j = 0; j < b->OV; j++) ev[y - b->y0][j] = em[y - ytop][j0 + j];
                 vb_cutpath(ev, b->y1 - b->y0, b->OV, 1, path);
                 for (int y = b->y0; y < b->y1; y++) vcut[y - ytop] = j0 + path[y - b->y0];
@@ -1703,7 +1714,7 @@ static int vb_fits(int side, const VbN *n, int front)
     }
     return 1;
 }
-static VbN vb_s[700];
+static VbN (*vb_s);
 static int vb_add(int side, int n, VbN t, int front, int filler)
 {
     int dir = side ? 2 : -2;
@@ -1890,6 +1901,7 @@ static void vb_analyse(void)
 }
 static void gen_vb(int pad)
 {
+    if (!ws_need_gen_vb()) return;
     pal_make(); vb_analyse();
     for (int c = 0; c < 3; c++) if (!VB_rc[c].ok || !VB_rf[c].ok) return;
     vb_ow = pad + 64;
@@ -1975,9 +1987,10 @@ static const VbBand CB_BANDS[2][9] = {
    the picture's columns 2-9 from the edge (full for 16 columns, gone at 64), and its first column onto the picture's
    last one (easing out over 8 columns), so the join is neither a tone step nor a line (the picture's last columns are
    often a little darker: the strip goes on from them and lightens as the picture does inwards) */
+static int (*cb_tone__d)[2][3];
 static void cb_tone(int side, int y0, int y1)
 {
-    static int d[PH][2][3];
+    int (*const d)[2][3] = cb_tone__d;
     for (int y = y0; y < y1; y++) {
         int s[4][3] = { { 0 } }, n[4] = { 0, 0, 0, 0 };     /* picture col 0, cols 2-9, strip col 1, cols 1-8 */
         for (int yy = y - 4; yy <= y + 4; yy++) {
@@ -2039,9 +2052,10 @@ static void cb_warp(int side)
    only its lightness), fully up to column CB_FN, gone at column 72 */
 #define CB_FN 20
 #define CB_FH 12
+static int (*cb_ftone__d)[2][3];
 static void cb_ftone(int side, int y0, int y1)
 {
-    static int d[PH][2][3];
+    int (*const d)[2][3] = cb_ftone__d;
     for (int y = y0; y < y1; y++) {
         int s[2][2][3] = { { { 0 } } }, n[2][2] = { { 0 } };     /* [picture, strip][grass, blossom] */
         for (int yy = y - 2; yy <= y + 2; yy++) {
@@ -2233,6 +2247,7 @@ static void cb_clean(const Rgb *und)
 }
 static void gen_cb(int pad)
 {
+    if (!ws_need_gen_cb()) return;
     pal_make();
     vb_ow = pad + 64;
     if (!canvas_open(vb_ow)) return;
@@ -2295,9 +2310,10 @@ static const VbBand CV_BANDS[2][8] = {
    (R 1, three quarters of the step, easing out over 6 columns) */
 #define CV_TN 40
 #define CV_TR 16
+static int (*cv_tone__jd)[2][3];
 static void cv_tone(int side, int y0, int y1)
 {
-    static int mp[PH], dp[PH], ms[PH], ds[PH], jd[PH][2][3];
+    static int mp[PH], dp[PH], ms[PH], ds[PH]; int (*const jd)[2][3] = cv_tone__jd;
     for (int y = y0; y < y1; y++) {
         long long s[2] = { 0, 0 }, q[2] = { 0, 0 }; int n[2] = { 0, 0 };
         for (int yy = y - CV_TR; yy <= y + CV_TR; yy++) {
@@ -2347,6 +2363,7 @@ static void cv_tone(int side, int y0, int y1)
 }
 static void gen_cv(int pad)
 {
+    if (!ws_need_gen_cv()) return;
     pal_make();
     vb_ow = pad + 64;
     if (!canvas_open(vb_ow)) return;
@@ -2420,11 +2437,13 @@ static const VbBand ST_BANDS[8] = {
 #define ST_LX 26                                         /* the edge sconce's flame */
 #define ST_LY 120
 #define ST_S2 900                                        /* its glow's radius, squared */
-static short st_lf[PH][PW];                              /* the wall's light (0: no wall texel near) */
+static short (*st_lf)[PW];                              /* the wall's light (0: no wall texel near) */
 static int st_le[PH], st_amb;                            /* the light at the edge per row (side being made), far light */
+static int (*st_light__S)[PW + 1];
+static int (*st_light__C)[PW + 1];
 static void st_light(void)
 {
-    static int S[PH + 1][PW + 1], C[PH + 1][PW + 1];
+    int (*const S)[PW + 1] = st_light__S, (*const C)[PW + 1] = st_light__C;
     for (int y = 0; y < PH; y++)
         for (int x = 0; x < PW; x++) {
             int m = !vb_excl(x, y);
@@ -2495,9 +2514,10 @@ static void st_stair(int side)
             cv[(size_t)y * vb_ow + X - 1] = c;
         }
 }
+static int (*st_join__jd)[2][3];
 static void st_join(int side)                            /* the wall at the join (stair texels left alone) */
 {
-    static int jd[PH][2][3];
+    int (*const jd)[2][3] = st_join__jd;
     for (int st = 0; st < 2; st++) {
         int R = st ? 1 : 4, N = st ? 1 : 8;
         for (int y = 0; y < PH; y++) {
@@ -2524,6 +2544,7 @@ static void st_join(int side)                            /* the wall at the join
 }
 static void gen_st(int pad)
 {
+    if (!ws_need_gen_st()) return;
     pal_make();
     vb_ow = pad + 64;
     if (!canvas_open(vb_ow)) return;
@@ -2584,11 +2605,11 @@ static void gen_st(int pad)
 #define TH_PL1 132
 static int th_plaster(int j) { return j >= TH_PL0 && j < TH_PL1; }
 #define TH_NO 400                                         /* rectified columns outwards (tables) */
-static u16 th_p0[PH][PW];                                 /* the picture as shown (th_shown; pic holds the rectified
+static u16 (*th_p0)[PW];                                 /* the picture as shown (th_shown; pic holds the rectified
                                                             one meanwhile) */
-static u8 th_m[PH][PW];                                   /* rectified texel not to copy */
-static long long th_D[2][TH_NO + TH_NK + 1];              /* per wall, D(k), k = -TH_NO..TH_NK, in 2^-20 px */
-static int th_dj[2][PH];                                  /* side's rectified picture: the other wall's texels read
+static u8 (*th_m)[PW];                                   /* rectified texel not to copy */
+static long long (*th_D)[TH_NO + TH_NK + 1];              /* per wall, D(k), k = -TH_NO..TH_NK, in 2^-20 px */
+static int (*th_dj)[PH];                                  /* side's rectified picture: the other wall's texels read
                                                             this much lower (1/256 row; th_register) */
 static const VbBox TH_EXCL[] = { { 15, 66, 58, 203 }, { 262, 66, 305, 203 }, { 0, 0, 0, 0 } };   /* the arches */
 static const VbBox TH_NONE[] = { { 0, 0, 0, 0 } };
@@ -2683,9 +2704,10 @@ static const VbBand TH_BANDS[TH_NB] = {                   /* the left side (the 
     { 132, 166, 128, 166, 0, 214, 6, 3, 4, 0, 0, 3, 0, 0, 0, TH_Q },    /* the dado: the ledge, the rail, the panel */
     { 166, 203, 162, 203, 0, 214, 6, 3, 4, 0, 0, 3, 0, 0, 0, TH_Q },
     { 203, PH, 200, PH, 0, 214, 6, 3, 3, 0, 0, 4, 0, 0, 0, TH_Q } };    /* the floor */
+static int (*th_join__jd)[2][3];
 static void th_join(int side)
 {
-    static int jd[PH][2][3];
+    int (*const jd)[2][3] = th_join__jd;
     for (int st = 0; st < 2; st++) {
         int R = st ? 1 : 2, N = st ? 1 : 8;
         for (int y = 0; y < PH; y++) {
@@ -2712,9 +2734,10 @@ static void th_join(int side)
 /* the plaster's light: its windows come from all over the recess, whose mottling is larger and stronger there than
    next to the edge; the strip's local light (luminance over 7 x 7) is pulled towards the edge's light of its row (the
    picture's 13 columns at the edge, rows +- 6), keeping 1/5 of its own variation; the grain stays */
+static int (*th_plaster_light__M)[TH_NO + 2];
 static void th_plaster_light(int side)
 {
-    static int M[PH][TH_NO + 2], T[PH];
+    static int T[PH]; int (*const M)[TH_NO + 2] = th_plaster_light__M;
     for (int y = TH_PL0; y < TH_PL1; y++) {
         int s = 0, n = 0;
         for (int yy = y - 6; yy <= y + 6; yy++) {
@@ -2787,9 +2810,10 @@ static int th_prof(int w, int j16)                        /* the sum over the ed
     }
     return s;
 }
+static int (*th_register__P)[TH_RGN * 16];
 static void th_register(void)
 {
-    static int P[2][TH_RGN * 16], d[PH], ok[PH];
+    static int d[PH], ok[PH]; int (*const P)[TH_RGN * 16] = th_register__P;
     for (int w = 0; w < 2; w++)
         for (int i = 0; i < TH_RGN * 16; i++) P[w][i] = th_prof(w, TH_RGB * 16 + i);
     for (int j = TH_RG0; j < TH_RG1; j++) {
@@ -2820,9 +2844,10 @@ static void th_register(void)
         th_dj[0][j] = s / 5; th_dj[1][j] = -(s / 5);
     }
 }
-static u16 th_raw[PH][PW];                                /* the picture, given back to pic at the end */
+static u16 (*th_raw)[PW];                                /* the picture, given back to pic at the end */
 static void gen_th(int pad)
 {
+    if (!ws_need_gen_th()) return;
     long long *D; int nk; Rgb *cv0;
     pal_make();
     th_table(0); th_table(1); D = th_D[0] + TH_NO;
@@ -2831,7 +2856,7 @@ static void gen_th(int pad)
     if (!canvas_open(vb_ow)) return;
     vb_srcmap = (int *)malloc(sizeof(int) * (size_t)vb_ow * PH); cv0 = (Rgb *)malloc(sizeof(Rgb) * (size_t)vb_ow * PH);
     if (!vb_srcmap || !cv0) { free(vb_srcmap); free(cv0); vb_srcmap = 0; canvas_close(); return; }
-    memcpy(th_raw, pic, sizeof pic); memcpy(th_p0, pic, sizeof pic); th_shown(); th_register();
+    memcpy(th_raw, pic, (sizeof *pic * (PH))); memcpy(th_p0, pic, (sizeof *pic * (PH))); th_shown(); th_register();
     vb_ex = TH_NONE; vb_exf = th_exf;
     for (int side = 0; side < 2; side++) {
         long long de = th_de16(side);
@@ -2886,7 +2911,7 @@ static void gen_th(int pad)
             }
         }
     }
-    memcpy(pic, th_raw, sizeof pic);
+    memcpy(pic, th_raw, (sizeof *pic * (PH)));
     free(vb_srcmap); vb_srcmap = 0; free(cv0);
     vb_ex = VB_EXCL; vb_exf = 0;
     canvas_close();
@@ -2943,9 +2968,9 @@ static const VbBand HL_VB[HL_NB] = {                      /* (left side; the rig
     { 184, 197, 184, 197, 0, 56, 10, 4, 0, 0, 0, 1, 0, 0, 0, HL_QF },
     { 197, PH, 197, PH, 0, 56, 10, 4, 0, 0, 0, 1, 0, 0, 0, HL_QF } };
 static const VbBox HL_VASE[] = { { 26, 146, 56, 204 }, { 264, 146, 294, 204 }, { 0, 0, 0, 0 } };   /* (screen) */
-static u16 hl_p0[PH][PW];                                 /* the picture (pic holds the rectified one meanwhile) */
-static u8 hl_m[PH][PW];                                   /* rectified texel not to copy */
-static int hl_gsrc[PH][PW];                               /* a rectified texel's source texel (itself, or for a gap
+static u16 (*hl_p0)[PW];                                 /* the picture (pic holds the rectified one meanwhile) */
+static u8 (*hl_m)[PW];                                   /* rectified texel not to copy */
+static int (*hl_gsrc)[PW];                               /* a rectified texel's source texel (itself, or for a gap
                                                             texel the one further in), j * PW + c; -1: none */
 static int hl_vx(int s) { return s ? 319 * 256 - HL_VX : HL_VX; }
 /* the picture point (side-local, 1/256) of the wall's point at geometric column k, rectified row j (1/256) */
@@ -3102,12 +3127,12 @@ static const int HL_URIM[2] = { 10365, 10220 };           /* the rim's start */
 #define HL_SHW 768                                        /* the bevel's first 3 columns: its inner shadow (B's lit
                                                             pane reaches about 2 columns further than A's there) */
 static int hl_ke[PH];                                     /* the edge's rectified column on rectified row j (1/256) */
-static int hl_eb[PH][3], hl_ea[PH][3];                    /* B's and A's texel at the edge */
-static int hl_ta[HL_NJ][HL_NU][3], hl_tb[HL_NJ][HL_NU][3], hl_la[HL_NJ][HL_NU][3];
-static unsigned char hl_vb[HL_NJ][HL_NU], hl_ms[HL_NJ][HL_NU], hl_md[HL_NJ][HL_NU];   /* B shows; measured; measured
+static int (*hl_eb)[3], (*hl_ea)[3];                    /* B's and A's texel at the edge */
+static int (*hl_ta)[HL_NU][3], (*hl_tb)[HL_NU][3], (*hl_la)[HL_NU][3];
+static unsigned char (*hl_vb)[HL_NU], (*hl_ms)[HL_NU], (*hl_md)[HL_NU];   /* B shows; measured; measured
                                                             directly (not held) */
-static short hl_rho[3][HL_NJ][HL_NU][3];                  /* the light ratio (x 256): B, C, the panels after C */
-static int hl_lvl[HL_NJ][3];                              /* B's pane's level (its rows) */
+static short (*hl_rho)[HL_NJ][HL_NU][3];                  /* the light ratio (x 256): B, C, the panels after C */
+static int (*hl_lvl)[3];                              /* B's pane's level (its rows) */
 static int hl_avg(int s, long long k0, long long j, int n, int step, int *rgb)   /* mean of n texels along the row */
 {
     int got = 0; Rgb o; rgb[0] = rgb[1] = rgb[2] = 0;
@@ -3130,12 +3155,17 @@ static int hl_seg(int s, int u)                           /* the part at unit of
     return u < HL_UBAR[s] ? 0 : u < HL_UPE[s] ? 1 : u < HL_UPE[s] + HL_SHW ? 2 : u < HL_URIM[s] ? 3 : 4;
 }
 static int hl_rcls(int j) { return j < HL_PN0 ? 0 : j < HL_PN1 ? 1 : 2; }   /* the frame above, the pane's rows, below */
+static int (*hl_light__q)[3];
+static int (*hl_light__qs)[3];
+static int (*hl_light__fa)[3];
+static int (*hl_light__fb)[3];
+static short (*hl_light__tmp)[HL_NU][3];
 static void hl_light(int s)
 {
     int P = HL_UPER[s], u0 = HL_UE[s] - P, nu = P / HL_US + 2, lo[5], hi[5], mg[5];
-    static int q[HL_NJ][3], qs[HL_NJ][3], qv[HL_NJ], fa[HL_NJ][3], fb[HL_NJ][3];
+    static int qv[HL_NJ]; int (*const q)[3] = hl_light__q, (*const qs)[3] = hl_light__qs, (*const fa)[3] = hl_light__fa, (*const fb)[3] = hl_light__fb;
     static unsigned char rowok[HL_NJ];
-    static short tmp[6][HL_NU][3];
+    short (*const tmp)[HL_NU][3] = hl_light__tmp;
     if (nu > HL_NU) nu = HL_NU;
     for (int j = HL_PA0; j < HL_PA1; j++) {
         int lo2 = -40 * 256, hi2 = 40 * 256;
@@ -3222,7 +3252,7 @@ static void hl_light(int s)
                 qs[r][c] = sum / n;
             }
     }
-    memcpy(hl_md, hl_ms, sizeof hl_md);
+    memcpy(hl_md, hl_ms, (sizeof *hl_md * (HL_NJ)));
     /* held over each part from where it was measured: from the nearest row of the same class measured there (the
        light of a part varies little down the wall), else along the row (the nearest measured sample), else from the
        nearest row of the same class that has one */
@@ -3410,9 +3440,10 @@ static int hl_unit(int s, long long kg, long long jq, Rgb *o)
     o->r = clampi(v[0], 0, 255); o->g = clampi(v[1], 0, 255); o->b = clampi(v[2], 0, 255);
     return 1;
 }
-static u16 hl_raw[PH][PW];
+static u16 (*hl_raw)[PW];
 static void gen_hl(int pad)
 {
+    if (!ws_need_gen_hl()) return;
     long long kg, jq;
     pal_make();
     hl_kj(0, (long long)-(pad + 32) * 256, (long long)HL_HY, &kg, &jq);
@@ -3420,7 +3451,7 @@ static void gen_hl(int pad)
     if (!canvas_open(vb_ow)) return;
     vb_srcmap = (int *)malloc(sizeof(int) * (size_t)vb_ow * PH);
     if (!vb_srcmap) { canvas_close(); return; }
-    memcpy(hl_raw, pic, sizeof pic); memcpy(hl_p0, pic, sizeof pic);
+    memcpy(hl_raw, pic, (sizeof *pic * (PH))); memcpy(hl_p0, pic, (sizeof *pic * (PH)));
     vb_ex = TH_NONE; vb_exf = hl_exf;
     for (int side = 0; side < 2; side++) {
         hl_rectify(side);
@@ -3453,7 +3484,7 @@ static void gen_hl(int pad)
             }
         hl_mode = 0;
     }
-    memcpy(pic, hl_raw, sizeof pic);
+    memcpy(pic, hl_raw, (sizeof *pic * (PH)));
     free(vb_srcmap); vb_srcmap = 0;
     vb_ex = VB_EXCL; vb_exf = 0;
     canvas_close();

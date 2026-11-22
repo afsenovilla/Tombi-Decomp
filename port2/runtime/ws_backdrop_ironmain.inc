@@ -65,7 +65,7 @@
 #define IM_H 1226                                         /* the ROOMS row's mark (no picture has this height) */
 #define IM_W 640
 static void gen_im(int pad) { (void)pad; }              /* (the table's gen: im_take makes the strips) */
-static u16 im_src[PH][IM_W];                             /* the picture */
+static u16 (*im_src)[IM_W];                             /* the picture */
 static u16 im_clut[256];
 static u16 *im_ext;                                      /* the two extensions: [y][side * pad + X - 1], X = 1.. outwards */
 
@@ -96,7 +96,7 @@ static int im_es[24], im_E;                              /* the parapet's top ed
 static int im_ca, im_cb, im_cr;                          /* the cornice's light per column (x 256): a + b x; at the picture's edge */
 static int im_rg[3];                                     /* the rail: its colour near the corner over the edge's (x 256) */
 static int im_pg[3];                                     /* the panes: the second at the picture's edge over the first's end (x 256) */
-static u16 im_qc[32768]; static u8 im_qh[32768];
+static u16 (*im_qc); static u8 (*im_qh);
 static int im_fl8(int v) { return v >= 0 ? v >> 8 : -((-v + 255) >> 8); }
 static Rgb im_tx(int side, int xn, int y)                /* a texel: column xn from the end inwards; xn < 0: the canvas */
 {
@@ -284,9 +284,10 @@ static void im_gen_side(int side, int pad)
 }
 static int im_gen(int pad)
 {
+    if (!ws_need_im_gen()) return 0;
     im_cw = pad; im_cv = calloc((size_t)2 * PH * pad, sizeof *im_cv);
     if (!im_cv) return 0;
-    memset(im_qh, 0, sizeof im_qh);
+    memset(im_qh, 0, (sizeof *im_qh * (32768)));
     for (int side = 0; side < 2; side++) {
         im_gen_side(side, pad);
         for (int y = 0; y < PH; y++)
@@ -299,9 +300,10 @@ static int im_gen(int pad)
 #ifdef WS_BACKDROP_MAIN
 static int im_main(int argc, char **argv)                /* wsb 17:2 PIC.raw PAD OUT.ppm: the picture with both ends */
 {
+    if (!ws_need_im_main()) return 0;
     FILE *f = argc >= 4 ? fopen(argv[1], "rb") : 0; int pad;
     if (!f) { fprintf(stderr, "usage: wsb 17:2 PIC.raw PAD OUT.ppm\n"); return 1; }
-    if (fread(im_clut, 1, sizeof im_clut, f) != sizeof im_clut || fread(im_src, 1, sizeof im_src, f) != sizeof im_src) return 1;
+    if (fread(im_clut, 1, sizeof im_clut, f) != sizeof im_clut || fread(im_src, 1, (sizeof *im_src * (PH)), f) != (sizeof *im_src * (PH))) return 1;
     fclose(f);
     pad = atoi(argv[2]); im_ext = calloc((size_t)PH * 2 * pad, 2);
     if (!im_ext || !im_gen(pad) || !(f = fopen(argv[3], "wb"))) return 1;
@@ -342,6 +344,7 @@ static u32 im_check(const u16 *vram)
 /* the picture's left sprite (page (128, 0), 256 x 224) at frame (x, 16): the frame's strips */
 static const u16 *im_take(const u16 *vram, int pad, int x, int y, int w, int h, int u, int v, int tx, int ty, int *rows)
 {
+    if (!ws_need_im_take()) return 0;
     u32 s;
     if (y != 16 || w != 256 || h != PH || u || v || ty || tx != 128) return 0;
     s = im_check(vram);
@@ -353,7 +356,7 @@ static const u16 *im_take(const u16 *vram, int pad, int x, int y, int w, int h, 
         if (!im_gen(pad)) { free(im_ext); im_ext = 0; return 0; }
         {   const char *e = getenv("PORT_WS_BACKDROP_DUMP");      /* research: the CLUT, then the picture (raw 15-bit LE, IM_W columns) */
             FILE *f = e ? fopen(e, "wb") : 0;
-            if (f) { fwrite(im_clut, 1, sizeof im_clut, f); fwrite(im_src, 1, sizeof im_src, f); fclose(f); }
+            if (f) { fwrite(im_clut, 1, sizeof im_clut, f); fwrite(im_src, 1, (sizeof *im_src * (PH)), f); fclose(f); }
         }
     }
     if (!im_ext) return 0;

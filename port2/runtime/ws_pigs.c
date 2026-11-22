@@ -47,14 +47,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include "port_runtime.h"
+#include "ws_heap.h"
 
 typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32; typedef short s16; typedef int s32;
-#ifdef __3DS__
-/* The 3DS: not there.  Its tables made the title too large for the console's memory (v0.7.1 did not start). */
-int port_ws_pigs_on;
-const char *port_ws_pigs_rooms;
-void port_ws_pigs_blocks(char *list, const u8 *tbl, int area, int section) { (void)list; (void)tbl; (void)area; (void)section; }
-#else
 typedef long long s64;
 
 extern int port_ws_cull;
@@ -109,12 +104,18 @@ typedef struct { s16 x, y, z; } P3;
 #define H 544
 #define INSIDE 48                         /* an end's edge lies at most this far inside the 4:3 frame's edge */
 
-static Poly ps[MAXP]; static int np;
-static Edge ed[MAXE]; static int ne;
-static Rail rl[2 * MAXE]; static int nr;
-static u8 ft3[MAXN][32], ft4[MAXN][40], gt3[MAXN][40], gt4[MAXN][52]; static int n3, n4, g3, g4;
-static u8 blk[16 + MAXN * (32 + 40 + 40 + 52) + 16]; static int blk_polys;
+/* the tables on the heap (ws_heap.h): ps and blk while the room is shown (the model is read every frame, the game
+   draws blk), the others while the extension is made */
+#define BLK (16 + MAXN * (32 + 40 + 40 + 52) + 16)
+static Poly (*ps); static int np;
+static Edge (*ed); static int ne;
+static Rail (*rl); static int nr;
+static u8 (*ft3)[32], (*ft4)[40], (*gt3)[40], (*gt4)[52]; static int n3, n4, g3, g4;
+static u8 (*blk); static int blk_polys;
 static u32 cur_key; static int have_key;
+static const WsTab ROOM_TABS[] = { WS_T(ps, MAXP), WS_T(blk, BLK) };
+static const WsTab GEN_TABS[] = { WS_T(ed, MAXE), WS_T(rl, 2 * MAXE), WS_T(ft3, MAXN), WS_T(ft4, MAXN), WS_T(gt3, MAXN), WS_T(gt4, MAXN) };
+static void pigs_reset(void) { have_key = 0; blk_polys = 0; }   /* (the room changed: blk goes, made again on the way back) */
 static int colw;                          /* column width, units */
 
 static const u8 RING3[3] = {0, 1, 2}, RING4[4] = {0, 1, 3, 2};
@@ -544,7 +545,15 @@ static void build_side(int side, int lim)
 
 /* called from port_ws_area_model_link with the game's block list of this frame (list[3] = count, u32 pointers from
    +4, room for 88) and the area model's table */
+static void blocks(char *list, const u8 *tbl, int area, int section);
 void port_ws_pigs_blocks(char *list, const u8 *tbl, int area, int section)
+{
+    if (ws_heap_failed) return;
+    ws_on_room(pigs_reset);
+    blocks(list, tbl, area, section);
+    ws_free(WS_GEN);
+}
+static void blocks(char *list, const u8 *tbl, int area, int section)
 {
     static const u8 *seen_tbl; static int seen_sec = -1, lo, hi, ylo, yhi;
     { static int once; if (!once) { once = 1; log_on = getenv("PORT_WS_PIGS_LOG") != 0; } }
@@ -570,6 +579,7 @@ void port_ws_pigs_blocks(char *list, const u8 *tbl, int area, int section)
     if (miny <= maxy && maxy - miny < 4000) { if (miny < ylo) ylo = miny; if (maxy > yhi) yhi = maxy; }
     if (cy < ylo) ylo = cy;
     if (cy > yhi) yhi = cy;
+    if (!ws_need(WS_ROOM, ROOM_TABS, WS_NT(ROOM_TABS))) return;
     int size = parse(b);
     if (!size) return;
     u32 key = 2166136261u;
@@ -577,6 +587,7 @@ void port_ws_pigs_blocks(char *list, const u8 *tbl, int area, int section)
     key = hsh(key, (u32)port_ws_cull, (u32)(lo + 8192) * 16384u + (u32)(hi + 8192));
     key = hsh(key, (u32)(ylo + 8192), (u32)(yhi + 8192));
     if (!have_key || key != cur_key) {
+        if (!ws_need(WS_GEN, GEN_TABS, WS_NT(GEN_TABS))) return;
         have_key = 1; cur_key = key;
         n3 = n4 = g3 = g4 = 0;
         cam_y0 = ylo; cam_y1 = yhi; find_holes();
@@ -593,4 +604,3 @@ void port_ws_pigs_blocks(char *list, const u8 *tbl, int area, int section)
     if (!blk_polys) return;
     ((u32 *)list)[2] = (u32)(unsigned long)blk; list[3] = 2;
 }
-#endif   /* (not the 3DS) */

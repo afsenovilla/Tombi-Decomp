@@ -29,13 +29,9 @@
 #include <stdio.h>
 #include <string.h>
 #include "port_runtime.h"
+#include "ws_heap.h"
 
 typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32; typedef short s16; typedef int s32;
-#ifdef __3DS__
-/* The 3DS: not there.  Its tables made the title too large for the console's memory (v0.7.1 did not start). */
-
-void port_ws_floor3d_blocks(char *list, const u8 *tbl, int area, int section) { (void)list; (void)tbl; (void)area; (void)section; }
-#else
 typedef long long s64;
 
 extern int port_ws_cull;
@@ -76,10 +72,16 @@ typedef struct { s32 x, y, z, u, v; u32 col; } Out;
 #define MAXCELL 24                        /* cells per floor row */
 #define MAXROW 32
 
-static Poly ps[MAXP]; static int np;
-static u8 gt3[MAXN][40], gt4[MAXN][52]; static int g3, g4;
-static u8 blk[16 + MAXN * (40 + 52) + 16]; static int blk_polys;
+/* the tables on the heap (ws_heap.h): ps and blk while the room is shown (the model is read every frame, the game
+   draws blk), the packets while the extension is made */
+#define BLK (16 + MAXN * (40 + 52) + 16)
+static Poly (*ps); static int np;
+static u8 (*gt3)[40], (*gt4)[52]; static int g3, g4;
+static u8 (*blk); static int blk_polys;
 static u32 cur_key; static int have_key;
+static const WsTab ROOM_TABS[] = { WS_T(ps, MAXP), WS_T(blk, BLK) };
+static const WsTab GEN_TABS[] = { WS_T(gt3, MAXN), WS_T(gt4, MAXN) };
+static void floor3d_reset(void) { have_key = 0; blk_polys = 0; }   /* (the room changed: blk goes, made again on the way back) */
 static int cam_x, cam_y, cam_z, cam_h;    /* the camera's translation and projection distance */
 
 static const u8 RING3[3] = {0, 1, 2}, RING4[4] = {0, 1, 3, 2};
@@ -380,7 +382,15 @@ static void build_side(int side, int half)
 
 /* called from port_ws_area_model_link with the game's block list of this frame (list[3] = count, u32 pointers from
    +4, room for 88) and the area model's table */
+static void blocks(char *list, const u8 *tbl, int area, int section);
 void port_ws_floor3d_blocks(char *list, const u8 *tbl, int area, int section)
+{
+    if (ws_heap_failed) return;
+    ws_on_room(floor3d_reset);
+    blocks(list, tbl, area, section);
+    ws_free(WS_GEN);
+}
+static void blocks(char *list, const u8 *tbl, int area, int section)
 {
     if (!port_ws_cull || !tbl || !room_enabled(area, section)) return;
     if (tbl[0] != 1 || (u8)list[3] != 1) return;                           /* one block, the whole room */
@@ -395,6 +405,7 @@ void port_ws_floor3d_blocks(char *list, const u8 *tbl, int area, int section)
     if (h < 64 || h > 4096) h = 544;
     if (ofx < 0 || ofx > 320) ofx = 160;
     if (t[0] != -ofx) return;                                              /* the camera's axis through the picture's middle column */
+    if (!ws_need(WS_ROOM, ROOM_TABS, WS_NT(ROOM_TABS))) return;
     int size = parse(b);
     if (!size) return;
     u32 key = 2166136261u;
@@ -402,6 +413,7 @@ void port_ws_floor3d_blocks(char *list, const u8 *tbl, int area, int section)
     key = (key ^ (u32)port_ws_cull) * 16777619u; key = (key ^ (u32)t[0]) * 16777619u; key = (key ^ (u32)t[1]) * 16777619u;
     key = (key ^ (u32)t[2]) * 16777619u; key = (key ^ (u32)(h * 512 + ofx)) * 16777619u;
     if (!have_key || key != cur_key) {
+        if (!ws_need(WS_GEN, GEN_TABS, WS_NT(GEN_TABS))) return;
         have_key = 1; cur_key = key;
         g3 = g4 = 0;
         cam_x = t[0]; cam_y = t[1]; cam_z = t[2]; cam_h = h;
@@ -418,4 +430,3 @@ void port_ws_floor3d_blocks(char *list, const u8 *tbl, int area, int section)
     if (!blk_polys) return;
     ((u32 *)list)[2] = (u32)(unsigned long)blk; list[3] = 2;
 }
-#endif   /* (not the 3DS) */

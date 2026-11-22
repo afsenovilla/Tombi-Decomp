@@ -39,14 +39,9 @@
 #include <stdio.h>
 #include <string.h>
 #include "port_runtime.h"
+#include "ws_heap.h"
 
 typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32; typedef short s16; typedef int s32;
-#ifdef __3DS__
-/* The 3DS: not there.  Its tables made the title too large for the console's memory (v0.7.1 did not start). */
-int port_ws_room3d_on;
-const char *port_ws_room3d_rooms;
-void port_ws_room3d_blocks(char *list, const u8 *tbl, int area, int section) { (void)list; (void)tbl; (void)area; (void)section; }
-#else
 
 extern int port_ws_cull;
 extern unsigned long port_gte_cfc2(int);
@@ -106,10 +101,16 @@ typedef struct { s16 y0, z0, y1, z1; int poly; } Seg;        /* a free edge of t
 #define JY 16
 #define MAXCOL 12
 
-static Poly ps[MAXP]; static int np;
-static u8 ft3[MAXN][32], ft4[MAXN][40], gt3[MAXN][40], gt4[MAXN][52]; static int n3, n4, g3, g4;
-static u8 blk[16 + MAXN * (32 + 40 + 40 + 52) + 16]; static int blk_polys;
+/* the tables on the heap (ws_heap.h): ps and blk while the room is shown (the model is read every frame, the game
+   draws blk), the packets while the extension is made */
+#define BLK (16 + MAXN * (32 + 40 + 40 + 52) + 16)
+static Poly (*ps); static int np;
+static u8 (*ft3)[32], (*ft4)[40], (*gt3)[40], (*gt4)[52]; static int n3, n4, g3, g4;
+static u8 (*blk); static int blk_polys;
 static u32 cur_key; static int have_key;
+static const WsTab ROOM_TABS[] = { WS_T(ps, MAXP), WS_T(blk, BLK) };
+static const WsTab GEN_TABS[] = { WS_T(ft3, MAXN), WS_T(ft4, MAXN), WS_T(gt3, MAXN), WS_T(gt4, MAXN) };
+static void room3d_reset(void) { have_key = 0; blk_polys = 0; }   /* (the room changed: blk goes, made again on the way back) */
 
 static const u8 RING3[3] = {0, 1, 2}, RING4[4] = {0, 1, 3, 2};
 
@@ -414,7 +415,15 @@ static void build_side(int side, int tx, int tz, int h, int half, const s16 *m)
 
 /* called from port_ws_area_model_link with the game's block list of this frame (list[3] = count, u32 pointers from
    +4, room for 88) and the area model's table */
+static void blocks(char *list, const u8 *tbl, int area, int section);
 void port_ws_room3d_blocks(char *list, const u8 *tbl, int area, int section)
+{
+    if (ws_heap_failed) return;
+    ws_on_room(room3d_reset);
+    blocks(list, tbl, area, section);
+    ws_free(WS_GEN);
+}
+static void blocks(char *list, const u8 *tbl, int area, int section)
 {
     if (!port_ws_cull || !tbl || !room_enabled(area, section)) return;
     if (tbl[0] != 1 || (u8)list[3] != 1) return;                           /* these rooms: one block, the whole room */
@@ -430,6 +439,7 @@ void port_ws_room3d_blocks(char *list, const u8 *tbl, int area, int section)
     int h = (int)(u16)port_gte_cfc2(26), ofx = (int)((s32)port_gte_cfc2(24) >> 16);
     if (h < 64 || h > 4096) h = 544;
     if (ofx < 0 || ofx > 320) ofx = 160;
+    if (!ws_need(WS_ROOM, ROOM_TABS, WS_NT(ROOM_TABS))) return;
     int size = parse(b);
     if (!size) return;
     u32 key = 2166136261u;
@@ -437,6 +447,7 @@ void port_ws_room3d_blocks(char *list, const u8 *tbl, int area, int section)
     key = hsh(key, (u32)port_ws_cull, (u32)t[0]); key = hsh(key, (u32)t[2], (u32)(h * 512 + ofx));
     if (turned) key = hsh(key, (u32)(u16)m[0], (u32)(u16)m[2]);
     if (!have_key || key != cur_key) {
+        if (!ws_need(WS_GEN, GEN_TABS, WS_NT(GEN_TABS))) return;
         have_key = 1; cur_key = key;
         n3 = n4 = g3 = g4 = 0;
         build_side(-1, t[0], t[2], h, ofx + port_ws_cull, turned ? m : 0);
@@ -452,4 +463,3 @@ void port_ws_room3d_blocks(char *list, const u8 *tbl, int area, int section)
     if (!blk_polys) return;
     ((u32 *)list)[2] = (u32)(unsigned long)blk; list[3] = 2;
 }
-#endif   /* (not the 3DS) */

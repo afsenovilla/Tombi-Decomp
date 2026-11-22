@@ -56,12 +56,12 @@ static int up_in(const short (*t)[4], int n, int x, int y)
 }
 static int up_ex(int x, int y) { return up_in(UP_EX, 2, x, y); }
 static int up_face(int x, int y) { return y >= UP_F0 && y < UP_F1 && x >= 0 && x < UP_FB[y - UP_F0]; }
-static short up_lf[PH][PW];                              /* the rock's light (0: no rock texel near) */
-static Rgb up_alb[PH][PW];                               /* the picture's texels over their light (x 128) */
-static Rgb up_al1[PH][UP_LW];                            /* the left columns' texels over their row's light (x 128) */
+static short (*up_lf)[PW];                              /* the rock's light (0: no rock texel near) */
+static Rgb (*up_alb)[PW];                               /* the picture's texels over their light (x 128) */
+static Rgb (*up_al1)[UP_LW];                            /* the left columns' texels over their row's light (x 128) */
 static int up_le[PH];                                    /* the light at the edge per row (the side being made) */
 static int up_fl;                                        /* the dark face's light */
-static Rgb up_alf[PH][PW];                               /* the dark face's texels over their light (x 128) */
+static Rgb (*up_alf)[PW];                               /* the dark face's texels over their light (x 128) */
 static Rgb *up_fc;                                       /* the left strip's dark face, quilted from them (canvas) */
 static u8 *up_fh;                                        /* its texels made */
 static int up_fq;                                        /* 1: the dark face is being quilted */
@@ -79,9 +79,11 @@ static int up_ctx(int side, int x, int y, Rgb *c)
     if (!side) { if (x >= UP_LW || up_face(x, y)) return 0; *c = up_al1[y][x]; return 1; }
     *c = up_alb[y][x]; return 1;
 }
+static int (*up_light__S)[PW + 1];
+static int (*up_light__C)[PW + 1];
 static void up_light(void)
 {
-    static int S[PH + 1][PW + 1], C[PH + 1][PW + 1];
+    int (*const S)[PW + 1] = up_light__S, (*const C)[PW + 1] = up_light__C;
     for (int y = 0; y < PH; y++)
         for (int x = 0; x < PW; x++) {
             int m = !up_ex(x, y) && !up_face(x, y);
@@ -274,9 +276,10 @@ static int up_hp(int x, int y)                           /* the picture's lumina
         }
     return lum(rgb15(pic[y][x])) - (n ? s / n : 0);
 }
+static int (*up_join__jd)[2][3];
 static void up_join(int side)
 {
-    static int jd[PH][2][3];
+    int (*const jd)[2][3] = up_join__jd;
     for (int st = 0; st < 2; st++) {
         int R = st ? 1 : 4, N = st ? 1 : 8;
         for (int y = 0; y < PH; y++) {
@@ -303,9 +306,11 @@ static void up_join(int side)
 /* the contrast per row (rows y +- 16): the spread of the strip's luminance (its first 40 columns) onto the picture's
    (its 32 columns next to the edge; the dark face left out on both), at most x 0.8 .. x UP_CMAX / 256; each texel
    moved about the mean of its 9 x 9 surroundings, so the light stays as made */
+static short (*up_contrast__lm)[UP_CW];
+static short (*up_contrast__hp)[32];
 static void up_contrast(int side)
 {
-    static int k256[PH]; static short lm[PH][UP_CW], hp[PH][32];
+    static int k256[PH]; short (*const lm)[UP_CW] = up_contrast__lm, (*const hp)[32] = up_contrast__hp;
     int w = vb_ow < UP_CW ? vb_ow : UP_CW;
     for (int y = 0; y < PH; y++) {
         for (int X = 1; X <= w; X++) lm[y][X - 1] = (short)up_cm(X, y);
@@ -345,6 +350,7 @@ static const RqBand UP_BR[3] = { { 0, 62, 12, 31, 6, 6, 0, PW, 0, 66, 10 }, { 62
                                  { 158, PH, 12, 22, 6, 6, 0, PW, 150, PH, 10 } };
 static void gen_up(int pad)
 {
+    if (!ws_need_gen_up()) return;
     pal_make();
     vb_ow = pad + 64;
     if (!canvas_open(vb_ow)) return;

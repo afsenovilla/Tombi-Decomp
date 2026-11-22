@@ -61,35 +61,31 @@
 #ifndef WS_BACKDROP_MAIN
 #include "port_runtime.h"
 #endif
+#include "ws_heap.h"
+#ifdef WS_BACKDROP_MAIN
+#include "ws_heap.c"
+#endif
 
 typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32;
+static int ws_need_grab(void); static int ws_need_pr_take(void); static int ws_need_en_take(void);
+static int ws_need_tw_take(void); static int ws_need_mm_take(void); static int ws_need_im_take(void);
+static int ws_need_ic_take(void); static int ws_need_ck_take(void); static int ws_need_lk_build(void);
+static int ws_need_is_build(void); static int ws_need_is_build_up(void); static int ws_need_main(void);
+static int ws_need_tw_main(void); static int ws_need_im_main(void); static int ws_need_tw_build(void);
+static int ws_need_mm_build(void); static int ws_need_im_gen(void); static int ws_need_ic_gen(void);
+static int ws_need_ck_gen(void); static int ws_need_build_redraw(void); static int ws_need_build_mirror(void);
+static int ws_need_gen_a5(void); static int ws_need_gen_bt(void); static int ws_need_gen_cb(void);
+static int ws_need_gen_cv(void); static int ws_need_gen_en(void); static int ws_need_gen_gr(void);
+static int ws_need_gen_hl(void); static int ws_need_gen_kt(void); static int ws_need_gen_lf(void);
+static int ws_need_gen_pr(void); static int ws_need_gen_rw(void); static int ws_need_gen_st(void);
+static int ws_need_gen_th(void); static int ws_need_gen_up(void); static int ws_need_gen_vb(void);
 
-#if defined(__3DS__) && !defined(WS_BACKDROP_MAIN)
-/* The 3DS: none of the picture strips.  Their generators keep their work in static tables, 35 MB of them, and a 3DS
-   title's code, data and bss must fit its 64 MB (an Old 3DS's whole application memory; past the code region on
-   both): with them the system's loader refused to start v0.7.0's title ("invalid address" in loader).  Every other
-   widescreen part stays (culls, room ends, 3D room walls, top-down maps).  The entry points shims/gpu.c and
-   runtime/main.c use, inert. */
-int port_ws_backdrop_on;
-int port_ws_backdrop_dy;
-int port_ws_backdrop_side = 3;
-const char *port_ws_backdrop_rooms;
-const u16 *port_ws_backdrop(const u16 *vram, int pad, int x, int y, int w, int h, int u, int v, int tx, int ty,
-                            int depth, int cx, int cy, int *rows)
-{
-    (void)vram; (void)pad; (void)x; (void)y; (void)w; (void)h; (void)u; (void)v; (void)tx; (void)ty; (void)depth; (void)cx; (void)cy; (void)rows;
-    return 0;
-}
-const u16 *port_ws_backdrop_over(int pad, int tx, int u, int v) { (void)pad; (void)tx; (void)u; (void)v; return 0; }
-const u16 *port_ws_backdrop_fix(int tx, int u, int v, int *x, int *w) { (void)tx; (void)u; (void)v; (void)x; (void)w; return 0; }
-int port_ws_island_fg(int tpage, int clut, int uv) { (void)tpage; (void)clut; (void)uv; return 0; }
-#else
 
 #define PW 320
 #define PH 224
 
-static u16 pic[PH][PW];                 /* the picture as 15-bit colours */
-static u8 pic_ov[PH][PW];               /* 1: an opaque texel of a piece drawn again over the player (Room.over) */
+static u16 (*pic)[PW];                 /* the picture as 15-bit colours */
+static u8 (*pic_ov)[PW];               /* 1: an opaque texel of a piece drawn again over the player (Room.over) */
 static int shown_gl;                    /* the OpenGL renderer draws the frames (it samples a stretched quad's texture
                                            otherwise than the software one: gen_th's th_shown) */
 static u16 *strip; static int strip_pad; static u32 strip_sum;
@@ -107,6 +103,7 @@ static int pingpong(int i, int n) { i %= 2 * n; return i < n ? i : 2 * n - 1 - i
 static u16 at(int side, int y, int m) { if (y < 0) y = 0; if (y >= PH) y = PH - 1; return pic[y][side ? PW - 1 - m : m]; }
 static void build_mirror(int pad)
 {
+    if (!ws_need_build_mirror()) return;
     for (int side = 0; side < 2; side++)
         for (int y = 0; y < PH; y++)
             for (int d = 1; d <= pad; d++) {
@@ -157,7 +154,7 @@ static Rgb mix(Rgb a, Rgb b, int t) { Rgb o = { a.r + (b.r - a.r) * t / 256, a.g
 static Rgb scale(Rgb a, int k) { Rgb o = { a.r * k / 256, a.g * k / 256, a.b * k / 256 }; return o; }
 
 /* --- ramps: the samples sorted by (luminance, colour) - a total order, so any qsort gives the same bins */
-static u32 samp[PW * PH]; static int nsamp;
+static u32 (*samp); static int nsamp;
 static int samp_cmp(const void *a, const void *b) { u32 x = *(const u32 *)a, y = *(const u32 *)b; return x < y ? -1 : x > y; }
 static void samp_add(u16 c) { if (nsamp < PW * PH) samp[nsamp++] = (u32)lum(rgb15(c)) << 16 | (c & 0x7FFF); }
 static void ramp_make(Ramp *rp)
@@ -197,10 +194,10 @@ static u16 picx(int side, int X, int y) { int x = clampi(pcol(side, X), 0, PW - 
 static Ramp R_wall, R_floor, R_ivy;
 static Rgb C_mortar, C_stem, C_gap;
 static int course_tone[2][14];          /* mean tone (ramp index 0..255) of the bricks next to each edge, per course */
-static int floor_tone[2][PH];           /* the floor's row tone next to each edge */
-static int edge_ivy[2][PH];             /* 0..256: share of ivy texels in the 6 columns at the edge (+-2 rows) */
-static int edge_depth[2][PH];           /* how far (columns) the picture's ivy reaches in from the edge on that row */
-static int edge_tone[2][PH];            /* the tone (on R_ivy) of the picture's ivy at the edge on that row */
+static int (*floor_tone)[PH];           /* the floor's row tone next to each edge */
+static int (*edge_ivy)[PH];             /* 0..256: share of ivy texels in the 6 columns at the edge (+-2 rows) */
+static int (*edge_depth)[PH];           /* how far (columns) the picture's ivy reaches in from the edge on that row */
+static int (*edge_tone)[PH];            /* the tone (on R_ivy) of the picture's ivy at the edge on that row */
 static int side_k[2];                   /* light of each side wall against the back wall (x 256) */
 static int floor_fit[2][2];             /* the floor's light: L(|f|) = a - b (|f| - 1), fitted per side on |f| 0.6..1.15 */
 static u8 lum_tone[256];                /* luminance -> tone on R_floor */
@@ -645,11 +642,12 @@ static void grow_ivy(int side)
 }
 
 /* nearest colour among those the picture uses (its CLUT), cached per 15-bit colour */
-static u16 pal[256]; static int npal; static u16 qcache[32768]; static u8 qhave[32768];
+static u16 pal[256]; static int npal; static u16 (*qcache); static u8 (*qhave);
+static u8 (*pal_make__seen);
 static void pal_make(void)
 {
-    static u8 seen[32768];
-    memset(seen, 0, sizeof seen); memset(qhave, 0, sizeof qhave); npal = 0;
+    u8 (*const seen) = pal_make__seen;
+    memset(seen, 0, (sizeof *seen * (32768))); memset(qhave, 0, (sizeof *qhave * (32768))); npal = 0;
     for (int y = 0; y < PH; y++) for (int x = 0; x < PW; x++) {
         u16 c = pic[y][x] & 0x7FFF;
         if (!seen[c] && npal < 256 && c) { seen[c] = 1; pal[npal++] = pic[y][x]; }
@@ -713,6 +711,7 @@ static void balance(int side)
 
 static void build_redraw(int pad)
 {
+    if (!ws_need_build_redraw()) return;
     analyse(); pal_make();
     cw = pad; cv = calloc((size_t)pad * PH, sizeof *cv); occ = calloc((size_t)pad * PH, 1);
     S256 = calloc((size_t)pad + 2, sizeof *S256); WU16 = calloc((size_t)pad + 2, sizeof *WU16);
@@ -775,6 +774,279 @@ static void gen_cb(int pad);
 #include "ws_backdrop_castle.inc"
 #include "ws_backdrop_island.inc"
 #include "ws_backdrop_prison.inc"
+/* The tables each entry point asks for (ws_heap.h: WS_ROOM ones stay until the room changes, WS_GEN ones go when
+   the call that made them returns).  Generated from the call graph and checked by tools/ws_heap_check.py: a
+   function that starts using a heap table needs it in the list of every entry point that reaches it. */
+static int ws_need_grab(void)
+{
+    static const WsTab t[] = { WS_T(pic, PH), WS_T(pic_ov, PH) };
+    return ws_need(WS_ROOM, t, WS_NT(t));
+}
+static int ws_need_pr_take(void)
+{
+    static const WsTab t[] = { WS_T(pr_W, PH), WS_T(pr_ray, PH) };
+    return ws_need(WS_ROOM, t, WS_NT(t));
+}
+static int ws_need_en_take(void)
+{
+    static const WsTab t[] = { WS_T(en_bk, PH), WS_T(pic, PH), WS_T(pic_ov, PH) };
+    return ws_need(WS_ROOM, t, WS_NT(t));
+}
+static int ws_need_tw_take(void)
+{
+    static const WsTab t[] = { WS_T(tw_pic, TW_H) };
+    return ws_need(WS_ROOM, t, WS_NT(t));
+}
+static int ws_need_mm_take(void)
+{
+    static const WsTab t[] = { WS_T(mm_src, MM_NPH) };
+    return ws_need(WS_ROOM, t, WS_NT(t));
+}
+static int ws_need_im_take(void)
+{
+    static const WsTab t[] = { WS_T(im_src, PH) };
+    return ws_need(WS_ROOM, t, WS_NT(t));
+}
+static int ws_need_ic_take(void)
+{
+    static const WsTab t[] = { WS_T(ic_l, IC_H), WS_T(ic_p, IC_H), WS_T(ic_k, IC_H), WS_T(ic_grow, IC_H),
+        WS_T(ic_sky, IC_H), WS_T(ic_measure__tmp, 256), WS_T(ic_measure__sum, 256), WS_T(ic_cr, 256),
+        WS_T(ic_measure__ok, IC_H), WS_T(ic_measure__srt, PW), WS_T(ic_measure__cnt, 256) };
+    return ws_need(WS_ROOM, t, WS_NT(t));
+}
+static int ws_need_ck_take(void)
+{
+    static const WsTab t[] = { WS_T(ck_src, CK_H) };
+    return ws_need(WS_ROOM, t, WS_NT(t));
+}
+static int ws_need_lk_build(void)
+{
+    static const WsTab t[] = { WS_T(mb_ii, 4), WS_T(mm_src, MM_NPH), WS_T(mb_band__dt, PH), WS_T(mq_l, PH),
+        WS_T(mq_s, PH), WS_T(mb_band__sh, PH), WS_T(mq_bad, PH + 1), WS_T(mq_quilt__errs, PH * MQ_SW),
+        WS_T(mb_band__shk, PH), WS_T(mq_k, PH), WS_T(mm_qc, 32768), WS_T(mq_quilt__ov, MQ_MB * MQ_MB),
+        WS_T(mm_qh, 32768), WS_T(mq_quilt__pe, PH), WS_T(mq_quilt__ev, MQ_MB), WS_T(mq_quilt__e, MQ_MB),
+        WS_T(mq_cut__E, MQ_MB), WS_T(mq_bp, MQ_NB), WS_T(mb_band__tn, PH), WS_T(mb_band__jc, PH),
+        WS_T(mb_band__tf, PH), WS_T(mq_quilt__picks, 512), WS_T(mq_by, MQ_NB), WS_T(mq_bx, MQ_NB) };
+    return ws_need(WS_ROOM, t, WS_NT(t));
+}
+static int ws_need_is_build(void)
+{
+    static const WsTab t[] = { WS_T(mb_ii, 4), WS_T(mm_src, MM_NPH), WS_T(mb_band__dt, PH), WS_T(mq_l, PH),
+        WS_T(mq_s, PH), WS_T(mb_band__sh, PH), WS_T(mq_bad, PH + 1), WS_T(mq_quilt__errs, PH * MQ_SW),
+        WS_T(mb_band__shk, PH), WS_T(mq_k, PH), WS_T(mm_qc, 32768), WS_T(mq_quilt__ov, MQ_MB * MQ_MB),
+        WS_T(mm_qh, 32768), WS_T(mq_quilt__pe, PH), WS_T(mq_quilt__ev, MQ_MB), WS_T(mq_quilt__e, MQ_MB),
+        WS_T(mq_cut__E, MQ_MB), WS_T(mq_bp, MQ_NB), WS_T(mb_band__tn, PH), WS_T(mb_band__jc, PH),
+        WS_T(mb_band__tf, PH), WS_T(mq_quilt__picks, 512), WS_T(mq_by, MQ_NB), WS_T(mq_bx, MQ_NB) };
+    return ws_need(WS_ROOM, t, WS_NT(t));
+}
+static int ws_need_is_build_up(void)
+{
+    static const WsTab t[] = { WS_T(mb_ii, 4), WS_T(mm_src, MM_NPH), WS_T(mb_band__dt, PH), WS_T(mq_l, PH),
+        WS_T(mq_s, PH), WS_T(mb_band__sh, PH), WS_T(mq_bad, PH + 1), WS_T(mq_quilt__errs, PH * MQ_SW),
+        WS_T(mb_band__shk, PH), WS_T(mq_k, PH), WS_T(mm_qc, 32768), WS_T(mq_quilt__ov, MQ_MB * MQ_MB),
+        WS_T(mm_qh, 32768), WS_T(mq_quilt__pe, PH), WS_T(mq_quilt__ev, MQ_MB), WS_T(mq_quilt__e, MQ_MB),
+        WS_T(mq_cut__E, MQ_MB), WS_T(mq_bp, MQ_NB), WS_T(mb_band__tn, PH), WS_T(mb_band__jc, PH),
+        WS_T(mb_band__tf, PH), WS_T(mq_quilt__picks, 512), WS_T(mq_by, MQ_NB), WS_T(mq_bx, MQ_NB) };
+    return ws_need(WS_ROOM, t, WS_NT(t));
+}
+static int ws_need_main(void)
+{
+    static const WsTab t[] = { WS_T(tw_pic, TW_H), WS_T(im_src, PH), WS_T(pic, PH), WS_T(en_bk, PH),
+        WS_T(pic_ov, PH) };
+    return ws_need(WS_ROOM, t, WS_NT(t));
+}
+static int ws_need_tw_main(void)
+{
+    static const WsTab t[] = { WS_T(tw_pic, TW_H) };
+    return ws_need(WS_ROOM, t, WS_NT(t));
+}
+static int ws_need_im_main(void)
+{
+    static const WsTab t[] = { WS_T(im_src, PH) };
+    return ws_need(WS_ROOM, t, WS_NT(t));
+}
+static int ws_need_tw_build(void)
+{
+    static const WsTab t[] = { WS_T(tw_analyse__cnt, 5), WS_T(tw_rgb, TW_H), WS_T(tw_analyse__sl, TW_H + 1),
+        WS_T(tw_analyse__sn, TW_H + 1), WS_T(tw_bad, TW_H + 1), WS_T(tw_pic, TW_H), WS_T(tw_gs, TW_H),
+        WS_T(tw_lab, TW_H), WS_T(tw_quilt__cand, PW * 64), WS_T(tw_quilt__errs, PW * 64), WS_T(qcache, 32768),
+        WS_T(tw_quilt__ctx, VB_MAXH), WS_T(tw_join__d, TW_H), WS_T(qhave, 32768), WS_T(tw_pal__seen, 32768),
+        WS_T(tw_quilt__em, VB_MAXH), WS_T(tw_quilt__ev, VB_MAXH), WS_T(vb_E, VB_MAXH), WS_T(tw_quilt__tg, VB_MAXH),
+        WS_T(tw_soft__d, TW_H), WS_T(tw_quilt__hv, VB_MAXH), WS_T(tw_quilt__tl, VB_MAXH), WS_T(tw_contrast__ms, TW_H),
+        WS_T(tw_contrast__k256, TW_H), WS_T(tw_contrast__mp, TW_H), WS_T(tw_slices__cs, PW), WS_T(tw_slices__ce, PW),
+        WS_T(tw_ol, TW_OLW) };
+    return ws_need(WS_GEN, t, WS_NT(t));
+}
+static int ws_need_mm_build(void)
+{
+    static const WsTab t[] = { WS_T(mb_ii, 4), WS_T(mm_src, MM_NPH), WS_T(mb_band__dt, PH), WS_T(mq_l, PH),
+        WS_T(mq_s, PH), WS_T(mb_band__sh, PH), WS_T(mq_bad, PH + 1), WS_T(mq_quilt__errs, PH * MQ_SW),
+        WS_T(mp_al, PH), WS_T(mp_a, PH), WS_T(mp_l, PH), WS_T(mp_gen__map, PH * MP_TW), WS_T(mb_band__shk, PH),
+        WS_T(mq_k, PH), WS_T(mm_qc, 32768), WS_T(mq_quilt__ov, MQ_MB * MQ_MB), WS_T(mm2_gen__map, PH * M2_TW),
+        WS_T(mp_ab, PH * MP_TW), WS_T(mp_fbk, PH * MP_TW), WS_T(mp_lb, PH * MP_TW), WS_T(mm_qh, 32768),
+        WS_T(m2_fb, PH * M2_TW), WS_T(m2_mb, PH * M2_TW), WS_T(mp_f, MP_FH), WS_T(mq_quilt__pe, PH),
+        WS_T(mp_n, MP_NH), WS_T(mq_quilt__ev, MQ_MB), WS_T(mq_quilt__e, MQ_MB), WS_T(mq_cut__E, MQ_MB),
+        WS_T(mp_fd, MQ_NB), WS_T(m2_mt, MQ_NB), WS_T(m2_ft, MQ_NB), WS_T(mp_at, MQ_NB), WS_T(mq_bp, MQ_NB),
+        WS_T(mp_fu, MQ_NB), WS_T(mb_band__tn, PH), WS_T(mp_ac, PH), WS_T(mp_lc, PH), WS_T(mb_band__jc, PH),
+        WS_T(mb_band__tf, PH), WS_T(mm1_gen__sand, PH), WS_T(mq_quilt__picks, 512), WS_T(mq_by, MQ_NB),
+        WS_T(mp_lt, MQ_NB), WS_T(mq_bx, MQ_NB) };
+    return ws_need(WS_GEN, t, WS_NT(t));
+}
+static int ws_need_im_gen(void)
+{
+    static const WsTab t[] = { WS_T(im_src, PH), WS_T(im_qc, 32768), WS_T(im_qh, 32768) };
+    return ws_need(WS_GEN, t, WS_NT(t));
+}
+static int ws_need_ic_gen(void)
+{
+    static const WsTab t[] = { WS_T(ic_l, IC_H), WS_T(ic_p, IC_H), WS_T(ic_k, IC_H), WS_T(ic_grow, IC_H),
+        WS_T(ic_sky, IC_H), WS_T(ic_cr, 256) };
+    return ws_need(WS_GEN, t, WS_NT(t));
+}
+static int ws_need_ck_gen(void)
+{
+    static const WsTab t[] = { WS_T(ck_src, CK_H), WS_T(ck_qc, 32768), WS_T(ck_qh, 32768), WS_T(ck_gu.g, 58 * 62),
+        WS_T(ck_gw.g, 58 * 62), WS_T(ck_profile__acc, CK_PB), WS_T(ck_profile__raw, CK_PB), WS_T(ck_pr, CK_PB),
+        WS_T(ck_gen__ds, CK_H), WS_T(ck_gen__dl, CK_H), WS_T(ck_pl, CK_PB), WS_T(ck_gen__lok, CK_H),
+        WS_T(ck_gen__ln, CK_H) };
+    return ws_need(WS_GEN, t, WS_NT(t));
+}
+static int ws_need_build_redraw(void)
+{
+    static const WsTab t[] = { WS_T(samp, PW * PH), WS_T(pic, PH), WS_T(qcache, 32768), WS_T(pal_make__seen, 32768),
+        WS_T(qhave, 32768), WS_T(edge_depth, 2), WS_T(floor_tone, 2), WS_T(edge_tone, 2), WS_T(edge_ivy, 2) };
+    return ws_need(WS_GEN, t, WS_NT(t));
+}
+static int ws_need_build_mirror(void)
+{
+    static const WsTab t[] = { WS_T(pic, PH) };
+    return ws_need(WS_GEN, t, WS_NT(t));
+}
+static int ws_need_gen_a5(void)
+{
+    static const WsTab t[] = { WS_T(samp, PW * PH), WS_T(A5_rrow, 2), WS_T(pic, PH), WS_T(qcache, 32768),
+        WS_T(pal_make__seen, 32768), WS_T(qhave, 32768), WS_T(a5_stones__stk, 77 * A5_SW * 2),
+        WS_T(balance_regions__hp, NREG), WS_T(balance_regions__hs, NREG), WS_T(a5_stones__m, 2), WS_T(A5_stc, 256),
+        WS_T(A5_sta, 257) };
+    return ws_need(WS_GEN, t, WS_NT(t));
+}
+static int ws_need_gen_bt(void)
+{
+    static const WsTab t[] = { WS_T(bt_stone__sa, PH + 1), WS_T(bt_stone__si, PH + 1), WS_T(bt_stone__sl, PH + 1),
+        WS_T(bt_sa, PH), WS_T(bt_sr, PH), WS_T(pic, PH), WS_T(bt_stone__st, PH), WS_T(bt_m, PH), WS_T(bt_mask__o, PH),
+        WS_T(qcache, 32768), WS_T(pal_make__seen, 32768), WS_T(qhave, 32768), WS_T(bt_fc, 2), WS_T(bt_gn, 2),
+        WS_T(bt_dl, 2), WS_T(bt_rd, 2), WS_T(bt_tone, 2), WS_T(bt_mu, 2), WS_T(bt_gp, 2) };
+    return ws_need(WS_GEN, t, WS_NT(t));
+}
+static int ws_need_gen_cb(void)
+{
+    static const WsTab t[] = { WS_T(vb_quilt__err, 320 * 128), WS_T(pic, PH), WS_T(qcache, 32768),
+        WS_T(vb_quilt__win, VB_MAXH), WS_T(vb_period__L, PH), WS_T(pal_make__seen, 32768), WS_T(qhave, 32768),
+        WS_T(vb_quilt__em, VB_MAXH), WS_T(vb_quilt__ev, VB_MAXH), WS_T(vb_E, VB_MAXH), WS_T(cb_tone__d, PH),
+        WS_T(cb_ftone__d, PH), WS_T(vb_quilt__pm, VB_MAXH) };
+    return ws_need(WS_GEN, t, WS_NT(t));
+}
+static int ws_need_gen_cv(void)
+{
+    static const WsTab t[] = { WS_T(vb_quilt__err, 320 * 128), WS_T(pic, PH), WS_T(qcache, 32768),
+        WS_T(vb_quilt__win, VB_MAXH), WS_T(vb_period__L, PH), WS_T(pal_make__seen, 32768), WS_T(qhave, 32768),
+        WS_T(vb_quilt__em, VB_MAXH), WS_T(vb_quilt__ev, VB_MAXH), WS_T(vb_E, VB_MAXH), WS_T(cv_tone__jd, PH),
+        WS_T(vb_quilt__pm, VB_MAXH) };
+    return ws_need(WS_GEN, t, WS_NT(t));
+}
+static int ws_need_gen_en(void)
+{
+    static const WsTab t[] = { WS_T(pic, PH), WS_T(en_bk, PH), WS_T(pic_ov, PH), WS_T(en_tp, 3), WS_T(qcache, 32768),
+        WS_T(pal_make__seen, 32768), WS_T(qhave, 32768), WS_T(en_vp, 3) };
+    return ws_need(WS_GEN, t, WS_NT(t));
+}
+static int ws_need_gen_gr(void)
+{
+    static const WsTab t[] = { WS_T(gr_raw, PH), WS_T(gr_alb, PH), WS_T(gr_light__C, PH + 1),
+        WS_T(gr_light__S, PH + 1), WS_T(gr_lf, PH), WS_T(pic, PH), WS_T(pic_ov, PH), WS_T(gr_flat, PH),
+        WS_T(qcache, 32768), WS_T(pal_make__seen, 32768), WS_T(qhave, 32768), WS_T(gr_bm, GR_NC), WS_T(gr_fd, GR_NF),
+        WS_T(gr_bd, GR_NC) };
+    return ws_need(WS_GEN, t, WS_NT(t));
+}
+static int ws_need_gen_hl(void)
+{
+    static const WsTab t[] = { WS_T(hl_gsrc, PH), WS_T(hl_rho, 3), WS_T(hl_la, HL_NJ), WS_T(hl_tb, HL_NJ),
+        WS_T(hl_ta, HL_NJ), WS_T(vb_quilt__err, 320 * 128), WS_T(hl_raw, PH), WS_T(hl_p0, PH), WS_T(pic, PH),
+        WS_T(hl_m, PH), WS_T(qcache, 32768), WS_T(vb_quilt__win, VB_MAXH), WS_T(vb_period__L, PH),
+        WS_T(pal_make__seen, 32768), WS_T(qhave, 32768), WS_T(vb_quilt__ev, VB_MAXH), WS_T(vb_E, VB_MAXH),
+        WS_T(vb_quilt__em, VB_MAXH), WS_T(hl_vb, HL_NJ), WS_T(hl_ms, HL_NJ), WS_T(hl_md, HL_NJ),
+        WS_T(vb_quilt__pm, VB_MAXH), WS_T(hl_light__tmp, 6), WS_T(hl_ea, PH), WS_T(hl_eb, PH), WS_T(hl_lvl, HL_NJ),
+        WS_T(hl_light__qs, HL_NJ), WS_T(hl_light__fa, HL_NJ), WS_T(hl_light__q, HL_NJ), WS_T(hl_light__fb, HL_NJ) };
+    return ws_need(WS_GEN, t, WS_NT(t));
+}
+static int ws_need_gen_kt(void)
+{
+    static const WsTab t[] = { WS_T(pic, PH), WS_T(qcache, 32768), WS_T(pal_make__seen, 32768), WS_T(qhave, 32768),
+        WS_T(kt_prof, 2), WS_T(kt_pl, 2), WS_T(kt_fl, 2), WS_T(kt_pr, 2), WS_T(kt_pan, PH),
+        WS_T(kt_analyse__raw, PH) };
+    return ws_need(WS_GEN, t, WS_NT(t));
+}
+static int ws_need_gen_lf(void)
+{
+    static const WsTab t[] = { WS_T(pic, PH), WS_T(lf_fm, LF_D), WS_T(lf_sources__srt, LF_NS), WS_T(lf_sl, LF_NS),
+        WS_T(lf_ramp, 256), WS_T(lf_sources__sum, 256), WS_T(lf_dt, PH), WS_T(lf_sy, LF_NS), WS_T(lf_sx, LF_NS),
+        WS_T(lf_sources__cnt, 256) };
+    return ws_need(WS_GEN, t, WS_NT(t));
+}
+static int ws_need_gen_pr(void)
+{
+    static const WsTab t[] = { WS_T(pr_W, PH), WS_T(pr_S, PH), WS_T(pr_D, PH), WS_T(pr_B, PH), WS_T(pr_C, PH),
+        WS_T(pr_ray, PH), WS_T(pic, PH), WS_T(pr_trunk__M, PH), WS_T(pr_lab, PH), WS_T(pr_leaves__seen, PH),
+        WS_T(pr_light__hist, 400), WS_T(pr_leaves__L, PR_MAXL), WS_T(pr_leaves__tmp, PR_MAXP),
+        WS_T(pr_leaves__vs, PR_MAXP), WS_T(pr_leaves__us, PR_MAXP), WS_T(pr_base__d, PH),
+        WS_T(pr_leaves__py, PR_MAXP), WS_T(pr_leaves__px, PR_MAXP), WS_T(pr_light__cnt, 400), WS_T(pr_light__g, 400),
+        WS_T(pr_light__g2, 400) };
+    return ws_need(WS_GEN, t, WS_NT(t));
+}
+static int ws_need_gen_rw(void)
+{
+    static const WsTab t[] = { WS_T(rw_alb, PH), WS_T(rw_light__S, PH + 1), WS_T(rw_light__C, PH + 1),
+        WS_T(rw_lf, PH), WS_T(pic, PH), WS_T(th_p0, PH), WS_T(rw_raw, PH),
+        WS_T(rq_quilt__cand, (PW / 2 + 1) * (PH / 2 + 1)), WS_T(rq_quilt__errs, (PW / 2 + 1) * (PH / 2 + 1)),
+        WS_T(pic_ov, PH), WS_T(qcache, 32768), WS_T(pal_make__seen, 32768), WS_T(qhave, 32768),
+        WS_T(rq_quilt__ev, VB_MAXH), WS_T(rq_quilt__em, VB_MAXH), WS_T(vb_E, VB_MAXH), WS_T(rw_join__jd, PH) };
+    return ws_need(WS_GEN, t, WS_NT(t));
+}
+static int ws_need_gen_st(void)
+{
+    static const WsTab t[] = { WS_T(st_light__C, PH + 1), WS_T(st_light__S, PH + 1), WS_T(vb_quilt__err, 320 * 128),
+        WS_T(st_lf, PH), WS_T(pic, PH), WS_T(qcache, 32768), WS_T(vb_quilt__win, VB_MAXH), WS_T(vb_period__L, PH),
+        WS_T(pal_make__seen, 32768), WS_T(qhave, 32768), WS_T(vb_quilt__em, VB_MAXH), WS_T(vb_quilt__ev, VB_MAXH),
+        WS_T(vb_E, VB_MAXH), WS_T(st_join__jd, PH), WS_T(vb_quilt__pm, VB_MAXH) };
+    return ws_need(WS_GEN, t, WS_NT(t));
+}
+static int ws_need_gen_th(void)
+{
+    static const WsTab t[] = { WS_T(th_plaster_light__M, PH), WS_T(vb_quilt__err, 320 * 128), WS_T(th_raw, PH),
+        WS_T(th_p0, PH), WS_T(pic, PH), WS_T(pic_ov, PH), WS_T(th_m, PH), WS_T(qcache, 32768),
+        WS_T(vb_quilt__win, VB_MAXH), WS_T(vb_period__L, PH), WS_T(pal_make__seen, 32768), WS_T(qhave, 32768),
+        WS_T(vb_quilt__ev, VB_MAXH), WS_T(vb_E, VB_MAXH), WS_T(vb_quilt__em, VB_MAXH), WS_T(th_register__P, 2),
+        WS_T(th_D, 2), WS_T(th_join__jd, PH), WS_T(vb_quilt__pm, VB_MAXH), WS_T(th_dj, 2) };
+    return ws_need(WS_GEN, t, WS_NT(t));
+}
+static int ws_need_gen_up(void)
+{
+    static const WsTab t[] = { WS_T(up_alb, PH), WS_T(up_alf, PH), WS_T(up_light__C, PH + 1),
+        WS_T(up_light__S, PH + 1), WS_T(up_contrast__lm, PH), WS_T(up_lf, PH), WS_T(pic, PH),
+        WS_T(rq_quilt__cand, (PW / 2 + 1) * (PH / 2 + 1)), WS_T(rq_quilt__errs, (PW / 2 + 1) * (PH / 2 + 1)),
+        WS_T(qcache, 32768), WS_T(up_al1, PH), WS_T(pal_make__seen, 32768), WS_T(qhave, 32768),
+        WS_T(rq_quilt__ev, VB_MAXH), WS_T(rq_quilt__em, VB_MAXH), WS_T(vb_E, VB_MAXH), WS_T(up_contrast__hp, PH),
+        WS_T(up_join__jd, PH) };
+    return ws_need(WS_GEN, t, WS_NT(t));
+}
+static int ws_need_gen_vb(void)
+{
+    static const WsTab t[] = { WS_T(samp, PW * PH), WS_T(vb_quilt__err, 320 * 128), WS_T(pic, PH),
+        WS_T(qcache, 32768), WS_T(vb_quilt__win, VB_MAXH), WS_T(vb_period__L, PH), WS_T(pal_make__seen, 32768),
+        WS_T(qhave, 32768), WS_T(vb_s, 700), WS_T(vb_quilt__em, VB_MAXH), WS_T(vb_quilt__ev, VB_MAXH),
+        WS_T(vb_E, VB_MAXH), WS_T(vb_quilt__pm, VB_MAXH), WS_T(VB_rf, 3), WS_T(VB_rc, 3) };
+    return ws_need(WS_GEN, t, WS_NT(t));
+}
 #define PIECES_TOP4 { 128, 0, 224, 64, 32, 256, 0 }, { 128, 64, 224, 64, 32, 256, 32 }, { 128, 128, 224, 64, 32, 256, 64 }, \
                     { 128, 192, 224, 64, 32, 256, 96 }
 #define OVER_A5 { { 256, 0, 112, 56, 104, 0, 0 }, { 256, 56, 112, 200, 104, 56, 0 }, { 256, 144, 0, 64, 80, 256, 24 }, \
@@ -836,9 +1108,27 @@ static const Room ROOMS[] = {
 };
 #define NROOMS ((int)(sizeof ROOMS / sizeof ROOMS[0]))
 const char *port_ws_backdrop_rooms;                      /* --ws-backdrop-rooms A:S,A:S,... (decimal; "all") */
+#ifdef __3DS__
+/* The 3DS: the rooms whose strips take too long to make there (a frozen frame at the room's start, made again on every
+   visit now that the tables go with the room) or need the most memory.  PC times at 16:9 (i386, one core, 2026-11-22);
+   an Old 3DS's ARM11 is some 30-50 times slower, so 300 ms here is 10-15 s there.  Everything else is on (the green
+   tower's 10.8 MB of tables is the largest; the beach / mermaid 7.6 MB, the lake 6.6 MB, the pier 5.0 MB). */
+static const struct { short area, sec; } N3DS_OFF[] = {
+    { 19, 1 },   /* Dwarf Village in blossom: 2.0 s (3.0 s at 21:9) */
+    { 9, 5 },    /* the brick wall with the staircase: 1.7 s */
+    { 11, 2 },   /* the cave with the brick tower: 0.6 s */
+    { 2, 1 },    /* Dwarf Village: 0.4 s */
+    { 9, 4 },    /* the rock wall with the stair: 0.4 s */
+    { 16, 4 },   /* the green tower: 0.4 s and 10.8 MB */
+};
+#endif
 static int room_enabled(const Room *r)
 {
     const char *l = port_ws_backdrop_rooms;
+#ifdef __3DS__
+    for (unsigned i = 0; i < sizeof N3DS_OFF / sizeof N3DS_OFF[0]; i++)
+        if (N3DS_OFF[i].area == r->area && N3DS_OFF[i].sec == r->sec) return 0;
+#endif
     if (l) {
         if (!strcmp(l, "all")) return 1;
         while (*l) {
@@ -874,6 +1164,7 @@ static int en_gl(void) { return shown_gl; }
 #endif
 static u32 grab(const u16 *vram, int cx, int cy)
 {
+    if (!ws_need_grab()) return 0;
     u32 h = 2166136261u;
     for (int y = 0; y < PH; y++) for (int x = 0; x < 256; x++) pic[y][x] = tex8(vram, 128, x, y, cx, cy);
     for (int i = 0; i < 6; i++) {
@@ -881,7 +1172,7 @@ static u32 grab(const u16 *vram, int cx, int cy)
         for (int y = 0; y < p->h; y++) for (int x = 0; x < p->w; x++)
             if (p->y + y < PH && p->x + x < PW) pic[p->y + y][p->x + x] = tex8(vram, p->tx, p->u + x, p->v + y, cx, cy);
     }
-    memset(pic_ov, 0, sizeof pic_ov);
+    memset(pic_ov, 0, (sizeof *pic_ov * (PH)));
     for (int i = 0; i < 6; i++) {
         const Piece *p = &room->over[i];
         for (int y = 0; y < p->h; y++) for (int x = 0; x < p->w; x++) {
@@ -900,8 +1191,42 @@ static u32 grab(const u16 *vram, int cx, int cy)
    the strip buffer when it is the left part of a listed room's picture (left strip at columns 0..pad-1, right strip
    at pad..2pad-1, PH rows, *rows set to PH), else 0 */
 extern int port_gpu_is_gl(void);                          /* shims/gpu.c */
+/* the room changed (ws_heap.c, before its WS_ROOM tables go): the strips and every cache key that depends on those
+   tables, so the next room, or this one again, builds anew */
+static void backdrop_reset(void)
+{
+    free(strip); strip = 0; strip_pad = 0; strip_sum = 0; room = 0;
+    free(tw_strip); tw_strip = 0; tw_pad = 0; tw_sum = 0;
+    free(mm_strip); free(mm_buf); mm_strip = mm_buf = 0; mm_pad = -1; mm_room = 0; mm_gl = 0; mm_sum = 0;
+    free(im_ext); free(im_buf); im_ext = im_buf = 0; im_pad = -1; im_sum = 0;
+    free(ic_ext); ic_ext = 0; ic_pad = -1; ic_sum = 0;
+    free(ck_ext); free(ck_buf); ck_ext = ck_buf = 0; ck_pad = -1; ck_sum = 0;
+    for (int s = 0; s < 2; s++) { free(lk_ext[s]); lk_ext[s] = 0; lk_made[s] = 0; free(is_ext[s]); is_ext[s] = 0; }
+    free(lk_buf); lk_buf = 0; lk_pad = -1; lk_sum = 0;
+    free(is_buf); free(is_pic); is_buf = 0; is_pic = 0; is_pad = -1; is_sum = 0; is_up = 0;
+    free(en_ov); en_ov = 0; en_ov_pad = 0;
+    pr_have_layers = 0;
+}
+static const u16 *backdrop(const u16 *vram, int pad, int x, int y, int w, int h, int u, int v, int tx, int ty,
+                           int depth, int cx, int cy, int *rows);
+/* (the work tables of what this call made go when it returns; out of memory in this room: no strips until it changes) */
 const u16 *port_ws_backdrop(const u16 *vram, int pad, int x, int y, int w, int h, int u, int v, int tx, int ty,
                             int depth, int cx, int cy, int *rows)
+{
+    const u16 *s; size_t peak = ws_heap_peak; unsigned long long t0 = port_verbose ? port_time_us() : 0;
+    if (ws_heap_failed) return 0;
+    ws_on_room(backdrop_reset);
+    s = backdrop(vram, pad, x, y, w, h, u, v, tx, ty, depth, cx, cy, rows);
+    if (port_verbose && ws_heap_peak > peak) {           /* (a generation: its time and the tables it needed) */
+        u8 *g = port_ram_ptr(PORT_A_GAME);
+        port_printf("[ws] strips AREA%02d s%d: %d ms, heap peak %u KB\n", *(u16 *)g, *(u16 *)(g + 2),
+                    (int)((port_time_us() - t0) / 1000), (unsigned)(ws_heap_peak >> 10));
+    }
+    ws_free(WS_GEN);
+    return ws_heap_failed ? 0 : s;
+}
+static const u16 *backdrop(const u16 *vram, int pad, int x, int y, int w, int h, int u, int v, int tx, int ty,
+                           int depth, int cx, int cy, int *rows)
 {
     const Room *r = 0;
     if (enabled < 0) { const char *e = getenv("PORT_WS_BACKDROP"); enabled = e && *e >= '1' && *e <= '3' ? *e - '0' : port_ws_backdrop_on; }
@@ -961,6 +1286,7 @@ const u16 *port_ws_backdrop(const u16 *vram, int pad, int x, int y, int w, int h
             const Room *q = &ROOMS[i];
             if ((q->garea ? q->garea : q->area) != a || (q->garea ? q->gsec : q->sec) != sc || q->h != h) continue;
             room = q; s = grab(vram, cx, cy);
+            if (ws_heap_failed) return 0;
             if (!q->is || q->is()) r = q;
         }
         if (!r || !room_enabled(r)) return 0;
@@ -971,8 +1297,8 @@ const u16 *port_ws_backdrop(const u16 *vram, int pad, int x, int y, int w, int h
                 FILE *f = e ? fopen(e, "wb") : 0;
                 if (f) {
                     for (int yy = 0; yy < PH; yy++) for (int xx = 0; xx < PW; xx++) { u8 b[2] = { (u8)pic[yy][xx], (u8)(pic[yy][xx] >> 8) }; fwrite(b, 1, 2, f); }
-                    fwrite(pic_ov, 1, sizeof pic_ov, f);   /* then the over pieces' opaque texels, one byte each */
-                    if (room->gen == gen_en) fwrite(en_bk, 1, sizeof en_bk, f);   /* (and that room's back layer) */
+                    fwrite(pic_ov, 1, (sizeof *pic_ov * (PH)), f);   /* then the over pieces' opaque texels, one byte each */
+                    if (room->gen == gen_en) fwrite(en_bk, 1, (sizeof *en_bk * (PH)), f);   /* (and that room's back layer) */
                     fclose(f);
                 }
             }
@@ -1014,6 +1340,7 @@ int port_ws_island_fg(int tpage, int clut, int uv)
 #else
 int main(int argc, char **argv)
 {
+    if (!ws_need_main()) return 0;
     FILE *f; int pad;
     int a = 2, sc = 5;
     if (argc > 1 && sscanf(argv[1], "%d:%d", &a, &sc) == 2) { argc--; argv++; }   /* the room, default 2:5 */
@@ -1022,8 +1349,8 @@ int main(int argc, char **argv)
     if (room && room->h == IM_H) return im_main(argc, argv);   /* (a 640-column picture: ws_backdrop_ironmain.inc) */
     if (!room || argc < 4 || !(f = fopen(argv[1], "rb"))) { fprintf(stderr, "usage: wsb [AREA:SECTION] PIC.raw PAD OUT.ppm [mirror]\n"); return 1; }
     for (int y = 0; y < PH; y++) for (int x = 0; x < PW; x++) { u8 b[2]; if (fread(b, 1, 2, f) != 2) return 1; pic[y][x] = (u16)(b[0] | b[1] << 8); }
-    if (fread(pic_ov, 1, sizeof pic_ov, f) != sizeof pic_ov) memset(pic_ov, 0, sizeof pic_ov);   /* (older dumps: none) */
-    if (fread(en_bk, 1, sizeof en_bk, f) != sizeof en_bk) memset(en_bk, 0, sizeof en_bk);
+    if (fread(pic_ov, 1, (sizeof *pic_ov * (PH)), f) != (sizeof *pic_ov * (PH))) memset(pic_ov, 0, (sizeof *pic_ov * (PH)));   /* (older dumps: none) */
+    if (fread(en_bk, 1, (sizeof *en_bk * (PH)), f) != (sizeof *en_bk * (PH))) memset(en_bk, 0, (sizeof *en_bk * (PH)));
     fclose(f);
     pad = atoi(argv[2]); enabled = argc > 4 ? 2 : 1;
     shown_gl = getenv("WSB_GL") != 0;                    /* as drawn by the OpenGL renderer (gen_th) */
@@ -1041,4 +1368,3 @@ int main(int argc, char **argv)
     return 0;
 }
 #endif
-#endif   /* (not the 3DS) */

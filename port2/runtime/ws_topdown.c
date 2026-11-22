@@ -121,6 +121,7 @@ static void mark(u32 id)
     s->used = 0;
 }
 
+#include "ws_heap.h"
 #include "ws_topdown_gen.inc"
 
 static char *prim(int size) { char *p = NEXT_PRIM; NEXT_PRIM += size; return p; }

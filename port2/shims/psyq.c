@@ -511,6 +511,7 @@ void port_vblank(void) {
                   if (pokes[i].size == 4) *(u32 *)p = v; else if (pokes[i].size == 2) *(u16 *)p = v; else *(u8 *)p = v; }
         }
     { extern void port_sweep_vblank(void); port_sweep_vblank(); }   /* --sweep-x (runtime/ws_poplog.c) */
+    { extern void port_ws_heap_vblank(void); port_ws_heap_vblank(); }   /* the widescreen tables of the last room go (runtime/ws_heap.c) */
     port_trace("vblank", port_frame);
     { extern void port_ovl_snapshot(void); port_ovl_snapshot(); }
     if (dump_ram_path && port_frame == dump_ram_frame) dump_ram();

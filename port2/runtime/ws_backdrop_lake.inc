@@ -103,13 +103,14 @@ static u32 lk_check(const u16 *vram)                      /* the right half's pa
 }
 static void lk_build(const u16 *vram, int side)           /* an end's extension, made when the frame first looks past it */
 {
+    if (!ws_need_lk_build()) return;
     int w = lk_w[side];
     Rgb t = rgb15(tex8(vram, 0, 4, 256 + 16, 128, 510));  /* (the sky in the top left corner: this picture) */
     lk_made[side] = 1;
     if (t.b < t.r + 24) return;
     mm_w = LK_W; mm_ph = 0; mm_pad = -1;                 /* (the Singing Rock's picture is no longer in mm_src) */
     for (int i = 0; i < 256; i++) mm_clut[i] = vram[(size_t)510 * 1024 + 128 + i];
-    memset(mm_qh, 0, sizeof mm_qh);
+    memset(mm_qh, 0, (sizeof *mm_qh * (32768)));
     for (int y = 0; y < PH; y++) for (int x = 0; x < LK_W; x++) mm_src[0][y][x] = lk_tex(vram, x, y);
     lk_ext[side] = calloc((size_t)PH * w, 2);
     if (!lk_ext[side] || !mm_canvas(w)) { free(lk_ext[side]); lk_ext[side] = 0; return; }

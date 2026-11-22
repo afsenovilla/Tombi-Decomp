@@ -47,10 +47,10 @@ typedef struct {
                                                              line's index is 12 y + 5 X) */
 } KtSide;
 static const KtSide KT_S[2] = { { 331, 575, 432 }, { 306, 552, 312 } };
-static Rgb kt_prof[2][PH];                                /* each edge's tone per row (6 columns, smoothed) */
-static Rgb kt_pr[2][PH], kt_pl[2][PH];                    /* ... along the rafter's / the log's direction (8 texels) */
-static Rgb kt_fl[2][PH];                                  /* ... the floor's (8 columns) */
-static Rgb kt_pan[PH];                                    /* the cupboard panel's tone per row */
+static Rgb (*kt_prof)[PH];                                /* each edge's tone per row (6 columns, smoothed) */
+static Rgb (*kt_pr)[PH], (*kt_pl)[PH];                    /* ... along the rafter's / the log's direction (8 texels) */
+static Rgb (*kt_fl)[PH];                                  /* ... the floor's (8 columns) */
+static Rgb (*kt_pan);                                    /* the cupboard panel's tone per row */
 
 static Rgb kt_px(int side, int i, int y) { return rgb15(pic[clampi(y, 0, PH - 1)][clampi(side ? PW - 1 - i : i, 0, PW - 1)]); }
 static int kt_sstep(int v, int a, int b)                 /* smoothstep, 0..256 */
@@ -138,9 +138,10 @@ static Rgb kt_avg(const Rgb *p, int y0, int y1)
     o.r = r / n; o.g = g / n; o.b = b / n;
     return o;
 }
+static Rgb (*kt_analyse__raw);
 static void kt_analyse(void)
 {
-    static Rgb raw[PH];
+    Rgb (*const raw) = kt_analyse__raw;
     for (int side = 0; side < 2; side++)
         for (int w = 0; w < 2; w++) {
             int nc = w ? 8 : 6;
@@ -275,6 +276,7 @@ static Rgb kt_texel(int side, int X, int y)
 
 static void gen_kt(int pad)
 {
+    if (!ws_need_gen_kt()) return;
     pal_make(); kt_analyse();
     for (int side = 0; side < 2; side++)
         for (int y = 0; y < PH; y++)

@@ -66,10 +66,11 @@ static const EnQ EN_Q[] = {
     { 384, 176, 176, 32, 48, 0, 0 },
 };
 #define EN_NQ ((int)(sizeof EN_Q / sizeof EN_Q[0]))
-static u16 en_bk[PH][PW];                                /* the back layer alone (the room's box) */
+static u16 (*en_bk)[PW];                                /* the back layer alone (the room's box) */
 static void en_take(const u16 *vram, int cx, int cy, int gl)
 {
-    memcpy(en_bk, pic, sizeof en_bk);
+    if (!ws_need_en_take()) return;
+    memcpy(en_bk, pic, (sizeof *en_bk * (PH)));
     for (int i = 0; i < EN_NQ; i++) {
         const EnQ *p = &EN_Q[i];
         for (int r = 0; r < p->h; r++)
@@ -189,7 +190,7 @@ static const EnS EN_S[] = {
     { 2, 261, 188, 38, 36 },                                                    /* copper: the upright piece */
 };
 #define EN_TL 96
-static short en_tp[3][EN_TL][40][3]; static int en_tl[3], en_tw[3];
+static short (*en_tp)[EN_TL][40][3]; static int en_tl[3], en_tw[3];
 static void en_grain(void)
 {
     memset(en_tl, 0, sizeof en_tl);
@@ -352,7 +353,7 @@ static void en_ring(int X)
 }
 /* --- the pipes' turns and fittings: the picture's own parts
    An upright stretch's cross-section, limb to limb from the left (columns [x0, x1) over rows [y0, y1)) */
-static Rgb en_vp[3][64];
+static Rgb (*en_vp)[64];
 static void en_vprof(int g, int x0, int x1, int y0, int y1)
 {
     for (int k = 0; k < 64; k++) {
@@ -537,6 +538,7 @@ static u16 *en_ov; static int en_ov_pad;
 #define EN_GX 62                                         /* the grey pipe */
 static void gen_en(int pad)
 {
+    if (!ws_need_gen_en()) return;
     Rgb *bk;
     if (!canvas_open(pad + 32)) return;                  /* (a margin: a column never depends on the strip's width) */
     bk = malloc((size_t)cw * PH * sizeof *bk);

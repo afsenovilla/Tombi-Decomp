@@ -68,12 +68,12 @@ static int bt_low256(int s, int y) { int d = y - 184; return (s ? -238 : -46) + 
 #define BT_CAP (236 * 16)
 #define BT_TW 10                                          /* the stone's quilting block, its step */
 #define BT_TS 7
-static u16 bt_fc[2][PH][14]; static u8 bt_fn[2][PH];
-static int bt_mu[2][PH], bt_rd[2][PH], bt_tone[2][PH], bt_last[2], bt_shaft[2], bt_g0;
-static u16 bt_gp[2][256]; static int bt_gn[2][256], bt_ngp[2];
+static u16 (*bt_fc)[PH][14]; static u8 bt_fn[2][PH];
+static int bt_last[2], bt_shaft[2], bt_g0, (*bt_mu)[PH], (*bt_rd)[PH], (*bt_tone)[PH];
+static u16 (*bt_gp)[256]; static int bt_ngp[2], (*bt_gn)[256];
 static u16 bt_rc[2][64], bt_rs[64];                       /* colours by luminance / 4: the lit faces', the stone's */
-static u16 bt_sr[PH][PW];                                 /* the stone's texture (x 256), 0 = not stone */
-static u16 bt_sa[PH][2 * PW];                             /* the same, twice as wide (the inner faces seen from the front) */
+static u16 (*bt_sr)[PW];                                 /* the stone's texture (x 256), 0 = not stone */
+static u16 (*bt_sa)[2 * PW];                             /* the same, twice as wide (the inner faces seen from the front) */
 static short (*bt_cand)[2]; static int bt_ncand;      /* the windows a block may come from */
 static long long *bt_cc; static u8 *bt_use;
 static int bt_ow;
@@ -149,9 +149,13 @@ static int bt_is_stone(int x, int y)
     return r >= b && r - b <= 9 && abs(r - g) <= 3 && l >= (x < 36 ? 105 : 55) && l <= 236 && !bt_ell(abs(x - 159), y);   /* (not
         the dark groove along the left pillar's corner) */
 }
+static u8 (*bt_stone__st)[PW];
+static int (*bt_stone__si)[PW + 1];
+static int (*bt_stone__sl)[PW + 1];
+static int (*bt_stone__sa)[2 * PW + 1];
 static void bt_stone(void)
 {
-    static u8 st[PH][PW]; static int si[PH + 1][PW + 1], sl[PH + 1][PW + 1];
+    u8 (*const st)[PW] = bt_stone__st; int (*const si)[PW + 1] = bt_stone__si, (*const sl)[PW + 1] = bt_stone__sl;
     long long dev = 0; int nd = 0;
     for (int y = 0; y < PH; y++) for (int x = 0; x < PW; x++) st[y][x] = (u8)bt_is_stone(x, y);
     for (int x = 0; x <= PW; x++) si[0][x] = sl[0][x] = 0;
@@ -173,7 +177,7 @@ static void bt_stone(void)
         dev += abs(bt_sr[y][x] - 256); nd++;
     }
     {
-        static int sa[PH + 1][2 * PW + 1];
+        int (*const sa)[2 * PW + 1] = bt_stone__sa;
         for (int y = 0; y < PH; y++) for (int x = 0; x < 2 * PW; x++) {
             int a = bt_sr[y][x / 2], c = x / 2 + 1 < PW ? bt_sr[y][x / 2 + 1] : 0;
             bt_sa[y][x] = (u16)(x & 1 ? (a && c ? (a + c) / 2 : 0) : a);
@@ -316,7 +320,7 @@ static void bt_dark_rows(int s)
         if (bt_is_dark(s, 0, y) && bt_is_dark(s, 1, y) && bt_is_dark(s, 2, y)) { if (bt_d0[s] < 0) bt_d0[s] = y; bt_d1[s] = y; }
         else if (bt_d0[s] >= 0) break;
 }
-static int bt_dl[2][PH];                                  /* that face's light per row (luminance x 16) */
+static int (*bt_dl)[PH];                                  /* that face's light per row (luminance x 16) */
 static void bt_dark_light(int s)
 {
     for (int y = 0; y < PH; y++) {
@@ -356,12 +360,13 @@ static u16 bt_floor_col(int s, int X, int y)
    sky's gradient, the horizon), from rows above only where the picture shows nothing of those rows (under row 176),
    the one that fits the blocks already there (among the best by a hash), joined to them along the cut of least error
    in the overlap's columns. */
-static u8 bt_m[PH][PW];
+static u8 (*bt_m)[PW];
 static u16 *bt_o;                                         /* the quilted canvas: columns X 0..bt_ow-1, 0 = not set */
 static int bt_need(int X, int y) { return X >= 1 && y >= 0 && y < PH && X * 256 + 384 > bt_far256(y); }
+static u8 (*bt_mask__o)[PW];
 static void bt_mask(void)
 {
-    static u8 o[PH][PW];
+    u8 (*const o)[PW] = bt_mask__o;
     for (int y = 0; y < PH; y++) for (int x = 0; x < PW; x++) {
         u16 c = pic[y][x]; int r = r5(c), g = g5(c), b = b5(c);
         o[y][x] = x >= 20 && x < 300 && !bt_ell(abs(x - 159), y)
@@ -466,6 +471,7 @@ static void bt_block(int s, int Xa, int ya)
 
 static void gen_bt(int pad)
 {
+    if (!ws_need_gen_bt()) return;
     pal_make(); bt_mask();
     bt_ow = pad + BT_BW + 2; bt_o = malloc((size_t)bt_ow * PH * sizeof *bt_o); bt_t = malloc((size_t)bt_ow * PH * sizeof *bt_t);
     if (!bt_o || !bt_t) { free(bt_o); free(bt_t); bt_o = bt_t = 0; return; }

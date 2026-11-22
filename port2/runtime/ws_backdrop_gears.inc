@@ -421,15 +421,17 @@ static int gr_sandc(int x, int y)
     k = rgb15(pic[y][x]);
     return k.r >= 152 && k.g >= 104 && k.r - k.b >= 48;
 }
-static short gr_lf[PH][PW];                              /* the wall's light (0: no wall texel near) */
-static Rgb gr_alb[PH][PW], gr_raw[PH][PW];               /* the wall's texels over their light (x 128); the raw texels */
+static short (*gr_lf)[PW];                              /* the wall's light (0: no wall texel near) */
+static Rgb (*gr_alb)[PW], (*gr_raw)[PW];               /* the wall's texels over their light (x 128); the raw texels */
 static int gr_le[PH];                                    /* the wall's light at the edge per row (the side being made) */
-static u8 gr_flat[PH][PW];                               /* the wall's light is even around (no shadow edge) */
+static u8 (*gr_flat)[PW];                               /* the wall's light is even around (no shadow edge) */
 static int gr_okw(int x, int y) { return gr_wallc(x, y) && gr_lf[y][x]; }
 static int gr_srcw(int x, int y) { return gr_okw(x, y) && gr_flat[y][x]; }
+static int (*gr_light__S)[PW + 1];
+static int (*gr_light__C)[PW + 1];
 static void gr_light(void)
 {
-    static int S[PH + 1][PW + 1], C[PH + 1][PW + 1];
+    int (*const S)[PW + 1] = gr_light__S, (*const C)[PW + 1] = gr_light__C;
     for (int y = 0; y < PH; y++)
         for (int x = 0; x < PW; x++) {
             int m = gr_wallc(x, y);
@@ -504,7 +506,7 @@ static void gr_edge(int side)                            /* gr_le: the light of 
 static const int GR_XC[2] = { 115, 111 };
 #define GR_NC 32
 #define GR_NB 96
-static short gr_mr[GR_NC + 1], gr_bm[GR_NC][256]; static u8 gr_bd[GR_NC][256]; static int gr_nc; static u8 gr_cr[PH];
+static short gr_mr[GR_NC + 1], (*gr_bm)[256]; static u8 (*gr_bd)[256]; static int gr_nc; static u8 gr_cr[PH];
 static short gr_bk[GR_NB][3]; static int gr_nb;         /* the bricks: course, first column (its joint), columns */
 static void gr_bricks(int even)
 {
@@ -741,7 +743,7 @@ static Rgb gr_lface(int X, int y)
    to the edge (columns 3-14 from it); a piece and its neighbours are never the same one, and every other use is the
    piece turned half round (a rotation), so twice as many different pieces come before one repeats */
 #define GR_NF 8
-static short gr_fp[GR_NF][2], gr_fd[GR_NF][15][16][3]; static int gr_nf; static Rgb gr_fb[2];
+static short gr_fp[GR_NF][2], (*gr_fd)[15][16][3]; static int gr_nf; static Rgb gr_fb[2];
 static int gr_fpok(int x0, int y0)                       /* a clean piece: lit sandstone (a few darker grains may be in it) */
 {
     int bad = 0;
@@ -822,6 +824,7 @@ static int gr_foot16(int side, int X) { return side ? 187 * 16 + 13 + X * 16 / 5
 
 static void gen_gr(int pad)
 {
+    if (!ws_need_gen_gr()) return;
     pal_make();
     gr_light(); gr_tones(); gr_courses(); gr_faces(); gr_lshade();
     for (int side = 0; side < 2; side++) {

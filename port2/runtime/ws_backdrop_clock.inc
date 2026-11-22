@@ -52,8 +52,8 @@
 #define CK_W 480
 #define CK_H 288
 static void gen_ck(int pad) { (void)pad; }               /* (the table's gen: ck_take makes the strips) */
-static u16 ck_src[CK_H][CK_W];
-static u16 ck_clut[256]; static u16 ck_qc[32768]; static u8 ck_qh[32768];
+static u16 (*ck_src)[CK_W];
+static u16 ck_clut[256]; static u16 (*ck_qc); static u8 (*ck_qh);
 static u16 *ck_ext; static int ck_side;
 typedef long long ck_i64;
 
@@ -147,11 +147,13 @@ static int ck_deep_n(int d2)                             /* the fewest periods t
    line a shade paler than the picture's). */
 #define CK_PN 8
 #define CK_PB (CK_H * 4 + 8)
-static Rgb ck_pr[CK_PB]; static short ck_pl[CK_PB];
+static Rgb (*ck_pr); static short (*ck_pl);
+static int (*ck_profile__acc)[4];
+static Rgb (*ck_profile__raw);
 static void ck_profile(void)
 {
-    static int acc[CK_PB][4]; static Rgb raw[CK_PB]; int last = -1;
-    memset(acc, 0, sizeof acc);
+    int (*const acc)[4] = ck_profile__acc; Rgb (*const raw) = ck_profile__raw; int last = -1;
+    memset(acc, 0, (sizeof *acc * (CK_PB)));
     for (int m = 0; m < CK_PN; m++) for (int y = 0; y < CK_H; y++) {
         ck_i64 p = (CK_VY16 + ck_fdiv((ck_i64)((y << 16) - CK_VY16) * 479, 479 - 2 * m)) * 4;
         int b0, f; Rgb c = ck_t(m, y);
@@ -183,7 +185,7 @@ static void ck_profile(void)
             }
             ck_pr[b].r = r / n; ck_pr[b].g = g / n; ck_pr[b].b = bl / n; ck_pl[b] = (short)lum(ck_pr[b]);
         }
-        memcpy(raw, ck_pr, sizeof raw);
+        memcpy(raw, ck_pr, (sizeof *raw * (CK_PB)));
     }
 }
 /* the ray through (d2 half columns from the vanishing column, row y16): its place in the profile (16.16 quarter rows) */
@@ -212,7 +214,7 @@ static int ck_flat(ck_i64 p, int n, int t0, int t1)
 #define CK_BF 6
 #define CK_GAW 218                                        /* the grain's strength: the panel's at the edge is 0.85 of its mean */
 #define CK_GAU 176                                        /* ... the lunettes': 0.7 (the CLUT's steps do the rest) */
-typedef struct { int x0, y0, w, h; short g[58 * 62][3]; } CkGrain;
+typedef struct { int x0, y0, w, h; short (*g)[3]; } CkGrain;   /* g: 58 x 62 texels (ws_heap) */
 static CkGrain ck_gw = { 1, 144, 62, 58 }, ck_gu = { 2, 42, 42, 36 };
 static int ck_gin(const CkGrain *G, int x, int y)       /* plaster and nothing else? */
 {
@@ -347,13 +349,18 @@ static Rgb ck_wall(int X, int y16)
     return ck_wall0(X, y16);
 }
 static Rgb ck_cv_px(const Rgb *cv, int pad, int X, int y) { return cv[(size_t)clampi(y, 0, CK_H - 1) * pad + clampi(X, 1, pad) - 1]; }
+static Rgb (*ck_gen__dl);
+static Rgb (*ck_gen__ds);
+static int (*ck_gen__ln);
+static int (*ck_gen__lok);
 static void ck_gen(int pad)
 {
-    int out = pad; Rgb *cv, *cu; static Rgb dl[CK_H], ds[CK_H]; static int ln[CK_H], lok[CK_H];
+    if (!ws_need_ck_gen()) return;
+    int out = pad; Rgb *cv, *cu; Rgb (*const dl) = ck_gen__dl, (*const ds) = ck_gen__ds; int (*const ln) = ck_gen__ln, (*const lok) = ck_gen__lok;
     pad += 3;                                            /* (3 more columns for the lunette's means: a texel does not depend on the strip's width) */
     cv = malloc((size_t)CK_H * pad * sizeof *cv); cu = malloc((size_t)CK_H * pad * sizeof *cv);
     if (!cv || !cu) { free(cv); free(cu); return; }
-    memset(ck_qh, 0, sizeof ck_qh);
+    memset(ck_qh, 0, (sizeof *ck_qh * (32768)));
     ck_side = 0; ck_grain_make(&ck_gw);
     for (ck_side = 0; ck_side < 2; ck_side++) {
         Rgb band[3];
@@ -390,7 +397,7 @@ static void ck_gen(int pad)
            7 x 7 texels) with the lunette's own grain, texel for texel ... */
         ck_grain_make(&ck_gu);
         memcpy(cu, cv, (size_t)CK_H * pad * sizeof *cv);
-        memset(ds, 0, sizeof ds); memset(ln, 0, sizeof ln);
+        memset(ds, 0, (sizeof *ds * (CK_H))); memset(ln, 0, (sizeof *ln * (CK_H)));
         for (int X = 1; X <= pad; X++) {
             int d2 = 479 + 2 * X, y0 = (ck_arch((ck_i64)d2 << 15) >> 16) + 2;
             for (int y = y0; y < CK_H; y++) {
@@ -491,6 +498,7 @@ static u32 ck_grab(const u16 *vram)
 }
 static const u16 *ck_take(const u16 *vram, int pad, int x, int y, int *rows)
 {
+    if (!ws_need_ck_take()) return 0;
     static int last = -1;
     extern int port_frame;
     int f0 = y > 16 ? y : 16, f1 = y + CK_H < 240 ? y + CK_H : 240;
@@ -507,7 +515,7 @@ static const u16 *ck_take(const u16 *vram, int pad, int x, int y, int *rows)
             ck_gen(pad);
             {   const char *e = getenv("PORT_WS_BACKDROP_DUMP");      /* research: the CLUT, then the picture (raw 15-bit LE) */
                 FILE *f = e ? fopen(e, "wb") : 0;
-                if (f) { fwrite(ck_clut, 1, sizeof ck_clut, f); fwrite(ck_src, 1, sizeof ck_src, f); fclose(f); }
+                if (f) { fwrite(ck_clut, 1, sizeof ck_clut, f); fwrite(ck_src, 1, (sizeof *ck_src * (CK_H)), f); fclose(f); }
             }
         }
     }

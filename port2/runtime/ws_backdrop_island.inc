@@ -162,6 +162,7 @@ static u32 is_check(const u16 *vram)                      /* the CLUT and the pa
 }
 static int is_build(const u16 *vram, int w)
 {
+    if (!ws_need_is_build()) return 0;
     if (!is_pic) is_pic = malloc(sizeof(u16[IS_H][IS_W]));
     for (int s = 0; s < 2; s++) { free(is_ext[s]); is_ext[s] = calloc((size_t)IS_H * w, 2); }
     if (!is_pic || !is_ext[0] || !is_ext[1]) return 0;
@@ -174,7 +175,7 @@ static int is_build(const u16 *vram, int w)
     mm_w = IS_W; mm_ph = 0; mm_pad = -1;                 /* (the Singing Rock's picture is no longer in mm_src) */
     lk_pad = -1;                                          /* (nor the beach's) */
     for (int i = 0; i < 256; i++) mm_clut[i] = vram[(size_t)511 * 1024 + 128 + i];
-    memset(mm_qh, 0, sizeof mm_qh);
+    memset(mm_qh, 0, (sizeof *mm_qh * (32768)));
     for (int y = 0; y < PH; y++) for (int x = 0; x < IS_W; x++) mm_src[0][y][x] = is_pic[IS_Y0 + y][x];
     if (!mm_canvas(w)) return 0;
     is_gen();
@@ -195,6 +196,7 @@ static int is_build(const u16 *vram, int w)
 }
 static void is_build_up(int w)                           /* the left strip's rows above (made when the camera first rises) */
 {
+    if (!ws_need_is_build_up()) return;
     is_up = 1;
     mm_w = IS_W; mm_ph = 0; mm_pad = -1; lk_pad = -1;
     for (int y = 0; y < PH; y++) for (int x = 0; x < IS_W; x++) mm_src[0][y][x] = is_pic[y][x];

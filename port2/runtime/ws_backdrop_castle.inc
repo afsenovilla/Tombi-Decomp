@@ -27,17 +27,22 @@
 #define IC_HM 1229                                        /* the ROOMS row's mark (no picture has this height) */
 #define IC_H 384
 static void gen_ic(int pad) { (void)pad; }               /* (the table's gen: ic_take makes the strips) */
-static u16 ic_p[IC_H][PW];
-static u8 ic_k[IC_H][PW];                                 /* 1 grass, 2 copper, 4 sky, 8 chain / grey, 16 dark chain */
-static int ic_l[IC_H][PW];
-static int ic_sky[IC_H][3], ic_grow[IC_H][3], ic_g0, ic_g1, ic_cr[256][3];
+static u16 (*ic_p)[PW];
+static u8 (*ic_k)[PW];                                 /* 1 grass, 2 copper, 4 sky, 8 chain / grey, 16 dark chain */
+static int (*ic_l)[PW];
+static int ic_g0, ic_g1, (*ic_sky)[3], (*ic_grow)[3], (*ic_cr)[3];
 static const int IC_GT[2] = { 346, 353 }, IC_T0[2] = { 264, 254 };
 
 static int ic_icmp(const void *a, const void *b) { return *(const int *)a - *(const int *)b; }
+static int (*ic_measure__sum)[3];
+static int (*ic_measure__cnt);
+static int (*ic_measure__tmp)[3];
+static int (*ic_measure__srt);
+static int (*ic_measure__ok);
 static void ic_measure(void)
 {
-    static int sum[256][3], cnt[256], tmp[256][3], srt[PW], ok[IC_H];
-    memset(sum, 0, sizeof sum); memset(cnt, 0, sizeof cnt);
+    int (*const sum)[3] = ic_measure__sum, (*const cnt) = ic_measure__cnt, (*const tmp)[3] = ic_measure__tmp, (*const srt) = ic_measure__srt, (*const ok) = ic_measure__ok;
+    memset(sum, 0, (sizeof *sum * (256))); memset(cnt, 0, (sizeof *cnt * (256)));
     for (int y = 0; y < IC_H; y++)
         for (int x = 0; x < PW; x++) {
             Rgb c = rgb15(ic_p[y][x]); int l = lum(c), k = 0;
@@ -125,6 +130,7 @@ static int ic_chain(int side, int which, int x, int y)   /* the picture's texel 
 
 static void ic_gen(u16 *ext, int pad)
 {
+    if (!ws_need_ic_gen()) return;
     static const int WHITE[3] = { 232, 236, 248 };
     static const int VEC[2][2][2] = { { { 12, 11 }, { 17, 34 } }, { { 31, 34 }, { 31, 34 } } };
     int (*cv)[3] = malloc(sizeof(int[3]) * (size_t)IC_H * (size_t)pad);
@@ -218,6 +224,7 @@ static u32 ic_check(const u16 *vram)                      /* the pages and the C
 /* the picture's first sprite at frame row y: both strips for the frame's rows 16..239 */
 static const u16 *ic_take(const u16 *vram, int pad, int y, int *rows)
 {
+    if (!ws_need_ic_take()) return 0;
     u32 s = ic_check(vram); int r0 = 16 - y;
     if (!ic_ext || ic_pad != pad || s != ic_sum) {
         ic_pad = pad; ic_sum = s;

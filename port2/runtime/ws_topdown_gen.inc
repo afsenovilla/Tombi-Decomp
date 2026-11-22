@@ -73,23 +73,24 @@ static int tg_trim(const u8 *tim, const u8 *pic, int stride, int pw, int ph)
     return (w + 1) & ~1;
 }
 
-#ifdef __3DS__
-/* The 3DS: no generated margins (Hidden Village).  Their work tables (2.4 MB of bss) made the title too large for
-   its memory (v0.7.1 did not start); the trim above (Dwarf Village) needs no tables and stays. */
-static const u8 *tg_extend(const u8 *tim, const u8 *pic, int stride, int pw, int ph, int need)
-{
-    (void)tim; (void)pic; (void)stride; (void)pw; (void)ph; (void)need; return 0;
-}
-#else
-static u8 tgA[TG_MAXH][TG_SB], tgK[TG_MAXH][TG_SB];
-static u8 tgC[TG_MAXH][TG_CW], tgKC[TG_MAXH][TG_CW], tgKA[TG_MAXH][TG_CW], tgF[TG_MAXH][TG_CW];
-static int tgI[4][TG_MAXH + 1][TG_SB + 1];                /* integrals: class 0 / 1 / 2 counts, re-use counts */
-static u16 tgUse[TG_MAXH][TG_SB];
-static int tgP[256][3], tgD2[256][256];
+/* the tables on the heap (ws_heap.h): the margins and the widened picture while the room is shown, the rest while
+   the margins are made */
+static u8 (*tgA)[TG_SB], (*tgK)[TG_SB];
+static u8 (*tgC)[TG_CW], (*tgKC)[TG_CW], (*tgKA)[TG_CW], (*tgF)[TG_CW];
+static int (*tgI)[TG_MAXH + 1][TG_SB + 1];                /* integrals: class 0 / 1 / 2 counts, re-use counts */
+static u16 (*tgUse)[TG_SB];
+static int (*tgP)[3], (*tgD2)[256];
 static u8 tgSet[2][256];
-static long long tgCost[TG_MAXH * TG_NX];
-static u8 tgG[2][TG_MAXH][TG_MAXM];                      /* the margins: side, row, column outwards */
-static u8 tgE[TG_MAXH * (TG_MAXW + 2 * TG_MAXM)];        /* the widened picture handed to the uploads */
+static long long (*tgCost);
+static u8 (*tgG)[TG_MAXH][TG_MAXM];                      /* the margins: side, row, column outwards */
+static u8 (*tgE);                                        /* the widened picture handed to the uploads */
+static u8 (*tgSky)[TG_SB], (*tgOk)[TG_SB];               /* tg_classes */
+static const WsTab TG_ROOM[] = { WS_T(tgG, 2), WS_T(tgE, TG_MAXH * (TG_MAXW + 2 * TG_MAXM)) };
+static const WsTab TG_GEN[] = { WS_T(tgA, TG_MAXH), WS_T(tgK, TG_MAXH), WS_T(tgC, TG_MAXH), WS_T(tgKC, TG_MAXH),
+    WS_T(tgKA, TG_MAXH), WS_T(tgF, TG_MAXH), WS_T(tgI, 4), WS_T(tgUse, TG_MAXH), WS_T(tgP, 256), WS_T(tgD2, 256),
+    WS_T(tgCost, TG_MAXH * TG_NX), WS_T(tgSky, TG_MAXH), WS_T(tgOk, TG_MAXH) };
+static const u8 *k_tim; static u32 k_hash; static int k_pw, k_ph, k_nb, k_need;   /* tg_extend's margins: of which picture */
+static void tg_reset(void) { k_tim = 0; k_nb = 0; k_need = 0; }   /* (the room changed: the margins go) */
 
 static int tg_fdiv(int a, int b) { return a >= 0 ? a / b : -((-a + b - 1) / b); }
 static int tg_near(const int *c, int k)
@@ -122,7 +123,7 @@ static int tg_box(int n, int sy, int sx)
 /* the band's classes (tgK: 0 sky, 1 rock, 2 other) and the outline row per column */
 static void tg_classes(int H, int *ys)
 {
-    static u8 skyc[TG_MAXH][TG_SB], okc[TG_MAXH][TG_SB];
+    u8 (*const skyc)[TG_SB] = tgSky, (*const okc)[TG_SB] = tgOk;
     for (int y = 0; y < H; y++) for (int x = 0; x < TG_SB; x++) {
         const int *p = tgP[tgA[y][x]];
         int mn = p[0] < p[1] ? p[0] : p[1];
@@ -351,7 +352,6 @@ static void tg_side(const u8 *pic, int stride, int pw, int H, int side, int nb)
    built once per picture (and again, from the first column on, when a wider frame asks for more). */
 static const u8 *tg_extend(const u8 *tim, const u8 *pic, int stride, int pw, int ph, int need)
 {
-    static const u8 *k_tim; static u32 k_hash; static int k_pw, k_ph, k_nb, k_need;
     if (need < 2 || need > TG_MAXM || (need & 1) || pw < TG_SB * 2 || pw > TG_MAXW || ph < 2 * TG_B || ph > TG_MAXH) return 0;
     u32 h = 2166136261u;
     for (int i = 0x14; i < 0x214; i++) h = (h ^ tim[i]) * 16777619u;
@@ -361,7 +361,11 @@ static const u8 *tg_extend(const u8 *tim, const u8 *pic, int stride, int pw, int
         for (int x = pw - TG_SB; x < pw; x++) h = (h ^ r[x]) * 16777619u;
     }
     int nb = (need + TG_NW - 1) / TG_NW, same = k_tim == tim && k_hash == h && k_pw == pw && k_ph == ph;
+    if (ws_heap_failed) return 0;
+    ws_on_room(tg_reset);
+    if (!ws_need(WS_ROOM, TG_ROOM, WS_NT(TG_ROOM))) return 0;
     if (!same || k_nb < nb) {
+        if (!ws_need(WS_GEN, TG_GEN, WS_NT(TG_GEN))) { ws_free(WS_GEN); return 0; }
         for (int i = 0; i < 256; i++) {
             int c = rd16(tim + 0x14 + i * 2);
             tgP[i][0] = (c & 31) << 3; tgP[i][1] = ((c >> 5) & 31) << 3; tgP[i][2] = ((c >> 10) & 31) << 3;
@@ -374,6 +378,7 @@ static const u8 *tg_extend(const u8 *tim, const u8 *pic, int stride, int pw, int
         tg_side(pic, stride, pw, ph, 1, nb);
         k_tim = tim; k_hash = h; k_pw = pw; k_ph = ph; k_nb = nb; k_need = 0;
         port_printf("[ws] top-down map: margins of %d columns generated for the %d x %d picture\n", nb * TG_NW, pw, ph);
+        ws_free(WS_GEN);
     }
     if (k_need != need) {
         int ew = pw + 2 * need;
@@ -386,4 +391,3 @@ static const u8 *tg_extend(const u8 *tim, const u8 *pic, int stride, int pw, int
     }
     return tgE;
 }
-#endif   /* (not the 3DS) */

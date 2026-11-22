@@ -4,13 +4,28 @@ Update this file whenever something lands or a task is decided. Newest first.
 
 ## Since v0.7.2 (not released)
 
+- **The widescreen generators' tables on the heap, only while a room uses them; the 3DS gets them back (2026-11-22,
+  docs/PORT.md "Widescreen tables on the heap").** `runtime/ws_heap.c`: the picture strips (ws_backdrop*.c/.inc, 239
+  tables), the Evil Pig rooms, room3d, trick, floor3d and the Hidden Village's top-down margins keep their work
+  tables as heap pointers, asked for by each entry point (`ws_need_*` lists, checked by `tools/ws_heap_check.py`) and
+  freed when the call that made them returns (work) or when GAME area / section changes (what later frames read),
+  with every cache key reset so a room builds again on the way back.  bss: ws_backdrop.c 39.0 MB -> 48 KB, pigs 409 ->
+  1.4 KB, room3d 272 -> 4 KB, trick 257 -> 4.5 KB, floor3d 155 -> 3.6 KB, ws_topdown 4.1 -> 1.66 MB (its 1.35 MB
+  slot cache stays).  Largest room: the green tower (AREA16 s4) 10.8 MB while its strips are made.  The 3DS stubs
+  are gone; on the 3DS six rooms whose strips take 0.4-2 s on a PC stay off (`N3DS_OFF`, ws_backdrop.c: an Old 3DS
+  would freeze 10 s to a minute there), and out of memory turns the room's extensions off (a log line).  Expected
+  3DS image ~25.8 MB (+0.56 MB of code from clang armv6k objects; limit 26 MB, last build 25.26 MB): not built
+  (no devkitPro here) and not run on the console.  PC: frames byte-identical to before (i386 and wasm2c) in every
+  room with strips / pigs / room3d / trick / floor3d / margins at 4:3, 16:9, 21:9, with sweeps to both ends, room
+  A -> B -> A through the debug menu's warp, and with the new tables filled with garbage (PORT_WS_HEAP_POISON=1).
+
 ## In v0.7.2 (released 2026-11-18, after v0.7.2-fix)
 
 - **v0.7.1's code with a 3DS that fits (image 25.3 MB; not yet run on the device).** The 3DS image of v0.7.1 was 28.7 MB, 2.9 MB over the
   build that runs (run 43647748843, 26.0 MB): the new widescreen modules from master. On the 3DS these are now inert:
   ws_topdown_gen.inc's margins (Hidden Village; 2.4 MB of tables; the Dwarf Village trim stays), ws_pigs.c,
-  ws_room3d.c, ws_trick.c, ws_floor3d.c (1.1 MB). check_3dsx.py's limit is now 26 MB. To do later: those tables on
-  the heap only while used, so the 3DS can have them.
+  ws_room3d.c, ws_trick.c, ws_floor3d.c (1.1 MB). check_3dsx.py's limit is now 26 MB.
+  (Done since v0.7.2: the tables on the heap, the 3DS has them again.)
 
 ## In v0.7.2-fix (released 2026-11-18)
 

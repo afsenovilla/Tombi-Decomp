@@ -25,14 +25,15 @@
 #define PR_HZ 113                                        /* the horizon row */
 #define PR_YT 30                                         /* the middle trunk: its rows in the picture */
 #define PR_YB 166
-static int pr_C[PH][PW][3], pr_S[PH][PW][3], pr_W[PH][PW][3];   /* the frame without rays; the scene without the pier; the water */
-static u8 pr_lab[PH][PW];                                /* 1 sky, 2 foliage, 3 trunk / shore, 4 water */
-static int pr_ray[PH][PW];                               /* the ray layer (0..248) */
+static int (*pr_C)[PW][3], (*pr_S)[PW][3], (*pr_W)[PW][3];   /* the frame without rays; the scene without the pier; the water */
+static u8 (*pr_lab)[PW];                                /* 1 sky, 2 foliage, 3 trunk / shore, 4 water */
+static int (*pr_ray)[PW];                               /* the ray layer (0..248) */
 static int pr_have_layers;
 
 static void pr_take(const u16 *vram)
 {
-    memset(pr_W, 0, sizeof pr_W);
+    if (!ws_need_pr_take()) return;
+    memset(pr_W, 0, (sizeof *pr_W * (PH)));
     for (int y = 0; y < 120; y++)
         for (int x = 0; x < PW; x++) {
             Rgb c = rgb15(x < 192 ? tex8(vram, 256, 64 + x, y, 128, 511) : tex8(vram, 256, 64 + x - 192, 120 + y, 128, 511));
@@ -63,7 +64,7 @@ static void pr_scene(void)
             }
             pr_lab[y][x] = (u8)l;
         }
-    memcpy(pr_S, pr_C, sizeof pr_S);
+    memcpy(pr_S, pr_C, (sizeof *pr_S * (PH)));
     for (int y = 148; y < PH; y++)                       /* the pier out: its texels back to water (the middle trunk's foot stays) */
         for (int x = 84; x < 228; x++) {
             if (!pic[y][x] || (y < 166 && x >= 205)) continue;
@@ -77,6 +78,7 @@ static int (*pr_cv)[3]; static int pr_pad;
 static int *pr_px(int j, int y) { return pr_cv[(size_t)y * pr_pad + j]; }
 
 /* the picture carried on from its other side, from the column that matches the edge best; the tone at the join */
+static int (*pr_base__d)[3];
 static void pr_base(int side)
 {
     int best = 1; long long be = -1;
@@ -90,7 +92,7 @@ static void pr_base(int side)
             int sx = fmodi(side ? best + j : PW - best - 1 - j, PW);
             memcpy(pr_px(j, y), pr_S[y][sx], sizeof(int[3]));
         }
-    {   static int d[PH][3];
+    {   int (*const d)[3] = pr_base__d;
         int ec = side ? PW - 1 : 0;
         for (int y = 0; y < PH; y++) for (int c = 0; c < 3; c++) d[y][c] = clampi(pr_C[y][ec][c] - pr_px(0, y)[c], -48, 48);
         for (int y = 0; y < PH; y++)
@@ -106,10 +108,11 @@ static void pr_base(int side)
 }
 
 /* --- the middle trunk: its flanks per row (x 256), its bark's shading (5 x 5 means of trunk texels, x 16) and grain */
-static int pr_lo[PH], pr_hi[PH], pr_B[PH][PW][3], pr_D[PH][PW][3];
+static int pr_lo[PH], pr_hi[PH], (*pr_B)[PW][3], (*pr_D)[PW][3];
+static u8 (*pr_trunk__M)[PW];
 static void pr_trunk(void)
 {
-    static int lo[PH], hi[PH]; static u8 M[PH][PW];
+    static int lo[PH], hi[PH]; u8 (*const M)[PW] = pr_trunk__M;
     int first = -1, last = -1;
     for (int y = 0; y < PH; y++) lo[y] = hi[y] = -1;
     for (int y = PR_YT; y < PR_YB; y++) {
@@ -142,7 +145,7 @@ static void pr_trunk(void)
             for (int y = 140; y < PH; y++) { pr_lo[y] = sl / 4; pr_hi[y] = sh / 4; }
         }
     }
-    memset(M, 0, sizeof M); memset(pr_B, 0, sizeof pr_B); memset(pr_D, 0, sizeof pr_D);
+    memset(M, 0, (sizeof *M * (PH))); memset(pr_B, 0, (sizeof *pr_B * (PH))); memset(pr_D, 0, (sizeof *pr_D * (PH)));
     for (int y = PR_YT; y < 138; y++)
         for (int x = (pr_lo[y] + 255) >> 8; x < pr_hi[y] >> 8; x++) if (x >= 0 && x < PW) M[y][x] = 1;
     for (int y = PR_YT; y < 138; y++) {
@@ -252,9 +255,16 @@ static int pr_pct(const int *v, int n, int p)             /* the p % point of so
     int pos = (n - 1) * p * 256 / 100, i = pos >> 8, f = pos & 255;
     return i + 1 < n ? v[i] + (v[i + 1] - v[i]) * f / 256 : v[n - 1];
 }
+static PrLeaf (*pr_leaves__L);
+static short (*pr_leaves__px);
+static short (*pr_leaves__py);
+static u8 (*pr_leaves__seen)[PW];
+static int (*pr_leaves__us);
+static int (*pr_leaves__vs);
+static int (*pr_leaves__tmp);
 static void pr_leaves(int side)
 {
-    static PrLeaf L[PR_MAXL]; static short px[PR_MAXP], py[PR_MAXP]; static u8 seen[PH][PW]; static int us[PR_MAXP], vs[PR_MAXP], tmp[PR_MAXP];
+    PrLeaf (*const L) = pr_leaves__L; short (*const px) = pr_leaves__px, (*const py) = pr_leaves__py; u8 (*const seen)[PW] = pr_leaves__seen; int (*const us) = pr_leaves__us, (*const vs) = pr_leaves__vs, (*const tmp) = pr_leaves__tmp;
     int e = side ? PW - 1 : 0, inw = side ? -1 : 1, nl = 0, y = 0;
     while (y < PH && nl < PR_MAXL) {
         int ya = y, yb, col[3] = { 0, 0, 0 }, np = 0, sp, n;
@@ -269,7 +279,7 @@ static void pr_leaves(int side)
             pr_sorti(tmp, m);
             if ((m & 1 ? tmp[m / 2] : (tmp[m / 2 - 1] + tmp[m / 2]) / 2) < 60) continue;
         }
-        memset(seen, 0, sizeof seen);                    /* the leaf's texels: similar colours joined to the run, 26 columns in */
+        memset(seen, 0, (sizeof *seen * (PH)));                    /* the leaf's texels: similar colours joined to the run, 26 columns in */
         for (int k = ya; k < yb && np < PR_MAXP; k++) { px[np] = (short)e; py[np] = (short)k; seen[k][e] = 1; np++; }
         sp = 0;
         while (sp < np) {
@@ -365,11 +375,15 @@ static void pr_leaves(int side)
 
 /* --- the light: the glow about G = (12, -44) by its radial profile, the rays that cross the edge along their lines
    from C = (30.25, -15.25), added to the strip */
+static int (*pr_light__g);
+static int (*pr_light__g2);
+static int (*pr_light__hist)[32];
+static int (*pr_light__cnt);
 static void pr_light(int side)
 {
-    static int g[400], g2[400], e[PH], hist[400][32], cnt[400];
+    static int e[PH]; int (*const g) = pr_light__g, (*const g2) = pr_light__g2, (*const hist)[32] = pr_light__hist, (*const cnt) = pr_light__cnt;
     int ex = side ? PW - 1 : 0;
-    memset(hist, 0, sizeof hist); memset(cnt, 0, sizeof cnt);
+    memset(hist, 0, (sizeof *hist * (400))); memset(cnt, 0, (sizeof *cnt * (400)));
     for (int y = 0; y < PH; y++)
         for (int x = 0; x < PW; x++) {
             int d2 = (x - 12) * (x - 12) + (y + 44) * (y + 44);
@@ -409,6 +423,7 @@ static void pr_light(int side)
 
 static void gen_pr(int pad)
 {
+    if (!ws_need_gen_pr()) return;
     static const int S[2] = { 111411, 98042 };           /* the near trees: 1.7 and 1.496 times nearer */
     if (!pr_have_layers) return;
     pr_scene(); pr_trunk();
