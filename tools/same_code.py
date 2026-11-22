@@ -308,7 +308,8 @@ def includes_of(path, src):
 
 
 def sources_using(changed, base):
-    """The i386 build's port2rt sources that are, or (transitively) include, one of the changed files."""
+    """The i386 build's port2rt sources that are, or (transitively) include, one of the changed files, with the files
+    each one reads."""
     out = []
     for c in compile_commands():
         rel = os.path.relpath(c["file"], ROOT)
@@ -326,7 +327,7 @@ def sources_using(changed, base):
                     if os.path.exists(os.path.join(ROOT, cand)):
                         todo.append(cand); break
         if seen & set(changed):
-            out.append(rel)
+            out.append((rel, seen))
     return out
 
 
@@ -344,12 +345,12 @@ def object_fingerprint(obj, renames):
             continue
         keep.append(ln)
     rel = run("objdump", "-r", obj)
-    sym = run("objdump", "-t", obj)
-    text = "\n".join(keep) + rel
-    text = text.replace(obj, "OBJ") + "\n".join(l for l in sym.splitlines()[2:] if ".debug" not in l)
+    sym = "\n".join(l for l in run("objdump", "-t", obj).splitlines()[2:] if ".debug" not in l)
+    names = rel + "\n" + sym                 # renames only touch symbol names, never the section bytes
     for old, news in renames.items():
         for new in news:
-            text = re.sub(r"\b%s\b" % re.escape(new), old, text)
+            names = re.sub(r"\b%s\b" % re.escape(new), old, names)
+    text = ("\n".join(keep) + names).replace(obj, "OBJ")
     return text
 
 
@@ -374,11 +375,11 @@ def check_objects(changed, base, renames_by_file):
         os.makedirs(broot)
         arch = subprocess.run(["git", "archive", base, "port2"], cwd=ROOT, capture_output=True, check=True).stdout
         subprocess.run(["tar", "-x", "-C", broot], input=arch, check=True)
-        renames = {}
-        for r in renames_by_file.values():
-            for k, v in r.items():
-                renames.setdefault(k, set()).update(v)
-        for rel in srcs:
+        for rel, reads in srcs:
+            renames = {}                      # the renames of the files this source reads
+            for f in reads:
+                for k, v in renames_by_file.get(f, {}).items():
+                    renames.setdefault(k, set()).update(v)
             cmd = compile_command(rel)
             oa, ob = os.path.join(tmp, "a.o"), os.path.join(tmp, "b.o")
             ra, ea = compile_one(cmd, broot, oa)
