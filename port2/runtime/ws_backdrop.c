@@ -80,6 +80,42 @@ static int ws_need_gen_hl(void); static int ws_need_gen_kt(void); static int ws_
 static int ws_need_gen_pr(void); static int ws_need_gen_rw(void); static int ws_need_gen_st(void);
 static int ws_need_gen_th(void); static int ws_need_gen_up(void); static int ws_need_gen_vb(void);
 
+/* The finished strips, kept per room (ws_cache.h, docs/PORT.md "Widescreen strips cache"): a generation happens once,
+   the next visit (or the next session, from ws_cache/) takes them from the cache.  WS_GEN_VERSION: bump it when a
+   generator's output changes (the build stamp of this file goes into the key too, so a rebuilt generator never takes
+   the strips of an older one).  The key's sum is a hash of every input the generator reads (the picture and the
+   layers next to it); a result is kept only when its generation ran to the end (no heap failure, not all zero). */
+#define WS_GEN_VERSION 1u
+#ifndef WS_BACKDROP_MAIN
+#include "ws_cache.h"
+static unsigned wsc_version(void)
+{
+    static unsigned v;
+    if (!v) { static const char stamp[] = __DATE__ " " __TIME__; v = ws_cache_hash(2166136261u ^ WS_GEN_VERSION, stamp, sizeof stamp) | 1; }
+    return v;
+}
+static int wsc_get(const char *tag, int area, int sec, int pad, u32 sum, u32 flags, const WsCPart *p, int np)
+{
+    WsCKey k = { tag, area, sec, pad, sum, flags, wsc_version() };
+    return ws_cache_get(&k, p, np);
+}
+static void wsc_put(const char *tag, int area, int sec, int pad, u32 sum, u32 flags, const WsCPart *p, int np)
+{
+    WsCKey k = { tag, area, sec, pad, sum, flags, wsc_version() }; const u8 *b = (const u8 *)p[0].p; size_t i = 0;
+    if (ws_heap_failed || !b) return;
+    while (i < p[0].n && !b[i]) i++;
+    if (i < p[0].n) ws_cache_put(&k, p, np);
+}
+static u32 wsc_hash(u32 h, const void *p, size_t n) { return ws_cache_hash(h, p, n); }
+#else
+typedef struct { void *p; size_t n; } WsCPart;
+static int wsc_get(const char *tag, int area, int sec, int pad, u32 sum, u32 flags, const WsCPart *p, int np)
+{ (void)tag; (void)area; (void)sec; (void)pad; (void)sum; (void)flags; (void)p; (void)np; return 0; }
+static void wsc_put(const char *tag, int area, int sec, int pad, u32 sum, u32 flags, const WsCPart *p, int np)
+{ (void)tag; (void)area; (void)sec; (void)pad; (void)sum; (void)flags; (void)p; (void)np; }
+static u32 wsc_hash(u32 h, const void *p, size_t n) { const u8 *b = (const u8 *)p; for (size_t i = 0; i < n; i++) h = (h ^ b[i]) * 16777619u; return h; }
+#endif
+
 
 #define PW 320
 #define PH 224
@@ -1109,17 +1145,16 @@ static const Room ROOMS[] = {
 #define NROOMS ((int)(sizeof ROOMS / sizeof ROOMS[0]))
 const char *port_ws_backdrop_rooms;                      /* --ws-backdrop-rooms A:S,A:S,... (decimal; "all") */
 #ifdef __3DS__
-/* The 3DS: the rooms whose strips take too long to make there (a frozen frame at the room's start, made again on every
-   visit now that the tables go with the room) or need the most memory.  PC times at 16:9 (i386, one core, 2026-11-22);
-   an Old 3DS's ARM11 is some 30-50 times slower, so 300 ms here is 10-15 s there.  Everything else is on (the green
-   tower's 10.8 MB of tables is the largest; the beach / mermaid 7.6 MB, the lake 6.6 MB, the pier 5.0 MB). */
+/* The 3DS: the green tower stays off, for the memory its generation needs (10.8 MB of tables for a moment, by far the
+   most of any room: the beach / mermaid 7.6 MB, the lake 6.6 MB, the pier 5.0 MB, all on; not tried on a console).
+   Its time is no longer the reason: since 2026-11-22 the strips are made once per room and width (ws_cache: in memory,
+   and in ws_cache/ on the SD card, so a later visit or session takes them from there), and the slowest generators
+   are 3-10 times faster (the same strips), so the rooms that were off for their time (Dwarf Village in blossom,
+   the brick wall with the staircase, the cave with the brick tower, Dwarf Village, the rock wall with the stair:
+   0.1-0.3 s on a PC now, i386, one core) freeze an Old 3DS (some 30-50 times slower) for some 3-13 s once, on the
+   first visit ever (a New 3DS about a third of that). */
 static const struct { short area, sec; } N3DS_OFF[] = {
-    { 19, 1 },   /* Dwarf Village in blossom: 2.0 s (3.0 s at 21:9) */
-    { 9, 5 },    /* the brick wall with the staircase: 1.7 s */
-    { 11, 2 },   /* the cave with the brick tower: 0.6 s */
-    { 2, 1 },    /* Dwarf Village: 0.4 s */
-    { 9, 4 },    /* the rock wall with the stair: 0.4 s */
-    { 16, 4 },   /* the green tower: 0.4 s and 10.8 MB */
+    { 16, 4 },   /* the green tower: 0.3-0.4 s on a PC and 10.8 MB */
 };
 #endif
 static int room_enabled(const Room *r)
@@ -1207,6 +1242,27 @@ static void backdrop_reset(void)
     free(en_ov); en_ov = 0; en_ov_pad = 0;
     pr_have_layers = 0;
 }
+/* build() through the cache (ws_cache): the strips, and what later frames read next to them (AREA17 s5's front
+   texels, AREA11 s1's fixed columns), keyed by the picture, its over pieces and the layers the room's generator reads */
+static void build_cached(int pad)
+{
+    int ri = (int)(room - ROOMS), mirror = enabled == 2 && room->gen == build_redraw, np;
+    u32 fl = (u32)shown_gl | (u32)mirror << 1, h = wsc_hash(strip_sum, pic_ov, sizeof *pic_ov * PH);
+    char tag[16]; WsCPart p[3]; size_t n = (size_t)2 * pad * PH * 2;
+    if (room->gen == gen_pr && pr_have_layers) h = wsc_hash(wsc_hash(h, pr_W, sizeof *pr_W * PH), pr_ray, sizeof *pr_ray * PH);
+    if (room->gen == gen_en) h = wsc_hash(h, en_bk, sizeof *en_bk * PH);
+    snprintf(tag, sizeof tag, "strip%d", ri);
+    free(strip); strip = calloc(n / 2, 2); strip_pad = pad;
+    if (room->gen == gen_en) { free(en_ov); en_ov = calloc(n / 2, 2); en_ov_pad = pad; }
+    np = 0; p[np].p = strip; p[np++].n = n;
+    if (room->gen == gen_en) { p[np].p = en_ov; p[np++].n = n; }
+    if (room->gen == gen_lf) { p[np].p = lf_fix; p[np++].n = sizeof lf_fix; }
+    if (strip && (room->gen != gen_en || en_ov) && wsc_get(tag, room->area, room->sec, pad, h, fl, p, np)) return;
+    build(pad);
+    if (!strip || (room->gen == gen_en && (!en_ov || en_ov_pad != pad))) return;
+    p[0].p = strip; if (room->gen == gen_en) p[1].p = en_ov;
+    wsc_put(tag, room->area, room->sec, pad, h, fl, p, np);
+}
 static const u16 *backdrop(const u16 *vram, int pad, int x, int y, int w, int h, int u, int v, int tx, int ty,
                            int depth, int cx, int cy, int *rows);
 /* (the work tables of what this call made go when it returns; out of memory in this room: no strips until it changes) */
@@ -1216,11 +1272,15 @@ const u16 *port_ws_backdrop(const u16 *vram, int pad, int x, int y, int w, int h
     const u16 *s; size_t peak = ws_heap_peak; unsigned long long t0 = port_verbose ? port_time_us() : 0;
     if (ws_heap_failed) return 0;
     ws_on_room(backdrop_reset);
+    ws_cache_last = -1;
     s = backdrop(vram, pad, x, y, w, h, u, v, tx, ty, depth, cx, cy, rows);
-    if (port_verbose && ws_heap_peak > peak) {           /* (a generation: its time and the tables it needed) */
+    if (port_verbose && (ws_heap_peak > peak || ws_cache_last > 0)) {   /* (a generation, or strips from the cache: the
+                                                                          time and the tables it needed) */
         u8 *g = port_ram_ptr(PORT_A_GAME);
-        port_printf("[ws] strips AREA%02d s%d: %d ms, heap peak %u KB\n", *(u16 *)g, *(u16 *)(g + 2),
-                    (int)((port_time_us() - t0) / 1000), (unsigned)(ws_heap_peak >> 10));
+        port_printf("[ws] strips AREA%02d s%d: %d ms, heap peak %u KB%s\n", *(u16 *)g, *(u16 *)(g + 2),
+                    (int)((port_time_us() - t0) / 1000), (unsigned)(ws_heap_peak >> 10),
+                    ws_cache_last == 1 ? " (from the cache in memory)" : ws_cache_last == 2 ? " (from the cache on disk)" :
+                    ws_cache_last == 0 ? " (made)" : "");
     }
     ws_free(WS_GEN);
     return ws_heap_failed ? 0 : s;
@@ -1292,7 +1352,7 @@ static const u16 *backdrop(const u16 *vram, int pad, int x, int y, int w, int h,
         if (!r || !room_enabled(r)) return 0;
         room = r;
         if (!strip || strip_pad != pad || s != strip_sum || shown_gl != port_gpu_is_gl()) {
-            strip_sum = s; shown_gl = port_gpu_is_gl(); build(pad);
+            strip_sum = s; shown_gl = port_gpu_is_gl(); build_cached(pad);
             {   const char *e = getenv("PORT_WS_BACKDROP_DUMP");      /* research: the picture, raw 15-bit LE */
                 FILE *f = e ? fopen(e, "wb") : 0;
                 if (f) {

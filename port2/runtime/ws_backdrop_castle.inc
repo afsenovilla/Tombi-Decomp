@@ -231,7 +231,10 @@ static const u16 *ic_take(const u16 *vram, int pad, int y, int *rows)
         free(ic_ext); ic_ext = calloc((size_t)IC_H * 2 * pad, 2);
         if (!ic_ext) return 0;
         for (int yy = 0; yy < IC_H; yy++) for (int x = 0; x < PW; x++) ic_p[yy][x] = ic_tex(vram, x, yy);
-        ic_measure(); ic_gen(ic_ext, pad);
+        {   WsCPart p = { ic_ext, (size_t)IC_H * 2 * pad * 2 };   /* (made once: ws_cache) */
+            u32 kh = wsc_hash(s, ic_p, sizeof *ic_p * IC_H);
+            if (!wsc_get("ic", 17, 1, pad, kh, 0, &p, 1)) { ic_measure(); ic_gen(ic_ext, pad); wsc_put("ic", 17, 1, pad, kh, 0, &p, 1); }
+        }
     }
     if (!ic_ext || r0 < 0 || r0 + PH > IC_H) return 0;
     port_ws_backdrop_dy = r0; port_ws_backdrop_side = 3;

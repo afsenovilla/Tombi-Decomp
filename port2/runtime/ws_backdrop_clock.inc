@@ -512,7 +512,10 @@ static const u16 *ck_take(const u16 *vram, int pad, int x, int y, int *rows)
             {   Rgb t = rgb15(ck_src[4][240]), f = rgb15(ck_src[284][20]);   /* (the vault's peach, the floor's grey: this picture) */
                 if (!ck_ext || !ck_buf || t.r < t.b + 24 || f.r > f.b) { free(ck_ext); free(ck_buf); ck_ext = ck_buf = 0; return 0; }
             }
-            ck_gen(pad);
+            {   WsCPart p = { ck_ext, (size_t)CK_H * 2 * pad * 2 };   /* (made once: ws_cache) */
+                u32 kh = wsc_hash(s, ck_clut, sizeof ck_clut);
+                if (!wsc_get("ck", 9, 2, pad, kh, 0, &p, 1)) { ck_gen(pad); wsc_put("ck", 9, 2, pad, kh, 0, &p, 1); }
+            }
             {   const char *e = getenv("PORT_WS_BACKDROP_DUMP");      /* research: the CLUT, then the picture (raw 15-bit LE) */
                 FILE *f = e ? fopen(e, "wb") : 0;
                 if (f) { fwrite(ck_clut, 1, sizeof ck_clut, f); fwrite(ck_src, 1, (sizeof *ck_src * (CK_H)), f); fclose(f); }

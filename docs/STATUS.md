@@ -4,6 +4,31 @@ Update this file whenever something lands or a task is decided. Newest first.
 
 ## Since v0.7.2 (not released)
 
+- **No more hitch when entering a room with widescreen picture strips (2026-11-22, docs/PORT.md "Widescreen strips
+  cache").**  Since f5451af every visit made the strips again (up to 2 s on a PC in the Dwarf Village in blossom, a
+  visible freeze on the Thor).  Now (1) the slowest generators are 3-10 times faster with the same output bytes (the
+  quilters `vb_quilt` / `rq_quilt` / `tw_quilt`: exclusion map, reflected rows, a running count of excluded texels
+  per row, target texels listed once per block instead of per candidate); (2) `runtime/ws_cache.c` keeps every
+  finished result (build()'s strips with AREA17 s5's `en_ov` and AREA11 s1's `lf_fix`, tw / mm / im / ic / ck /
+  lake / island takes) in memory (8 results, 8 MB, LRU) and on disk (`ws_cache/` next to the memory cards, one file
+  per path, room, width and renderer flag; head + checksum, written to a temporary file and moved over), keyed by
+  the picture's hash, the width, the renderer flag, the mirror mode, `WS_GEN_VERSION` and ws_backdrop.c's build
+  stamp.  `--ws-cache off|mem|on`, `--no-ws-cache`.  PC (i386, one core, time of the strips at the room's entry,
+  before -> made now -> from the cache, 16:9 / 21:9): Dwarf Village in blossom AREA19 s1 1993 -> 166 -> 0 ms / 3063
+  -> 269 -> 0, the brick wall with the staircase AREA09 s5 1756 -> 202 / 2678 -> 319, the cave with the brick tower
+  AREA11 s2 621 -> 100 / 1039 -> 146, Dwarf Village AREA02 s1 408 -> 163 / 577 -> 216, the rock wall with the stair
+  AREA09 s4 367 -> 138 / 525 -> 196, the green tower AREA16 s4 363 -> 335 / 531 -> 475, the Underground Prison
+  AREA02 s2 188 -> 135, the treasure hall AREA09 s3 135 -> 39, the mermaid AREA06 s2 117 (unchanged), the clock
+  room AREA09 s2 99 (unchanged); from the cache 0-3 ms everywhere.  Cache files: 47 KB per 16:9 strip (108 KB at
+  21:9), the green tower 143 / 323 KB, the mermaid's four phases 190 / 430 KB.  The 3DS: five of the six `N3DS_OFF` rooms are on again
+  (expected first visit ever on an Old 3DS some 3-13 s, then from the SD card); the green tower stays off for its
+  10.8 MB.  Checked on the PC: frames byte-identical to the build before in all 27 strip rooms at 16:9 and 21:9 with
+  the cache cold, warm from disk (a new process), off, and A -> AREA02 s5 -> A through the debug menu (memory, and
+  `--ws-cache mem`), walking both ways (which also reaches the island, AREA11 s1 and the lake); a truncated, flipped,
+  random or empty cache file is ignored and replaced; 21:9 after 16:9 in the same folder makes its own file; the GL
+  renderer (xvfb) gets its own files (AREA09 s3, AREA06 s2, AREA19 s1: GL and software frames each identical to the
+  build before); the wasm2c build (9 rooms at 16:9 walking, 3 at 21:9 A -> B -> A: frames identical to the wasm2c build before, the cache files written through WASI).  Not run on the Thor or a 3DS.
+
 - **Smaller program image (all platforms, for the 3DS's 26 MB limit).** Three tables the 3DS never uses are no longer
   in the image: the OpenGL renderer's vertex / op buffers (`shims/gpu_gl.c`, 3.5 MB, allocated by `gl_start`), the
   RGB frame buffer of window presents and dumps (`shims/gpu.c` `frame_rgb`, 1.5 MB, allocated on first use) and the

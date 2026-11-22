@@ -43,14 +43,29 @@ static void rq_quilt(int side, const RqBand *b, int seed)
             if (ok) cand[ncand++] = sy * PW + sx;
         }
     if (!ncand) return;
+    VbTgt *tg = (VbTgt *)malloc(sizeof *tg * VB_MAXH * VB_MAXW);   /* (speed: the target texels, the same for every
+                                                                      candidate; the same sums) */
     for (int X0 = 1; X0 <= vb_ow; X0 += b->BW)
         for (int yb = b->y0; yb < b->y1; yb += b->BH) {
             int H = b->BH + b->OT, ytop = yb - b->OT, bh = yb + b->BH > b->y1 ? b->y1 - yb : b->BH;
             /* the window's picture columns: [wx0, wx0 + W), the new ones the BW outer ones */
-            int wx0 = side ? PW - 1 + X0 - b->OV : -(X0 + b->BW - 1), mn = 1 << 30, nc = 0, k, pick = -1;
+            int wx0 = side ? PW - 1 + X0 - b->OV : -(X0 + b->BW - 1), mn = 1 << 30, nc = 0, k, pick = -1, nt = 0;
+            if (tg && H <= VB_MAXH && W <= VB_MAXW)
+                for (int y = 0; y < H; y++)
+                    for (int j = 0; j < W; j++) {
+                        int ov = side ? j < b->OV : j >= b->BW; Rgb o;
+                        if (!ov && y >= b->OT) continue;
+                        if (!rq_get(side, wx0 + j, ytop + y, &o)) continue;
+                        tg[nt].y = (short)y; tg[nt].j = (short)j; tg[nt].o = o; nt++;
+                    }
+            else nt = -1;
             for (int c = 0; c < ncand; c++) {
                 int sx = cand[c] % PW, sy = cand[c] / PW, n = 0; long long e = 0;
                 if (b->dy >= 0 && (sy - ytop > b->dy || ytop - sy > b->dy)) { errs[c] = -1; continue; }
+                if (nt >= 0) {
+                    for (int i = 0; i < nt; i++) e += vb_d2(tg[i].o, rq_src[sy + tg[i].y][sx + tg[i].j]);
+                    n = nt;
+                } else
                 for (int y = 0; y < H; y++)
                     for (int j = 0; j < W; j++) {
                         int ov = side ? j < b->OV : j >= b->BW; Rgb o, s;
@@ -96,6 +111,7 @@ static void rq_quilt(int side, const RqBand *b, int seed)
             }
             nbk++;
         }
+    free(tg);
 }
 
 /* ================================================================== AREA09 s4: the rock wall with the stair down to
@@ -389,7 +405,15 @@ static const u16 *tw_take(const u16 *vram, int pad, int fy, int tx, int *rows)
             if (a.b < a.r + 64 || b.b < b.r + 64) { free(tw_strip); tw_strip = 0; return 0; }
         }
         if (!tw_strip || tw_pad != pad || s != tw_sum) {
-            tw_sum = s; tw_build(pad);
+            WsCPart p;                                   /* (made once: ws_cache) */
+            tw_sum = s;
+            free(tw_strip); tw_strip = calloc((size_t)2 * pad * TW_H, 2); tw_pad = pad;
+            p.p = tw_strip; p.n = (size_t)2 * pad * TW_H * 2;
+            if (!tw_strip || !wsc_get("tw", room->area, room->sec, pad, s, 0, &p, 1)) {
+                tw_build(pad);
+                p.p = tw_strip;
+                if (tw_strip && tw_pad == pad) wsc_put("tw", room->area, room->sec, pad, s, 0, &p, 1);
+            }
             {   const char *e = getenv("PORT_WS_BACKDROP_DUMP");      /* research: the picture, raw 15-bit LE, 672 rows */
                 FILE *f = e ? fopen(e, "wb") : 0;
                 if (f) {
@@ -642,6 +666,8 @@ static void tw_quilt(int side, const TwBand *b, int seed)
     static int path[VB_MAXH], tcut[VB_MAXW]; int (*const em)[VB_MAXW] = tw_quilt__em, (*const ev)[VB_MAXW] = tw_quilt__ev;
     int (*const cand) = tw_quilt__cand, (*const errs) = tw_quilt__errs;
     u8 (*const tl)[VB_MAXW] = tw_quilt__tl, (*const hv)[VB_MAXW] = tw_quilt__hv; Rgb (*const ctx)[VB_MAXW] = tw_quilt__ctx; short (*const tg)[VB_MAXW] = tw_quilt__tg;
+    VbTgt *hl = (VbTgt *)malloc(sizeof *hl * VB_MAXH * VB_MAXW); int rs[VB_MAXH + 1];   /* (speed, the same sums: the
+                                                            context texels of each row as a list) */
     for (int X0 = 1; X0 <= tw_cw; X0 += b->BW)
         for (int yb = b->y0; yb < b->y1; yb += b->BH) {
             int H = b->BH + b->OT, ytop = yb - b->OT, bh = yb + b->BH > b->y1 ? b->y1 - yb : b->BH;
@@ -666,6 +692,14 @@ static void tw_quilt(int side, const TwBand *b, int seed)
                         if ((y + j) & 1) hv[y][j] = 0;   /* (a checkerboard of it) */
                         n += hv[y][j]; nl += tl[y][j] && !((y | j) & 1);
                     }
+                if (hl) {
+                    int m = 0;
+                    for (int y = 0; y < H; y++) {
+                        rs[y] = m;
+                        for (int j = 0; j < W; j++) if (hv[y][j]) { hl[m].j = (short)j; hl[m].o = ctx[y][j]; m++; }
+                    }
+                    rs[H] = m;
+                }
                 for (int c = 0; c < ncand; c++) {
                     int sx = cand[c] % PW, sy = cand[c] / PW, ml = 0, ng = 0, lim = mn < (1 << 28) ? mn + mn / 8 : 1 << 29;
                     long long e = 0, el, eg = 0;
@@ -675,6 +709,13 @@ static void tw_quilt(int side, const TwBand *b, int seed)
                             if (tg[y][j] >= 0 && tw_gs[sy + y][sx + j] >= 0) { int d = tw_gs[sy + y][sx + j] - tg[y][j]; eg += d * d; ng++; }
                         }
                     el = (nl ? (long long)ml * TW_LW * 64 / nl : 0) + (ng ? eg * 64 * TW_GW / ng : 0);
+                    if (hl) {                            /* (el + e * 64 / n <= lim, e >= 0: e * 64 < (lim - el + 1) n) */
+                        long long thr = lim - el >= 0 ? (lim - el + 1) * n : -1;
+                        for (int y = 0; y < H && (n ? e * 64 < thr : el <= lim); y++) {
+                            const Rgb *s = &tw_rgb[sy + y][sx];
+                            for (int i = rs[y]; i < rs[y + 1]; i++) e += vb_d2(hl[i].o, s[hl[i].j]);
+                        }
+                    } else
                     for (int y = 0; y < H && el + (n ? e * 64 / n : 0) <= lim; y++)
                         for (int j = 0; j < W; j++) if (hv[y][j]) e += vb_d2(ctx[y][j], tw_rgb[sy + y][sx + j]);
                     e = (n ? e * 64 / n : 0) + el;
@@ -712,6 +753,7 @@ static void tw_quilt(int side, const TwBand *b, int seed)
             }
             nbk++;
         }
+    free(hl);
 }
 /* the trees' foot, the grey band and the grass under them (rows y0..y1): slices 2-5 columns wide of the clean columns
    at both edges (pool: no trunk, bush or path there), the same rows, each in its own left-to-right order; the next

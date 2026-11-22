@@ -205,6 +205,40 @@ static void is_build_up(int w)                           /* the left strip's row
     for (int r = 0; r < IS_LA; r++) for (int X = 1; X <= w; X++) is_ext[0][(size_t)r * w + X - 1] = mm_quant(*mm_at(0, X, r));
     mm_canvas_free();
 }
+/* is_build / is_build_up through the cache (ws_cache), keyed by the whole mosaic and the CLUT (is_pic is no heap
+   table: nothing of the generator's is needed when the strips are in the cache) */
+static u32 is_kh;
+static int is_cached(const u16 *vram, int w)
+{
+    WsCPart p[2]; size_t n = (size_t)IS_H * w * 2;
+    if (!is_pic) is_pic = malloc(sizeof(u16[IS_H][IS_W]));
+    for (int s = 0; s < 2; s++) { free(is_ext[s]); is_ext[s] = calloc((size_t)IS_H * w, 2); }
+    if (is_pic && is_ext[0] && is_ext[1]) {
+        memset(is_pic, 0, sizeof(u16[IS_H][IS_W]));
+        for (int i = 0; i < 10; i++) {
+            const Piece *q = &IS_P[i];
+            for (int y = 0; y < q->h && q->y + y < IS_H; y++) for (int x = 0; x < q->w; x++) is_pic[q->y + y][q->x + x] = tex8(vram, q->tx, q->u + x, q->v + y, 128, 511);
+        }
+        is_kh = wsc_hash(wsc_hash(is_sum, &vram[(size_t)511 * 1024 + 128], 512), is_pic, sizeof(u16[IS_H][IS_W]));
+        p[0].p = is_ext[0]; p[1].p = is_ext[1]; p[0].n = p[1].n = n;
+        if (wsc_get("is", 9, 1, is_pad, is_kh, (u32)w, p, 2)) {
+            is_clear = is_pic[0][279];
+            mm_w = IS_W; mm_ph = 0; mm_pad = -1; lk_pad = -1; is_up = 0;
+            return 1;
+        }
+    }
+    if (!is_build(vram, w)) return 0;
+    p[0].p = is_ext[0]; p[1].p = is_ext[1]; p[0].n = p[1].n = n;
+    wsc_put("is", 9, 1, is_pad, is_kh, (u32)w, p, 2);
+    return 1;
+}
+static void is_cached_up(int w)
+{
+    WsCPart p = { is_ext[0], (size_t)IS_LA * w * 2 };
+    if (wsc_get("isu", 9, 1, is_pad, is_kh, (u32)w, &p, 1)) { is_up = 1; mm_w = IS_W; mm_ph = 0; mm_pad = -1; lk_pad = -1; return; }
+    is_build_up(w);
+    p.p = is_ext[0]; wsc_put("isu", 9, 1, is_pad, is_kh, (u32)w, &p, 1);
+}
 /* the beach picture's right half (the first sprite of the room's backdrop, drawn every frame) at frame (x, y) while
    the camera is on the island: the strips' rows for frame rows 16-239 */
 static const u16 *is_take(const u16 *vram, int pad, int x, int y, int *rows)
@@ -217,14 +251,14 @@ static const u16 *is_take(const u16 *vram, int pad, int x, int y, int *rows)
     if (!is_buf || is_pad != pad || s != is_sum) {
         is_pad = pad; is_sum = s; is_w = w;
         free(is_buf); is_buf = calloc((size_t)PH * 2 * pad, 2);
-        if (!is_buf || !is_build(vram, w)) { free(is_ext[0]); free(is_ext[1]); is_ext[0] = is_ext[1] = 0; }
+        if (!is_buf || !is_cached(vram, w)) { free(is_ext[0]); free(is_ext[1]); is_ext[0] = is_ext[1] = 0; }
         else {
             Rgb a = rgb15(is_pic[IS_Y0 + 4][IS_W - 2]), b = rgb15(is_pic[IS_H - 8][4]);   /* (sky top right, sand bottom left: this picture) */
             if (a.b < a.r + 64 || b.r < b.b + 16) { free(is_ext[0]); free(is_ext[1]); is_ext[0] = is_ext[1] = 0; }
         }
     }
     if (!is_ext[0] || !is_ext[1] || !is_buf) return 0;
-    if (nl && T > 16 - IS_Y0 && !is_up) is_build_up(is_w);
+    if (nl && T > 16 - IS_Y0 && !is_up) is_cached_up(is_w);
     for (int j = 0; j < PH; j++) {
         u16 *row = is_buf + (size_t)j * 2 * pad;
         int r = j + 16 - T;

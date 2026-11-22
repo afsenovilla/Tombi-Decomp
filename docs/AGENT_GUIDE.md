@@ -71,6 +71,10 @@ is the reference for each feature (it is long: search it).
 - In side view one world unit is about one screen column at Tomba's depth (measured), so the widescreen pad in
   columns is also the distance in units.
 - Picking the moment of a room change in a frame series: the last frame before the fade (brightness drops).
+- The widescreen strips are cached (docs/PORT.md "Widescreen strips cache"): in memory and in `ws_cache/` next to the
+  memory cards (`--save-dir`, else the repo root for `--data data`).  To time a generator or to compare a changed one,
+  use `--no-ws-cache` (or a fresh `--save-dir`); `-v` says "(made)" / "(from the cache ...)".  A rebuilt
+  ws_backdrop.c never takes an older build's strips (its build stamp is in the key).
 
 ## 4. Widescreen exits (2026-11-16/17)
 

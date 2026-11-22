@@ -118,6 +118,24 @@ static void lk_build(const u16 *vram, int side)           /* an end's extension,
     for (int y = 0; y < PH; y++) for (int X = 1; X <= w; X++) lk_ext[side][(size_t)y * w + X - 1] = mm_quant(*mm_at(side, X, y));
     mm_canvas_free();
 }
+/* lk_build through the cache (ws_cache), keyed by the whole picture and its CLUT (read from VRAM: no heap table is
+   needed when the end is in the cache) */
+static void lk_cached(const u16 *vram, int side)
+{
+    Rgb t = rgb15(tex8(vram, 0, 4, 256 + 16, 128, 510)); u32 h = lk_sum; WsCPart p; int w = lk_w[side];
+    if (t.b >= t.r + 24) {
+        u16 row[LK_W];
+        for (int i = 0; i < 256; i++) { u16 c = vram[(size_t)510 * 1024 + 128 + i]; h = wsc_hash(h, &c, 2); }
+        for (int y = 0; y < PH; y++) { for (int x = 0; x < LK_W; x++) row[x] = lk_tex(vram, x, y); h = wsc_hash(h, row, sizeof row); }
+        lk_made[side] = 1;
+        free(lk_ext[side]); lk_ext[side] = calloc((size_t)PH * w, 2);
+        p.p = lk_ext[side]; p.n = (size_t)PH * w * 2;
+        if (lk_ext[side] && wsc_get("lk", 9, 1, lk_pad, h, (u32)side, &p, 1)) { mm_w = LK_W; mm_ph = 0; mm_pad = -1; return; }
+        free(lk_ext[side]); lk_ext[side] = 0;
+    }
+    lk_build(vram, side);
+    if (lk_ext[side] && t.b >= t.r + 24) { p.p = lk_ext[side]; p.n = (size_t)PH * w * 2; wsc_put("lk", 9, 1, lk_pad, h, (u32)side, &p, 1); }
+}
 /* the picture's right half (page (0, 256), CLUT (128, 510)) at frame column x: the strips of the ends the wide frame
    looks past, the picture's own columns and then the extension's */
 static const u16 *lk_take(const u16 *vram, int pad, int x, int *rows)
@@ -134,8 +152,8 @@ static const u16 *lk_take(const u16 *vram, int pad, int x, int *rows)
         free(lk_buf); lk_buf = calloc((size_t)PH * 2 * pad, 2);
     }
     if (!lk_buf) return 0;
-    if (nl && !lk_made[0]) lk_build(vram, 0);
-    if (nr && !lk_made[1]) lk_build(vram, 1);
+    if (nl && !lk_made[0]) lk_cached(vram, 0);
+    if (nr && !lk_made[1]) lk_cached(vram, 1);
     if ((nl && !lk_ext[0]) || (nr && !lk_ext[1])) return 0;
     top = nr ? 0 : LK_S;                                 /* the left strip alone: the rows above it stay the clear colour */
     for (int j = top; j < PH; j++) {

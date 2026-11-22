@@ -6437,7 +6437,58 @@ s5 2.1 MB / 0.09 s; staircase wall AREA09 s5 1.4 MB / 1.7 s; treasure hall AREA0
 AREA02 s1 1.0 MB / 0.38 s, in blossom AREA19 s1 0.7 MB / 2.0 s; the cave with the tower AREA11 s2 0.7 MB / 0.6 s;
 every other room below 1 MB and 0.1 s; Evil Pig rooms 0.4 MB, room3d 0.26 MB, trick 0.25 MB, floor3d 0.15 MB.
 
-On the 3DS the rooms of `N3DS_OFF` (ws_backdrop.c: AREA19 s1, AREA09 s5, AREA11 s2, AREA02 s1, AREA09 s4, AREA16 s4,
-the ones above 0.3 s on a PC, 10 s to a minute on an Old 3DS) keep their strips off; everything else is on.  The
+On the 3DS the rooms of `N3DS_OFF` (ws_backdrop.c) keep their strips off; everything else is on.  Until the strips
+cache below that was six rooms (AREA19 s1, AREA09 s5, AREA11 s2, AREA02 s1, AREA09 s4, AREA16 s4: above 0.3 s on a
+PC, 10 s to a minute on an Old 3DS, on every visit); now only the green tower (AREA16 s4), for its 10.8 MB.  The
 3DS image grows by the code of these modules: +0.56 MB measured on clang armv6k objects (not devkitARM), against
 25.26 MB for the last build and check_3dsx.py's 26 MB.  Not run on a console yet.
+
+## Widescreen strips cache (2026-11-22)
+
+Since the tables went to the heap (above) a room's strips were made again on every visit, and the slowest took up to
+2 s on a PC (a visible freeze on the AYN Thor; 10 s to a minute on an Old 3DS, so six rooms stayed off there).  Two
+changes, both giving the same strips byte for byte:
+
+- **Faster generators.**  Profiled with callgrind on the standalone generator (`WS_BACKDROP_MAIN`, a picture dumped
+  with `PORT_WS_BACKDROP_DUMP`): 60-90 % of the time of AREA19 s1, AREA09 s5 and AREA11 s2 went to `vb_excl` and
+  `vb_srow` called for every texel of every candidate window of the quilter (`vb_quilt`).  `vb_quilt` now makes,
+  once per band, the picture's exclusion map (`vb_exmap`; `vb_ex` / `vb_exf` do not change during a quilt), the
+  reflected rows (`vb_sr`), a running count per row of the texels a window may not hold (`vb_bad`: the window test
+  is two reads per row), and per block the list of target texels a window is compared with (`vb_tg`: `vb_get` once
+  per block, not once per candidate; a candidate's error is a sum of integers, so the order does not matter).
+  `rq_quilt` (AREA09 s4, AREA02 s2) takes the same target list; `tw_quilt` (AREA16 s4) its context texels as row
+  lists and its early stop without a 64-bit division per row.  Standalone, i386, pad 53 (16:9): AREA19 s1 2174 ->
+  187 ms, AREA09 s5 1831 -> 272, AREA11 s2 682 -> 126, AREA02 s1 396 -> 178, AREA09 s4 458 -> 135, AREA02 s2 225 ->
+  137, AREA09 s3 162 -> 54, AREA16 s4 320 -> ~300.  Checked: the strip hashes of 16 dumped rooms at pads 1, 53, 120
+  and 267 (and AREA09 s3 as the GL renderer draws it) identical to the code before.
+- **The cache** (`runtime/ws_cache.c`, `ws_cache.h`).  Every path that keeps a result across frames goes through it:
+  build()'s strip buffer (with AREA17 s5's front texels `en_ov` and AREA11 s1's `lf_fix`), the green tower's
+  `tw_take`, the mermaid / beach `mm_take` (all four wave phases), `im_take`, `ic_take`, `ck_take`, the lake's two
+  ends (`lk_take`, made as the camera first looks past each) and the island's strips with their upper rows
+  (`is_take`, the upper rows a key of their own as they are made later).  The key: the path and its room, the strip
+  width, a hash of every input the generator reads (the picture as grab() took it, its over pieces `pic_ov`, the
+  pier's water and ray layers, the engine room's back layer, the whole picture and CLUT of the tall / wide ones),
+  flags (`shown_gl` / `mm_gl`, the mirror preview, the lake's side, the island's canvas width) and the generators'
+  version: `WS_GEN_VERSION` (ws_backdrop.c; bump it when an output changes on purpose) and the build stamp
+  (`__DATE__ __TIME__`) of ws_backdrop.c, so a rebuilt generator never takes an older one's strips (a release build
+  makes every room once again after an update).  Whether a room is on (approved / `--ws-backdrop on` / the rooms
+  list) only decides whether its strips are drawn, not what they are, so it is no part of the key.  A result is kept
+  only when its generation ran to the end (no heap failure, not all zero).
+  - In memory: the last 8 results, at most 8 MB (2 MB on the 3DS), least recently used out first: A -> B -> A
+    takes A's strips without a generation.  They survive the room change (they are no heap table).
+  - On disk: `ws_cache/<path>_<area>_<sec>_<pad>_<flags>.bin` in the folder of the memory cards (`port_save_file`:
+    `--save-dir`, which the Android app passes (its files folder); else next to the disc image or data/, which on the
+    3DS is `sdmc:/3ds/tombi/` when the image or data/ is there).  One file per path, room, width and flags (a new key overwrites it: the folder holds
+    at most one file per room and width, 47 KB for a 16:9 strip, 190 KB for the mermaid's four phases, 143 KB for the
+    green tower).  Layout: a head (magic `TWSC`, format, version, area, section, pad, sum, flags, path name, part
+    sizes), the parts, an FNV-1a checksum of both; any mismatch (another key, a short or longer file, a bad checksum,
+    a read error) is a miss: the strips are made again and the file replaced (`-v`: "[ws] cache: ... does not
+    match").  Written to `NAME.tmp` and moved over the old file: `renameat` (Linux, Android, wasm2c's WASI),
+    `MoveFileExA` (Windows) - not `rename()`, which is the game's BIOS stub in the port's link; the 3DS writes the
+    file in place (a torn file fails its checksum).
+  - `--ws-cache off|mem|on` (default on), `--no-ws-cache` = off (every visit makes the strips, as before);
+    `PORT_WS_CACHE=0/1/2` outside the wasm2c build.  `-v` prints each room's strips with "(made)", "(from the cache
+    in memory)" or "(from the cache on disk)".
+  - On a hit no generator table is asked for: the green tower's room needs 0.4 MB instead of 10.8, the mermaid's
+    1.1 MB instead of 7.6, the lake's nothing instead of 6.6 MB.
+

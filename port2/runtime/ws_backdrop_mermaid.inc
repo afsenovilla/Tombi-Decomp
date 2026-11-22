@@ -833,7 +833,6 @@ static void mm_grab(const u16 *vram, int sc)
         for (int i = 0; i < 256; i++) mm_clut[i] = vram[(size_t)510 * 1024 + 128 + i];
         for (int y = 0; y < PH; y++) for (int x = 0; x < MM_W; x++) mm_src[0][y][x] = tex8(vram, 576, x, y, 128, 510);
     }
-    memset(mm_qh, 0, (sizeof *mm_qh * (32768)));
     {   const char *e = getenv("PORT_WS_BACKDROP_DUMP");      /* research: the CLUT, then the pictures (raw 15-bit LE, MM_W columns) */
         FILE *f = e ? fopen(e, "wb") : 0;
         if (f) { fwrite(mm_clut, 1, sizeof mm_clut, f); fwrite(mm_src, 1, sc == 2 ? (sizeof *mm_src * (MM_NPH)) : sizeof mm_src[0], f); fclose(f); }
@@ -852,6 +851,7 @@ static int mm_build(const u16 *vram, int pad, int sc)
     if (!ws_need_mm_build()) return 0;
     int nph = sc == 2 ? MM_NPH : 1;
     mm_grab(vram, sc);
+    memset(mm_qh, 0, (sizeof *mm_qh * (32768)));        /* (the quantiser's cache: this picture's CLUT) */
     free(mm_strip); free(mm_buf); mm_buf = 0;
     mm_strip = calloc((size_t)nph * PH * 2 * pad, 2);
     if (sc == 1) mm_buf = calloc((size_t)PH * 2 * pad, 2);
@@ -886,6 +886,21 @@ static int mm2_phase(void)
     }
     return last;
 }
+/* mm_build through the cache (ws_cache): the strips of every phase, keyed by the pictures and the CLUT */
+static int mm_cached(const u16 *vram, int pad, int sc)
+{
+    int nph = sc == 2 ? MM_NPH : 1; size_t n = (size_t)nph * PH * 2 * pad * 2; WsCPart p; u32 h;
+    mm_grab(vram, sc);
+    h = wsc_hash(wsc_hash(mm_sum, mm_clut, sizeof mm_clut), mm_src, sizeof *mm_src * (size_t)nph);
+    free(mm_strip); free(mm_buf); mm_buf = 0;
+    mm_strip = calloc(n / 2, 2);
+    if (sc == 1) mm_buf = calloc((size_t)PH * 2 * pad, 2);
+    p.p = mm_strip; p.n = n;
+    if (mm_strip && (sc != 1 || mm_buf) && wsc_get("mm", 6, sc, pad, h, (u32)mm_gl, &p, 1)) return 1;
+    if (!mm_build(vram, pad, sc)) return 0;
+    p.p = mm_strip; wsc_put("mm", 6, sc, pad, h, (u32)mm_gl, &p, 1);
+    return 1;
+}
 /* a 256-column sprite of CLUT (128, 510 / 511) at frame (x, y) in section sc: the strips when it is that picture's */
 static const u16 *mm_take(const u16 *vram, int pad, int sc, int x, int y, int w, int h, int u, int v, int tx, int ty, int cy, int *rows)
 {
@@ -897,7 +912,7 @@ static const u16 *mm_take(const u16 *vram, int pad, int sc, int x, int y, int w,
     if (!mm_strip || mm_pad != pad || mm_room != sc || s != mm_sum || mm_gl != port_gpu_is_gl()) {
         Rgb t = rgb15(tex8(vram, sc == 2 ? 128 : 576, 4, 4, 128, cy));    /* (the sky in the top left corner: this picture) */
         mm_pad = pad; mm_room = sc; mm_sum = s; mm_gl = port_gpu_is_gl();
-        if (t.b < t.r + 24 || !mm_build(vram, pad, sc)) { free(mm_strip); mm_strip = 0; }
+        if (t.b < t.r + 24 || !mm_cached(vram, pad, sc)) { free(mm_strip); mm_strip = 0; }
     }
     if (!mm_strip) return 0;
     *rows = PH;

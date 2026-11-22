@@ -1145,9 +1145,12 @@ static int (*vb_otgt)(int side, int X, int *tol);
 static int (*vb_exf)(int x, int y);                     /* objects that are not boxes (gen_st's stair), or none */
 static int *vb_srcmap;                                   /* where each canvas texel was copied from (y * PW + x), or
                                                             none: gen_st relights the copies */
+static u8 *vb_exmap;                                     /* vb_excl of every picture texel while vb_quilt runs (vb_ex
+                                                            and vb_exf do not change during a quilt), or none */
 static int vb_excl(int x, int y)
 {
     if (x < 0 || x >= PW || y < 0 || y >= PH) return 1;
+    if (vb_exmap) return vb_exmap[y * PW + x];
     if (vb_exf && vb_exf(x, y)) return 1;
     for (int i = 0; vb_ex[i].x1; i++)
         if (x >= vb_ex[i].x0 && x < vb_ex[i].x1 && y >= vb_ex[i].y0 && y < vb_ex[i].y1) return 1;
@@ -1264,7 +1267,27 @@ static int (*vb_quilt__em)[VB_MAXW];
 static Rgb (*vb_quilt__win)[VB_MAXW];
 static u8 (*vb_quilt__pm)[VB_MAXW];
 static int (*vb_quilt__ev)[VB_MAXW];
+/* (speed, the same strips: vb_quilt_run's inner loops read these instead of calling vb_excl / vb_srow / vb_get for
+   every candidate window; a candidate's error is a sum of integers, so the order it is added in does not matter) */
+typedef struct { short y, j, wv; Rgb o; } VbTgt;          /* a target texel the window's error compares */
+static VbTgt *vb_tg;
+static short vb_sr[3 * PH];                              /* vb_srow(b, y) for y in [-PH, 2 PH) */
+static u16 *vb_bad;                                      /* per picture row, a running count of the texels a window may
+                                                            not hold (vb_excl and not vb_hole): row y, columns [0, x) at
+                                                            y * (PW + 1) + x */
+static void vb_quilt_run(int side, const VbBand *b, int seed);
 static void vb_quilt(int side, const VbBand *b, int seed)
+{
+    u8 *m = (u8 *)malloc((size_t)PW * PH); VbTgt *tg = (VbTgt *)malloc(sizeof *tg * VB_MAXH * VB_MAXW);
+    if (m) for (int y = 0; y < PH; y++) for (int x = 0; x < PW; x++) m[y * PW + x] = (u8)vb_excl(x, y);
+    vb_exmap = m; vb_tg = tg;
+    for (int y = -PH; y < 2 * PH; y++) vb_sr[y + PH] = (short)vb_srow(b, y);
+    vb_quilt_run(side, b, seed);
+    vb_exmap = 0; vb_tg = 0; free(m); free(tg); free(vb_bad); vb_bad = 0;
+}
+#define VB_SR(y) ((y) >= -PH && (y) < 2 * PH ? vb_sr[(y) + PH] : vb_srow(b, y))
+#define VB_EX(x, y) (vb_exmap && (unsigned)(x) < PW && (unsigned)(y) < PH ? vb_exmap[(y) * PW + (x)] : vb_excl(x, y))
+static void vb_quilt_run(int side, const VbBand *b, int seed)
 {
     int W = b->B + b->OV, ytop = b->y0 - b->OT, ybot = b->y1 + b->OB, H = ybot - ytop, per = b->per ? vb_period(side, b) : 0;
     int pos = side ? PW : -1, nb = 0, used[3] = { -999, -999, -999 }, nd = 2 * b->dy + 1, ncand = (b->sx1 - b->sx0 - W + 1) * nd;
@@ -1272,6 +1295,11 @@ static void vb_quilt(int side, const VbBand *b, int seed)
     Rgb (*const win)[VB_MAXW] = vb_quilt__win; u8 (*const pm)[VB_MAXW] = vb_quilt__pm;
     if (H > VB_MAXH || W > VB_MAXW || ncand <= 0 || ncand > 320 * 128) return;
     if (b->st & VBB_OUTL) for (int x = 0; x < PW; x++) vb_hs[x] = (short)vb_hcol(side, x);
+    if (vb_exmap && (vb_bad = (u16 *)malloc(sizeof *vb_bad * PH * (PW + 1))) != 0)   /* (after vb_hs: vb_hole reads it) */
+        for (int y = 0; y < PH; y++) {
+            u16 *r = vb_bad + (size_t)y * (PW + 1); r[0] = 0;
+            for (int x = 0; x < PW; x++) r[x + 1] = (u16)(r[x] + (vb_exmap[y * PW + x] && !vb_hole(b, x, y)));
+        }
     if (b->mr > 0) {                                     /* the trunk cut by the edge goes on: the picture's last k
                                                             columns repeated, k (mr/2+1 .. 2 mr) the shift at which
                                                             its last 3 columns best match 3 earlier ones (the stripes'
@@ -1310,14 +1338,42 @@ static void vb_quilt(int side, const VbBand *b, int seed)
             if (na) oref = a / na;
             if (na && nc2) { oslope = (a * 4 / na - c * 4 / nc2) / 2; oslope = oslope > 8 ? 8 : oslope < -8 ? -8 : oslope; }
         }
+        int nt = 0;                                      /* the target texels (the same for every candidate) */
+        if (vb_tg)
+            for (int y = ytop; y < ybot; y++)
+                for (int j = 0; j < W; j++) {
+                    int ov = side ? j < b->OV : j >= b->B; Rgb o;
+                    if (!ov && y >= b->y0 && y < b->y1) continue;
+                    if (first && ov && (y < b->ry0 || y >= b->ry1)) continue;   /* (the picture's canopy above the back) */
+                    if (!vb_get(side, t0 + j, y, &o)) continue;
+                    {   int wv = 1;                      /* (VBB_EDGEW: the overlap columns next to the new ones
+                                                            weigh 4, the 2 after them 2) */
+                        if ((b->st & VBB_EDGEW) && ov && y >= b->y0 && y < b->y1) { int dj = side ? b->OV - 1 - j : j - b->B; wv = dj < 2 ? 4 : dj < 4 ? 2 : 1; }
+                        vb_tg[nt].y = (short)y; vb_tg[nt].j = (short)j; vb_tg[nt].wv = (short)wv; vb_tg[nt].o = o; nt++;
+                    }
+                }
         for (int c = 0; c < ncand; c++) {
             int sx = b->sx0 + c / nd, dy = c % nd - b->dy, ok = 1, n = 0; long long e = 0;
             if ((b->st & VBB_STRICT) && (ytop + dy < b->ry0 || ybot + dy > b->ry1)) ok = 0;
             for (int y = ytop; y < ybot && ok; y++) {
+                int ys;
                 if ((b->st & VBB_SOFT) && (y < b->y0 || y >= b->y1)) continue;
-                for (int j = 0; j < W; j++) if (vb_excl(sx + j, vb_srow(b, y + dy)) && !vb_hole(b, sx + j, vb_srow(b, y + dy))) { ok = 0; break; }
+                ys = VB_SR(y + dy);
+                if (vb_bad && ys >= 0 && ys < PH && sx >= 0 && sx + W <= PW) {   /* (any such texel in [sx, sx + W)) */
+                    const u16 *r = vb_bad + (size_t)ys * (PW + 1);
+                    if (r[sx + W] != r[sx]) ok = 0;
+                    continue;
+                }
+                for (int j = 0; j < W; j++) if (vb_excl(sx + j, ys) && !vb_hole(b, sx + j, ys)) { ok = 0; break; }
             }
             if (!ok) { err[c] = -1; continue; }
+            if (vb_tg)
+                for (int i = 0; i < nt; i++) {
+                    const VbTgt *q = &vb_tg[i]; int ys = VB_SR(q->y + dy), xs = sx + q->j;
+                    if ((b->st & (VBB_SOFT | VBB_OUTL)) && VB_EX(xs, ys)) continue;
+                    e += (long long)vb_d2(q->o, rgb15(pic[ys][xs])) * q->wv; n += q->wv;
+                }
+            else
             for (int y = ytop; y < ybot; y++)
                 for (int j = 0; j < W; j++) {
                     int ov = side ? j < b->OV : j >= b->B; Rgb o;

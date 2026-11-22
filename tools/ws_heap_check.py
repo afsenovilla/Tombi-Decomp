@@ -19,7 +19,7 @@ RT = os.path.join(ROOT, "port2", "runtime")
 # reached outside an entry point's closure, after the tables were asked for: port_ws_backdrop's body (the research
 # dump after a build, the room's picture once grab has asked for it), the rooms' `is` tests (after grab), the
 # standalone main's file reading
-ROOTS = {"backdrop", "port_ws_backdrop", "main", "tw_main", "im_main", "port_ws_backdrop_over", "port_ws_backdrop_fix",
+ROOTS = {"backdrop", "build_cached", "port_ws_backdrop", "main", "tw_main", "im_main", "port_ws_backdrop_over", "port_ws_backdrop_fix",
          "port_ws_island_fg", "v_cherry", "v_not_cherry"}
 
 

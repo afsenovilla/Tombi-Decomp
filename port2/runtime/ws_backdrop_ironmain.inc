@@ -353,7 +353,13 @@ static const u16 *im_take(const u16 *vram, int pad, int x, int y, int w, int h, 
         im_grab_vram(vram);
         free(im_ext); free(im_buf); im_ext = calloc((size_t)PH * 2 * pad, 2); im_buf = calloc((size_t)PH * 2 * pad, 2);
         if (!im_ext || !im_buf) { free(im_ext); free(im_buf); im_ext = im_buf = 0; return 0; }
-        if (!im_gen(pad)) { free(im_ext); im_ext = 0; return 0; }
+        {   WsCPart p = { im_ext, (size_t)PH * 2 * pad * 2 };   /* (made once: ws_cache) */
+            u32 kh = wsc_hash(wsc_hash(s, im_clut, sizeof im_clut), im_src, sizeof *im_src * PH);
+            if (!wsc_get("im", 17, 2, pad, kh, 0, &p, 1)) {
+                if (!im_gen(pad)) { free(im_ext); im_ext = 0; return 0; }
+                wsc_put("im", 17, 2, pad, kh, 0, &p, 1);
+            }
+        }
         {   const char *e = getenv("PORT_WS_BACKDROP_DUMP");      /* research: the CLUT, then the picture (raw 15-bit LE, IM_W columns) */
             FILE *f = e ? fopen(e, "wb") : 0;
             if (f) { fwrite(im_clut, 1, sizeof im_clut, f); fwrite(im_src, 1, (sizeof *im_src * (PH)), f); fclose(f); }
