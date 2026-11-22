@@ -582,8 +582,7 @@ static unsigned load_wfm_bank(u8 *d, unsigned n) {
             glyphs[k][ch].h = (u8)h;
             glyphs[k][ch].img = norm ? norm : d + glyph_off + 8;
             used++;
-        }
-        else free(norm);
+        } else free(norm);
     }
     return used;
 }

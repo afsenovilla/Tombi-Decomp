@@ -36,8 +36,7 @@ static int hud_num(int x, int y, const char *d, int sc) {
         if (*d >= '0' && *d <= '9') {
             pa_spr(x + w, y, HUD, 8 * (*d - '0'), 64, 8, 8, 368, 481, st_scale_flag(sc) | PA_OUTLINE);
             w += 8 * sc;
-        }
-        else w += 4 * sc;
+        } else w += 4 * sc;
     }
     return w;
 }
