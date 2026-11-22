@@ -24,9 +24,6 @@ is the reference for each feature (it is long: search it).
 - Say plainly what was tested (PC headless, which widths, which build) and what was not (the device). The user tests
   on an AYN Thor (Android, arm64 = the wasm2c build) and an Odin 3.
 - The user does not review pull requests: verified work goes to master. Releases only when asked.
-- **Another agent often works at the same time** on the widescreen room strips (`port2/runtime/ws_backdrop*.c/.inc`,
-  `ws_room3d.c`, `ws_edge.c`, docs/PORT.md widescreen sections). Pull before editing those files, keep your commits
-  to explicit paths, and expect master to move under you; each of its pushes cancels the running APK CI run.
 
 ## 2. Source and build pitfalls
 
