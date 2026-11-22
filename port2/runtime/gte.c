@@ -5,7 +5,11 @@
  * exact rounded division; good enough for gameplay, refine against an emulator for pixel-exact output. */
 #include "port_runtime.h"
 
-typedef int s32; typedef unsigned int u32; typedef short s16; typedef unsigned short u16; typedef long long s64;
+typedef int s32;
+typedef unsigned int u32;
+typedef short s16;
+typedef unsigned short u16;
+typedef long long s64;
 
 /* (not static: the 3DS build's game code reads and writes the registers in line, include/port_prelude.h) */
 s32 port_gte_D[32];   /* data registers */
@@ -29,17 +33,32 @@ u32 port_gte_FLAG;
 #define M16LO(r) ((s16)(C[r] & 0xFFFF))
 #define M16HI(r) ((s16)((u32)C[r] >> 16))
 
+/* the 3 x 3 matrix of 16-bit elements held by control registers base.. (0 rotation, 8 light, 16 light colour) */
 static void mat(int base, s16 m[3][3]) {
-    m[0][0] = M16LO(base); m[0][1] = M16HI(base); m[0][2] = M16LO(base + 1);
-    m[1][0] = M16HI(base + 1); m[1][1] = M16LO(base + 2); m[1][2] = M16HI(base + 2);
-    m[2][0] = M16LO(base + 3); m[2][1] = M16HI(base + 3); m[2][2] = M16LO(base + 4);
+    m[0][0] = M16LO(base);
+    m[0][1] = M16HI(base);
+    m[0][2] = M16LO(base + 1);
+    m[1][0] = M16HI(base + 1);
+    m[1][1] = M16LO(base + 2);
+    m[1][2] = M16HI(base + 2);
+    m[2][0] = M16LO(base + 3);
+    m[2][1] = M16HI(base + 3);
+    m[2][2] = M16LO(base + 4);
 }
 
+/* v saturated to lo..hi; FLAG gets the bit flag when v was out of range */
 static s32 clampf(s64 v, s32 lo, s32 hi, u32 flag) {
-    if (v < lo) { FLAG |= flag; return lo; }
-    if (v > hi) { FLAG |= flag; return hi; }
+    if (v < lo) {
+        FLAG |= flag;
+        return lo;
+    }
+    if (v > hi) {
+        FLAG |= flag;
+        return hi;
+    }
     return (s32)v;
 }
+/* IR1..IR3 = MAC1..MAC3 saturated (lm: to 0..0x7FFF, else to -0x8000..0x7FFF) */
 static void set_ir(int lm) {
     s32 lo = lm ? 0 : -0x8000;
     IR1 = clampf(MAC1, lo, 0x7FFF, 1u << 24);
@@ -52,8 +71,14 @@ static void set_ir(int lm) {
 int port_gte_dx;
 
 static inline s32 clamp32(s32 v, s32 lo, s32 hi, u32 flag) {
-    if (v < lo) { FLAG |= flag; return lo; }
-    if (v > hi) { FLAG |= flag; return hi; }
+    if (v < lo) {
+        FLAG |= flag;
+        return lo;
+    }
+    if (v > hi) {
+        FLAG |= flag;
+        return hi;
+    }
     return v;
 }
 /* floor((a + b + c) / 4096) of three 32-bit products, in 32 bits (their sum does not fit) */
@@ -62,35 +87,55 @@ static inline s32 sum3_12(s32 a, s32 b, s32 c) {
 }
 /* (the rotation's products are 16 x 16 bits: 32-bit multiplies, and the translation, a multiple of 4096 once shifted,
    is added after the sum's own shift: the same values as the 64-bit sums, a third of the game's time on an Old 3DS) */
-static inline __attribute__((always_inline)) void rtp(int n, int last) {   /* (in line: RTPT's three share the matrix and the screen registers they load) */
-    s32 x = VX(n), y = VY(n), z = VZ(n);
+/* (in line: RTPT's three share the matrix and the screen registers they load) */
+static inline __attribute__((always_inline)) void rtp(int n, int last) {
+    s32 x = VX(n),
+        y = VY(n),
+        z = VZ(n);
     s64 m1 = (s64)C[5] + sum3_12(M16LO(0) * x, M16HI(0) * y, M16LO(1) * z);
     s64 m2 = (s64)C[6] + sum3_12(M16HI(1) * x, M16LO(2) * y, M16HI(2) * z);
     s64 m3 = (s64)C[7] + sum3_12(M16LO(3) * x, M16HI(3) * y, M16LO(4) * z);
-    MAC1 = (s32)m1; MAC2 = (s32)m2; MAC3 = (s32)m3;
+    MAC1 = (s32)m1;
+    MAC2 = (s32)m2;
+    MAC3 = (s32)m3;
     IR1 = clamp32(MAC1, -0x8000, 0x7FFF, 1u << 24);
     IR2 = clamp32(MAC2, -0x8000, 0x7FFF, 1u << 23);
     IR3 = clamp32(MAC3, -0x8000, 0x7FFF, 1u << 22);
     /* SZ FIFO */
-    D[16] = D[17]; D[17] = D[18]; D[18] = D[19];
+    D[16] = D[17];
+    D[17] = D[18];
+    D[18] = D[19];
     D[19] = clampf(m3, 0, 0xFFFF, 1u << 18);
     u32 h = (u16)C[26], sz = (u32)D[19];
     u32 q;
-    if (sz * 2 <= h) { q = 0x1FFFF; FLAG |= 1u << 17; }
-    else {
+    if (sz * 2 <= h) {
+        q = 0x1FFFF;
+        FLAG |= 1u << 17;
+    } else {
         /* (h << 17) / sz with 32-bit divisions (h < 2 sz, both 16 bits: the quotient has 18): a 64-bit division is a
            long library call on the 3DS's ARM11, once a vertex */
-        u32 a = (h << 16) / sz, rem = (h << 16) - a * sz, d = 2 * a + (2 * rem >= sz);
+        u32 a = (h << 16) / sz,
+            rem = (h << 16) - a * sz,
+            d = 2 * a + (2 * rem >= sz);
         q = (d + 1) >> 1;
-        if (q > 0x1FFFF) { q = 0x1FFFF; FLAG |= 1u << 17; }
+        if (q > 0x1FFFF) {
+            q = 0x1FFFF;
+            FLAG |= 1u << 17;
+        }
     }
     s64 sx = (((s64)C[24] + (s64)IR1 * q) >> 16) + port_gte_dx;
     s64 sy = ((s64)C[25] + (s64)IR2 * q) >> 16;
-    D[12] = D[13]; D[13] = D[14];
-    s32 SX = clampf(sx, -0x400, 0x3FF, 1u << 14), SY = clampf(sy, -0x400, 0x3FF, 1u << 13);
+    D[12] = D[13];
+    D[13] = D[14];
+    s32 SX = clampf(sx, -0x400, 0x3FF, 1u << 14),
+        SY = clampf(sy, -0x400, 0x3FF, 1u << 13);
     D[14] = (SX & 0xFFFF) | ((u32)SY << 16);
     D[15] = D[14];
-    { extern int port_stereo_on; extern void port_stereo_note(int, int, unsigned); if (port_stereo_on) port_stereo_note(SX, SY, sz); }
+    {
+        extern int port_stereo_on;
+        extern void port_stereo_note(int, int, unsigned);
+        if (port_stereo_on) port_stereo_note(SX, SY, sz);
+    }
     if (last) {
         s64 m0 = (s64)(s16)C[27] * q + C[28];
         MAC0 = (s32)m0;
@@ -106,12 +151,17 @@ static inline void set_ir0(void) {   /* set_ir(1) */
     IR3 = clamp32(MAC3, 0, 0x7FFF, 1u << 22);
 }
 static void ncc(int n) {
-    s32 x = VX(n), y = VY(n), z = VZ(n);
+    s32 x = VX(n),
+        y = VY(n),
+        z = VZ(n);
     MAC1 = sum3_12(M16LO(8) * x, M16HI(8) * y, M16LO(9) * z);
     MAC2 = sum3_12(M16HI(9) * x, M16LO(10) * y, M16HI(10) * z);
     MAC3 = sum3_12(M16LO(11) * x, M16HI(11) * y, M16LO(12) * z);
     set_ir0();
-    s32 a = IR1, b = IR2, d = IR3;   /* (0 .. 0x7FFF) */
+    /* (0 .. 0x7FFF) */
+    s32 a = IR1,
+        b = IR2,
+        d = IR3;
     MAC1 = (s32)((u32)C[13] + (u32)sum3_12(M16LO(16) * a, M16HI(16) * b, M16LO(17) * d));
     MAC2 = (s32)((u32)C[14] + (u32)sum3_12(M16HI(17) * a, M16LO(18) * b, M16HI(18) * d));
     MAC3 = (s32)((u32)C[15] + (u32)sum3_12(M16LO(19) * a, M16HI(19) * b, M16LO(20) * d));
@@ -121,19 +171,48 @@ static void ncc(int n) {
     MAC2 = (s32)(((rgbc >> 8) & 0xFF) * (u32)IR2) >> 8;
     MAC3 = (s32)(((rgbc >> 16) & 0xFF) * (u32)IR3) >> 8;
     set_ir0();
-    u32 R = clamp32(MAC1 >> 4, 0, 255, 1u << 21), G = clamp32(MAC2 >> 4, 0, 255, 1u << 20), B = clamp32(MAC3 >> 4, 0, 255, 1u << 19);
-    D[20] = D[21]; D[21] = D[22];
+    u32 R = clamp32(MAC1 >> 4, 0, 255, 1u << 21),
+        G = clamp32(MAC2 >> 4, 0, 255, 1u << 20),
+        B = clamp32(MAC3 >> 4, 0, 255, 1u << 19);
+    D[20] = D[21];
+    D[21] = D[22];
     D[22] = R | (G << 8) | (B << 16) | (rgbc & 0xFF000000u);
 }
 
 static void mvmva(u32 op) {
-    int sf = (op >> 19) & 1, mx = (op >> 17) & 3, v = (op >> 15) & 3, cv = (op >> 13) & 3, lm = (op >> 10) & 1;
-    s16 m[3][3]; mat(mx == 0 ? 0 : mx == 1 ? 8 : 16, m);
+    int sf = (op >> 19) & 1,
+        mx = (op >> 17) & 3,
+        v = (op >> 15) & 3,
+        cv = (op >> 13) & 3,
+        lm = (op >> 10) & 1;
+    s16 m[3][3];
+    mat(mx == 0 ? 0 : mx == 1 ? 8 : 16, m);
     s32 x, y, z;
-    if (v == 3) { x = (s16)IR1; y = (s16)IR2; z = (s16)IR3; } else { x = VX(v); y = VY(v); z = VZ(v); }
-    u32 t1 = 0, t2 = 0, t3 = 0;
-    if (cv == 0) { t1 = (u32)C[5]; t2 = (u32)C[6]; t3 = (u32)C[7]; } else if (cv == 1) { t1 = (u32)C[13]; t2 = (u32)C[14]; t3 = (u32)C[15]; }
-    else if (cv == 2) { t1 = (u32)C[21]; t2 = (u32)C[22]; t3 = (u32)C[23]; }
+    if (v == 3) {
+        x = (s16)IR1;
+        y = (s16)IR2;
+        z = (s16)IR3;
+    } else {
+        x = VX(v);
+        y = VY(v);
+        z = VZ(v);
+    }
+    u32 t1 = 0,
+        t2 = 0,
+        t3 = 0;
+    if (cv == 0) {
+        t1 = (u32)C[5];
+        t2 = (u32)C[6];
+        t3 = (u32)C[7];
+    } else if (cv == 1) {
+        t1 = (u32)C[13];
+        t2 = (u32)C[14];
+        t3 = (u32)C[15];
+    } else if (cv == 2) {
+        t1 = (u32)C[21];
+        t2 = (u32)C[22];
+        t3 = (u32)C[23];
+    }
     if (sf) {
         MAC1 = (s32)(t1 + (u32)sum3_12(m[0][0] * x, m[0][1] * y, m[0][2] * z));
         MAC2 = (s32)(t2 + (u32)sum3_12(m[1][0] * x, m[1][1] * y, m[1][2] * z));
@@ -149,28 +228,48 @@ static void mvmva(u32 op) {
 void port_gte_op(unsigned long op) {
     FLAG = 0;
     switch (op & 0x3F) {
-    case 0x01: rtp(0, 1); break;                                     /* RTPS */
-    case 0x30: rtp(0, 0); rtp(1, 0); rtp(2, 1); break;               /* RTPT */
+    case 0x01: /* RTPS */
+        rtp(0, 1);
+        break;
+    case 0x30: /* RTPT */
+        rtp(0, 0);
+        rtp(1, 0);
+        rtp(2, 1);
+        break;
     case 0x06: {                                                     /* NCLIP */
         /* (modulo 2^32, what the 64-bit sum cut to 32 bits was) */
-        s32 x0 = (s16)D[12], y0 = (s16)(D[12] >> 16), x1 = (s16)D[13], y1 = (s16)(D[13] >> 16);
+        s32 x0 = (s16)D[12],
+            y0 = (s16)(D[12] >> 16),
+            x1 = (s16)D[13],
+            y1 = (s16)(D[13] >> 16);
         s32 x2 = (s16)D[14], y2 = (s16)(D[14] >> 16);
-        MAC0 = (s32)((u32)(x0 * y1) + (u32)(x1 * y2) + (u32)(x2 * y0) - (u32)(x0 * y2) - (u32)(x1 * y0) - (u32)(x2 * y1));
+        MAC0 = (s32)((u32)(x0 * y1) + (u32)(x1 * y2) + (u32)(x2 * y0) - (u32)(x0 * y2) - (u32)(x1 * y0) -
+                     (u32)(x2 * y1));
         break;
     }
     case 0x2D: {                                                     /* AVSZ3 */
         s64 m = (s64)(s16)C[29] * ((u16)D[17] + (u16)D[18] + (u16)D[19]);
-        MAC0 = (s32)m; D[7] = clampf(m >> 12, 0, 0xFFFF, 1u << 18);
+        MAC0 = (s32)m;
+        D[7] = clampf(m >> 12, 0, 0xFFFF, 1u << 18);
         break;
     }
     case 0x2E: {                                                     /* AVSZ4 */
         s64 m = (s64)(s16)C[30] * ((u16)D[16] + (u16)D[17] + (u16)D[18] + (u16)D[19]);
-        MAC0 = (s32)m; D[7] = clampf(m >> 12, 0, 0xFFFF, 1u << 18);
+        MAC0 = (s32)m;
+        D[7] = clampf(m >> 12, 0, 0xFFFF, 1u << 18);
         break;
     }
-    case 0x1B: ncc(0); break;                                        /* NCCS */
-    case 0x3F: ncc(0); ncc(1); ncc(2); break;                        /* NCCT */
-    case 0x12: mvmva((u32)op); break;                                /* MVMVA */
+    case 0x1B: /* NCCS */
+        ncc(0);
+        break;
+    case 0x3F: /* NCCT */
+        ncc(0);
+        ncc(1);
+        ncc(2);
+        break;
+    case 0x12: /* MVMVA */
+        mvmva((u32)op);
+        break;
     default: port_printf("[port] GTE op %08lx not implemented\n", op);
     }
     if (FLAG & 0x7F87E000u) FLAG |= 0x80000000u;
@@ -178,13 +277,36 @@ void port_gte_op(unsigned long op) {
 
 void port_gte_mtc2(int r, unsigned long v) {
     switch (r) {
-    case 15: D[12] = D[13]; D[13] = D[14]; D[14] = (s32)v; D[15] = (s32)v; break;  /* SXYP pushes */
-    case 7: case 16: case 17: case 18: case 19: D[r] = (s32)(v & 0xFFFF); break;
-    case 8: case 9: case 10: case 11: D[r] = (s16)v; break;
-    case 28: D[28] = (s32)(v & 0x7FFF);
-        IR1 = (v & 0x1F) << 7; IR2 = ((v >> 5) & 0x1F) << 7; IR3 = ((v >> 10) & 0x1F) << 7; break;
-    case 30: { D[30] = (s32)v; s32 x = (s32)v; u32 u = x < 0 ? ~(u32)x : (u32)x; int n = 0;
-        while (n < 32 && !(u & 0x80000000u)) { u <<= 1; n++; } D[31] = n; break; }
+    case 15: /* SXYP pushes */
+        D[12] = D[13];
+        D[13] = D[14];
+        D[14] = (s32)v;
+        D[15] = (s32)v;
+        break;
+    case 7: case 16: case 17: case 18: case 19:
+        D[r] = (s32)(v & 0xFFFF);
+        break;
+    case 8: case 9: case 10: case 11:
+        D[r] = (s16)v;
+        break;
+    case 28:
+        D[28] = (s32)(v & 0x7FFF);
+        IR1 = (v & 0x1F) << 7;
+        IR2 = ((v >> 5) & 0x1F) << 7;
+        IR3 = ((v >> 10) & 0x1F) << 7;
+        break;
+    case 30: {
+        D[30] = (s32)v;
+        s32 x = (s32)v;
+        u32 u = x < 0 ? ~(u32)x : (u32)x;
+        int n = 0;
+        while (n < 32 && !(u & 0x80000000u)) {
+            u <<= 1;
+            n++;
+        }
+        D[31] = n;
+        break;
+    }
     case 29: case 31: break;
     default: D[r] = (s32)v;
     }
@@ -196,8 +318,12 @@ unsigned long port_gte_mfc2(int r) {
     case 7: case 16: case 17: case 18: case 19: return (u16)D[r];
     case 15: return (u32)D[14];
     case 28: case 29: {
-        s32 r5 = IR1 >> 7, g5 = IR2 >> 7, b5 = IR3 >> 7;
-        r5 = r5 < 0 ? 0 : r5 > 31 ? 31 : r5; g5 = g5 < 0 ? 0 : g5 > 31 ? 31 : g5; b5 = b5 < 0 ? 0 : b5 > 31 ? 31 : b5;
+        s32 r5 = IR1 >> 7,
+            g5 = IR2 >> 7,
+            b5 = IR3 >> 7;
+        r5 = r5 < 0 ? 0 : r5 > 31 ? 31 : r5;
+        g5 = g5 < 0 ? 0 : g5 > 31 ? 31 : g5;
+        b5 = b5 < 0 ? 0 : b5 > 31 ? 31 : b5;
         return (u32)(r5 | (g5 << 5) | (b5 << 10));
     }
     default: return (u32)D[r];
@@ -205,7 +331,11 @@ unsigned long port_gte_mfc2(int r) {
 }
 
 void port_gte_ctc2(int r, unsigned long v) {
-    if (r == 31) { FLAG = v & 0x7FFFF000u; if (FLAG & 0x7F87E000u) FLAG |= 0x80000000u; return; }
+    if (r == 31) {
+        FLAG = v & 0x7FFFF000u;
+        if (FLAG & 0x7F87E000u) FLAG |= 0x80000000u;
+        return;
+    }
     if (r == 4 || r == 12 || r == 20 || r == 26 || r == 27 || r == 29 || r == 30) v = (unsigned long)(s32)(s16)v;
     if (r == 26) v &= 0xFFFF;
     C[r] = (s32)v;
