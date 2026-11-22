@@ -26,47 +26,88 @@
 #include "panel_charmap.h"
 #include "panel_addrs.h"
 
-typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32; typedef short s16;
+typedef unsigned char u8;
+typedef unsigned short u16;
+typedef unsigned int u32;
+typedef short s16;
 
 int pa_ok;              /* pages + palettes read */
 int pa_font_ok;         /* WFM glyphs read */
 static u16 *vram;       /* 1024 x 512, malloc'd when the panel starts */
 
+/* little-endian reads at byte offset o */
 static unsigned rd32(const u8 *d, unsigned o) { return d[o] | d[o + 1] << 8 | d[o + 2] << 16 | (u32)d[o + 3] << 24; }
 static unsigned rd16(const u8 *d, unsigned o) { return d[o] | d[o + 1] << 8; }
 
 /* `GAM\0`, u32 size, then 16-bit flag words (bit 0 first; 1 = copy: back offset byte, length byte) */
 static u8 *gam_unpack(const u8 *d, unsigned n, unsigned *out_n) {
     if (n < 8 || memcmp(d, "GAM", 4)) return NULL;
-    unsigned size = rd32(d, 4), p = 8, o = 0, flags = 0, left = 0;
+    unsigned size = rd32(d, 4),
+             src_pos = 8,
+             dst_pos = 0,
+             flags = 0,
+             left = 0;
     if (size > (8u << 20)) return NULL;
     u8 *out = malloc(size ? size : 1);
-    while (o < size) {
-        if (!left) { if (p + 2 > n) break; flags = rd16(d, p); p += 2; left = 16; }
-        int bit = flags & 1; flags >>= 1; left--;
+    while (dst_pos < size) {
+        if (!left) {
+            if (src_pos + 2 > n) break;
+            flags = rd16(d, src_pos);
+            src_pos += 2;
+            left = 16;
+        }
+        int bit = flags & 1;
+        flags >>= 1;
+        left--;
         if (bit) {
-            if (p + 2 > n) break;
-            unsigned off = d[p], ln = d[p + 1]; p += 2;
-            if (!off || off > o) break;
-            for (unsigned k = 0; k < ln && o < size; k++, o++) out[o] = out[o - off];
-        } else { if (p >= n) break; out[o++] = d[p++]; }
+            if (src_pos + 2 > n) break;
+            unsigned off = d[src_pos],
+                     run_len = d[src_pos + 1];
+            src_pos += 2;
+            if (!off || off > dst_pos) break;
+            for (unsigned k = 0; k < run_len && dst_pos < size; k++, dst_pos++) out[dst_pos] = out[dst_pos - off];
+        } else {
+            if (src_pos >= n) break;
+            out[dst_pos++] = d[src_pos++];
+        }
     }
-    if (o < size) { free(out); return NULL; }
+    if (dst_pos < size) {
+        free(out);
+        return NULL;
+    }
     *out_n = size;
     return out;
 }
+/* a disc file, unpacked when it is GAM-packed; NULL when missing */
 u8 *pa_read(const char *name, unsigned *n) {
     u8 *d = port_cd_read_named(name, n);
-    if (d && *n >= 8 && !memcmp(d, "GAM", 4)) { unsigned m; u8 *u = gam_unpack(d, *n, &m); free(d); d = u; *n = u ? m : 0; }
+    if (d && *n >= 8 && !memcmp(d, "GAM", 4)) {
+        unsigned unpacked_n;
+        u8 *unpacked = gam_unpack(d, *n, &unpacked_n);
+        free(d);
+        d = unpacked;
+        *n = unpacked ? unpacked_n : 0;
+    }
     return d;
 }
+/* copies the file's 16-bit words from byte off into the VRAM copy as a w-word-wide rect at (x, y); h <= 0: to the
+   end of the file */
 static int load_rect(const char *name, int x, int y, int w, unsigned off, int h) {
-    unsigned n; u8 *d = pa_read(name, &n);
-    if (!d) { port_printf("[panel] %s not readable: game graphics off\n", name); return 0; }
+    unsigned n;
+    u8 *d = pa_read(name, &n);
+    if (!d) {
+        port_printf("[panel] %s not readable: game graphics off\n", name);
+        return 0;
+    }
     unsigned words = h > 0 ? (unsigned)(w * h) : (n - off) / 2;
-    if (off + 2 * words > n) { free(d); port_printf("[panel] %s: unexpected size %u\n", name, n); return 0; }
+    if (off + 2 * words > n) {
+        free(d);
+        port_printf("[panel] %s: unexpected size %u\n", name, n);
+        return 0;
+    }
     for (unsigned i = 0; i < words; i++) {
-        int X = x + (int)(i % w), Y = y + (int)(i / w);
+        int X = x + (int)(i % w),
+            Y = y + (int)(i / w);
         if (Y < 512 && X < 1024) vram[Y * 1024 + X] = (u16)rd16(d, off + 2 * i);
     }
     free(d);
@@ -75,88 +116,147 @@ static int load_rect(const char *name, int x, int y, int w, unsigned off, int h)
 
 /* ---------------------------------------------------------------- event / item icon tables */
 #define NEV_ICONS 192
-static struct { u8 u, v, w, h; u16 clut; } ev_icon[NEV_ICONS];
+static struct {
+    u8 u, v, w, h;
+    u16 clut;
+} ev_icon[NEV_ICONS];
 static u8 item_clut[200];
 static int icons_ok;
+/* the event icon rects (the first part of each icon's sprite frame) and the item icon CLUT rows */
 static void load_icons(void) {
-    static const struct { u8 e; u16 c; } force[] = { {0x56, 0x7D12}, {0x57, 0x7D52}, {0x58, 0x7D92}, {0x74, 0x7DD2},
+    /* the CLUTs subScreenDrawEventIcons forces on 8 events */
+    static const struct {
+        u8 e;
+        u16 c;
+    } force[] = { {0x56, 0x7D12}, {0x57, 0x7D52}, {0x58, 0x7D92}, {0x74, 0x7DD2},
         {0x97, 0x7A93}, {0x9D, 0x7AD3}, {0x9F, 0x7B13}, {0xA4, 0x7B53} };
-    unsigned nd, nb; u8 *d = pa_read(PA_F_SUB, &nd), *b0 = pa_read(PA_F_SPRITES, &nb), *b = b0;
-    const unsigned icons = PV_EVENT_ICONS - PORT_OVL_BASE, cluts = PV_ITEM_ICON_CLUTS - PORT_OVL_BASE;
-    if (b && nb > PA_SPRITES_OFF + 16) { b += PA_SPRITES_OFF; nb -= PA_SPRITES_OFF; } else nb = 0;
-    if (d && b && nd > cluts + 200 && nb > 16) {
-        int nf = (int)(rd16(b, 2) / 4), good = 0;
+    unsigned sub_n, bank_n;
+    u8 *sub_ovl = pa_read(PA_F_SUB, &sub_n),
+       *bank_file = pa_read(PA_F_SPRITES, &bank_n),
+       *sprite_bank = bank_file;
+    const unsigned icons = PV_EVENT_ICONS - PORT_OVL_BASE,
+                   cluts = PV_ITEM_ICON_CLUTS - PORT_OVL_BASE;
+    if (sprite_bank && bank_n > PA_SPRITES_OFF + 16) {
+        sprite_bank += PA_SPRITES_OFF;
+        bank_n -= PA_SPRITES_OFF;
+    } else bank_n = 0;
+    if (sub_ovl && sprite_bank && sub_n > cluts + 200 && bank_n > 16) {
+        int n_frames = (int)(rd16(sprite_bank, 2) / 4),
+            good = 0;
         for (int k = 0; k < NEV_ICONS; k++) {
-            unsigned p = rd32(d, icons + 4 * k) - PORT_OVL_BASE;
-            if (p + 2 > nd) continue;
-            int f = (int)rd16(d, p);
-            if (f >= nf) continue;
-            unsigned o = rd16(b, 4 * f + 2);
-            if (o + 16 > nb) continue;
-            const u8 *q = b + o;
-            ev_icon[k].u = q[0]; ev_icon[k].v = q[1]; ev_icon[k].clut = (u16)rd16(q, 2); ev_icon[k].w = q[10]; ev_icon[k].h = q[11];
+            unsigned p = rd32(sub_ovl, icons + 4 * k) - PORT_OVL_BASE;
+            if (p + 2 > sub_n) continue;
+            int f = (int)rd16(sub_ovl, p);
+            if (f >= n_frames) continue;
+            unsigned o = rd16(sprite_bank, 4 * f + 2);
+            if (o + 16 > bank_n) continue;
+            const u8 *frame_part = sprite_bank + o;
+            ev_icon[k].u = frame_part[0];
+            ev_icon[k].v = frame_part[1];
+            ev_icon[k].clut = (u16)rd16(frame_part, 2);
+            ev_icon[k].w = frame_part[10];
+            ev_icon[k].h = frame_part[11];
             good++;
         }
         for (unsigned i = 0; i < sizeof force / sizeof force[0]; i++) ev_icon[force[i].e].clut = force[i].c;
-        memcpy(item_clut, d + cluts, sizeof item_clut);
+        memcpy(item_clut, sub_ovl + cluts, sizeof item_clut);
         icons_ok = good > 100;
     }
-    if (!icons_ok) port_printf("[panel] event icon tables not found (%s %u bytes, %s %u bytes)\n", PA_F_SUB, d ? nd : 0, PA_F_SPRITES, b ? nb : 0);
-    free(d); free(b0);
+    if (!icons_ok)
+        port_printf("[panel] event icon tables not found (%s %u bytes, %s %u bytes)\n",
+                    PA_F_SUB, sub_ovl ? sub_n : 0, PA_F_SPRITES, sprite_bank ? bank_n : 0);
+    free(sub_ovl);
+    free(bank_file);
 }
 
 /* ---------------------------------------------------------------- canvas (game pixels) */
-u32 *pa_cv; int pa_cw, pa_ch;
-int pa_clip_x0, pa_clip_y0, pa_clip_x1 = 1 << 20, pa_clip_y1 = 1 << 20;
+u32 *pa_cv;
+int pa_cw, pa_ch;
+int pa_clip_x0,
+    pa_clip_y0,
+    pa_clip_x1 = 1 << 20,
+    pa_clip_y1 = 1 << 20;
 
+/* a 15-bit PS1 colour as 0xAABBGGRR, opaque */
 static inline u32 c15(u16 v) {
-    u32 r = (v & 31) * 255 / 31, g = (v >> 5 & 31) * 255 / 31, b = (v >> 10 & 31) * 255 / 31;
+    u32 r = (v & 31) * 255 / 31,
+        g = (v >> 5 & 31) * 255 / 31,
+        b = (v >> 10 & 31) * 255 / 31;
     return 0xFF000000u | b << 16 | g << 8 | r;
 }
+/* 1 when (x, y) is outside the clip rect or the canvas */
 static inline int clipped(int x, int y) {
-    return x < pa_clip_x0 || y < pa_clip_y0 || x >= pa_clip_x1 || y >= pa_clip_y1 || (unsigned)x >= (unsigned)pa_cw || (unsigned)y >= (unsigned)pa_ch;
+    return x < pa_clip_x0 || y < pa_clip_y0 || x >= pa_clip_x1 || y >= pa_clip_y1 ||
+           (unsigned)x >= (unsigned)pa_cw || (unsigned)y >= (unsigned)pa_ch;
 }
 void pa_put(int x, int y, u32 c) { if (!clipped(x, y)) pa_cv[y * pa_cw + x] = c; }
+/* c over the canvas pixel with alpha a (0..255) */
 void pa_blend(int x, int y, u32 c, int a) {
     if (clipped(x, y) || a <= 0) return;
     u32 *p = &pa_cv[y * pa_cw + x];
-    if (a >= 255) { *p = c | 0xFF000000u; return; }
+    if (a >= 255) {
+        *p = c | 0xFF000000u;
+        return;
+    }
     u32 d = *p;
     /* x / 255 for x <= 255 * 255 as (x + 1 + (x >> 8)) >> 8: exact over that range, no division (the 3DS has none) */
     #define DIV255(x) (((x) + 1 + ((x) >> 8)) >> 8)
-    u32 r = DIV255((c & 0xFF) * a + (d & 0xFF) * (255 - a)), g = DIV255((c >> 8 & 0xFF) * a + (d >> 8 & 0xFF) * (255 - a)),
+    u32 r = DIV255((c & 0xFF) * a + (d & 0xFF) * (255 - a)),
+        g = DIV255((c >> 8 & 0xFF) * a + (d >> 8 & 0xFF) * (255 - a)),
         bb = DIV255((c >> 16 & 0xFF) * a + (d >> 16 & 0xFF) * (255 - a));
     #undef DIV255
     *p = 0xFF000000u | bb << 16 | g << 8 | r;
 }
-void pa_fill(int x, int y, int w, int h, u32 c) { for (int j = y; j < y + h; j++) for (int i = x; i < x + w; i++) pa_put(i, j, c); }
-u32 pa_clut_color(int cx, int cy, int i) { return vram ? c15(vram[(cy & 511) * 1024 + ((cx + i) & 1023)]) : 0xFF808080u; }
+void pa_fill(int x, int y, int w, int h, u32 c) {
+    for (int j = y; j < y + h; j++) for (int i = x; i < x + w; i++) pa_put(i, j, c);
+}
+/* colour i of the CLUT at (cx, cy) of the VRAM copy (grey before it exists) */
+u32 pa_clut_color(int cx, int cy, int i) {
+    return vram ? c15(vram[(cy & 511) * 1024 + ((cx + i) & 1023)]) : 0xFF808080u;
+}
 
 /* texel (4 bpp) of the page at word x tx, row ty */
-static inline int texel(int tx, int ty, int u, int v) { return (vram[((ty + v) & 511) * 1024 + ((tx + (u >> 2)) & 1023)] >> ((u & 3) * 4)) & 15; }
+static inline int texel(int tx, int ty, int u, int v) {
+    return (vram[((ty + v) & 511) * 1024 + ((tx + (u >> 2)) & 1023)] >> ((u & 3) * 4)) & 15;
+}
 
 /* draw rect (u, v, w, h) of the 4 bpp page at (tx, ty) words with the CLUT at (cx, cy) at canvas (x, y).
    flags: PA_FLIPX, PA_DIM (silhouette), PA_SHADE (darker), PA_OPAQUE (index 0 drawn) */
 unsigned pa_cut_mask, pa_drop_mask;   /* PA_CUTBOX: indices flooded from the border / dropped anywhere */
 void pa_spr(int x, int y, int tx, int ty, int u, int v, int w, int h, int cx, int cy, int flags) {
     if (!pa_ok || w <= 0 || h <= 0 || w > 256 || h > 256) return;
-    u16 pal[16]; static u8 idx[258 * 258], vis[258 * 258];
+    u16 pal[16];
+    static u8 idx[258 * 258], vis[258 * 258];
     for (int i = 0; i < 16; i++) pal[i] = vram[(cy & 511) * 1024 + ((cx + i) & 1023)];
     if (!(flags & ~PA_OPAQUE)) {
         /* the plain sprite (and every tile of a background): straight to the canvas, a row at a time inside the
            clip, the colours converted once (the same pixels as the general way below, which is a fifth as fast:
            an Old 3DS took 200 ms a panel) */
-        u32 p32[16]; u8 on[16];
-        for (int i = 0; i < 16; i++) { p32[i] = c15(pal[i]); on[i] = pal[i] || (flags & PA_OPAQUE); }
-        int x0 = x, x1 = x + w, y0 = y, y1 = y + h;
-        if (x0 < pa_clip_x0) x0 = pa_clip_x0; if (x0 < 0) x0 = 0; if (x1 > pa_clip_x1) x1 = pa_clip_x1; if (x1 > pa_cw) x1 = pa_cw;
-        if (y0 < pa_clip_y0) y0 = pa_clip_y0; if (y0 < 0) y0 = 0; if (y1 > pa_clip_y1) y1 = pa_clip_y1; if (y1 > pa_ch) y1 = pa_ch;
+        u32 rgba[16];
+        u8 on[16];
+        for (int i = 0; i < 16; i++) {
+            rgba[i] = c15(pal[i]);
+            on[i] = pal[i] || (flags & PA_OPAQUE);
+        }
+        int x0 = x,
+            x1 = x + w,
+            y0 = y,
+            y1 = y + h;
+        if (x0 < pa_clip_x0) x0 = pa_clip_x0;
+        if (x0 < 0) x0 = 0;
+        if (x1 > pa_clip_x1) x1 = pa_clip_x1;
+        if (x1 > pa_cw) x1 = pa_cw;
+        if (y0 < pa_clip_y0) y0 = pa_clip_y0;
+        if (y0 < 0) y0 = 0;
+        if (y1 > pa_clip_y1) y1 = pa_clip_y1;
+        if (y1 > pa_ch) y1 = pa_ch;
         for (int j = y0; j < y1; j++) {
             const u16 *row = &vram[((ty + v + (j - y)) & 511) * 1024];
             u32 *d = pa_cv + j * pa_cw;
             for (int i = x0; i < x1; i++) {
-                const int uu = u + (i - x), t = (row[(tx + (uu >> 2)) & 1023] >> ((uu & 3) * 4)) & 15;
-                if (on[t]) d[i] = p32[t];
+                const int uu = u + (i - x),
+                          t = (row[(tx + (uu >> 2)) & 1023] >> ((uu & 3) * 4)) & 15;
+                if (on[t]) d[i] = rgba[t];
             }
         }
         return;
@@ -165,26 +265,43 @@ void pa_spr(int x, int y, int tx, int ty, int u, int v, int w, int h, int cx, in
        is drawn (the panel draws opaque, like a primitive without semi-transparency) */
     for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) {
         int t = texel(tx, ty, u + ((flags & PA_FLIPX) ? w - 1 - i : i), v + j);
-        idx[j * w + i] = (u8)t; vis[j * w + i] = pal[t] || (flags & PA_OPAQUE);
+        idx[j * w + i] = (u8)t;
+        vis[j * w + i] = pal[t] || (flags & PA_OPAQUE);
     }
     if (flags & PA_CUTBOX) {   /* flood from the border through the box's indices */
-        static int st[258 * 258]; int n = 0;
+        static int flood_stack[258 * 258];
+        int n = 0;
         for (int j = 0; j < h; j++) for (int i = 0; i < w; i++)
-            if ((!i || !j || i == w - 1 || j == h - 1) && (pa_cut_mask >> idx[j * w + i] & 1)) { st[n++] = j * w + i; idx[j * w + i] |= 0x80; }
+            if ((!i || !j || i == w - 1 || j == h - 1) && (pa_cut_mask >> idx[j * w + i] & 1)) {
+                flood_stack[n++] = j * w + i;
+                idx[j * w + i] |= 0x80;
+            }
         while (n) {
-            int p = st[--n], i = p % w, j = p / w; vis[p] = 0;
-            int nb[4] = { i > 0 ? p - 1 : -1, i < w - 1 ? p + 1 : -1, j > 0 ? p - w : -1, j < h - 1 ? p + w : -1 };
-            for (int k = 0; k < 4; k++) if (nb[k] >= 0 && !(idx[nb[k]] & 0x80) && (pa_cut_mask >> idx[nb[k]] & 1)) { idx[nb[k]] |= 0x80; st[n++] = nb[k]; }
+            int p = flood_stack[--n],
+                i = p % w,
+                j = p / w;
+            vis[p] = 0;
+            int nbr[4] = { i > 0 ? p - 1 : -1, i < w - 1 ? p + 1 : -1, j > 0 ? p - w : -1, j < h - 1 ? p + w : -1 };
+            for (int k = 0; k < 4; k++) if (nbr[k] >= 0 && !(idx[nbr[k]] & 0x80) && (pa_cut_mask >> idx[nbr[k]] & 1)) {
+                idx[nbr[k]] |= 0x80;
+                flood_stack[n++] = nbr[k];
+            }
         }
-        for (int k = 0; k < w * h; k++) { idx[k] &= 15; if (pa_drop_mask >> idx[k] & 1) vis[k] = 0; }
+        for (int k = 0; k < w * h; k++) {
+            idx[k] &= 15;
+            if (pa_drop_mask >> idx[k] & 1) vis[k] = 0;
+        }
     }
     /* integer scale (PA_X2 / PA_X3, map markers): every texel, and the outline around them, an s x s block */
     int sc = flags & PA_X4 ? 4 : flags & PA_X3 ? 3 : flags & PA_X2 ? 2 : 1;
     if (flags & PA_OUTLINE)
         for (int j = -1; j <= h; j++) for (int i = -1; i <= w; i++) {
             if (i >= 0 && j >= 0 && i < w && j < h && vis[j * w + i]) continue;
-            int on = (i > 0 && j >= 0 && j < h && i - 1 < w && vis[j * w + i - 1]) || (i + 1 < w && i + 1 >= 0 && j >= 0 && j < h && vis[j * w + i + 1]) ||
-                     (j > 0 && i >= 0 && i < w && j - 1 < h && vis[(j - 1) * w + i]) || (j + 1 < h && j + 1 >= 0 && i >= 0 && i < w && vis[(j + 1) * w + i]);
+            /* a visible texel to the left, right, above or below */
+            int on = (i > 0 && j >= 0 && j < h && i - 1 < w && vis[j * w + i - 1]) ||
+                     (i + 1 < w && i + 1 >= 0 && j >= 0 && j < h && vis[j * w + i + 1]) ||
+                     (j > 0 && i >= 0 && i < w && j - 1 < h && vis[(j - 1) * w + i]) ||
+                     (j + 1 < h && j + 1 >= 0 && i >= 0 && i < w && vis[(j + 1) * w + i]);
             if (on) pa_fill(x + i * sc, y + j * sc, sc, sc, 0xFF101828u);
         }
     for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) {
@@ -192,7 +309,8 @@ void pa_spr(int x, int y, int tx, int ty, int u, int v, int w, int h, int cx, in
         u32 col = c15(pal[idx[j * w + i]]);
         if (flags & PA_DIM) col = 0xFF463240u;
         else if (flags & PA_SHADE) col = 0xFF000000u | ((col >> 1) & 0x7F7F7Fu);
-        if (sc == 1) pa_put(x + i, y + j, col); else pa_fill(x + i * sc, y + j * sc, sc, sc, col);
+        if (sc == 1) pa_put(x + i, y + j, col);
+        else pa_fill(x + i * sc, y + j * sc, sc, sc, col);
     }
 }
 /* tile a rect over (x, y, W, H) */
@@ -201,48 +319,95 @@ void pa_spr(int x, int y, int tx, int ty, int u, int v, int w, int h, int cx, in
    texel, was most of a render: 30 to 45 ms on an Old 3DS, whose every touch waits for one.)  The least recently used
    leave when the kept ones pass 640 KB. */
 #define TC_N 24
-static struct { int key[10], ok; unsigned used; u32 *pix; } tc[TC_N];
+static struct {
+    int key[10], ok;
+    unsigned used;
+    u32 *pix;
+} tc[TC_N];
 static unsigned tc_clock, tc_bytes;
 void pa_tile(int x, int y, int W, int H, int tx, int ty, int u, int v, int w, int h, int cx, int cy) {
-    int sx0 = pa_clip_x0, sy0 = pa_clip_y0, sx1 = pa_clip_x1, sy1 = pa_clip_y1;
+    int old_clip_x0 = pa_clip_x0,
+        old_clip_y0 = pa_clip_y0,
+        old_clip_x1 = pa_clip_x1,
+        old_clip_y1 = pa_clip_y1;
     const int key[10] = { W, H, tx, ty, u, v, w, h, cx, cy };
-    int big = pa_ok && W > 0 && H > 0 && W * H >= 512 && W <= 2048 && H <= 2048 && w > 0 && h > 0, slot = -1;
+    int big = pa_ok && W > 0 && H > 0 && W * H >= 512 && W <= 2048 && H <= 2048 && w > 0 && h > 0,
+        slot = -1;
     if (big) {
-        for (int i = 0; i < TC_N; i++) if (tc[i].ok && !memcmp(tc[i].key, key, sizeof key)) { slot = i; break; }
+        for (int i = 0; i < TC_N; i++) if (tc[i].ok && !memcmp(tc[i].key, key, sizeof key)) {
+            slot = i;
+            break;
+        }
         if (slot >= 0) {
-            int x0 = x, x1 = x + W, y0 = y, y1 = y + H;
-            if (x0 < pa_clip_x0) x0 = pa_clip_x0; if (x0 < 0) x0 = 0; if (x1 > pa_clip_x1) x1 = pa_clip_x1; if (x1 > pa_cw) x1 = pa_cw;
-            if (y0 < pa_clip_y0) y0 = pa_clip_y0; if (y0 < 0) y0 = 0; if (y1 > pa_clip_y1) y1 = pa_clip_y1; if (y1 > pa_ch) y1 = pa_ch;
-            if (x1 > x0) for (int j = y0; j < y1; j++) memcpy(pa_cv + j * pa_cw + x0, tc[slot].pix + (j - y) * W + (x0 - x), (size_t)(x1 - x0) * 4);
+            int x0 = x,
+                x1 = x + W,
+                y0 = y,
+                y1 = y + H;
+            if (x0 < pa_clip_x0) x0 = pa_clip_x0;
+            if (x0 < 0) x0 = 0;
+            if (x1 > pa_clip_x1) x1 = pa_clip_x1;
+            if (x1 > pa_cw) x1 = pa_cw;
+            if (y0 < pa_clip_y0) y0 = pa_clip_y0;
+            if (y0 < 0) y0 = 0;
+            if (y1 > pa_clip_y1) y1 = pa_clip_y1;
+            if (y1 > pa_ch) y1 = pa_ch;
+            if (x1 > x0)
+                for (int j = y0; j < y1; j++)
+                    memcpy(pa_cv + j * pa_cw + x0, tc[slot].pix + (j - y) * W + (x0 - x), (size_t)(x1 - x0) * 4);
             tc[slot].used = ++tc_clock;
             return;
         }
     }
-    if (x > pa_clip_x0) pa_clip_x0 = x; if (y > pa_clip_y0) pa_clip_y0 = y;
-    if (x + W < pa_clip_x1) pa_clip_x1 = x + W; if (y + H < pa_clip_y1) pa_clip_y1 = y + H;
-    for (int j = y; j < y + H; j += h) for (int i = x; i < x + W; i += w) pa_spr(i, j, tx, ty, u, v, w, h, cx, cy, PA_OPAQUE);
-    pa_clip_x0 = sx0; pa_clip_y0 = sy0; pa_clip_x1 = sx1; pa_clip_y1 = sy1;
+    if (x > pa_clip_x0) pa_clip_x0 = x;
+    if (y > pa_clip_y0) pa_clip_y0 = y;
+    if (x + W < pa_clip_x1) pa_clip_x1 = x + W;
+    if (y + H < pa_clip_y1) pa_clip_y1 = y + H;
+    for (int j = y; j < y + H; j += h)
+        for (int i = x; i < x + W; i += w) pa_spr(i, j, tx, ty, u, v, w, h, cx, cy, PA_OPAQUE);
+    pa_clip_x0 = old_clip_x0;
+    pa_clip_y0 = old_clip_y0;
+    pa_clip_x1 = old_clip_x1;
+    pa_clip_y1 = old_clip_y1;
     /* kept when all of it was drawn (inside the clip and the canvas) */
-    if (big && x >= sx0 && y >= sy0 && x + W <= sx1 && y + H <= sy1 && x >= 0 && y >= 0 && x + W <= pa_cw && y + H <= pa_ch) {
-        const unsigned bytes = (unsigned)W * H * 4, cap = 640u << 10;
+    if (big && x >= old_clip_x0 && y >= old_clip_y0 && x + W <= old_clip_x1 && y + H <= old_clip_y1 &&
+        x >= 0 && y >= 0 && x + W <= pa_cw && y + H <= pa_ch) {
+        const unsigned bytes = (unsigned)W * H * 4,
+                       cap = 640u << 10;
         if (bytes > cap / 2) return;
         for (;;) {   /* room: a free entry, and under the cap */
-            int freei = -1, old = -1;
-            for (int i = 0; i < TC_N; i++) { if (!tc[i].ok) freei = i; else if (old < 0 || tc[i].used < tc[old].used) old = i; }
-            if (freei >= 0 && tc_bytes + bytes <= cap) { slot = freei; break; }
-            if (old < 0) return;
-            free(tc[old].pix); tc_bytes -= (unsigned)tc[old].key[0] * tc[old].key[1] * 4; tc[old].ok = 0; tc[old].pix = NULL;
+            int free_slot = -1,
+                oldest = -1;
+            for (int i = 0; i < TC_N; i++) {
+                if (!tc[i].ok) free_slot = i;
+                else if (oldest < 0 || tc[i].used < tc[oldest].used) oldest = i;
+            }
+            if (free_slot >= 0 && tc_bytes + bytes <= cap) {
+                slot = free_slot;
+                break;
+            }
+            if (oldest < 0) return;
+            free(tc[oldest].pix);
+            tc_bytes -= (unsigned)tc[oldest].key[0] * tc[oldest].key[1] * 4;
+            tc[oldest].ok = 0;
+            tc[oldest].pix = NULL;
         }
         if (!(tc[slot].pix = malloc(bytes))) return;
         for (int j = 0; j < H; j++) memcpy(tc[slot].pix + j * W, pa_cv + (y + j) * pa_cw + x, (size_t)W * 4);
-        memcpy(tc[slot].key, key, sizeof key); tc[slot].ok = 1; tc[slot].used = ++tc_clock; tc_bytes += bytes;
+        memcpy(tc[slot].key, key, sizeof key);
+        tc[slot].ok = 1;
+        tc[slot].used = ++tc_clock;
+        tc_bytes += bytes;
     }
 }
 /* 9-slice of a framed rect (u, v, w, h) with corner c; fill: 0 = tile the middle, else that colour, 1 = transparent */
-void pa_nine(int x, int y, int W, int H, int tx, int ty, int u, int v, int w, int h, int c, int cx, int cy, u32 fill) {
+void pa_nine(int x, int y, int W, int H, int tx, int ty, int u, int v, int w, int h, int c, int cx, int cy,
+             u32 fill) {
     if (fill == 0) pa_tile(x + c, y + c, W - 2 * c, H - 2 * c, tx, ty, u + c, v + c, w - 2 * c, h - 2 * c, cx, cy);
     else if (fill != 1) pa_fill(x + c, y + c, W - 2 * c, H - 2 * c, fill);
-    int sx0 = pa_clip_x0, sy0 = pa_clip_y0, sx1 = pa_clip_x1, sy1 = pa_clip_y1;
+    int old_clip_x0 = pa_clip_x0,
+        old_clip_y0 = pa_clip_y0,
+        old_clip_x1 = pa_clip_x1,
+        old_clip_y1 = pa_clip_y1;
     for (int i = x + c; i < x + W - c; i += w - 2 * c) {   /* top / bottom edges */
         int n = x + W - c - i < w - 2 * c ? x + W - c - i : w - 2 * c;
         pa_spr(i, y, tx, ty, u + c, v, n, c, cx, cy, 0);
@@ -253,16 +418,23 @@ void pa_nine(int x, int y, int W, int H, int tx, int ty, int u, int v, int w, in
         pa_spr(x, j, tx, ty, u, v + c, c, n, cx, cy, 0);
         pa_spr(x + W - c, j, tx, ty, u + w - c, v + c, c, n, cx, cy, 0);
     }
-    pa_spr(x, y, tx, ty, u, v, c, c, cx, cy, 0); pa_spr(x + W - c, y, tx, ty, u + w - c, v, c, c, cx, cy, 0);
-    pa_spr(x, y + H - c, tx, ty, u, v + h - c, c, c, cx, cy, 0); pa_spr(x + W - c, y + H - c, tx, ty, u + w - c, v + h - c, c, c, cx, cy, 0);
-    pa_clip_x0 = sx0; pa_clip_y0 = sy0; pa_clip_x1 = sx1; pa_clip_y1 = sy1;
+    pa_spr(x, y, tx, ty, u, v, c, c, cx, cy, 0);
+    pa_spr(x + W - c, y, tx, ty, u + w - c, v, c, c, cx, cy, 0);
+    pa_spr(x, y + H - c, tx, ty, u, v + h - c, c, c, cx, cy, 0);
+    pa_spr(x + W - c, y + H - c, tx, ty, u + w - c, v + h - c, c, c, cx, cy, 0);
+    pa_clip_x0 = old_clip_x0;
+    pa_clip_y0 = old_clip_y0;
+    pa_clip_x1 = old_clip_x1;
+    pa_clip_y1 = old_clip_y1;
 }
 
 /* ---------------------------------------------------------------- icons */
-int pa_event_icon(int x, int y, int e, int flags) {   /* returns the width drawn, unscaled (0: none) */
+/* returns the width drawn, unscaled (0: none) */
+int pa_event_icon(int x, int y, int e, int flags) {
     if (!pa_ok || !icons_ok || e < 0 || e >= NEV_ICONS || !ev_icon[e].w) return 0;
-    u16 cw = ev_icon[e].clut;
-    pa_spr(x, y, 256, 0, ev_icon[e].u, ev_icon[e].v, ev_icon[e].w, ev_icon[e].h, (cw & 63) * 16, cw >> 6, flags);
+    u16 clut_word = ev_icon[e].clut;
+    pa_spr(x, y, 256, 0, ev_icon[e].u, ev_icon[e].v, ev_icon[e].w, ev_icon[e].h,
+           (clut_word & 63) * 16, clut_word >> 6, flags);
     return ev_icon[e].w;
 }
 int pa_event_icon_h(int e) { return pa_ok && icons_ok && e >= 0 && e < NEV_ICONS ? ev_icon[e].h : 0; }
@@ -273,166 +445,257 @@ void pa_item_icon(int x, int y, int n, int flags) {
 }
 
 /* ---------------------------------------------------------------- WFM fonts */
-typedef struct { u8 w, h; const u8 *img; } Glyph;
+typedef struct {
+    u8 w, h;
+    const u8 *img;
+} Glyph;
 static Glyph glyphs[3][256];         /* heights 8, 16, 24 */
-static u8 *font_blobs[48]; static int nblobs;
+static u8 *font_blobs[48];
+static int nblobs;
 
 /* SHA-1 (only to name the glyph bitmaps) */
 static void sha1(const u8 *m, unsigned n, u8 out[20]) {
     u32 h[5] = { 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0 };
     unsigned total = ((n + 8) / 64 + 1) * 64;
     u8 *b = calloc(total, 1);
-    memcpy(b, m, n); b[n] = 0x80;
+    memcpy(b, m, n);
+    b[n] = 0x80;
     unsigned long long bits = (unsigned long long)n * 8;
     for (int i = 0; i < 8; i++) b[total - 1 - i] = (u8)(bits >> (8 * i));
     for (unsigned o = 0; o < total; o += 64) {
         u32 w[80];
-        for (int i = 0; i < 16; i++) w[i] = (u32)b[o + 4 * i] << 24 | b[o + 4 * i + 1] << 16 | b[o + 4 * i + 2] << 8 | b[o + 4 * i + 3];
-        for (int i = 16; i < 80; i++) { u32 t = w[i - 3] ^ w[i - 8] ^ w[i - 14] ^ w[i - 16]; w[i] = t << 1 | t >> 31; }
-        u32 a = h[0], bb = h[1], c = h[2], d = h[3], e = h[4];
+        for (int i = 0; i < 16; i++)
+            w[i] = (u32)b[o + 4 * i] << 24 | b[o + 4 * i + 1] << 16 | b[o + 4 * i + 2] << 8 | b[o + 4 * i + 3];
+        for (int i = 16; i < 80; i++) {
+            u32 t = w[i - 3] ^ w[i - 8] ^ w[i - 14] ^ w[i - 16];
+            w[i] = t << 1 | t >> 31;
+        }
+        u32 a = h[0],
+            bb = h[1],
+            c = h[2],
+            d = h[3],
+            e = h[4];
         for (int i = 0; i < 80; i++) {
             u32 f, k;
-            if (i < 20) { f = (bb & c) | (~bb & d); k = 0x5A827999; } else if (i < 40) { f = bb ^ c ^ d; k = 0x6ED9EBA1; }
-            else if (i < 60) { f = (bb & c) | (bb & d) | (c & d); k = 0x8F1BBCDC; } else { f = bb ^ c ^ d; k = 0xCA62C1D6; }
+            if (i < 20) {
+                f = (bb & c) | (~bb & d);
+                k = 0x5A827999;
+            } else if (i < 40) {
+                f = bb ^ c ^ d;
+                k = 0x6ED9EBA1;
+            } else if (i < 60) {
+                f = (bb & c) | (bb & d) | (c & d);
+                k = 0x8F1BBCDC;
+            } else {
+                f = bb ^ c ^ d;
+                k = 0xCA62C1D6;
+            }
             u32 t = (a << 5 | a >> 27) + f + e + k + w[i];
-            e = d; d = c; c = bb << 30 | bb >> 2; bb = a; a = t;
+            e = d;
+            d = c;
+            c = bb << 30 | bb >> 2;
+            bb = a;
+            a = t;
         }
-        h[0] += a; h[1] += bb; h[2] += c; h[3] += d; h[4] += e;
+        h[0] += a;
+        h[1] += bb;
+        h[2] += c;
+        h[3] += d;
+        h[4] += e;
     }
     free(b);
     for (int i = 0; i < 20; i++) out[i] = (u8)(h[i / 4] >> (24 - 8 * (i % 4)));
 }
-static int hidx(int h) { return h == 8 ? 0 : h == 16 ? 1 : h == 24 ? 2 : -1; }
+/* the glyphs[] row of a font height (8, 16, 24 px), -1 for another height */
+static int height_index(int h) { return h == 8 ? 0 : h == 16 ? 1 : h == 24 ? 2 : -1; }
+/* the character whose glyph has exactly this bitmap (panel_charmap.h, by SHA-1), -1 when none */
 static int charmap_exact(int h, int w, const u8 *img) {
-    u8 s[20]; sha1(img, (unsigned)(w * h + 1) / 2, s);
+    u8 s[20];
+    sha1(img, (unsigned)(w * h + 1) / 2, s);
     for (unsigned j = 0; j < sizeof panel_charmap / sizeof panel_charmap[0]; j++)
-        if (panel_charmap[j].h == h && panel_charmap[j].w == w && !memcmp(panel_charmap[j].sha, s, 6)) return panel_charmap[j].ch;
+        if (panel_charmap[j].h == h && panel_charmap[j].w == w && !memcmp(panel_charmap[j].sha, s, 6))
+            return panel_charmap[j].ch;
     return -1;
 }
-/* The Latin-1 character of a WFM glyph bitmap (w x h, 4 bpp), -1 when not known.  The files of a text patch (the improved
-   Spanish translation: --text-patch, translation.tpatch, or data/ written by the PC launcher) move some glyphs inside their
-   cell (tools/wfm_py.py shift_glyphs: the 16 px ',' and u-acute dx pixels sideways, the 8 px accented letters one row up
-   by dropping the empty row under the accent), so their hashes are not the disc's: when there is no exact match the
-   move is undone (a sideways shift of up to 2 columns that loses no ink; an empty row put back at each place, the last
-   row being empty) and the disc glyph looked up again.  *norm (when not NULL) gets a malloc'd copy of the disc's bitmap
-   for a moved glyph (the panel draws its fonts as the disc has them, its own redrawn accents included), else NULL. */
+/* The Latin-1 character of a WFM glyph bitmap (w x h, 4 bpp), -1 when not known.  The files of a text patch (the
+   improved Spanish translation: --text-patch, translation.tpatch, or data/ written by the PC launcher) move some
+   glyphs inside their cell (tools/wfm_py.py shift_glyphs: the 16 px ',' and u-acute dx pixels sideways, the 8 px
+   accented letters one row up by dropping the empty row under the accent), so their hashes are not the disc's: when
+   there is no exact match the move is undone (a sideways shift of up to 2 columns that loses no ink; an empty row put
+   back at each place, the last row being empty) and the disc glyph looked up again.  *norm (when not NULL) gets a
+   malloc'd copy of the disc's bitmap for a moved glyph (the panel draws its fonts as the disc has them, its own
+   redrawn accents included), else NULL. */
 static int glyph_char(int h, int w, const u8 *img, u8 **norm) {
-    int c = charmap_exact(h, w, img), n = w * h, sz = (n + 1) / 2;
+    int c = charmap_exact(h, w, img),
+        n = w * h,
+        packed_size = (n + 1) / 2;
     if (norm) *norm = NULL;
     if (c >= 0 || n <= 0 || n > 64 * 32) return c;
     u8 px[64 * 32], out[64 * 32];
-    u8 *pk = malloc((size_t)sz);
-    if (!pk) return -1;
+    u8 *packed = malloc((size_t)packed_size);
+    if (!packed) return -1;
     for (int p = 0; p < n; p++) px[p] = (img[p >> 1] >> ((p & 1) * 4)) & 15;
     for (int t = 0; t < 4 + h && c < 0; t++) {
         memset(out, 0, (size_t)n);
         if (t < 4) {   /* sideways by dx = 1, -1, 2, -2 (the glyph went -dx) */
             static const int dxs[4] = { 1, -1, 2, -2 };
-            int dx = dxs[t], lost = 0;
+            int dx = dxs[t],
+                lost = 0;
             for (int r = 0; r < h; r++) for (int x = 0; x < w; x++) {
-                int v = px[r * w + x], nx = x + dx;
-                if (nx < 0 || nx >= w) lost |= v; else out[r * w + nx] = (u8)v;
+                int v = px[r * w + x],
+                    nx = x + dx;
+                if (nx < 0 || nx >= w) lost |= v;
+                else out[r * w + nx] = (u8)v;
             }
             if (lost) continue;
         } else {       /* an empty row put back at row t - 4, the rest one row lower */
-            int r0 = t - 4, last = 0;
+            int r0 = t - 4,
+                last = 0;
             for (int x = 0; x < w; x++) last |= px[(h - 1) * w + x];
             if (last) break;
             for (int r = 0; r < h; r++) if (r != r0) memcpy(out + r * w, px + (r < r0 ? r : r - 1) * w, (size_t)w);
         }
-        memset(pk, 0, (size_t)sz);
-        for (int p = 0; p < n; p++) pk[p >> 1] |= (u8)(out[p] << ((p & 1) * 4));
-        c = charmap_exact(h, w, pk);
+        memset(packed, 0, (size_t)packed_size);
+        for (int p = 0; p < n; p++) packed[p >> 1] |= (u8)(out[p] << ((p & 1) * 4));
+        c = charmap_exact(h, w, packed);
     }
-    if (c >= 0 && norm) *norm = pk; else free(pk);
+    if (c >= 0 && norm) *norm = packed;
+    else free(packed);
     return c;
 }
 /* the glyphs of the WFM3 bank at d (n bytes); returns how many were new */
 static unsigned load_wfm_bank(u8 *d, unsigned n) {
-    unsigned ng = rd16(d, 14), used = 0;
-    for (unsigned i = 0; i < ng && 144 + 2 * i + 2 <= n; i++) {
-        unsigned p = rd16(d, 144 + 2 * i);
-        if (p + 8 > n) continue;
-        int h = (int)rd16(d, p + 2), w = (int)rd16(d, p + 4), k = hidx(h);
+    unsigned n_glyphs = rd16(d, 14),
+             used = 0;
+    for (unsigned i = 0; i < n_glyphs && 144 + 2 * i + 2 <= n; i++) {
+        unsigned glyph_off = rd16(d, 144 + 2 * i);
+        if (glyph_off + 8 > n) continue;
+        int h = (int)rd16(d, glyph_off + 2),
+            w = (int)rd16(d, glyph_off + 4),
+            k = height_index(h);
         unsigned sz = (unsigned)(w * h + 1) / 2;
-        if (k < 0 || !w || w > 255 || p + 8 + sz > n) continue;
-        u8 *norm; int ch = glyph_char(h, w, d + p + 8, &norm);
-        if (ch >= 0 && !glyphs[k][ch].img) { glyphs[k][ch].w = (u8)w; glyphs[k][ch].h = (u8)h; glyphs[k][ch].img = norm ? norm : d + p + 8; used++; }
+        if (k < 0 || !w || w > 255 || glyph_off + 8 + sz > n) continue;
+        u8 *norm;
+        int ch = glyph_char(h, w, d + glyph_off + 8, &norm);
+        if (ch >= 0 && !glyphs[k][ch].img) {
+            glyphs[k][ch].w = (u8)w;
+            glyphs[k][ch].h = (u8)h;
+            glyphs[k][ch].img = norm ? norm : d + glyph_off + 8;
+            used++;
+        }
         else free(norm);
     }
     return used;
 }
+/* the glyphs of a font file; the file stays loaded (font_blobs) when any glyph of it is used */
 static void load_wfm(const char *name) {
-    unsigned n, used = 0; u8 *d;
+    unsigned n,
+             used = 0;
+    u8 *d;
 #if PORT_VERSION_USA
-    /* USA: no WFM files; the dialogue banks (8 / 16 px) and the event title bank (24 px) are inside the area's GAM files */
+    /* USA: no WFM files; the dialogue banks (8 / 16 px) and the event title bank (24 px) are inside the area's GAM
+       files */
     d = pa_read(name, &n);
     if (!d) return;
-    if (nblobs >= 48) { free(d); return; }
-    for (unsigned o = 0; o + 144 <= n; o += 4) if (!memcmp(d + o, "WFM3", 4)) used += load_wfm_bank(d + o, n - o);
+    if (nblobs >= 48) {
+        free(d);
+        return;
+    }
+    for (unsigned o = 0; o + 144 <= n; o += 4)
+        if (!memcmp(d + o, "WFM3", 4)) used += load_wfm_bank(d + o, n - o);
 #else
     d = port_cd_read_named(name, &n);
     if (!d) return;
-    if (n < 144 || memcmp(d, "WFM3", 4) || nblobs >= 48) { free(d); return; }
+    if (n < 144 || memcmp(d, "WFM3", 4) || nblobs >= 48) {
+        free(d);
+        return;
+    }
     used = load_wfm_bank(d, n);
 #endif
-    if (used) font_blobs[nblobs++] = d; else free(d);
+    if (used) font_blobs[nblobs++] = d;
+    else free(d);
 }
 static void load_fonts(void) {
 #if PORT_VERSION_USA
     {   /* the banks of AREA01 (dialogue + titles), AREA02, AREA00, then the other areas until the letters are there */
-        static const char *const usa[] = { "AREA01/A008.GAM", "AREA02/A003.GAM", "AREA00/D003.GAM", "AREA03/A005.GAM", "AREA04/A007.GAM",
-            "AREA05/A003.GAM", "AREA06/A002.GAM", "AREA08/A003.GAM", "AREA09/A003.GAM", "AREA10/A003.GAM", "AREA11/A002.GAM" };
+        static const char *const usa[] = {
+            "AREA01/A008.GAM", "AREA02/A003.GAM", "AREA00/D003.GAM", "AREA03/A005.GAM", "AREA04/A007.GAM",
+            "AREA05/A003.GAM", "AREA06/A002.GAM", "AREA08/A003.GAM", "AREA09/A003.GAM", "AREA10/A003.GAM",
+            "AREA11/A002.GAM" };
         for (unsigned i = 0; i < sizeof usa / sizeof usa[0]; i++) {
             int have = 0;
-            for (const char *s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"; *s; s++) have += glyphs[0][(u8)*s].img && glyphs[1][(u8)*s].img;
+            for (const char *s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"; *s; s++)
+                have += glyphs[0][(u8)*s].img && glyphs[1][(u8)*s].img;
             if (i >= 2 && have >= 62) break;
             load_wfm(usa[i]);
         }
     }
 #else
-    {   static const char L[9] = { 'B', 'F', 'G', 'I', 'H', 'S', 'P', 'W', 'D' };
-    char l = port_lang >= 0 && port_lang < 9 ? L[port_lang] : 'B', name[40];
-    snprintf(name, sizeof name, "AREA00/CFNT999%c.WFM", l); load_wfm(name);
-    snprintf(name, sizeof name, "AREA00/MFNT000%c.WFM", l); load_wfm(name);
-    snprintf(name, sizeof name, "AREA00/MFNT001%c.WFM", l); load_wfm(name);
-    for (int a = 1; a < 20; a++) {
-        int have = 0;
-        for (const char *s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789\xE1\xE9\xED\xF3\xFA\xF1"; *s; s++) have += glyphs[0][(u8)*s].img && glyphs[1][(u8)*s].img;
-        if (have >= 68) break;
-        snprintf(name, sizeof name, "AREA%02d/MFNT%02d0%c.WFM", a, a, l); load_wfm(name);
-    }
+    {
+        static const char L[9] = { 'B', 'F', 'G', 'I', 'H', 'S', 'P', 'W', 'D' };
+        char l = port_lang >= 0 && port_lang < 9 ? L[port_lang] : 'B',
+             name[40];
+        snprintf(name, sizeof name, "AREA00/CFNT999%c.WFM", l);
+        load_wfm(name);
+        snprintf(name, sizeof name, "AREA00/MFNT000%c.WFM", l);
+        load_wfm(name);
+        snprintf(name, sizeof name, "AREA00/MFNT001%c.WFM", l);
+        load_wfm(name);
+        for (int a = 1; a < 20; a++) {
+            int have = 0;
+            for (const char *s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+                                 "0123456789\xE1\xE9\xED\xF3\xFA\xF1"; *s; s++)
+                have += glyphs[0][(u8)*s].img && glyphs[1][(u8)*s].img;
+            if (have >= 68) break;
+            snprintf(name, sizeof name, "AREA%02d/MFNT%02d0%c.WFM", a, a, l);
+            load_wfm(name);
+        }
     }
 #endif
     /* the fonts that lack the Spanish opening marks: draw them as the ? / ! glyph turned 180 degrees */
     for (int k = 0; k < 3; k++) for (int m = 0; m < 2; m++) {
-        int inv = m ? 0xA1 : 0xBF, src = m ? '!' : '?';
+        int inv = m ? 0xA1 : 0xBF,
+            src = m ? '!' : '?';
         const Glyph *g = &glyphs[k][src];
         if (glyphs[k][inv].img || !g->img) continue;
-        int n = g->w * g->h; u8 *img = calloc((size_t)(n + 1) / 2, 1);
+        int n = g->w * g->h;
+        u8 *img = calloc((size_t)(n + 1) / 2, 1);
         if (!img) continue;
-        for (int p = 0; p < n; p++) { int v = (g->img[p >> 1] >> ((p & 1) * 4)) & 15, q = n - 1 - p; img[q >> 1] |= (u8)(v << ((q & 1) * 4)); }
-        glyphs[k][inv].w = g->w; glyphs[k][inv].h = g->h; glyphs[k][inv].img = img;
+        for (int p = 0; p < n; p++) {
+            int v = (g->img[p >> 1] >> ((p & 1) * 4)) & 15,
+                q = n - 1 - p;
+            img[q >> 1] |= (u8)(v << ((q & 1) * 4));
+        }
+        glyphs[k][inv].w = g->w;
+        glyphs[k][inv].h = g->h;
+        glyphs[k][inv].img = img;
     }
-    /* the 8 px font's acute accents: the game draws them in its light edge shades, which vanish on the cream windows, its
-       i-acute has a smeared accent and u-acute is missing.  Its accented small letters sit one row lower than the plain
-       ones, the accent in rows 0-1: u-acute is built that way from u, i-acute from i on its own line (the accent in
-       place of the dot, so it lines up with the plain letters), and every acute gets a solid stroke. */
-    {   static const u8 acute[][2] = { {0xE1, 'a'}, {0xE9, 'e'}, {0xED, 'i'}, {0xF3, 'o'}, {0xFA, 'u'}, {0xC1, 'A'} };
+    /* the 8 px font's acute accents: the game draws them in its light edge shades, which vanish on the cream windows,
+       its i-acute has a smeared accent and u-acute is missing.  Its accented small letters sit one row lower than the
+       plain ones, the accent in rows 0-1: u-acute is built that way from u, i-acute from i on its own line (the accent
+       in place of the dot, so it lines up with the plain letters), and every acute gets a solid stroke. */
+    {
+        static const u8 acute[][2] = { {0xE1, 'a'}, {0xE9, 'e'}, {0xED, 'i'}, {0xF3, 'o'}, {0xFA, 'u'}, {0xC1, 'A'} };
         static const u8 stroke[2][8] = { {0, 0, 0, 0, 1, 1, 2, 0}, {0, 0, 0, 1, 1, 2, 0, 0} };
         for (unsigned a = 0; a < sizeof acute / sizeof acute[0]; a++) {
-            Glyph *g = &glyphs[0][acute[a][0]]; const Glyph *b = &glyphs[0][acute[a][1]];
+            Glyph *g = &glyphs[0][acute[a][0]];
+            const Glyph *b = &glyphs[0][acute[a][1]];
             int build = acute[a][0] == 0xED || acute[a][0] == 0xFA;
             if (build ? !b->img || b->w != 8 || b->h != 8 : !g->img || g->w != 8 || g->h != 8) continue;
             u8 *img = calloc(32, 1);
             if (!img) continue;
             for (int p = 16; p < 64; p++) {
-                int q = acute[a][1] == 'i' ? p : p - 8;   /* the i keeps its line (its dot row is where the accent goes) */
-                int v = build ? (p < 24 ? 0 : (b->img[q >> 1] >> ((q & 1) * 4)) & 15) : (g->img[p >> 1] >> ((p & 1) * 4)) & 15;
+                /* the i keeps its line (its dot row is where the accent goes) */
+                int q = acute[a][1] == 'i' ? p : p - 8;
+                int v = build ? (p < 24 ? 0 : (b->img[q >> 1] >> ((q & 1) * 4)) & 15)
+                              : (g->img[p >> 1] >> ((p & 1) * 4)) & 15;
                 img[p >> 1] |= (u8)(v << ((p & 1) * 4));
             }
-            for (int j = 0; j < 2; j++) for (int i = 0; i < 8; i++) img[(j * 8 + i) >> 1] |= (u8)(stroke[j][i] << ((i & 1) * 4));
-            g->w = 8; g->h = 8; g->img = img;
+            for (int j = 0; j < 2; j++)
+                for (int i = 0; i < 8; i++) img[(j * 8 + i) >> 1] |= (u8)(stroke[j][i] << ((i & 1) * 4));
+            g->w = 8;
+            g->h = 8;
+            g->img = img;
         }
     }
     /* accented capitals the fonts lack (8 px: A-acute with the improved translation, which moves the disc's one out of
@@ -441,18 +704,26 @@ static void load_fonts(void) {
        rows 2-7 like the accented small letters) or two rows (16 px, rows 4-13) shorter, a row where the letter is
        straight dropped.  The accent: 8 px, the solid stroke above (the I's one column left, over its stem) or the
        n-tilde's rows; 16 px, the rows of the game's own small accented letter (i-acute, n-tilde). */
-    {   static const struct { u8 ch, base, alt, small, drop8, drop16a, drop16b; } caps[] = {
+    {
+        static const struct {
+            u8 ch, base, alt, small, drop8, drop16a, drop16b;
+        } caps[] = {
             {0xC1, 'A', 0, 0xE1, 3, 3, 12}, {0xC9, 'E', 0, 0xE9, 2, 3, 12}, {0xCD, 'I', 0, 0xED, 3, 3, 12},
             {0xD3, 'O', '0', 0xF3, 3, 3, 12}, {0xDA, 'U', 0, 0xFA, 3, 3, 12}, {0xD1, 'N', 0, 0xF1, 3, 3, 12} };
         static const u8 stroke[2][8] = { {0, 0, 0, 0, 1, 1, 2, 0}, {0, 0, 0, 1, 1, 2, 0, 0} };
         for (int k = 0; k < 2; k++) for (unsigned a = 0; a < sizeof caps / sizeof caps[0]; a++) {
-            int h = k ? 16 : 8, top = k ? 4 : 2;
-            Glyph *g = &glyphs[k][caps[a].ch]; const Glyph *b = &glyphs[k][caps[a].base], *sm = &glyphs[k][caps[a].small];
+            int h = k ? 16 : 8,
+                top = k ? 4 : 2;
+            Glyph *g = &glyphs[k][caps[a].ch];
+            const Glyph *b = &glyphs[k][caps[a].base],
+                        *sm = &glyphs[k][caps[a].small];
             if (g->img) continue;
             if (!b->img && caps[a].alt) b = &glyphs[k][caps[a].alt];
-            if (!b->img || b->h != h || (k && (!sm->img || sm->w != b->w || sm->h != 16)) || (!k && b->w != 8)) continue;
+            if (!b->img || b->h != h || (k && (!sm->img || sm->w != b->w || sm->h != 16)) || (!k && b->w != 8))
+                continue;
             if (!k && caps[a].ch == 0xD1 && (!sm->img || sm->w != 8 || sm->h != 8)) continue;
-            int w = b->w, n = w * h;
+            int w = b->w,
+                n = w * h;
             u8 *img = calloc((size_t)(n + 1) / 2, 1);
             if (!img) continue;
             #define PX(gl, x, y) (((gl)->img[((y) * w + (x)) >> 1] >> ((((y) * w + (x)) & 1) * 4)) & 15)
@@ -468,32 +739,54 @@ static void load_fonts(void) {
                 int v;
                 if (k) v = PX(sm, x, 2 + j);
                 else if (caps[a].ch == 0xD1) v = PX(sm, x, j);
-                else { int sx = caps[a].ch == 0xCD ? x + 1 : x; v = sx < 8 ? stroke[j][sx] : 0; }
+                else {
+                    int sx = caps[a].ch == 0xCD ? x + 1 : x;
+                    v = sx < 8 ? stroke[j][sx] : 0;
+                }
                 PUT(x, (k ? 2 : 0) + j, v);
             }
             #undef PX
             #undef PUT
-            g->w = (u8)w; g->h = (u8)h; g->img = img;
+            g->w = (u8)w;
+            g->h = (u8)h;
+            g->img = img;
         }
     }
     /* a font with no 8 px hyphen (the English disc's): the 16 px one's bar on the 8 px font's hyphen row (3) */
     if (!glyphs[0]['-'].img && glyphs[1]['-'].img && glyphs[1]['-'].h == 16) {
-        const Glyph *b = &glyphs[1]['-']; int w = b->w, row = -1;
-        for (int y = 0; y < 16 && row < 0; y++) for (int x = 0; x < w; x++) if ((b->img[(y * w + x) >> 1] >> (((y * w + x) & 1) * 4)) & 15) { row = y; break; }
+        const Glyph *b = &glyphs[1]['-'];
+        int w = b->w,
+            row = -1;
+        for (int y = 0; y < 16 && row < 0; y++)
+            for (int x = 0; x < w; x++) if ((b->img[(y * w + x) >> 1] >> (((y * w + x) & 1) * 4)) & 15) {
+                row = y;
+                break;
+            }
         u8 *img = row >= 0 ? calloc((size_t)(w * 8 + 1) / 2, 1) : NULL;
         if (img) {
             for (int x = 0; x < w; x++) {
-                int v = (b->img[(row * w + x) >> 1] >> (((row * w + x) & 1) * 4)) & 15, p = 3 * w + x;
+                int v = (b->img[(row * w + x) >> 1] >> (((row * w + x) & 1) * 4)) & 15,
+                    p = 3 * w + x;
                 img[p >> 1] |= (u8)(v << ((p & 1) * 4));
             }
-            glyphs[0]['-'].w = (u8)w; glyphs[0]['-'].h = 8; glyphs[0]['-'].img = img;
+            glyphs[0]['-'].w = (u8)w;
+            glyphs[0]['-'].h = 8;
+            glyphs[0]['-'].img = img;
         }
     }
-    int n8 = 0, n16 = 0, n24 = 0;
-    for (int c = 0; c < 256; c++) { n8 += !!glyphs[0][c].img; n16 += !!glyphs[1][c].img; n24 += !!glyphs[2][c].img; }
+    int n8 = 0,
+        n16 = 0,
+        n24 = 0;
+    for (int c = 0; c < 256; c++) {
+        n8 += !!glyphs[0][c].img;
+        n16 += !!glyphs[1][c].img;
+        n24 += !!glyphs[2][c].img;
+    }
     pa_font_ok = n16 > 40;
     port_printf("[panel] WFM glyphs: %d (8 px), %d (16 px), %d (24 px) from %d files\n", n8, n16, n24, nblobs);
 }
+/* the glyph drawn for character c in font k: its own, else the other case, else the letter without its accent; the
+   24 px font falls back on the 16 px one */
 static const Glyph *find_glyph(int k, int c) {
     static const char *base = "AAAAAAACEEEEIIIIDNOOOOOxOUUUUYTsaaaaaaaceeeeiiiidnooooo/ouuuuyty";
     if (glyphs[k][c].img) return &glyphs[k][c];
@@ -504,42 +797,60 @@ static const Glyph *find_glyph(int k, int c) {
     return NULL;
 }
 static int space_w(int k) { return k == 0 ? 4 : k == 1 ? 5 : 10; }
-/* 1 when every letter of s has a glyph of its own in the h px font (the 24 px font does not borrow the 16 px one here) */
+/* 1 when every letter of s has a glyph of its own in the h px font (the 24 px font does not borrow the 16 px one
+   here) */
 int pa_has_glyphs(int h, const char *s) {
-    int k = hidx(h);
+    int k = height_index(h);
     if (k < 0 || !pa_font_ok) return 0;
     static const char *base = "AAAAAAACEEEEIIIIDNOOOOOxOUUUUYTsaaaaaaaceeeeiiiidnooooo/ouuuuyty";
     for (; *s; s++) {
         int c = (u8)*s;
         if (c == ' ') continue;
-        if (glyphs[k][c].img || (c >= 'a' && c <= 'z' && glyphs[k][c - 32].img) || (c >= 'A' && c <= 'Z' && glyphs[k][c + 32].img) ||
-            (c >= 0xC0 && glyphs[k][(u8)base[c - 0xC0]].img)) continue;
+        if (glyphs[k][c].img || (c >= 'a' && c <= 'z' && glyphs[k][c - 32].img) ||
+            (c >= 'A' && c <= 'Z' && glyphs[k][c + 32].img) || (c >= 0xC0 && glyphs[k][(u8)base[c - 0xC0]].img))
+            continue;
         return 0;
     }
     return 1;
 }
+/* the width of s in the h px font */
 int pa_text_w(int h, const char *s) {
-    int k = hidx(h), w = 0;
+    int k = height_index(h),
+        w = 0;
     if (k < 0) return 0;
     for (; *s; s++) {
         int c = (u8)*s;
-        if (c == ' ') { w += space_w(k); continue; }
-        if (c == ':') { const Glyph *g = find_glyph(k, '.'); w += g ? g->w : 3; continue; }
+        if (c == ' ') {
+            w += space_w(k);
+            continue;
+        }
+        if (c == ':') {
+            const Glyph *g = find_glyph(k, '.');
+            w += g ? g->w : 3;
+            continue;
+        }
         const Glyph *g = find_glyph(k, c);
         w += g ? g->w : space_w(k);
     }
     return w;
 }
+/* one glyph, bottom-aligned in its font's line at (x, y): the 24 px title font in its own colours; the others with
+   index 1 in body and the edge shades blended from edge towards body */
 static void glyph(int x, int y, const Glyph *g, int k, u32 body, u32 edge) {
-    static const u32 title[8] = { 0, 0xFF000000u, 0xFFFFFFFFu, 0xFF7B7B7Bu, 0xFF4A4A4Au, 0xFFADADADu, 0xFF003A84u, 0xFF0063C6u };
+    static const u32 title[8] = { 0, 0xFF000000u, 0xFFFFFFFFu, 0xFF7B7B7Bu, 0xFF4A4A4Au, 0xFFADADADu,
+                                  0xFF003A84u, 0xFF0063C6u };
     for (int j = 0; j < g->h; j++) for (int i = 0; i < g->w; i++) {
-        int p = j * g->w + i, v = (g->img[p >> 1] >> ((p & 1) * 4)) & 15;
+        int p = j * g->w + i,
+            v = (g->img[p >> 1] >> ((p & 1) * 4)) & 15;
         if (!v) continue;
         u32 c;
-        if (g->h == 24) { if (v >= 8) continue; c = title[v]; }
-        else if (v == 1) c = body;
+        if (g->h == 24) {
+            if (v >= 8) continue;
+            c = title[v];
+        } else if (v == 1) c = body;
         else {
-            int t = (v - 2) * 255 / 5; if (t > 255) t = 255;
+            int t = (v - 2) * 255 / 5;
+            if (t > 255) t = 255;
             u32 r = ((edge & 0xFF) * (255 - t * 2 / 5) + (body & 0xFF) * (t * 2 / 5)) / 255;
             u32 gg = ((edge >> 8 & 0xFF) * (255 - t * 2 / 5) + (body >> 8 & 0xFF) * (t * 2 / 5)) / 255;
             u32 b = ((edge >> 16 & 0xFF) * (255 - t * 2 / 5) + (body >> 16 & 0xFF) * (t * 2 / 5)) / 255;
@@ -551,24 +862,35 @@ static void glyph(int x, int y, const Glyph *g, int k, u32 body, u32 edge) {
 /* text in the game's glyphs; h = 8, 16 or 24 (event titles); (x, y) = top left; returns the end x */
 extern u32 pa_outline;
 int pa_text(int x, int y, int h, const char *s, u32 body, u32 edge) {
-    int k = hidx(h);
+    int k = height_index(h);
     if (k < 0) return x;
     if (pa_outline && k < 2) {
         static const int d[8][2] = { {-1, 0}, {1, 0}, {0, -1}, {0, 1}, {-1, -1}, {1, -1}, {-1, 1}, {1, 1} };
-        u32 o = pa_outline; pa_outline = 0;
+        u32 o = pa_outline;
+        pa_outline = 0;
         for (int i = 0; i < 8; i++) pa_text(x + d[i][0], y + d[i][1], h, s, o, o);
         pa_outline = o;
     }
     for (; *s; s++) {
         int c = (u8)*s;
-        if (c == ' ') { x += space_w(k); continue; }
+        if (c == ' ') {
+            x += space_w(k);
+            continue;
+        }
         if (c == ':') {   /* no colon glyph: two dots */
             const Glyph *g = find_glyph(k, '.');
-            if (g) { glyph(x - 1, y, g, k, body, edge); glyph(x - 1, y - h / 3, g, k, body, edge); x += g->w; } else x += 3;
+            if (g) {
+                glyph(x - 1, y, g, k, body, edge);
+                glyph(x - 1, y - h / 3, g, k, body, edge);
+                x += g->w;
+            } else x += 3;
             continue;
         }
         const Glyph *g = find_glyph(k, c);
-        if (!g) { x += space_w(k); continue; }
+        if (!g) {
+            x += space_w(k);
+            continue;
+        }
         glyph(x, y, g, k, body, edge);
         x += g->w;
     }
@@ -578,20 +900,25 @@ int pa_text(int x, int y, int h, const char *s, u32 body, u32 edge) {
    pa_text / pa_text_fit draw it too */
 u32 pa_outline;
 int pa_text_ol(int x, int y, int h, const char *s, u32 body, u32 edge, u32 outline) {
-    u32 o = pa_outline; pa_outline = outline;
+    u32 o = pa_outline;
+    pa_outline = outline;
     int r = pa_text(x, y, h, s, body, edge);
-    pa_outline = o; return r;
+    pa_outline = o;
+    return r;
 }
 /* the same, cut with "..." to fit w */
 int pa_text_fit(int x, int y, int h, int w, const char *s, u32 body, u32 edge) {
-    char b[160]; int n = (int)strlen(s);
+    char b[160];
+    int n = (int)strlen(s);
     if (n > 150) n = 150;
-    memcpy(b, s, n); b[n] = 0;
+    memcpy(b, s, n);
+    b[n] = 0;
     if (pa_text_w(h, b) <= w) return pa_text(x, y, h, b, body, edge);
     while (n > 0) {
         b[--n] = 0;
         while (n > 0 && b[n - 1] == ' ') b[--n] = 0;
-        char t[164]; snprintf(t, sizeof t, "%s...", b);
+        char t[164];
+        snprintf(t, sizeof t, "%s...", b);
         if (pa_text_w(h, t) <= w) return pa_text(x, y, h, t, body, edge);
     }
     return x;
@@ -604,13 +931,16 @@ void pa_init(void) {
     vram = calloc(1024 * 512, 2);
     if (!vram) return;
 #if PORT_VERSION_USA
-    /* USA: one page at (64, 0) holds PAL's A10301 + A00300 (its sub-screen font differs; the item / event icons are the same) */
-    pa_ok = load_rect("SYSTEM/A00014.000", 64, 0, 256, 0, 256) && load_rect("SYSTEM/A00003.GAM", 256, 256, 64, 0, 224) &&
+    /* USA: one page at (64, 0) holds PAL's A10301 + A00300 (its sub-screen font differs; the item / event icons are
+       the same) */
+    pa_ok = load_rect("SYSTEM/A00014.000", 64, 0, 256, 0, 256) &&
+            load_rect("SYSTEM/A00003.GAM", 256, 256, 64, 0, 224) &&
 #else
     pa_ok = load_rect("SYSTEM/A10301.000", 64, 0, 64, 0, 256) && load_rect("SYSTEM/A00300.000", 128, 0, 192, 0, 256) &&
             load_rect("SYSTEM/A10003.GAM", 256, 256, 64, 0, 224) &&
 #endif
-            load_rect("SYSTEM/A00000.GAM", 320, 256, 64, 0, 224) && load_rect("AREA00/CLUT01.GAM", 128, 480, 256, 0, 32) &&
+            load_rect("SYSTEM/A00000.GAM", 320, 256, 64, 0, 224) &&
+            load_rect("AREA00/CLUT01.GAM", 128, 480, 256, 0, 32) &&
             load_rect(PA_F_SUB, 288, 480, 48, PV_SUBSCREEN_CLUT_IMAGE - PORT_OVL_BASE, 31);
     if (pa_ok) load_icons();
     load_fonts();
@@ -622,40 +952,71 @@ void pa_init(void) {
    Used by the item tab for the item sub-screen's own messages (DnSPSUB3's bank: "Can't use this here.", ...). */
 int pa_wfm_dialogue(const unsigned char *d, unsigned n, int idx, char *out, int max) {
     if (!d || n < 144 || memcmp(d, "WFM3", 4) || max < 2) return -1;
-    unsigned dpt = (unsigned)d[8] | d[9] << 8 | d[10] << 16 | (unsigned)d[11] << 24, nd = rd16(d, 12), ng = rd16(d, 14), k = 0;
-    if (idx < 0 || (unsigned)idx >= nd || dpt + 2 * nd > n) return -1;
-    for (unsigned p = dpt + rd16(d, dpt + 2 * idx); p + 2 <= n && k + 2 < (unsigned)max; p += 2) {
+    unsigned dlg_table = (unsigned)d[8] | d[9] << 8 | d[10] << 16 | (unsigned)d[11] << 24,
+             n_dialogues = rd16(d, 12),
+             n_glyphs = rd16(d, 14),
+             k = 0;
+    if (idx < 0 || (unsigned)idx >= n_dialogues || dlg_table + 2 * n_dialogues > n) return -1;
+    for (unsigned p = dlg_table + rd16(d, dlg_table + 2 * idx); p + 2 <= n && k + 2 < (unsigned)max; p += 2) {
         unsigned v = rd16(d, p);
         if (v >= 0xFFFE) break;
         if (v >= 0xFFF2) {
-            static const unsigned char nargs[12] = { 1, 0, 0, 0, 2, 1, 2, 1, 2, 0, 0, 0 };   /* POSE HALT F4 CHOICE MOVE COLOR VOICE PAUSE BOX CLEAR WAIT NL */
+            /* POSE HALT F4 CHOICE MOVE COLOR VOICE PAUSE BOX CLEAR WAIT NL */
+            static const unsigned char nargs[12] = { 1, 0, 0, 0, 2, 1, 2, 1, 2, 0, 0, 0 };
             if (v == 0xFFFD) out[k++] = '\n';
             p += 2 * nargs[v - 0xFFF2];
             continue;
         }
-        if (v < 0x8000 || v - 0x8000 >= ng) continue;
-        unsigned gp = rd16(d, 144 + 2 * (v - 0x8000)), h, w, sz; int ch = '?';
-        if (gp + 8 > n) continue;
-        h = rd16(d, gp + 2); w = rd16(d, gp + 4); sz = (w * h + 1) / 2;
-        if (gp + 8 + sz <= n) { int c = glyph_char((int)h, (int)w, d + gp + 8, NULL); if (c >= 0) ch = c; }
+        if (v < 0x8000 || v - 0x8000 >= n_glyphs) continue;
+        unsigned glyph_pos = rd16(d, 144 + 2 * (v - 0x8000)),
+                 h,
+                 w,
+                 sz;
+        int ch = '?';
+        if (glyph_pos + 8 > n) continue;
+        h = rd16(d, glyph_pos + 2);
+        w = rd16(d, glyph_pos + 4);
+        sz = (w * h + 1) / 2;
+        if (glyph_pos + 8 + sz <= n) {
+            int c = glyph_char((int)h, (int)w, d + glyph_pos + 8, NULL);
+            if (c >= 0) ch = c;
+        }
         out[k++] = (char)ch;
     }
     out[k] = 0;
     return (int)k;
 }
 
-/* text drawn at an integer scale sc (1..4), optionally shaded (each colour halved, like PA_SHADE): the h px glyphs (and
-   their outline when pa_outline is set) rendered off the canvas at 1x, then every pixel put as an sc x sc block (pixel
-   doubled, never resampled).  Returns the end x. */
+/* text drawn at an integer scale sc (1..4), optionally shaded (each colour halved, like PA_SHADE): the h px glyphs
+   (and their outline when pa_outline is set) rendered off the canvas at 1x, then every pixel put as an sc x sc block
+   (pixel doubled, never resampled).  Returns the end x. */
 int pa_text_scaled(int x, int y, int h, const char *s, u32 body, u32 edge, int sc, int shade) {
-    int w = pa_text_w(h, s) + 4, hh = h + 6;
+    int w = pa_text_w(h, s) + 4,
+        hh = h + 6;
     if (w <= 4 || w > 512 || sc < 1 || sc > 4) return x;
     static u32 buf[512 * 32];
-    u32 *cv = pa_cv; int cw = pa_cw, ch = pa_ch, c0 = pa_clip_x0, c1 = pa_clip_y0, c2 = pa_clip_x1, c3 = pa_clip_y1;
+    u32 *saved_cv = pa_cv;
+    int saved_cw = pa_cw,
+        saved_ch = pa_ch,
+        saved_clip_x0 = pa_clip_x0,
+        saved_clip_y0 = pa_clip_y0,
+        saved_clip_x1 = pa_clip_x1,
+        saved_clip_y1 = pa_clip_y1;
     memset(buf, 0, sizeof buf);
-    pa_cv = buf; pa_cw = w; pa_ch = hh; pa_clip_x0 = pa_clip_y0 = 0; pa_clip_x1 = w; pa_clip_y1 = hh;
+    pa_cv = buf;
+    pa_cw = w;
+    pa_ch = hh;
+    pa_clip_x0 = pa_clip_y0 = 0;
+    pa_clip_x1 = w;
+    pa_clip_y1 = hh;
     pa_text(2, 3, h, s, body, edge);
-    pa_cv = cv; pa_cw = cw; pa_ch = ch; pa_clip_x0 = c0; pa_clip_y0 = c1; pa_clip_x1 = c2; pa_clip_y1 = c3;
+    pa_cv = saved_cv;
+    pa_cw = saved_cw;
+    pa_ch = saved_ch;
+    pa_clip_x0 = saved_clip_x0;
+    pa_clip_y0 = saved_clip_y0;
+    pa_clip_x1 = saved_clip_x1;
+    pa_clip_y1 = saved_clip_y1;
     for (int j = 0; j < hh; j++) for (int i = 0; i < w; i++) {
         u32 c = buf[j * w + i];
         if (!(c >> 24)) continue;
