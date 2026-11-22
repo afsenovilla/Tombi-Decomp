@@ -8,7 +8,8 @@
  * shims/gpu.c calls port_ws_backdrop when it meets the left sprite of the picture while the wide plane is on and fills
  * the strips of the wide copy before the game draws the picture itself, so everything the game draws on top (drums,
  * actors, boxes) stays on top.  Identity without --widescreen and in every other room (the sprite signature and the
- * room are both checked).  The approved rooms are on by default with --widescreen (AREA02 s5 since 2026-11-14, AREA05 s1/s3, AREA02 s1 and AREA19 s1 since 2026-11-15, AREA11 s2, AREA09 s5 and AREA09 s3 since 2026-11-16);
+ * room are both checked).  The approved rooms are on by default with --widescreen (AREA02 s5 since 2026-11-14,
+ * AREA05 s1/s3, AREA02 s1 and AREA19 s1 since 2026-11-15, AREA11 s2, AREA09 s5 and AREA09 s3 since 2026-11-16);
  * `--ws-backdrop off` disables them, `--ws-backdrop on` takes every room of the table (the previews too),
  * `--ws-backdrop-rooms A:S,...` exactly those rooms, `--ws-backdrop mirror` AREA02 s5's first preview (the picture
  * mirrored at its edge); also PORT_WS_BACKDROP=1 (approved) / 2 (mirror) / 3 (every room) (not in the wasm2c build,
@@ -39,16 +40,18 @@
  *   - no roots: the user rejected every generated root ("never draw roots again"), so the left strip is side wall,
  *     floor and ivy only; the picture's own root ends at its edge, where the edge ivy comes down to the floor over it;
  *   - ivy grown as stems: a fringe hanging from the top of the side wall, curtains (long stems that sway and branch,
- *     spaced along the wall, thicker near the corner), climbers from the wall's foot, and a mass next to
- *     each edge as deep as the picture's own ivy on that row so the join closes; leaves sized by the wall's scale where
- *     they hang relative to the edge's (bigger towards the viewer); every leaf drawn one by one (a tapered ellipse at one of 16 angles, lit top-left, rim shadow), back leaves darker
- *     first, front leaves lighter last, and the wall shadowed under the leaves;
+ *     spaced along the wall, thicker near the corner), climbers from the wall's foot, and a mass next to each edge as
+ *     deep as the picture's own ivy on that row so the join closes; leaves sized by the wall's scale where they hang
+ *     relative to the edge's (bigger towards the viewer); every leaf drawn one by one (a tapered ellipse at one of 16
+ *     angles, lit top-left, rim shadow), back leaves darker first, front leaves lighter last, and the wall shadowed
+ *     under the leaves;
  *   - the three columns next to the picture blended with its edge column; every pixel quantised to the nearest colour
  *     the picture itself uses (the room's 8 bpp CLUT).
  * Deterministic: integers only (no floating point, no libm), fixed seeds and position hashes, and never two random
- * draws in one argument list (gcc on i386 evaluates arguments right to left, clang / wasm2c left to right); a structure depends on
- * where it is, not on the strip width, so a 21:9 / 32:9 strip starts with the same columns as the 16:9 one and goes
- * on with new content (no repeat).  The same code gives the same strips on i386, x86-64 and the wasm2c build.
+ * draws in one argument list (gcc on i386 evaluates arguments right to left, clang / wasm2c left to right); a
+ * structure depends on where it is, not on the strip width, so a 21:9 / 32:9 strip starts with the same columns as
+ * the 16:9 one and goes on with new content (no repeat).  The same code gives the same strips on i386, x86-64 and the
+ * wasm2c build.
  *
  * Standalone check / iteration (WS_BACKDROP_MAIN): PORT_WS_BACKDROP_DUMP=FILE writes the picture (raw, 320x224
  * little-endian 15-bit colours, then 320x224 bytes: 1 where a piece drawn again over the player is opaque) during a
@@ -66,19 +69,45 @@
 #include "ws_heap.c"
 #endif
 
-typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32;
-static int ws_need_grab(void); static int ws_need_pr_take(void); static int ws_need_en_take(void);
-static int ws_need_tw_take(void); static int ws_need_mm_take(void); static int ws_need_im_take(void);
-static int ws_need_ic_take(void); static int ws_need_ck_take(void); static int ws_need_lk_build(void);
-static int ws_need_is_build(void); static int ws_need_is_build_up(void); static int ws_need_main(void);
-static int ws_need_tw_main(void); static int ws_need_im_main(void); static int ws_need_tw_build(void);
-static int ws_need_mm_build(void); static int ws_need_im_gen(void); static int ws_need_ic_gen(void);
-static int ws_need_ck_gen(void); static int ws_need_build_redraw(void); static int ws_need_build_mirror(void);
-static int ws_need_gen_a5(void); static int ws_need_gen_bt(void); static int ws_need_gen_cb(void);
-static int ws_need_gen_cv(void); static int ws_need_gen_en(void); static int ws_need_gen_gr(void);
-static int ws_need_gen_hl(void); static int ws_need_gen_kt(void); static int ws_need_gen_lf(void);
-static int ws_need_gen_pr(void); static int ws_need_gen_rw(void); static int ws_need_gen_st(void);
-static int ws_need_gen_th(void); static int ws_need_gen_up(void); static int ws_need_gen_vb(void);
+typedef unsigned char u8;
+typedef unsigned short u16;
+typedef unsigned int u32;
+static int ws_need_grab(void);
+static int ws_need_pr_take(void);
+static int ws_need_en_take(void);
+static int ws_need_tw_take(void);
+static int ws_need_mm_take(void);
+static int ws_need_im_take(void);
+static int ws_need_ic_take(void);
+static int ws_need_ck_take(void);
+static int ws_need_lk_build(void);
+static int ws_need_is_build(void);
+static int ws_need_is_build_up(void);
+static int ws_need_main(void);
+static int ws_need_tw_main(void);
+static int ws_need_im_main(void);
+static int ws_need_tw_build(void);
+static int ws_need_mm_build(void);
+static int ws_need_im_gen(void);
+static int ws_need_ic_gen(void);
+static int ws_need_ck_gen(void);
+static int ws_need_build_redraw(void);
+static int ws_need_build_mirror(void);
+static int ws_need_gen_a5(void);
+static int ws_need_gen_bt(void);
+static int ws_need_gen_cb(void);
+static int ws_need_gen_cv(void);
+static int ws_need_gen_en(void);
+static int ws_need_gen_gr(void);
+static int ws_need_gen_hl(void);
+static int ws_need_gen_kt(void);
+static int ws_need_gen_lf(void);
+static int ws_need_gen_pr(void);
+static int ws_need_gen_rw(void);
+static int ws_need_gen_st(void);
+static int ws_need_gen_th(void);
+static int ws_need_gen_up(void);
+static int ws_need_gen_vb(void);
 
 /* The finished strips, kept per room (ws_cache.h, docs/PORT.md "Widescreen strips cache"): a generation happens once,
    the next visit (or the next session, from ws_cache/) takes them from the cache.  WS_GEN_VERSION: bump it when a
@@ -91,7 +120,10 @@ static int ws_need_gen_th(void); static int ws_need_gen_up(void); static int ws_
 static unsigned wsc_version(void)
 {
     static unsigned v;
-    if (!v) { static const char stamp[] = __DATE__ " " __TIME__; v = ws_cache_hash(2166136261u ^ WS_GEN_VERSION, stamp, sizeof stamp) | 1; }
+    if (!v) {
+        static const char stamp[] = __DATE__ " " __TIME__;
+        v = ws_cache_hash(2166136261u ^ WS_GEN_VERSION, stamp, sizeof stamp) | 1;
+    }
     return v;
 }
 static int wsc_get(const char *tag, int area, int sec, int pad, u32 sum, u32 flags, const WsCPart *p, int np)
@@ -101,7 +133,9 @@ static int wsc_get(const char *tag, int area, int sec, int pad, u32 sum, u32 fla
 }
 static void wsc_put(const char *tag, int area, int sec, int pad, u32 sum, u32 flags, const WsCPart *p, int np)
 {
-    WsCKey k = { tag, area, sec, pad, sum, flags, wsc_version() }; const u8 *b = (const u8 *)p[0].p; size_t i = 0;
+    WsCKey k = { tag, area, sec, pad, sum, flags, wsc_version() };
+    const u8 *b = (const u8 *)p[0].p;
+    size_t i = 0;
     if (ws_heap_failed || !b) return;
     while (i < p[0].n && !b[i]) i++;
     if (i < p[0].n) ws_cache_put(&k, p, np);
@@ -110,10 +144,34 @@ static u32 wsc_hash(u32 h, const void *p, size_t n) { return ws_cache_hash(h, p,
 #else
 typedef struct { void *p; size_t n; } WsCPart;
 static int wsc_get(const char *tag, int area, int sec, int pad, u32 sum, u32 flags, const WsCPart *p, int np)
-{ (void)tag; (void)area; (void)sec; (void)pad; (void)sum; (void)flags; (void)p; (void)np; return 0; }
+{
+    (void)tag;
+    (void)area;
+    (void)sec;
+    (void)pad;
+    (void)sum;
+    (void)flags;
+    (void)p;
+    (void)np;
+    return 0;
+}
 static void wsc_put(const char *tag, int area, int sec, int pad, u32 sum, u32 flags, const WsCPart *p, int np)
-{ (void)tag; (void)area; (void)sec; (void)pad; (void)sum; (void)flags; (void)p; (void)np; }
-static u32 wsc_hash(u32 h, const void *p, size_t n) { const u8 *b = (const u8 *)p; for (size_t i = 0; i < n; i++) h = (h ^ b[i]) * 16777619u; return h; }
+{
+    (void)tag;
+    (void)area;
+    (void)sec;
+    (void)pad;
+    (void)sum;
+    (void)flags;
+    (void)p;
+    (void)np;
+}
+static u32 wsc_hash(u32 h, const void *p, size_t n)
+{
+    const u8 *b = (const u8 *)p;
+    for (size_t i = 0; i < n; i++) h = (h ^ b[i]) * 16777619u;
+    return h;
+}
 #endif
 
 
@@ -124,19 +182,39 @@ static u16 (*pic)[PW];                 /* the picture as 15-bit colours */
 static u8 (*pic_ov)[PW];               /* 1: an opaque texel of a piece drawn again over the player (Room.over) */
 static int shown_gl;                    /* the OpenGL renderer draws the frames (it samples a stretched quad's texture
                                            otherwise than the software one: gen_th's th_shown) */
-static u16 *strip; static int strip_pad; static u32 strip_sum;
-int port_ws_backdrop_on = 1;            /* 1: the approved rooms (default); --ws-backdrop off = 0, mirror = 2, on = 3 (main.c) */
+static u16 *strip;
+static int strip_pad;
+static u32 strip_sum;
+/* 1: the approved rooms (default); --ws-backdrop off = 0, mirror = 2, on = 3 (main.c) */
+int port_ws_backdrop_on = 1;
 static int enabled = -1;                /* 0 off, 1 the approved rooms, 2 mirror (AREA02 s5), 3 every room */
 
-static int r5(u16 c) { return c & 31; } static int g5(u16 c) { return (c >> 5) & 31; } static int b5(u16 c) { return (c >> 10) & 31; }
-static int is_ivy(u16 c) { int r = r5(c), g = g5(c), b = b5(c); return g >= r + 2 && g >= b + 2; }
+static int r5(u16 c) { return c & 31; }
+static int g5(u16 c) { return (c >> 5) & 31; }
+static int b5(u16 c) { return (c >> 10) & 31; }
+static int is_ivy(u16 c)
+{
+    int r = r5(c),
+        g = g5(c),
+        b = b5(c);
+    return g >= r + 2 && g >= b + 2;
+}
 
 /* ================================================================== mode 2: the first preview (mirror) */
-static int pingpong(int i, int n) { i %= 2 * n; return i < n ? i : 2 * n - 1 - i; }
+static int pingpong(int i, int n)
+{
+    i %= 2 * n;
+    return i < n ? i : 2 * n - 1 - i;
+}
 #define BAND 56
 #define IVY 24
 #define MFLOOR 176
-static u16 at(int side, int y, int m) { if (y < 0) y = 0; if (y >= PH) y = PH - 1; return pic[y][side ? PW - 1 - m : m]; }
+static u16 at(int side, int y, int m)
+{
+    if (y < 0) y = 0;
+    if (y >= PH) y = PH - 1;
+    return pic[y][side ? PW - 1 - m : m];
+}
 static void build_mirror(int pad)
 {
     if (!ws_need_build_mirror()) return;
@@ -145,7 +223,8 @@ static void build_mirror(int pad)
             for (int d = 1; d <= pad; d++) {
                 u16 c = at(side, y, pingpong(d - 1, BAND));
                 if (y < MFLOOR) {
-                    int k = (d - 1) / IVY, sy = y - 5 * (k % 3) - 4;
+                    int k = (d - 1) / IVY,
+                        sy = y - 5 * (k % 3) - 4;
                     u16 l = sy >= 0 ? at(side, sy, pingpong(d - 1 + IVY / 2, IVY)) : 0;
                     if (sy >= 0 && is_ivy(l)) c = l;
                 }
@@ -160,56 +239,131 @@ typedef struct { Rgb bin[NRAMP]; int ok; } Ramp;
 
 /* --- integer helpers (all arithmetic below is on ints; no floating point anywhere) */
 static int clampi(int v, int a, int b) { return v < a ? a : v > b ? b : v; }
-static int fdiv(int a, int b) { int q = a / b; if ((a % b != 0) && ((a < 0) != (b < 0))) q--; return q; }  /* floor */
+/* floor: a / b rounded towards minus infinity */
+static int fdiv(int a, int b)
+{
+    int q = a / b;
+    if ((a % b != 0) && ((a < 0) != (b < 0))) q--;
+    return q;
+}
 static int fmodi(int a, int b) { return a - fdiv(a, b) * b; }
+/* a 32-bit hash of three integers (the position hashes) */
 static u32 hash3(int a, int b, int c)
 {
-    u32 h = 0x9E3779B9u ^ (u32)a * 0x85EBCA6Bu; h ^= h >> 15; h += (u32)b * 0xC2B2AE35u; h ^= h >> 13;
-    h *= 0x27D4EB2Fu; h += (u32)c * 0x165667B1u; h ^= h >> 16; h *= 0x85EBCA6Bu; h ^= h >> 13; return h;
+    u32 h = 0x9E3779B9u ^ (u32)a * 0x85EBCA6Bu;
+    h ^= h >> 15;
+    h += (u32)b * 0xC2B2AE35u;
+    h ^= h >> 13;
+    h *= 0x27D4EB2Fu;
+    h += (u32)c * 0x165667B1u;
+    h ^= h >> 16;
+    h *= 0x85EBCA6Bu;
+    h ^= h >> 13;
+    return h;
 }
 typedef struct { u32 s; } Rng;
-static u32 rnd(Rng *r) { u32 x = r->s; x ^= x << 13; x ^= x >> 17; x ^= x << 5; return r->s = x ? x : 0x6D2B79F5u; }
+/* xorshift32 */
+static u32 rnd(Rng *r)
+{
+    u32 x = r->s;
+    x ^= x << 13;
+    x ^= x >> 17;
+    x ^= x << 5;
+    return r->s = x ? x : 0x6D2B79F5u;
+}
 static int rndi(Rng *r, int n) { return n > 0 ? (int)((rnd(r) >> 8) % (u32)n) : 0; }         /* 0..n-1 */
 static int rndr(Rng *r, int a, int b) { return a + rndi(r, b - a + 1); }                        /* a..b */
-static Rng rng_at(int a, int b, int c) { Rng r; r.s = hash3(a, b, c) | 1; rnd(&r); rnd(&r); return r; }
+/* a generator seeded by a position hash */
+static Rng rng_at(int a, int b, int c)
+{
+    Rng r;
+    r.s = hash3(a, b, c) | 1;
+    rnd(&r);
+    rnd(&r);
+    return r;
+}
 
 /* value noise 0..255 at (x, y) in pixels, cells sx x sy pixels, smoothstep blend */
 static int noise(int x, int y, int sx, int sy, int seed)
 {
-    int fx = fdiv((x + 4096) * 256, sx), fy = fdiv((y + 4096) * 256, sy);
-    int ix = fx >> 8, iy = fy >> 8, tx = fx & 255, ty = fy & 255;
-    int a = hash3(ix, iy, seed) & 255, b = hash3(ix + 1, iy, seed) & 255;
-    int c = hash3(ix, iy + 1, seed) & 255, d = hash3(ix + 1, iy + 1, seed) & 255;
-    tx = tx * tx * (768 - 2 * tx) / 65536; ty = ty * ty * (768 - 2 * ty) / 65536;
-    { int top = a * 256 + (b - a) * tx, bot = c * 256 + (d - c) * tx; return (top * 256 + (bot - top) * ty) >> 16; }
+    int fx = fdiv((x + 4096) * 256, sx),
+        fy = fdiv((y + 4096) * 256, sy);
+    int ix = fx >> 8,
+        iy = fy >> 8,
+        tx = fx & 255,
+        ty = fy & 255;
+    int a = hash3(ix, iy, seed) & 255,
+        b = hash3(ix + 1, iy, seed) & 255;
+    int c = hash3(ix, iy + 1, seed) & 255,
+        d = hash3(ix + 1, iy + 1, seed) & 255;
+    tx = tx * tx * (768 - 2 * tx) / 65536;
+    ty = ty * ty * (768 - 2 * ty) / 65536;
+    {
+        int top = a * 256 + (b - a) * tx,
+            bot = c * 256 + (d - c) * tx;
+        return (top * 256 + (bot - top) * ty) >> 16;
+    }
 }
 
 static int lum(Rgb c) { return (c.r * 3 + c.g * 6 + c.b) / 10; }
-static Rgb rgb15(u16 c) { Rgb o = { r5(c) << 3, g5(c) << 3, b5(c) << 3 }; return o; }
-static Rgb mix(Rgb a, Rgb b, int t) { Rgb o = { a.r + (b.r - a.r) * t / 256, a.g + (b.g - a.g) * t / 256, a.b + (b.b - a.b) * t / 256 }; return o; }
-static Rgb scale(Rgb a, int k) { Rgb o = { a.r * k / 256, a.g * k / 256, a.b * k / 256 }; return o; }
+static Rgb rgb15(u16 c)
+{
+    Rgb o = { r5(c) << 3, g5(c) << 3, b5(c) << 3 };
+    return o;
+}
+static Rgb mix(Rgb a, Rgb b, int t)
+{
+    Rgb o = { a.r + (b.r - a.r) * t / 256, a.g + (b.g - a.g) * t / 256, a.b + (b.b - a.b) * t / 256 };
+    return o;
+}
+static Rgb scale(Rgb a, int k)
+{
+    Rgb o = { a.r * k / 256, a.g * k / 256, a.b * k / 256 };
+    return o;
+}
 
 /* --- ramps: the samples sorted by (luminance, colour) - a total order, so any qsort gives the same bins */
-static u32 (*samp); static int nsamp;
-static int samp_cmp(const void *a, const void *b) { u32 x = *(const u32 *)a, y = *(const u32 *)b; return x < y ? -1 : x > y; }
+static u32 (*samp);
+static int nsamp;
+static int samp_cmp(const void *a, const void *b)
+{
+    u32 x = *(const u32 *)a,
+        y = *(const u32 *)b;
+    return x < y ? -1 : x > y;
+}
 static void samp_add(u16 c) { if (nsamp < PW * PH) samp[nsamp++] = (u32)lum(rgb15(c)) << 16 | (c & 0x7FFF); }
 static void ramp_make(Ramp *rp)
 {
     memset(rp, 0, sizeof *rp);
-    if (nsamp < NRAMP) { nsamp = 0; return; }
+    if (nsamp < NRAMP) {
+        nsamp = 0;
+        return;
+    }
     qsort(samp, (size_t)nsamp, sizeof samp[0], samp_cmp);
     for (int i = 0; i < NRAMP; i++) {
-        int a = (int)((long long)nsamp * i / NRAMP), b = (int)((long long)nsamp * (i + 1) / NRAMP), n = b - a;
+        int a = (int)((long long)nsamp * i / NRAMP),
+            b = (int)((long long)nsamp * (i + 1) / NRAMP),
+            n = b - a;
         Rgb s = { 0, 0, 0 };
-        for (int j = a; j < b; j++) { Rgb c = rgb15((u16)samp[j]); s.r += c.r; s.g += c.g; s.b += c.b; }
-        rp->bin[i].r = s.r / n; rp->bin[i].g = s.g / n; rp->bin[i].b = s.b / n;
+        for (int j = a; j < b; j++) {
+            Rgb c = rgb15((u16)samp[j]);
+            s.r += c.r;
+            s.g += c.g;
+            s.b += c.b;
+        }
+        rp->bin[i].r = s.r / n;
+        rp->bin[i].g = s.g / n;
+        rp->bin[i].b = s.b / n;
     }
-    rp->ok = 1; nsamp = 0;
+    rp->ok = 1;
+    nsamp = 0;
 }
 /* t 0..255 (dark..light), clamped */
 static Rgb ramp(const Ramp *rp, int t)
 {
-    int p = clampi(t, 0, 255) * (NRAMP - 1), i = p / 255, f = (p % 255) * 256 / 255;
+    int p = clampi(t, 0, 255) * (NRAMP - 1),
+        i = p / 255,
+        f = (p % 255) * 256 / 255;
     return i >= NRAMP - 1 ? rp->bin[NRAMP - 1] : mix(rp->bin[i], rp->bin[i + 1], f);
 }
 
@@ -223,9 +377,15 @@ static Rgb ramp(const Ramp *rp, int t)
 #define VPX16 (172 * 16)    /* the vanishing point (x 16) and the camera's focal length, see "the side walls" below */
 #define VPY16 (85 * 16)
 #define FOC16 (320 * 16)
-static const int JOINT_EVEN[2] = { 5, 4 }, JOINT_ODD[2] = { 19, 18 };   /* X of the first joint, even / odd courses */
+/* X of the first joint, even / odd courses */
+static const int JOINT_EVEN[2] = { 5, 4 },
+                 JOINT_ODD[2] = { 19, 18 };
 static int pcol(int side, int X) { return side ? PW - 1 + X : -X; }      /* X <= 0: inside the picture */
-static u16 picx(int side, int X, int y) { int x = clampi(pcol(side, X), 0, PW - 1); return pic[clampi(y, 0, PH - 1)][x]; }
+static u16 picx(int side, int X, int y)
+{
+    int x = clampi(pcol(side, X), 0, PW - 1);
+    return pic[clampi(y, 0, PH - 1)][x];
+}
 
 static Ramp R_wall, R_floor, R_ivy;
 static Rgb C_mortar, C_stem, C_gap;
@@ -235,32 +395,67 @@ static int (*edge_ivy)[PH];             /* 0..256: share of ivy texels in the 6 
 static int (*edge_depth)[PH];           /* how far (columns) the picture's ivy reaches in from the edge on that row */
 static int (*edge_tone)[PH];            /* the tone (on R_ivy) of the picture's ivy at the edge on that row */
 static int side_k[2];                   /* light of each side wall against the back wall (x 256) */
-static int floor_fit[2][2];             /* the floor's light: L(|f|) = a - b (|f| - 1), fitted per side on |f| 0.6..1.15 */
+/* the floor's light: L(|f|) = a - b (|f| - 1), fitted per side on |f| 0.6..1.15 */
+static int floor_fit[2][2];
 static u8 lum_tone[256];                /* luminance -> tone on R_floor */
-static int pic_lum[2][3], pic_dev[2][3]; /* mean luminance and its standard deviation (x 16) of the picture's 40 columns next
-                                           to each edge: wall, floor, ivy */
+/* mean luminance and its standard deviation (x 16) of the picture's 40 columns next to each edge: wall, floor, ivy */
+static int pic_lum[2][3], pic_dev[2][3];
 enum { REG_WALL, REG_FLOOR, REG_IVY, REG_NONE };
 
-static int green(u16 c) { Rgb k = rgb15(c); return k.g >= k.r + 16 && k.g >= k.b + 16; }
-static int greenish(u16 c) { Rgb k = rgb15(c); return k.g >= k.r + 8 && k.g >= k.b + 8; }
-static int brownish(u16 c) { Rgb k = rgb15(c); return k.r >= k.b + 16 && k.g < k.r + 8; }
-static int wall_px(u16 c) { Rgb k = rgb15(c); int l = lum(k); return !greenish(c) && l >= 40 && l < 150 && k.r >= k.b; }
+static int green(u16 c)
+{
+    Rgb k = rgb15(c);
+    return k.g >= k.r + 16 && k.g >= k.b + 16;
+}
+static int greenish(u16 c)
+{
+    Rgb k = rgb15(c);
+    return k.g >= k.r + 8 && k.g >= k.b + 8;
+}
+static int brownish(u16 c)
+{
+    Rgb k = rgb15(c);
+    return k.r >= k.b + 16 && k.g < k.r + 8;
+}
+static int wall_px(u16 c)
+{
+    Rgb k = rgb15(c);
+    int l = lum(k);
+    return !greenish(c) && l >= 40 && l < 150 && k.r >= k.b;
+}
 
 /* tone (0..255 on R_wall) of colour c: the ramp bin nearest in luminance */
 static int tone_of(const Ramp *rp, Rgb c)
 {
-    int l = lum(c), best = 0, bd = 1 << 30;
-    for (int t = 0; t < 256; t += 4) { int d = lum(ramp(rp, t)) - l; d = d < 0 ? -d : d; if (d < bd) { bd = d; best = t; } }
+    int l = lum(c),
+        best = 0,
+        best_d = 1 << 30;
+    for (int t = 0; t < 256; t += 4) {
+        int d = lum(ramp(rp, t)) - l;
+        d = d < 0 ? -d : d;
+        if (d < best_d) {
+            best_d = d;
+            best = t;
+        }
+    }
     return best;
 }
 
+/* integer square root, bit by bit */
 static int isqrt_i(int v)
 {
-    int r = 0, b = 1 << 30;
+    int root = 0,
+        bit = 1 << 30;
     if (v <= 0) return 0;
-    while (b > v) b >>= 2;
-    while (b) { if (v >= r + b) { v -= r + b; r = (r >> 1) + b; } else r >>= 1; b >>= 2; }
-    return r;
+    while (bit > v) bit >>= 2;
+    while (bit) {
+        if (v >= root + bit) {
+            v -= root + bit;
+            root = (root >> 1) + bit;
+        } else root >>= 1;
+        bit >>= 2;
+    }
+    return root;
 }
 
 static void analyse(void)
@@ -274,28 +469,58 @@ static void analyse(void)
     }
     ramp_make(&R_wall);
     /* mortar: the darkest texels of the left wall's mortar rows */
-    for (int k = 0; k < 6; k++) for (int x = 26; x < 58; x++) { u16 c = pic[COURSE0 + COURSE * (k + 1)][x]; if (!greenish(c)) samp_add(c); }
-    { Ramp m; ramp_make(&m); C_mortar = m.ok ? m.bin[NRAMP / 4] : (Rgb){ 40, 32, 30 }; }
+    for (int k = 0; k < 6; k++)
+        for (int x = 26; x < 58; x++) {
+            u16 c = pic[COURSE0 + COURSE * (k + 1)][x];
+            if (!greenish(c)) samp_add(c);
+        }
+    {
+        Ramp m;
+        ramp_make(&m);
+        C_mortar = m.ok ? m.bin[NRAMP / 4] : (Rgb){ 40, 32, 30 };
+    }
     /* floor */
-    for (int y = 186; y < PH; y++) { for (int x = 30; x < 90; x++) samp_add(pic[y][x]); for (int x = 250; x < 300; x++) samp_add(pic[y][x]); }
+    for (int y = 186; y < PH; y++) {
+        for (int x = 30; x < 90; x++) samp_add(pic[y][x]);
+        for (int x = 250; x < 300; x++) samp_add(pic[y][x]);
+    }
     ramp_make(&R_floor);
     /* ivy leaves: the green texels at both edges */
-    for (int y = 0; y < 200; y++) for (int x = 0; x < 40; x++) { if (green(pic[y][x])) samp_add(pic[y][x]); if (green(pic[y][PW - 1 - x])) samp_add(pic[y][PW - 1 - x]); }
+    for (int y = 0; y < 200; y++)
+        for (int x = 0; x < 40; x++) {
+            if (green(pic[y][x])) samp_add(pic[y][x]);
+            if (green(pic[y][PW - 1 - x])) samp_add(pic[y][PW - 1 - x]);
+        }
     ramp_make(&R_ivy);
     /* stems: dark non-green texels among the left ivy; gaps between leaves: the darkest greens */
-    for (int y = 0; y < 120; y++) for (int x = 0; x < 30; x++) { u16 c = pic[y][x]; Rgb k = rgb15(c); if (!greenish(c) && lum(k) < 60 && k.r >= k.b) samp_add(c); }
-    { Ramp m; ramp_make(&m); C_stem = m.ok ? m.bin[NRAMP / 2] : (Rgb){ 56, 40, 32 }; }
+    for (int y = 0; y < 120; y++)
+        for (int x = 0; x < 30; x++) {
+            u16 c = pic[y][x];
+            Rgb k = rgb15(c);
+            if (!greenish(c) && lum(k) < 60 && k.r >= k.b) samp_add(c);
+        }
+    {
+        Ramp m;
+        ramp_make(&m);
+        C_stem = m.ok ? m.bin[NRAMP / 2] : (Rgb){ 56, 40, 32 };
+    }
     C_gap = R_ivy.ok ? R_ivy.bin[0] : (Rgb){ 16, 24, 8 };
     /* per-course tone of the visible bricks next to each edge */
     for (int side = 0; side < 2; side++)
         for (int k = 0; k < 14; k++) {
-            int top = COURSE0 + COURSE * (k - 1) + MORTAR + 1, n = 0, s = 0;
+            int top = COURSE0 + COURSE * (k - 1) + MORTAR + 1,
+                n = 0,
+                s = 0;
             for (int y = top; y < top + COURSE - MORTAR - 2 && y < FLOOR; y++) {
                 if (y < 0) continue;
                 for (int x = 0; x < 56; x++) {
-                    int px = side ? 300 - x : 20 + x; u16 c = pic[y][px];
+                    int px = side ? 300 - x : 20 + x;
+                    u16 c = pic[y][px];
                     if (px < 0 || px >= PW || (side == 0 && px > 58) || (side == 1 && px < 262)) continue;
-                    if (wall_px(c) && !brownish(c)) { s += lum(rgb15(c)); n++; }
+                    if (wall_px(c) && !brownish(c)) {
+                        s += lum(rgb15(c));
+                        n++;
+                    }
                 }
             }
             course_tone[side][k] = n > 30 ? s / n : -1;
@@ -303,7 +528,10 @@ static void analyse(void)
     for (int side = 0; side < 2; side++) {
         int last = -1;
         for (int k = 0; k < 14; k++) if (course_tone[side][k] >= 0) last = course_tone[side][k];
-        for (int k = 13; k >= 0; k--) { if (course_tone[side][k] >= 0) last = course_tone[side][k]; else course_tone[side][k] = last; }
+        for (int k = 13; k >= 0; k--) {
+            if (course_tone[side][k] >= 0) last = course_tone[side][k];
+            else course_tone[side][k] = last;
+        }
         for (int k = 0; k < 14; k++) {
             Rgb c = { course_tone[side][k], course_tone[side][k], course_tone[side][k] };
             course_tone[side][k] = R_wall.ok ? tone_of(&R_wall, c) : 128;
@@ -312,72 +540,155 @@ static void analyse(void)
     /* floor row tones next to each edge, and the edge ivy profile */
     for (int side = 0; side < 2; side++)
         for (int y = 0; y < PH; y++) {
-            int s = 0, n = 0, g = 0, gn = 0, depth = 0;
-            for (int x = 6; x < 60; x++) { u16 c = picx(side, -x, y); if (!greenish(c)) { s += lum(rgb15(c)); n++; } }
+            int s = 0,
+                n = 0,
+                g = 0,
+                gn = 0,
+                depth = 0;
+            for (int x = 6; x < 60; x++) {
+                u16 c = picx(side, -x, y);
+                if (!greenish(c)) {
+                    s += lum(rgb15(c));
+                    n++;
+                }
+            }
             floor_tone[side][y] = n ? s / n : 80;
-            for (int dy = -2; dy <= 2; dy++) for (int x = 0; x < 6; x++) { gn++; if (greenish(picx(side, -x, y + dy)) || lum(rgb15(picx(side, -x, y + dy))) < 28) g++; }
+            for (int dy = -2; dy <= 2; dy++)
+                for (int x = 0; x < 6; x++) {
+                    gn++;
+                    if (greenish(picx(side, -x, y + dy)) || lum(rgb15(picx(side, -x, y + dy))) < 28) g++;
+                }
             edge_ivy[side][y] = g * 256 / gn;
-            for (int x = 0, miss = 0; x < 80 && miss < 6; x++) { if (greenish(picx(side, -x, y))) { depth = x + 1; miss = 0; } else miss++; }
+            for (int x = 0, miss = 0; x < 80 && miss < 6; x++) {
+                if (greenish(picx(side, -x, y))) {
+                    depth = x + 1;
+                    miss = 0;
+                } else miss++;
+            }
             edge_depth[side][y] = depth;
-            { int ls = 0, ln = 0;
-              for (int dy = -3; dy <= 3; dy++) for (int x = 0; x < 8; x++) { u16 c = picx(side, -x, y + dy); if (greenish(c)) { ls += lum(rgb15(c)); ln++; } }
-              { Rgb c = { ln ? ls / ln : 60, ln ? ls / ln : 60, ln ? ls / ln : 60 }; edge_tone[side][y] = ln ? tone_of(&R_ivy, c) : -1; } }
+            {
+                /* the mean luminance of the greens around the edge -> edge_tone */
+                int ivy_sum = 0,
+                    ivy_n = 0;
+                for (int dy = -3; dy <= 3; dy++)
+                    for (int x = 0; x < 8; x++) {
+                        u16 c = picx(side, -x, y + dy);
+                        if (greenish(c)) {
+                            ivy_sum += lum(rgb15(c));
+                            ivy_n++;
+                        }
+                    }
+                {
+                    Rgb c = { ivy_n ? ivy_sum / ivy_n : 60, ivy_n ? ivy_sum / ivy_n : 60,
+                              ivy_n ? ivy_sum / ivy_n : 60 };
+                    edge_tone[side][y] = ivy_n ? tone_of(&R_ivy, c) : -1;
+                }
+            }
         }
-    for (int side = 0; side < 2; side++) for (int y = 0; y < PH; y++) {
-        Rgb c = { floor_tone[side][y], floor_tone[side][y], floor_tone[side][y] };
-        if (y >= FLOOR) floor_tone[side][y] = R_floor.ok ? tone_of(&R_floor, c) : 128;
-    }
+    for (int side = 0; side < 2; side++)
+        for (int y = 0; y < PH; y++) {
+            Rgb c = { floor_tone[side][y], floor_tone[side][y], floor_tone[side][y] };
+            if (y >= FLOOR) floor_tone[side][y] = R_floor.ok ? tone_of(&R_floor, c) : 128;
+        }
     /* the side walls' light: the picture's one wall face turned sideways (x 298-301, between the mortar rows) against
        the back wall beside it (x 284-291); the left wall a little darker still, in the tree's shade */
     {
         static const int rows[3][2] = { { 127, 138 }, { 147, 156 }, { 166, 174 } };
-        int sa = 0, sn = 0, ba = 0, bn = 0;
-        for (int i = 0; i < 3; i++) for (int y = rows[i][0]; y < rows[i][1]; y++) {
-            for (int x = 298; x < 302; x++) { sa += lum(rgb15(pic[y][x])); sn++; }
-            for (int x = 284; x < 292; x++) { ba += lum(rgb15(pic[y][x])); bn++; }
-        }
-        side_k[1] = clampi(sa * 256 / sn * bn / (ba ? ba : 1), 160, 256);
+        int side_sum = 0,
+            side_n = 0,
+            back_sum = 0,
+            back_n = 0;
+        for (int i = 0; i < 3; i++)
+            for (int y = rows[i][0]; y < rows[i][1]; y++) {
+                for (int x = 298; x < 302; x++) {
+                    side_sum += lum(rgb15(pic[y][x]));
+                    side_n++;
+                }
+                for (int x = 284; x < 292; x++) {
+                    back_sum += lum(rgb15(pic[y][x]));
+                    back_n++;
+                }
+            }
+        side_k[1] = clampi(side_sum * 256 / side_n * back_n / (back_sum ? back_sum : 1), 160, 256);
         side_k[0] = side_k[1] * 15 / 16;
     }
     /* the floor's light across the room: a line through its luminance against |f| (0.6..1.15, rows 186-223, no ivy),
        per side; past the edge the strip follows that line (the pool of light fading towards the side walls) */
     for (int side = 0; side < 2; side++) {
-        long long n = 0, sf = 0, sl = 0, sff = 0, sfl = 0;
+        long long n = 0,
+                  sf = 0,
+                  sl = 0,
+                  sff = 0,
+                  sfl = 0;
         for (int y = 186; y < PH; y++)
             for (int x = 0; x < PW; x++) {
-                int f = ((x * 16 + 8 - VPX16) * 256) / (y * 16 + 8 - VPY16), l;
+                int f = ((x * 16 + 8 - VPX16) * 256) / (y * 16 + 8 - VPY16),
+                    l;
                 if ((side ? f : -f) < 154 || (side ? f : -f) > 294 || greenish(pic[y][x])) continue;
-                f = f < 0 ? -f : f; l = lum(rgb15(pic[y][x]));
-                n++; sf += f; sl += l; sff += (long long)f * f; sfl += (long long)f * l;
+                f = f < 0 ? -f : f;
+                l = lum(rgb15(pic[y][x]));
+                n++;
+                sf += f;
+                sl += l;
+                sff += (long long)f * f;
+                sfl += (long long)f * l;
             }
         if (n > 100 && n * sff - sf * sf != 0) {
-            long long den = n * sff - sf * sf, num = n * sfl - sf * sl;             /* slope x 256 = num * 256 / den */
-            int b = (int)(-num * 256 / den);                                          /* L(256) = mean + slope (256 - mean f) */
+            /* slope x 256 = num * 256 / den */
+            long long den = n * sff - sf * sf,
+                      num = n * sfl - sf * sl;
+            /* L(256) = mean + slope (256 - mean f) */
+            int b = (int)(-num * 256 / den);
             int a = (int)((sl * 256 + (long long)b * sf) / (n * 256)) - b;
-            floor_fit[side][0] = clampi(a, 50, 140); floor_fit[side][1] = clampi(b, 0, 120);
-        } else { floor_fit[side][0] = 85; floor_fit[side][1] = 40; }
+            floor_fit[side][0] = clampi(a, 50, 140);
+            floor_fit[side][1] = clampi(b, 0, 120);
+        } else {
+            floor_fit[side][0] = 85;
+            floor_fit[side][1] = 40;
+        }
     }
-    for (int l = 0; l < 256; l++) { Rgb c = { l, l, l }; lum_tone[l] = (u8)(R_floor.ok ? tone_of(&R_floor, c) : l); }
+    for (int l = 0; l < 256; l++) {
+        Rgb c = { l, l, l };
+        lum_tone[l] = (u8)(R_floor.ok ? tone_of(&R_floor, c) : l);
+    }
     /* the brightness the strips are matched to: the picture's 40 columns next to each edge, per region (ivy: the green
        texels; floor: rows 196-223; wall: the rest of rows 4-169, on the left above the root, rows 4-121) */
     for (int side = 0; side < 2; side++) {
-        int sum[3] = { 0, 0, 0 }, n[3] = { 0, 0, 0 }; long long sq[3] = { 0, 0, 0 };
+        int sum[3] = { 0, 0, 0 },
+            n[3] = { 0, 0, 0 };
+        long long sq[3] = { 0, 0, 0 };
         for (int X = -39; X <= 0; X++)
             for (int y = 0; y < PH; y++) {
-                u16 c = picx(side, X, y); int r = greenish(c) ? REG_IVY : y >= 196 ? REG_FLOOR : y >= 4 && y < (side ? 170 : 122) ? REG_WALL : REG_NONE;
-                if (r != REG_NONE) { int l = lum(rgb15(c)); sum[r] += l; sq[r] += l * l; n[r]++; }
+                u16 c = picx(side, X, y);
+                int r = greenish(c) ? REG_IVY
+                        : y >= 196 ? REG_FLOOR
+                        : y >= 4 && y < (side ? 170 : 122) ? REG_WALL
+                        : REG_NONE;
+                if (r != REG_NONE) {
+                    int l = lum(rgb15(c));
+                    sum[r] += l;
+                    sq[r] += l * l;
+                    n[r]++;
+                }
             }
         for (int r = 0; r < 3; r++) {
             pic_lum[side][r] = n[r] ? sum[r] * 16 / n[r] : 0;
-            pic_dev[side][r] = n[r] ? isqrt_i((int)((sq[r] * 256 - (long long)sum[r] * sum[r] * 256 / n[r]) / n[r])) : 0;
+            pic_dev[side][r] = n[r] ? isqrt_i((int)((sq[r] * 256 - (long long)sum[r] * sum[r] * 256 / n[r]) / n[r]))
+                                    : 0;
         }
     }
 }
 
 /* --- the canvas of one strip: X = 1..pad, y = 0..PH-1 */
-static Rgb *cv; static u8 *occ; static int cw;         /* occ: leaf coverage (for the wall's shadow) */
+static Rgb *cv;
+static u8 *occ;                         /* occ: leaf coverage (for the wall's shadow) */
+static int cw;
 static Rgb *px_at(int X, int y) { return (X >= 1 && X <= cw && y >= 0 && y < PH) ? &cv[(size_t)y * cw + X - 1] : 0; }
-static void put(int X, int y, Rgb c) { Rgb *p = px_at(X, y); if (p) *p = c; }
+static void put(int X, int y, Rgb c)
+{
+    Rgb *p = px_at(X, y);
+    if (p) *p = c;
+}
 
 /* --- the side walls in perspective.  The room is a box: at the right edge the back wall turns towards the viewer
    (the narrow face at x 297-302 whose mortar lines slant down-right from the back wall's rows 121 / 139 / 157 / 176 to
@@ -400,10 +711,13 @@ static void put(int X, int y, Rgb c) { Rgb *p = px_at(X, y); if (p) *p = c; }
    be too; its foot passes x 0 at row 187.6, under the ivy that drapes onto the floor down to row ~194 there. */
 static const int CORNER16[2] = { 19 * 16 + 8, 296 * 16 + 8 };
 static int DC16(int side) { return side ? CORNER16[1] - VPX16 : VPX16 - CORNER16[0]; }
-static int DE16(int side, int X) { return side ? (PW - 1) * 16 + 8 + X * 16 - VPX16 : VPX16 - 8 + X * 16; }   /* column centre */
-static int *S256, *WU16;                                   /* per strip column 0..cw+1: scale (x 256), U (back-wall px x 16) */
+/* column centre */
+static int DE16(int side, int X) { return side ? (PW - 1) * 16 + 8 + X * 16 - VPX16 : VPX16 - 8 + X * 16; }
+/* per strip column 0..cw+1: scale (x 256), U (back-wall px x 16) */
+static int *S256, *WU16;
 static int s_at(int X) { return S256[clampi(X, 0, cw + 1)]; }
-static int ivy_s(int X) { return s_at(X) * 256 / s_at(1); }   /* the ivy's size: as the picture's own at the edge, growing outwards */
+/* the ivy's size: as the picture's own at the edge, growing outwards */
+static int ivy_s(int X) { return s_at(X) * 256 / s_at(1); }
 static void persp_cols(int side)
 {
     for (int X = 0; X <= cw + 1; X++) {
@@ -413,16 +727,28 @@ static void persp_cols(int side)
     }
 }
 /* screen row (x 16) of back-wall height yb16 at column X, and back-wall height (x 16) of screen row y16 */
-static int wall_y16(int side, int X, int yb16) { (void)side; return VPY16 + (int)((long long)(yb16 - VPY16) * s_at(X) / 256); }
-static int wall_yb16(int side, int X, int y16) { (void)side; return VPY16 + (int)((long long)(y16 - VPY16) * 256 / s_at(X)); }
+static int wall_y16(int side, int X, int yb16)
+{
+    (void)side;
+    return VPY16 + (int)((long long)(yb16 - VPY16) * s_at(X) / 256);
+}
+static int wall_yb16(int side, int X, int y16)
+{
+    (void)side;
+    return VPY16 + (int)((long long)(y16 - VPY16) * 256 / s_at(X));
+}
 #define FOOT16 (FLOOR * 16 - 8)                            /* the back wall's foot: between rows 175 and 176 */
 static int foot_y16(int side, int X) { return wall_y16(side, X, FOOT16); }
 static int foot_y(int side, int X) { return (foot_y16(side, X) + 8) / 16; }   /* first floor row of the column */
 /* strip column of a place U16 along the wall (the inverse of WU16) */
 static int X_of_U(int side, int U16)
 {
-    int u = U16; if (u > FOC16 * 15 / 16) u = FOC16 * 15 / 16;
-    { int s = (int)((long long)256 * FOC16 / (FOC16 - u)); return (int)(((long long)s * DC16(side) / 256 - DE16(side, 0)) / 16); }
+    int u = U16;
+    if (u > FOC16 * 15 / 16) u = FOC16 * 15 / 16;
+    {
+        int s = (int)((long long)256 * FOC16 / (FOC16 - u));
+        return (int)(((long long)s * DC16(side) / 256 - DE16(side, 0)) / 16);
+    }
 }
 
 /* --- the room's light (measured on the picture).  One soft pool from above the camera, centred on the door: the floor
@@ -438,10 +764,17 @@ static int X_of_U(int side, int U16)
    wall_light: the side wall's light (x 256) at strip column X, row y (foot16: its foot, 1/16 px) */
 static int wall_light(int side, int X, int y, int foot16)
 {
-    int s = s_at(X), k = side_k[side];
-    k = k * (256 - clampi((s - 256) * 40 / 256, 0, 36)) / 256;               /* a gentle falloff towards the viewer (<= 14 %) */
-    {   int up = foot16 - (y * 16 + 8), sc = s / 16;                        /* height over the foot (1/16 px), scale */
-        if (up < 2 * sc) k = k * 208 / 256; else if (up < 4 * sc) k = k * 236 / 256;   /* the foot's corner, soft */
+    int s = s_at(X),
+        k = side_k[side];
+    /* a gentle falloff towards the viewer (<= 14 %) */
+    k = k * (256 - clampi((s - 256) * 40 / 256, 0, 36)) / 256;
+    {
+        /* height over the foot (1/16 px), scale */
+        int up = foot16 - (y * 16 + 8),
+            sc = s / 16;
+        /* the foot's corner, soft */
+        if (up < 2 * sc) k = k * 208 / 256;
+        else if (up < 4 * sc) k = k * 236 / 256;
     }
     return k;
 }
@@ -449,15 +782,22 @@ static int wall_light(int side, int X, int y, int foot16)
 static void draw_wall(int side)
 {
     for (int X = 1; X <= cw; X++) {
-        int U = WU16[X], dU = WU16[X + 1] - WU16[X], foot16 = foot_y16(side, X);
+        int U = WU16[X],
+            dU = WU16[X + 1] - WU16[X],
+            foot16 = foot_y16(side, X);
         int jw = dU > 16 ? dU : 16;                                         /* a joint is at least a column wide */
         for (int y = 0; y < PH; y++) {
             int yb = wall_yb16(side, X, y * 16 + 8);
             if (yb >= FOOT16) break;
-            int k = fdiv(yb - COURSE0 * 16, COURSE * 16), t = yb - COURSE0 * 16 - k * COURSE * 16;  /* course k, t in it */
-            int odd = k & 1, j0 = odd ? JOINT_ODD[side] : JOINT_EVEN[side];
+            /* course k, t in it */
+            int k = fdiv(yb - COURSE0 * 16, COURSE * 16),
+                t = yb - COURSE0 * 16 - k * COURSE * 16;
+            int odd = k & 1,
+                j0 = odd ? JOINT_ODD[side] : JOINT_EVEN[side];
             int base = course_tone[side][clampi(k + 1, 0, 13)];
-            int n = fdiv(U - j0 * 16, BRICK * 16), u = U - j0 * 16 - n * BRICK * 16;   /* brick n, u in it */
+            /* brick n, u in it */
+            int n = fdiv(U - j0 * 16, BRICK * 16),
+                u = U - j0 * 16 - n * BRICK * 16;
             u32 h = hash3(side * 1000 + k, n, 17);
             int w = (BRICK + (int)(h >> 24) % 3 - 1) * 16;                  /* bricks a column longer or shorter */
             Rgb c;
@@ -466,17 +806,31 @@ static void draw_wall(int side)
                 c = mix(C_mortar, ramp(&R_wall, 0), 64 + m / 4);
             } else {
                 int tone = base + (int)(h & 63) - 32;
-                int bt = t - MORTAR * 16, bh = (COURSE - MORTAR) * 16;
-                int lo = side ? u - jw : w - u, hi = side ? w - u : u - jw;     /* screen-left / -right edge of the brick */
+                int bt = t - MORTAR * 16,
+                    bh = (COURSE - MORTAR) * 16;
+                /* screen-left / -right edge of the brick */
+                int lo = side ? u - jw : w - u,
+                    hi = side ? w - u : u - jw;
                 tone += noise(U + n * 112, yb, 96, 64, 11 + side) / 5 - 25;     /* mottling */
                 tone += noise(U, yb, 32, 32, 13) / 8 - 16;                       /* grain */
-                if ((h >> 8 & 7) == 0) { int st = noise(U, yb, 80, 48, 29); if (st > 150) tone -= (st - 150) / 2; }   /* stain */
-                if (bt < 16) tone += 34; else if (bt < 32) tone += 14;            /* bevel: lit top edge */
-                if (bt >= bh - 16) tone -= 42; else if (bt >= bh - 32) tone -= 18;
+                /* stain */
+                if ((h >> 8 & 7) == 0) {
+                    int st = noise(U, yb, 80, 48, 29);
+                    if (st > 150) tone -= (st - 150) / 2;
+                }
+                /* bevel: lit top edge */
+                if (bt < 16) tone += 34;
+                else if (bt < 32) tone += 14;
+                if (bt >= bh - 16) tone -= 42;
+                else if (bt >= bh - 32) tone -= 18;
                 if (lo < jw) tone += 20;                                         /* lit left edge, shadowed right */
-                if (hi < jw) tone -= 34; else if (hi < 2 * jw) tone -= 12;
+                if (hi < jw) tone -= 34;
+                else if (hi < 2 * jw) tone -= 12;
                 if ((h >> 12 & 15) == 0) {                                       /* a crack: a dark diagonal hairline */
-                    int cx = (int)(h >> 16 & 15) + 4, cy = (int)(h >> 20 & 7) + 3, uu = u / 16, tt = bt / 16;
+                    int cx = (int)(h >> 16 & 15) + 4,
+                        cy = (int)(h >> 20 & 7) + 3,
+                        uu = u / 16,
+                        tt = bt / 16;
                     if ((uu - cx) == (tt - cy) / 2 && tt >= cy && tt < cy + 8) tone -= 60;
                 }
                 c = ramp(&R_wall, tone);
@@ -492,29 +846,45 @@ static void draw_wall(int side)
    the wall's foot darker (the contact shadow, a few rows, wider towards the viewer) */
 static int floor_lum(int side, int f256)                   /* |f| x 256 -> luminance */
 {
-    int a = floor_fit[side][0], b = floor_fit[side][1];    /* L = a - b (|f| - 1) */
+    /* L = a - b (|f| - 1) */
+    int a = floor_fit[side][0],
+        b = floor_fit[side][1];
     return clampi(a - b * (f256 - 256) / 256, 40, 140);
 }
 static void draw_floor(int side)
 {
     for (int X = 1; X <= cw; X++) {
-        int foot16 = foot_y16(side, X), fy = foot_y(side, X), x16 = pcol(side, X) * 16 + 8, sc = s_at(X);
+        int foot16 = foot_y16(side, X),
+            fy = foot_y(side, X),
+            x16 = pcol(side, X) * 16 + 8,
+            sc = s_at(X);
         for (int y = fy < 0 ? 0 : fy; y < PH; y++) {
-            int dy = y * 16 + 8 - VPY16; if (dy < 16) dy = 16;
-            int fu = (int)((long long)(x16 - VPX16) * 115 * 16 / dy) + 8192, fv = 115 * 115 * 256 / dy;
-            int f256 = (int)((long long)(x16 - VPX16) * 256 / dy); if (f256 < 0) f256 = -f256;
-            int e256 = (int)((long long)(pcol(side, 0) * 16 + 8 - VPX16) * 256 / dy), le, lf;
+            int dy = y * 16 + 8 - VPY16;
+            if (dy < 16) dy = 16;
+            int fu = (int)((long long)(x16 - VPX16) * 115 * 16 / dy) + 8192,
+                fv = 115 * 115 * 256 / dy;
+            int f256 = (int)((long long)(x16 - VPX16) * 256 / dy);
+            if (f256 < 0) f256 = -f256;
+            int e256 = (int)((long long)(pcol(side, 0) * 16 + 8 - VPX16) * 256 / dy),
+                le, lf;
             if (e256 < 0) e256 = -e256;
-            le = floor_lum(side, e256); lf = floor_lum(side, f256);                   /* the edge's light, this column's */
-            if (lf < le - le / 8) lf = le - le / 8;                                   /* at most 1/8 darker than the edge */
+            /* the edge's light, this column's */
+            le = floor_lum(side, e256);
+            lf = floor_lum(side, f256);
+            /* at most 1/8 darker than the edge */
+            if (lf < le - le / 8) lf = le - le / 8;
             int tone = lum_tone[lf];
             tone += noise(fu, fv, 13 * 16, 2 * 16, 31 + side) / 2 - 64;              /* streaks */
             tone += noise(fu, fv, 5 * 16, 2 * 16, 37) / 4 - 32;                      /* slabs */
             tone += noise(X, y, 1, 1, 41) / 10 - 12;                                  /* grain */
             tone += noise(fu, fv, 3 * 16, 16, 43) / 5 - 25;                           /* pebbles: short light dashes */
-            {   int dn = (y * 16 + 8 - foot16) * 256 / sc;                       /* rows below the foot, at the corner's scale */
+            {
+                /* rows below the foot, at the corner's scale */
+                int dn = (y * 16 + 8 - foot16) * 256 / sc;
                 Rgb c = ramp(&R_floor, tone);
-                if (dn < 16) c = scale(c, 200); else if (dn < 32) c = scale(c, 232);   /* a soft contact line at the foot */
+                /* a soft contact line at the foot */
+                if (dn < 16) c = scale(c, 200);
+                else if (dn < 32) c = scale(c, 232);
                 put(X, y, c);
             }
         }
@@ -523,18 +893,26 @@ static void draw_floor(int side)
 
 /* --- ivy */
 typedef struct { short x16, y16; u8 rx, ry, ang, tone, layer; } Leaf;
-static Leaf *leaves; static int nleaves, capleaves;
+static Leaf *leaves;
+static int nleaves, capleaves;
 static void leaf_add(int x16, int y16, int rx, int ry, int ang, int tone, int layer)
 {
     if (x16 < -64 || x16 > (cw + 6) * 16 || y16 < -64 || y16 > (PH + 4) * 16) return;
     if (nleaves == capleaves) {
-        int n = capleaves ? capleaves * 2 : 4096; Leaf *l = realloc(leaves, (size_t)n * sizeof *l);
+        int n = capleaves ? capleaves * 2 : 4096;
+        Leaf *l = realloc(leaves, (size_t)n * sizeof *l);
         if (!l) return;
-        leaves = l; capleaves = n;
+        leaves = l;
+        capleaves = n;
     }
     Leaf *l = &leaves[nleaves++];
-    l->x16 = (short)x16; l->y16 = (short)y16; l->rx = (u8)rx; l->ry = (u8)ry; l->ang = (u8)(ang & 15);
-    l->tone = (u8)clampi(tone, 0, 255); l->layer = (u8)layer;
+    l->x16 = (short)x16;
+    l->y16 = (short)y16;
+    l->rx = (u8)rx;
+    l->ry = (u8)ry;
+    l->ang = (u8)(ang & 15);
+    l->tone = (u8)clampi(tone, 0, 255);
+    l->layer = (u8)layer;
 }
 static const int COS16[16] = { 256, 237, 181, 98, 0, -98, -181, -237, -256, -237, -181, -98, 0, 98, 181, 237 };
 static const int SIN16[16] = { 0, 98, 181, 237, 256, 237, 181, 98, 0, -98, -181, -237, -256, -237, -181, -98 };
@@ -543,43 +921,79 @@ static const int SIN16[16] = { 0, 98, 181, 237, 256, 237, 181, 98, 0, -98, -181,
 static int cur_side;                                       /* the strip being drawn */
 static void leaf_draw(const Leaf *l, int mode)
 {
-    int c = COS16[l->ang], s = SIN16[l->ang], rx = l->rx, ry = l->ry, R = (rx > ry ? rx : ry) / 16 + 2;
-    int X0 = l->x16 / 16, Y0 = l->y16 / 16;
+    int c = COS16[l->ang],
+        s = SIN16[l->ang],
+        rx = l->rx,
+        ry = l->ry,
+        R = (rx > ry ? rx : ry) / 16 + 2;
+    int X0 = l->x16 / 16,
+        Y0 = l->y16 / 16;
     for (int py = Y0 - R; py <= Y0 + R; py++)
         for (int X = X0 - R; X <= X0 + R; X++) {
-            int dx = X * 16 + 8 - l->x16, dy = py * 16 + 8 - l->y16;
-            int u = (dx * c + dy * s) / 256, v = (dy * c - dx * s) / 256;
+            int dx = X * 16 + 8 - l->x16,
+                dy = py * 16 + 8 - l->y16;
+            int u = (dx * c + dy * s) / 256,
+                v = (dy * c - dx * s) / 256;
             int ryu = ry * (256 - 80 * u / (rx + 1)) / 256;                 /* taper towards the tip */
             if (ryu < 4) continue;
             long long q = (long long)u * u * 256 / (rx * rx) + (long long)v * v * 256 / (ryu * ryu);
             if (q > 256) continue;
-            if (mode == 0) { if (X >= 1 && X <= cw && py >= 0 && py < PH) occ[(size_t)py * cw + X - 1] = 1; continue; }
+            if (mode == 0) {
+                if (X >= 1 && X <= cw && py >= 0 && py < PH) occ[(size_t)py * cw + X - 1] = 1;
+                continue;
+            }
             int tone = l->tone - (dx + dy) * 3 / 2;                         /* light from the top left */
             if (q > 150 && dx + dy > 0) tone -= 50;                          /* the far rim */
             if (q < 40 && dx + dy < 0) tone += 18;                           /* the sheen */
             tone += (int)(hash3(X, py, l->x16) & 31) - 16;                  /* the painted grain */
-            {   int k = wall_light(cur_side, clampi(X, 1, cw), py, (PH + 64) * 16) * 256 / (side_k[cur_side] ? side_k[cur_side] : 256);
-                put(X, py, scale(ramp(&R_ivy, tone), clampi(k * 9 / 8, 120, 256)));   /* the room's light on the leaves too */
+            {
+                int k = wall_light(cur_side, clampi(X, 1, cw), py, (PH + 64) * 16) * 256
+                        / (side_k[cur_side] ? side_k[cur_side] : 256);
+                /* the room's light on the leaves too */
+                put(X, py, scale(ramp(&R_ivy, tone), clampi(k * 9 / 8, 120, 256)));
             }
         }
 }
 static void stem_line(int x0, int y0, int x1, int y1, Rgb c)      /* 1/16 px endpoints */
 {
-    int ax = x0 / 16, ay = y0 / 16, bx = x1 / 16, by = y1 / 16;
-    int dx = bx > ax ? bx - ax : ax - bx, dy = by > ay ? by - ay : ay - by, sx = ax < bx ? 1 : -1, sy = ay < by ? 1 : -1, e = dx - dy;
+    int ax = x0 / 16,
+        ay = y0 / 16,
+        bx = x1 / 16,
+        by = y1 / 16;
+    int dx = bx > ax ? bx - ax : ax - bx,
+        dy = by > ay ? by - ay : ay - by,
+        sx = ax < bx ? 1 : -1,
+        sy = ay < by ? 1 : -1,
+        e = dx - dy;
     for (int i = 0; i < 400; i++) {
         put(ax, ay, c);
         if (ax == bx && ay == by) break;
-        { int e2 = 2 * e; if (e2 > -dy) { e -= dy; ax += sx; } if (e2 < dx) { e += dx; ay += sy; } }
+        {
+            int e2 = 2 * e;
+            if (e2 > -dy) {
+                e -= dy;
+                ax += sx;
+            }
+            if (e2 < dx) {
+                e += dx;
+                ay += sy;
+            }
+        }
     }
 }
 
 /* density of the ivy at (X, y): the edge's own ivy carried a little way out, falling off */
 static int edge_dens(int side, int X, int y)
 {
-    int yy = clampi(y, 0, PH - 1), d = edge_depth[side][yy], e = edge_ivy[side][yy], reach;
-    if (side == 0 && y >= 112 && y < 202) { if (d < 12) d = 12; if (e < 236) e = 236; }  /* the ivy down to the floor over
-                                                                                       the picture's root, cut at the edge */
+    int yy = clampi(y, 0, PH - 1),
+        d = edge_depth[side][yy],
+        e = edge_ivy[side][yy],
+        reach;
+    /* the ivy down to the floor over the picture's root, cut at the edge */
+    if (side == 0 && y >= 112 && y < 202) {
+        if (d < 12) d = 12;
+        if (e < 236) e = 236;
+    }
     reach = 3 + d * 3 / 4 + noise(0, y, 1, 11, 61 + side) * (4 + d / 3) / 256;       /* ragged boundary */
     if (X > reach) return 0;
     return e * (reach - X + 2) / (reach + 2);
@@ -589,20 +1003,28 @@ static int edge_dens(int side, int X, int y)
 static void grow(int side, Rng *r, int x16, int y16, int dir, int len, int drift, int spread0, int spread1, int dens,
                  int depth, Rgb sc)
 {
-    int px = x16, py = y16;
+    int px = x16,
+        py = y16;
     for (int i = 0; i < len; i++) {
-        int t = i * 256 / (len + 1), spread = spread0 + (spread1 - spread0) * t / 256;
+        int t = i * 256 / (len + 1),
+            spread = spread0 + (spread1 - spread0) * t / 256;
         int sway = (noise(i, depth * 37 + x16 / 16, 9, 1, 71) - 128) / 16;
-        int nx = px + drift + sway, ny = py + 16 * dir;
+        int nx = px + drift + sway,
+            ny = py + 16 * dir;
         stem_line(px, py, nx, ny, sc);
-        px = nx; py = ny;
+        px = nx;
+        py = ny;
         /* leaves along the stem, thinning towards the tip */
         int want = dens * (256 - t / 2) / 256;
         while (want > 0) {
             if (rndi(r, 256) < (want > 256 ? 256 : want)) {
-                int ox = rndr(r, -spread, spread), oy = rndr(r, -spread / 2 - 8, spread / 2 + 8);
+                int ox = rndr(r, -spread, spread),
+                    oy = rndr(r, -spread / 2 - 8, spread / 2 + 8);
                 int front = rndi(r, 2);
-                int lx = rndr(r, 18, 34), ly = rndr(r, 13, 22), la = rndi(r, 16), lt = front ? rndr(r, 90, 220) : rndr(r, 40, 120);
+                int lx = rndr(r, 18, 34),
+                    ly = rndr(r, 13, 22),
+                    la = rndi(r, 16),
+                    lt = front ? rndr(r, 90, 220) : rndr(r, 40, 120);
                 int ks = ivy_s((px + ox) / 16);                              /* nearer the viewer, bigger */
                 leaf_add(px + ox * ks / 256, py + oy * ks / 256, lx * ks / 256, ly * ks / 256, la, lt, front ? 2 : 1);
             }
@@ -611,8 +1033,10 @@ static void grow(int side, Rng *r, int x16, int y16, int dir, int len, int drift
         /* a branch now and then */
         if (depth < 2 && i > 4 && rndi(r, 96) == 0)
         {
-            int bl = len / 3 + rndi(r, len / 3 + 1), bs = rndi(r, 2) ? 1 : -1, bd = bs * rndr(r, 3, 8);
-            grow(side, r, px, py, dir, bl, bd, spread0 / 2 + 16, 16, dens * 3 / 4, depth + 1, sc);
+            int branch_len = len / 3 + rndi(r, len / 3 + 1),
+                branch_sign = rndi(r, 2) ? 1 : -1,
+                branch_drift = branch_sign * rndr(r, 3, 8);
+            grow(side, r, px, py, dir, branch_len, branch_drift, spread0 / 2 + 16, 16, dens * 3 / 4, depth + 1, sc);
         }
         if (px / 16 < -6 || px / 16 > cw + 6) break;
     }
@@ -620,7 +1044,8 @@ static void grow(int side, Rng *r, int x16, int y16, int dir, int len, int drift
 
 static void grow_ivy(int side)
 {
-    Rgb sc = C_stem, sc2 = mix(C_stem, C_gap, 128);
+    Rgb sc = C_stem,
+        sc2 = mix(C_stem, C_gap, 128);
     nleaves = 0;
     /* 1. the mass at the edge: the picture's ivy carried on, as deep as it is on each row */
     for (int y = -2; y < PH; y += 2)
@@ -628,10 +1053,16 @@ static void grow_ivy(int side)
             int dn = edge_dens(side, X, y);
             Rng r = rng_at(side * 7 + 1, X, y);
             if (dn <= 0 || rndi(&r, 256) >= dn) continue;
-            int front = rndi(&r, 2), et = edge_tone[side][clampi(y, 0, PH - 1)];
+            int front = rndi(&r, 2),
+                et = edge_tone[side][clampi(y, 0, PH - 1)];
             if (et < 0) et = 120;
-            int lx = X * 16 + rndr(&r, -16, 16), ly = y * 16 + rndr(&r, -16, 16), rx = rndr(&r, 18, 34), ry = rndr(&r, 13, 22);
-            int la = rndi(&r, 16), lt = front ? et + rndr(&r, -10, 90) : et - rndr(&r, 30, 100), ks = ivy_s(X);
+            int lx = X * 16 + rndr(&r, -16, 16),
+                ly = y * 16 + rndr(&r, -16, 16),
+                rx = rndr(&r, 18, 34),
+                ry = rndr(&r, 13, 22);
+            int la = rndi(&r, 16),
+                lt = front ? et + rndr(&r, -10, 90) : et - rndr(&r, 30, 100),
+                ks = ivy_s(X);
             leaf_add(lx, ly, rx * ks / 256, ry * ks / 256, la, lt, front ? 2 : 1);
         }
     /* 2. hanging from the top of the side wall: cascades (several stems side by side, the middle ones longest), laid
@@ -639,18 +1070,25 @@ static void grow_ivy(int side)
        the whole wall top, long ones near the corner and here and there further out */
     for (int slot = -1; ; slot++) {
         Rng r = rng_at(side * 7 + 2, slot, 0);
-        int X = X_of_U(side, WU16[1] + (slot * 22 + rndi(&r, 10)) * 16), ks, near;
+        int X = X_of_U(side, WU16[1] + (slot * 22 + rndi(&r, 10)) * 16),
+            ks, near;
         if (slot < 0) X = -8 + rndi(&r, 6);
         if (X > cw + 22) break;
-        ks = ivy_s(X); near = X < 48 ? 256 - X * 4 : 70;
-        int W = rndr(&r, 8, 22) * ks / 256, L = 8 + rndi(&r, 22), n = W / 4 + 1;
+        ks = ivy_s(X);
+        near = X < 48 ? 256 - X * 4 : 70;
+        int W = rndr(&r, 8, 22) * ks / 256,
+            L = 8 + rndi(&r, 22),
+            n = W / 4 + 1;
         if (rndi(&r, 256) < near) L += 40 + rndi(&r, 100);
         if (X < 30) L += 50;
         L = L * ks / 256;
         for (int j = 0; j < n; j++) {
-            int off = 2 * j - (n - 1), m = n > 1 ? (off < 0 ? -off : off) * 256 / n : 0;   /* 0 middle .. 256 sides */
+            /* 0 middle .. 256 sides */
+            int off = 2 * j - (n - 1),
+                m = n > 1 ? (off < 0 ? -off : off) * 256 / n : 0;
             int len = L * (256 - m * 5 / 8) / 256 * rndr(&r, 180, 256) / 256;
-            int sx = (X + j * 4) * 16 + rndr(&r, -24, 24), dr = rndr(&r, -3, 3);
+            int sx = (X + j * 4) * 16 + rndr(&r, -24, 24),
+                dr = rndr(&r, -3, 3);
             grow(side, &r, sx, -32, 1, len, dr, 44, 28, 300, 0, sc);
         }
     }
@@ -660,7 +1098,8 @@ static void grow_ivy(int side)
         int X = k < 2 ? 3 + k * 10 + rndi(&r, 6) : 30 + rndi(&r, cw);
         int y = foot_y(side, X) - 2;
         if (k >= 3 && rndi(&r, 2)) continue;
-        int cl = 30 + rndi(&r, 70), dr = rndr(&r, -4, 4);
+        int cl = 30 + rndi(&r, 70),
+            dr = rndr(&r, -4, 4);
         grow(side, &r, X * 16, y * 16, -1, cl, dr, 24, 40, 260, 1, sc2);
     }
     /* draw: shadow on the wall under the leaves, then back leaves, then front leaves */
@@ -668,37 +1107,77 @@ static void grow_ivy(int side)
     for (int i = 0; i < nleaves; i++) leaf_draw(&leaves[i], 0);
     for (int y = PH - 1; y >= 0; y--)
         for (int X = cw; X >= 1; X--) {
-            int sx = X - 1, sy = y - 2, o = sx >= 1 && sy >= 0 && occ[(size_t)sy * cw + sx - 1];
-            if (o && !occ[(size_t)y * cw + X - 1]) { Rgb *p = px_at(X, y); *p = scale(*p, 208); }
+            int sx = X - 1,
+                sy = y - 2,
+                o = sx >= 1 && sy >= 0 && occ[(size_t)sy * cw + sx - 1];
+            if (o && !occ[(size_t)y * cw + X - 1]) {
+                Rgb *p = px_at(X, y);
+                *p = scale(*p, 208);
+            }
         }
-    for (int i = 0; i < nleaves; i++) if (leaves[i].layer == 1) { Leaf g = leaves[i]; g.rx += 6; g.ry += 6; g.tone = 0; leaf_draw(&g, 1); }
+    for (int i = 0; i < nleaves; i++)
+        if (leaves[i].layer == 1) {
+            Leaf g = leaves[i];
+            g.rx += 6;
+            g.ry += 6;
+            g.tone = 0;
+            leaf_draw(&g, 1);
+        }
     for (int i = 0; i < nleaves; i++) if (leaves[i].layer == 1) leaf_draw(&leaves[i], 1);
-    for (int i = 0; i < nleaves; i++) if (leaves[i].layer == 2) { Leaf g = leaves[i]; g.x16 += 12; g.y16 += 16; g.tone = 10; leaf_draw(&g, 1); }
+    for (int i = 0; i < nleaves; i++)
+        if (leaves[i].layer == 2) {
+            Leaf g = leaves[i];
+            g.x16 += 12;
+            g.y16 += 16;
+            g.tone = 10;
+            leaf_draw(&g, 1);
+        }
     for (int i = 0; i < nleaves; i++) if (leaves[i].layer == 2) leaf_draw(&leaves[i], 1);
 }
 
 /* nearest colour among those the picture uses (its CLUT), cached per 15-bit colour */
-static u16 pal[256]; static int npal; static u16 (*qcache); static u8 (*qhave);
+static u16 pal[256];
+static int npal;
+static u16 (*qcache);
+static u8 (*qhave);
 static u8 (*pal_make__seen);
 static void pal_make(void)
 {
     u8 (*const seen) = pal_make__seen;
-    memset(seen, 0, (sizeof *seen * (32768))); memset(qhave, 0, (sizeof *qhave * (32768))); npal = 0;
-    for (int y = 0; y < PH; y++) for (int x = 0; x < PW; x++) {
-        u16 c = pic[y][x] & 0x7FFF;
-        if (!seen[c] && npal < 256 && c) { seen[c] = 1; pal[npal++] = pic[y][x]; }
-    }
+    memset(seen, 0, (sizeof *seen * (32768)));
+    memset(qhave, 0, (sizeof *qhave * (32768)));
+    npal = 0;
+    for (int y = 0; y < PH; y++)
+        for (int x = 0; x < PW; x++) {
+            u16 c = pic[y][x] & 0x7FFF;
+            if (!seen[c] && npal < 256 && c) {
+                seen[c] = 1;
+                pal[npal++] = pic[y][x];
+            }
+        }
 }
 static u16 quant(Rgb c)
 {
-    int r = clampi(c.r + 4, 0, 255) >> 3, g = clampi(c.g + 4, 0, 255) >> 3, b = clampi(c.b + 4, 0, 255) >> 3, k = r | g << 5 | b << 10;   /* rounded */
+    /* rounded */
+    int r = clampi(c.r + 4, 0, 255) >> 3,
+        g = clampi(c.g + 4, 0, 255) >> 3,
+        b = clampi(c.b + 4, 0, 255) >> 3,
+        k = r | g << 5 | b << 10;
     if (!qhave[k]) {
-        int bd = 1 << 30, best = 0;
+        int best_d = 1 << 30,
+            best = 0;
         for (int i = 0; i < npal; i++) {
-            int dr = r5(pal[i]) - r, dg = g5(pal[i]) - g, db = b5(pal[i]) - b, d = 3 * dr * dr + 4 * dg * dg + 2 * db * db;
-            if (d < bd) { bd = d; best = i; }
+            int dr = r5(pal[i]) - r,
+                dg = g5(pal[i]) - g,
+                db = b5(pal[i]) - b,
+                d = 3 * dr * dr + 4 * dg * dg + 2 * db * db;
+            if (d < best_d) {
+                best_d = d;
+                best = i;
+            }
         }
-        qcache[k] = npal ? pal[best] : (u16)k; qhave[k] = 1;
+        qcache[k] = npal ? pal[best] : (u16)k;
+        qhave[k] = 1;
     }
     return qcache[k];
 }
@@ -714,49 +1193,80 @@ static int region(int side, int X, int y, Rgb c)
     return y * 16 + 8 >= f16 ? REG_FLOOR : REG_WALL;
 }
 /* match the strip's brightness and contrast to the room's: per region, the luminance of the strip's 10 columns next to
-   the join (4-13) mapped (L' = m + (L - ms) k, k = dev / devs) onto the mean and spread of the picture's 40 columns next to the edge
-   (pic_lum / pic_dev), each pixel's colour scaled by L' / L; the whole strip takes the same map, so its own falloff
-   towards the viewer stays (gentle: wall_light, draw_floor) */
+   the join (4-13) mapped (L' = m + (L - ms) k, k = dev / devs) onto the mean and spread of the picture's 40 columns
+   next to the edge (pic_lum / pic_dev), each pixel's colour scaled by L' / L; the whole strip takes the same map, so
+   its own falloff towards the viewer stays (gentle: wall_light, draw_floor) */
 static void balance(int side)
 {
-    int sum[3] = { 0, 0, 0 }, n[3] = { 0, 0, 0 }, ms[3], k[3]; long long sq[3] = { 0, 0, 0 };
+    int sum[3] = { 0, 0, 0 },
+        n[3] = { 0, 0, 0 },
+        ms[3], k[3];
+    long long sq[3] = { 0, 0, 0 };
     for (int X = 4; X <= 13 && X <= cw; X++)                              /* past the 3 columns blended with the edge */
         for (int y = 0; y < PH; y++) {
-            Rgb c = cv[(size_t)y * cw + X - 1]; int f16 = foot_y16(side, X), r = region(side, X, y, c), l = lum(c);
-            if (r == REG_IVY || y * 16 + 8 >= f16 + 32 || (y >= 4 && y * 16 + 8 < f16 - 48)) { sum[r] += l; sq[r] += l * l; n[r]++; }
+            Rgb c = cv[(size_t)y * cw + X - 1];
+            int f16 = foot_y16(side, X),
+                r = region(side, X, y, c),
+                l = lum(c);
+            if (r == REG_IVY || y * 16 + 8 >= f16 + 32 || (y >= 4 && y * 16 + 8 < f16 - 48)) {
+                sum[r] += l;
+                sq[r] += l * l;
+                n[r]++;
+            }
         }
     for (int r = 0; r < 3; r++) {
-        int dev = n[r] ? isqrt_i((int)((sq[r] * 256 - (long long)sum[r] * sum[r] * 256 / n[r]) / n[r])) : 0;   /* x 16 */
+        /* x 16 */
+        int dev = n[r] ? isqrt_i((int)((sq[r] * 256 - (long long)sum[r] * sum[r] * 256 / n[r]) / n[r])) : 0;
         ms[r] = n[r] ? sum[r] * 16 / n[r] : 0;
         k[r] = dev && pic_dev[side][r] ? clampi(pic_dev[side][r] * 256 / dev, 192, 512) : 256;
-        if (!n[r] || !pic_lum[side][r]) { ms[r] = 0; k[r] = 256; }
+        if (!n[r] || !pic_lum[side][r]) {
+            ms[r] = 0;
+            k[r] = 256;
+        }
     }
     for (int y = 0; y < PH; y++)
         for (int X = 1; X <= cw; X++) {
-            Rgb *p = &cv[(size_t)y * cw + X - 1]; int r = region(side, X, y, *p), l = lum(*p), l2;
+            Rgb *p = &cv[(size_t)y * cw + X - 1];
+            int r = region(side, X, y, *p),
+                l = lum(*p),
+                l2;
             if (!ms[r]) continue;
             l2 = clampi((pic_lum[side][r] + (l * 16 - ms[r]) * k[r] / 256) / 16, 2, 255);   /* L' */
             *p = l ? scale(*p, clampi(l2 * 256 / l, 0, 1024)) : (Rgb){ l2, l2, l2 };
         }
 #ifdef WS_BACKDROP_MAIN
-    if (getenv("WSB_INFO")) for (int r = 0; r < 3; r++)
-        fprintf(stderr, "side %d region %d: picture mean %d dev %d, strip mean %d -> contrast x%d/256\n", side, r,
-                pic_lum[side][r] / 16, pic_dev[side][r] / 16, ms[r] / 16, k[r]);
+    if (getenv("WSB_INFO"))
+        for (int r = 0; r < 3; r++)
+            fprintf(stderr, "side %d region %d: picture mean %d dev %d, strip mean %d -> contrast x%d/256\n", side, r,
+                    pic_lum[side][r] / 16, pic_dev[side][r] / 16, ms[r] / 16, k[r]);
 #endif
 }
 
 static void build_redraw(int pad)
 {
     if (!ws_need_build_redraw()) return;
-    analyse(); pal_make();
-    cw = pad; cv = calloc((size_t)pad * PH, sizeof *cv); occ = calloc((size_t)pad * PH, 1);
-    S256 = calloc((size_t)pad + 2, sizeof *S256); WU16 = calloc((size_t)pad + 2, sizeof *WU16);
+    analyse();
+    pal_make();
+    cw = pad;
+    cv = calloc((size_t)pad * PH, sizeof *cv);
+    occ = calloc((size_t)pad * PH, 1);
+    S256 = calloc((size_t)pad + 2, sizeof *S256);
+    WU16 = calloc((size_t)pad + 2, sizeof *WU16);
     if (!cv || !occ || !S256 || !WU16 || !R_wall.ok || !R_floor.ok || !R_ivy.ok) {
-        free(cv); free(occ); free(S256); free(WU16); cv = 0; occ = 0; S256 = WU16 = 0; return;
+        free(cv);
+        free(occ);
+        free(S256);
+        free(WU16);
+        cv = 0;
+        occ = 0;
+        S256 = WU16 = 0;
+        return;
     }
     for (int side = 0; side < 2; side++) {
-        persp_cols(side); cur_side = side;
-        draw_wall(side); draw_floor(side);
+        persp_cols(side);
+        cur_side = side;
+        draw_wall(side);
+        draw_floor(side);
 #ifdef WS_BACKDROP_MAIN
         if (!getenv("WSB_NOIVY"))
 #endif
@@ -769,24 +1279,35 @@ static void build_redraw(int pad)
                 strip[(size_t)y * 2 * pad + (side ? pad + (X - 1) : pad - X)] = quant(c);
             }
     }
-    free(cv); free(occ); free(S256); free(WU16); cv = 0; occ = 0; S256 = WU16 = 0; free(leaves); leaves = 0; nleaves = capleaves = 0;
+    free(cv);
+    free(occ);
+    free(S256);
+    free(WU16);
+    cv = 0;
+    occ = 0;
+    S256 = WU16 = 0;
+    free(leaves);
+    leaves = 0;
+    nleaves = capleaves = 0;
 }
 
 /* --- the rooms (docs/PORT.md "Room picture strips").  Every one is a fixed-camera room whose background is one
-   pre-rendered 320 x 224 8 bpp picture with CLUT (128, 511): its left 256 columns are page (128, 0) rows 0-223, drawn as
-   one sprite at frame (0, 16) (256 x 224, or 256 x 256 clipped by the frame); the right 64 columns come from page
+   pre-rendered 320 x 224 8 bpp picture with CLUT (128, 511): its left 256 columns are page (128, 0) rows 0-223, drawn
+   as one sprite at frame (0, 16) (256 x 224, or 256 x 256 clipped by the frame); the right 64 columns come from page
    (256, 0) or are pieced together from 64 x 32 leftovers (the Iron Castle hall, AREA17 s3 / s4, draws its left part
-   256 x 256 and its right one from page (256, 0); gen_hl takes its 224 rows like the others'), and some rooms draw parts of the scene as further unscaled
-   quads over it (the roof and tree tops of AREA05, the hut and the front blossoms of the Dwarf Village).  The table
-   holds where those pieces are (coordinates only); grab() puts the room's picture together from VRAM with them, so
-   the redraw samples what the player sees.  area / sec name the room (the debug select's numbers; --ws-backdrop-rooms
-   takes them); AREA19 s1 runs as area 2 s1, so garea / gsec / is() tell the game's numbers and which picture it is.
-   approved: on by default (the user approved that room's strips); the
+   256 x 256 and its right one from page (256, 0); gen_hl takes its 224 rows like the others'), and some rooms draw
+   parts of the scene as further unscaled quads over it (the roof and tree tops of AREA05, the hut and the front
+   blossoms of the Dwarf Village).  The table holds where those pieces are (coordinates only); grab() puts the room's
+   picture together from VRAM with them, so the redraw samples what the player sees.  area / sec name the room (the
+   debug select's numbers; --ws-backdrop-rooms takes them); AREA19 s1 runs as area 2 s1, so garea / gsec / is() tell
+   the game's numbers and which picture it is.  approved: on by default (the user approved that room's strips); the
    others only with --ws-backdrop on or --ws-backdrop-rooms. */
-typedef struct { short tx, u, v, w, h, x, y; } Piece;   /* 8 bpp page (tx, 0): w x h texels from (u, v) to picture (x, y) */
+/* 8 bpp page (tx, 0): w x h texels from (u, v) to picture (x, y) */
+typedef struct { short tx, u, v, w, h, x, y; } Piece;
 typedef struct {
     short area, sec, h, approved;
-    Piece right[6]; Piece over[6];                       /* the right 64 columns; quads over the picture (texel 0 clear) */
+    Piece right[6];                                      /* the right 64 columns */
+    Piece over[6];                                       /* quads over the picture (texel 0 clear) */
     void (*gen)(int pad);
     short garea, gsec;                                   /* the game's area / section there, when not area / sec */
     int (*is)(void);                                     /* rooms that share them: is the grabbed picture this one's? */
@@ -1167,7 +1688,8 @@ static int room_enabled(const Room *r)
     if (l) {
         if (!strcmp(l, "all")) return 1;
         while (*l) {
-            int a, s, n = 0;
+            int a, s,
+                n = 0;
             if (sscanf(l, "%d:%d%n", &a, &s, &n) == 2 && a == r->area && s == r->sec) return 1;
             while (*l && *l != ',') l++;
             if (*l == ',') l++;
@@ -1179,9 +1701,12 @@ static int room_enabled(const Room *r)
 
 static void build(int pad)
 {
-    free(strip); strip = calloc((size_t)2 * pad * PH, 2); strip_pad = pad;
+    free(strip);
+    strip = calloc((size_t)2 * pad * PH, 2);
+    strip_pad = pad;
     if (!strip) return;
-    if (enabled == 2 && room->gen == build_redraw) build_mirror(pad); else room->gen(pad);
+    if (enabled == 2 && room->gen == build_redraw) build_mirror(pad);
+    else room->gen(pad);
 }
 
 /* the room's picture (with its pieces and quads) from VRAM: 8 bpp pages at row 0, CLUT at (cx, cy); vram is 1024 x 512
@@ -1201,23 +1726,34 @@ static u32 grab(const u16 *vram, int cx, int cy)
 {
     if (!ws_need_grab()) return 0;
     u32 h = 2166136261u;
-    for (int y = 0; y < PH; y++) for (int x = 0; x < 256; x++) pic[y][x] = tex8(vram, 128, x, y, cx, cy);
+    /* the left 256 columns, then the right pieces, then the quads drawn over the picture */
+    for (int y = 0; y < PH; y++)
+        for (int x = 0; x < 256; x++) pic[y][x] = tex8(vram, 128, x, y, cx, cy);
     for (int i = 0; i < 6; i++) {
         const Piece *p = &room->right[i];
-        for (int y = 0; y < p->h; y++) for (int x = 0; x < p->w; x++)
-            if (p->y + y < PH && p->x + x < PW) pic[p->y + y][p->x + x] = tex8(vram, p->tx, p->u + x, p->v + y, cx, cy);
+        for (int y = 0; y < p->h; y++)
+            for (int x = 0; x < p->w; x++)
+                if (p->y + y < PH && p->x + x < PW)
+                    pic[p->y + y][p->x + x] = tex8(vram, p->tx, p->u + x, p->v + y, cx, cy);
     }
     memset(pic_ov, 0, (sizeof *pic_ov * (PH)));
     for (int i = 0; i < 6; i++) {
         const Piece *p = &room->over[i];
-        for (int y = 0; y < p->h; y++) for (int x = 0; x < p->w; x++) {
-            u16 c = tex8(vram, p->tx, p->u + x, p->v + y, cx, cy);
-            if (c && p->y + y < PH && p->x + x < PW) { pic[p->y + y][p->x + x] = c; pic_ov[p->y + y][p->x + x] = 1; }
-        }
+        for (int y = 0; y < p->h; y++)
+            for (int x = 0; x < p->w; x++) {
+                u16 c = tex8(vram, p->tx, p->u + x, p->v + y, cx, cy);
+                if (c && p->y + y < PH && p->x + x < PW) {
+                    pic[p->y + y][p->x + x] = c;
+                    pic_ov[p->y + y][p->x + x] = 1;
+                }
+            }
     }
     if (room->gen == gen_pr) pr_take(vram);              /* (its water and ray layers) */
-    if (room->gen == gen_en) en_take(vram, cx, cy, en_gl());   /* (its scene: 19 more quads, as the renderer shows them) */
-    for (int y = 0; y < PH; y++) for (int x = 0; x < PW; x++) h = (h ^ pic[y][x]) * 16777619u;
+    /* (its scene: 19 more quads, as the renderer shows them) */
+    if (room->gen == gen_en) en_take(vram, cx, cy, en_gl());
+    /* a hash of the whole picture (FNV-1a style) */
+    for (int y = 0; y < PH; y++)
+        for (int x = 0; x < PW; x++) h = (h ^ pic[y][x]) * 16777619u;
     return h;
 }
 
@@ -1230,46 +1766,112 @@ extern int port_gpu_is_gl(void);                          /* shims/gpu.c */
    tables, so the next room, or this one again, builds anew */
 static void backdrop_reset(void)
 {
-    free(strip); strip = 0; strip_pad = 0; strip_sum = 0; room = 0;
-    free(tw_strip); tw_strip = 0; tw_pad = 0; tw_sum = 0;
-    free(mm_strip); free(mm_buf); mm_strip = mm_buf = 0; mm_pad = -1; mm_room = 0; mm_gl = 0; mm_sum = 0;
-    free(im_ext); free(im_buf); im_ext = im_buf = 0; im_pad = -1; im_sum = 0;
-    free(ic_ext); ic_ext = 0; ic_pad = -1; ic_sum = 0;
-    free(ck_ext); free(ck_buf); ck_ext = ck_buf = 0; ck_pad = -1; ck_sum = 0;
-    for (int s = 0; s < 2; s++) { free(lk_ext[s]); lk_ext[s] = 0; lk_made[s] = 0; free(is_ext[s]); is_ext[s] = 0; }
-    free(lk_buf); lk_buf = 0; lk_pad = -1; lk_sum = 0;
-    free(is_buf); free(is_pic); is_buf = 0; is_pic = 0; is_pad = -1; is_sum = 0; is_up = 0;
-    free(en_ov); en_ov = 0; en_ov_pad = 0;
+    free(strip);
+    strip = 0;
+    strip_pad = 0;
+    strip_sum = 0;
+    room = 0;
+    free(tw_strip);
+    tw_strip = 0;
+    tw_pad = 0;
+    tw_sum = 0;
+    free(mm_strip);
+    free(mm_buf);
+    mm_strip = mm_buf = 0;
+    mm_pad = -1;
+    mm_room = 0;
+    mm_gl = 0;
+    mm_sum = 0;
+    free(im_ext);
+    free(im_buf);
+    im_ext = im_buf = 0;
+    im_pad = -1;
+    im_sum = 0;
+    free(ic_ext);
+    ic_ext = 0;
+    ic_pad = -1;
+    ic_sum = 0;
+    free(ck_ext);
+    free(ck_buf);
+    ck_ext = ck_buf = 0;
+    ck_pad = -1;
+    ck_sum = 0;
+    for (int s = 0; s < 2; s++) {
+        free(lk_ext[s]);
+        lk_ext[s] = 0;
+        lk_made[s] = 0;
+        free(is_ext[s]);
+        is_ext[s] = 0;
+    }
+    free(lk_buf);
+    lk_buf = 0;
+    lk_pad = -1;
+    lk_sum = 0;
+    free(is_buf);
+    free(is_pic);
+    is_buf = 0;
+    is_pic = 0;
+    is_pad = -1;
+    is_sum = 0;
+    is_up = 0;
+    free(en_ov);
+    en_ov = 0;
+    en_ov_pad = 0;
     pr_have_layers = 0;
 }
 /* build() through the cache (ws_cache): the strips, and what later frames read next to them (AREA17 s5's front
-   texels, AREA11 s1's fixed columns), keyed by the picture, its over pieces and the layers the room's generator reads */
+   texels, AREA11 s1's fixed columns), keyed by the picture, its over pieces and the layers the room's generator
+   reads */
 static void build_cached(int pad)
 {
-    int ri = (int)(room - ROOMS), mirror = enabled == 2 && room->gen == build_redraw, np;
-    u32 fl = (u32)shown_gl | (u32)mirror << 1, h = wsc_hash(strip_sum, pic_ov, sizeof *pic_ov * PH);
-    char tag[16]; WsCPart p[3]; size_t n = (size_t)2 * pad * PH * 2;
-    if (room->gen == gen_pr && pr_have_layers) h = wsc_hash(wsc_hash(h, pr_W, sizeof *pr_W * PH), pr_ray, sizeof *pr_ray * PH);
+    int ri = (int)(room - ROOMS),
+        mirror = enabled == 2 && room->gen == build_redraw,
+        np;
+    u32 fl = (u32)shown_gl | (u32)mirror << 1,
+        h = wsc_hash(strip_sum, pic_ov, sizeof *pic_ov * PH);
+    char tag[16];
+    WsCPart p[3];
+    size_t n = (size_t)2 * pad * PH * 2;
+    if (room->gen == gen_pr && pr_have_layers)
+        h = wsc_hash(wsc_hash(h, pr_W, sizeof *pr_W * PH), pr_ray, sizeof *pr_ray * PH);
     if (room->gen == gen_en) h = wsc_hash(h, en_bk, sizeof *en_bk * PH);
     snprintf(tag, sizeof tag, "strip%d", ri);
-    free(strip); strip = calloc(n / 2, 2); strip_pad = pad;
-    if (room->gen == gen_en) { free(en_ov); en_ov = calloc(n / 2, 2); en_ov_pad = pad; }
-    np = 0; p[np].p = strip; p[np++].n = n;
-    if (room->gen == gen_en) { p[np].p = en_ov; p[np++].n = n; }
-    if (room->gen == gen_lf) { p[np].p = lf_fix; p[np++].n = sizeof lf_fix; }
+    free(strip);
+    strip = calloc(n / 2, 2);
+    strip_pad = pad;
+    if (room->gen == gen_en) {
+        free(en_ov);
+        en_ov = calloc(n / 2, 2);
+        en_ov_pad = pad;
+    }
+    np = 0;
+    p[np].p = strip;
+    p[np++].n = n;
+    if (room->gen == gen_en) {
+        p[np].p = en_ov;
+        p[np++].n = n;
+    }
+    if (room->gen == gen_lf) {
+        p[np].p = lf_fix;
+        p[np++].n = sizeof lf_fix;
+    }
     if (strip && (room->gen != gen_en || en_ov) && wsc_get(tag, room->area, room->sec, pad, h, fl, p, np)) return;
     build(pad);
     if (!strip || (room->gen == gen_en && (!en_ov || en_ov_pad != pad))) return;
-    p[0].p = strip; if (room->gen == gen_en) p[1].p = en_ov;
+    p[0].p = strip;
+    if (room->gen == gen_en) p[1].p = en_ov;
     wsc_put(tag, room->area, room->sec, pad, h, fl, p, np);
 }
 static const u16 *backdrop(const u16 *vram, int pad, int x, int y, int w, int h, int u, int v, int tx, int ty,
                            int depth, int cx, int cy, int *rows);
-/* (the work tables of what this call made go when it returns; out of memory in this room: no strips until it changes) */
+/* (the work tables of what this call made go when it returns; out of memory in this room: no strips until it
+   changes) */
 const u16 *port_ws_backdrop(const u16 *vram, int pad, int x, int y, int w, int h, int u, int v, int tx, int ty,
                             int depth, int cx, int cy, int *rows)
 {
-    const u16 *s; size_t peak = ws_heap_peak; unsigned long long t0 = port_verbose ? port_time_us() : 0;
+    const u16 *s;
+    size_t peak = ws_heap_peak;
+    unsigned long long t0 = port_verbose ? port_time_us() : 0;
     if (ws_heap_failed) return 0;
     ws_on_room(backdrop_reset);
     ws_cache_last = -1;
@@ -1279,8 +1881,9 @@ const u16 *port_ws_backdrop(const u16 *vram, int pad, int x, int y, int w, int h
         u8 *g = port_ram_ptr(PORT_A_GAME);
         port_printf("[ws] strips AREA%02d s%d: %d ms, heap peak %u KB%s\n", *(u16 *)g, *(u16 *)(g + 2),
                     (int)((port_time_us() - t0) / 1000), (unsigned)(ws_heap_peak >> 10),
-                    ws_cache_last == 1 ? " (from the cache in memory)" : ws_cache_last == 2 ? " (from the cache on disk)" :
-                    ws_cache_last == 0 ? " (made)" : "");
+                    ws_cache_last == 1 ? " (from the cache in memory)"
+                    : ws_cache_last == 2 ? " (from the cache on disk)"
+                    : ws_cache_last == 0 ? " (made)" : "");
     }
     ws_free(WS_GEN);
     return ws_heap_failed ? 0 : s;
@@ -1289,76 +1892,118 @@ static const u16 *backdrop(const u16 *vram, int pad, int x, int y, int w, int h,
                            int depth, int cx, int cy, int *rows)
 {
     const Room *r = 0;
-    if (enabled < 0) { const char *e = getenv("PORT_WS_BACKDROP"); enabled = e && *e >= '1' && *e <= '3' ? *e - '0' : port_ws_backdrop_on; }
-    port_ws_backdrop_dy = 0; port_ws_backdrop_side = 3;
+    if (enabled < 0) {
+        const char *e = getenv("PORT_WS_BACKDROP");
+        enabled = e && *e >= '1' && *e <= '3' ? *e - '0' : port_ws_backdrop_on;
+    }
+    port_ws_backdrop_dy = 0;
+    port_ws_backdrop_side = 3;
     if (enabled && pad > 0 && depth == 1 && cx == 128 && (cy == 510 || cy == 511)) {   /* AREA06 s1 / s2 (mm_take) */
-        u8 *g = port_ram_ptr(PORT_A_GAME); int a = *(u16 *)(g + 0), sc = *(u16 *)(g + 2);
+        u8 *g = port_ram_ptr(PORT_A_GAME);
+        int a = *(u16 *)(g + 0),
+            sc = *(u16 *)(g + 2);
         for (int i = 0; i < NROOMS; i++)
             if ((ROOMS[i].h == MM_H1 || ROOMS[i].h == MM_H2) && ROOMS[i].area == a && ROOMS[i].sec == sc)
                 return room_enabled(&ROOMS[i]) ? mm_take(vram, pad, sc, x, y, w, h, u, v, tx, ty, cy, rows) : 0;
     }
-    if (enabled && pad > 0 && depth == 1 && cx == 128 && cy == 511 && tx == 128 && w == 256 && h == PH) {   /* AREA17 s2 (im_take) */
-        u8 *g = port_ram_ptr(PORT_A_GAME); int a = *(u16 *)(g + 0), sc = *(u16 *)(g + 2);
+    /* AREA17 s2 (im_take) */
+    if (enabled && pad > 0 && depth == 1 && cx == 128 && cy == 511 && tx == 128 && w == 256 && h == PH) {
+        u8 *g = port_ram_ptr(PORT_A_GAME);
+        int a = *(u16 *)(g + 0),
+            sc = *(u16 *)(g + 2);
         for (int i = 0; i < NROOMS; i++)
             if (ROOMS[i].h == IM_H && ROOMS[i].area == a && ROOMS[i].sec == sc)
                 return room_enabled(&ROOMS[i]) ? im_take(vram, pad, x, y, w, h, u, v, tx, ty, rows) : 0;
     }
-    if (enabled && pad > 0 && !x && w == 256 && h == 256 && !u && !v && tx == 128 && !ty && depth == 1 && cx == 128 && cy == 511) {
-        u8 *g = port_ram_ptr(PORT_A_GAME); int a = *(u16 *)(g + 0), sc = *(u16 *)(g + 2);   /* AREA17 s1 (ic_take) */
+    /* AREA17 s1 (ic_take) */
+    if (enabled && pad > 0 && !x && w == 256 && h == 256 && !u && !v && tx == 128 && !ty && depth == 1 && cx == 128
+        && cy == 511) {
+        u8 *g = port_ram_ptr(PORT_A_GAME);
+        int a = *(u16 *)(g + 0),
+            sc = *(u16 *)(g + 2);
         for (int i = 0; i < NROOMS; i++)
             if (ROOMS[i].h == IC_HM && ROOMS[i].area == a && ROOMS[i].sec == sc)
                 return room_enabled(&ROOMS[i]) ? ic_take(vram, pad, y, rows) : 0;
     }
-    if (enabled && pad > 0 && w == 256 && h == 256 && !u && !v && tx == 128 && !ty && depth == 1 && cx == 128 && cy == 511) {
-        u8 *g = port_ram_ptr(PORT_A_GAME); int a = *(u16 *)(g + 0), sc = *(u16 *)(g + 2);   /* AREA09 s2 (ck_take) */
+    /* AREA09 s2 (ck_take) */
+    if (enabled && pad > 0 && w == 256 && h == 256 && !u && !v && tx == 128 && !ty && depth == 1 && cx == 128
+        && cy == 511) {
+        u8 *g = port_ram_ptr(PORT_A_GAME);
+        int a = *(u16 *)(g + 0),
+            sc = *(u16 *)(g + 2);
         for (int i = 0; i < NROOMS; i++)
             if (ROOMS[i].h == CK_HM && ROOMS[i].area == a && ROOMS[i].sec == sc)
                 return room_enabled(&ROOMS[i]) ? ck_take(vram, pad, x, y, rows) : 0;
     }
-    if (enabled && pad > 0 && w == 256 && h == 256 && !u && !v && !tx && ty == 256 && depth == 1 && cx == 128 && cy == 510) {
-        u8 *g = port_ram_ptr(PORT_A_GAME); int a = *(u16 *)(g + 0), sc = *(u16 *)(g + 2);   /* AREA09 s1, the island (is_take) */
+    /* AREA09 s1, the island (is_take) */
+    if (enabled && pad > 0 && w == 256 && h == 256 && !u && !v && !tx && ty == 256 && depth == 1 && cx == 128
+        && cy == 510) {
+        u8 *g = port_ram_ptr(PORT_A_GAME);
+        int a = *(u16 *)(g + 0),
+            sc = *(u16 *)(g + 2);
         for (int i = 0; i < NROOMS; i++)
             if (ROOMS[i].h == IS_HM && ROOMS[i].area == a && ROOMS[i].sec == sc && room_enabled(&ROOMS[i])) {
                 const u16 *st = is_take(vram, pad, x, y, rows);
                 if (st) return st;
             }
     }
-    if (enabled && pad > 0 && y == 4 && w == 256 && h == 256 && !u && !v && !tx && ty == 256 && depth == 1 && cx == 128 && cy == 510) {
-        u8 *g = port_ram_ptr(PORT_A_GAME); int a = *(u16 *)(g + 0), sc = *(u16 *)(g + 2);   /* AREA09 s1 (lk_take) */
+    /* AREA09 s1 (lk_take) */
+    if (enabled && pad > 0 && y == 4 && w == 256 && h == 256 && !u && !v && !tx && ty == 256 && depth == 1 && cx == 128
+        && cy == 510) {
+        u8 *g = port_ram_ptr(PORT_A_GAME);
+        int a = *(u16 *)(g + 0),
+            sc = *(u16 *)(g + 2);
         for (int i = 0; i < NROOMS; i++)
             if (ROOMS[i].h == LK_HM && ROOMS[i].area == a && ROOMS[i].sec == sc)
                 return room_enabled(&ROOMS[i]) ? lk_take(vram, pad, x, rows) : 0;
     }
     if (enabled && pad > 0 && x == 0 && w == 256 && !u && !v && !ty && depth == 1 && cx == 128 && cy == 511
         && (tx == 128 || tx == 256 || tx == 384)) {     /* a tall picture's set (AREA16 s4: tw_take) */
-        u8 *g = port_ram_ptr(PORT_A_GAME); int a = *(u16 *)(g + 0), sc = *(u16 *)(g + 2);
+        u8 *g = port_ram_ptr(PORT_A_GAME);
+        int a = *(u16 *)(g + 0),
+            sc = *(u16 *)(g + 2);
         for (int i = 0; i < NROOMS; i++)
             if (ROOMS[i].h == TW_H && ROOMS[i].area == a && ROOMS[i].sec == sc) {
                 if (!room_enabled(&ROOMS[i])) return 0;
-                room = &ROOMS[i]; return tw_take(vram, pad, y, tx, rows);
+                room = &ROOMS[i];
+                return tw_take(vram, pad, y, tx, rows);
             }
     }
     if (!enabled || pad <= 0 || x != 0 || y != 16 || w != 256 || u || v || tx != 128 || ty || depth != 1
         || cx != 128 || cy != 511) return 0;
     {
-        u8 *g = port_ram_ptr(PORT_A_GAME); int a = *(u16 *)(g + 0), sc = *(u16 *)(g + 2); u32 s = 0;
+        u8 *g = port_ram_ptr(PORT_A_GAME);
+        int a = *(u16 *)(g + 0),
+            sc = *(u16 *)(g + 2);
+        u32 s = 0;
         for (int i = 0; i < NROOMS && !r; i++) {
             const Room *q = &ROOMS[i];
             if ((q->garea ? q->garea : q->area) != a || (q->garea ? q->gsec : q->sec) != sc || q->h != h) continue;
-            room = q; s = grab(vram, cx, cy);
+            room = q;
+            s = grab(vram, cx, cy);
             if (ws_heap_failed) return 0;
             if (!q->is || q->is()) r = q;
         }
         if (!r || !room_enabled(r)) return 0;
         room = r;
         if (!strip || strip_pad != pad || s != strip_sum || shown_gl != port_gpu_is_gl()) {
-            strip_sum = s; shown_gl = port_gpu_is_gl(); build_cached(pad);
-            {   const char *e = getenv("PORT_WS_BACKDROP_DUMP");      /* research: the picture, raw 15-bit LE */
+            strip_sum = s;
+            shown_gl = port_gpu_is_gl();
+            build_cached(pad);
+            /* research: the picture, raw 15-bit LE */
+            {
+                const char *e = getenv("PORT_WS_BACKDROP_DUMP");
                 FILE *f = e ? fopen(e, "wb") : 0;
                 if (f) {
-                    for (int yy = 0; yy < PH; yy++) for (int xx = 0; xx < PW; xx++) { u8 b[2] = { (u8)pic[yy][xx], (u8)(pic[yy][xx] >> 8) }; fwrite(b, 1, 2, f); }
-                    fwrite(pic_ov, 1, (sizeof *pic_ov * (PH)), f);   /* then the over pieces' opaque texels, one byte each */
-                    if (room->gen == gen_en) fwrite(en_bk, 1, (sizeof *en_bk * (PH)), f);   /* (and that room's back layer) */
+                    for (int yy = 0; yy < PH; yy++)
+                        for (int xx = 0; xx < PW; xx++) {
+                            u8 b[2] = { (u8)pic[yy][xx], (u8)(pic[yy][xx] >> 8) };
+                            fwrite(b, 1, 2, f);
+                        }
+                    /* then the over pieces' opaque texels, one byte each */
+                    fwrite(pic_ov, 1, (sizeof *pic_ov * (PH)), f);
+                    /* (and that room's back layer) */
+                    if (room->gen == gen_en) fwrite(en_bk, 1, (sizeof *en_bk * (PH)), f);
                     fclose(f);
                 }
             }
@@ -1380,7 +2025,8 @@ const u16 *port_ws_backdrop_over(int pad, int tx, int u, int v)
 const u16 *port_ws_backdrop_fix(int tx, int u, int v, int *x, int *w)
 {
     if (!room || room->gen != gen_lf || !strip || tx != 256 || u != 64 || v != 0) return 0;
-    *x = 318; *w = 2;
+    *x = 318;
+    *w = 2;
     return &lf_fix[0][0];
 }
 /* AREA09 s1 with the island's strips on (ws_backdrop_island.inc): the columns an object sprite's quad moves left,
@@ -1388,43 +2034,80 @@ const u16 *port_ws_backdrop_fix(int tx, int u, int v, int *x, int *w)
 int port_ws_island_fg(int tpage, int clut, int uv)
 {
     extern int port_widescreen;
-    u8 *g; int a, sc;
+    u8 *g;
+    int a, sc;
     if (port_widescreen <= 0 || !is_fg_face(tpage, clut, uv)) return 0;
-    if (enabled < 0) { const char *e = getenv("PORT_WS_BACKDROP"); enabled = e && *e >= '1' && *e <= '3' ? *e - '0' : port_ws_backdrop_on; }
+    if (enabled < 0) {
+        const char *e = getenv("PORT_WS_BACKDROP");
+        enabled = e && *e >= '1' && *e <= '3' ? *e - '0' : port_ws_backdrop_on;
+    }
     if (!enabled) return 0;
-    g = port_ram_ptr(PORT_A_GAME); a = *(u16 *)(g + 0); sc = *(u16 *)(g + 2);
+    g = port_ram_ptr(PORT_A_GAME);
+    a = *(u16 *)(g + 0);
+    sc = *(u16 *)(g + 2);
     for (int i = 0; i < NROOMS; i++)
-        if (ROOMS[i].h == IS_HM && ROOMS[i].area == a && ROOMS[i].sec == sc && room_enabled(&ROOMS[i])) return port_widescreen;
+        if (ROOMS[i].h == IS_HM && ROOMS[i].area == a && ROOMS[i].sec == sc && room_enabled(&ROOMS[i]))
+            return port_widescreen;
     return 0;
 }
 #else
 int main(int argc, char **argv)
 {
     if (!ws_need_main()) return 0;
-    FILE *f; int pad;
-    int a = 2, sc = 5;
-    if (argc > 1 && sscanf(argv[1], "%d:%d", &a, &sc) == 2) { argc--; argv++; }   /* the room, default 2:5 */
-    for (int i = 0; i < NROOMS; i++) if (ROOMS[i].area == a && ROOMS[i].sec == sc) { room = &ROOMS[i]; break; }
+    FILE *f;
+    int pad;
+    int a = 2,
+        sc = 5;
+    /* the room, default 2:5 */
+    if (argc > 1 && sscanf(argv[1], "%d:%d", &a, &sc) == 2) {
+        argc--;
+        argv++;
+    }
+    for (int i = 0; i < NROOMS; i++)
+        if (ROOMS[i].area == a && ROOMS[i].sec == sc) {
+            room = &ROOMS[i];
+            break;
+        }
     if (room && room->h == TW_H) return tw_main(argc, argv);   /* (a 672-row picture: rooms2.inc) */
     if (room && room->h == IM_H) return im_main(argc, argv);   /* (a 640-column picture: ws_backdrop_ironmain.inc) */
-    if (!room || argc < 4 || !(f = fopen(argv[1], "rb"))) { fprintf(stderr, "usage: wsb [AREA:SECTION] PIC.raw PAD OUT.ppm [mirror]\n"); return 1; }
-    for (int y = 0; y < PH; y++) for (int x = 0; x < PW; x++) { u8 b[2]; if (fread(b, 1, 2, f) != 2) return 1; pic[y][x] = (u16)(b[0] | b[1] << 8); }
-    if (fread(pic_ov, 1, (sizeof *pic_ov * (PH)), f) != (sizeof *pic_ov * (PH))) memset(pic_ov, 0, (sizeof *pic_ov * (PH)));   /* (older dumps: none) */
+    if (!room || argc < 4 || !(f = fopen(argv[1], "rb"))) {
+        fprintf(stderr, "usage: wsb [AREA:SECTION] PIC.raw PAD OUT.ppm [mirror]\n");
+        return 1;
+    }
+    for (int y = 0; y < PH; y++)
+        for (int x = 0; x < PW; x++) {
+            u8 b[2];
+            if (fread(b, 1, 2, f) != 2) return 1;
+            pic[y][x] = (u16)(b[0] | b[1] << 8);
+        }
+    /* (older dumps: none) */
+    if (fread(pic_ov, 1, (sizeof *pic_ov * (PH)), f) != (sizeof *pic_ov * (PH)))
+        memset(pic_ov, 0, (sizeof *pic_ov * (PH)));
     if (fread(en_bk, 1, (sizeof *en_bk * (PH)), f) != (sizeof *en_bk * (PH))) memset(en_bk, 0, (sizeof *en_bk * (PH)));
     fclose(f);
-    pad = atoi(argv[2]); enabled = argc > 4 ? 2 : 1;
+    pad = atoi(argv[2]);
+    enabled = argc > 4 ? 2 : 1;
     shown_gl = getenv("WSB_GL") != 0;                    /* as drawn by the OpenGL renderer (gen_th) */
     build(pad);
-    if (getenv("WSB_INFO")) fprintf(stderr, "side_k %d %d floor_fit L %d-%d R %d-%d\n", side_k[0], side_k[1], floor_fit[0][0], floor_fit[0][1], floor_fit[1][0], floor_fit[1][1]);
+    if (getenv("WSB_INFO"))
+        fprintf(stderr, "side_k %d %d floor_fit L %d-%d R %d-%d\n", side_k[0], side_k[1], floor_fit[0][0],
+                floor_fit[0][1], floor_fit[1][0], floor_fit[1][1]);
     if (!strip || !(f = fopen(argv[3], "wb"))) return 1;
     fprintf(f, "P6 %d %d 255\n", PW + 2 * pad, PH);
     for (int y = 0; y < PH; y++)
         for (int x = 0; x < PW + 2 * pad; x++) {
-            u16 c = x < pad ? strip[(size_t)y * 2 * pad + x] : x >= pad + PW ? strip[(size_t)y * 2 * pad + x - PW] : pic[y][x - pad];
-            u8 rgb[3] = { (u8)(r5(c) << 3), (u8)(g5(c) << 3), (u8)(b5(c) << 3) }; fwrite(rgb, 1, 3, f);
+            u16 c = x < pad ? strip[(size_t)y * 2 * pad + x]
+                    : x >= pad + PW ? strip[(size_t)y * 2 * pad + x - PW]
+                    : pic[y][x - pad];
+            u8 rgb[3] = { (u8)(r5(c) << 3), (u8)(g5(c) << 3), (u8)(b5(c) << 3) };
+            fwrite(rgb, 1, 3, f);
         }
     fclose(f);
-    { u32 h = 2166136261u; for (size_t i = 0; i < (size_t)2 * pad * PH; i++) h = (h ^ strip[i]) * 16777619u; printf("strip hash %08x\n", h); }
+    {
+        u32 h = 2166136261u;
+        for (size_t i = 0; i < (size_t)2 * pad * PH; i++) h = (h ^ strip[i]) * 16777619u;
+        printf("strip hash %08x\n", h);
+    }
     return 0;
 }
 #endif
