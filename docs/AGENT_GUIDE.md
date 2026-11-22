@@ -47,6 +47,10 @@ is the reference for each feature (it is long: search it).
   headless test on both when a change touches game logic.
 - Memory the game reads must be in game RAM or the port's data image; the collision view checks pointers with
   `port_is_ram_ptr` (a buffer of the runtime, like the WHM copies of `ws_exits.c`, needs its own check).
+- Layout-only or rename-only edits of port2/runtime / port2/shims: prove them with `python3 tools/same_code.py
+  --base <ref>` (C tokens equal modulo layout, comments and safe renames, and the same i386 objects).  Splitting
+  `int a = 1, b = 2;` into two declarations counts as a change; struct members, headers and code under
+  platform #ifs keep their names.
 - The cloud container's disk is small: delete scratch builds (`build/cctest`, extra dumps) when done.
 
 ## 3. Headless recipes

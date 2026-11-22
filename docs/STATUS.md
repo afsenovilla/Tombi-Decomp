@@ -4,6 +4,15 @@ Update this file whenever something lands or a task is decided. Newest first.
 
 ## Since v0.7.2 (not released)
 
+- **Readability pass over the port's C code (2026-11-22, branch `claude/beautiful-euler-shynjz`, not on master
+  yet).**  port2/runtime and port2/shims (80 files): one statement per line, lines within 120 columns, cryptic local
+  names renamed (locals, parameters, statics only), short comments above unclear functions; data tables and
+  generated files untouched.  Form only: `tools/same_code.py` proves it (C tokens equal apart from layout, comments
+  and safe renames; i386 objects equal), and the whole i386 binary is byte-identical to the base apart from the build
+  stamp; the wasm2c build and a mingw syntax check pass; 3DS-only code is format-only (token check + the 3DS CI
+  build).  Merging into master may conflict with newer widescreen work in the ws_* files: re-run the pass's checker
+  (`python3 tools/same_code.py --base <base>`) after resolving.
+
 - **No more hitch when entering a room with widescreen picture strips (2026-11-22, docs/PORT.md "Widescreen strips
   cache").**  Since f5451af every visit made the strips again (up to 2 s on a PC in the Dwarf Village in blossom, a
   visible freeze on the Thor).  Now (1) the slowest generators are 3-10 times faster with the same output bytes (the
