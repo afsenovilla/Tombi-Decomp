@@ -9,7 +9,8 @@ Two checks, run on every C / header / .inc file that differs between a base comm
              - the new name does not occur anywhere in the base file and is not a macro of the build;
              - two different old names never get the same new name;
              - an old name renamed at file scope (outside every function body) is renamed everywhere in the file;
-               an old name renamed inside a function body is renamed everywhere in that body;
+               an old name renamed inside a function body (its parameters included) is renamed everywhere in that
+               body;
              - names with external linkage keep their names (checked on the i386 objects);
              - struct members keep their names (a member access .x / ->x is never renamed);
              - no renames in headers (.h: shared with other files), nor in code under #if blocks for builds this
@@ -188,6 +189,14 @@ def annotate(toks):
         if t.text == "{":
             if depth == 0:
                 func = nfunc; nfunc += 1
+                if k and toks[k - 1].text == ")":           # a function's parameters belong to its body
+                    j, level = k - 1, 0
+                    while j >= 0:
+                        level += {")": 1, "(": -1}.get(toks[j].text, 0)
+                        if level == 0:
+                            break
+                        toks[j].func = func
+                        j -= 1
             depth += 1
         t.depth, t.func, t.guard = depth, func, any(stack)
         if t.text == "}":
