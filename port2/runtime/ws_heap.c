@@ -12,30 +12,38 @@
 #include "port_runtime.h"
 #endif
 
+/* one allocated table: the pointer it was stored in, its size and its owner (WS_ROOM / WS_GEN) */
 typedef struct { void **slot; size_t size; int owner; } WsEnt;
 #define WS_MAXENT 384
-static WsEnt ent[WS_MAXENT]; static int nent;
-static void (*hooks[16])(void); static int nhooks;
+static WsEnt entries[WS_MAXENT];
+static int entry_count;
+static void (*hooks[16])(void);                          /* the modules' reset hooks (ws_on_room) */
+static int hook_count;
 int ws_heap_failed;
 size_t ws_heap_used, ws_heap_peak;
 static int poison = -1;
 
-int ws_need(int owner, const WsTab *t, int n)
+int ws_need(int owner, const WsTab *table_list, int n)
 {
-    if (poison < 0) { const char *e = getenv("PORT_WS_HEAP_POISON"); poison = e && *e == '1'; }
+    if (poison < 0) {
+        const char *env = getenv("PORT_WS_HEAP_POISON");
+        poison = env && *env == '1';
+    }
     for (int i = 0; i < n; i++) {
-        void **slot = (void **)t[i].slot;
+        void **slot = (void **)table_list[i].slot;
         if (*slot) {                                     /* there: a WS_GEN table asked for by a WS_ROOM list stays */
             if (owner == WS_ROOM)
-                for (int k = 0; k < nent; k++) if (ent[k].slot == slot) ent[k].owner = WS_ROOM;
+                for (int k = 0; k < entry_count; k++)
+                    if (entries[k].slot == slot)
+                        entries[k].owner = WS_ROOM;
             continue;
         }
-        void *p = nent < WS_MAXENT ? (poison ? malloc(t[i].size) : calloc(1, t[i].size)) : 0;
+        void *p = entry_count < WS_MAXENT ? (poison ? malloc(table_list[i].size) : calloc(1, table_list[i].size)) : 0;
         if (!p) {
             if (!ws_heap_failed) {
 #ifndef WS_BACKDROP_MAIN
                 port_printf("[ws] heap: out of memory (a table of %u KB, %u KB in use): no widescreen extension here\n",
-                            (unsigned)(t[i].size >> 10), (unsigned)(ws_heap_used >> 10));
+                            (unsigned)(table_list[i].size >> 10), (unsigned)(ws_heap_used >> 10));
 #else
                 fprintf(stderr, "ws heap: out of memory\n");
 #endif
@@ -43,71 +51,93 @@ int ws_need(int owner, const WsTab *t, int n)
             ws_heap_failed = 1;
             return 0;
         }
-        if (poison) memset(p, 0xA5, t[i].size);
+        if (poison) memset(p, 0xA5, table_list[i].size);
         *slot = p;
-        ent[nent].slot = slot; ent[nent].size = t[i].size; ent[nent].owner = owner; nent++;
-        ws_heap_used += t[i].size;
+        entries[entry_count].slot = slot;
+        entries[entry_count].size = table_list[i].size;
+        entries[entry_count].owner = owner;
+        entry_count++;
+        ws_heap_used += table_list[i].size;
         if (ws_heap_used > ws_heap_peak) ws_heap_peak = ws_heap_used;
     }
     return 1;
 }
 
+/* frees every table of this owner and closes the gaps in the list */
 void ws_free(int owner)
 {
     int k = 0;
-    for (int i = 0; i < nent; i++) {
-        if (ent[i].owner == owner) { free(*ent[i].slot); *ent[i].slot = 0; ws_heap_used -= ent[i].size; }
-        else ent[k++] = ent[i];
+    for (int i = 0; i < entry_count; i++) {
+        if (entries[i].owner == owner) {
+            free(*entries[i].slot);
+            *entries[i].slot = 0;
+            ws_heap_used -= entries[i].size;
+        }
+        else entries[k++] = entries[i];
     }
-    nent = k;
+    entry_count = k;
 }
 
 void ws_on_room(void (*reset)(void))
 {
-    for (int i = 0; i < nhooks; i++) if (hooks[i] == reset) return;
-    if (nhooks < (int)(sizeof hooks / sizeof hooks[0])) hooks[nhooks++] = reset;
+    for (int i = 0; i < hook_count; i++)
+        if (hooks[i] == reset) return;
+    if (hook_count < (int)(sizeof hooks / sizeof hooks[0])) hooks[hook_count++] = reset;
 }
 
 /* The room's tables are given back a few vblanks late: the ordering table the game built in the last frame of the
    old room is drawn after the vblank that saw the change, and its packets may still point into them (the top-down
    map's widened picture, the model blocks).  Their pointers are cleared at once, so nothing new reaches them. */
 #define WS_LATE 4
-static struct { void *p; int left; } late[WS_MAXENT]; static int nlate;
+static struct { void *p; int left; } late[WS_MAXENT];
+static int late_count;
 static void late_age(void)
 {
     int k = 0;
-    for (int i = 0; i < nlate; i++) {
+    for (int i = 0; i < late_count; i++) {
         if (--late[i].left <= 0) free(late[i].p);
         else late[k++] = late[i];
     }
-    nlate = k;
+    late_count = k;
 }
 void ws_room_change(void)
 {
     int k = 0;
-    for (int i = 0; i < nhooks; i++) hooks[i]();
+    for (int i = 0; i < hook_count; i++) hooks[i]();
     ws_free(WS_GEN);
-    for (int i = 0; i < nent; i++) {
-        if (ent[i].owner != WS_ROOM) { ent[k++] = ent[i]; continue; }
-        if (nlate < WS_MAXENT) { late[nlate].p = *ent[i].slot; late[nlate].left = WS_LATE; nlate++; } else free(*ent[i].slot);
-        *ent[i].slot = 0; ws_heap_used -= ent[i].size;
+    for (int i = 0; i < entry_count; i++) {
+        if (entries[i].owner != WS_ROOM) {
+            entries[k++] = entries[i];
+            continue;
+        }
+        if (late_count < WS_MAXENT) {
+            late[late_count].p = *entries[i].slot;
+            late[late_count].left = WS_LATE;
+            late_count++;
+        } else free(*entries[i].slot);
+        *entries[i].slot = 0;
+        ws_heap_used -= entries[i].size;
     }
-    nent = k;
+    entry_count = k;
     ws_heap_failed = 0;
     ws_heap_peak = ws_heap_used;
 }
 
 #ifndef WS_BACKDROP_MAIN
+/* each vblank: ages the late frees, and on a change of the GAME area / section frees the room's tables */
 void port_ws_heap_vblank(void)
 {
-    static int last_a = -1, last_s = -1;
-    const unsigned char *g = port_ram_ptr(PORT_A_GAME);
-    int a = *(const unsigned short *)(g + 0), s = *(const unsigned short *)(g + 2);
-    if (nlate) late_age();
-    if (a == last_a && s == last_s) return;
+    static int last_area = -1, last_sec = -1;
+    const unsigned char *game = port_ram_ptr(PORT_A_GAME);
+    int area = *(const unsigned short *)(game + 0),
+        sec = *(const unsigned short *)(game + 2);
+    if (late_count) late_age();
+    if (area == last_area && sec == last_sec) return;
     if (ws_heap_peak && port_verbose)
-        port_printf("[ws] heap: AREA%02d s%d: peak %u KB of tables; freed\n", last_a, last_s, (unsigned)(ws_heap_peak >> 10));
-    last_a = a; last_s = s;
+        port_printf("[ws] heap: AREA%02d s%d: peak %u KB of tables; freed\n", last_area, last_sec,
+                    (unsigned)(ws_heap_peak >> 10));
+    last_area = area;
+    last_sec = sec;
     ws_room_change();
 }
 #endif
