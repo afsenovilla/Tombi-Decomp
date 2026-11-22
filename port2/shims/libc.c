@@ -25,12 +25,12 @@ int rand(void) {
 void srand(unsigned int s) { rand_next = s; }
 
 int printf(const char *f, ...) {
-    char buf[1024];
+    char out_buf[1024];
     va_list ap;
     va_start(ap, f);
-    int len = vsnprintf(buf, sizeof buf, f, ap);
+    int len = vsnprintf(out_buf, sizeof out_buf, f, ap);
     va_end(ap);
-    if (port_verbose) fprintf(stderr, "[game] %s", buf);
+    if (port_verbose) fprintf(stderr, "[game] %s", out_buf);
     return len;
 }
 int puts(const char *s) {

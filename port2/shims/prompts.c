@@ -67,8 +67,8 @@ int port_prompt_parse_style(const char *s) {
     return -2;
 }
 static int src_parse(const char *s, int n) {
-    static const char *names[] = { "a", "b", "x", "y", "l1", "r1", "l2", "r2" };
-    for (int i = 0; i < 8; i++) if ((int)strlen(names[i]) == n && !strncmp(s, names[i], n)) return i;
+    static const char *src_names[] = { "a", "b", "x", "y", "l1", "r1", "l2", "r2" };
+    for (int i = 0; i < 8; i++) if ((int)strlen(src_names[i]) == n && !strncmp(s, src_names[i], n)) return i;
     return -1;
 }
 /* --prompt-map cross=a,circle=b,square=x,triangle=y (sources: a b x y l1 r1 l2 r2 none) */
@@ -81,8 +81,8 @@ void port_prompt_map(const char *s) {
         if (eq && eq < end)
             for (int i = 0; i < 4; i++)
                 if ((int)strlen(ps[i]) == eq - s && !strncmp(s, ps[i], eq - s)) {
-                    int source = src_parse(eq + 1, (int)(end - eq - 1));
-                    port_prompt_src[i] = source < 0 ? SRC_NONE : source;
+                    int src_idx = src_parse(eq + 1, (int)(end - eq - 1));
+                    port_prompt_src[i] = src_idx < 0 ? SRC_NONE : src_idx;
                 }
         s = *end ? end + 1 : end;
     }
@@ -107,17 +107,17 @@ static u32 mix_rgb(u32 a, u32 b, int t) {
     return mixed;
 }
 static void custom_row(int pos, u32 disc, u32 letter) {
-    u16 *entry = port_prompt_clut + (9 + pos) * 16;   /* ROW_CUSTOM + pos */
-    for (int i = 0; i < 16; i++) entry[i] = port_prompt_clut[3 * 16 + i];   /* the shared entries of a Thor row */
-    entry[7] = bgr_of(disc);
-    entry[8] = bgr_of(mix_rgb(disc, 0, 30));
-    entry[9] = bgr_of(mix_rgb(disc, letter, 35));
-    entry[15] = bgr_of(letter);
+    u16 *row_ptr = port_prompt_clut + (9 + pos) * 16;   /* ROW_CUSTOM + pos */
+    for (int i = 0; i < 16; i++) row_ptr[i] = port_prompt_clut[3 * 16 + i];   /* the shared entries of a Thor row */
+    row_ptr[7] = bgr_of(disc);
+    row_ptr[8] = bgr_of(mix_rgb(disc, 0, 30));
+    row_ptr[9] = bgr_of(mix_rgb(disc, letter, 35));
+    row_ptr[15] = bgr_of(letter);
     /* black, not transparent */
-    if (!entry[7]) entry[7] = 0x8000;
-    if (!entry[8]) entry[8] = 0x8000;
-    if (!entry[9]) entry[9] = 0x8000;
-    if (!entry[15]) entry[15] = 0x8000;
+    if (!row_ptr[7]) row_ptr[7] = 0x8000;
+    if (!row_ptr[8]) row_ptr[8] = 0x8000;
+    if (!row_ptr[9]) row_ptr[9] = 0x8000;
+    if (!row_ptr[15]) row_ptr[15] = 0x8000;
 }
 static void custom_defaults(void);
 void port_prompt_colors(const char *s) {
@@ -617,8 +617,8 @@ const u16 *port_prompt_glyph(const u16 *src, int w, int h, int slot) {
     if (slot >= 0 && slot < NSLOTS) slot_port_clut[slot] = 0;
     if (w != GW / 4 || h != GH) return src;
     u32 fnv = 2166136261u;
-    const u8 *bytes = (const u8 *)src;
-    for (int i = 0; i < GW * GH / 2; i++) fnv = (fnv ^ bytes[i]) * 16777619u;
+    const u8 *pix_bytes = (const u8 *)src;
+    for (int i = 0; i < GW * GH / 2; i++) fnv = (fnv ^ pix_bytes[i]) * 16777619u;
     for (int ps = 0; ps < 4; ps++) if (fnv == ps_hash[ps]) {
         /* keep the game's own glyph: PlayStation style shows the original art (only lowered), read here at run time */
         for (int y = 0; y < GH; y++) for (int x = 0; x < GW; x++)
@@ -834,7 +834,7 @@ static int mi_draw(int i, int w, int h) {
 }
 static void mi_apply(int i) {
     const MenuIcon *m = &menu_icons[i];
-    static u16 words[16 * 4];
+    static u16 packed[16 * 4];
     int w = m->w * 4,
         h = m->h;
     mi_gen[i] = prompt_gen();
@@ -851,10 +851,10 @@ static void mi_apply(int i) {
         for (int y = 0; y < h; y++) for (int q = 0; q < m->w; q++) {
             u16 v = 0;
             for (int k = 0; k < 4; k++) v |= (u16)(mimg[y][q * 4 + k] & 15) << (4 * k);
-            words[y * m->w + q] = v;
+            packed[y * m->w + q] = v;
         }
         mi_on[i] = 1;
-        mi_write(m->x, m->y, m->w, m->h, words);
+        mi_write(m->x, m->y, m->w, m->h, packed);
     }
     port_prompt_icons_on = 0;
     for (int j = 0; j < NMI; j++) port_prompt_icons_on |= mi_on[j] | mi_have[j];

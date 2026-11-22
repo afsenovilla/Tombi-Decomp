@@ -63,16 +63,16 @@ static void sha1_block(Sha1 *s, const unsigned char *p) {
 }
 static void sha1(const unsigned char *p, unsigned n, unsigned char out[20]) {
     Sha1 s = { { 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0 }, 0, { 0 } };
-    unsigned i, left = n;
-    while (left >= 64) {
+    unsigned i, rest_len = n;
+    while (rest_len >= 64) {
         sha1_block(&s, p);
         p += 64;
-        left -= 64;
+        rest_len -= 64;
     }
     unsigned char last[128] = { 0 };
-    memcpy(last, p, left);
-    last[left] = 0x80;
-    unsigned padded = left + 1 + 8 <= 64 ? 64 : 128;
+    memcpy(last, p, rest_len);
+    last[rest_len] = 0x80;
+    unsigned padded = rest_len + 1 + 8 <= 64 ? 64 : 128;
     unsigned long long bits = (unsigned long long)n * 8;
     for (i = 0; i < 8; i++) last[padded - 1 - i] = (unsigned char)(bits >> (8 * i));
     sha1_block(&s, last);
@@ -131,18 +131,18 @@ int port_tpatch_count;              /* files served from text patches */
 /* a whole file in a malloc'd buffer (*n: its size), 0 when it cannot be read */
 static unsigned char *slurp(const char *path, long *n) {
     FILE *f = fopen(path, "rb");
-    unsigned char *buf;
+    unsigned char *file_buf;
     if (!f) return 0;
     fseek(f, 0, SEEK_END);
     *n = ftell(f);
     fseek(f, 0, SEEK_SET);
-    buf = malloc(*n > 0 ? (size_t)*n : 1);
-    if (buf && (long)fread(buf, 1, (size_t)*n, f) != *n) {
-        free(buf);
-        buf = 0;
+    file_buf = malloc(*n > 0 ? (size_t)*n : 1);
+    if (file_buf && (long)fread(file_buf, 1, (size_t)*n, f) != *n) {
+        free(file_buf);
+        file_buf = 0;
     }
     fclose(f);
-    return buf;
+    return file_buf;
 }
 static unsigned u32(const unsigned char *p) { return p[0] | p[1] << 8 | p[2] << 16 | (unsigned)p[3] << 24; }
 static unsigned u16(const unsigned char *p) { return p[0] | p[1] << 8; }

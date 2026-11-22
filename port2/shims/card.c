@@ -236,9 +236,9 @@ static int card_backup(const char *path, const char *stem) {
     char dir[1024], out[1100];
     u8 *buf = (u8 *)malloc(CARD_SIZE);
     FILE *f = fopen(path, "rb");
-    int got = f && buf ? (int)fread(buf, 1, CARD_SIZE, f) : 0;
+    int got_len = f && buf ? (int)fread(buf, 1, CARD_SIZE, f) : 0;
     if (f) fclose(f);
-    if (got <= 0) {
+    if (got_len <= 0) {
         free(buf);
         return 0;
     }
@@ -253,7 +253,7 @@ static int card_backup(const char *path, const char *stem) {
         snprintf(out, sizeof out, "%s/%s-%s-%d.mcd", dir, stem, stamp, k);
     }
     f = fopen(out, "wb");
-    int ok = f && fwrite(buf, 1, got, f) == (size_t)got;
+    int ok = f && fwrite(buf, 1, got_len, f) == (size_t)got_len;
     if (f) fclose(f);
     free(buf);
     if (!ok) port_printf("[port] memory card: cannot write the backup %s\n", out);
@@ -317,22 +317,22 @@ static void card_migrate(void) {
                 break;
             }
             for (int k = 0; k < chain_len; k++) {
-                u8 *entry = DIR(card1_copy, free_blk[k]);
+                u8 *dir_ent = DIR(card1_copy, free_blk[k]);
                 if (k == 0) {
-                    memcpy(entry, dir_frame, FRAME);
-                    memset(entry + 0x0A, 0, 20);
-                    memcpy(entry + 0x0A, name, strlen(name));
-                } else memset(entry, 0, FRAME);
-                entry[0] = k == 0 ? 0x51 : k == chain_len - 1 ? 0x53 : 0x52;
+                    memcpy(dir_ent, dir_frame, FRAME);
+                    memset(dir_ent + 0x0A, 0, 20);
+                    memcpy(dir_ent + 0x0A, name, strlen(name));
+                } else memset(dir_ent, 0, FRAME);
+                dir_ent[0] = k == 0 ? 0x51 : k == chain_len - 1 ? 0x53 : 0x52;
                 u32 size = k == 0 ? (u32)chain_len * BLOCK : 0;
-                entry[4] = size;
-                entry[5] = size >> 8;
-                entry[6] = size >> 16;
-                entry[7] = size >> 24;
+                dir_ent[4] = size;
+                dir_ent[5] = size >> 8;
+                dir_ent[6] = size >> 16;
+                dir_ent[7] = size >> 24;
                 int next_link = k == chain_len - 1 ? 0xFFFF : free_blk[k + 1] - 1;
-                entry[8] = next_link & 0xFF;
-                entry[9] = next_link >> 8;
-                entry[FRAME - 1] = frame_sum(entry);
+                dir_ent[8] = next_link & 0xFF;
+                dir_ent[9] = next_link >> 8;
+                dir_ent[FRAME - 1] = frame_sum(dir_ent);
                 memcpy(card1_copy + free_blk[k] * BLOCK, card2 + chain[k] * BLOCK, BLOCK);
             }
             /* the title's slot digits (save +0x16, fullwidth = 0x824F + n) */
@@ -355,9 +355,9 @@ static void card_migrate(void) {
             snprintf(old_path, sizeof old_path, "%s.old", card2_path);
             /* (not rename(): the game's BIOS rename stub takes the name in the port's link) */
             FILE *old_file = fopen(old_path, "wb");
-            int written = old_file && fwrite(card2, 1, CARD_SIZE, old_file) == CARD_SIZE;
-            if (old_file && fclose(old_file)) written = 0;
-            if (!written || remove(card2_path))
+            int old_ok = old_file && fwrite(card2, 1, CARD_SIZE, old_file) == CARD_SIZE;
+            if (old_file && fclose(old_file)) old_ok = 0;
+            if (!old_ok || remove(card2_path))
                 port_printf("[port] memory card 2: merged, but %s could not be moved to %s\n", card2_path, old_path);
             port_printf("[port] memory card 2 (%s) merged into card 1: %d saves copied, %d already there; "
                         "the file is now %s (backups in backup/)\n", card2_path, moved, skipped, old_path);

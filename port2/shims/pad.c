@@ -118,14 +118,14 @@ void port_pad_script(const char *s) {
 
 void port_pad_vblank(void) {
     if (n_script) {
-        u16 held = 0;
+        u16 held_mask = 0;
         for (int i = 0; i < n_script; i++) {
             int elapsed = port_frame - script[i].frame;
             /* inside one of the entry's COUNT presses, each LEN vblanks long, every PERIOD */
             if (elapsed >= 0 && elapsed / script[i].period < script[i].count
-                && elapsed % script[i].period < script[i].len) held |= script[i].mask;
+                && elapsed % script[i].period < script[i].len) held_mask |= script[i].mask;
         }
-        port_pad_buttons[0] = held;
+        port_pad_buttons[0] = held_mask;
     }
     {   /* --window: the keyboard / game controller state (merged with a script, if any) */
         u16 host;
@@ -159,12 +159,12 @@ void port_pad_vblank(void) {
         if (port_dualshock) {
             int lx = port_pad_lx,
                 ly = port_pad_ly,
-                held = port_pad_buttons[i];
+                held_mask = port_pad_buttons[i];
             /* the d-pad: the stick at that end */
-            if (held & 0x80) lx = 0x00;
-            else if (held & 0x20) lx = 0xFF;
-            if (held & 0x10) ly = 0x00;
-            else if (held & 0x40) ly = 0xFF;
+            if (held_mask & 0x80) lx = 0x00;
+            else if (held_mask & 0x20) lx = 0xFF;
+            if (held_mask & 0x10) ly = 0x00;
+            else if (held_mask & 0x40) ly = 0xFF;
             rx_buf[i][1] = 0x73;
             rx_buf[i][4] = 0x80;
             rx_buf[i][5] = 0x80;
