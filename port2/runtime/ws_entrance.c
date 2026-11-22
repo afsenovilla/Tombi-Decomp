@@ -12,7 +12,8 @@
  * to Tomba. */
 extern int port_ws_cull;
 
-static int wi_dx, wi_total, wi_frames, wi_k;
+/* the walk-in in progress: the parking offset, the measured distance, the retail frame count, the frames walked so far */
+static int wi_dx, wi_total, wi_frames, wi_step;
 
 /* the X offset to park an actor at world/screen x: past the right edge by pad, past the left one by -pad */
 int port_ws_park_dx(int x)
@@ -26,18 +27,21 @@ int port_ws_park_dx(int x)
 /* dist: the distance the script measured (it includes the parking offset); returns the walk's frame count */
 int port_ws_walkin_frames(int dist)
 {
-    int d = wi_dx < 0 ? -wi_dx : wi_dx;
-    wi_k = 0;
+    int park = wi_dx < 0 ? -wi_dx : wi_dx;
+    wi_step = 0;
     wi_total = dist;
-    if (!d) { wi_frames = 0; return dist; }                         /* retail */
-    wi_frames = dist - d < 1 ? 1 : dist - d;   /* the retail count (the script runs one frame when it is <= 0) */
-    return dist - d;
+    if (!park) {                                                    /* retail */
+        wi_frames = 0;
+        return dist;
+    }
+    wi_frames = dist - park < 1 ? 1 : dist - park;   /* the retail count (the script runs one frame when it is <= 0) */
+    return dist - park;
 }
 
 /* units to move this frame (1 when off); the sum over the walk is the measured distance */
 int port_ws_walkin_step(void)
 {
-    int k = wi_k++;
+    int k = wi_step++;
     if (!wi_frames || k >= wi_frames) return 1;
     return (int)((long long)wi_total * (k + 1) / wi_frames - (long long)wi_total * k / wi_frames);
 }
