@@ -1313,7 +1313,15 @@ static int write_png(const char *path, const u8 *rgb, int w, int h) {
     fclose(fd);
     return 0;
 }
-static u8 frame_rgb[1024 * 512 * 3];
+/* the displayed frame as RGB (window presents of the software path, frame dumps): allocated the first time it is used,
+   so it is not in the program image of a build that never uses it (the 3DS draws with the pica backend) */
+static u8 *frame_rgb_buf;
+static u8 *frame_rgb_get(void)
+{
+    if (!frame_rgb_buf && !(frame_rgb_buf = malloc((size_t)1024 * 512 * 3))) { port_printf("[gpu] no memory for the frame buffer\n"); exit(1); }
+    return frame_rgb_buf;
+}
+#define frame_rgb (frame_rgb_get())
 /* the displayed area has a wide copy (--widescreen) */
 static int ws_frame(const RECT *d, int W, int rgb24) {
     if (!port_widescreen || W != 320 || rgb24) return 0;

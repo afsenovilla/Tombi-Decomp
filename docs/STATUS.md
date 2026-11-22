@@ -4,6 +4,15 @@ Update this file whenever something lands or a task is decided. Newest first.
 
 ## Since v0.7.2 (not released)
 
+- **Smaller program image (all platforms, for the 3DS's 26 MB limit).** Three tables the 3DS never uses are no longer
+  in the image: the OpenGL renderer's vertex / op buffers (`shims/gpu_gl.c`, 3.5 MB, allocated by `gl_start`), the
+  RGB frame buffer of window presents and dumps (`shims/gpu.c` `frame_rgb`, 1.5 MB, allocated on first use) and the
+  top-down strips' VRAM save rows (`runtime/ws_topdown.c` `Slot.save`, 1.3 MB, allocated the first time the VRAM path
+  needs them; the pica path never does). About 6.3 MB less bss than after f5451af (estimated 3dsx ~25.8 MB -> ~19.5
+  MB; not measured: no devkitARM here, Docker Hub refused the pull with 429). Checked on the PC: frames identical
+  before / after on the software renderer (village 16:9, AREA05 s0 16:9, AREA19 s2 21:9) and on GL under xvfb (16:9),
+  and the wasm2c build matches i386 in AREA05 s0.
+
 - **The widescreen generators' tables on the heap, only while a room uses them; the 3DS gets them back (2026-11-22,
   docs/PORT.md "Widescreen tables on the heap").** `runtime/ws_heap.c`: the picture strips (ws_backdrop*.c/.inc, 239
   tables), the Evil Pig rooms, room3d, trick, floor3d and the Hidden Village's top-down margins keep their work

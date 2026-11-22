@@ -293,8 +293,8 @@ typedef struct { int kind; Key key; int first, count; int r[6]; u16 col; int ns;
 
 #define MAX_VTX 65536
 #define MAX_OPS 8192
-static GVtx vtx[MAX_VTX];
-static Op ops[MAX_OPS];
+static GVtx *vtx;   /* MAX_VTX, allocated by gl_start: not in the program image of builds without OpenGL (the 3DS) */
+static Op *ops;     /* MAX_OPS, the same */
 static int n_vtx, n_ops;
 static GLuint vram_tex, fbo, vbo, prog, bprog;
 static GLint u_tex, u_pass, u_tw, u_setmask, bu_vram, u_hw, u_reps, u_repr;
@@ -911,6 +911,9 @@ static int gl_start(void) {
     stage = (u16 *)SDL_malloc((size_t)2048 * 512 * (R * R + 1) * 2);
     stage8 = (u8 *)SDL_malloc((size_t)2048 * 512 * R * R * 4);
     if (!stage || !stage8) return -1;
+    if (!vtx) vtx = (GVtx *)SDL_malloc(sizeof(GVtx) * MAX_VTX);
+    if (!ops) ops = (Op *)SDL_malloc(sizeof(Op) * MAX_OPS);
+    if (!vtx || !ops) return -1;
     {   /* the fragment shader, after pclut(): the port-only CLUT (gpu_backend.h PORT_CLUT_Y) as constants */
         /* a binary search (8 comparisons), not a chain of 208 ifs: Mesa's llvmpipe returned a wrong constant past row 8 of
            a long chain (the custom rows 9..12 came out as one flat colour) */

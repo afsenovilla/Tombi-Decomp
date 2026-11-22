@@ -53,7 +53,8 @@ typedef struct {
     int n; Rect r[MAXR];
     struct { int k, ri, du, dw, j0, j1, tx, ty, u, v, cx, cy; } up[5 * MAXR]; int nup;   /* uploads per batch (k = -2..2); tx..cy: the strip SPRT's texels (the pica path) */
     int pica;                             /* the strips go to the pica backend's own slots, not into VRAM (below) */
-    u16 save[MAXR][256 * 256 / 2 + 8 * 128]; int saved[MAXR];
+    u16 (*save)[256 * 256 / 2 + 8 * 128]; int saved[MAXR];   /* save: MAXR rows, allocated the first time the VRAM path
+                                          needs them (the pica path of the 3DS never does: not in its program image) */
 } Slot;
 static Slot slots[SLOTS];
 static int slot_next;
@@ -70,6 +71,7 @@ static void upload(Slot *s, int k)
         int du = s->up[i].du, dw = s->up[i].dw, j0 = s->up[i].j0, j1 = s->up[i].j1;
         if (!s->saved[s->up[i].ri]) {     /* what the game uploaded there, put back by the last marker */
             const u16 *v = port_vram();
+            if (!s->save && !(s->save = calloc(MAXR, sizeof s->save[0]))) continue;
             for (int j = 0; j < r->h; j++) memcpy(&s->save[s->up[i].ri][j * r->w], v + (r->y + j) * 1024 + r->x, (size_t)r->w * 2);
             s->saved[s->up[i].ri] = 1;
         }
