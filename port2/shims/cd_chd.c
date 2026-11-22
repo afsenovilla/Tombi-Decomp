@@ -23,47 +23,71 @@
 
 typedef struct { int lba, frames, chd_frame, cooked; } ChdTrack;
 static chd_file *chd;
-static unsigned char *hunk; static unsigned hunk_bytes, hunk_frames; static int hunk_cached = -1;
-static ChdTrack tracks[99]; static int ntracks, total_sectors;
+static unsigned char *hunk;
+static unsigned hunk_bytes, hunk_frames;
+static int hunk_cached = -1;
+static ChdTrack tracks[99];
+static int track_count, total_sectors;
 
 void port_chd_close(void) {
     if (chd) chd_close(chd);
-    chd = 0; free(hunk); hunk = 0; hunk_cached = -1; ntracks = 0; total_sectors = 0;
+    chd = 0;
+    free(hunk);
+    hunk = 0;
+    hunk_cached = -1;
+    track_count = 0;
+    total_sectors = 0;
 }
 
 int port_chd_open(const char *path, int *sectors, char *err, int errlen) {
     port_chd_close();
-    chd_error e = chd_open(path, CHD_OPEN_READ, NULL, &chd);
-    if (e != CHDERR_NONE) { snprintf(err, errlen, "chd_open: %s", chd_error_string(e)); chd = 0; return -1; }
-    const chd_header *h = chd_get_header(chd);
-    hunk_bytes = h->hunkbytes; hunk_frames = hunk_bytes / CD_FRAME_SIZE;
+    chd_error open_err = chd_open(path, CHD_OPEN_READ, NULL, &chd);
+    if (open_err != CHDERR_NONE) {
+        snprintf(err, errlen, "chd_open: %s", chd_error_string(open_err));
+        chd = 0;
+        return -1;
+    }
+    const chd_header *hdr = chd_get_header(chd);
+    hunk_bytes = hdr->hunkbytes;
+    hunk_frames = hunk_bytes / CD_FRAME_SIZE;
     if (!hunk_frames || hunk_bytes % CD_FRAME_SIZE) {
         snprintf(err, errlen, "not a CD image (hunk of %u bytes is not a multiple of %d)", hunk_bytes, CD_FRAME_SIZE);
-        port_chd_close(); return -1;
+        port_chd_close();
+        return -1;
     }
     hunk = malloc(hunk_bytes);
     int chd_frame = 0, lba = 0;
     for (int i = 0; i < 99; i++) {
         char meta[256] = "", type[32] = "", sub[32] = "", pgtype[32] = "", pgsub[32] = "";
-        int tn = 0, frames = 0, pregap = 0, postgap = 0; uint32_t len = 0, tag = 0; uint8_t fl = 0;
-        if (chd_get_metadata(chd, CDROM_TRACK_METADATA2_TAG, i, meta, sizeof meta - 1, &len, &tag, &fl) == CHDERR_NONE) {
+        int track_no = 0, frames = 0, pregap = 0, postgap = 0;
+        uint32_t len = 0, tag = 0;
+        uint8_t meta_flags = 0;
+        /* track i's CHT2 metadata, else the old CHTR one; neither: no more tracks */
+        if (chd_get_metadata(chd, CDROM_TRACK_METADATA2_TAG, i, meta, sizeof meta - 1, &len, &tag, &meta_flags)
+            == CHDERR_NONE) {
             meta[len < sizeof meta ? len : sizeof meta - 1] = 0;
-            if (sscanf(meta, CDROM_TRACK_METADATA2_FORMAT, &tn, type, sub, &frames, &pregap, pgtype, pgsub, &postgap) < 4) break;
-        } else if (chd_get_metadata(chd, CDROM_TRACK_METADATA_TAG, i, meta, sizeof meta - 1, &len, &tag, &fl) == CHDERR_NONE) {
+            if (sscanf(meta, CDROM_TRACK_METADATA2_FORMAT, &track_no, type, sub, &frames, &pregap, pgtype, pgsub,
+                       &postgap) < 4) break;
+        } else if (chd_get_metadata(chd, CDROM_TRACK_METADATA_TAG, i, meta, sizeof meta - 1, &len, &tag, &meta_flags)
+                   == CHDERR_NONE) {
             meta[len < sizeof meta ? len : sizeof meta - 1] = 0;
-            if (sscanf(meta, CDROM_TRACK_METADATA_FORMAT, &tn, type, sub, &frames) < 4) break;
+            if (sscanf(meta, CDROM_TRACK_METADATA_FORMAT, &track_no, type, sub, &frames) < 4) break;
         } else break;
-        int vpregap = pgtype[0] == 'V' ? pregap : 0;          /* pregap frames stored before index 1 */
-        ChdTrack *t = &tracks[ntracks++];
-        t->lba = lba; t->frames = frames - vpregap; t->chd_frame = chd_frame + vpregap;
+        int stored_pregap = pgtype[0] == 'V' ? pregap : 0;          /* pregap frames stored before index 1 */
+        ChdTrack *t = &tracks[track_count++];
+        t->lba = lba;
+        t->frames = frames - stored_pregap;
+        t->chd_frame = chd_frame + stored_pregap;
         t->cooked = !strcmp(type, "MODE1") || !strcmp(type, "MODE2_FORM1");
         lba += t->frames;
         chd_frame += (frames + CD_TRACK_PADDING - 1) / CD_TRACK_PADDING * CD_TRACK_PADDING;
     }
-    if (!ntracks) {                                           /* no track metadata: one raw track over every frame */
-        ChdTrack *t = &tracks[ntracks++];
-        t->lba = 0; t->chd_frame = 0; t->cooked = 0;
-        t->frames = (int)(h->logicalbytes / CD_FRAME_SIZE);
+    if (!track_count) {                                       /* no track metadata: one raw track over every frame */
+        ChdTrack *t = &tracks[track_count++];
+        t->lba = 0;
+        t->chd_frame = 0;
+        t->cooked = 0;
+        t->frames = (int)(hdr->logicalbytes / CD_FRAME_SIZE);
         lba = t->frames;
     }
     total_sectors = lba;
@@ -74,28 +98,54 @@ int port_chd_open(const char *path, int *sectors, char *err, int errlen) {
 int port_chd_read_raw(int lba, unsigned char *out) {
     if (!chd || lba < 0) return -1;
     const ChdTrack *t = 0;
-    for (int i = 0; i < ntracks; i++) if (lba >= tracks[i].lba && lba < tracks[i].lba + tracks[i].frames) { t = &tracks[i]; break; }
+    for (int i = 0; i < track_count; i++)
+        if (lba >= tracks[i].lba && lba < tracks[i].lba + tracks[i].frames) {
+            t = &tracks[i];
+            break;
+        }
     if (!t) return -2;                                        /* beyond the last track */
-    unsigned frame = (unsigned)(t->chd_frame + (lba - t->lba)), hn = frame / hunk_frames;
-    if ((int)hn != hunk_cached) {
-        if (chd_read(chd, hn, hunk) != CHDERR_NONE) { hunk_cached = -1; return -1; }
-        hunk_cached = (int)hn;
+    /* the frame inside the image, and the hunk that holds it */
+    unsigned frame = (unsigned)(t->chd_frame + (lba - t->lba)),
+             hunk_index = frame / hunk_frames;
+    if ((int)hunk_index != hunk_cached) {
+        if (chd_read(chd, hunk_index, hunk) != CHDERR_NONE) {
+            hunk_cached = -1;
+            return -1;
+        }
+        hunk_cached = (int)hunk_index;
     }
-    const unsigned char *f = hunk + (size_t)(frame % hunk_frames) * CD_FRAME_SIZE;
-    if (!t->cooked) { memcpy(out, f, 2352); return 0; }
+    const unsigned char *frame_data = hunk + (size_t)(frame % hunk_frames) * CD_FRAME_SIZE;
+    if (!t->cooked) {
+        memcpy(out, frame_data, 2352);
+        return 0;
+    }
     /* cooked 2048: a Mode 2 Form 1 sector around it (MSF header of the LBA + 150, mode 2, zero subheader) */
     static const unsigned char sync[12] = { 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0 };
-    memset(out, 0, 2352); memcpy(out, sync, 12);
-    int a = lba + 150, m = a / 4500, s = a / 75 % 60, fr = a % 75;
-    out[12] = (unsigned char)(m / 10 << 4 | m % 10); out[13] = (unsigned char)(s / 10 << 4 | s % 10);
-    out[14] = (unsigned char)(fr / 10 << 4 | fr % 10); out[15] = 2;
-    memcpy(out + 24, f, 2048);
+    memset(out, 0, 2352);
+    memcpy(out, sync, 12);
+    /* header: minute / second / frame of the LBA + 150, in BCD */
+    int msf_frames = lba + 150,
+        m = msf_frames / 4500,
+        s = msf_frames / 75 % 60,
+        fr = msf_frames % 75;
+    out[12] = (unsigned char)(m / 10 << 4 | m % 10);
+    out[13] = (unsigned char)(s / 10 << 4 | s % 10);
+    out[14] = (unsigned char)(fr / 10 << 4 | fr % 10);
+    out[15] = 2;
+    memcpy(out + 24, frame_data, 2048);
     return 0;
 }
 #else
 int port_chd_open(const char *path, int *sectors, char *err, int errlen) {
-    (void)path; (void)sectors; snprintf(err, errlen, "this build has no .chd support"); return -1;
+    (void)path;
+    (void)sectors;
+    snprintf(err, errlen, "this build has no .chd support");
+    return -1;
 }
-int port_chd_read_raw(int lba, unsigned char *out) { (void)lba; (void)out; return -1; }
+int port_chd_read_raw(int lba, unsigned char *out) {
+    (void)lba;
+    (void)out;
+    return -1;
+}
 void port_chd_close(void) {}
 #endif

@@ -27,8 +27,11 @@
 #include <string.h>
 #include "port_runtime.h"
 
-typedef unsigned char u8; typedef unsigned short u16; typedef short s16;
-typedef unsigned int u32; typedef int s32;
+typedef unsigned char u8;
+typedef unsigned short u16;
+typedef short s16;
+typedef unsigned int u32;
+typedef int s32;
 
 #define LOCK() port_audio_lock()
 #define UNLOCK() port_audio_unlock()
@@ -68,55 +71,71 @@ typedef struct {
 static Voice voices[NVOICES];
 static unsigned voice_clock;
 
-static const int adpcm_f0[5] = { 0, 60, 115, 98, 122 }, adpcm_f1[5] = { 0, 0, -52, -55, -60 };
+static const int adpcm_f0[5] = { 0, 60, 115, 98, 122 },
+                 adpcm_f1[5] = { 0, 0, -52, -55, -60 };
 
 static void decode_block(Voice *v) {
-    const u8 *b = spu_ram + (v->cur & (SPU_RAM_SIZE - 16));
-    int shift = b[0] & 15, f = (b[0] >> 4) & 7;
+    const u8 *blk = spu_ram + (v->cur & (SPU_RAM_SIZE - 16));
+    int shift = blk[0] & 15,
+        filter = (blk[0] >> 4) & 7;
     if (shift > 12) shift = 9;
-    if (f > 4) f = 4;
+    if (filter > 4) filter = 4;
     for (int i = 0; i < 28; i++) {
-        int nib = (b[2 + i / 2] >> ((i & 1) * 4)) & 15;
+        int nib = (blk[2 + i / 2] >> ((i & 1) * 4)) & 15;
         int s = (s16)(nib << 12) >> shift;
-        s += (v->s1 * adpcm_f0[f] + v->s2 * adpcm_f1[f] + 32) >> 6;
+        s += (v->s1 * adpcm_f0[filter] + v->s2 * adpcm_f1[filter] + 32) >> 6;
         if (s > 32767) s = 32767;
         if (s < -32768) s = -32768;
         v->buf[i] = (s16)s;
-        v->s2 = v->s1; v->s1 = s;
+        v->s2 = v->s1;
+        v->s1 = s;
     }
-    if (b[1] & 4) v->loop = v->cur;   /* loop start flag: the repeat address */
+    if (blk[1] & 4) v->loop = v->cur;   /* loop start flag: the repeat address */
 }
 
 /* one envelope step for a phase: exp / decreasing / shift / step per the SPU's rate rules */
 static inline __attribute__((always_inline)) void env_tick(Voice *v, int exp, int dec, int shift, int step) {
-    if (v->env_wait > 0) { v->env_wait--; return; }
-    int s = dec ? -8 + step : 7 - step;
+    if (v->env_wait > 0) {
+        v->env_wait--;
+        return;
+    }
+    int env_delta = dec ? -8 + step : 7 - step;
     int wait = 1 << (shift > 11 ? shift - 11 : 0);
-    s <<= (shift < 11 ? 11 - shift : 0);
+    env_delta <<= (shift < 11 ? 11 - shift : 0);
     if (exp && !dec && v->env_level > 0x6000) wait <<= 2;
-    if (exp && dec) s = (s * v->env_level) >> 15;
+    if (exp && dec) env_delta = (env_delta * v->env_level) >> 15;
     v->env_wait = wait - 1;
-    v->env_level += s;
+    v->env_level += env_delta;
     if (v->env_level > 0x7FFF) v->env_level = 0x7FFF;
     if (v->env_level < 0) v->env_level = 0;
 }
 static inline void env_step(Voice *v) {
-    u16 a1 = v->adsr1, a2 = v->adsr2;
+    u16 a1 = v->adsr1,
+        a2 = v->adsr2;
     switch (v->env_phase) {
     case ENV_ATTACK:
         env_tick(v, a1 >> 15, 0, (a1 >> 10) & 31, (a1 >> 8) & 3);
-        if (v->env_level >= 0x7FFF) { v->env_phase = ENV_DECAY; v->env_wait = 0; }
+        if (v->env_level >= 0x7FFF) {
+            v->env_phase = ENV_DECAY;
+            v->env_wait = 0;
+        }
         break;
     case ENV_DECAY:
         env_tick(v, 1, 1, (a1 >> 4) & 15, 0);
-        if (v->env_level <= (int)(((a1 & 15) + 1) << 11)) { v->env_phase = ENV_SUSTAIN; v->env_wait = 0; }
+        if (v->env_level <= (int)(((a1 & 15) + 1) << 11)) {
+            v->env_phase = ENV_SUSTAIN;
+            v->env_wait = 0;
+        }
         break;
     case ENV_SUSTAIN:
         env_tick(v, a2 >> 15, (a2 >> 14) & 1, (a2 >> 8) & 31, (a2 >> 6) & 3);
         break;
     case ENV_RELEASE:
         env_tick(v, (a2 >> 5) & 1, 1, a2 & 31, 0);
-        if (v->env_level == 0) { v->env_phase = ENV_OFF; v->owner = -1; }
+        if (v->env_level == 0) {
+            v->env_phase = ENV_OFF;
+            v->owner = -1;
+        }
         break;
     }
 }
@@ -124,25 +143,36 @@ static inline void env_step(Voice *v) {
 static void voice_key_on(Voice *v, u32 addr, u16 pitch, u16 adsr1, u16 adsr2, int vl, int vr) {
     v->start = v->cur = addr & (SPU_RAM_SIZE - 8);
     v->loop = v->start;
-    v->counter = 0; v->s1 = v->s2 = 0; v->prev = 0;
+    v->counter = 0;
+    v->s1 = v->s2 = 0;
+    v->prev = 0;
     v->pitch = pitch > 0x3FFF ? 0x3FFF : pitch;
-    v->adsr1 = adsr1; v->adsr2 = adsr2;
-    v->env_phase = ENV_ATTACK; v->env_level = 0; v->env_wait = 0;
-    v->vol_l = vl; v->vol_r = vr;
+    v->adsr1 = adsr1;
+    v->adsr2 = adsr2;
+    v->env_phase = ENV_ATTACK;
+    v->env_level = 0;
+    v->env_wait = 0;
+    v->vol_l = vl;
+    v->vol_r = vr;
     v->age = ++voice_clock;
     decode_block(v);
 }
 static void voice_key_off(Voice *v) {
-    if (v->env_phase != ENV_OFF) { v->env_phase = ENV_RELEASE; v->env_wait = 0; }
+    if (v->env_phase != ENV_OFF) {
+        v->env_phase = ENV_RELEASE;
+        v->env_wait = 0;
+    }
 }
 
 /* ---------------------------------------------------------------------------------------- reverb */
 /* The SPU reverb (the hardware's algorithm, run every other sample on a work buffer).  The registers are Sony's
    preset table (libspu's rev_param table in MAIN0: 10 modes, the same values the SPU documentation lists) as
    SpuSetReverbModeParam copies them, with the ECHO / DELAY delay and feedback rewrites of that function. */
-enum { R_dAPF1, R_dAPF2, R_vIIR, R_vCOMB1, R_vCOMB2, R_vCOMB3, R_vCOMB4, R_vWALL, R_vAPF1, R_vAPF2, R_mLSAME, R_mRSAME,
-       R_mLCOMB1, R_mRCOMB1, R_mLCOMB2, R_mRCOMB2, R_dLSAME, R_dRSAME, R_mLDIFF, R_mRDIFF, R_mLCOMB3, R_mRCOMB3,
-       R_mLCOMB4, R_mRCOMB4, R_dLDIFF, R_dRDIFF, R_mLAPF1, R_mRAPF1, R_mLAPF2, R_mRAPF2, R_vLIN, R_vRIN };
+enum {
+    R_dAPF1, R_dAPF2, R_vIIR, R_vCOMB1, R_vCOMB2, R_vCOMB3, R_vCOMB4, R_vWALL, R_vAPF1, R_vAPF2, R_mLSAME, R_mRSAME,
+    R_mLCOMB1, R_mRCOMB1, R_mLCOMB2, R_mRCOMB2, R_dLSAME, R_dRSAME, R_mLDIFF, R_mRDIFF, R_mLCOMB3, R_mRCOMB3,
+    R_mLCOMB4, R_mRCOMB4, R_dLDIFF, R_dRDIFF, R_mLAPF1, R_mRAPF1, R_mLAPF2, R_mRAPF2, R_vLIN, R_vRIN
+};
 static const u16 rev_preset[10][32] = {
     { 0 },
     { 0x007D, 0x005B, 0x6D80, 0x54B8, 0xBED0, 0x0000, 0x0000, 0xBA80, 0x5800, 0x5300, 0x04D6, 0x0333, 0x03F0, 0x0227, 0x0374, 0x01EF,
@@ -177,39 +207,73 @@ static u32 rev_voices;                /* SpuSetReverbVoice */
 static int rev_delay, rev_feedback;
 static int rev_in_l, rev_in_r, rev_cnt, rev_out_l, rev_out_r, rev_prev_l, rev_prev_r;
 
-static int rev_rd(int units, int back) {          /* sample at the register address (8-byte units), `back` samples earlier */
+/* sample at the register address (8-byte units), `back` samples earlier */
+static int rev_rd(int units, int back) {
     /* (32 bits hold it: 16-bit units, a position inside the buffer; and it is nearly always in range already: the
        64-bit modulo this was is a library call on 32-bit ARM, ten of them a sample) */
     int a = (int)rev_pos + units * 8 - back * 2;
     /* (one wrap nearly always: a division is a library call on the 3DS's ARM11, a dozen of them a reverb cycle) */
-    if (a >= (int)rev_bytes) a -= (int)rev_bytes; else if (a < 0) a += (int)rev_bytes;
-    if ((unsigned)a >= rev_bytes) { a %= (int)rev_bytes; if (a < 0) a += (int)rev_bytes; }
+    if (a >= (int)rev_bytes) a -= (int)rev_bytes;
+    else if (a < 0) a += (int)rev_bytes;
+    if ((unsigned)a >= rev_bytes) {
+        a %= (int)rev_bytes;
+        if (a < 0) a += (int)rev_bytes;
+    }
     return rev_buf[a >> 1];
 }
 static void rev_wr(int units, int val) {
     int a = (int)rev_pos + units * 8;
-    if (a >= (int)rev_bytes) a -= (int)rev_bytes; else if (a < 0) a += (int)rev_bytes;
-    if ((unsigned)a >= rev_bytes) { a %= (int)rev_bytes; if (a < 0) a += (int)rev_bytes; }
+    if (a >= (int)rev_bytes) a -= (int)rev_bytes;
+    else if (a < 0) a += (int)rev_bytes;
+    if ((unsigned)a >= rev_bytes) {
+        a %= (int)rev_bytes;
+        if (a < 0) a += (int)rev_bytes;
+    }
     rev_buf[a >> 1] = val > 32767 ? 32767 : val < -32768 ? -32768 : val;
 }
 #define RV(i) ((int)(s16)rev[i])
 #define RA(i) ((int)rev[i])
 static int clamp16(long long v) { return v > 32767 ? 32767 : v < -32768 ? -32768 : (int)v; }
 static void rev_step(int in_l, int in_r) {          /* one 22.05 kHz reverb cycle */
-    int Lin = (RV(R_vLIN) * in_l) >> 15, Rin = (RV(R_vRIN) * in_r) >> 15;
-    rev_wr(RA(R_mLSAME), (((Lin + ((rev_rd(RA(R_dLSAME), 0) * RV(R_vWALL)) >> 15) - rev_rd(RA(R_mLSAME), 1)) * RV(R_vIIR)) >> 15) + rev_rd(RA(R_mLSAME), 1));
-    rev_wr(RA(R_mRSAME), (((Rin + ((rev_rd(RA(R_dRSAME), 0) * RV(R_vWALL)) >> 15) - rev_rd(RA(R_mRSAME), 1)) * RV(R_vIIR)) >> 15) + rev_rd(RA(R_mRSAME), 1));
-    rev_wr(RA(R_mLDIFF), (((Lin + ((rev_rd(RA(R_dRDIFF), 0) * RV(R_vWALL)) >> 15) - rev_rd(RA(R_mLDIFF), 1)) * RV(R_vIIR)) >> 15) + rev_rd(RA(R_mLDIFF), 1));
-    rev_wr(RA(R_mRDIFF), (((Rin + ((rev_rd(RA(R_dLDIFF), 0) * RV(R_vWALL)) >> 15) - rev_rd(RA(R_mRDIFF), 1)) * RV(R_vIIR)) >> 15) + rev_rd(RA(R_mRDIFF), 1));
-    long long L = ((long long)RV(R_vCOMB1) * rev_rd(RA(R_mLCOMB1), 0) + (long long)RV(R_vCOMB2) * rev_rd(RA(R_mLCOMB2), 0) +
-                   (long long)RV(R_vCOMB3) * rev_rd(RA(R_mLCOMB3), 0) + (long long)RV(R_vCOMB4) * rev_rd(RA(R_mLCOMB4), 0)) >> 15;
-    long long R = ((long long)RV(R_vCOMB1) * rev_rd(RA(R_mRCOMB1), 0) + (long long)RV(R_vCOMB2) * rev_rd(RA(R_mRCOMB2), 0) +
-                   (long long)RV(R_vCOMB3) * rev_rd(RA(R_mRCOMB3), 0) + (long long)RV(R_vCOMB4) * rev_rd(RA(R_mRCOMB4), 0)) >> 15;
-    int Lout = clamp16(L), Rout = clamp16(R), t;
-    t = rev_rd(RA(R_mLAPF1) - RA(R_dAPF1), 0); Lout -= (RV(R_vAPF1) * t) >> 15; rev_wr(RA(R_mLAPF1), Lout); Lout = clamp16(((long long)Lout * RV(R_vAPF1) >> 15) + t);
-    t = rev_rd(RA(R_mRAPF1) - RA(R_dAPF1), 0); Rout -= (RV(R_vAPF1) * t) >> 15; rev_wr(RA(R_mRAPF1), Rout); Rout = clamp16(((long long)Rout * RV(R_vAPF1) >> 15) + t);
-    t = rev_rd(RA(R_mLAPF2) - RA(R_dAPF2), 0); Lout -= (RV(R_vAPF2) * t) >> 15; rev_wr(RA(R_mLAPF2), Lout); Lout = clamp16(((long long)Lout * RV(R_vAPF2) >> 15) + t);
-    t = rev_rd(RA(R_mRAPF2) - RA(R_dAPF2), 0); Rout -= (RV(R_vAPF2) * t) >> 15; rev_wr(RA(R_mRAPF2), Rout); Rout = clamp16(((long long)Rout * RV(R_vAPF2) >> 15) + t);
+    int Lin = (RV(R_vLIN) * in_l) >> 15,
+        Rin = (RV(R_vRIN) * in_r) >> 15;
+    /* the same-side and cross (diff) reflections: (in + wall * delayed - previous) * IIR + previous */
+    rev_wr(RA(R_mLSAME), (((Lin + ((rev_rd(RA(R_dLSAME), 0) * RV(R_vWALL)) >> 15) - rev_rd(RA(R_mLSAME), 1))
+                          * RV(R_vIIR)) >> 15) + rev_rd(RA(R_mLSAME), 1));
+    rev_wr(RA(R_mRSAME), (((Rin + ((rev_rd(RA(R_dRSAME), 0) * RV(R_vWALL)) >> 15) - rev_rd(RA(R_mRSAME), 1))
+                          * RV(R_vIIR)) >> 15) + rev_rd(RA(R_mRSAME), 1));
+    rev_wr(RA(R_mLDIFF), (((Lin + ((rev_rd(RA(R_dRDIFF), 0) * RV(R_vWALL)) >> 15) - rev_rd(RA(R_mLDIFF), 1))
+                          * RV(R_vIIR)) >> 15) + rev_rd(RA(R_mLDIFF), 1));
+    rev_wr(RA(R_mRDIFF), (((Rin + ((rev_rd(RA(R_dLDIFF), 0) * RV(R_vWALL)) >> 15) - rev_rd(RA(R_mRDIFF), 1))
+                          * RV(R_vIIR)) >> 15) + rev_rd(RA(R_mRDIFF), 1));
+    /* the four early echoes (comb taps), weighted */
+    long long L = ((long long)RV(R_vCOMB1) * rev_rd(RA(R_mLCOMB1), 0)
+                   + (long long)RV(R_vCOMB2) * rev_rd(RA(R_mLCOMB2), 0)
+                   + (long long)RV(R_vCOMB3) * rev_rd(RA(R_mLCOMB3), 0)
+                   + (long long)RV(R_vCOMB4) * rev_rd(RA(R_mLCOMB4), 0)) >> 15;
+    long long R = ((long long)RV(R_vCOMB1) * rev_rd(RA(R_mRCOMB1), 0)
+                   + (long long)RV(R_vCOMB2) * rev_rd(RA(R_mRCOMB2), 0)
+                   + (long long)RV(R_vCOMB3) * rev_rd(RA(R_mRCOMB3), 0)
+                   + (long long)RV(R_vCOMB4) * rev_rd(RA(R_mRCOMB4), 0)) >> 15;
+    int Lout = clamp16(L),
+        Rout = clamp16(R),
+        t;
+    t = rev_rd(RA(R_mLAPF1) - RA(R_dAPF1), 0);
+    Lout -= (RV(R_vAPF1) * t) >> 15;
+    rev_wr(RA(R_mLAPF1), Lout);
+    Lout = clamp16(((long long)Lout * RV(R_vAPF1) >> 15) + t);
+    t = rev_rd(RA(R_mRAPF1) - RA(R_dAPF1), 0);
+    Rout -= (RV(R_vAPF1) * t) >> 15;
+    rev_wr(RA(R_mRAPF1), Rout);
+    Rout = clamp16(((long long)Rout * RV(R_vAPF1) >> 15) + t);
+    t = rev_rd(RA(R_mLAPF2) - RA(R_dAPF2), 0);
+    Lout -= (RV(R_vAPF2) * t) >> 15;
+    rev_wr(RA(R_mLAPF2), Lout);
+    Lout = clamp16(((long long)Lout * RV(R_vAPF2) >> 15) + t);
+    t = rev_rd(RA(R_mRAPF2) - RA(R_dAPF2), 0);
+    Rout -= (RV(R_vAPF2) * t) >> 15;
+    rev_wr(RA(R_mRAPF2), Rout);
+    Rout = clamp16(((long long)Rout * RV(R_vAPF2) >> 15) + t);
     rev_out_l = clamp16((long long)Lout * rev_vol_l >> 15);
     rev_out_r = clamp16((long long)Rout * rev_vol_r >> 15);
     rev_pos += 2;
@@ -220,7 +284,8 @@ static void rev_set_mode(int mode, int clear) {
     rev_mode = mode;
     memcpy(rev, rev_preset[mode], sizeof rev);
     rev_bytes = rev_size[mode];
-    if (mode == 7 || mode == 8) {                   /* ECHO / DELAY: SpuSetReverbModeParam derives the delays and the wall */
+    /* ECHO / DELAY: SpuSetReverbModeParam derives the delays and the wall */
+    if (mode == 7 || mode == 8) {
         int d = rev_delay;
         rev[R_mLSAME] = ((d << 13) / 0x7F) - RA(R_dAPF1);
         rev[R_mRSAME] = ((d << 12) / 0x7F) - RA(R_dAPF2);
@@ -230,8 +295,13 @@ static void rev_set_mode(int mode, int clear) {
         rev[R_mRAPF1] = ((d << 12) / 0x7F) + RA(R_mRAPF2);
         rev[R_vWALL] = (rev_feedback * 0x8100) / 0x7F;
     }
-    if (clear) { memset(rev_buf, 0, sizeof rev_buf); rev_pos = 0; rev_in_l = rev_in_r = rev_cnt = rev_out_l = rev_out_r = rev_prev_l = rev_prev_r = 0; }
-    if (port_verbose) port_printf("[port] sound: reverb mode %d (%u byte work area)%s\n", mode, rev_bytes, clear ? ", cleared" : "");
+    if (clear) {
+        memset(rev_buf, 0, sizeof rev_buf);
+        rev_pos = 0;
+        rev_in_l = rev_in_r = rev_cnt = rev_out_l = rev_out_r = rev_prev_l = rev_prev_r = 0;
+    }
+    if (port_verbose)
+        port_printf("[port] sound: reverb mode %d (%u byte work area)%s\n", mode, rev_bytes, clear ? ", cleared" : "");
 }
 
 /* --------------------------------------------------------------------------------- XA (CD audio) */
@@ -250,17 +320,22 @@ static int xa_s1[2], xa_s2[2];
 static u32 xa_phase;
 static int xa_sectors, xa_underruns, xa_8bit_warned, xa_ended;
 static unsigned long long samples_total;        /* samples rendered since the start (the audio clock) */
-static const int xa_f0[4] = { 0, 60, 115, 98 }, xa_f1[4] = { 0, 0, -52, -55 };
+static const int xa_f0[4] = { 0, 60, 115, 98 },
+                 xa_f1[4] = { 0, 0, -52, -55 };
 
 static void xa_push(int l, int r) {
     if (xa_w - xa_r >= XA_FIFO) xa_r++;             /* full (the mixer is not consuming): drop the oldest */
-    xa_fifo[xa_w % XA_FIFO][0] = l; xa_fifo[xa_w % XA_FIFO][1] = r;
+    xa_fifo[xa_w % XA_FIFO][0] = l;
+    xa_fifo[xa_w % XA_FIFO][1] = r;
     xa_w++;
 }
 static void xa_unit(const u8 *grp, int u, int ch, s16 *out) {
-    int h = grp[4 + u], shift = h & 15, f = (h >> 4) & 3;
+    int h = grp[4 + u],
+        shift = h & 15,
+        f = (h >> 4) & 3;
     if (shift > 12) shift = 9;
-    int s1 = xa_s1[ch], s2 = xa_s2[ch];
+    int s1 = xa_s1[ch],
+        s2 = xa_s2[ch];
     for (int k = 0; k < 28; k++) {
         int b = grp[16 + k * 4 + (u >> 1)];
         int nib = (u & 1) ? b >> 4 : b & 15;
@@ -268,9 +343,12 @@ static void xa_unit(const u8 *grp, int u, int ch, s16 *out) {
         s += (s1 * xa_f0[f] + s2 * xa_f1[f] + 32) >> 6;
         if (s > 32767) s = 32767;
         if (s < -32768) s = -32768;
-        out[k] = s; s2 = s1; s1 = s;
+        out[k] = s;
+        s2 = s1;
+        s1 = s;
     }
-    xa_s1[ch] = s1; xa_s2[ch] = s2;
+    xa_s1[ch] = s1;
+    xa_s2[ch] = s2;
 }
 static void xa_sector(int coding, const u8 *payload) {
     if (coding & 0x30) {
@@ -285,7 +363,8 @@ static void xa_sector(int coding, const u8 *payload) {
         const u8 *grp = payload + g * 128;
         if (stereo)
             for (int u = 0; u < 8; u += 2) {
-                xa_unit(grp, u, 0, a); xa_unit(grp, u + 1, 1, b);
+                xa_unit(grp, u, 0, a);
+                xa_unit(grp, u + 1, 1, b);
                 for (int k = 0; k < 28; k++) xa_push(a[k], b[k]);
             }
         else
@@ -294,39 +373,68 @@ static void xa_sector(int coding, const u8 *payload) {
                 for (int k = 0; k < 28; k++) xa_push(a[k], a[k]);
             }
     }
-    xa_sectors++; xa_ended = 0;
+    xa_sectors++;
+    xa_ended = 0;
 }
 static void xa_reset(void) {
-    xa_w = xa_r = 0; xa_primed = 0; xa_phase = 0; xa_ended = 0;
+    xa_w = xa_r = 0;
+    xa_primed = 0;
+    xa_phase = 0;
+    xa_ended = 0;
     xa_s1[0] = xa_s1[1] = xa_s2[0] = xa_s2[1] = 0;
 }
 /* the next 44.1 kHz frame of CD audio (0 when nothing is queued) */
 static void xa_next(int *l, int *r) {
     unsigned avail = xa_w - xa_r;
     *l = *r = 0;
-    if (!xa_primed) { if (avail < (unsigned)xa_prime) return; xa_primed = 1; }
+    if (!xa_primed) {
+        if (avail < (unsigned)xa_prime) return;
+        xa_primed = 1;
+    }
     if (avail == 0) {
         xa_primed = 0;
-        if (!xa_ended) { xa_underruns++; if (port_verbose) port_printf("[port] sound: XA underrun at sample %llu (frame %d)\n", samples_total, port_frame); }
+        if (!xa_ended) {
+            xa_underruns++;
+            if (port_verbose)
+                port_printf("[port] sound: XA underrun at sample %llu (frame %d)\n", samples_total, port_frame);
+        }
         return;
     }
-    const s16 *c = xa_fifo[xa_r % XA_FIFO], *n = avail > 1 ? xa_fifo[(xa_r + 1) % XA_FIFO] : c;
-#ifdef __3DS__   /* (no divide instruction: two 64-bit divisions a sample were a routine call each; the phase to 15 bits) */
-    { const int f = (int)(((unsigned)xa_phase << 15) / RATE);
-      *l = c[0] + (((n[0] - c[0]) * f) >> 15);
-      *r = c[1] + (((n[1] - c[1]) * f) >> 15); }
+    const s16 *c = xa_fifo[xa_r % XA_FIFO],
+              *n = avail > 1 ? xa_fifo[(xa_r + 1) % XA_FIFO] : c;
+/* (no divide instruction: two 64-bit divisions a sample were a routine call each; the phase to 15 bits) */
+#ifdef __3DS__
+    {
+        const int f = (int)(((unsigned)xa_phase << 15) / RATE);
+        *l = c[0] + (((n[0] - c[0]) * f) >> 15);
+        *r = c[1] + (((n[1] - c[1]) * f) >> 15);
+    }
 #else
     *l = c[0] + (int)(((long long)(n[0] - c[0]) * xa_phase) / RATE);
     *r = c[1] + (int)(((long long)(n[1] - c[1]) * xa_phase) / RATE);
 #endif
     xa_phase += xa_rate;
-    while (xa_phase >= RATE) { xa_phase -= RATE; if (xa_w - xa_r) xa_r++; }
+    while (xa_phase >= RATE) {
+        xa_phase -= RATE;
+        if (xa_w - xa_r) xa_r++;
+    }
 }
-void port_sound_xa_sector(int coding, const unsigned char *payload) { LOCK(); xa_sector(coding, payload); UNLOCK(); }
-void port_sound_xa_reset(void) { LOCK(); xa_reset(); UNLOCK(); }
+void port_sound_xa_sector(int coding, const unsigned char *payload) {
+    LOCK();
+    xa_sector(coding, payload);
+    UNLOCK();
+}
+void port_sound_xa_reset(void) {
+    LOCK();
+    xa_reset();
+    UNLOCK();
+}
 void port_sound_xa_end(void) { xa_ended = 1; }       /* the stream stopped: what is queued plays out */
 void port_sound_cd_mute(int mute) { cd_muted = mute; }
-int port_sound_xa_stats(int *underruns) { *underruns = xa_underruns; return xa_sectors; }
+int port_sound_xa_stats(int *underruns) {
+    *underruns = xa_underruns;
+    return xa_sectors;
+}
 
 /* ------------------------------------------------------------------------------------------- mixer */
 /* --audio-half (an Old 3DS, whose second core cannot mix 44100 samples a second): one sample out for two of the SPU's:
@@ -341,48 +449,75 @@ int port_sound_dry;                      /* --audio-dry: no reverb (an Old 3DS: 
 static void mix_voices(s16 *out, int n) {
     static int accl[2048], accr[2048];
     const int half = port_sound_half;
-    memset(accl, 0, (size_t)n * sizeof accl[0]); memset(accr, 0, (size_t)n * sizeof accr[0]);
+    memset(accl, 0, (size_t)n * sizeof accl[0]);
+    memset(accr, 0, (size_t)n * sizeof accr[0]);
     for (int k = 0; k < NVOICES; k++) {
         Voice *v = &voices[k];
         if (v->env_phase == ENV_OFF) continue;
-        const int step = v->pitch << half, vl = v->vol_l, vr = v->vol_r;
-        int counter = v->counter, prev = v->prev;
+        const int step = v->pitch << half,
+                  vl = v->vol_l,
+                  vr = v->vol_r;
+        int counter = v->counter,
+            prev = v->prev;
         const s16 *buf = v->buf;
         for (int i = 0; i < n; i++) {
             {   /* a run of samples inside the block, the envelope waiting: its level does not change and nothing of
                    the voice is read or written but the counter (the same sums as the general step below, which
                    takes over at the block's last sample or when the envelope is due) */
-                const int per = 1 + half, lev = v->env_level, last = (28 << 12) - step;
+                const int per = 1 + half,
+                          lev = v->env_level,
+                          last = (28 << 12) - step;
                 /* (a sustain that has reached its end, full level going up or nothing going down, steps for ever
                    without changing the level: only its wait counter turns, P steps a turn, and is set once after
                    the run) */
                 int steady = 0, P = 1;
                 if (v->env_phase == ENV_SUSTAIN) {
-                    const int a2 = v->adsr2, dec = (a2 >> 14) & 1, sh = (a2 >> 8) & 31;
-                    if (dec ? lev == 0 : lev == 0x7FFF) { steady = 1; P = 1 << (sh > 11 ? sh - 11 : 0); if ((a2 >> 15) && !dec) P <<= 2; }
+                    const int a2 = v->adsr2,
+                              dec = (a2 >> 14) & 1,
+                              sh = (a2 >> 8) & 31;
+                    if (dec ? lev == 0 : lev == 0x7FFF) {
+                        steady = 1;
+                        P = 1 << (sh > 11 ? sh - 11 : 0);
+                        if ((a2 >> 15) && !dec) P <<= 2;
+                    }
                 }
-                int run = steady ? n - i : v->env_wait / per, done = 0;
+                int run = steady ? n - i : v->env_wait / per,
+                    done = 0;
                 if (run > n - i) run = n - i;
                 while (done < run && counter < last && counter >= 1 << 12) {
-                    const int idx = counter >> 12, fr = counter & 0xFFF;
-                    const int a = buf[idx - 1], b = buf[idx];
+                    const int idx = counter >> 12,
+                              fr = counter & 0xFFF;
+                    const int a = buf[idx - 1],
+                              b = buf[idx];
                     int s = a + (((b - a) * fr) >> 12);
                     s = (s * lev) >> 15;
-                    accl[i] += (s * vl) >> 14; accr[i] += (s * vr) >> 14;
-                    counter += step; i++; done++;
+                    accl[i] += (s * vl) >> 14;
+                    accr[i] += (s * vr) >> 14;
+                    counter += step;
+                    i++;
+                    done++;
                 }
-                if (steady) { const int k = done * per, w = v->env_wait; v->env_wait = w >= k ? w - k : (P - 1) - ((k - w - 1) & (P - 1)); }
-                else v->env_wait -= done * per;
+                if (steady) {
+                    const int k = done * per,
+                              w = v->env_wait;
+                    v->env_wait = w >= k ? w - k : (P - 1) - ((k - w - 1) & (P - 1));
+                } else v->env_wait -= done * per;
                 if (i >= n) break;
             }
-            int idx = counter >> 12, fr = counter & 0xFFF;
-            int a = idx == 0 ? prev : buf[idx - 1], b = buf[idx];
+            int idx = counter >> 12,
+                fr = counter & 0xFFF;
+            int a = idx == 0 ? prev : buf[idx - 1],
+                b = buf[idx];
             int s = a + (((b - a) * fr) >> 12);
             s = (s * v->env_level) >> 15;
-            accl[i] += (s * vl) >> 14; accr[i] += (s * vr) >> 14;
+            accl[i] += (s * vl) >> 14;
+            accr[i] += (s * vr) >> 14;
             /* (an envelope that is waiting only counts down: nothing else in env_step changes then) */
             if (v->env_wait > half) v->env_wait -= 1 + half;
-            else { env_step(v); if (half) env_step(v); }
+            else {
+                env_step(v);
+                if (half) env_step(v);
+            }
             counter += step;
             while (counter >= 28 << 12 && v->env_phase != ENV_OFF) {
                 u8 fl = spu_ram[(v->cur & (SPU_RAM_SIZE - 16)) + 1];
@@ -390,42 +525,63 @@ static void mix_voices(s16 *out, int n) {
                 prev = buf[27];
                 if (fl & 1) {                         /* loop end: jump to the loop address, or stop */
                     v->cur = v->loop;
-                    if (!(fl & 2)) { v->env_phase = ENV_OFF; v->env_level = 0; v->owner = -1; break; }
+                    if (!(fl & 2)) {
+                        v->env_phase = ENV_OFF;
+                        v->env_level = 0;
+                        v->owner = -1;
+                        break;
+                    }
                 } else v->cur = (v->cur + 16) & (SPU_RAM_SIZE - 1);
                 decode_block(v);
             }
             if (v->env_phase == ENV_OFF) break;
         }
-        v->counter = counter; v->prev = prev;
+        v->counter = counter;
+        v->prev = prev;
     }
     for (int i = 0; i < n; i++) {
-        int l = accl[i], r = accr[i];
+        int l = accl[i],
+            r = accr[i];
         if (xa_w != xa_r || xa_primed) {
             int cl, cr;
             xa_next(&cl, &cr);
             if (half) xa_next(&cl, &cr);
-            if (!cd_muted) { l += (cl * cd_l) >> 15; r += (cr * cd_r) >> 15; }
+            if (!cd_muted) {
+                l += (cl * cd_l) >> 15;
+                r += (cr * cd_r) >> 15;
+            }
         }
-        l = (l * main_l) >> 14; r = (r * main_r) >> 14;
+        l = (l * main_l) >> 14;
+        r = (r * main_r) >> 14;
         out[2 * i] = l > 32767 ? 32767 : l < -32768 ? -32768 : l;
         out[2 * i + 1] = r > 32767 ? 32767 : r < -32768 ? -32768 : r;
     }
 }
 static void mix(s16 *out, int n) {
     const int half = port_sound_half;
-    if ((port_sound_dry || !rev_on) && n <= 2048) { mix_voices(out, n); return; }
+    if ((port_sound_dry || !rev_on) && n <= 2048) {
+        mix_voices(out, n);
+        return;
+    }
     for (int i = 0; i < n; i++) {
         int l = 0, r = 0, wl = 0, wr = 0;
         for (int k = 0; k < NVOICES; k++) {
             Voice *v = &voices[k];
             if (v->env_phase == ENV_OFF) continue;
-            int idx = v->counter >> 12, fr = v->counter & 0xFFF;
-            int a = idx == 0 ? v->prev : v->buf[idx - 1], b = v->buf[idx];
+            int idx = v->counter >> 12,
+                fr = v->counter & 0xFFF;
+            int a = idx == 0 ? v->prev : v->buf[idx - 1],
+                b = v->buf[idx];
             int s = a + (((b - a) * fr) >> 12);
             s = (s * v->env_level) >> 15;
-            int sl = (s * v->vol_l) >> 14, sr = (s * v->vol_r) >> 14;
-            l += sl; r += sr;
-            if (rev_voices & (1u << k)) { wl += sl; wr += sr; }
+            int sl = (s * v->vol_l) >> 14,
+                sr = (s * v->vol_r) >> 14;
+            l += sl;
+            r += sr;
+            if (rev_voices & (1u << k)) {
+                wl += sl;
+                wr += sr;
+            }
             env_step(v);
             if (half) env_step(v);
             v->counter += v->pitch << half;
@@ -435,7 +591,12 @@ static void mix(s16 *out, int n) {
                 v->prev = v->buf[27];
                 if (fl & 1) {                         /* loop end: jump to the loop address, or stop */
                     v->cur = v->loop;
-                    if (!(fl & 2)) { v->env_phase = ENV_OFF; v->env_level = 0; v->owner = -1; break; }
+                    if (!(fl & 2)) {
+                        v->env_phase = ENV_OFF;
+                        v->env_level = 0;
+                        v->owner = -1;
+                        break;
+                    }
                 } else v->cur = (v->cur + 16) & (SPU_RAM_SIZE - 1);
                 decode_block(v);
             }
@@ -444,22 +605,34 @@ static void mix(s16 *out, int n) {
             int cl, cr;
             xa_next(&cl, &cr);
             if (half) xa_next(&cl, &cr);
-            if (!cd_muted) { l += (cl * cd_l) >> 15; r += (cr * cd_r) >> 15; }
+            if (!cd_muted) {
+                l += (cl * cd_l) >> 15;
+                r += (cr * cd_r) >> 15;
+            }
         }
         if (rev_on && !port_sound_dry) {
-            rev_in_l += wl; rev_in_r += wr;
+            rev_in_l += wl;
+            rev_in_r += wr;
             if (half) {
                 rev_step(clamp16(rev_in_l), clamp16(rev_in_r));
                 rev_in_l = rev_in_r = 0;
-                l += rev_out_l; r += rev_out_r;
+                l += rev_out_l;
+                r += rev_out_r;
             } else if (++rev_cnt == 2) {
-                rev_prev_l = rev_out_l; rev_prev_r = rev_out_r;
+                rev_prev_l = rev_out_l;
+                rev_prev_r = rev_out_r;
                 rev_step(clamp16(rev_in_l / 2), clamp16(rev_in_r / 2));
-                rev_in_l = rev_in_r = 0; rev_cnt = 0;
-                l += rev_out_l; r += rev_out_r;
-            } else { l += (rev_prev_l + rev_out_l) >> 1; r += (rev_prev_r + rev_out_r) >> 1; }
+                rev_in_l = rev_in_r = 0;
+                rev_cnt = 0;
+                l += rev_out_l;
+                r += rev_out_r;
+            } else {
+                l += (rev_prev_l + rev_out_l) >> 1;
+                r += (rev_prev_r + rev_out_r) >> 1;
+            }
         }
-        l = (l * main_l) >> 14; r = (r * main_r) >> 14;
+        l = (l * main_l) >> 14;
+        r = (r * main_r) >> 14;
         out[2 * i] = l > 32767 ? 32767 : l < -32768 ? -32768 : l;
         out[2 * i + 1] = r > 32767 ? 32767 : r < -32768 ? -32768 : r;
     }
@@ -474,21 +647,30 @@ static void wav_header(u8 *h, u32 data) {
     static const u8 t[44] = { 'R','I','F','F',0,0,0,0,'W','A','V','E','f','m','t',' ',16,0,0,0,1,0,2,0,
                               0x44,0xAC,0,0, 0x10,0xB1,2,0, 4,0,16,0, 'd','a','t','a',0,0,0,0 };
     for (int i = 0; i < 44; i++) h[i] = t[i];
-    u32 riff = data + 36, rate = RATE >> port_sound_half, bps = rate * 4;
-    for (int i = 0; i < 4; i++) { h[4 + i] = riff >> (8 * i); h[40 + i] = data >> (8 * i); h[24 + i] = rate >> (8 * i); h[28 + i] = bps >> (8 * i); }
+    u32 riff = data + 36,
+        rate = RATE >> port_sound_half,
+        bps = rate * 4;
+    for (int i = 0; i < 4; i++) {
+        h[4 + i] = riff >> (8 * i);
+        h[40 + i] = data >> (8 * i);
+        h[24 + i] = rate >> (8 * i);
+        h[28 + i] = bps >> (8 * i);
+    }
 }
 void port_audio_close(void) {
     LOCK();
     if (audio_fd) {
         u8 h[44];
         wav_header(h, audio_bytes);
-        fseek(audio_fd, 0, SEEK_SET); fwrite(h, 1, 44, audio_fd);
+        fseek(audio_fd, 0, SEEK_SET);
+        fwrite(h, 1, 44, audio_fd);
         fclose(audio_fd);
         audio_fd = 0;
         port_printf("[port] audio: %u samples written to %s\n", audio_bytes / 4, port_audio_path);
     }
     UNLOCK();
-    if (port_verbose && xa_sectors) port_printf("[port] sound: %d XA sectors played, %d underruns\n", xa_sectors, xa_underruns);
+    if (port_verbose && xa_sectors)
+        port_printf("[port] sound: %d XA sectors played, %d underruns\n", xa_sectors, xa_underruns);
 }
 
 /* ---------------------------------------------------------------------------------- VAB banks */
@@ -523,20 +705,28 @@ short SsVabFakeHead(u8 *h, short vabid, u32 sbaddr) {
     if (id < 0 || id >= NVAB) for (id = 0; id < NVAB && vabs[id].used; id++) ;
     if (id >= NVAB) return -1;
     Vab *vb = &vabs[id];
-    int ps = *(u16 *)(h + 0x12), vs = *(u16 *)(h + 0x16);
+    int ps = *(u16 *)(h + 0x12),
+        vs = *(u16 *)(h + 0x16);
     if (ps > 128 || vs > 254) return -1;
     u32 size = 0x20 + 0x800 + ps * 0x200 + 0x200;
     LOCK();
     for (u32 i = 0; i < size; i++) vab_store[id][i] = h[i];
     vb->hdr = vab_store[id];
-    vb->used = 1; vb->ps = ps; vb->vs = vs; vb->mvol = h[0x18];
+    vb->used = 1;
+    vb->ps = ps;
+    vb->vs = vs;
+    vb->mvol = h[0x18];
     vb->base = sbaddr;
     const u16 *sizes = (const u16 *)(vb->hdr + 0x20 + 0x800 + ps * 0x200);
     u32 a = sbaddr;
-    for (int k = 1; k <= vs; k++) { vb->vag_addr[k] = a; a += sizes[k] * 8; }
+    for (int k = 1; k <= vs; k++) {
+        vb->vag_addr[k] = a;
+        a += sizes[k] * 8;
+    }
     for (int p = 0, g = 0; p < 128; p++) vb->tone_base[p] = PROG(vb, p)[0] ? 16 * g++ : -1;
     UNLOCK();
-    if (port_verbose) port_printf("[port] sound: VAB %d: %d programs, %d VAGs at SPU %05x..%05x\n", id, ps, vs, sbaddr, a);
+    if (port_verbose)
+        port_printf("[port] sound: VAB %d: %d programs, %d VAGs at SPU %05x..%05x\n", id, ps, vs, sbaddr, a);
     return id;
 }
 short SsVabFakeBody(short id) { return id; }
@@ -548,26 +738,42 @@ static u16 note_pitch(int note, int fine, int center, int shift) {
                                   0x1C82, 0x1E34 };
     int c = (note - center) * 128 + fine + shift;
     int oct = c >= 0 ? c / (12 * 128) : -((-c + 12 * 128 - 1) / (12 * 128));
-    int rem = c - oct * 12 * 128, st = rem / 128, f = rem % 128;
+    int rem = c - oct * 12 * 128,
+        st = rem / 128,
+        f = rem % 128;
     u32 p = semi[st];
     u32 nx = st == 11 ? 0x2000 : semi[st + 1];
     p = p + (((nx - p) * f) >> 7);
-    if (oct > 0) p <<= oct; else p >>= -oct;
+    if (oct > 0) p <<= oct;
+    else p >>= -oct;
     return p > 0x3FFF ? 0x3FFF : p;
 }
 
 /* libsnd's voice gain (_SsVmKeyOnNow): volume (velocity x CC7, or the effect's volume) through the VAB master,
    program and tone volumes, the sequence volume (seq_l < 0: a sound effect), the tone, program and channel pans,
    then squared.  All inputs 0..127; the result is the SPU voice volume 0..0x3FFF. */
-static void libsnd_gain(int volume, int pan, int mvol, int pvol, int ppan, int tvol, int tpan, int seq_l, int seq_r, int *outl, int *outr) {
+static void libsnd_gain(int volume, int pan, int mvol, int pvol, int ppan, int tvol, int tpan, int seq_l, int seq_r,
+                        int *outl, int *outr) {
     int vol = (volume * (mvol * 16383)) / 16129;
-    int chR = ((vol * pvol) * tvol) / 16129, chL;
+    int chR = ((vol * pvol) * tvol) / 16129,
+        chL;
     vol = chR;
-    if (seq_l >= 0) { vol = (chR * seq_l) / 127; chR = (chR * seq_r) / 127; }
-    if (tpan < 64) { chR = (chR * tpan) / 63; chL = vol; } else chL = (vol * (127 - tpan)) / 63;
-    if (ppan < 64) chR = (chR * ppan) / 63; else chL = (chL * (127 - ppan)) / 63;
-    if (pan < 64) chR = (chR * pan) / 63; else chL = (chL * (127 - pan)) / 63;
-    if (stereo_mono) { if (chL < chR) chL = chR; else chR = chL; }
+    if (seq_l >= 0) {
+        vol = (chR * seq_l) / 127;
+        chR = (chR * seq_r) / 127;
+    }
+    if (tpan < 64) {
+        chR = (chR * tpan) / 63;
+        chL = vol;
+    } else chL = (vol * (127 - tpan)) / 63;
+    if (ppan < 64) chR = (chR * ppan) / 63;
+    else chL = (chL * (127 - ppan)) / 63;
+    if (pan < 64) chR = (chR * pan) / 63;
+    else chL = (chL * (127 - pan)) / 63;
+    if (stereo_mono) {
+        if (chL < chR) chL = chR;
+        else chR = chL;
+    }
     *outl = (chL * chL) / 16383;
     *outr = (chR * chR) / 16383;
 }
@@ -591,7 +797,10 @@ static int max_voice = NVOICES;      /* SsSetReservedVoice: the sequencer alloca
 
 static int read_delta(Seq *s) {      /* _SsReadDeltaValue: a MIDI variable-length quantity, in tenths */
     int v = 0, b;
-    do { b = *s->pos++; v = (v << 7) | (b & 0x7F); } while (b & 0x80);
+    do {
+        b = *s->pos++;
+        v = (v << 7) | (b & 0x7F);
+    } while (b & 0x80);
     return v * 10;
 }
 static void seq_set_tempo(Seq *s, int bpm, int at_open) {
@@ -604,11 +813,19 @@ static void seq_set_tempo(Seq *s, int bpm, int at_open) {
     if (s->step <= 0) s->step = 1;
 }
 static void seq_rewind(Seq *s) {
-    s->pos = s->start; s->status = 0;
+    s->pos = s->start;
+    s->status = 0;
     s->delta = read_delta(s);
     s->loop_pos = s->pos;
-    s->nrpn = 0; s->loop_count = 0; s->after_loop_start = 0;
-    for (int c = 0; c < 16; c++) { s->ch[c].vol = 127; s->ch[c].pan = 64; s->ch[c].bend = 0x2000; s->ch[c].prog = c; }
+    s->nrpn = 0;
+    s->loop_count = 0;
+    s->after_loop_start = 0;
+    for (int c = 0; c < 16; c++) {
+        s->ch[c].vol = 127;
+        s->ch[c].pan = 64;
+        s->ch[c].bend = 0x2000;
+        s->ch[c].prog = c;
+    }
 }
 static short seq_open(u8 *d, short vab) {
     int id;
@@ -617,7 +834,9 @@ static short seq_open(u8 *d, short vab) {
     if (id == NSEQ) return -1;
     Seq *s = &seqs[id];
     memset(s, 0, sizeof *s);
-    s->used = 1; s->vab = vab; s->data = d;
+    s->used = 1;
+    s->vab = vab;
+    s->data = d;
     s->res = d[8] << 8 | d[9];
     u32 tempo = d[10] << 16 | d[11] << 8 | d[12];
     if (tempo == 0) tempo = 500000;
@@ -627,22 +846,26 @@ static short seq_open(u8 *d, short vab) {
     s->start = d + 15;
     s->vol_l = s->vol_r = 127;
     seq_rewind(s);
-    if (port_verbose) port_printf("[port] sound: SEQ %d at %p: resolution %d, tempo %u us (%d bpm, step %d/10 ticks per 1/60 s), bank %d\n",
-                                  id, d, s->res, tempo, bpm, s->step, vab);
+    if (port_verbose)
+        port_printf("[port] sound: SEQ %d at %p: resolution %d, tempo %u us (%d bpm, step %d/10 ticks per 1/60 s), "
+                    "bank %d\n", id, d, s->res, tempo, bpm, s->step, vab);
     return id;
 }
 static void seq_notes_off(int id, int now) {
     for (int k = 0; k < NVOICES; k++)
         if (voices[k].owner == id) {
-            if (now) { voices[k].env_phase = ENV_OFF; voices[k].owner = -1; }
-            else voice_key_off(&voices[k]);
+            if (now) {
+                voices[k].env_phase = ENV_OFF;
+                voices[k].owner = -1;
+            } else voice_key_off(&voices[k]);
         }
 }
 static void seq_apply_vol(int id, Seq *s) {         /* _SsVmSetSeqVol: the sounding notes follow the sequence volume */
     for (int k = 0; k < NVOICES; k++) {
         Voice *v = &voices[k];
         if (v->owner != id || v->env_phase == ENV_OFF) continue;
-        libsnd_gain(v->g_vol, v->g_pan, v->g_mvol, v->g_pvol, v->g_ppan, v->g_tvol, v->g_tpan, s->vol_l, s->vol_r, &v->vol_l, &v->vol_r);
+        libsnd_gain(v->g_vol, v->g_pan, v->g_mvol, v->g_pvol, v->g_ppan, v->g_tvol, v->g_tpan, s->vol_l, s->vol_r,
+                    &v->vol_l, &v->vol_r);
     }
 }
 
@@ -655,15 +878,19 @@ static Voice *alloc_voice(int prior) {
     for (int k = 0; k < max_voice; k++) {
         Voice *v = &voices[k];
         if (v->owner == 100 || v->prior > prior) continue;
-        int vr = v->env_phase == ENV_RELEASE, br = best ? best->env_phase == ENV_RELEASE : 0;
-        if (!best || v->prior < best->prior || (v->prior == best->prior && (vr > br || (vr == br && v->age < best->age)))) best = v;
+        int vr = v->env_phase == ENV_RELEASE,
+            br = best ? best->env_phase == ENV_RELEASE : 0;
+        if (!best || v->prior < best->prior
+            || (v->prior == best->prior && (vr > br || (vr == br && v->age < best->age))))
+            best = v;
     }
     return best;
 }
 static void seq_note_on(int id, Seq *s, int c, int key, int vel) {
     Vab *vb = (s->vab >= 0 && s->vab < NVAB && vabs[s->vab].used) ? &vabs[s->vab] : 0;
     if (!vb) return;
-    int prog = s->ch[c].prog, tb = vb->tone_base[prog];
+    int prog = s->ch[c].prog,
+        tb = vb->tone_base[prog];
     if (tb < 0) return;
     u8 *pa = PROG(vb, prog);
     int volume = (vel * s->ch[c].vol) / 127;       /* _SsVmKeyOn */
@@ -677,12 +904,24 @@ static void seq_note_on(int id, Seq *s, int c, int key, int vel) {
         int range = bend >= 0 ? ta[13] : ta[12];
         int fine = bend * (range ? range : 2) * 128 / 0x2000;
         int l, r;
-        v->g_vol = volume; v->g_pan = s->ch[c].pan; v->g_mvol = vb->mvol; v->g_pvol = pa[1]; v->g_ppan = pa[4]; v->g_tvol = ta[2]; v->g_tpan = ta[3];
+        v->g_vol = volume;
+        v->g_pan = s->ch[c].pan;
+        v->g_mvol = vb->mvol;
+        v->g_pvol = pa[1];
+        v->g_ppan = pa[4];
+        v->g_tvol = ta[2];
+        v->g_tpan = ta[3];
         libsnd_gain(volume, s->ch[c].pan, vb->mvol, pa[1], pa[4], ta[2], ta[3], s->vol_l, s->vol_r, &l, &r);
-        voice_key_on(v, vb->vag_addr[vag], note_pitch(key, fine, ta[4], ta[5]), *(u16 *)(ta + 0x10), *(u16 *)(ta + 0x12), l, r);
-        v->owner = id; v->ch = c; v->key = key; v->prior = ta[0];
-        if (port_verbose > 1) port_printf("[port] sound: seq %d ch %d key %d vel %d prog %d tone %d vag %d voice %d pitch %04x vol %d/%d at sample %llu\n",
-                                          id, c, key, vel, prog, t, vag, (int)(v - voices), v->pitch, l, r, samples_total);
+        voice_key_on(v, vb->vag_addr[vag], note_pitch(key, fine, ta[4], ta[5]), *(u16 *)(ta + 0x10),
+                     *(u16 *)(ta + 0x12), l, r);
+        v->owner = id;
+        v->ch = c;
+        v->key = key;
+        v->prior = ta[0];
+        if (port_verbose > 1)
+            port_printf("[port] sound: seq %d ch %d key %d vel %d prog %d tone %d vag %d voice %d pitch %04x vol "
+                        "%d/%d at sample %llu\n", id, c, key, vel, prog, t, vag, (int)(v - voices), v->pitch, l, r,
+                        samples_total);
     }
 }
 static void seq_note_off(int id, int c, int key) {
@@ -694,7 +933,8 @@ static void seq_note_off(int id, int c, int key) {
 static int seq_event(int id, Seq *s) {
     int st = *s->pos;
     if (st == 0xFF) {
-        int ty = s->pos[1], ln = s->pos[2];
+        int ty = s->pos[1],
+            ln = s->pos[2];
         const u8 *body = s->pos + 3;
         s->pos += 3 + ln;
         if (ty == 0x51 && ln == 3) {
@@ -711,22 +951,45 @@ static int seq_event(int id, Seq *s) {
         s->delta = read_delta(s);
         return 1;
     }
-    if (st & 0x80) { s->status = st; s->pos++; }
-    int c = s->status & 15, a = s->pos[0], b = 0;
+    if (st & 0x80) {
+        s->status = st;
+        s->pos++;
+    }
+    int c = s->status & 15,
+        a = s->pos[0],
+        b = 0;
     switch (s->status >> 4) {
-    case 0xC: case 0xD: s->pos += 1; break;
-    default: b = s->pos[1]; s->pos += 2; break;
+    case 0xC: case 0xD:
+        s->pos += 1;
+        break;
+    default:
+        b = s->pos[1];
+        s->pos += 2;
+        break;
     }
     switch (s->status >> 4) {
-    case 0x9: if (b) seq_note_on(id, s, c, a, b); else seq_note_off(id, c, a); break;
-    case 0x8: seq_note_off(id, c, a); break;
-    case 0xC: s->ch[c].prog = a; break;
-    case 0xE: s->ch[c].bend = a | b << 7; break;
+    case 0x9:
+        if (b) seq_note_on(id, s, c, a, b);
+        else seq_note_off(id, c, a);
+        break;
+    case 0x8:
+        seq_note_off(id, c, a);
+        break;
+    case 0xC:
+        s->ch[c].prog = a;
+        break;
+    case 0xE:
+        s->ch[c].bend = a | b << 7;
+        break;
     case 0xB:
         if (a == 7) s->ch[c].vol = b;
         else if (a == 10) s->ch[c].pan = b;
-        else if (a == 6) { if (s->after_loop_start) { s->loop_count = b; s->after_loop_start = 0; } }
-        else if (a == 99) {                            /* _SsContNrpn2 */
+        else if (a == 6) {
+            if (s->after_loop_start) {
+                s->loop_count = b;
+                s->after_loop_start = 0;
+            }
+        } else if (a == 99) {                            /* _SsContNrpn2 */
             s->nrpn = b;
             if (b == 20) {                             /* loop start: the loop resumes after this event's delta */
                 s->after_loop_start = 1;
@@ -735,7 +998,10 @@ static int seq_event(int id, Seq *s) {
                 return 1;
             }
             if (b == 30) {                             /* loop end */
-                if (s->loop_count == 0) { s->delta = read_delta(s); return 1; }
+                if (s->loop_count == 0) {
+                    s->delta = read_delta(s);
+                    return 1;
+                }
                 if (s->loop_count < 0x7F) {
                     s->loop_count--;
                     s->delta = read_delta(s);
@@ -756,10 +1022,17 @@ static int seq_event(int id, Seq *s) {
 /* _SsSeqPlay, once per 60 Hz tick */
 static void seq_tick(int id, Seq *s) {
     int a = s->delta - s->step;
-    if (a > 0) { s->delta = a; return; }
+    if (a > 0) {
+        s->delta = a;
+        return;
+    }
     int acc = s->delta;
     for (;;) {
-        if (!seq_event(id, s)) { s->playing = 0; seq_notes_off(id, 0); return; }
+        if (!seq_event(id, s)) {
+            s->playing = 0;
+            seq_notes_off(id, 0);
+            return;
+        }
         if (s->delta == 0) continue;
         acc += s->delta;
         if (acc >= s->step) break;
@@ -772,67 +1045,119 @@ static void seq_stop(int id) {
     seq_notes_off(id, 0);
 }
 
-short SsSeqOpen(u8 *d, short vab) { LOCK(); short id = seq_open(d, vab); UNLOCK(); return id; }
+short SsSeqOpen(u8 *d, short vab) {
+    LOCK();
+    short id = seq_open(d, vab);
+    UNLOCK();
+    return id;
+}
 void SsSeqPlay(short id, char mode, short loops) {
     if (port_verbose) port_printf("[port] sound: SsSeqPlay(%d, %d, %d)\n", id, mode, loops);
     if (id < 0 || id >= NSEQ || !seqs[id].used) return;
     LOCK();
     Seq *s = &seqs[id];
-    if (mode == 1) { s->playing = 1; s->loops = loops; }     /* SSPLAY_PLAY */
-    else if (mode == 0) s->playing = 0;                      /* SSPLAY_PAUSE */
+    /* SSPLAY_PLAY */
+    if (mode == 1) {
+        s->playing = 1;
+        s->loops = loops;
+    } else if (mode == 0) s->playing = 0;                      /* SSPLAY_PAUSE */
     UNLOCK();
 }
-void SsSeqStop(short id) { LOCK(); seq_stop(id); UNLOCK(); }
-void SsSeqClose(short id) { LOCK(); seq_stop(id); if (id >= 0 && id < NSEQ) seqs[id].used = 0; UNLOCK(); }
+void SsSeqStop(short id) {
+    LOCK();
+    seq_stop(id);
+    UNLOCK();
+}
+void SsSeqClose(short id) {
+    LOCK();
+    seq_stop(id);
+    if (id >= 0 && id < NSEQ) seqs[id].used = 0;
+    UNLOCK();
+}
 void SsSeqSetVol(short id, short l, short r) {
     if (id < 0 || id >= NSEQ) return;
     l = l < 0 ? 0 : l > 127 ? 127 : l;
     r = r < 0 ? 0 : r > 127 ? 127 : r;
     LOCK();
-    seqs[id].vol_l = l; seqs[id].vol_r = r;
+    seqs[id].vol_l = l;
+    seqs[id].vol_r = r;
     seq_apply_vol(id, &seqs[id]);
     UNLOCK();
 }
-void SsSeqGetVol(short id, short *l, short *r) { if (id >= 0 && id < NSEQ) { *l = seqs[id].vol_l; *r = seqs[id].vol_r; } }
+void SsSeqGetVol(short id, short *l, short *r) {
+    if (id >= 0 && id < NSEQ) {
+        *l = seqs[id].vol_l;
+        *r = seqs[id].vol_r;
+    }
+}
 short SsIsEos(short id, short sep) { return id >= 0 && id < NSEQ && seqs[id].playing; }
 void SsSetMVol(short l, short r) {   /* libsnd: the SPU main volume, 0x81 * vol */
     l = l < 0 ? 0 : l > 127 ? 127 : l;
     r = r < 0 ? 0 : r > 127 ? 127 : r;
-    main_l = 0x81 * l; main_r = 0x81 * r;
+    main_l = 0x81 * l;
+    main_r = 0x81 * r;
 }
-char SsSetReservedVoice(char n) { if (n <= 0 || n > NVOICES) return -1; max_voice = n; return n; }
+char SsSetReservedVoice(char n) {
+    if (n <= 0 || n > NVOICES) return -1;
+    max_voice = n;
+    return n;
+}
 
 /* ---------------------------------------------------------------------------------- sound effects */
 short SsUtKeyOnV(short voice, short vabid, short prog, short tone, short note, short fine, short voll, short volr) {
     if (voice < 0 || voice >= NVOICES || vabid < 0 || vabid >= NVAB || !vabs[vabid].used) return -1;
     Vab *vb = &vabs[vabid];
     if (prog < 0 || prog >= 128 || vb->tone_base[prog] < 0) return -1;
-    u8 *pa = PROG(vb, prog), *ta = TONE(vb, vb->tone_base[prog] + (tone & 15));
+    u8 *pa = PROG(vb, prog),
+       *ta = TONE(vb, vb->tone_base[prog] + (tone & 15));
     int vag = *(u16 *)(ta + 0x16);
     if (vag <= 0 || vag > vb->vs) return -1;
-    int volume, pan;                                   /* libsnd SsUtKeyOnV: the larger volume, the pan from the ratio */
+    /* libsnd SsUtKeyOnV: the larger volume, the pan from the ratio */
+    int volume, pan;
     voll = voll < 0 ? 0 : voll > 127 ? 127 : voll;
     volr = volr < 0 ? 0 : volr > 127 ? 127 : volr;
-    if (voll == volr) { volume = voll; pan = 64; }
-    else if (voll > volr) { volume = voll; pan = (volr << 6) / voll; }
-    else { volume = volr; pan = 127 - (voll << 6) / volr; }
+    if (voll == volr) {
+        volume = voll;
+        pan = 64;
+    } else if (voll > volr) {
+        volume = voll;
+        pan = (volr << 6) / voll;
+    } else {
+        volume = volr;
+        pan = 127 - (voll << 6) / volr;
+    }
     int l, r;
     libsnd_gain(volume, pan, vb->mvol, pa[1], pa[4], ta[2], ta[3], -1, -1, &l, &r);
     LOCK();
     Voice *v = &voices[voice];
-    v->g_vol = volume; v->g_pan = pan; v->g_mvol = vb->mvol; v->g_pvol = pa[1]; v->g_ppan = pa[4]; v->g_tvol = ta[2]; v->g_tpan = ta[3];
-    voice_key_on(v, vb->vag_addr[vag], note_pitch(note, fine, ta[4], ta[5]), *(u16 *)(ta + 0x10), *(u16 *)(ta + 0x12), l, r);
-    v->owner = 100; v->ch = -1; v->key = note; v->prior = ta[0];
+    v->g_vol = volume;
+    v->g_pan = pan;
+    v->g_mvol = vb->mvol;
+    v->g_pvol = pa[1];
+    v->g_ppan = pa[4];
+    v->g_tvol = ta[2];
+    v->g_tpan = ta[3];
+    voice_key_on(v, vb->vag_addr[vag], note_pitch(note, fine, ta[4], ta[5]), *(u16 *)(ta + 0x10), *(u16 *)(ta + 0x12),
+                 l, r);
+    v->owner = 100;
+    v->ch = -1;
+    v->key = note;
+    v->prior = ta[0];
     UNLOCK();
-    if (port_verbose > 1) port_printf("[port] sound: sfx voice %d vab %d prog %d tone %d note %d vol %d/%d -> %d/%d\n", voice, vabid, prog, tone, note, voll, volr, l, r);
+    if (port_verbose > 1)
+        port_printf("[port] sound: sfx voice %d vab %d prog %d tone %d note %d vol %d/%d -> %d/%d\n", voice, vabid,
+                    prog, tone, note, voll, volr, l, r);
     return voice;
 }
 short SsUtKeyOffV(short voice) {
     if (voice < 0 || voice >= NVOICES) return -1;
-    LOCK(); voice_key_off(&voices[voice]); UNLOCK();
+    LOCK();
+    voice_key_off(&voices[voice]);
+    UNLOCK();
     return 0;
 }
-short SsUtChangePitch(short voice, short vabid, short prog, short old_note, short old_fine, short new_note, short new_fine) {
+short SsUtChangePitch(short voice, short vabid, short prog, short old_note, short old_fine, short new_note,
+                      short new_fine) {
     if (voice < 0 || voice >= NVOICES || vabid < 0 || vabid >= NVAB || !vabs[vabid].used) return -1;
     Vab *vb = &vabs[vabid];
     if (prog < 0 || prog >= 128 || vb->tone_base[prog] < 0) return -1;
@@ -854,8 +1179,19 @@ int SpuGetAllKeysStatus(u8 *st) {
 
 /* ------------------------------------------------------------------------------ libspu attributes */
 typedef struct { short left, right; } SpuVol;
-typedef struct { u32 mask; SpuVol mvol, mvolmode, mvolx, cd_vol; int cd_reverb, cd_mix; SpuVol ext_vol; int ext_reverb, ext_mix; } SpuCommon;
-typedef struct { u32 mask; int mode; SpuVol depth; int delay, feedback; } SpuReverb;
+typedef struct {
+    u32 mask;
+    SpuVol mvol, mvolmode, mvolx, cd_vol;
+    int cd_reverb, cd_mix;
+    SpuVol ext_vol;
+    int ext_reverb, ext_mix;
+} SpuCommon;
+typedef struct {
+    u32 mask;
+    int mode;
+    SpuVol depth;
+    int delay, feedback;
+} SpuReverb;
 void SpuSetCommonAttr(SpuCommon *a) {
     u32 m = a->mask ? a->mask : ~0u;
     if (m & 0x01) main_l = a->mvol.left & 0x7FFF;      /* SPU_COMMON_MVOLL */
@@ -866,14 +1202,20 @@ void SpuSetCommonAttr(SpuCommon *a) {
     if (main_r > 0x3FFF) main_r = 0x3FFF;
     if (cd_l < 0) cd_l = 0;
     if (cd_r < 0) cd_r = 0;
-    if (port_verbose) port_printf("[port] sound: SpuSetCommonAttr mask %x: main %d/%d cd %d/%d\n", a->mask, main_l, main_r, cd_l, cd_r);
+    if (port_verbose)
+        port_printf("[port] sound: SpuSetCommonAttr mask %x: main %d/%d cd %d/%d\n", a->mask, main_l, main_r, cd_l,
+                    cd_r);
 }
 long SpuSetReverbModeParam(SpuReverb *a) {
     u32 m = a->mask ? a->mask : ~0u;
     LOCK();
     if (m & 1) {                                        /* SPU_REV_MODE */
-        int mode = a->mode & 0xFF, clear = (a->mode & 0x100) != 0;
-        if (mode > 9) { UNLOCK(); return -1; }
+        int mode = a->mode & 0xFF,
+            clear = (a->mode & 0x100) != 0;
+        if (mode > 9) {
+            UNLOCK();
+            return -1;
+        }
         if (mode == 7 || mode == 8) {                   /* ECHO / DELAY: libspu's defaults unless the call sets them */
             rev_delay = (m & 8) ? a->delay : 0x7F;                  /* SPU_REV_DELAYTIME */
             rev_feedback = (m & 0x10) ? a->feedback : (mode == 7 ? 0x7F : 0);   /* SPU_REV_FEEDBACK */
@@ -912,7 +1254,12 @@ int SpuSetReverb(int on) {
     return rev_on;
 }
 u32 SpuReserveReverbWorkArea(int on) { return on; }
-u32 SpuClearReverbWorkArea(int mode) { LOCK(); memset(rev_buf, 0, sizeof rev_buf); UNLOCK(); return 0; }
+u32 SpuClearReverbWorkArea(int mode) {
+    LOCK();
+    memset(rev_buf, 0, sizeof rev_buf);
+    UNLOCK();
+    return 0;
+}
 /* initialisation the game's SoundInit runs (libsnd / libspu internals that have nothing to set up here) */
 void _SsInit(void) {}
 void SpuInitHot(void) {}
@@ -921,7 +1268,9 @@ void SetFogNear(long a, long h) {}  /* 800635e8: depth cueing, which the GTE shi
 void _SpuInit(int hot) {}
 void SpuQuit(void) {}
 void SsSetTableSize(void *table, short s_max, short t_max) {}
-void SsSetTickMode(int mode) { if (port_verbose) port_printf("[port] sound: SsSetTickMode(%d) (the sequencer ticks at %d Hz)\n", mode, TICK_HZ); }
+void SsSetTickMode(int mode) {
+    if (port_verbose) port_printf("[port] sound: SsSetTickMode(%d) (the sequencer ticks at %d Hz)\n", mode, TICK_HZ);
+}
 void SsSetAutoKeyOffMode(short mode) {}
 
 /* ---------------------------------------------------------------------------------- the sample clock */
@@ -929,14 +1278,27 @@ static s16 out[2 * 2048];
 static int tick_left;                      /* samples until the next sequencer tick */
 static int samples_second;                 /* --show-fps: samples produced since the last report */
 static int pulled;                         /* an audio device drives the mixer through port_sound_pull */
-int port_sound_samples_last_second(void) { int n = samples_second; samples_second = 0; return n; }
+int port_sound_samples_last_second(void) {
+    int n = samples_second;
+    samples_second = 0;
+    return n;
+}
 static void wav_out(const s16 *buf, int n) {
     if (port_audio_path && !audio_fd && !audio_failed) {
         audio_fd = fopen(port_audio_path, "wb");
-        if (!audio_fd) { port_printf("[port] cannot create %s\n", port_audio_path); audio_failed = 1; }
-        else { u8 h[44]; wav_header(h, 0); fwrite(h, 1, 44, audio_fd); }
+        if (!audio_fd) {
+            port_printf("[port] cannot create %s\n", port_audio_path);
+            audio_failed = 1;
+        } else {
+            u8 h[44];
+            wav_header(h, 0);
+            fwrite(h, 1, 44, audio_fd);
+        }
     }
-    if (audio_fd) { fwrite(buf, 4, n, audio_fd); audio_bytes += n * 4; }
+    if (audio_fd) {
+        fwrite(buf, 4, n, audio_fd);
+        audio_bytes += n * 4;
+    }
 }
 /* n stereo frames of audio time: the sequencer ticks every TICK_SAMPLES of them */
 static void render(s16 *dst, int n) {
@@ -949,7 +1311,10 @@ static void render(s16 *dst, int n) {
         int k = n < tick_left ? n : tick_left;
         mix(dst, k);
         wav_out(dst, k);
-        dst += 2 * k; n -= k; tick_left -= k; samples_total += k << port_sound_half;
+        dst += 2 * k;
+        n -= k;
+        tick_left -= k;
+        samples_total += k << port_sound_half;
     }
 }
 void port_sound_pulled(int on) { pulled = on; }
@@ -961,26 +1326,49 @@ static s16 ring[2 * RING];
 static volatile unsigned ring_w, ring_r;
 static volatile int mixer_thread;
 static unsigned long long ring_under;               /* frames the callback found missing */
-unsigned long long port_sound_underruns(void) { unsigned long long n = ring_under; ring_under = 0; return n; }
-volatile int port_sound_mixer_quit;                 /* the way out: the thread ends (n3ds/pica_c3d.c port_n3ds_threads_stop) */
+unsigned long long port_sound_underruns(void) {
+    unsigned long long n = ring_under;
+    ring_under = 0;
+    return n;
+}
+/* the way out: the thread ends (n3ds/pica_c3d.c port_n3ds_threads_stop) */
+volatile int port_sound_mixer_quit;
 void port_sound_mixer_run(void) {                   /* (returns when the program closes) */
     extern void port_sleep_us(unsigned long long);
     static s16 piece[2 * 64];
     mixer_thread = 1;
     for (;;) {
-        if (port_sound_mixer_quit) { mixer_thread = 0; return; }
-        if (!mixer_thread) { port_sleep_us(200000); continue; }           /* (given up: the callback mixes, port_sound_pull) */
-        if (ring_w - ring_r > 1536u) { port_sleep_us(2000); continue; }   /* (~70 ms ahead at 22050 Hz) */
+        if (port_sound_mixer_quit) {
+            mixer_thread = 0;
+            return;
+        }
+        /* (given up: the callback mixes, port_sound_pull) */
+        if (!mixer_thread) {
+            port_sleep_us(200000);
+            continue;
+        }
+        /* (~70 ms ahead at 22050 Hz) */
+        if (ring_w - ring_r > 1536u) {
+            port_sleep_us(2000);
+            continue;
+        }
         /* (short pieces: the lock is the game thread's too, and this core gives the program a share of its time,
            so a piece's hold can last several times its own work) */
         LOCK();
         if (mixer_thread) render(piece, 64);
 #ifdef __3DS__   /* (runtime/sdl.c's: it only yields there; the wasm2c build has no runtime/sdl.c) */
-        { extern void port_audio_yield(void); port_audio_yield(); }   /* (the game thread first, if it waits for the lock: the lock is held here, as in the callback) */
+        /* (the game thread first, if it waits for the lock: the lock is held here, as in the callback) */
+        {
+            extern void port_audio_yield(void);
+            port_audio_yield();
+        }
 #endif
         UNLOCK();
         unsigned w = ring_w;
-        for (int i = 0; i < 64; i++) { ring[2 * ((w + i) & (RING - 1))] = piece[2 * i]; ring[2 * ((w + i) & (RING - 1)) + 1] = piece[2 * i + 1]; }
+        for (int i = 0; i < 64; i++) {
+            ring[2 * ((w + i) & (RING - 1))] = piece[2 * i];
+            ring[2 * ((w + i) & (RING - 1)) + 1] = piece[2 * i + 1];
+        }
         ring_w = w + 64;
     }
 }
@@ -989,18 +1377,30 @@ int port_sound_pull(short *dst, int frames) {       /* the audio device's callba
     unsigned long long t0 = port_time_us();
     int done = 0;
     if (mixer_thread) {
-        unsigned r = ring_r, have = ring_w - r, n = have < (unsigned)frames ? have : (unsigned)frames;
-        for (unsigned i = 0; i < n; i++) { dst[2 * i] = ring[2 * ((r + i) & (RING - 1))]; dst[2 * i + 1] = ring[2 * ((r + i) & (RING - 1)) + 1]; }
+        unsigned r = ring_r,
+                 have = ring_w - r,
+                 n = have < (unsigned)frames ? have : (unsigned)frames;
+        for (unsigned i = 0; i < n; i++) {
+            dst[2 * i] = ring[2 * ((r + i) & (RING - 1))];
+            dst[2 * i + 1] = ring[2 * ((r + i) & (RING - 1)) + 1];
+        }
         ring_r = r + n;
-        if (n < (unsigned)frames) { memset(dst + 2 * n, 0, (size_t)(frames - (int)n) * 4); ring_under += (unsigned)frames - n; }
+        if (n < (unsigned)frames) {
+            memset(dst + 2 * n, 0, (size_t)(frames - (int)n) * 4);
+            ring_under += (unsigned)frames - n;
+        }
         {   /* the thread cannot keep up (its core's share is the system's to give): after three seconds in a row with
                more than a twentieth of the samples missing the callback mixes again, as without the thread */
             static unsigned asked, missing, bad;
-            asked += (unsigned)frames; missing += (unsigned)frames - n;
+            asked += (unsigned)frames;
+            missing += (unsigned)frames - n;
             if (asked >= 22050u) {
                 bad = missing * 20u > asked && ring_w > 44100u ? bad + 1 : 0;   /* (not while the ring first fills) */
                 asked = missing = 0;
-                if (bad >= 3) { mixer_thread = 0; port_printf("[port] sound: the mixer thread fell behind: the device's callback mixes again\n"); }
+                if (bad >= 3) {
+                    mixer_thread = 0;
+                    port_printf("[port] sound: the mixer thread fell behind: the device's callback mixes again\n");
+                }
             }
         }
         port_prof_sound_us += port_time_us() - t0;
@@ -1014,15 +1414,22 @@ int port_sound_pull(short *dst, int frames) {       /* the audio device's callba
 #endif
         render(out, k);
         memcpy(dst, out, k * 4);
-        dst += 2 * k; frames -= k; done += k;
+        dst += 2 * k;
+        frames -= k;
+        done += k;
 #ifdef __3DS__
-        { extern void port_audio_yield(void); if (frames > 0) port_audio_yield(); }
+        {
+            extern void port_audio_yield(void);
+            if (frames > 0) port_audio_yield();
+        }
 #endif
     }
-    port_prof_sound_us += port_time_us() - t0;       /* (the fps line's "sound": here the callback's time, on its thread) */
+    /* (the fps line's "sound": here the callback's time, on its thread) */
+    port_prof_sound_us += port_time_us() - t0;
     return done;
 }
-void port_sound_vblank(void) {                       /* no device: 44100/hz samples per vblank, whatever the wall clock does */
+/* no device: 44100/hz samples per vblank, whatever the wall clock does */
+void port_sound_vblank(void) {
     if (pulled) return;
     int n = RATE / port_hz + (port_frame % port_hz < RATE % port_hz);
     n >>= port_sound_half;
