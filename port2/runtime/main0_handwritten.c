@@ -7,15 +7,20 @@
 #include <string.h>
 #include <stdlib.h>
 
-typedef unsigned char u8; typedef signed char s8; typedef unsigned short u16; typedef short s16;
-typedef unsigned int u32; typedef int s32;
+typedef unsigned char u8;
+typedef signed char s8;
+typedef unsigned short u16;
+typedef short s16;
+typedef unsigned int u32;
+typedef int s32;
 
 #define SPAD(T, a) (*(volatile T *)PORT_SPAD(a))
 #define F8(o, off)  (*(u8 *)((u8 *)(o) + (off)))
 #define F16(o, off) (*(u16 *)((u8 *)(o) + (off)))
 #define S16(o, off) (*(s16 *)((u8 *)(o) + (off)))
 #define F32(o, off) (*(u32 *)((u8 *)(o) + (off)))
-#if PORT_VERSION_PAL     /* PAL units translated by hand, bound by their PAL addresses (gen_port handwritten_port2_funcs) */
+/* PAL units translated by hand, bound by their PAL addresses (gen_port handwritten_port2_funcs) */
+#if PORT_VERSION_PAL
 
 extern void ApplyRotMatrix(void *, void *);
 extern u16 GetClut(int, int);
@@ -50,15 +55,23 @@ unsigned long port_gte_mfc2(int reg);
 static void msg_notify_close(void) {
     D_8009D00F = 0;
     switch (D_800A603A) {
-    case 0: if (D_8009C960 == 9) func_800EEA7C(D_800A6038, 0, 0); break;
-    case 1: func_800E8A98(D_800A6038, 0, D_800A6066); break;
-    case 2: func_800E96E8(D_800A6038, 0, D_800A6066); break;
-    case 3: func_800E940C(D_800A6038, 0, D_800A6066); break;
+    case 0:
+        if (D_8009C960 == 9) func_800EEA7C(D_800A6038, 0, 0);
+        break;
+    case 1:
+        func_800E8A98(D_800A6038, 0, D_800A6066);
+        break;
+    case 2:
+        func_800E96E8(D_800A6038, 0, D_800A6066);
+        break;
+    case 3:
+        func_800E940C(D_800A6038, 0, D_800A6066);
+        break;
     }
 }
-/* Port look tweak: extra pixels between the lines of a dialogue box (retail: 13 px per {NL}, glyphs are 16 px tall with ~3
- * blank rows, so descenders of one line nearly touch the accents of the next). {BOX w h} heights follow the retail rule
- * h = 16 + 13 * lines, so a box grows by extra * (lines - 1) to keep its bottom margin. 0 = retail. */
+/* Port look tweak: extra pixels between the lines of a dialogue box (retail: 13 px per {NL}, glyphs are 16 px tall with
+ * ~3 blank rows, so descenders of one line nearly touch the accents of the next). {BOX w h} heights follow the retail
+ * rule h = 16 + 13 * lines, so a box grows by extra * (lines - 1) to keep its bottom margin. 0 = retail. */
 int port_msg_line_extra = 2;
 static u16 msg_box_h(u16 h) {
     int lines = h >= 16 ? (h - 16 + 6) / 13 : 0;
@@ -224,12 +237,14 @@ void func_8002CF40(void *o) {
     } else if (F8(o, 5) == 1) {
         if (F16(o, 0xB8) == 0) {
             switch (F16(o, 0xB4)) {
-            case 3:
-            case 6:
+            case 3: case 6:
                 if (PAD_HIT()) F8(o, 5) = 0;
                 break;
             case 2:
-                if ((u16)--F16(o, 0x20) == 0 || PAD_HIT()) { F16(o, 0x20) = 1; F8(o, 5) = 0; }
+                if ((u16)--F16(o, 0x20) == 0 || PAD_HIT()) {
+                    F16(o, 0x20) = 1;
+                    F8(o, 5) = 0;
+                }
                 break;
             }
         } else {
@@ -263,7 +278,9 @@ void func_8002CF40(void *o) {
         SPAD(s32, 0x1C) += SPAD(s32, 0xDC);
         SetRotMatrix((void *)PORT_SPAD(0x00));
         SetTransMatrix((void *)PORT_SPAD(0x00));
-        SPAD(s16, 0x48) = 0; SPAD(s16, 0x4A) = 0; SPAD(s16, 0x4C) = 0;
+        SPAD(s16, 0x48) = 0;
+        SPAD(s16, 0x4A) = 0;
+        SPAD(s16, 0x4C) = 0;
         port_gte_mtc2(0, SPAD(u32, 0x48));
         port_gte_mtc2(1, SPAD(u32, 0x4C));
         port_gte_op(0x4A180001);                   /* RTPS */
@@ -302,7 +319,9 @@ void func_8002CF40(void *o) {
 int func_800406E8(void *o, int x, int y) {
     u16 *p = SPAD(u16 *, 0x278);
     s16 n = (s16)*p;
-    int t3 = x & 7, t4 = (s16)x, t5 = (s16)y;
+    int t3 = x & 7,
+        t4 = (s16)x,
+        t5 = (s16)y;
     SPAD(u16 *, 0x278) = p + 1;
     if (n == 0) return 0;
     do {
@@ -311,7 +330,9 @@ int func_800406E8(void *o, int x, int y) {
         n--;
         SPAD(u16 *, 0x278) = r + 4;
         if ((fl & 2) && !(fl & 0x10)) {
-            u16 a3 = r[1], t2 = r[2], w = r[3];
+            u16 a3 = r[1],
+                t2 = r[2],
+                w = r[3];
             int start = w & 0xF, span = (w >> 4) & 0xF;
             if (span != 0 && t5 >= (s16)a3 - 0x10 && t3 >= start && start + span >= t3) {
                 int v = (s16)t2 == 0 ? a3 : a3 + ((s16)t2 * ((t4 - start) % span)) / span;
@@ -333,8 +354,8 @@ int func_800406E8(void *o, int x, int y) {
 /* func_800416B8 (0x5F0 bytes): wall probe against the slope list at *(u16 **)0x1F800278 (count, then records of
  * 4 halfwords: flags, y, dy, (rise << 8) | (span << 4) | start), for an object moving left (animFrame even: flags
  * 0x14 / 0x4004) or right (odd: 0x18 / 0x4008).  A wall record whose height covers y switches to the plane list
- * of the neighbouring column (getCollisionPlaneAt, or the per-object table COLLISION_COLUMN_TABLE[mode] when mode != -1; at
- * most 7 hops).  A slope record pushes o->h (x) back onto the slope, sets the slope angle 0x1F80027C, and with a
+ * of the neighbouring column (getCollisionPlaneAt, or the per-object table COLLISION_COLUMN_TABLE[mode] when mode !=
+ * -1; at most 7 hops).  A slope record pushes o->h (x) back onto the slope, sets the slope angle 0x1F80027C, and with a
  * rise (flags & 0xFF00) also steps o->y up by up to 8 pixels.  Returns 0 (clear), 1 (pushed) or 2 (stepped). */
 extern char *getCollisionPlaneAt(short x, short y);
 extern int angleFromDelta(int a, int b);
@@ -359,7 +380,10 @@ int func_800416B8(void *o, int x, int y, int mode) {
     if (n == 0) return 0;
     for (;;) {
         u16 *r = SPAD(u16 *, 0x278);
-        u16 fl = r[0], ry = r[1], dy = r[2], w = r[3];
+        u16 fl = r[0],
+            ry = r[1],
+            dy = r[2],
+            w = r[3];
         int start, span, sub, d;
         SPAD(u16 *, 0x278) = r + 4;
         n--;
@@ -393,8 +417,10 @@ int func_800416B8(void *o, int x, int y, int mode) {
         {
             int q = (sub - start) - (span * ((s16)yy - (s16)ry)) / (s16)dy;
             u16 a, dh;
-            if (F16(o, 0x2E) & 1) { if ((s16)q > 0) return 0; }
-            else if ((s16)q < 0) return 0;
+            if (F16(o, 0x2E) & 1) {
+                if ((s16)q > 0) return 0;
+            } else if ((s16)q < 0)
+                return 0;
             x -= q;
             a = angleFromDelta(span, (s16)dy);
             SPAD(u16, 0x27C) = a;
@@ -457,55 +483,129 @@ extern u8 D_8009CFF9;
 #define ANIM_54 ((u32)PORT_M0(0x80015054u))
 #define ANIM_6C ((u32)PORT_M0(0x8001506Cu))
 static void evactor_pick(u8 *o) {
-    int area = *(volatile u16 *)PORT_M0(0x8009C960u), sec = *(volatile u16 *)PORT_M0(0x8009C962u);
+    int area = *(volatile u16 *)PORT_M0(0x8009C960u),
+        sec = *(volatile u16 *)PORT_M0(0x8009C962u);
     int t = -1, kind = -1;                        /* -1: leave +0x1E / +0x6A as they are */
     u32 anim = ANIM_28;
     switch (area) {
-    case 0: t = 0xE; anim = ANIM_40; break;
-    case 1: anim = ANIM_40; if (sec < 2) t = 0xB; else if (sec < 5) t = 6; break;
+    case 0:
+        t = 0xE;
+        anim = ANIM_40;
+        break;
+    case 1:
+        anim = ANIM_40;
+        if (sec < 2)
+            t = 0xB;
+        else if (sec < 5)
+            t = 6;
+        break;
     case 2:
         switch (sec) {
-        case 0: t = 0xF; anim = ANIM_6C; kind = 1; break;
-        case 1: case 2: t = 0xE; break;
-        case 3: t = 0x10; anim = ANIM_54; kind = 3; break;
-        case 4: case 5: t = 0x11; break;
+        case 0:
+            t = 0xF;
+            anim = ANIM_6C;
+            kind = 1;
+            break;
+        case 1: case 2:
+            t = 0xE;
+            break;
+        case 3:
+            t = 0x10;
+            anim = ANIM_54;
+            kind = 3;
+            break;
+        case 4: case 5:
+            t = 0x11;
+            break;
         default: return;
         }
         break;
-    case 3: if (sec < 7) t = (sec == 0 || sec == 4) ? 0xD : 5; break;
-    case 4: t = 0x10; break;
+    case 3:
+        if (sec < 7) t = (sec == 0 || sec == 4) ? 0xD : 5;
+        break;
+    case 4:
+        t = 0x10;
+        break;
     case 5:
-        if (sec == 0 || sec == 2) { t = 0xF; anim = ANIM_6C; kind = 2; }
-        else if (sec == 1 || sec == 3) t = 0xB;
+        if (sec == 0 || sec == 2) {
+            t = 0xF;
+            anim = ANIM_6C;
+            kind = 2;
+        } else if (sec == 1 || sec == 3)
+            t = 0xB;
         else return;
         break;
-    case 6: t = 0xF; break;
+    case 6:
+        t = 0xF;
+        break;
     case 8:
-        if (sec == 0 || sec == 2) { t = 0xF; anim = ANIM_6C; kind = 2; }
-        else if (sec == 1 || sec == 3) t = 0xE;
+        if (sec == 0 || sec == 2) {
+            t = 0xF;
+            anim = ANIM_6C;
+            kind = 2;
+        } else if (sec == 1 || sec == 3)
+            t = 0xE;
         else return;
         break;
     case 9:
         switch (sec) {
-        case 0: t = 0xC; anim = ANIM_40; break;
-        case 1: t = 0x12; break;
-        case 2: t = 0x11; break;
-        case 3: t = 0xB; break;
-        case 4: case 5: t = 0xF; break;
+        case 0:
+            t = 0xC;
+            anim = ANIM_40;
+            break;
+        case 1:
+            t = 0x12;
+            break;
+        case 2:
+            t = 0x11;
+            break;
+        case 3:
+            t = 0xB;
+            break;
+        case 4: case 5:
+            t = 0xF;
+            break;
         default: return;
         }
         break;
-    case 10: if (sec < 8) t = 7; else if (sec == 8) t = 0xC; break;
-    case 11: case 13: t = 0xD; break;
-    case 14: t = 0xA; break;
-    case 16: if (sec < 4 || sec >= 7) return; t = 0xF; break;
-    case 17: t = 0xB; break;
-    case 18: if (sec == 1) t = 0xA; else if (sec == 2) t = 9; break;
+    case 10:
+        if (sec < 8)
+            t = 7;
+        else if (sec == 8)
+            t = 0xC;
+        break;
+    case 11: case 13:
+        t = 0xD;
+        break;
+    case 14:
+        t = 0xA;
+        break;
+    case 16:
+        if (sec < 4 || sec >= 7) return;
+        t = 0xF;
+        break;
+    case 17:
+        t = 0xB;
+        break;
+    case 18:
+        if (sec == 1)
+            t = 0xA;
+        else if (sec == 2)
+            t = 9;
+        break;
     case 19:
-        if (sec == 0) { t = 0xF; anim = ANIM_6C; kind = 1; }
-        else if (sec == 1) t = 0xE;
-        else if (sec == 2) { t = 0x12; anim = ANIM_54; kind = 2; }
-        else return;
+        if (sec == 0) {
+            t = 0xF;
+            anim = ANIM_6C;
+            kind = 1;
+        } else if (sec == 1)
+            t = 0xE;
+        else if (sec == 2) {
+            t = 0x12;
+            anim = ANIM_54;
+            kind = 2;
+        } else
+            return;
         break;
     default: return;
     }
@@ -517,7 +617,10 @@ void func_8004AE7C(u8 *o) {
     u8 *pl = D_800A6038;
     switch (F8(o, 4)) {
     case 0:
-        if (F8(o, 3) == 0) { F8(o, 4) = 3; return; }
+        if (F8(o, 3) == 0) {
+            F8(o, 4) = 3;
+            return;
+        }
         F8(o, 0x6A) = 0;
         evactor_pick(o);
         F8(o, 0x1C) |= 0x80;
@@ -547,7 +650,10 @@ void func_8004AE7C(u8 *o) {
         return;
     case 1:
         ObjCullRegister(o);
-        if (F8(o, 3) == 0) { AnimAdvance(o); return; }
+        if (F8(o, 3) == 0) {
+            AnimAdvance(o);
+            return;
+        }
         if (F8(o, 0x6A) == 0) {
             if (D_8009CFF9 == 0) eventTakePlayerControlA(o);
             else if (D_8009CFF9 == 1) eventCarryPlayerB(o);
@@ -569,10 +675,11 @@ void func_8004AE7C(u8 *o) {
 /* --widescreen (port/fixes.txt, callAreaModelLinkHook): the per-area hook picks which 80-unit-wide blocks of the
  * area's background model (all already in RAM) are drawn this frame from the camera X (scratchpad 0x176,
  * SCREEN_ORIGIN_X).  With wider screens the blocks just past the 4:3 window popped in at the edges, so for the areas
- * whose hook selects blocks (GAME 0, 1, 2, 3, 7, 9, 10; their palette uploads are kept out: port_ws_dry, and AREA03 s2/s3 below) it is run again with the camera
- * moved left and right and the extra blocks are added to the list (capacity 88, the size the game's own clear keeps).
- * Drawing only: nothing else reads the list.  Off (port_ws_cull 0) the hook runs once exactly as before.
- * What of AREA03's hook (animateArea3Palettes) the extra runs must not pick up or repeat:
+ * whose hook selects blocks (GAME 0, 1, 2, 3, 7, 9, 10; their palette uploads are kept out: port_ws_dry, and AREA03
+ * s2/s3 below) it is run again with the camera moved left and right and the extra blocks are added to the list
+ * (capacity 88, the size the game's own clear keeps). Drawing only: nothing else reads the list.  Off (port_ws_cull 0)
+ * the hook runs once exactly as before. What of AREA03's hook (animateArea3Palettes) the extra runs must not pick up or
+ * repeat:
  *  - sections 2/3 store block k at slot k - base and count only k >= 0, so with the camera moved left of the room's
  *    start (base < 0) the first slots of the zeroed list stay 0 and are counted: a NULL block went into the list and
  *    drawModelUnlit(NULL) walked the kernel area from address 0 (harmless while page 0 is zero; once something has
@@ -593,7 +700,10 @@ static void area3_blocks(u32 *o, const u8 *tbl)
     for (int i = 0; i < 11; i++) {
         int k = base + i;
         if (k >= n) break;
-        if (k >= 0) { o[1 + i] = (u32)(unsigned long)tbl + list[k]; ((u8 *)o)[3]++; }
+        if (k >= 0) {
+            o[1 + i] = (u32)(unsigned long)tbl + list[k];
+            ((u8 *)o)[3]++;
+        }
     }
 }
 extern int port_ws_cull;
@@ -604,23 +714,34 @@ void port_ws_area_model_link(void (*hook)(char *, int), char *list, int wmd, int
         extern void port_funga_room(const u8 *, int, int);
         port_funga_room((const u8 *)(unsigned long)(u32)wmd, game, *(volatile u16 *)port_ram_ptr(PORT_A_GAME + 2));
     }
-    if (port_ws_cull && game == 4) {   /* the 3D side rooms' front wall carried on sideways (runtime/ws_room3d.c; off by default) */
+    /* the 3D side rooms' front wall carried on sideways (runtime/ws_room3d.c; off by default) */
+    if (port_ws_cull && game == 4) {
         extern void port_ws_room3d_blocks(char *, const u8 *, int, int);
-        port_ws_room3d_blocks(list, (const u8 *)(unsigned long)(u32)wmd, game, *(volatile u16 *)port_ram_ptr(PORT_A_GAME + 2));
+        port_ws_room3d_blocks(list, (const u8 *)(unsigned long)(u32)wmd, game,
+                              *(volatile u16 *)port_ram_ptr(PORT_A_GAME + 2));
     }
-    if (port_ws_cull && game == 18) {  /* the Y crossing's floor and walls carried on sideways (runtime/ws_floor3d.c; off by default) */
+    /* the Y crossing's floor and walls carried on sideways (runtime/ws_floor3d.c; off by default) */
+    if (port_ws_cull && game == 18) {
         extern void port_ws_floor3d_blocks(char *, const u8 *, int, int);
-        port_ws_floor3d_blocks(list, (const u8 *)(unsigned long)(u32)wmd, game, *(volatile u16 *)port_ram_ptr(PORT_A_GAME + 2));
+        port_ws_floor3d_blocks(list, (const u8 *)(unsigned long)(u32)wmd, game,
+                               *(volatile u16 *)port_ram_ptr(PORT_A_GAME + 2));
     }
-    if (port_ws_cull && game == 14) {  /* the Evil Pig battle rooms carried on past their model's ends (runtime/ws_pigs.c; off by default) */
+    /* the Evil Pig battle rooms carried on past their model's ends (runtime/ws_pigs.c; off by default) */
+    if (port_ws_cull && game == 14) {
         extern void port_ws_pigs_blocks(char *, const u8 *, int, int);
-        port_ws_pigs_blocks(list, (const u8 *)(unsigned long)(u32)wmd, game, *(volatile u16 *)port_ram_ptr(PORT_A_GAME + 2));
+        port_ws_pigs_blocks(list, (const u8 *)(unsigned long)(u32)wmd, game,
+                            *(volatile u16 *)port_ram_ptr(PORT_A_GAME + 2));
     }
-    if (!port_ws_cull || !(game == 0 || game == 1 || game == 2 || game == 3 || game == 7 || game == 9 || game == 10)) return;
+    if (!port_ws_cull || !(game == 0 || game == 1 || game == 2 || game == 3 || game == 7 || game == 9 || game == 10))
+        return;
     static u32 tmp[0x5b + 4];
     extern int port_ws_dry;
-    static int dx = -1;                       /* research: PORT_WSBLK=N moves the extra runs N units further (a reference) */
-    if (dx < 0) { const char *e = getenv("PORT_WSBLK"); dx = e ? atoi(e) : 0; }
+    /* research: PORT_WSBLK=N moves the extra runs N units further (a reference) */
+    static int dx = -1;
+    if (dx < 0) {
+        const char *e = getenv("PORT_WSBLK");
+        dx = e ? atoi(e) : 0;
+    }
     int d = 2 * port_ws_cull + 40 + dx;
     int steps = (d + 159) / 160;                                  /* windows at most 160 apart: no gap at 32:9 */
     u16 sec = *(volatile u16 *)port_ram_ptr(PORT_A_GAME + 2);     /* GAME.section */
@@ -628,21 +749,29 @@ void port_ws_area_model_link(void (*hook)(char *, int), char *list, int wmd, int
     for (int s = -1; s <= 1; s += 2)
     for (int k = 1; k <= steps; k++) {
         int off = s * d * k / steps;
-        s16 cam = SPAD(s16, 0x176); u16 ox = *origin_x;
+        s16 cam = SPAD(s16, 0x176);
+        u16 ox = *origin_x;
         memset(tmp, 0, sizeof tmp);
-        SPAD(s16, 0x176) = cam + off; *origin_x = ox + off;
+        SPAD(s16, 0x176) = cam + off;
+        *origin_x = ox + off;
         port_ws_dry = 1;                                          /* no palette uploads / VRAM copies from these runs */
         if (a3) area3_blocks(tmp, (u8 *)wmd);
         else hook((char *)tmp, wmd);
         port_ws_dry = 0;
-        SPAD(s16, 0x176) = cam; *origin_x = ox;
-        int n = ((u8 *)tmp)[3]; if (n > 88) n = 88;
+        SPAD(s16, 0x176) = cam;
+        *origin_x = ox;
+        int n = ((u8 *)tmp)[3];
+        if (n > 88) n = 88;
         for (int i = 0; i < n; i++) {
-            u8 cnt = (u8)list[3]; int j;
+            u8 cnt = (u8)list[3];
+            int j;
             if (cnt >= 88) goto full;
             if (!tmp[1 + i]) continue;                        /* a slot the hook counted but did not fill */
             for (j = 0; j < cnt; j++) if (((u32 *)list)[1 + j] == tmp[1 + i]) break;
-            if (j == cnt) { ((u32 *)list)[1 + cnt] = tmp[1 + i]; list[3] = cnt + 1; }
+            if (j == cnt) {
+                ((u32 *)list)[1 + cnt] = tmp[1 + i];
+                list[3] = cnt + 1;
+            }
         }
     }
 full:
@@ -650,7 +779,9 @@ full:
         extern void port_ws_edge_blocks(char *, const u8 *, int, int);
         port_ws_edge_blocks(list, (const u8 *)(unsigned long)(u32)wmd, game, sec);
     }
-    if (game == 10 || game == 3) {   /* a room's end wall carried on: Trick Village's left end, the mountain's cliff (runtime/ws_trick.c; previews off by default) */
+    /* a room's end wall carried on: Trick Village's left end, the mountain's cliff (runtime/ws_trick.c; previews off
+       by default) */
+    if (game == 10 || game == 3) {
         extern void port_ws_trick_blocks(char *, const u8 *, int, int);
         port_ws_trick_blocks(list, (const u8 *)(unsigned long)(u32)wmd, game, sec);
     }
@@ -662,7 +793,10 @@ full:
  * column of the cycle is listed) and the layer-7 drawer (drawCategory7Objects -> port_ws_cat7) draws it again one
  * period to the left and right wherever that lands on the wide frame.  Same scroll, same texture: no seams. */
 extern int port_frame;
-static struct { void *o; int period, frame; } ws_rep[32];
+static struct {
+    void *o;
+    int period, frame;
+} ws_rep[32];
 static void port_ws_cat7_draw(void *o, void (*draw)(void *));
 int port_ws_backdrop_period(void *o, int period)
 {
@@ -672,12 +806,17 @@ int port_ws_backdrop_period(void *o, int period)
         if (free_k < 0 && (!ws_rep[k].o || port_frame - ws_rep[k].frame > 8)) free_k = k;
     }
     if (k == 32) k = free_k;
-    if (k >= 0) { ws_rep[k].o = o; ws_rep[k].period = period; ws_rep[k].frame = port_frame; }
+    if (k >= 0) {
+        ws_rep[k].o = o;
+        ws_rep[k].period = period;
+        ws_rep[k].frame = port_frame;
+    }
     return 1;
 }
 void port_ws_cat7(void *o, void (*draw)(void *))
 {
-    extern unsigned long port_pop_begin(void); extern void port_pop_end(unsigned long, const void *, int);
+    extern unsigned long port_pop_begin(void);
+    extern void port_pop_end(unsigned long, const void *, int);
     unsigned long pb = port_pop_begin();                 /* --log-pop: the whole layer-7 object, repeats included */
     port_ws_cat7_draw(o, draw);
     port_pop_end(pb, o, 0);
@@ -690,12 +829,16 @@ static void port_ws_cat7_draw(void *o, void (*draw)(void *))
         if (ws_rep[k].o != o || port_frame - ws_rep[k].frame > 8) continue;
         s16 x = S16(o, 0x12);
         if (ws_rep[k].period < 0) {                       /* carried on to the left only, as far as the strip shows */
-            for (int nx = x + ws_rep[k].period; nx + 256 >= -port_ws_cull; nx += ws_rep[k].period) { S16(o, 0x12) = nx; draw(o); }
+            for (int nx = x + ws_rep[k].period; nx + 256 >= -port_ws_cull; nx += ws_rep[k].period) {
+                S16(o, 0x12) = nx;
+                draw(o);
+            }
         } else
         for (int c = -1; c <= 1; c += 2) {
             int nx = x + c * ws_rep[k].period;
             if (nx + 128 < -port_ws_cull || nx - 128 >= 320 + port_ws_cull) continue;   /* (parts sit within +-128) */
-            S16(o, 0x12) = nx; draw(o);
+            S16(o, 0x12) = nx;
+            draw(o);
         }
         S16(o, 0x12) = x;
         return;
