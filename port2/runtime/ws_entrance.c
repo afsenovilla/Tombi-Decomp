@@ -12,7 +12,8 @@
  * to Tomba. */
 extern int port_ws_cull;
 
-/* the walk-in in progress: the parking offset, the measured distance, the retail frame count, the frames walked so far */
+/* the walk-in in progress: the parking offset, the measured distance, the retail frame count, the frames walked so
+   far */
 static int wi_dx, wi_total, wi_frames, wi_step;
 
 /* the X offset to park an actor at world/screen x: past the right edge by pad, past the left one by -pad */
