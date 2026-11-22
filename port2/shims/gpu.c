@@ -262,7 +262,11 @@ static void soft_tri(const Vtx *a, const Vtx *b, const Vtx *c, int shade, const 
     #define GRAD(f, dx, dy) \
         float dx = ((float)(b->f - a->f) * (c->y - a->y) - (float)(c->f - a->f) * (b->y - a->y)) * inv; \
         float dy = ((float)(c->f - a->f) * (b->x - a->x) - (float)(b->f - a->f) * (c->x - a->x)) * inv;
-    GRAD(r, drdx, drdy) GRAD(g, dgdx, dgdy) GRAD(b, dbdx, dbdy) GRAD(u, dudx, dudy) GRAD(v, dvdx, dvdy)
+    GRAD(r, drdx, drdy)
+    GRAD(g, dgdx, dgdy)
+    GRAD(b, dbdx, dbdy)
+    GRAD(u, dudx, dudy)
+    GRAD(v, dvdx, dvdy)
     #undef GRAD
     /* edge e(p) = (q1-q0) x (p-q0); inside when e > 0, or e == 0 on a top/left edge */
     const Vtx *E[3][2] = { { b, c }, { c, a }, { a, b } };
