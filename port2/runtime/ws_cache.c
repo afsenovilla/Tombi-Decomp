@@ -20,9 +20,13 @@ unsigned ws_cache_hash(unsigned h, const void *p, size_t n)
     return h;
 }
 
+/* the cache mode: 0 off, 1 memory only, 2 memory + disk (from PORT_WS_CACHE the first time, unless set already) */
 static int mode(void)
 {
-    if (port_ws_cache < 0) { const char *e = getenv("PORT_WS_CACHE"); port_ws_cache = e && *e >= '0' && *e <= '2' ? *e - '0' : 2; }
+    if (port_ws_cache < 0) {
+        const char *env = getenv("PORT_WS_CACHE");
+        port_ws_cache = env && *env >= '0' && *env <= '2' ? *env - '0' : 2;
+    }
     return port_ws_cache;
 }
 
@@ -30,18 +34,38 @@ static int mode(void)
 #define WSC_MAGIC 0x43535754u                            /* "TWSC" */
 #define WSC_FORMAT 1u
 #define WSC_MAXP 4
-typedef struct { unsigned magic, format, version, area, sec, pad, sum, flags; char tag[16]; unsigned np, n[WSC_MAXP]; } Head;
+typedef struct {
+    unsigned magic, format, version, area, sec, pad, sum, flags;
+    char tag[16];
+    unsigned np, n[WSC_MAXP];
+} Head;
+/* the stored head of a key and its parts' sizes; 0 when it cannot be stored (too many parts, a long tag) */
 static int head_of(const WsCKey *k, const WsCPart *parts, int np, Head *h)
 {
     if (np < 1 || np > WSC_MAXP || strlen(k->tag) >= sizeof h->tag) return 0;
     memset(h, 0, sizeof *h);
-    h->magic = WSC_MAGIC; h->format = WSC_FORMAT; h->version = k->version;
-    h->area = (unsigned)k->area; h->sec = (unsigned)k->sec; h->pad = (unsigned)k->pad; h->sum = k->sum; h->flags = k->flags;
-    strcpy(h->tag, k->tag); h->np = (unsigned)np;
-    for (int i = 0; i < np; i++) { if (parts[i].n > 0x7FFFFFFFu) return 0; h->n[i] = (unsigned)parts[i].n; }
+    h->magic = WSC_MAGIC;
+    h->format = WSC_FORMAT;
+    h->version = k->version;
+    h->area = (unsigned)k->area;
+    h->sec = (unsigned)k->sec;
+    h->pad = (unsigned)k->pad;
+    h->sum = k->sum;
+    h->flags = k->flags;
+    strcpy(h->tag, k->tag);
+    h->np = (unsigned)np;
+    for (int i = 0; i < np; i++) {
+        if (parts[i].n > 0x7FFFFFFFu) return 0;
+        h->n[i] = (unsigned)parts[i].n;
+    }
     return 1;
 }
-static size_t total(const WsCPart *parts, int np) { size_t t = 0; for (int i = 0; i < np; i++) t += parts[i].n; return t; }
+static size_t total(const WsCPart *parts, int np)
+{
+    size_t bytes = 0;
+    for (int i = 0; i < np; i++) bytes += parts[i].n;
+    return bytes;
+}
 
 /* --- memory: the last results, least recently used out first */
 #define WSC_NMEM 8
@@ -51,33 +75,60 @@ static size_t total(const WsCPart *parts, int np) { size_t t = 0; for (int i = 0
 #define WSC_MEMMAX ((size_t)8 << 20)
 #endif
 static struct { Head h; unsigned char *d; size_t n; unsigned long long used; } mem[WSC_NMEM];
-static size_t mem_bytes; static unsigned long long mem_tick;
-static void mem_drop(int i) { free(mem[i].d); mem_bytes -= mem[i].n; mem[i].d = 0; mem[i].n = 0; }
+static size_t mem_bytes;
+static unsigned long long mem_tick;
+static void mem_drop(int i)
+{
+    free(mem[i].d);
+    mem_bytes -= mem[i].n;
+    mem[i].d = 0;
+    mem[i].n = 0;
+}
 static void mem_put(const Head *h, const WsCPart *parts, int np)
 {
-    size_t n = total(parts, np); int slot = -1;
+    size_t n = total(parts, np);
+    int slot = -1;
     if (n > WSC_MEMMAX / 2) return;
-    for (int i = 0; i < WSC_NMEM; i++) if (mem[i].d && !memcmp(&mem[i].h, h, sizeof *h)) mem_drop(i);
+    for (int i = 0; i < WSC_NMEM; i++)
+        if (mem[i].d && !memcmp(&mem[i].h, h, sizeof *h)) mem_drop(i);
     for (;;) {                                            /* room for it: a free slot and the byte budget */
-        int lru = -1, fr = -1;
+        int lru = -1, free_slot = -1;
         for (int i = 0; i < WSC_NMEM; i++) {
-            if (!mem[i].d) { if (fr < 0) fr = i; continue; }
+            if (!mem[i].d) {
+                if (free_slot < 0) free_slot = i;
+                continue;
+            }
             if (lru < 0 || mem[i].used < mem[lru].used) lru = i;
         }
-        if (fr >= 0 && mem_bytes + n <= WSC_MEMMAX) { slot = fr; break; }
+        if (free_slot >= 0 && mem_bytes + n <= WSC_MEMMAX) {
+            slot = free_slot;
+            break;
+        }
         if (lru < 0) return;
         mem_drop(lru);
     }
     if (!(mem[slot].d = (unsigned char *)malloc(n ? n : 1))) return;
-    {   size_t o = 0; for (int i = 0; i < np; i++) { memcpy(mem[slot].d + o, parts[i].p, parts[i].n); o += parts[i].n; } }
-    mem[slot].h = *h; mem[slot].n = n; mem[slot].used = ++mem_tick; mem_bytes += n;
+    {
+        size_t offset = 0;
+        for (int i = 0; i < np; i++) {
+            memcpy(mem[slot].d + offset, parts[i].p, parts[i].n);
+            offset += parts[i].n;
+        }
+    }
+    mem[slot].h = *h;
+    mem[slot].n = n;
+    mem[slot].used = ++mem_tick;
+    mem_bytes += n;
 }
 static int mem_get(const Head *h, const WsCPart *parts, int np)
 {
     for (int i = 0; i < WSC_NMEM; i++)
         if (mem[i].d && !memcmp(&mem[i].h, h, sizeof *h)) {
-            size_t o = 0;
-            for (int j = 0; j < np; j++) { memcpy(parts[j].p, mem[i].d + o, parts[j].n); o += parts[j].n; }
+            size_t offset = 0;
+            for (int j = 0; j < np; j++) {
+                memcpy(parts[j].p, mem[i].d + offset, parts[j].n);
+                offset += parts[j].n;
+            }
             mem[i].used = ++mem_tick;
             return 1;
         }
@@ -101,44 +152,66 @@ static int replace(const char *tmp, const char *dst)
 #ifdef _WIN32
     return MoveFileExA(tmp, dst, MOVEFILE_REPLACE_EXISTING) ? 0 : -1;
 #elif defined(__3DS__)
-    (void)tmp; (void)dst; return -1;
+    (void)tmp;
+    (void)dst;
+    return -1;
 #else
     return renameat(AT_FDCWD, tmp, AT_FDCWD, dst);
 #endif
 }
 static int disk_get(const Head *h, const WsCPart *parts, int np)
 {
-    char path[1200]; Head fh; FILE *f; size_t n = total(parts, np); unsigned char *d; unsigned sum, fs; int ok = 0;
+    char path[1200];
+    Head file_head;
+    FILE *f;
+    size_t n = total(parts, np);
+    unsigned char *buf;
+    unsigned sum, file_sum;
+    int ok = 0;
     path_of(h, path, sizeof path, 0);
     if (!(f = fopen(path, "rb"))) return 0;
-    if (fread(&fh, sizeof fh, 1, f) == 1 && !memcmp(&fh, h, sizeof fh) && (d = (unsigned char *)malloc(n ? n : 1)) != 0) {
-        if (fread(d, 1, n, f) == n && fread(&fs, sizeof fs, 1, f) == 1 && fgetc(f) == EOF) {
-            sum = ws_cache_hash(ws_cache_hash(2166136261u, &fh, sizeof fh), d, n);
-            if (sum == fs) {
-                size_t o = 0;
-                for (int j = 0; j < np; j++) { memcpy(parts[j].p, d + o, parts[j].n); o += parts[j].n; }
+    if (fread(&file_head, sizeof file_head, 1, f) == 1 && !memcmp(&file_head, h, sizeof file_head)
+        && (buf = (unsigned char *)malloc(n ? n : 1)) != 0) {
+        if (fread(buf, 1, n, f) == n && fread(&file_sum, sizeof file_sum, 1, f) == 1 && fgetc(f) == EOF) {
+            sum = ws_cache_hash(ws_cache_hash(2166136261u, &file_head, sizeof file_head), buf, n);
+            if (sum == file_sum) {
+                size_t offset = 0;
+                for (int j = 0; j < np; j++) {
+                    memcpy(parts[j].p, buf + offset, parts[j].n);
+                    offset += parts[j].n;
+                }
                 ok = 1;
             }
         }
-        free(d);
+        free(buf);
     }
     fclose(f);
-    if (!ok && port_verbose) port_printf("[ws] cache: %s does not match (another key, short or corrupt): made again\n", path);
+    if (!ok && port_verbose)
+        port_printf("[ws] cache: %s does not match (another key, short or corrupt): made again\n", path);
     return ok;
 }
 static void disk_put(const Head *h, const WsCPart *parts, int np)
 {
     static int warned;
-    char path[1200], tmp[1300]; FILE *f; unsigned sum = ws_cache_hash(2166136261u, h, sizeof *h); int ok;
+    char path[1200], tmp[1300];
+    FILE *f;
+    unsigned sum = ws_cache_hash(2166136261u, h, sizeof *h);
+    int ok;
     path_of(h, path, sizeof path, 1);
 #ifdef __3DS__
     snprintf(tmp, sizeof tmp, "%s", path);
 #else
     snprintf(tmp, sizeof tmp, "%s.tmp", path);
 #endif
-    if (!(f = fopen(tmp, "wb"))) { if (!warned++) port_printf("[ws] cache: cannot write %s (strips made again next time)\n", tmp); return; }
+    if (!(f = fopen(tmp, "wb"))) {
+        if (!warned++) port_printf("[ws] cache: cannot write %s (strips made again next time)\n", tmp);
+        return;
+    }
     ok = fwrite(h, sizeof *h, 1, f) == 1;
-    for (int i = 0; i < np && ok; i++) { ok = fwrite(parts[i].p, 1, parts[i].n, f) == parts[i].n; sum = ws_cache_hash(sum, parts[i].p, parts[i].n); }
+    for (int i = 0; i < np && ok; i++) {
+        ok = fwrite(parts[i].p, 1, parts[i].n, f) == parts[i].n;
+        sum = ws_cache_hash(sum, parts[i].p, parts[i].n);
+    }
     if (ok) ok = fwrite(&sum, sizeof sum, 1, f) == 1;
     if (fclose(f)) ok = 0;
 #ifndef __3DS__
@@ -158,8 +231,15 @@ int ws_cache_get(const WsCKey *k, const WsCPart *parts, int np)
     Head h;
     ws_cache_last = 0;
     if (!mode() || !head_of(k, parts, np, &h)) return 0;
-    if (mem_get(&h, parts, np)) { ws_cache_last = 1; return 1; }
-    if (mode() >= 2 && disk_get(&h, parts, np)) { mem_put(&h, parts, np); ws_cache_last = 2; return 1; }
+    if (mem_get(&h, parts, np)) {
+        ws_cache_last = 1;
+        return 1;
+    }
+    if (mode() >= 2 && disk_get(&h, parts, np)) {
+        mem_put(&h, parts, np);
+        ws_cache_last = 2;
+        return 1;
+    }
     return 0;
 }
 void ws_cache_put(const WsCKey *k, const WsCPart *parts, int np)
