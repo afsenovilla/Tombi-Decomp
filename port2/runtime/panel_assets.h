@@ -12,7 +12,9 @@
 #define PA_CUTBOX 32   /* drop the texels of CLUT indices pa_cut_mask reachable from the rect border (a boxed icon) */
 extern unsigned pa_cut_mask, pa_drop_mask, pa_outline;
 extern int pa_ok, pa_font_ok;
-extern unsigned *pa_cv; extern int pa_cw, pa_ch;          /* the canvas, in game pixels (0xAABBGGRR) */
+/* the canvas, in game pixels (0xAABBGGRR) */
+extern unsigned *pa_cv;
+extern int pa_cw, pa_ch;
 extern int pa_clip_x0, pa_clip_y0, pa_clip_x1, pa_clip_y1;
 void pa_init(void);
 unsigned char *pa_read(const char *name, unsigned *n);   /* a disc file, GAM unpacked */
@@ -22,7 +24,8 @@ void pa_fill(int x, int y, int w, int h, unsigned c);
 unsigned pa_clut_color(int cx, int cy, int i);
 void pa_spr(int x, int y, int tx, int ty, int u, int v, int w, int h, int cx, int cy, int flags);
 void pa_tile(int x, int y, int W, int H, int tx, int ty, int u, int v, int w, int h, int cx, int cy);
-void pa_nine(int x, int y, int W, int H, int tx, int ty, int u, int v, int w, int h, int c, int cx, int cy, unsigned fill);
+void pa_nine(int x, int y, int W, int H, int tx, int ty, int u, int v, int w, int h, int c, int cx, int cy,
+             unsigned fill);
 int pa_event_icon(int x, int y, int e, int flags);
 int pa_event_icon_w(int e), pa_event_icon_h(int e);
 void pa_item_icon(int x, int y, int n, int flags);
@@ -30,7 +33,8 @@ int pa_text_w(int h, const char *s);
 int pa_text(int x, int y, int h, const char *s, unsigned body, unsigned edge);
 int pa_text_ol(int x, int y, int h, const char *s, unsigned body, unsigned edge, unsigned outline);
 int pa_has_glyphs(int h, const char *s);
-int pa_text_scaled(int x, int y, int h, const char *s, unsigned body, unsigned edge, int sc, int shade);   /* pixel blocks */
+/* pixel blocks */
+int pa_text_scaled(int x, int y, int h, const char *s, unsigned body, unsigned edge, int sc, int shade);
 int pa_text_fit(int x, int y, int h, int w, const char *s, unsigned body, unsigned edge);
 int pa_wfm_dialogue(const unsigned char *wfm, unsigned n, int idx, char *out, int max);
 /* the version's files (PORT_VERSION_USA from port_runtime.h): the sub-screen overlays; USA has one English set */
