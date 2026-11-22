@@ -11,15 +11,20 @@
 #ifndef PORT2_GPU_BACKEND_H
 #define PORT2_GPU_BACKEND_H
 
-typedef unsigned char gpu_u8; typedef unsigned short gpu_u16; typedef unsigned int gpu_u32;
+typedef unsigned char gpu_u8;
+typedef unsigned short gpu_u16;
+typedef unsigned int gpu_u32;
 
-typedef struct { int x, y, r, g, b, u, v, sh; } GpuVtx;         /* x, y: VRAM pixels (offset applied); r, g, b 0..255; sh: --stereo, the right eye's x is x + sh */
-/* --texture-pack (texpack.c): a replacement image (GL texture) for the texels (ou .. ou + w - 1, ov .. ov + h - 1) of the page */
+/* x, y: VRAM pixels (offset applied); r, g, b 0..255; sh: --stereo, the right eye's x is x + sh */
+typedef struct { int x, y, r, g, b, u, v, sh; } GpuVtx;
+/* --texture-pack (texpack.c): a replacement image (GL texture) for the texels (ou .. ou + w - 1, ov .. ov + h - 1) of
+   the page */
 typedef struct PortTexRep { unsigned gltex; int ou, ov, w, h; } PortTexRep;
-typedef struct { int tx, ty, depth, cx, cy; const PortTexRep *rep; } GpuTex;   /* texture page base, 0 = 4-bit / 1 = 8-bit / 2 = 15-bit, CLUT x, y; rep: 0 = none */
+/* texture page base, 0 = 4-bit / 1 = 8-bit / 2 = 15-bit, CLUT x, y; rep: 0 = none */
+typedef struct { int tx, ty, depth, cx, cy; const PortTexRep *rep; } GpuTex;
 /* the port-only CLUTs (prompts.c "port CLUT": the controller button glyphs): a primitive with CLUT id PORT_CLUT_ID - r
-   (r < PORT_CLUT_ROWS; bit 15 set: never a GetClut value) reads its 16 colours from row r of port_prompt_clut, not VRAM;
-   GpuTex.cy = PORT_CLUT_Y marks it and GpuTex.cx = 16 * r picks the row */
+   (r < PORT_CLUT_ROWS; bit 15 set: never a GetClut value) reads its 16 colours from row r of port_prompt_clut, not
+   VRAM; GpuTex.cy = PORT_CLUT_Y marks it and GpuTex.cx = 16 * r picks the row */
 #define PORT_CLUT_ID 0xFFFF
 #define PORT_CLUT_ROWS 13
 #define PORT_CLUT_IS(id) ((unsigned)(id) > 0xFFFFu - PORT_CLUT_ROWS && (unsigned)(id) <= 0xFFFFu)
@@ -33,12 +38,14 @@ typedef struct {
     int x1, y1, x2, y2;             /* drawing area, inclusive, inside VRAM */
     int ox, oy;                     /* drawing offset */
     int set_mask, check_mask;
-    int wide;                       /* --widescreen: this primitive goes to the wide plane (gpu.c ws_begin), its x/clip in wide columns */
+    /* --widescreen: this primitive goes to the wide plane (gpu.c ws_begin), its x/clip in wide columns */
+    int wide;
 } GpuState;
 extern GpuState port_gs;
-/* --fps replays (gpu.c hfr.inc): the sub-pixel part of the interpolated positions of the vertices of the primitive being
-   drawn (tri: a, b, c; rect: the corner; line: both ends), in pixels; only while port_gpu_subpx_on.  The OpenGL backend
-   adds them at internal resolutions above 1x; the software rasteriser works in whole pixels and ignores them. */
+/* --fps replays (gpu.c hfr.inc): the sub-pixel part of the interpolated positions of the vertices of the primitive
+   being drawn (tri: a, b, c; rect: the corner; line: both ends), in pixels; only while port_gpu_subpx_on.  The OpenGL
+   backend adds them at internal resolutions above 1x; the software rasteriser works in whole pixels and ignores
+   them. */
 extern float port_gpu_subpx[3][2];
 extern int port_gpu_subpx_on;            /* the current GP0 E1..E6 state (gpu.c); the backends read it per primitive */
 
@@ -50,15 +57,19 @@ typedef struct {
     void (*tri)(const GpuVtx *a, const GpuVtx *b, const GpuVtx *c, int shade, const GpuTex *tex, int semi, int raw);
     void (*rect)(int x, int y, int w, int h, gpu_u32 col, const GpuTex *tex, int u0, int v0, int semi, int raw);
     void (*line)(int x0, int y0, gpu_u32 c0, int x1, int y1, gpu_u32 c1, int shade, int semi);
-    void (*fill)(int x, int y, int w, int h, gpu_u16 c);                  /* GP0 02 (no clip, no mask) and the DRAWENV isbg clear */
+    /* GP0 02 (no clip, no mask) and the DRAWENV isbg clear */
+    void (*fill)(int x, int y, int w, int h, gpu_u16 c);
     void (*copy)(int sx, int sy, int dx, int dy, int w, int h);           /* GP0 80: VRAM to VRAM */
     /* coherence with the CPU mirror vram[] (gpu.c) */
     void (*vram_written)(int x, int y, int w, int h);   /* the host changed vram[] in this rectangle */
     void (*vram_read)(int x, int y, int w, int h);      /* the host is about to read vram[] in this rectangle */
     void (*list_end)(void);                             /* end of DrawOTag / DrawPrim: submit the batched work */
-    int (*present)(int dx, int dy, int dw, int dh, int masked);   /* show the display area in the window; 0 = not handled */
-    int (*present_rgb)(const gpu_u8 *rgb, int w, int h);          /* show an RGB8 frame (the 24-bit display mode); 0 = not handled, may be null */
-    /* --widescreen wide plane (2048x512, gpu.c "widescreen"); null on the software backend, which uses gpu.c's wvram[] */
+    /* show the display area in the window; 0 = not handled */
+    int (*present)(int dx, int dy, int dw, int dh, int masked);
+    /* show an RGB8 frame (the 24-bit display mode); 0 = not handled, may be null */
+    int (*present_rgb)(const gpu_u8 *rgb, int w, int h);
+    /* --widescreen wide plane (2048x512, gpu.c "widescreen"); null on the software backend, which uses gpu.c's
+       wvram[] */
     void (*ws_fill)(int x, int y, int w, int h, gpu_u16 c);                      /* wide-plane rectangle */
     void (*ws_copy_down)(int wx, int wy, int vx, int vy, int w, int h);         /* wide plane -> VRAM */
     void (*ws_upload)(int wx, int wy, int w, int h, const gpu_u16 *src, int stride);
@@ -71,6 +82,7 @@ typedef struct {
 
 extern const GpuBackend port_gpu_soft, port_gpu_gl, port_gpu_pica;
 extern const GpuBackend *port_gpu_be;
-extern int port_renderer;           /* --renderer: 1 = gl (default), 0 = soft, 2 = pica (gpu_pica.c), -1 = not given (headless picks soft) */
+/* --renderer: 1 = gl (default), 0 = soft, 2 = pica (gpu_pica.c), -1 = not given (headless picks soft) */
+extern int port_renderer;
 gpu_u16 *port_vram(void);           /* &vram[0][0], 1024 words per row */
 #endif
