@@ -20,7 +20,11 @@
 #include <string.h>
 #include "port_runtime.h"
 
-typedef unsigned char u8; typedef unsigned short u16; typedef short s16; typedef int s32; typedef unsigned int u32;
+typedef unsigned char u8;
+typedef unsigned short u16;
+typedef short s16;
+typedef int s32;
+typedef unsigned int u32;
 
 int port_st_frame_dims(const void *bs, int *w, int *h, int *bytes);   /* psyq.c: the frame StGetNext handed out */
 
@@ -100,26 +104,42 @@ static u8 ac_len[65536], ac_run[65536], ac_lvl[65536];
 static u16 ac_small[256];
 static u8 dcl_len[256], dcl_size[256], dcc_len[256], dcc_size[256];   /* on the next 8 bits */
 
+/* the lookup entries of one code: every 16-bit window that starts with it gets its length and two values */
 static void lut_fill16(u8 *len, u8 *a, u8 *b, const char *code, u8 va, u8 vb) {
-    int l = (int)strlen(code); u32 v = 0;
-    for (const char *c = code; *c; c++) v = v * 2 + (*c - '0');
-    u32 lo = v << (16 - l), hi = lo + (1u << (16 - l));
-    for (u32 i = lo; i < hi; i++) { len[i] = (u8)l; a[i] = va; b[i] = vb; }
+    int code_len = (int)strlen(code);
+    u32 code_val = 0;
+    for (const char *c = code; *c; c++) code_val = code_val * 2 + (*c - '0');
+    u32 lo = code_val << (16 - code_len),
+        hi = lo + (1u << (16 - code_len));
+    for (u32 i = lo; i < hi; i++) {
+        len[i] = (u8)code_len;
+        a[i] = va;
+        b[i] = vb;
+    }
 }
+/* the same on 8-bit windows, one value */
 static void lut_fill8(u8 *len, u8 *a, const char *code, u8 va) {
-    int l = (int)strlen(code); u32 v = 0;
-    for (const char *c = code; *c; c++) v = v * 2 + (*c - '0');
-    u32 lo = v << (8 - l), hi = lo + (1u << (8 - l));
-    for (u32 i = lo; i < hi; i++) { len[i] = (u8)l; a[i] = va; }
+    int code_len = (int)strlen(code);
+    u32 code_val = 0;
+    for (const char *c = code; *c; c++) code_val = code_val * 2 + (*c - '0');
+    u32 lo = code_val << (8 - code_len),
+        hi = lo + (1u << (8 - code_len));
+    for (u32 i = lo; i < hi; i++) {
+        len[i] = (u8)code_len;
+        a[i] = va;
+    }
 }
 static int tables_ready;
 static void tables_init(void) {
     if (tables_ready) return;
     tables_ready = 1;
     for (unsigned i = 0; i < sizeof ac_codes / sizeof ac_codes[0]; i++) {
-        u32 v = 0; const char *c = ac_codes[i].code; int l = (int)strlen(c);
-        for (; *c; c++) v = v * 2 + (*c - '0');
-        if (ac_len[v << (16 - l)]) port_printf("[mdec] AC table: code %s is not prefix-free\n", ac_codes[i].code);
+        u32 code_val = 0;
+        const char *c = ac_codes[i].code;
+        int code_len = (int)strlen(c);
+        for (; *c; c++) code_val = code_val * 2 + (*c - '0');
+        if (ac_len[code_val << (16 - code_len)])
+            port_printf("[mdec] AC table: code %s is not prefix-free\n", ac_codes[i].code);
         lut_fill16(ac_len, ac_run, ac_lvl, ac_codes[i].code, ac_codes[i].run, ac_codes[i].level);
     }
     lut_fill16(ac_len, ac_run, ac_lvl, "10", AC_EOB, 0);
@@ -128,11 +148,18 @@ static void tables_init(void) {
        are a cache miss each on a 3DS, three a coefficient.  An entry: length << 12 | run << 6 | level; 0: a longer
        code, read from the big tables */
     for (int p8 = 0; p8 < 256; p8++) {
-        int i16 = p8 << 8, l = ac_len[i16];
-        ac_small[p8] = l && l <= 8 ? (u16)(l << 12 | (ac_run[i16] == AC_EOB ? 62 : ac_run[i16] == AC_ESC ? 63 : ac_run[i16]) << 6 | ac_lvl[i16]) : 0;
+        int i16 = p8 << 8,
+            code_len = ac_len[i16];
+        ac_small[p8] = code_len && code_len <= 8
+                       ? (u16)(code_len << 12
+                               | (ac_run[i16] == AC_EOB ? 62 : ac_run[i16] == AC_ESC ? 63 : ac_run[i16]) << 6
+                               | ac_lvl[i16])
+                       : 0;
     }
-    for (unsigned i = 0; i < sizeof dc_luma / sizeof dc_luma[0]; i++) lut_fill8(dcl_len, dcl_size, dc_luma[i].code, dc_luma[i].size);
-    for (unsigned i = 0; i < sizeof dc_chroma / sizeof dc_chroma[0]; i++) lut_fill8(dcc_len, dcc_size, dc_chroma[i].code, dc_chroma[i].size);
+    for (unsigned i = 0; i < sizeof dc_luma / sizeof dc_luma[0]; i++)
+        lut_fill8(dcl_len, dcl_size, dc_luma[i].code, dc_luma[i].size);
+    for (unsigned i = 0; i < sizeof dc_chroma / sizeof dc_chroma[0]; i++)
+        lut_fill8(dcc_len, dcc_size, dc_chroma[i].code, dc_chroma[i].size);
     for (int k = 0; k < 64; k++) iq_y[k] = iq_c[k] = k == 0 ? 2 : quant_raster[zigzag[k]];
     /* cos((2x+1) u pi / 16) C(u) / 2 in 12-bit fixed point, from the values of cos(k pi/16), k = 0..7
        (0.5 * 4096 = 2048; C(0) = 1/sqrt 2) */
@@ -148,19 +175,33 @@ static void tables_init(void) {
 }
 
 /* ------------------------------------------------------------------ bit reader (16-bit words, MSB first) */
+/* win: the next bits, MSB first; n: how many of them are valid; over: bits read past the end */
 typedef struct { const u8 *p, *end; u32 win; int n; int over; } BR;
 static void br_fill(BR *b) {
     while (b->n <= 16) {
         u32 w = 0;
-        if (b->p + 2 <= b->end) { w = b->p[0] | (u32)b->p[1] << 8; b->p += 2; }
-        else b->over += 16;                           /* past the data: zeros (the caller stops on that) */
+        if (b->p + 2 <= b->end) {
+            w = b->p[0] | (u32)b->p[1] << 8;
+            b->p += 2;
+        } else
+            b->over += 16;                           /* past the data: zeros (the caller stops on that) */
         b->win |= w << (16 - b->n);
         b->n += 16;
     }
 }
-static u32 br_peek(BR *b, int k) { br_fill(b); return b->win >> (32 - k); }
-static void br_skip(BR *b, int k) { b->win <<= k; b->n -= k; }
-static u32 br_get(BR *b, int k) { u32 v = br_peek(b, k); br_skip(b, k); return v; }
+static u32 br_peek(BR *b, int k) {
+    br_fill(b);
+    return b->win >> (32 - k);
+}
+static void br_skip(BR *b, int k) {
+    b->win <<= k;
+    b->n -= k;
+}
+static u32 br_get(BR *b, int k) {
+    u32 v = br_peek(b, k);
+    br_skip(b, k);
+    return v;
+}
 
 /* ------------------------------------------------------------------ DecDCTvlc: BS frame -> run-length codes */
 static int vlc_warned;
@@ -169,8 +210,9 @@ static int vlc_block(BR *b, int ver, int chroma, int *dc_pred, int q, u16 **out,
     u16 *o = *out;
     int dc;
     if (ver >= 3) {
-        u32 pk = br_peek(b, 8);
-        int len = chroma ? dcc_len[pk] : dcl_len[pk], size = chroma ? dcc_size[pk] : dcl_size[pk];
+        u32 peek = br_peek(b, 8);
+        int len = chroma ? dcc_len[peek] : dcl_len[peek],
+            size = chroma ? dcc_size[peek] : dcl_size[peek];
         if (!len) return 0;
         br_skip(b, len);
         int diff = 0;
@@ -187,19 +229,30 @@ static int vlc_block(BR *b, int ver, int chroma, int *dc_pred, int q, u16 **out,
     if (o >= out_end) return 0;
     *o++ = (u16)((q << 10) | (dc & 0x3FF));
     for (int k = 0; k < 64;) {
-        u32 pk = br_peek(b, 16);
-        const u16 sm = ac_small[pk >> 8];
-        int len = sm ? sm >> 12 : ac_len[pk];
+        u32 peek = br_peek(b, 16);
+        /* the ac_small entry of the next 8 bits (0: a longer code, from the big tables) */
+        const u16 short_code = ac_small[peek >> 8];
+        int len = short_code ? short_code >> 12 : ac_len[peek];
         if (!len) return 0;
         br_skip(b, len);
         int run, level;
-        const int rr = sm ? ((sm >> 6 & 63) == 62 ? AC_EOB : (sm >> 6 & 63) == 63 ? AC_ESC : (sm >> 6 & 63)) : ac_run[pk];
-        if (rr == AC_EOB) { if (o >= out_end) return 0; *o++ = 0xFE00; *out = o; return 1; }
-        if (rr == AC_ESC) {
+        const int run_code = short_code
+                             ? ((short_code >> 6 & 63) == 62   ? AC_EOB
+                                : (short_code >> 6 & 63) == 63 ? AC_ESC
+                                                               : (short_code >> 6 & 63))
+                             : ac_run[peek];
+        if (run_code == AC_EOB) {
+            if (o >= out_end) return 0;
+            *o++ = 0xFE00;
+            *out = o;
+            return 1;
+        }
+        if (run_code == AC_ESC) {
             run = (int)br_get(b, 6);
             level = (int)(br_get(b, 10) << 22) >> 22;
         } else {
-            run = rr; level = sm ? sm & 63 : ac_lvl[pk];
+            run = run_code;
+            level = short_code ? short_code & 63 : ac_lvl[peek];
             if (br_get(b, 1)) level = -level;
         }
         k += run + 1;
@@ -208,38 +261,61 @@ static int vlc_block(BR *b, int ver, int chroma, int *dc_pred, int q, u16 **out,
     }
     /* 64 coefficients without an end-of-block code: close the block as the hardware would read it */
     if (o >= out_end) return 0;
-    *o++ = 0xFE00; *out = o;
+    *o++ = 0xFE00;
+    *out = o;
     return 1;
 }
 /* (a movie's time by stage, logged when its stream stops: psyq.c) */
-unsigned long long port_mdec_us[2]; unsigned port_mdec_n[2];   /* [0] DecDCTvlc, [1] the macroblocks of DecDCTout */
+/* [0] DecDCTvlc, [1] the macroblocks of DecDCTout */
+unsigned long long port_mdec_us[2];
+unsigned port_mdec_n[2];
 extern unsigned long long port_time_us(void);
 static void vlc_run(u32 *bs, u32 *buf);
 void DecDCTvlc(u32 *bs, u32 *buf) {
     unsigned long long t0 = port_time_us();
     vlc_run(bs, buf);
-    port_mdec_us[0] += port_time_us() - t0; port_mdec_n[0]++;
+    port_mdec_us[0] += port_time_us() - t0;
+    port_mdec_n[0]++;
 }
 static void vlc_run(u32 *bs, u32 *buf) {
     tables_init();
-    const u16 *h = (const u16 *)bs;
-    int nwords = h[0], q = h[2] & 0x3F, ver = h[3];
-    int w = 0, hgt = 0, bytes = 0, mbs = 0, known = port_st_frame_dims(bs, &w, &hgt, &bytes);
-    if (known) mbs = ((w + 15) / 16) * ((hgt + 15) / 16);      /* 0: the end-of-stream placeholder, nothing to decode */
-    BR b; b.p = (const u8 *)bs + 8; b.end = bytes > 8 ? (const u8 *)bs + bytes : (const u8 *)bs + 0x10000; b.win = 0; b.n = 0; b.over = 0;
-    u16 *o = (u16 *)(buf + 1), *out_end = o + 2 * 0x3FE0;     /* the game's VLC buffers are 64 KB */
-    int dc[3] = { 0, 0, 0 }, done = 0, ok = 1;
-    for (; (known ? done < mbs : 1) && ok; done++) {
+    const u16 *hdr = (const u16 *)bs;
+    int nwords = hdr[0],
+        q = hdr[2] & 0x3F,
+        ver = hdr[3];
+    int w = 0,
+        height = 0,
+        bytes = 0,
+        mb_count = 0,
+        known = port_st_frame_dims(bs, &w, &height, &bytes);
+    /* 0: the end-of-stream placeholder, nothing to decode */
+    if (known) mb_count = ((w + 15) / 16) * ((height + 15) / 16);
+    BR b;
+    b.p = (const u8 *)bs + 8;
+    b.end = bytes > 8 ? (const u8 *)bs + bytes : (const u8 *)bs + 0x10000;
+    b.win = 0;
+    b.n = 0;
+    b.over = 0;
+    u16 *o = (u16 *)(buf + 1),
+        *out_end = o + 2 * 0x3FE0;     /* the game's VLC buffers are 64 KB */
+    int dc[3] = { 0, 0, 0 },
+        done = 0,
+        ok = 1;
+    for (; (known ? done < mb_count : 1) && ok; done++) {
         u16 *mark = o;
         for (int blk = 0; blk < 6 && ok; blk++) {
             int chroma = blk < 2;          /* Cr, Cb, Y1, Y2, Y3, Y4 */
             ok = vlc_block(&b, ver, chroma, &dc[blk < 2 ? blk : 2], q, &o, out_end);
             if (ok && b.over > 16) ok = 0;  /* read past the end of the frame data */
         }
-        if (!ok) { o = mark; break; }
+        if (!ok) {
+            o = mark;
+            break;
+        }
     }
-    if (mbs && done < mbs && vlc_warned++ < 5)
-        port_printf("[mdec] frame %dx%d version %d: %d of %d macroblocks decoded (%d bytes of data)\n", w, hgt, ver, done, mbs, bytes);
+    if (mb_count && done < mb_count && vlc_warned++ < 5)
+        port_printf("[mdec] frame %dx%d version %d: %d of %d macroblocks decoded (%d bytes of data)\n",
+                    w, height, ver, done, mb_count, bytes);
     /* pad to the next multiple of 32 words, then to the size the frame header announces (what the real DecDCTvlc
        emits and what DecDCTin hands the decoder) */
     int hw = (int)(o - (u16 *)(buf + 1));
@@ -255,24 +331,64 @@ int DecDCTBufSize(u32 *bs) { return *(u16 *)bs; }
 static const u16 *in_p, *in_end;       /* the run-length codes of DecDCTin */
 static int in_depth, in_bit15, in_signed;
 static void (*out_cb)(void);
-static int in_cb, have_pending; static u32 *pending_buf; static int pending_n;
+/* a DecDCTout asked for from inside the callback: run after it returns */
+static int in_cb, have_pending;
+static u32 *pending_buf;
+static int pending_n;
 
 typedef struct { u8 iq_y[64], iq_c[64]; s16 dct[64]; } DECDCTENV;
-void DecDCTReset(int mode) { tables_init(); in_p = in_end = 0; (void)mode; }
-DECDCTENV *DecDCTGetEnv(DECDCTENV *env) { tables_init(); memcpy(env->iq_y, iq_y, 64); memcpy(env->iq_c, iq_c, 64); memset(env->dct, 0, sizeof env->dct); return env; }
-DECDCTENV *DecDCTPutEnv(DECDCTENV *env) { tables_init(); memcpy(iq_y, env->iq_y, 64); memcpy(iq_c, env->iq_c, 64); return env; }
+void DecDCTReset(int mode) {
+    tables_init();
+    in_p = in_end = 0;
+    (void)mode;
+}
+DECDCTENV *DecDCTGetEnv(DECDCTENV *env) {
+    tables_init();
+    memcpy(env->iq_y, iq_y, 64);
+    memcpy(env->iq_c, iq_c, 64);
+    memset(env->dct, 0, sizeof env->dct);
+    return env;
+}
+DECDCTENV *DecDCTPutEnv(DECDCTENV *env) {
+    tables_init();
+    memcpy(iq_y, env->iq_y, 64);
+    memcpy(iq_c, env->iq_c, 64);
+    return env;
+}
 void DecDCTin(u32 *buf, int mode) {
     tables_init();
-    if (mode & 1) buf[0] &= ~0x08000000u; else buf[0] |= 0x08000000u;
-    if (mode & 2) buf[0] |= 0x02000000u; else buf[0] &= ~0x02000000u;
+    if (mode & 1)
+        buf[0] &= ~0x08000000u;
+    else
+        buf[0] |= 0x08000000u;
+    if (mode & 2)
+        buf[0] |= 0x02000000u;
+    else
+        buf[0] &= ~0x02000000u;
     u32 cmd = buf[0];
-    in_depth = (cmd >> 27) & 3; in_signed = (cmd >> 26) & 1; in_bit15 = (cmd >> 25) & 1;
-    in_p = (const u16 *)(buf + 1); in_end = in_p + 2 * (cmd & 0xFFFF);
+    in_depth = (cmd >> 27) & 3;
+    in_signed = (cmd >> 26) & 1;
+    in_bit15 = (cmd >> 25) & 1;
+    in_p = (const u16 *)(buf + 1);
+    in_end = in_p + 2 * (cmd & 0xFFFF);
 }
-int DecDCTinSync(int mode) { (void)mode; return 0; }
-int DecDCToutSync(int mode) { (void)mode; return 0; }
-void *DecDCToutCallback(void *f) { void *o = (void *)out_cb; out_cb = (void (*)(void))f; return o; }
-void *DecDCTinCallback(void *f) { (void)f; return 0; }
+int DecDCTinSync(int mode) {
+    (void)mode;
+    return 0;
+}
+int DecDCToutSync(int mode) {
+    (void)mode;
+    return 0;
+}
+void *DecDCToutCallback(void *f) {
+    void *old = (void *)out_cb;
+    out_cb = (void (*)(void))f;
+    return old;
+}
+void *DecDCTinCallback(void *f) {
+    (void)f;
+    return 0;
+}
 
 /* --mdec-fast (the 3DS's default: an Old 3DS decoded three frames a second with the sums below, 1024 multiplications
    a block): the same inverse transform by Wang's factorisation, as the MPEG reference decoders have it (12
@@ -287,88 +403,145 @@ int port_mdec_fast;
 #define W7 565
 static void idct_fast(s32 *b, s32 *px) {
     for (int i = 0; i < 8; i++) {   /* rows */
-        s32 *r = b + i * 8, x0, x1 = r[4] << 11, x2 = r[6], x3 = r[2], x4 = r[1], x5 = r[7], x6 = r[5], x7 = r[3], x8;
-        if (!(x1 | x2 | x3 | x4 | x5 | x6 | x7)) { r[0] = r[1] = r[2] = r[3] = r[4] = r[5] = r[6] = r[7] = r[0] << 3; continue; }
+        s32 *r = b + i * 8, x0, x1 = r[4] << 11, x2 = r[6], x3 = r[2], x4 = r[1], x5 = r[7], x6 = r[5], x7 = r[3],
+            x8;
+        if (!(x1 | x2 | x3 | x4 | x5 | x6 | x7)) {
+            r[0] = r[1] = r[2] = r[3] = r[4] = r[5] = r[6] = r[7] = r[0] << 3;
+            continue;
+        }
         x0 = (r[0] << 11) + 128;
-        x8 = W7 * (x4 + x5); x4 = x8 + (W1 - W7) * x4; x5 = x8 - (W1 + W7) * x5;
-        x8 = W3 * (x6 + x7); x6 = x8 - (W3 - W5) * x6; x7 = x8 - (W3 + W5) * x7;
-        x8 = x0 + x1; x0 -= x1;
-        x1 = W6 * (x3 + x2); x2 = x1 - (W2 + W6) * x2; x3 = x1 + (W2 - W6) * x3;
-        x1 = x4 + x6; x4 -= x6; x6 = x5 + x7; x5 -= x7;
-        x7 = x8 + x3; x8 -= x3; x3 = x0 + x2; x0 -= x2;
-        x2 = (181 * (x4 + x5) + 128) >> 8; x4 = (181 * (x4 - x5) + 128) >> 8;
-        r[0] = (x7 + x1) >> 8; r[1] = (x3 + x2) >> 8; r[2] = (x0 + x4) >> 8; r[3] = (x8 + x6) >> 8;
-        r[4] = (x8 - x6) >> 8; r[5] = (x0 - x4) >> 8; r[6] = (x3 - x2) >> 8; r[7] = (x7 - x1) >> 8;
+        x8 = W7 * (x4 + x5);
+        x4 = x8 + (W1 - W7) * x4;
+        x5 = x8 - (W1 + W7) * x5;
+        x8 = W3 * (x6 + x7);
+        x6 = x8 - (W3 - W5) * x6;
+        x7 = x8 - (W3 + W5) * x7;
+        x8 = x0 + x1;
+        x0 -= x1;
+        x1 = W6 * (x3 + x2);
+        x2 = x1 - (W2 + W6) * x2;
+        x3 = x1 + (W2 - W6) * x3;
+        x1 = x4 + x6;
+        x4 -= x6;
+        x6 = x5 + x7;
+        x5 -= x7;
+        x7 = x8 + x3;
+        x8 -= x3;
+        x3 = x0 + x2;
+        x0 -= x2;
+        x2 = (181 * (x4 + x5) + 128) >> 8;
+        x4 = (181 * (x4 - x5) + 128) >> 8;
+        r[0] = (x7 + x1) >> 8;
+        r[1] = (x3 + x2) >> 8;
+        r[2] = (x0 + x4) >> 8;
+        r[3] = (x8 + x6) >> 8;
+        r[4] = (x8 - x6) >> 8;
+        r[5] = (x0 - x4) >> 8;
+        r[6] = (x3 - x2) >> 8;
+        r[7] = (x7 - x1) >> 8;
     }
     #define CL(v) ((v) < -128 ? -128 : (v) > 127 ? 127 : (v))
     for (int i = 0; i < 8; i++) {   /* columns */
-        s32 *c = b + i, x0, x1 = c[32] << 8, x2 = c[48], x3 = c[16], x4 = c[8], x5 = c[56], x6 = c[40], x7 = c[24], x8;
+        s32 *c = b + i, x0, x1 = c[32] << 8, x2 = c[48], x3 = c[16], x4 = c[8], x5 = c[56], x6 = c[40], x7 = c[24],
+            x8;
         if (!(x1 | x2 | x3 | x4 | x5 | x6 | x7)) {
-            s32 v = (c[0] + 32) >> 6; v = CL(v);
+            s32 v = (c[0] + 32) >> 6;
+            v = CL(v);
             for (int y = 0; y < 8; y++) px[y * 8 + i] = v;
             continue;
         }
         x0 = (c[0] << 8) + 8192;
-        x8 = W7 * (x4 + x5) + 4; x4 = (x8 + (W1 - W7) * x4) >> 3; x5 = (x8 - (W1 + W7) * x5) >> 3;
-        x8 = W3 * (x6 + x7) + 4; x6 = (x8 - (W3 - W5) * x6) >> 3; x7 = (x8 - (W3 + W5) * x7) >> 3;
-        x8 = x0 + x1; x0 -= x1;
-        x1 = W6 * (x3 + x2) + 4; x2 = (x1 - (W2 + W6) * x2) >> 3; x3 = (x1 + (W2 - W6) * x3) >> 3;
-        x1 = x4 + x6; x4 -= x6; x6 = x5 + x7; x5 -= x7;
-        x7 = x8 + x3; x8 -= x3; x3 = x0 + x2; x0 -= x2;
-        x2 = (181 * (x4 + x5) + 128) >> 8; x4 = (181 * (x4 - x5) + 128) >> 8;
+        x8 = W7 * (x4 + x5) + 4;
+        x4 = (x8 + (W1 - W7) * x4) >> 3;
+        x5 = (x8 - (W1 + W7) * x5) >> 3;
+        x8 = W3 * (x6 + x7) + 4;
+        x6 = (x8 - (W3 - W5) * x6) >> 3;
+        x7 = (x8 - (W3 + W5) * x7) >> 3;
+        x8 = x0 + x1;
+        x0 -= x1;
+        x1 = W6 * (x3 + x2) + 4;
+        x2 = (x1 - (W2 + W6) * x2) >> 3;
+        x3 = (x1 + (W2 - W6) * x3) >> 3;
+        x1 = x4 + x6;
+        x4 -= x6;
+        x6 = x5 + x7;
+        x5 -= x7;
+        x7 = x8 + x3;
+        x8 -= x3;
+        x3 = x0 + x2;
+        x0 -= x2;
+        x2 = (181 * (x4 + x5) + 128) >> 8;
+        x4 = (181 * (x4 - x5) + 128) >> 8;
         s32 v;
-        v = (x7 + x1) >> 14; px[i] = CL(v); v = (x3 + x2) >> 14; px[8 + i] = CL(v);
-        v = (x0 + x4) >> 14; px[16 + i] = CL(v); v = (x8 + x6) >> 14; px[24 + i] = CL(v);
-        v = (x8 - x6) >> 14; px[32 + i] = CL(v); v = (x0 - x4) >> 14; px[40 + i] = CL(v);
-        v = (x3 - x2) >> 14; px[48 + i] = CL(v); v = (x7 - x1) >> 14; px[56 + i] = CL(v);
+        v = (x7 + x1) >> 14;
+        px[i] = CL(v);
+        v = (x3 + x2) >> 14;
+        px[8 + i] = CL(v);
+        v = (x0 + x4) >> 14;
+        px[16 + i] = CL(v);
+        v = (x8 + x6) >> 14;
+        px[24 + i] = CL(v);
+        v = (x8 - x6) >> 14;
+        px[32 + i] = CL(v);
+        v = (x0 - x4) >> 14;
+        px[40 + i] = CL(v);
+        v = (x3 - x2) >> 14;
+        px[48 + i] = CL(v);
+        v = (x7 - x1) >> 14;
+        px[56 + i] = CL(v);
     }
     #undef CL
 }
 /* one block of codes -> 64 coefficients (raster order) -> 64 samples (-128..127) */
-static int rl_block(const u8 *qt, s32 *blk, s32 *px) {
+static int rl_block(const u8 *qtable, s32 *blk, s32 *px) {
     memset(blk, 0, 64 * sizeof *blk);
     while (in_p < in_end && *in_p == 0xFE00) in_p++;
     if (in_p >= in_end) return 0;
-    u32 n = *in_p++;
-    int qs = (n >> 10) & 0x3F, val = (int)(n << 22) >> 22;
-    val = qs ? val * qt[0] : val * 2;
+    u32 rl_code = *in_p++;
+    int qscale = (rl_code >> 10) & 0x3F,
+        val = (int)(rl_code << 22) >> 22;
+    val = qscale ? val * qtable[0] : val * 2;
     val = val < -0x400 ? -0x400 : val > 0x3FF ? 0x3FF : val;
     blk[0] = val;
     int ac = 0;
     for (int k = 0; in_p < in_end;) {
-        n = *in_p++;
-        if (n == 0xFE00) break;
-        k += ((n >> 10) & 0x3F) + 1;
+        rl_code = *in_p++;
+        if (rl_code == 0xFE00) break;
+        k += ((rl_code >> 10) & 0x3F) + 1;
         if (k > 63) break;
-        val = (int)(n << 22) >> 22;
-        val = qs ? (val * qt[k] * qs + 4) >> 3 : val * 2;
+        val = (int)(rl_code << 22) >> 22;
+        val = qscale ? (val * qtable[k] * qscale + 4) >> 3 : val * 2;
         val = val < -0x400 ? -0x400 : val > 0x3FF ? 0x3FF : val;
-        blk[qs ? zigzag[k] : k] = val;
+        blk[qscale ? zigzag[k] : k] = val;
         ac = 1;
     }
     if (port_mdec_fast) {
         if (!ac) {   /* the DC term alone: a flat block */
-            s32 v = (blk[0] + 4) >> 3; v = v < -128 ? -128 : v > 127 ? 127 : v;
+            s32 v = (blk[0] + 4) >> 3;
+            v = v < -128 ? -128 : v > 127 ? 127 : v;
             for (int i = 0; i < 64; i++) px[i] = v;
-        } else idct_fast(blk, px);
+        } else
+            idct_fast(blk, px);
         return 1;
     }
     /* separable IDCT: rows (frequency u along x) then columns */
-    s32 t[64];
+    s32 row_pass[64];
     for (int v = 0; v < 8; v++) {
         const s32 *row = blk + v * 8;
         for (int x = 0; x < 8; x++) {
-            s32 s = 0;
-            for (int u = 0; u < 8; u++) if (row[u]) s += row[u] * idct_cos[u][x];
-            t[v * 8 + x] = (s + 2048) >> 12;
+            s32 sum = 0;
+            for (int u = 0; u < 8; u++)
+                if (row[u]) sum += row[u] * idct_cos[u][x];
+            row_pass[v * 8 + x] = (sum + 2048) >> 12;
         }
     }
     for (int x = 0; x < 8; x++)
         for (int y = 0; y < 8; y++) {
-            s32 s = 0;
-            for (int v = 0; v < 8; v++) if (t[v * 8 + x]) s += t[v * 8 + x] * idct_cos[v][y];
-            s = (s + 2048) >> 12;
-            px[y * 8 + x] = s < -128 ? -128 : s > 127 ? 127 : s;
+            s32 sum = 0;
+            for (int v = 0; v < 8; v++)
+                if (row_pass[v * 8 + x]) sum += row_pass[v * 8 + x] * idct_cos[v][y];
+            sum = (sum + 2048) >> 12;
+            px[y * 8 + x] = sum < -128 ? -128 : sum > 127 ? 127 : sum;
         }
     return 1;
 }
@@ -379,29 +552,43 @@ static int decode_mb(u8 *out) {
     ok &= rl_block(iq_c, blk, cb);
     for (int i = 0; i < 4; i++) ok &= rl_block(iq_y, blk, y[i]);
     if (!ok) {   /* out of codes: black, as a stalled hardware output would be read */
-        memset(cr, 0, sizeof cr); memset(cb, 0, sizeof cb);
-        for (int i = 0; i < 4; i++) for (int j = 0; j < 64; j++) y[i][j] = -128;
+        memset(cr, 0, sizeof cr);
+        memset(cb, 0, sizeof cb);
+        for (int i = 0; i < 4; i++)
+            for (int j = 0; j < 64; j++) y[i][j] = -128;
     }
     u8 *o = out;
     /* (the chroma terms once per chroma sample, which four pixels share: the same sums) */
-    s32 rc[64], gc[64], bc[64];
-    for (int c = 0; c < 64; c++) { rc[c] = (1436 * cr[c]) >> 10; gc[c] = (352 * cb[c] + 731 * cr[c]) >> 10; bc[c] = (1815 * cb[c]) >> 10; }
+    s32 red_term[64], green_term[64], blue_term[64];
+    for (int c = 0; c < 64; c++) {
+        red_term[c] = (1436 * cr[c]) >> 10;
+        green_term[c] = (352 * cb[c] + 731 * cr[c]) >> 10;
+        blue_term[c] = (1815 * cb[c]) >> 10;
+    }
     if (in_depth != 2 && !in_signed) {
         /* the usual output, 15-bit words of unsigned samples: a luma block at a time, the clamp and the cut to five
            bits from a table (the same words as the general loop below, a quarter of its instructions) */
-        static u8 t5[768];
-        if (!t5[767]) for (int v = -384; v < 384; v++) { int c = v + 128; t5[v + 384] = (u8)((c < 0 ? 0 : c > 255 ? 255 : c) >> 3); }
+        static u8 to5bit[768];
+        if (!to5bit[767])
+            for (int v = -384; v < 384; v++) {
+                int c = v + 128;
+                to5bit[v + 384] = (u8)((c < 0 ? 0 : c > 255 ? 255 : c) >> 3);
+            }
         const u16 top = (u16)(in_bit15 << 15);
         for (int b4 = 0; b4 < 4; b4++) {
-            const int bx = (b4 & 1) * 8, by = (b4 >> 1) * 8;
+            const int bx = (b4 & 1) * 8,
+                      by = (b4 >> 1) * 8;
             const s32 *Y = y[b4];
             for (int py = 0; py < 8; py++) {
                 u8 *q = out + ((by + py) * 16 + bx) * 2;
-                const int ci = ((by + py) >> 1) * 8 + (bx >> 1);
+                const int chroma_row = ((by + py) >> 1) * 8 + (bx >> 1);
                 for (int px = 0; px < 8; px++) {
-                    const int c = ci + (px >> 1), Yv = Y[py * 8 + px] + 384;
-                    const u16 p = (u16)(t5[Yv + rc[c]] | t5[Yv - gc[c]] << 5 | t5[Yv + bc[c]] << 10 | top);
-                    q[px * 2] = (u8)p; q[px * 2 + 1] = (u8)(p >> 8);
+                    const int c = chroma_row + (px >> 1),
+                              Yv = Y[py * 8 + px] + 384;
+                    const u16 p = (u16)(to5bit[Yv + red_term[c]] | to5bit[Yv - green_term[c]] << 5
+                                        | to5bit[Yv + blue_term[c]] << 10 | top);
+                    q[px * 2] = (u8)p;
+                    q[px * 2 + 1] = (u8)(p >> 8);
                 }
             }
         }
@@ -411,36 +598,73 @@ static int decode_mb(u8 *out) {
         for (int px = 0; px < 16; px++) {
             int Y = y[(py >> 3) * 2 + (px >> 3)][(py & 7) * 8 + (px & 7)];
             int c = (py >> 1) * 8 + (px >> 1);
-            int r = Y + rc[c], g = Y - gc[c], b = Y + bc[c];
+            int r = Y + red_term[c],
+                g = Y - green_term[c],
+                b = Y + blue_term[c];
             if (in_signed) {
-                r = r < -128 ? -128 : r > 127 ? 127 : r; g = g < -128 ? -128 : g > 127 ? 127 : g; b = b < -128 ? -128 : b > 127 ? 127 : b;
-                r &= 0xFF; g &= 0xFF; b &= 0xFF;
+                r = r < -128 ? -128 : r > 127 ? 127 : r;
+                g = g < -128 ? -128 : g > 127 ? 127 : g;
+                b = b < -128 ? -128 : b > 127 ? 127 : b;
+                r &= 0xFF;
+                g &= 0xFF;
+                b &= 0xFF;
             } else {
-                r += 128; g += 128; b += 128;
-                r = r < 0 ? 0 : r > 255 ? 255 : r; g = g < 0 ? 0 : g > 255 ? 255 : g; b = b < 0 ? 0 : b > 255 ? 255 : b;
+                r += 128;
+                g += 128;
+                b += 128;
+                r = r < 0 ? 0 : r > 255 ? 255 : r;
+                g = g < 0 ? 0 : g > 255 ? 255 : g;
+                b = b < 0 ? 0 : b > 255 ? 255 : b;
             }
-            if (in_depth == 2) { *o++ = (u8)r; *o++ = (u8)g; *o++ = (u8)b; }
-            else { u16 p = (u16)((r >> 3) | (g >> 3) << 5 | (b >> 3) << 10 | in_bit15 << 15); *o++ = (u8)p; *o++ = (u8)(p >> 8); }
+            if (in_depth == 2) {
+                *o++ = (u8)r;
+                *o++ = (u8)g;
+                *o++ = (u8)b;
+            } else {
+                u16 p = (u16)((r >> 3) | (g >> 3) << 5 | (b >> 3) << 10 | in_bit15 << 15);
+                *o++ = (u8)p;
+                *o++ = (u8)(p >> 8);
+            }
         }
     return (int)(o - out) / 4;
 }
+/* n words of decoded pixels into buf: whole macroblocks, then the start of one more */
 static void decode_words(u32 *buf, int n) {
-    u8 *o = (u8 *)buf; int left = n;
+    u8 *o = (u8 *)buf;
+    int left = n;
     int mb_words = in_depth == 2 ? 192 : 128;
-    while (left >= mb_words) { decode_mb(o); o += mb_words * 4; left -= mb_words; }
+    while (left >= mb_words) {
+        decode_mb(o);
+        o += mb_words * 4;
+        left -= mb_words;
+    }
     if (left > 0) {   /* a partial macroblock: the hardware would hold the rest for the next request */
-        u8 tmp[768]; decode_mb(tmp); memcpy(o, tmp, (size_t)left * 4);
+        u8 tmp[768];
+        decode_mb(tmp);
+        memcpy(o, tmp, (size_t)left * 4);
     }
 }
 void DecDCTout(u32 *buf, int n) {
-    if (in_cb) { pending_buf = buf; pending_n = n; have_pending = 1; return; }
+    if (in_cb) {
+        pending_buf = buf;
+        pending_n = n;
+        have_pending = 1;
+        return;
+    }
     for (;;) {
-        { unsigned long long t0 = port_time_us(); decode_words(buf, n); port_mdec_us[1] += port_time_us() - t0; port_mdec_n[1] += (unsigned)n; }
+        {
+            unsigned long long t0 = port_time_us();
+            decode_words(buf, n);
+            port_mdec_us[1] += port_time_us() - t0;
+            port_mdec_n[1] += (unsigned)n;
+        }
         if (!out_cb) return;
-        in_cb = 1; have_pending = 0;
+        in_cb = 1;
+        have_pending = 0;
         out_cb();
         in_cb = 0;
         if (!have_pending) return;
-        buf = pending_buf; n = pending_n;
+        buf = pending_buf;
+        n = pending_n;
     }
 }
