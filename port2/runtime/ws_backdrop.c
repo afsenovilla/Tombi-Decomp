@@ -866,8 +866,7 @@ static void draw_floor(int side)
             int f256 = (int)((long long)(x16 - VPX16) * 256 / dy);
             if (f256 < 0) f256 = -f256;
             int e256 = (int)((long long)(pcol(side, 0) * 16 + 8 - VPX16) * 256 / dy),
-                le,
-                lf;
+                le, lf;
             if (e256 < 0) e256 = -e256;
             /* the edge's light, this column's */
             le = floor_lum(side, e256);
@@ -1072,8 +1071,7 @@ static void grow_ivy(int side)
     for (int slot = -1; ; slot++) {
         Rng r = rng_at(side * 7 + 2, slot, 0);
         int X = X_of_U(side, WU16[1] + (slot * 22 + rndi(&r, 10)) * 16),
-            ks,
-            near;
+            ks, near;
         if (slot < 0) X = -8 + rndi(&r, 6);
         if (X > cw + 22) break;
         ks = ivy_s(X);
@@ -1202,8 +1200,7 @@ static void balance(int side)
 {
     int sum[3] = { 0, 0, 0 },
         n[3] = { 0, 0, 0 },
-        ms[3],
-        k[3];
+        ms[3], k[3];
     long long sq[3] = { 0, 0, 0 };
     for (int X = 4; X <= 13 && X <= cw; X++)                              /* past the 3 columns blended with the edge */
         for (int y = 0; y < PH; y++) {
@@ -1691,8 +1688,7 @@ static int room_enabled(const Room *r)
     if (l) {
         if (!strcmp(l, "all")) return 1;
         while (*l) {
-            int a,
-                s,
+            int a, s,
                 n = 0;
             if (sscanf(l, "%d:%d%n", &a, &s, &n) == 2 && a == r->area && s == r->sec) return 1;
             while (*l && *l != ',') l++;
