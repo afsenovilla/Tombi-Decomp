@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 #include <ctype.h>
 #include "port_runtime.h"
 #include "panel_assets.h"
@@ -353,8 +354,11 @@ static void ctext(int cx, int y, int h, const char *s, u32 b, u32 e) {
     pa_text(cx - pa_text_w(h, s) / 2, y, h, s, b, e);
 }
 /* a plank's label: 16 px, outlined, yellow when selected */
-static void plank_text(int cx, int y, const char *s, int sel) {
-    pa_text_ol(cx - pa_text_w(16, s) / 2, y, 16, s, sel ? C_YELLOW : C_WHITE, C_WOODE, C_DARK);
+/* a plank's label centred on cx, in the 16 px font; on a plank w wide that it does not fit (a long word of another
+   language on the 3DS's narrow panel) in the 8 px one, never cut */
+static void plank_text(int cx, int y, int w, const char *s, int sel) {
+    int h = pa_text_w(16, s) <= w ? 16 : 8;
+    pa_text_ol(cx - pa_text_w(h, s) / 2, h == 16 ? y : y + 4, h, s, sel ? C_YELLOW : C_WHITE, C_WOODE, C_DARK);
 }
 
 /* the HUD's pieces: page (320, 256) = SYSTEM/A00000.GAM, CLUT rows at (368, 480..) */
@@ -469,7 +473,35 @@ static const char *map_tab_name(void);   /* panel_side.inc: "Mapa" / "Cenital" b
 
 /* ---------------------------------------------------------------- the panel */
 static int es(void) { return port_lang == 5; }
-#define T(en, sp) (es() ? sp : en)
+/* The panel's own words: the English and the Spanish text at each T call site; French, German, Italian, Dutch, Portuguese,
+   Swedish and Danish from panel_lang.inc (tools/panel_lang.py), found by the pair's text (a string the table lacks
+   stays English).  The last answers are kept by the literals' addresses. */
+#include "panel_lang.inc"
+static const char *panel_tr(const char *en, const char *sp)
+{
+    static const signed char column[9] = { -1, 2, 3, 4, 5, -1, 6, 7, 8 };   /* port_lang -> panel_lang_rows column */
+    if (port_lang == 5) return sp;
+    int col = port_lang > 0 && port_lang < 9 ? column[port_lang] : -1;
+    if (col < 0) return en;
+    static struct {
+        const char *en, *sp;
+        short row;
+    } memo[256];
+    unsigned slot = (unsigned)(((uintptr_t)en >> 2) ^ ((uintptr_t)sp >> 4)) & 255;
+    if (memo[slot].en != en || memo[slot].sp != sp) {
+        short row = -1;
+        for (unsigned i = 0; i < sizeof panel_lang_rows / sizeof panel_lang_rows[0]; i++)
+            if (!strcmp(panel_lang_rows[i][0], en) && !strcmp(panel_lang_rows[i][1], sp)) {
+                row = (short)i;
+                break;
+            }
+        memo[slot].en = en;
+        memo[slot].sp = sp;
+        memo[slot].row = row;
+    }
+    return memo[slot].row >= 0 ? panel_lang_rows[memo[slot].row][col] : en;
+}
+#define T(en, sp) panel_tr(en, sp)
 #if PORT_VERSION_USA
 #define PANEL_HERO "Tomba"   /* the English chrome names him as the version does */
 #else
@@ -668,7 +700,7 @@ static void header_draw(const char *title) {
         int x = 16 + c++ * (tw + 16);
         plank(x, 26, tw);
         hot(x, 26, tw, 24, HS_PAGE + i);
-        plank_text(x + tw / 2, 30, page_name(i), i == page);
+        plank_text(x + tw / 2, 30, tw, page_name(i), i == page);
     }
     pa_fill(4, 52, W - 8, pa_ch - 56, C_PINK);
 }
@@ -801,12 +833,12 @@ static void draw_map(int x, int y, int w, int h, int link) {
     pa_clip_y1 = cy1;
 }
 
-static int fmt_ap(char *b, int n, u32 v) {   /* 1.234.567 / 1,234,567 */
+static int fmt_ap(char *b, int n, u32 v) {   /* 1,234,567 (English) / 1 234 567 (fr, sv) / 1.234.567 */
     char t[16];
     int k = snprintf(t, sizeof t, "%u", v),
         o = 0;
     for (int i = 0; i < k && o < n - 2; i++) {
-        if (i && (k - i) % 3 == 0) b[o++] = es() ? '.' : ',';
+        if (i && (k - i) % 3 == 0) b[o++] = !port_lang ? ',' : port_lang == 1 || port_lang == 7 ? ' ' : '.';
         b[o++] = t[i];
     }
     b[o] = 0;

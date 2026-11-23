@@ -4,6 +4,18 @@ Update this file whenever something lands or a task is decided. Newest first.
 
 ## Since v0.7.2 (not released)
 
+- **The second-screen panel in French, German, Italian, Dutch, Portuguese, Swedish and Danish (2026-11-23).**  Its
+  own words (tabs, labels, planks, messages: 103 pairs) were English for every language but Spanish; now
+  `tools/panel_lang.py` holds them in the seven other languages of the PAL disc and writes
+  `port2/runtime/panel_lang.inc`, which `T()` reads by the pair's text (English and Spanish unchanged at the call
+  sites).  Plank labels that do not fit (long words on the 3DS's 320 x 240 panel) drop to the 8 px font instead of
+  overflowing, a back plank whose word is too long no longer breaks it mid-word, and the 3DS's shared Sort / Equip
+  row is split by the words' widths.  "Who" (the character that gives an event) has names only in English and
+  Spanish, so the other languages show the hint.  Checked on PC headless (i386): every tab and the event / item
+  pages in the nine languages at 1240 x 1080 and 320 x 240; English and Spanish panels identical to before.  Not
+  checked: the devices.  Known, older and in English too: on the 320 x 240 panel the room line of an event's
+  "Where" box can run over the box's lower edge.
+
 - **Readability pass over the port's C code (2026-11-22).**  port2/runtime and port2/shims (80 files): one
   statement per line, lines within 120 columns, cryptic local names renamed (locals, parameters, statics only), short comments above unclear functions; data tables and
   generated files untouched.  Form only: `tools/same_code.py` proves it (C tokens equal apart from layout, comments
@@ -547,8 +559,8 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    is byte-identical to SCES-01331 Rev.1 except SYSTEM.CNF and the boot file name, so every PAL disc carries all
    nine MAINn.EXE and `--lang 1..4` already ran (lang.c). Now exposed: port usage, PC launcher (list, flags,
    launcher-language default), Android launcher (`LANG_N` appended). Checked on PC headless: in-game text in the
-   four languages, panel names from `D<n>SPSUB`. Not checked: the device, the Android build. Open: the panel's own
-   chrome is English for 1..4 (only en/es exist, `T()` in panel.c). Rev.0 (July 1998 build of either serial, MAIN0
+   four languages, panel names from `D<n>SPSUB`. Not checked: the device, the Android build. The panel's own chrome
+   is translated since 2026-11-23 (see "Since v0.7.2"). Rev.0 (July 1998 build of either serial, MAIN0
    md5 3edd55b0) is not supported: 793 files differ from Rev.1 and the port reads overlay tables at Rev.1 addresses.
    Since 2026-11-04 the PC launcher, extract_data.py and the Android app name a Rev.0 disc as such (sha1 118459ce),
    and the messages say Rev 1 of SCES-01331 or SCES-01330 is needed. The SCES-01330 zip in R2 is Rev.1 again

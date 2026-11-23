@@ -265,6 +265,7 @@ static void pin_mark(int x, int y, unsigned c) {   /* a push pin, 10 x 14: round
 static const char *kind_name(int k), *ev_giver(int e);
 static const char *place_area(int area, int sec), *place_room(int area, int sec);
 static const char *ev_giver(int e) {   /* panel_givers.h, in the panel's language */
+    if (port_lang && !es()) return NULL;   /* no names in the other languages yet: the hint (what starts it) instead */
     for (unsigned i = 0; i < sizeof panel_givers / sizeof panel_givers[0]; i++) if (panel_givers[i].ev == e) {
         const char *s = T(panel_givers[i].en, panel_givers[i].es);
         if (es() && es_improved)
@@ -293,7 +294,7 @@ static void filters(int y) {
         int x = 8 + i * (tw + 4);
         plank(x, y, tw);
         hot(x, y, tw, 24, HS_FILTER + i);
-        plank_text(x + tw / 2, y + 4, filter_name(i), i == ev_filter);
+        plank_text(x + tw / 2, y + 4, tw, filter_name(i), i == ev_filter);
     }
 }
 
@@ -424,14 +425,14 @@ static void event_list(void) {
         cur = n ? ids[ev_sel] : -1;
     plank(8, py, pw2);
     hot(8, py, pw2, 24, HS_FILTER + 8);
-    plank_text(8 + pw2 / 2, py + 4, cur >= 0 && ev_hidden(cur) ? T("Show", "Mostrar") : T("Hide", "Ocultar"), 0);
+    plank_text(8 + pw2 / 2, py + 4, pw2, cur >= 0 && ev_hidden(cur) ? T("Show", "Mostrar") : T("Hide", "Ocultar"), 0);
     plank(W - 8 - pw2, py, pw2);
     hot(W - 8 - pw2, py, pw2, 24, HS_FILTER + 9);
     snprintf(b, sizeof b,
              ev_show_hidden ? T("Hidden: shown (%d)", "Ocultos: s\xED (%d)")
                             : T("Hidden: off (%d)", "Ocultos: no (%d)"),
              ev_hidden_count());
-    plank_text(W - 8 - pw2 / 2, py + 4, b, ev_show_hidden);
+    plank_text(W - 8 - pw2 / 2, py + 4, pw2, b, ev_show_hidden);
 }
 
 /* the detail page, laid out as the Items page's showcase: a top window with the icon at 3x in a stone frame, the title
@@ -467,8 +468,21 @@ static const char *kind_hint(int k) {   /* what starts an event, when no one is 
 }
 /* a plank twice as high: the label in the 24 px event-title letters when they have all of it and it fits (mode 0), else
    the 16 px font pixel doubled (1), else 16 px, wrapped (2: never cut).  ev_plank_mode: the mode a label needs. */
+/* 0: the 24 px title letters, 1: the 16 px font doubled, 2: the 16 px font wrapped, 3: the 8 px font (a word wider
+   than the plank in the 16 px one would be broken by the wrap) */
 static int ev_plank_mode(int w, const char *s) {
-    return pa_has_glyphs(24, s) && pa_text_w(24, s) <= w - 16 ? 0 : 2 * pa_text_w(16, s) <= w - 16 ? 1 : 2;
+    if (pa_has_glyphs(24, s) && pa_text_w(24, s) <= w - 16) return 0;
+    if (2 * pa_text_w(16, s) <= w - 16) return 1;
+    char word[64];
+    for (const char *p = s; *p;) {   /* the widest word */
+        int n = 0;
+        while (*p == ' ') p++;
+        while (*p && *p != ' ' && n < 63) word[n++] = *p++;
+        word[n] = 0;
+        if (n && pa_text_w(16, word) > w - 12) return 3;
+        while (*p && *p != ' ') p++;
+    }
+    return 2;
 }
 static void ev_plank(int x, int y, int w, int h, const char *s, int mode, int id) {
     plank_h(x, y, w, h);
@@ -482,9 +496,12 @@ static void ev_plank(int x, int y, int w, int h, const char *s, int mode, int id
     } else if (mode == 1) {
         int tw = 2 * pa_text_w(16, s);
         pa_text_scaled(x + w / 2 - tw / 2, y + (h - 32) / 2, 16, s, C_WHITE, C_WOODE, 2, 0);
-    } else {
+    } else if (mode == 2) {
         int nl = text_lines(16, w - 12, 3, s);
         text_wrap(x + 6, y + (h - nl * 16) / 2 + 1, 16, w - 12, 16, 3, 1, s, C_WHITE, C_WOODE);
+    } else {
+        int nl = text_lines(8, w - 8, 4, s);
+        text_wrap(x + 4, y + (h - nl * 10) / 2 + 1, 8, w - 8, 10, 4, 1, s, C_WHITE, C_WOODE);
     }
     pa_outline = o;
 }
@@ -518,7 +535,7 @@ static int ev_where(int x, int y, int w, int h, int e) {
         int py = y + h - 8 - 24;
         plank(x + 8, py, w - 16);
         hot(x + 8, py, w - 16, 24, HS_FILTER + 11);
-        plank_text(x + w / 2, py + 4, T("Show on the map", "Ver en el mapa"), 0);
+        plank_text(x + w / 2, py + 4, w - 16, T("Show on the map", "Ver en el mapa"), 0);
     }
     return cy - y + 8 + (map ? 30 : 0);
 }

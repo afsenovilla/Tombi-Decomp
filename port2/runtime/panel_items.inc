@@ -209,7 +209,7 @@ static const char *it_reason(int item) {   /* NULL: confirming it now does what 
     static const char *en[4] = { "No need using this.", "Already equipped.", "Can't use this here.", "Not enough." },
                       *sp[4] = { "No hace falta usarlo.", "Ya equipado.", "No se puede usar aqu\xED.",
                                  "No es suficiente." };
-    return es() ? sp[w] : en[w];
+    return T(en[w], sp[w]);
 }
 /* the in-use mark of subScreenDrawItemGrid */
 static int it_in_use(int item) {
@@ -555,7 +555,8 @@ static int it_desc(int item, char *d, int n) {   /* the sub-screen's description
 static void it_btn(int x, int y, int w, const char *s, int st, int id) {
     plank(x, y, w);
     hot(x, y, w, 24, id);
-    pa_text_ol(x + w / 2 - pa_text_w(16, s) / 2, y + 4, 16, s,
+    int h = pa_text_w(16, s) <= w - 4 ? 16 : 8;   /* the 8 px font when the word is wider than the plank */
+    pa_text_ol(x + w / 2 - pa_text_w(h, s) / 2, h == 16 ? y + 4 : y + 8, h, s,
                st == 1 ? C_YELLOW : st == 2 ? RGB(176, 160, 144) : C_WHITE, C_WOODE, C_DARK);
 }
 /* a tall plank (h >= 28): the game's 24-row plank cut in three, its top 14 and bottom 10 rows kept and its middle rows
@@ -578,9 +579,12 @@ static void plank_h(int x, int y, int w, int h) {
 static void it_btn_big(int x, int y, int w, const char *s, int st, int id) {
     plank_h(x, y, w, IT_BIG);
     hot(x, y, w, IT_BIG, id);
-    if (pa_has_glyphs(24, s)) {
+    if (pa_has_glyphs(24, s) && pa_text_w(24, s) <= w - 12) {
         int tw = pa_text_w(24, s);
         pa_text_scaled(x + w / 2 - tw / 2, y + (IT_BIG - 24) / 2, 24, s, C_WHITE, C_WOODE, 1, st == 2);
+    } else if (2 * pa_text_w(16, s) > w - 4) {   /* too wide doubled: the 16 px font as it is */
+        pa_text_ol(x + w / 2 - pa_text_w(16, s) / 2, y + (IT_BIG - 16) / 2, 16, s,
+                   st == 1 ? C_YELLOW : st == 2 ? RGB(176, 160, 144) : C_WHITE, C_WOODE, C_DARK);
     } else {
         int tw = 2 * pa_text_w(16, s);
         u32 o = pa_outline;
@@ -666,8 +670,14 @@ static void page_items(int play) {
         ay = sm ? top + h - 8 - 24 : top + h - 10 - IT_BIG,
         oy = sm ? ay : ay - 28,
         sw = sm ? (bw - 4) / 2 : bw;
-    if (it_warp >= 0) it_btn(lx + 10, oy, sw, T("Cancel", "Cancelar"), 0, HS_ITOP + 4);
-    else it_btn(lx + 10, oy, sw, T("Sort", "Ordenar"), 0, HS_ITOP + 2);
+    const char *left = it_warp >= 0 ? T("Cancel", "Cancelar") : T("Sort", "Ordenar");
+    if (sm && (it_n || it_warp >= 0)) {   /* two long words of another language: the row shared by their widths */
+        int w1 = pa_text_w(16, left),
+            w2 = pa_text_w(16, it_act_name(it_sel, it_warp >= 0 ? it_warp : it_items[it_sel]));
+        if (w1 + 4 > sw || w2 + 4 > bw - sw - 4) sw = (bw - 4) * w1 / (w1 + w2);
+    }
+    if (it_warp >= 0) it_btn(lx + 10, oy, sw, left, 0, HS_ITOP + 4);
+    else it_btn(lx + 10, oy, sw, left, 0, HS_ITOP + 2);
     if (it_n || it_warp >= 0) {
         int item = it_warp >= 0 ? it_warp : it_items[it_sel],
             bad;
