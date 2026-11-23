@@ -327,6 +327,7 @@ static size_t heap_free(void) {
     char *brk = sbrk(0);
     return (size_t)mi.fordblks + (brk && brk < fake_heap_end ? (size_t)(fake_heap_end - brk) : 0);
 }
+unsigned port_n3ds_heap_free(void) { return (unsigned)heap_free(); }   /* (n3ds/pica_c3d.c's lines a few seconds apart) */
 /* runtime/lazy_bss.h: a unit's big tables (the widescreen generators: the picture strips, the top-down margins, the
    Evil Pig / 3D room / Trick Village / 3D floor ends; port2/tools/lazy_bss.py), zeroed, from the heap.  Only on a New
    3DS (124 MB: the heap is about 66 MB) and with 16 MB left over; an Old 3DS's heap (about 20 MB) is the game's, so

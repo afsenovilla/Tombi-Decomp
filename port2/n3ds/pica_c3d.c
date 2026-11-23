@@ -659,6 +659,10 @@ static int c3d_present(int x, int y, int w, int h, int masked) {
           if (u) port_printf("[3ds] sound: the mixer thread was %llu samples short in these %d presents\n", u, TK_N); }
         { extern unsigned long long port_frames_skipped; static unsigned long long last;
           port_printf("[3ds] frameskip: %llu ordering tables not drawn in these %d presents\n", port_frames_skipped - last, TK_N); last = port_frames_skipped; }
+        {   /* the memory left (n3ds/main_3ds.c port_n3ds_heap_free): how close a console comes to the end of its heap */
+            extern unsigned port_n3ds_heap_free(void); static unsigned low = ~0u; unsigned h = port_n3ds_heap_free();
+            if (h < low) low = h;
+            port_printf("[3ds] memory: heap %u KB free (the least so far %u KB), linear %u KB free\n", h >> 10, low >> 10, (unsigned)(linearSpaceFree() >> 10)); }
         {   /* the sampled ordering tables' time (shims/gpu.c, shims/gpu_pica.c), in ms per sampled table */
             extern unsigned long long pica_prof[6]; extern unsigned pica_prof_n;
             {   extern unsigned long long pica_cnt[8], pica_ot[4];

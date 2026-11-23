@@ -42,7 +42,7 @@ const char *port_panel_dump_dir;   /* --dump-panel DIR */
 #define CH_MAX 640
 #define OUT_MAX 1920
 static int pw, ph, pk = 1, req_w, req_h;   /* pw x ph = the canvas x pk */
-static u32 *pix;                           /* malloc'd: the scaled frame (PC window, PNG dumps) */
+static u32 *pix;                           /* malloc'd when first used: the scaled frame (PC window, PNG dumps) */
 
 /* ---------------------------------------------------------------- game RAM (include/gamestate.h, notes/data_names_main0.csv) */
 #define G8(a)  (*(u8 *)PORT_M0(a))
@@ -611,11 +611,13 @@ static void layout(void) {
     if (cw > CW_MAX) cw = CW_MAX; if (ch > CH_MAX) ch = CH_MAX;
     if (cw < 320) cw = 320; if (ch < 240) ch = 240;
     if (!pa_cv) pa_cv = malloc(CW_MAX * CH_MAX * 4);
-    if (!pix) pix = malloc((size_t)OUT_MAX * OUT_MAX * 4);
     pa_cw = cw; pa_ch = ch; pk = k; pw = cw * k; ph = ch * k;
     if (pw > OUT_MAX || ph > OUT_MAX) { pk = 1; pw = cw; ph = ch; }
 }
 static void upscale(void) {
+    /* (the scaled frame, 14.4 MB: only where it is shown or dumped; the 3DS shows the canvas itself, and on an Old 3DS
+       those megabytes were most of its 20 MB heap) */
+    if (!pix && !(pix = malloc((size_t)OUT_MAX * OUT_MAX * 4))) return;
     for (int y = 0; y < pa_ch; y++) {
         const u32 *s = pa_cv + y * pa_cw;
         u32 *d = pix + (size_t)y * pk * pw;
@@ -849,12 +851,13 @@ void port_panel_vblank(void) {
 #else
     if (port_panel_window) {
         if (port_panel_canvas_out) port_panel_window_frame((const unsigned char *)pa_cv, pa_cw, pa_ch);
-        else port_panel_window_frame((const unsigned char *)pix, pw, ph);
+        else if (pix) port_panel_window_frame((const unsigned char *)pix, pw, ph);
     }
 #endif
-    if (dump) {
+    if (dump && pix) {
         static u8 *rgb; char path[512];
         if (!rgb) rgb = malloc((size_t)OUT_MAX * OUT_MAX * 3);
+        if (!rgb) return;
         for (int i = 0; i < pw * ph; i++) { u32 c = pix[i]; rgb[3 * i] = c & 0xFF; rgb[3 * i + 1] = c >> 8 & 0xFF; rgb[3 * i + 2] = c >> 16 & 0xFF; }
         port_mkdir(port_panel_dump_dir);
         snprintf(path, sizeof path, "%s/panel_%06d.png", port_panel_dump_dir, port_frame);
