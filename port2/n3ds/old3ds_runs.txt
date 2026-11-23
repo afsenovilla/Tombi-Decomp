@@ -3,3 +3,4 @@
 44371333060  v0.7.1 (28.7 MB image: out of memory at start on the user's Old 3DS)
 44380369699  v0.7.2 (25.3 MB)
 44430949427  the lazy tables build (23.4 MB: crashed on the user's Old 3DS)
+45243645947  the lazy tables build + the panel's 14.4 MB scaled frame only when used

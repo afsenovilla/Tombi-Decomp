@@ -38,7 +38,7 @@ jobs:
       fail-fast: false
       matrix:
         run: ${{ fromJSON(needs.plan.outputs.runs) }}
-        case: [start, start-wide, start-stereo, play-wide, rooms-wide]
+        case: [start, start-wide, start-stereo, start-es, play-wide, rooms-wide]
     steps:
       - name: The build
         env:
@@ -69,16 +69,19 @@ jobs:
 
       - name: Run as an Old 3DS
         run: |
+          set +e
           SD="$HOME/.local/share/azahar-emu/sdmc"
           mkdir -p "$SD/3ds/tombi" shots "$HOME/.config/azahar-emu"
           # an Old 3DS (Azahar's System setting), the rest as it comes
           printf '[System]\nis_new_3ds\\default=false\nis_new_3ds=false\n' > "$HOME/.config/azahar-emu/qt-config.ini"
           cp "$RUNNER_TEMP/disccache/game.bin" "$SD/3ds/tombi/tombi.bin"
-          echo 9 > "$SD/3ds/tombi/lang.txt"                       # Spanish, the improved translation
+          # English (the improved Spanish builds its files at the first start: minutes in an emulated Old 3DS; start-es)
+          echo 0 > "$SD/3ds/tombi/lang.txt"; T=16
           case "${{ matrix.case }}" in
             start)        echo "1 60 0" > "$SD/3ds/tombi/opts.txt" ;;
             start-wide)   echo "1 60 1" > "$SD/3ds/tombi/opts.txt" ;;
             start-stereo) echo "1 60 2" > "$SD/3ds/tombi/opts.txt" ;;
+            start-es)     echo "1 60 1" > "$SD/3ds/tombi/opts.txt"; echo 9 > "$SD/3ds/tombi/lang.txt"; T=32 ;;
             play-wide)    echo "1 60 1" > "$SD/3ds/tombi/opts.txt"
                           echo "--skip-movies --poke 900:1F8001B4:1 --poke 1250:8009C960:1:2 --poke 1250:8009C962:0:2 --pad-script 1000:start,1300:circle:3,2000:right:6000" > "$SD/3ds/tombi/args.txt" ;;
             rooms-wide)   echo "1 60 1" > "$SD/3ds/tombi/opts.txt"     # (Mushroom Forest, walked left)
@@ -91,22 +94,27 @@ jobs:
           ./squashfs-root/AppRun "$PWD/$F" > azahar.log 2>&1 &
           EMU=$!
           alive=1
-          for i in $(seq 1 12); do sleep 15; import -window root "shots/shot_$(printf %03d $((i*15))).png" || true; kill -0 "$EMU" 2>/dev/null || { alive=0; echo "the emulator ended after ~$((i*15)) s"; break; }; done
-          kill "$EMU" 2>/dev/null || true; sleep 2
+          for i in $(seq 1 $T); do sleep 15; import -window root "shots/shot_$(printf %03d $((i*15))).png"; kill -0 "$EMU" 2>/dev/null || { alive=0; echo "the emulator ended after ~$((i*15)) s"; break; }; done
+          kill -9 "$EMU" 2>/dev/null; pkill -9 -x AppRun.wrapped 2>/dev/null; sleep 2
           cp "$SD/3ds/tombi/log.txt" shots/log.txt 2>/dev/null || echo "(no log.txt)" > shots/log.txt
           L=$(find "$HOME/.local/share/azahar-emu" -name "*.txt" -path "*log*" | head -1)
           echo "== the emulator's settings"; grep -i "new_3ds" "$HOME/.config/azahar-emu/qt-config.ini" | head -4
-          echo "== the emulator's log: errors"; [ -n "$L" ] && grep -i -E "exception|abort|crash|fatal|critical|svcBreak|break|invalid|unmapped|prefetch|data abort|out of memory|ControlMemory" "$L" | grep -v "Config <Info>" | head -60
-          echo "== code addresses in the emulator's log"
-          [ -n "$L" ] && grep -o "at PC 0x[0-9A-Fa-f]*" "$L" | awk '{print $3}' | sort | uniq -c | sort -rn | head -12 | while read n a; do
-            echo "$n x $a $(arm-none-eabi-addr2line -f -s -e app/tombi.elf $a | tr '\n' ' ')"; done
-          echo "== log.txt (start)"; head -25 shots/log.txt
-          echo "== log.txt (memory, tables)"; grep -a -E "memory|tables|wsbd|slots|no memory|failed|fatal|crash|abort" shots/log.txt | head -40
-          echo "== log.txt (end)"; tail -25 shots/log.txt
-          n=$(grep -a -c "\[port\] fps\|ordering tables:" shots/log.txt)
-          echo "RESULT run ${{ matrix.run }} case ${{ matrix.case }}: alive=$alive, $(wc -l < shots/log.txt) log lines, $n fps lines"
-          [ -n "$L" ] && cp "$L" shots/azahar_log.txt
-          cp azahar.log shots/ 2>/dev/null || true
+          if [ -n "$L" ]; then
+            echo "== the emulator's log: errors"
+            grep -i -E "exception|abort|crash|fatal|critical|svcBreak|invalid|unmapped|prefetch|data abort|out of memory" "$L" | grep -v "Config <Info>" | head -40
+            echo "== code addresses in the emulator's log"
+            grep -o "at PC 0x[0-9A-Fa-f]*" "$L" | awk '{print $3}' | sort | uniq -c | sort -rn | head -12 | while read n a; do
+              echo "$n x $a $(arm-none-eabi-addr2line -f -s -e app/tombi.elf $a | tr '\n' ' ')"; done
+            cp "$L" shots/azahar_log.txt
+          fi
+          echo "== log.txt (start)"; head -12 shots/log.txt
+          echo "== log.txt (memory, tables)"; grep -a -E "memory|tables|wsbd|no memory|failed|fatal|crash|abort" shots/log.txt | head -30
+          echo "== log.txt (end)"; tail -15 shots/log.txt
+          n=$(grep -a -c "ordering tables:" shots/log.txt)
+          low=$(grep -a "\[3ds\] memory:" shots/log.txt | tail -1)
+          echo "RESULT run ${{ matrix.run }} case ${{ matrix.case }}: alive=$alive, $(wc -l < shots/log.txt) log lines, $n frame-time lines; $low"
+          cp azahar.log shots/ 2>/dev/null
+          exit 0
 
       - uses: actions/upload-artifact@v4
         if: always()
