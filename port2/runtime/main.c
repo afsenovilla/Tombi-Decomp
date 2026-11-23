@@ -51,8 +51,10 @@ void port_printf(const char *fmt, ...) {
 #ifdef __3DS__
         /* (the log is a file on the SD card there, and a write to it a request to the card's service, milliseconds each:
            buffered (main), and written out a second apart at most; port_flush_log and the fault reports write at once) */
-        { extern unsigned long long port_time_us(void); static unsigned long long last; unsigned long long now = port_time_us();
-          if (now - last > 1000000ull) { last = now; fflush(stderr); } }
+        { extern unsigned long long port_time_us(void); static unsigned long long last, first; unsigned long long now = port_time_us();
+          if (!first) first = now;
+          /* (every line during the first 40 seconds: a start that fails leaves its last lines on the card) */
+          if (now - first < 40000000ull || now - last > 1000000ull) { last = now; fflush(stderr); } }
 #else
         fflush(stderr);
 #endif
