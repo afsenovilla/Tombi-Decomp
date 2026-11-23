@@ -1,0 +1,115 @@
+# Nintendo 3DS builds run in Azahar set up as an OLD 3DS (64 MB of application memory), started as the title (the
+# .cci: the memory a .cia gets) the way the console starts it: the language and the options from the SD card, no
+# args.txt (the movies, the title screen), and with args.txt into gameplay rooms.  Manual: the 3ds.yml runs to try
+# (their tombi-3ds artifacts) as a list of run ids, or a push of port2/n3ds/old3ds_runs.txt to a claude/ branch.  The log says whether the title was still running at the end.
+name: 3DS as an Old 3DS (Azahar)
+
+on:
+  workflow_dispatch:
+    inputs:
+      runs:
+        description: "3ds.yml run ids, separated by spaces (default: port2/n3ds/old3ds_runs.txt)"
+        required: false
+        type: string
+  push:
+    branches: ["claude/**"]
+    paths: [".github/workflows/3ds-old.yml", "port2/n3ds/old3ds_runs.txt"]
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  plan:
+    runs-on: ubuntu-24.04
+    outputs:
+      runs: ${{ steps.p.outputs.runs }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: p
+        run: |
+          R="${{ inputs.runs }}"; [ -n "$R" ] || R=$(grep -v "^#" port2/n3ds/old3ds_runs.txt | awk '{print $1}')
+          echo "runs=$(echo $R | python3 -c "import sys,json; print(json.dumps(sys.stdin.read().split()))")" >> "$GITHUB_OUTPUT"
+
+  old3ds:
+    needs: plan
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        run: ${{ fromJSON(needs.plan.outputs.runs) }}
+        case: [start, start-wide, start-stereo, play-wide, rooms-wide]
+    steps:
+      - name: The build
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run download ${{ matrix.run }} -R "${{ github.repository }}" -n tombi-3ds -D app
+          ls -l app
+
+      - name: Restore disc image
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/disccache
+          key: disc-pal-v1
+
+      - name: Azahar (latest release AppImage)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq xvfb x11-utils imagemagick libgl1-mesa-dri libegl1 libopengl0 libgl1 libglx-mesa0 libvulkan1 mesa-vulkan-drivers binutils-arm-none-eabi libxkbcommon-x11-0 libxcb-cursor0 \
+               libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0 libxcb-xinerama0 libxcb-xkb1 libfuse2 > /dev/null
+          url=$(curl -fsSL -H "Authorization: Bearer $GH_TOKEN" https://api.github.com/repos/azahar-emu/azahar/releases/latest \
+                | python3 -c "import sys,json; a=[x['browser_download_url'] for x in json.load(sys.stdin)['assets'] if x['name'].lower().endswith('.appimage')]; print(a[0] if a else '')")
+          echo "AppImage: $url"
+          curl -fsSL -o azahar.AppImage "$url"
+          chmod +x azahar.AppImage
+          ./azahar.AppImage --appimage-extract > /dev/null
+
+      - name: Run as an Old 3DS
+        run: |
+          SD="$HOME/.local/share/azahar-emu/sdmc"
+          mkdir -p "$SD/3ds/tombi" shots "$HOME/.config/azahar-emu"
+          # an Old 3DS (Azahar's System setting), the rest as it comes
+          printf '[System]\nis_new_3ds\\default=false\nis_new_3ds=false\n' > "$HOME/.config/azahar-emu/qt-config.ini"
+          cp "$RUNNER_TEMP/disccache/game.bin" "$SD/3ds/tombi/tombi.bin"
+          echo 9 > "$SD/3ds/tombi/lang.txt"                       # Spanish, the improved translation
+          case "${{ matrix.case }}" in
+            start)        echo "1 60 0" > "$SD/3ds/tombi/opts.txt" ;;
+            start-wide)   echo "1 60 1" > "$SD/3ds/tombi/opts.txt" ;;
+            start-stereo) echo "1 60 2" > "$SD/3ds/tombi/opts.txt" ;;
+            play-wide)    echo "1 60 1" > "$SD/3ds/tombi/opts.txt"
+                          echo "--skip-movies --poke 900:1F8001B4:1 --poke 1250:8009C960:1:2 --poke 1250:8009C962:0:2 --pad-script 1000:start,1300:circle:3,2000:right:6000" > "$SD/3ds/tombi/args.txt" ;;
+            rooms-wide)   echo "1 60 1" > "$SD/3ds/tombi/opts.txt"     # (Mushroom Forest, walked left)
+                          echo "--skip-movies --poke 900:1F8001B4:1 --poke 1250:8009C960:5:2 --poke 1250:8009C962:1:2 --pad-script 1000:start,1300:circle:3,2000:left:6000" > "$SD/3ds/tombi/args.txt" ;;
+          esac
+          F=$(ls app/*.cci | head -1)
+          export LIBGL_ALWAYS_SOFTWARE=1 QT_QPA_PLATFORM=xcb
+          Xvfb :99 -screen 0 1280x1024x24 & sleep 2
+          export DISPLAY=:99
+          ./squashfs-root/AppRun "$PWD/$F" > azahar.log 2>&1 &
+          EMU=$!
+          alive=1
+          for i in $(seq 1 12); do sleep 15; import -window root "shots/shot_$(printf %03d $((i*15))).png" || true; kill -0 "$EMU" 2>/dev/null || { alive=0; echo "the emulator ended after ~$((i*15)) s"; break; }; done
+          kill "$EMU" 2>/dev/null || true; sleep 2
+          cp "$SD/3ds/tombi/log.txt" shots/log.txt 2>/dev/null || echo "(no log.txt)" > shots/log.txt
+          L=$(find "$HOME/.local/share/azahar-emu" -name "*.txt" -path "*log*" | head -1)
+          echo "== the emulator's settings"; grep -i "new_3ds" "$HOME/.config/azahar-emu/qt-config.ini" | head -4
+          echo "== the emulator's log: errors"; [ -n "$L" ] && grep -i -E "exception|abort|crash|fatal|critical|svcBreak|break|invalid|unmapped|prefetch|data abort|out of memory|ControlMemory" "$L" | grep -v "Config <Info>" | head -60
+          echo "== code addresses in the emulator's log"
+          [ -n "$L" ] && grep -o "at PC 0x[0-9A-Fa-f]*" "$L" | awk '{print $3}' | sort | uniq -c | sort -rn | head -12 | while read n a; do
+            echo "$n x $a $(arm-none-eabi-addr2line -f -s -e app/tombi.elf $a | tr '\n' ' ')"; done
+          echo "== log.txt (start)"; head -25 shots/log.txt
+          echo "== log.txt (memory, tables)"; grep -a -E "memory|tables|wsbd|slots|no memory|failed|fatal|crash|abort" shots/log.txt | head -40
+          echo "== log.txt (end)"; tail -25 shots/log.txt
+          n=$(grep -a -c "\[port\] fps\|ordering tables:" shots/log.txt)
+          echo "RESULT run ${{ matrix.run }} case ${{ matrix.case }}: alive=$alive, $(wc -l < shots/log.txt) log lines, $n fps lines"
+          [ -n "$L" ] && cp "$L" shots/azahar_log.txt
+          cp azahar.log shots/ 2>/dev/null || true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: old3ds-${{ matrix.run }}-${{ matrix.case }}
+          path: shots
