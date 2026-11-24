@@ -3,6 +3,7 @@
  * push and pop its address on a stack of the calling thread (thread-local, so the panel's and the mixer's threads
  * keep their own).  A thread of higher priority on the main thread's core wakes every millisecond and counts the
  * function on top of the main thread's stack (the one it is in, its callees not instrumented counted with it).
+ * Instrumented: the game, and the renderer (shims/gpu.c, shims/gpu_pica.c, n3ds/pica_c3d.c).
  * Every 10 seconds the log gets the 40 functions most often found, their addresses (named with the build's ELF:
  * arm-none-eabi-addr2line -f -e tombi.elf ADDR), and the samples' total.  The hooks cost time themselves: the
  * shares are what counts, not the frame rate of such a build. */

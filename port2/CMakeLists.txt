@@ -279,6 +279,10 @@ if(PORT_FN_PROFILE AND NINTENDO_3DS)
   foreach(t ${PORT2_GAME_TARGETS})
     target_compile_options(${t} PRIVATE -finstrument-functions)
   endforeach()
+  # and the renderer (the ordering tables' decoder and the PICA backend: no coroutine switches in them), so a drawn
+  # table's time is split by function too
+  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/shims/gpu.c ${CMAKE_CURRENT_SOURCE_DIR}/shims/gpu_pica.c
+                              ${CMAKE_CURRENT_SOURCE_DIR}/n3ds/pica_c3d.c PROPERTIES COMPILE_OPTIONS -finstrument-functions)
 endif()
 if(PORT_LAZY_BSS)
   target_compile_definitions(port2rt PRIVATE PORT_LAZY_BSS)
