@@ -4,6 +4,9 @@ Update this file whenever something lands or a task is decided. Newest first.
 
 ## Since v0.7.2 (not released)
 
+- Spanish: the cold-medicine event's title (#116 of every CFNT999S) is "Al primer síntoma..." (was "Coge dos de
+  estos", a literal "Take two of these"); it follows the Japanese title's hint, a cut-off cold-medicine advert line.
+  The console's layout shows 14 of its 18 letters; the port shows it whole (freeTitles).
 - **3DS (branch claude/wizardly-heisenberg-5fllxj, merged 2026-11-24).**  Old 3DS at 5:3 / 60 Hz: the GTE's
   perspective division in single precision with one correction step (exact over every pair; 2-3 ms a frame less on an
   Old 3DS), the screen products in one SMULL, RTPT straight into the FIFOs (`tools/gte_arm_test.c` in qemu: identical
