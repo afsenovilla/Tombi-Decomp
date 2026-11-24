@@ -91,7 +91,10 @@ static inline __attribute__((always_inline)) s64 gte_smull(s32 a, s32 b) {   /* 
 #else
 #define GTE_MUL(a, b) ((s64)(a) * (s32)(b))
 #endif
-static inline __attribute__((always_inline)) void rtp(int n, int last) {   /* (in line: RTPT's three share the matrix and the screen registers they load) */
+/* slot: -1 RTPS (the SZ / SXY FIFOs shift), 0..2 RTPT's vertex n written straight to its place in them (the caller
+   moved SZ3 to SZ0 first): the state after the three is the one three shifts leave, without the stores in between;
+   MAC1..3 / IR1..3 are stored by the last one alone (each vertex overwrites them; their flags are kept for all) */
+static inline __attribute__((always_inline)) void rtp(int n, int last, int slot) {   /* (in line: RTPT's three share the matrix and the screen registers they load) */
 #ifdef GTE_ARM
     const u32 xy = (u32)D[n * 2], zz = (u32)D[n * 2 + 1];
     s64 m1 = (s64)C[5] + (gte_smlalbb(gte_smlald(0, (u32)C[0], xy), (u32)C[1], zz) >> 12);
@@ -103,14 +106,15 @@ static inline __attribute__((always_inline)) void rtp(int n, int last) {   /* (i
     s64 m2 = (s64)C[6] + sum3_12(M16HI(1) * x, M16LO(2) * y, M16HI(2) * z);
     s64 m3 = (s64)C[7] + sum3_12(M16LO(3) * x, M16HI(3) * y, M16LO(4) * z);
 #endif
-    MAC1 = (s32)m1; MAC2 = (s32)m2; MAC3 = (s32)m3;
-    IR1 = clamp32(MAC1, -0x8000, 0x7FFF, 1u << 24);
-    IR2 = clamp32(MAC2, -0x8000, 0x7FFF, 1u << 23);
-    IR3 = clamp32(MAC3, -0x8000, 0x7FFF, 1u << 22);
+    const s32 ir1 = clamp32((s32)m1, -0x8000, 0x7FFF, 1u << 24);
+    const s32 ir2 = clamp32((s32)m2, -0x8000, 0x7FFF, 1u << 23);
+    const s32 ir3 = clamp32((s32)m3, -0x8000, 0x7FFF, 1u << 22);
+    if (last) { MAC1 = (s32)m1; MAC2 = (s32)m2; MAC3 = (s32)m3; IR1 = ir1; IR2 = ir2; IR3 = ir3; }
     /* SZ FIFO */
-    D[16] = D[17]; D[17] = D[18]; D[18] = D[19];
-    D[19] = clampf(m3, 0, 0xFFFF, 1u << 18);
-    u32 h = (u16)C[26], sz = (u32)D[19];
+    const u32 sz = (u32)clampf(m3, 0, 0xFFFF, 1u << 18);
+    if (slot < 0) { D[16] = D[17]; D[17] = D[18]; D[18] = D[19]; D[19] = (s32)sz; }
+    else D[17 + slot] = (s32)sz;
+    u32 h = (u16)C[26];
     u32 q;
     if (sz * 2 <= h) { q = 0x1FFFF; FLAG |= 1u << 17; }
     else {
@@ -133,12 +137,12 @@ static inline __attribute__((always_inline)) void rtp(int n, int last) {   /* (i
         q = (d + 1) >> 1;
         if (q > 0x1FFFF) { q = 0x1FFFF; FLAG |= 1u << 17; }
     }
-    s64 sx = (((s64)C[24] + GTE_MUL(IR1, q)) >> 16) + port_gte_dx;
-    s64 sy = ((s64)C[25] + GTE_MUL(IR2, q)) >> 16;
-    D[12] = D[13]; D[13] = D[14];
+    s64 sx = (((s64)C[24] + GTE_MUL(ir1, q)) >> 16) + port_gte_dx;
+    s64 sy = ((s64)C[25] + GTE_MUL(ir2, q)) >> 16;
     s32 SX = clampf(sx, -0x400, 0x3FF, 1u << 14), SY = clampf(sy, -0x400, 0x3FF, 1u << 13);
-    D[14] = (SX & 0xFFFF) | ((u32)SY << 16);
-    D[15] = D[14];
+    const s32 sxy = (SX & 0xFFFF) | ((u32)SY << 16);
+    if (slot < 0) { D[12] = D[13]; D[13] = D[14]; D[14] = sxy; D[15] = sxy; }
+    else { D[12 + slot] = sxy; if (last) D[15] = sxy; }
     { extern int port_stereo_on; extern void port_stereo_note(int, int, unsigned); if (port_stereo_on) port_stereo_note(SX, SY, sz); }
     if (last) {
         s64 m0 = GTE_MUL((s16)C[27], q) + C[28];
@@ -213,8 +217,8 @@ static void mvmva(u32 op) {
 void port_gte_op(unsigned long op) {
     FLAG = 0;
     switch (op & 0x3F) {
-    case 0x01: rtp(0, 1); break;                                     /* RTPS */
-    case 0x30: rtp(0, 0); rtp(1, 0); rtp(2, 1); break;               /* RTPT */
+    case 0x01: rtp(0, 1, -1); break;                                 /* RTPS */
+    case 0x30: D[16] = D[19]; rtp(0, 0, 0); rtp(1, 0, 1); rtp(2, 1, 2); break;   /* RTPT */
     case 0x06: {                                                     /* NCLIP */
         /* (modulo 2^32, what the 64-bit sum cut to 32 bits was) */
         s32 x0 = (s16)D[12], y0 = (s16)(D[12] >> 16), x1 = (s16)D[13], y1 = (s16)(D[13] >> 16);
@@ -243,8 +247,8 @@ void port_gte_op(unsigned long op) {
 /* the commands one by one (include/port_gte_inline.h: the 3DS's game code calls these straight, the command being a
    constant there, instead of port_gte_op's switch) */
 static inline void flag_fold(void) { if (FLAG & 0x7F87E000u) FLAG |= 0x80000000u; }
-void port_gte_rtps(void) { FLAG = 0; rtp(0, 1); flag_fold(); }
-void port_gte_rtpt(void) { FLAG = 0; rtp(0, 0); rtp(1, 0); rtp(2, 1); flag_fold(); }
+void port_gte_rtps(void) { FLAG = 0; rtp(0, 1, -1); flag_fold(); }
+void port_gte_rtpt(void) { FLAG = 0; D[16] = D[19]; rtp(0, 0, 0); rtp(1, 0, 1); rtp(2, 1, 2); flag_fold(); }
 void port_gte_nccs(void) { FLAG = 0; ncc(0); flag_fold(); }
 void port_gte_ncct(void) { FLAG = 0; ncc(0); ncc(1); ncc(2); flag_fold(); }
 
