@@ -108,7 +108,15 @@ static inline __attribute__((always_inline)) void rtp(int n, int last) {   /* (i
     else {
         /* (h << 17) / sz with 32-bit divisions (h < 2 sz, both 16 bits: the quotient has 18): a 64-bit division is a
            long library call on the 3DS's ARM11, once a vertex */
-        u32 a = (h << 16) / sz, rem = (h << 16) - a * sz, d = 2 * a + (2 * rem >= sz);
+#ifdef GTE_ARM
+        /* (the ARM11 has no divide instruction, its VFP a double one: the quotient of two integers under 2^32 and
+           2^16 as a double is the exact one rounded, never across an integer (it is at least 1 / sz away), so its
+           truncation is the integer quotient) */
+        u32 a = (u32)((double)(h << 16) / (double)sz);
+#else
+        u32 a = (h << 16) / sz;
+#endif
+        u32 rem = (h << 16) - a * sz, d = 2 * a + (2 * rem >= sz);
         q = (d + 1) >> 1;
         if (q > 0x1FFFF) { q = 0x1FFFF; FLAG |= 1u << 17; }
     }
@@ -218,6 +226,14 @@ void port_gte_op(unsigned long op) {
     }
     if (FLAG & 0x7F87E000u) FLAG |= 0x80000000u;
 }
+
+/* the commands one by one (include/port_gte_inline.h: the 3DS's game code calls these straight, the command being a
+   constant there, instead of port_gte_op's switch) */
+static inline void flag_fold(void) { if (FLAG & 0x7F87E000u) FLAG |= 0x80000000u; }
+void port_gte_rtps(void) { FLAG = 0; rtp(0, 1); flag_fold(); }
+void port_gte_rtpt(void) { FLAG = 0; rtp(0, 0); rtp(1, 0); rtp(2, 1); flag_fold(); }
+void port_gte_nccs(void) { FLAG = 0; ncc(0); flag_fold(); }
+void port_gte_ncct(void) { FLAG = 0; ncc(0); ncc(1); ncc(2); flag_fold(); }
 
 void port_gte_mtc2(int r, unsigned long v) {
     switch (r) {
