@@ -82,6 +82,14 @@ static inline __attribute__((always_inline)) s64 gte_smlaltb(s64 acc, u32 a, u32
     __asm__("smlaltb %0, %1, %2, %3" : "+r"(lo), "+r"(hi) : "r"(a), "r"(b));
     return (s64)(((unsigned long long)hi << 32) | lo);
 }
+static inline __attribute__((always_inline)) s64 gte_smull(s32 a, s32 b) {   /* (gcc made three multiplies of it) */
+    u32 lo, hi;
+    __asm__("smull %0, %1, %2, %3" : "=&r"(lo), "=&r"(hi) : "r"(a), "r"(b));
+    return (s64)(((unsigned long long)hi << 32) | lo);
+}
+#define GTE_MUL(a, b) gte_smull((a), (s32)(b))
+#else
+#define GTE_MUL(a, b) ((s64)(a) * (s32)(b))
 #endif
 static inline __attribute__((always_inline)) void rtp(int n, int last) {   /* (in line: RTPT's three share the matrix and the screen registers they load) */
 #ifdef GTE_ARM
@@ -112,7 +120,12 @@ static inline __attribute__((always_inline)) void rtp(int n, int last) {   /* (i
         /* (the ARM11 has no divide instruction, its VFP a double one: the quotient of two integers under 2^32 and
            2^16 as a double is the exact one rounded, never across an integer (it is at least 1 / sz away), so its
            truncation is the integer quotient) */
-        u32 a = (u32)((double)(h << 16) / (double)sz);
+        /* (single precision: a third of the double division's cycles on the VFP11; the float quotient is within 1 of
+           the exact one (each rounding 2^-24 relative, the quotient under 2^17), one step on the remainder makes it
+           the integer quotient) */
+        u32 n = h << 16, a = (u32)((float)n / (float)sz);
+        s32 r0 = (s32)(n - a * sz);
+        if (r0 < 0) a--; else if ((u32)r0 >= sz) a++;
 #else
         u32 a = (h << 16) / sz;
 #endif
@@ -120,15 +133,15 @@ static inline __attribute__((always_inline)) void rtp(int n, int last) {   /* (i
         q = (d + 1) >> 1;
         if (q > 0x1FFFF) { q = 0x1FFFF; FLAG |= 1u << 17; }
     }
-    s64 sx = (((s64)C[24] + (s64)IR1 * q) >> 16) + port_gte_dx;
-    s64 sy = ((s64)C[25] + (s64)IR2 * q) >> 16;
+    s64 sx = (((s64)C[24] + GTE_MUL(IR1, q)) >> 16) + port_gte_dx;
+    s64 sy = ((s64)C[25] + GTE_MUL(IR2, q)) >> 16;
     D[12] = D[13]; D[13] = D[14];
     s32 SX = clampf(sx, -0x400, 0x3FF, 1u << 14), SY = clampf(sy, -0x400, 0x3FF, 1u << 13);
     D[14] = (SX & 0xFFFF) | ((u32)SY << 16);
     D[15] = D[14];
     { extern int port_stereo_on; extern void port_stereo_note(int, int, unsigned); if (port_stereo_on) port_stereo_note(SX, SY, sz); }
     if (last) {
-        s64 m0 = (s64)(s16)C[27] * q + C[28];
+        s64 m0 = GTE_MUL((s16)C[27], q) + C[28];
         MAC0 = (s32)m0;
         IR0 = clampf(m0 >> 12, 0, 0x1000, 1u << 12);
     }

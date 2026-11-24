@@ -5,7 +5,9 @@
      F="-O2 -marm -march=armv6k -mfpu=vfp -mfloat-abi=softfp -static -Iport2/include"
      arm-linux-gnueabi-gcc $F port2/tools/gte_arm_test.c -o /tmp/gte_arm
      arm-linux-gnueabi-gcc $F -DGTE_PLAIN port2/tools/gte_arm_test.c -o /tmp/gte_c
-     qemu-arm /tmp/gte_arm > a.txt; qemu-arm /tmp/gte_c > c.txt; cmp a.txt c.txt   (and the first prints "GTE_ARM 1") */
+     qemu-arm /tmp/gte_arm > a.txt; qemu-arm /tmp/gte_c > c.txt; cmp a.txt c.txt   (and the first prints "GTE_ARM 1")
+   Without arm-linux-gnueabi-gcc (it removes gcc-multilib, which the i386 build needs): arm-none-eabi-gcc with
+   F="-O2 -march=armv6k -marm -mfloat-abi=hard -mfpu=vfp --specs=rdimon.specs -Iport2/include -Iport2/runtime" */
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
