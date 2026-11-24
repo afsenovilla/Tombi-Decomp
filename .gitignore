@@ -64,3 +64,5 @@ game_sces01330
 game_jp_demo
 .sdl3ds/
 game_yoiko2
+# the widescreen strips cache the port writes next to the memory cards (runtime/ws_cache.c)
+ws_cache/

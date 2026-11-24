@@ -62,7 +62,12 @@ static const short GR_SIN[91] = {
     15491, 15582, 15668, 15749, 15826, 15897, 15964, 16026, 16083, 16135, 16182, 16225, 16262, 16294, 16322, 16344,
     16362, 16374, 16382, 16384 };
 /* angles are sixteenths of a degree, clockwise from straight up; sin / cos x 16384 */
-static int gr_sin90(int a) { int d = a >> 4, f = a & 15; return d >= 90 ? 16384 : GR_SIN[d] + (GR_SIN[d + 1] - GR_SIN[d]) * f / 16; }
+static int gr_sin90(int a)
+{
+    int deg = a >> 4,
+        frac = a & 15;
+    return deg >= 90 ? 16384 : GR_SIN[deg] + (GR_SIN[deg + 1] - GR_SIN[deg]) * frac / 16;
+}
 static int gr_sinq(int a)
 {
     a = fmodi(a, 360 * 16);
@@ -72,20 +77,46 @@ static int gr_sinq(int a)
     return -gr_sin90(360 * 16 - a);
 }
 static int gr_cosq(int a) { return gr_sinq(a + 90 * 16); }
-static int gr_ang(int dx, int dy)                        /* the angle of (dx, dy) from straight up (-180 .. 180 degrees) */
+/* the angle of (dx, dy) from straight up (-180 .. 180 degrees) */
+static int gr_ang(int dx, int dy)
 {
-    int ax = dx < 0 ? -dx : dx, ay = dy < 0 ? -dy : dy, lo = 0, hi = 90, f0, f1, a;
+    int ax = dx < 0 ? -dx : dx,
+        ay = dy < 0 ? -dy : dy,
+        lo = 0,
+        hi = 90,
+        f0, f1, a;
     if (!ax && !ay) return 0;
-    while (hi - lo > 1) { int m = (lo + hi) / 2; if (ax * GR_SIN[90 - m] - ay * GR_SIN[m] >= 0) lo = m; else hi = m; }
-    f0 = ax * GR_SIN[90 - lo] - ay * GR_SIN[lo]; f1 = ax * GR_SIN[90 - hi] - ay * GR_SIN[hi];
+    while (hi - lo > 1) {
+        int mid = (lo + hi) / 2;
+        if (ax * GR_SIN[90 - mid] - ay * GR_SIN[mid] >= 0)
+            lo = mid;
+        else
+            hi = mid;
+    }
+    f0 = ax * GR_SIN[90 - lo] - ay * GR_SIN[lo];
+    f1 = ax * GR_SIN[90 - hi] - ay * GR_SIN[hi];
     a = lo * 16 + (f0 > f1 ? clampi(f0 * 16 / (f0 - f1), 0, 16) : 0);
     if (dy > 0) a = 180 * 16 - a;
     return dx < 0 ? -a : a;
 }
-static int gr_isqrt(int v) { int r = 0, b = 1 << 30; while (b > v) b >>= 2; while (b) { if (v >= r + b) { v -= r + b; r = (r >> 1) + b; } else r >>= 1; b >>= 2; } return r; }
+static int gr_isqrt(int v)
+{
+    int root = 0,
+        bit = 1 << 30;
+    while (bit > v) bit >>= 2;
+    while (bit) {
+        if (v >= root + bit) {
+            v -= root + bit;
+            root = (root >> 1) + bit;
+        } else
+            root >>= 1;
+        bit >>= 2;
+    }
+    return root;
+}
 static int gr_rnd(int v, int sh) { return fdiv(v + (1 << (sh - 1)), 1 << sh); }
 
-#define GR_LCX (-34)                                     /* the left wheel's centre and radii (x 16) */
+#define GR_LCX (-34) /* the left wheel's centre and radii (x 16) */
 #define GR_LCY 291
 #define GR_RCX 389
 #define GR_RCY 337
@@ -93,21 +124,21 @@ static int gr_rnd(int v, int sh) { return fdiv(v + (1 << (sh - 1)), 1 << sh); }
 #define GR_LIN (147 * 16 + 8)
 #define GR_RIN (142 * 16 + 8)
 #define GR_TOP (212 * 16)
-#define GR_PER (44 * 16)                                 /* a tooth period */
+#define GR_PER (44 * 16) /* a tooth period */
 /* the spokes are bars: t along the bar (x 16; 147 at the point given, growing towards the rim), p across it from the
    edge of its lit face that the side face is on (x 16, positive to the right).  Left: that edge is the picture's line
    x = 11.5 - 0.458 (y - 161) (24.6 degrees off the vertical), the lit face 18 wide on its left, the side face 6.8 wide
    on its right; right: the same bar the other way round under the cut tooth */
 #define GR_SPK (24 * 16 + 10)
 #define GR_SPKR (-(27 * 16 + 10))
-#define GR_LEX (-795)                                    /* the bars' origins (x 16): 147 down the edge from (11.5, 161) */
+#define GR_LEX (-795) /* the bars' origins (x 16): 147 down the edge from (11.5, 161) */
 #define GR_LEY 4714
-#define GR_REX 6478                                      /* ... from (336.8, 209.6) */
+#define GR_REX 6478 /* ... from (336.8, 209.6) */
 #define GR_REY 5437
 #define GR_SPW (18 * 16)
 #define GR_SPD 109
-#define GR_AXR (-(18 * 16 + 8))                          /* the right tooth's axis */
-#define GR_RSC 305                                       /* the right rim's width over the left rim's (x 256) */
+#define GR_AXR (-(18 * 16 + 8)) /* the right tooth's axis */
+#define GR_RSC 305              /* the right rim's width over the left rim's (x 256) */
 
 static int gr_blue(Rgb k) { return k.b > k.r + 25 && k.b >= k.g; }
 /* a wheel texel of the quads' wheel at wheel coordinates (x, y): sx columns off (the right quad: -3) */
@@ -115,92 +146,159 @@ static int gr_wtex(int x, int y, Rgb *o)
 {
     if (x < 0 || x >= PW || y < 0 || y >= PH) return 0;
     *o = rgb15(pic[y][x]);
-    return pic_ov[y][x] || (gr_blue(*o) && lum(*o) < 60);     /* (the dark faces are the picture's only) */
+    return pic_ov[y][x] || (gr_blue(*o) && lum(*o) < 60); /* (the dark faces are the picture's only) */
 }
 static int gr_lit(int x, int y, Rgb *o) { return gr_wtex(x, y, o) && gr_blue(*o) && lum(*o) >= 60; }
 /* Catmull-Rom weights (x 256) of the four texels around a point f sixteenths past the second */
 static void gr_cr4(int f, int *w)
 {
-    int t = f * 16, t2 = t * t / 256, t3 = t2 * t / 256;
-    w[0] = (-t3 + 2 * t2 - t) / 2; w[1] = (3 * t3 - 5 * t2 + 512) / 2; w[2] = (-3 * t3 + 4 * t2 + t) / 2; w[3] = 256 - w[0] - w[1] - w[2];
+    int t = f * 16,
+        t2 = t * t / 256,
+        t3 = t2 * t / 256;
+    w[0] = (-t3 + 2 * t2 - t) / 2;
+    w[1] = (3 * t3 - 5 * t2 + 512) / 2;
+    w[2] = (-3 * t3 + 4 * t2 + t) / 2;
+    w[3] = 256 - w[0] - w[1] - w[2];
 }
 /* (the texel at radius r16, angle a: a turned face keeps the picture's mottling when it is taken between the texels
    around the point - cubic over the 4 x 4 around it when they are all lit faces (bilinear loses a fifth of the
    mottle's contrast - measured, the 5 x 5 high-pass deviation 6.6 for the picture's 8.1 - and nearest gives a
    speckle), bilinear over the 2 x 2 when only they are; else the nearest texel) */
-static int gr_pq;                                        /* how gr_polar took its last texel: 2 cubic, 1 bilinear, 0 nearest */
+/* how gr_polar took its last texel: 2 cubic, 1 bilinear, 0 nearest */
+static int gr_pq;
 static int gr_polar(int cx, int cy, int r16, int a, int sx, Rgb *o)
 {
-    int xf = cx * 16 + gr_rnd(r16 * (gr_sinq(a) >> 2), 12) - 8, yf = cy * 16 - gr_rnd(r16 * (gr_cosq(a) >> 2), 12) - 8;     /* (x 16, from the texel centres) */
-    int x0 = fdiv(xf, 16), y0 = fdiv(yf, 16), fx = xf - x0 * 16, fy = yf - y0 * 16, all = 1; Rgb k[4][4];
-    for (int j = 1; j < 3 && all; j++) for (int i = 1; i < 3 && all; i++) all = gr_lit(x0 - 1 + i + sx, y0 - 1 + j, &k[j][i]);
+    /* (x 16, from the texel centres) */
+    int xf = cx * 16 + gr_rnd(r16 * (gr_sinq(a) >> 2), 12) - 8,
+        yf = cy * 16 - gr_rnd(r16 * (gr_cosq(a) >> 2), 12) - 8;
+    int x0 = fdiv(xf, 16),
+        y0 = fdiv(yf, 16),
+        fx = xf - x0 * 16,
+        fy = yf - y0 * 16,
+        all_lit = 1;
+    Rgb k[4][4];
+    for (int j = 1; j < 3 && all_lit; j++)
+        for (int i = 1; i < 3 && all_lit; i++) all_lit = gr_lit(x0 - 1 + i + sx, y0 - 1 + j, &k[j][i]);
     gr_pq = 0;
-    if (!all) return gr_wtex(x0 + (fx >= 8) + sx, y0 + (fy >= 8), o);
-    for (int j = 0; j < 4 && all; j++) for (int i = 0; i < 4 && all; i++) if (j < 1 || j > 2 || i < 1 || i > 2) all = gr_lit(x0 - 1 + i + sx, y0 - 1 + j, &k[j][i]);
-    if (all) {
-        int wx[4], wy[4], r = 0, g = 0, b = 0;
-        gr_cr4(fx, wx); gr_cr4(fy, wy);
-        for (int j = 0; j < 4; j++) for (int i = 0; i < 4; i++) { int w = wx[i] * wy[j]; r += k[j][i].r * w; g += k[j][i].g * w; b += k[j][i].b * w; }
-        o->r = clampi(gr_rnd(r, 16), 0, 255); o->g = clampi(gr_rnd(g, 16), 0, 255); o->b = clampi(gr_rnd(b, 16), 0, 255);
+    if (!all_lit) return gr_wtex(x0 + (fx >= 8) + sx, y0 + (fy >= 8), o);
+    for (int j = 0; j < 4 && all_lit; j++)
+        for (int i = 0; i < 4 && all_lit; i++)
+            if (j < 1 || j > 2 || i < 1 || i > 2) all_lit = gr_lit(x0 - 1 + i + sx, y0 - 1 + j, &k[j][i]);
+    if (all_lit) {
+        int wx[4], wy[4],
+            r = 0,
+            g = 0,
+            b = 0;
+        gr_cr4(fx, wx);
+        gr_cr4(fy, wy);
+        for (int j = 0; j < 4; j++)
+            for (int i = 0; i < 4; i++) {
+                int w = wx[i] * wy[j];
+                r += k[j][i].r * w;
+                g += k[j][i].g * w;
+                b += k[j][i].b * w;
+            }
+        o->r = clampi(gr_rnd(r, 16), 0, 255);
+        o->g = clampi(gr_rnd(g, 16), 0, 255);
+        o->b = clampi(gr_rnd(b, 16), 0, 255);
         gr_pq = 2;
-    } else { gr_pq = 1; *o = mix(mix(k[1][1], k[1][2], fx * 16), mix(k[2][1], k[2][2], fx * 16), fy * 16); }
+    } else {
+        gr_pq = 1;
+        *o = mix(mix(k[1][1], k[1][2], fx * 16), mix(k[2][1], k[2][2], fx * 16), fy * 16);
+    }
     return 1;
 }
-static int gr_lin(int a, const short (*t)[2], int n)     /* piecewise linear over degrees */
+static int gr_lin(int a, const short (*t)[2], int n) /* piecewise linear over degrees */
 {
     if (a <= t[0][0] * 16) return t[0][1];
     for (int i = 1; i < n; i++)
-        if (a <= t[i][0] * 16) return t[i - 1][1] + (t[i][1] - t[i - 1][1]) * (a - t[i - 1][0] * 16) / ((t[i][0] - t[i - 1][0]) * 16);
+        if (a <= t[i][0] * 16)
+            return t[i - 1][1] + (t[i][1] - t[i - 1][1]) * (a - t[i - 1][0] * 16) / ((t[i][0] - t[i - 1][0]) * 16);
     return t[n - 1][1];
 }
-static const short GR_PIN[][2] = { { 36, 2360 }, { 40, 2304 }, { 44, 2272 } };            /* the left rim's inner edge (x 16) */
+/* the left rim's inner edge (x 16) */
+static const short GR_PIN[][2] = { { 36, 2360 }, { 40, 2304 }, { 44, 2272 } };
 static const short GR_POUT[][2] = { { 42, 2912 }, { 44, 2880 }, { 46, 2840 }, { 48, 2824 }, { 50, 2808 }, { 52, 2792 } };
 static int gr_pin(int a) { return gr_lin(a, GR_PIN, 3); }
 static int gr_pout(int a) { return gr_lin(a, GR_POUT, 6); }
 /* the left rim's face is low-poly: its facets differ in tone (mean luminance 69 .. 101 over 3 degrees).  gr_rm: the
    face's mean luminance (x 16) per degree 8 .. 71, over 3 degrees and radii 152-178 (0: off the picture) */
-static short gr_rm[64]; static int gr_rmj;               /* gr_rmj: the same of the picture's first 3 degrees at the join */
+/* gr_rmj: the same of the picture's first 3 degrees at the join */
+static short gr_rm[64];
+static int gr_rmj;
 static int gr_rmean(int a)
 {
-    int d = clampi(fdiv(a, 16) - 8, 0, 62), f = clampi(a - (d + 8) * 16, 0, 16), u = gr_rm[d], v = gr_rm[d + 1];
-    if (!u) u = v ? v : gr_rmj;
-    if (!v) v = u;
-    return u + (v - u) * f / 16;
+    int d = clampi(fdiv(a, 16) - 8, 0, 62),
+        f = clampi(a - (d + 8) * 16, 0, 16),
+        m0 = gr_rm[d],
+        m1 = gr_rm[d + 1];
+    if (!m0) m0 = m1 ? m1 : gr_rmj;
+    if (!m1) m1 = m0;
+    return m0 + (m1 - m0) * f / 16;
 }
 static void gr_rmake(void)
 {
-    Rgb k; int sj = 0, nj = 0;
+    Rgb k;
+    int join_sum = 0,
+        join_n = 0;
     for (int d = 0; d < 64; d++) {
-        int s = 0, n = 0;
+        int s = 0,
+            n = 0;
         for (int a = (d + 8) * 16 - 24; a <= (d + 8) * 16 + 24; a += 4)
             for (int r = 152 * 16; r <= 178 * 16; r += 24)
-                if (gr_polar(GR_LCX, GR_LCY, r, a, 0, &k) && gr_blue(k)) { s += lum(k); n++; }
+                if (gr_polar(GR_LCX, GR_LCY, r, a, 0, &k) && gr_blue(k)) {
+                    s += lum(k);
+                    n++;
+                }
         gr_rm[d] = (short)(n >= 60 ? s * 16 / n : 0);
     }
     for (int a = 11 * 16 + 8; a <= 14 * 16 + 8; a += 4)
         for (int r = 152 * 16; r <= 178 * 16; r += 24)
-            if (gr_polar(GR_LCX, GR_LCY, r, a, 0, &k) && gr_blue(k)) { sj += lum(k); nj++; }
-    gr_rmj = nj >= 30 ? sj * 16 / nj : gr_rm[6] ? gr_rm[6] : 80 * 16;
+            if (gr_polar(GR_LCX, GR_LCY, r, a, 0, &k) && gr_blue(k)) {
+                join_sum += lum(k);
+                join_n++;
+            }
+    gr_rmj = join_n >= 30 ? join_sum * 16 / join_n : gr_rm[6] ? gr_rm[6] : 80 * 16;
 }
-static int gr_rta;                                       /* the angle gr_rimtex took its texel at */
+static int gr_rta; /* the angle gr_rimtex took its texel at */
 /* a texel of the left rim's face laid straight: u columns along (0 .. about 80), v 0 .. 255 across */
 static int gr_rimtex(int u, int v, Rgb *o)
 {
-    int a = 22 * 16 + 8 + fmodi(u, 82) * 89 / 16, in = gr_pin(a) + 40, out = gr_pout(a) - 24;
+    int a = 22 * 16 + 8 + fmodi(u, 82) * 89 / 16,
+        inner = gr_pin(a) + 40,
+        outer = gr_pout(a) - 24;
     gr_rta = a;
-    if (gr_polar(GR_LCX, GR_LCY, in + (out - in) * clampi(v, 0, 255) / 255, a, 0, o) && gr_blue(*o)) return 1;
-    return gr_polar(GR_LCX, GR_LCY, (in + out) / 2, a, 0, o);
+    if (gr_polar(GR_LCX, GR_LCY, inner + (outer - inner) * clampi(v, 0, 255) / 255, a, 0, o) && gr_blue(*o)) return 1;
+    return gr_polar(GR_LCX, GR_LCY, (inner + outer) / 2, a, 0, o);
 }
-static Rgb gr_gain(Rgb c, const int *g) { Rgb o = { clampi(c.r * g[0] / 256, 0, 255), clampi(c.g * g[1] / 256, 0, 255), clampi(c.b * g[2] / 256, 0, 255) }; return o; }
-static int gr_gS0[3], gr_gR[3], gr_gT[3], gr_dl;        /* tones over the left rim's (x 256): the left spoke, the right rim;
-                                                            the right tooth over the left tooth; gr_dl: gr_join */
-static Rgb gr_sm; static int gr_sl, gr_sd, gr_rd;       /* the visible spoke's lit face: mean colour, its luminance and
-                                                            mean deviation (x 16); the deviation of the rim texels laid on the bar */
-typedef struct { int r, g, b, n; } GrSum;
-static void gr_add(GrSum *s, Rgb k) { s->r += k.r; s->g += k.g; s->b += k.b; s->n++; }
-static void gr_ratio(const GrSum *a, const GrSum *b, int *g)     /* a over b */
+static Rgb gr_gain(Rgb c, const int *g)
 {
-    if (a->n < 12 || b->n < 12) { g[0] = g[1] = g[2] = 256; return; }
+    Rgb o = { clampi(c.r * g[0] / 256, 0, 255), clampi(c.g * g[1] / 256, 0, 255), clampi(c.b * g[2] / 256, 0, 255) };
+    return o;
+}
+/* tones over the left rim's (x 256): the left spoke, the right rim; the right tooth over the left tooth; gr_dl:
+   gr_join */
+static int gr_gS0[3], gr_gR[3], gr_gT[3], gr_dl;
+/* the visible spoke's lit face: mean colour, its luminance and mean deviation (x 16); the deviation of the rim
+   texels laid on the bar */
+static Rgb gr_sm;
+static int gr_sl, gr_sd, gr_rd;
+typedef struct {
+    int r, g, b, n;
+} GrSum;
+static void gr_add(GrSum *s, Rgb k)
+{
+    s->r += k.r;
+    s->g += k.g;
+    s->b += k.b;
+    s->n++;
+}
+static void gr_ratio(const GrSum *a, const GrSum *b, int *g) /* a over b */
+{
+    if (a->n < 12 || b->n < 12) {
+        g[0] = g[1] = g[2] = 256;
+        return;
+    }
     g[0] = clampi((a->r * 256 / a->n) / (b->r / b->n + 1), 180, 360);
     g[1] = clampi((a->g * 256 / a->n) / (b->g / b->n + 1), 180, 360);
     g[2] = clampi((a->b * 256 / a->n) / (b->b / b->n + 1), 180, 360);
@@ -208,78 +306,143 @@ static void gr_ratio(const GrSum *a, const GrSum *b, int *g)     /* a over b */
 /* a bar at angle a0 from (cx, cy) (x 16): t along it, p across (right positive), x 16, of the point (x, y) (x 16) */
 static void gr_bar(int cx, int cy, int a0, int x, int y, int *t, int *p)
 {
-    int s = gr_sinq(a0), c = gr_cosq(a0), dx = x - cx, dy = y - cy;
-    *t = gr_rnd(dx * s - dy * c, 14); *p = gr_rnd(dx * c + dy * s, 14);
+    int sin_a = gr_sinq(a0),
+        cos_a = gr_cosq(a0),
+        dx = x - cx,
+        dy = y - cy;
+    *t = gr_rnd(dx * sin_a - dy * cos_a, 14);
+    *p = gr_rnd(dx * cos_a + dy * sin_a, 14);
 }
-static int gr_barpt(int cx, int cy, int a0, int t, int p, int sx, Rgb *o)     /* the wheel texel at (t, p) of the bar */
+static int gr_barpt(int cx, int cy, int a0, int t, int p, int sx, Rgb *o) /* the wheel texel at (t, p) of the bar */
 {
-    int s = gr_sinq(a0) >> 2, c = gr_cosq(a0) >> 2;
-    return gr_wtex(gr_rnd(cx * 4096 + t * s + p * c, 16) + sx, gr_rnd(cy * 4096 - t * c + p * s, 16), o);
+    int sin_a = gr_sinq(a0) >> 2,
+        cos_a = gr_cosq(a0) >> 2;
+    return gr_wtex(gr_rnd(cx * 4096 + t * sin_a + p * cos_a, 16) + sx, gr_rnd(cy * 4096 - t * cos_a + p * sin_a, 16),
+                   o);
 }
 /* the left rim at the join: the strip's rim is the picture's rim next to the edge turned gr_dl about the centre, gr_dl
    the angle (17 .. 34 degrees, quarter degrees) at which the rim's first 4 degrees inside the picture differ least from
    the rim that far on (so its facets and mottling go on across the join) */
 static void gr_join(void)
 {
-    long long best = -1; Rgb k1, k2;
+    long long best = -1;
+    Rgb k1, k2;
     gr_dl = GR_PER;
     for (int d = 17 * 16; d <= 34 * 16; d += 4) {
-        long long e = 0; int n = 0;
+        long long err = 0;
+        int n = 0;
         for (int a = 13 * 16 + 8; a <= 17 * 16 + 8; a += 4)
             for (int r = 150 * 16; r <= 180 * 16; r += 24)
-                if (gr_polar(GR_LCX, GR_LCY, r, a, 0, &k1) && gr_blue(k1) && gr_polar(GR_LCX, GR_LCY, r, a + d, 0, &k2) && gr_blue(k2)) { e += vb_d2(k1, k2); n++; }
+                if (gr_polar(GR_LCX, GR_LCY, r, a, 0, &k1) && gr_blue(k1) &&
+                    gr_polar(GR_LCX, GR_LCY, r, a + d, 0, &k2) && gr_blue(k2)) {
+                    err += vb_d2(k1, k2);
+                    n++;
+                }
         if (n < 200) continue;
-        e = e * 64 / n;
-        if (best < 0 || e < best) { best = e; gr_dl = d; }
+        err = err * 64 / n;
+        if (best < 0 || err < best) {
+            best = err;
+            gr_dl = d;
+        }
     }
 }
-static int gr_spktex(int t, int p, int j, Rgb *o) { return gr_rimtex((t >> 4) - 75 + 37 * j, 40 + (p + GR_SPW) * 175 / GR_SPW, o); }
+static int gr_spktex(int t, int p, int j, Rgb *o)
+{
+    return gr_rimtex((t >> 4) - 75 + 37 * j, 40 + (p + GR_SPW) * 175 / GR_SPW, o);
+}
 /* a spoke's lit texel: the rim texel there at the visible spoke's tone and contrast (g: a further tone, x 256) */
 static void gr_spklit(int t, int p, int j, const int *g, Rgb *o)
 {
     gr_spktex(t, p, j, o);
     if (gr_sl) {
-        int l = clampi(gr_sl + (lum(*o) - gr_rmean(gr_rta) / 16) * clampi(gr_sd * 256 / gr_rd, 64, 256) / 256, 8, 255);
-        o->r = clampi(gr_sm.r * l / gr_sl, 0, 255); o->g = clampi(gr_sm.g * l / gr_sl, 0, 255); o->b = clampi(gr_sm.b * l / gr_sl, 0, 255);
-    } else *o = gr_gain(*o, gr_gS0);
+        int luma =
+            clampi(gr_sl + (lum(*o) - gr_rmean(gr_rta) / 16) * clampi(gr_sd * 256 / gr_rd, 64, 256) / 256, 8, 255);
+        o->r = clampi(gr_sm.r * luma / gr_sl, 0, 255);
+        o->g = clampi(gr_sm.g * luma / gr_sl, 0, 255);
+        o->b = clampi(gr_sm.b * luma / gr_sl, 0, 255);
+    } else
+        *o = gr_gain(*o, gr_gS0);
     if (g) *o = gr_gain(*o, g);
 }
+/* the tones the strips are laid in: the rim's facets and the join's turn (gr_rmake, gr_join), the left spoke's,
+   the right rim's and the right tooth's ratios to the left rim, and the visible spoke's lit face */
 static void gr_tones(void)
 {
-    GrSum rim = { 0 }, spk = { 0 }, rrim = { 0 }, rt = { 0 }, lt = { 0 }; Rgb k;
-    gr_rmake(); gr_join();
-    for (int a = 24 * 16; a <= 42 * 16; a += 8) for (int r = 152 * 16; r <= 178 * 16; r += 16) if (gr_polar(GR_LCX, GR_LCY, r, a, 0, &k) && gr_blue(k)) gr_add(&rim, k);
-    for (int a = -36 * 16; a <= -26 * 16; a += 8) for (int r = 150 * 16; r <= 178 * 16; r += 16) if (gr_polar(GR_RCX, GR_RCY, r, a, -3, &k) && gr_blue(k)) gr_add(&rrim, k);
-    for (int y = 150; y < 200; y++) for (int x = 0; x < 16; x++) {
-        int t, p; gr_bar(GR_LEX, GR_LEY, GR_SPK, x * 16, y * 16, &t, &p);
-        if (p >= -10 * 16 && p <= -2 * 16 && t >= 122 * 16 && t <= 145 * 16 && gr_wtex(x, y, &k) && gr_blue(k)) gr_add(&spk, k);
-    }
-    for (int a = 13 * 16 + 8; a <= 18 * 16; a += 8) for (int r = 187 * 16; r <= 207 * 16; r += 16) if (gr_polar(GR_LCX, GR_LCY, r, a, 0, &k) && gr_blue(k)) gr_add(&lt, k);
-    for (int y = 141; y < 168; y++) for (int x = PW - 4; x < PW; x++) {      /* the picture's own (the quad ends before) */
-        k = rgb15(pic[y][x]);
-        if (!pic_ov[y][x] && gr_blue(k) && lum(k) > 90) gr_add(&rt, k);
-    }
-    gr_ratio(&spk, &rim, gr_gS0); gr_ratio(&rrim, &rim, gr_gR); gr_ratio(&rt, &lt, gr_gT);
-    {   /* the spoke's lit face: its texels in the picture, and the rim texels the strip lays on the bar */
-        GrSum pa = { 0 }, st = { 0 }; int da = 0, ds = 0;
+    GrSum rim = { 0 }, spk = { 0 }, rrim = { 0 }, rt = { 0 }, lt = { 0 };
+    Rgb k;
+    gr_rmake();
+    gr_join();
+    for (int a = 24 * 16; a <= 42 * 16; a += 8)
+        for (int r = 152 * 16; r <= 178 * 16; r += 16)
+            if (gr_polar(GR_LCX, GR_LCY, r, a, 0, &k) && gr_blue(k)) gr_add(&rim, k);
+    for (int a = -36 * 16; a <= -26 * 16; a += 8)
+        for (int r = 150 * 16; r <= 178 * 16; r += 16)
+            if (gr_polar(GR_RCX, GR_RCY, r, a, -3, &k) && gr_blue(k)) gr_add(&rrim, k);
+    for (int y = 150; y < 200; y++)
+        for (int x = 0; x < 16; x++) {
+            int t, p;
+            gr_bar(GR_LEX, GR_LEY, GR_SPK, x * 16, y * 16, &t, &p);
+            if (p >= -10 * 16 && p <= -2 * 16 && t >= 122 * 16 && t <= 145 * 16 && gr_wtex(x, y, &k) && gr_blue(k))
+                gr_add(&spk, k);
+        }
+    for (int a = 13 * 16 + 8; a <= 18 * 16; a += 8)
+        for (int r = 187 * 16; r <= 207 * 16; r += 16)
+            if (gr_polar(GR_LCX, GR_LCY, r, a, 0, &k) && gr_blue(k)) gr_add(&lt, k);
+    /* the picture's own (the quad ends before) */
+    for (int y = 141; y < 168; y++)
+        for (int x = PW - 4; x < PW; x++) {
+            k = rgb15(pic[y][x]);
+            if (!pic_ov[y][x] && gr_blue(k) && lum(k) > 90) gr_add(&rt, k);
+        }
+    gr_ratio(&spk, &rim, gr_gS0);
+    gr_ratio(&rrim, &rim, gr_gR);
+    gr_ratio(&rt, &lt, gr_gT);
+    { /* the spoke's lit face: its texels in the picture, and the rim texels the strip lays on the bar */
+        GrSum pic_lit = { 0 }, strip_lit = { 0 };
+        int lit_dev = 0,
+            bar_dev = 0;
         gr_sl = 0;
         for (int pass = 0; pass < 2; pass++) {
-            for (int y = 158; y < PH; y++) for (int x = -40; x < 14; x++) {
-                int t, p; gr_bar(GR_LEX, GR_LEY, GR_SPK, x * 16, y * 16, &t, &p);
-                if (p < -GR_SPW + 16 || p > -24 || t > 146 * 16) continue;
-                if (x >= 0) {
-                    if (!(gr_wtex(x, y, &k) && gr_blue(k) && lum(k) >= 60)) continue;
-                    if (!pass) gr_add(&pa, k); else da += abs(lum(k) - gr_sl);
-                } else if (gr_spktex(t, p, 0, &k)) { if (!pass) gr_add(&st, k); else ds += abs(lum(k) - gr_rmean(gr_rta) / 16); }
+            for (int y = 158; y < PH; y++)
+                for (int x = -40; x < 14; x++) {
+                    int t, p;
+                    gr_bar(GR_LEX, GR_LEY, GR_SPK, x * 16, y * 16, &t, &p);
+                    if (p < -GR_SPW + 16 || p > -24 || t > 146 * 16) continue;
+                    if (x >= 0) {
+                        if (!(gr_wtex(x, y, &k) && gr_blue(k) && lum(k) >= 60)) continue;
+                        if (!pass)
+                            gr_add(&pic_lit, k);
+                        else
+                            lit_dev += abs(lum(k) - gr_sl);
+                    } else if (gr_spktex(t, p, 0, &k)) {
+                        if (!pass)
+                            gr_add(&strip_lit, k);
+                        else
+                            bar_dev += abs(lum(k) - gr_rmean(gr_rta) / 16);
+                    }
+                }
+            if (pic_lit.n < 12 || strip_lit.n < 12) {
+                gr_sl = 0;
+                break;
             }
-            if (pa.n < 12 || st.n < 12) { gr_sl = 0; break; }
-            if (!pass) { gr_sm.r = pa.r / pa.n; gr_sm.g = pa.g / pa.n; gr_sm.b = pa.b / pa.n; gr_sl = lum(gr_sm); }
-            else { gr_sd = da * 16 / pa.n + 1; gr_rd = ds * 16 / st.n + 1; }
+            if (!pass) {
+                gr_sm.r = pic_lit.r / pic_lit.n;
+                gr_sm.g = pic_lit.g / pic_lit.n;
+                gr_sm.b = pic_lit.b / pic_lit.n;
+                gr_sl = lum(gr_sm);
+            } else {
+                gr_sd = lit_dev * 16 / pic_lit.n + 1;
+                gr_rd = bar_dev * 16 / strip_lit.n + 1;
+            }
         }
     }
 #ifdef WS_BACKDROP_MAIN
-    if (getenv("WSB_INFO")) fprintf(stderr, "gears: rim turned %d/16 degrees, join lum %d/16; spoke lum %d dev %d/16 (rim texels %d/16); right rim %d %d %d (n %d), right tooth %d %d %d (n %d / %d)\n",
-        gr_dl, gr_rmj, gr_sl, gr_sd, gr_rd, gr_gR[0], gr_gR[1], gr_gR[2], rrim.n, gr_gT[0], gr_gT[1], gr_gT[2], rt.n, lt.n);
+    if (getenv("WSB_INFO"))
+        fprintf(stderr,
+                "gears: rim turned %d/16 degrees, join lum %d/16; spoke lum %d dev %d/16 (rim texels %d/16); right rim "
+                "%d %d %d (n %d), right tooth %d %d %d (n %d / %d)\n",
+                gr_dl, gr_rmj, gr_sl, gr_sd, gr_rd, gr_gR[0], gr_gR[1], gr_gR[2], rrim.n, gr_gT[0], gr_gT[1], gr_gT[2],
+                rt.n, lt.n);
 #endif
 }
 /* the wheels' layer at wheel coordinates (x, y) in eighths of a pixel, outside the picture: 1 and the texel when a
@@ -288,99 +451,140 @@ static int gr_wheel(int side, int x, int y, Rgb *o)
 {
     int t, p;
     if (!side) {
-        int dx = x - GR_LCX * 8, dy = y - GR_LCY * 8, r = gr_isqrt((dx * dx + dy * dy) << 2), a = gr_ang(dx, dy);
+        int dx = x - GR_LCX * 8,
+            dy = y - GR_LCY * 8,
+            r = gr_isqrt((dx * dx + dy * dy) << 2),
+            a = gr_ang(dx, dy);
         if (r > GR_TOP + 32) return 0;
-        if (r > GR_ROUT) {                               /* a tooth: the picture's, a period on each */
+        if (r > GR_ROUT) { /* a tooth: the picture's, a period on each */
             for (int k = 1; k <= 3; k++) {
-                int as = a + GR_PER * k, ph = fmodi(as, GR_PER);     /* (teeth: 10.5 .. 22 degrees of each period) */
-                if (GR_LCX * 16384 + (GR_ROUT >> 4) * gr_sinq(as) < 16384) continue;     /* (the source is off the picture) */
-                if (ph < 10 * 16 + 8 || ph > 22 * 16 || as > 23 * 16) return 0;
-                return gr_polar(GR_LCX, GR_LCY, gr_pout(as) + (r - GR_ROUT), as, 0, o);
+                /* (teeth: 10.5 .. 22 degrees of each period) */
+                int src_a = a + GR_PER * k,
+                    phase = fmodi(src_a, GR_PER);
+                /* (the source is off the picture) */
+                if (GR_LCX * 16384 + (GR_ROUT >> 4) * gr_sinq(src_a) < 16384) continue;
+                if (phase < 10 * 16 + 8 || phase > 22 * 16 || src_a > 23 * 16) return 0;
+                return gr_polar(GR_LCX, GR_LCY, gr_pout(src_a) + (r - GR_ROUT), src_a, 0, o);
             }
             return 0;
         }
-        if (r >= GR_LIN - 24)                            /* the rim: the picture's next to the edge, turned gr_dl each time */
+        /* the rim: the picture's next to the edge, turned gr_dl each time */
+        if (r >= GR_LIN - 24)
             for (int k = 1; k <= 12; k++) {
-                int as = a + gr_dl * k, in = gr_pin(as), out = gr_pout(as), rs, w, g[3];
-                rs = r < GR_LIN ? in + 32 : in + (r - GR_LIN) * (out - in) / (GR_ROUT - GR_LIN);
-                if (GR_LCX * 16384 + (rs >> 4) * gr_sinq(as) < 2 * 16384) continue;      /* (the source is off the picture) */
-                if (!(gr_polar(GR_LCX, GR_LCY, rs, as, 0, o) && gr_blue(*o)) && !(gr_polar(GR_LCX, GR_LCY, clampi(rs, in + 24, out - 24), as, 0, o) && gr_blue(*o)))
-                    gr_rimtex(as * 16 / 89, (r - GR_LIN) * 255 / (GR_ROUT - GR_LIN), o);
+                int src_a = a + gr_dl * k,
+                    inner = gr_pin(src_a),
+                    outer = gr_pout(src_a),
+                    src_r, ease, g[3];
+                src_r = r < GR_LIN ? inner + 32 : inner + (r - GR_LIN) * (outer - inner) / (GR_ROUT - GR_LIN);
+                /* (the source is off the picture) */
+                if (GR_LCX * 16384 + (src_r >> 4) * gr_sinq(src_a) < 2 * 16384) continue;
+                if (!(gr_polar(GR_LCX, GR_LCY, src_r, src_a, 0, o) && gr_blue(*o)) &&
+                    !(gr_polar(GR_LCX, GR_LCY, clampi(src_r, inner + 24, outer - 24), src_a, 0, o) && gr_blue(*o)))
+                    gr_rimtex(src_a * 16 / 89, (r - GR_LIN) * 255 / (GR_ROUT - GR_LIN), o);
                 /* (the band's edges are not quite gr_pin / gr_pout everywhere: a texel of the picture's dark outline
-                   within 3 texels of an edge is taken further into the face, so the strip's outline is one clean line) */
+                   within 3 texels of an edge is taken further into the face, so the strip's outline is one clean
+                   line) */
                 if (r >= GR_LIN && (r < GR_LIN + 48 || r > GR_ROUT - 48))
                     for (int q = 1; q <= 4 && lum(*o) < 62; q++) {
                         Rgb f;
-                        if (gr_polar(GR_LCX, GR_LCY, clampi(rs + (r < GR_LIN + 48 ? q * 16 : -q * 16), in + 24, out - 24), as, 0, &f) && gr_blue(f)) *o = f;
+                        if (gr_polar(GR_LCX, GR_LCY,
+                                     clampi(src_r + (r < GR_LIN + 48 ? q * 16 : -q * 16), inner + 24, outer - 24),
+                                     src_a, 0, &f) &&
+                            gr_blue(f))
+                            *o = f;
                     }
                 /* at the join the facet's tone is the picture's there, eased back to its own over 12 degrees of arc */
-                w = k == 1 ? clampi(256 - (11 * 16 - a) * 256 / (12 * 16), 0, 256) : 0;
-                g[0] = g[1] = g[2] = 256 + (clampi(gr_rmj * 256 / gr_rmean(as), 190, 345) - 256) * w / 256;
+                ease = k == 1 ? clampi(256 - (11 * 16 - a) * 256 / (12 * 16), 0, 256) : 0;
+                g[0] = g[1] = g[2] = 256 + (clampi(gr_rmj * 256 / gr_rmean(src_a), 190, 345) - 256) * ease / 256;
                 *o = gr_gain(*o, g);
-                if (r < GR_LIN) *o = scale(*o, 112);     /* the dark line under the rim */
+                if (r < GR_LIN) *o = scale(*o, 112); /* the dark line under the rim */
                 return 1;
             }
         if (r > GR_LIN + 16) return 0;
-        for (int j = 0; j < 3; j++) {                    /* the spokes: this one's, then one a period out each (the
-                                                            point turned back onto this one's bar) */
-            int sn = gr_sinq(GR_PER * j), cs = gr_cosq(GR_PER * j);
-            gr_bar(GR_LEX, GR_LEY, GR_SPK, GR_LCX * 16 + gr_rnd(dx * cs - dy * sn, 13), GR_LCY * 16 + gr_rnd(dx * sn + dy * cs, 13), &t, &p);
+        /* the spokes: this one's, then one a period out each (the point turned back onto this one's bar) */
+        for (int j = 0; j < 3; j++) {
+            int sn = gr_sinq(GR_PER * j),
+                cs = gr_cosq(GR_PER * j);
+            gr_bar(GR_LEX, GR_LEY, GR_SPK, GR_LCX * 16 + gr_rnd(dx * cs - dy * sn, 13),
+                   GR_LCY * 16 + gr_rnd(dx * sn + dy * cs, 13), &t, &p);
             if (t < 40 * 16) continue;
             if (p >= -GR_SPW && p <= 0) {
-                int sh = 256 - clampi((t - 147 * 16) * 110 / (6 * 16), 0, 110);    /* (the rim's shadow on the spoke's top) */
-                gr_spklit(t, p, j, 0, o); *o = scale(*o, sh); return 1;
+                /* (the rim's shadow on the spoke's top) */
+                int shade = 256 - clampi((t - 147 * 16) * 110 / (6 * 16), 0, 110);
+                gr_spklit(t, p, j, 0, o);
+                *o = scale(*o, shade);
+                return 1;
             }
-            if (p > 0 && p <= GR_SPD) {                  /* the side face: this spoke's own, slid along the bar */
+            if (p > 0 && p <= GR_SPD) { /* the side face: this spoke's own, slid along the bar */
                 if (gr_barpt(GR_LEX, GR_LEY, GR_SPK, 108 * 16 + fmodi(t, 36 * 16), p, 0, o) && lum(*o) < 60) return 1;
-                gr_rimtex(t >> 4, 128, o); *o = scale(*o, 60); return 1;
+                gr_rimtex(t >> 4, 128, o);
+                *o = scale(*o, 60);
+                return 1;
             }
         }
         return 0;
     } else {
-        int dx = x - GR_RCX * 8, dy = y - GR_RCY * 8, r = gr_isqrt((dx * dx + dy * dy) << 2), a = gr_ang(dx, dy);
+        int dx = x - GR_RCX * 8,
+            dy = y - GR_RCY * 8,
+            r = gr_isqrt((dx * dx + dy * dy) << 2),
+            a = gr_ang(dx, dy);
         if (r > GR_TOP + 32) return 0;
-        if (r >= GR_RIN && r <= GR_ROUT + 8) {           /* the rim: the left wheel's, turned onto it */
+        if (r >= GR_RIN && r <= GR_ROUT + 8) { /* the rim: the left wheel's, turned onto it */
             /* (the right rim is 40 texels wide, the left one 33.5: the nearer wheel.  The left rim's 24 - 40.8 degrees
                are laid on 20 degrees of it, 1.19 times as large along the rim as across it, from the outer edge in:
                a first version stretched them across only, which drew the mottle out into streaks) */
-            int as = 24 * 16 + fmodi(a + 24 * 16, 20 * 16) * 256 / GR_RSC, in = gr_pin(as) + 16, out = gr_pout(as);
-            int rs = clampi(out - (GR_ROUT + 8 - r) * 256 / GR_RSC, in, out);
-            if (!(gr_polar(GR_LCX, GR_LCY, rs, as, 0, o) && gr_blue(*o)))
-                gr_rimtex(as * 16 / 89, (r - GR_RIN) * 255 / (GR_ROUT - GR_RIN), o);
+            int src_a = 24 * 16 + fmodi(a + 24 * 16, 20 * 16) * 256 / GR_RSC,
+                inner = gr_pin(src_a) + 16,
+                outer = gr_pout(src_a);
+            int src_r = clampi(outer - (GR_ROUT + 8 - r) * 256 / GR_RSC, inner, outer);
+            if (!(gr_polar(GR_LCX, GR_LCY, src_r, src_a, 0, o) && gr_blue(*o)))
+                gr_rimtex(src_a * 16 / 89, (r - GR_RIN) * 255 / (GR_ROUT - GR_RIN), o);
             if (r < GR_RIN + 48 || r > GR_ROUT - 40)
                 for (int q = 1; q <= 4 && lum(*o) < 62; q++) {
                     Rgb f;
-                    if (gr_polar(GR_LCX, GR_LCY, clampi(rs + (r < GR_RIN + 48 ? q * 16 : -q * 16), in + 24, out - 24), as, 0, &f) && gr_blue(f)) *o = f;
+                    if (gr_polar(GR_LCX, GR_LCY,
+                                 clampi(src_r + (r < GR_RIN + 48 ? q * 16 : -q * 16), inner + 24, outer - 24), src_a, 0,
+                                 &f) &&
+                        gr_blue(f))
+                        *o = f;
                 }
-            *o = gr_gain(*o, gr_gR); return 1;
+            *o = gr_gain(*o, gr_gR);
+            return 1;
         }
-        if (r > GR_ROUT) {                               /* the tooth cut by the edge: its lit face */
-            int al = gr_rnd((r >> 4) * (gr_sinq(a - GR_AXR) >> 2), 8);     /* columns off its axis (x 16) */
-            if (r > GR_TOP - 8 || al < -12 * 16 || al > 14 * 16 + 5 - 3 * (r - GR_ROUT) / 16) return 0;
+        if (r > GR_ROUT) { /* the tooth cut by the edge: its lit face */
+            int off_axis = gr_rnd((r >> 4) * (gr_sinq(a - GR_AXR) >> 2), 8); /* columns off its axis (x 16) */
+            if (r > GR_TOP - 8 || off_axis < -12 * 16 || off_axis > 14 * 16 + 5 - 3 * (r - GR_ROUT) / 16) return 0;
             int ok = 0;
             /* (the left tooth is cut by the picture's edge and its first columns there are darker: the source is taken
                from its sixth column on, a little further round where it would fall before that) */
             for (int q = 0; q < 8 && !ok; q++) {
-                int as = a + 32 * 16 + 8 + q * 24;
-                if (GR_LCX * 16384 + (r >> 4) * gr_sinq(as) < 6 * 16384) continue;
-                ok = gr_polar(GR_LCX, GR_LCY, r, as, 0, o) && gr_pq == 2;      /* (inside the face: none of its outline's texels) */
+                int src_a = a + 32 * 16 + 8 + q * 24;
+                if (GR_LCX * 16384 + (r >> 4) * gr_sinq(src_a) < 6 * 16384) continue;
+                /* (inside the face: none of its outline's texels) */
+                ok = gr_polar(GR_LCX, GR_LCY, r, src_a, 0, o) && gr_pq == 2;
             }
             if (!ok) {
-                gr_rimtex(al / 16 + 20, (r - GR_ROUT) * 255 / (GR_TOP - GR_ROUT), o);
-                *o = gr_gain(*o, gr_gR); return 1;
+                gr_rimtex(off_axis / 16 + 20, (r - GR_ROUT) * 255 / (GR_TOP - GR_ROUT), o);
+                *o = gr_gain(*o, gr_gR);
+                return 1;
             }
-            *o = gr_gain(*o, gr_gT); return 1;
+            *o = gr_gain(*o, gr_gT);
+            return 1;
         }
         gr_bar(GR_REX, GR_REY, GR_SPKR, x * 2, y * 2, &t, &p);
         if (t < 40 * 16) return 0;
         if (p >= 0 && p <= GR_SPW) {
-            gr_spklit(t, p - GR_SPW, 0, gr_gR, o); *o = scale(*o, 256 - clampi((t - 140 * 16) * 110 / (6 * 16), 0, 110));
+            gr_spklit(t, p - GR_SPW, 0, gr_gR, o);
+            *o = scale(*o, 256 - clampi((t - 140 * 16) * 110 / (6 * 16), 0, 110));
             return 1;
         }
-        if (p < 0 && p >= -GR_SPD) {                     /* its side face: the tooth's side face, slid inwards */
-            int rs = 186 * 16 + fmodi(-t, 24 * 16), al = -16 * 16 + (p + GR_SPD) * 64 / GR_SPD;
-            if (gr_polar(GR_RCX, GR_RCY, rs, GR_AXR + al * 917 / rs, -3, o) && lum(*o) < 60) return 1;
-            gr_rimtex(t >> 4, 128, o); *o = scale(*o, 60); return 1;
+        if (p < 0 && p >= -GR_SPD) { /* its side face: the tooth's side face, slid inwards */
+            int src_r = 186 * 16 + fmodi(-t, 24 * 16),
+                off_axis = -16 * 16 + (p + GR_SPD) * 64 / GR_SPD;
+            if (gr_polar(GR_RCX, GR_RCY, src_r, GR_AXR + off_axis * 917 / src_r, -3, o) && lum(*o) < 60) return 1;
+            gr_rimtex(t >> 4, 128, o);
+            *o = scale(*o, 60);
+            return 1;
         }
         return 0;
     }
@@ -389,12 +593,25 @@ static int gr_wheel(int side, int x, int y, Rgb *o)
    there (the centre's, else the first sample's on the wheel): the wheels' outlines are drawn anti-aliased */
 static int gr_cover(int side, int x, int y, Rgb *o)
 {
-    static const signed char O[4] = { -3, -1, 1, 3 };
-    Rgb k; int c = gr_wheel(side, x * 8, y * 8, o), have = c, same = 1, n = 0;
-    for (int j = 0; j < 4; j += 3) for (int i = 0; i < 4; i += 3) if (gr_wheel(side, x * 8 + O[i], y * 8 + O[j], &k) != c) same = 0;
-    if (same) return c ? 16 : 0;
-    for (int j = 0; j < 4; j++) for (int i = 0; i < 4; i++)
-        if (gr_wheel(side, x * 8 + O[i], y * 8 + O[j], &k)) { n++; if (!have) { *o = k; have = 1; } }
+    static const signed char OFF[4] = { -3, -1, 1, 3 };
+    Rgb k;
+    int hit = gr_wheel(side, x * 8, y * 8, o),
+        have = hit,
+        same = 1,
+        n = 0;
+    for (int j = 0; j < 4; j += 3)
+        for (int i = 0; i < 4; i += 3)
+            if (gr_wheel(side, x * 8 + OFF[i], y * 8 + OFF[j], &k) != hit) same = 0;
+    if (same) return hit ? 16 : 0;
+    for (int j = 0; j < 4; j++)
+        for (int i = 0; i < 4; i++)
+            if (gr_wheel(side, x * 8 + OFF[i], y * 8 + OFF[j], &k)) {
+                n++;
+                if (!have) {
+                    *o = k;
+                    have = 1;
+                }
+            }
     return n;
 }
 
@@ -421,64 +638,99 @@ static int gr_sandc(int x, int y)
     k = rgb15(pic[y][x]);
     return k.r >= 152 && k.g >= 104 && k.r - k.b >= 48;
 }
-static short gr_lf[PH][PW];                              /* the wall's light (0: no wall texel near) */
-static Rgb gr_alb[PH][PW], gr_raw[PH][PW];               /* the wall's texels over their light (x 128); the raw texels */
-static int gr_le[PH];                                    /* the wall's light at the edge per row (the side being made) */
-static u8 gr_flat[PH][PW];                               /* the wall's light is even around (no shadow edge) */
+static short (*gr_lf)[PW];               /* the wall's light (0: no wall texel near) */
+static Rgb (*gr_alb)[PW], (*gr_raw)[PW]; /* the wall's texels over their light (x 128); the raw texels */
+/* the wall's light at the edge per row (the side being made) */
+static int gr_le[PH];
+static u8 (*gr_flat)[PW]; /* the wall's light is even around (no shadow edge) */
 static int gr_okw(int x, int y) { return gr_wallc(x, y) && gr_lf[y][x]; }
 static int gr_srcw(int x, int y) { return gr_okw(x, y) && gr_flat[y][x]; }
+static int (*gr_light__S)[PW + 1];
+static int (*gr_light__C)[PW + 1];
 static void gr_light(void)
 {
-    static int S[PH + 1][PW + 1], C[PH + 1][PW + 1];
+    int (*const S)[PW + 1] = gr_light__S,
+        (*const C)[PW + 1] = gr_light__C;
     for (int y = 0; y < PH; y++)
         for (int x = 0; x < PW; x++) {
-            int m = gr_wallc(x, y);
+            int is_wall = gr_wallc(x, y);
             gr_raw[y][x] = rgb15(pic[y][x]);
-            S[y + 1][x + 1] = S[y][x + 1] + S[y + 1][x] - S[y][x] + (m ? lum(gr_raw[y][x]) : 0);
-            C[y + 1][x + 1] = C[y][x + 1] + C[y + 1][x] - C[y][x] + m;
+            S[y + 1][x + 1] = S[y][x + 1] + S[y + 1][x] - S[y][x] + (is_wall ? lum(gr_raw[y][x]) : 0);
+            C[y + 1][x + 1] = C[y][x + 1] + C[y + 1][x] - C[y][x] + is_wall;
         }
     for (int y = 0; y < PH; y++)
         for (int x = 0; x < PW; x++) {
-            int x0 = x - 8 < 0 ? 0 : x - 8, x1 = x + 9 > PW ? PW : x + 9, y0 = y - 8 < 0 ? 0 : y - 8, y1 = y + 9 > PH ? PH : y + 9;
-            int s = S[y1][x1] - S[y0][x1] - S[y1][x0] + S[y0][x0], c = C[y1][x1] - C[y0][x1] - C[y1][x0] + C[y0][x0], l;
+            int x0 = x - 8 < 0 ? 0 : x - 8,
+                x1 = x + 9 > PW ? PW : x + 9,
+                y0 = y - 8 < 0 ? 0 : y - 8,
+                y1 = y + 9 > PH ? PH : y + 9;
+            int s = S[y1][x1] - S[y0][x1] - S[y1][x0] + S[y0][x0],
+                c = C[y1][x1] - C[y0][x1] - C[y1][x0] + C[y0][x0],
+                light;
             Rgb k = gr_raw[y][x];
             gr_lf[y][x] = (short)(c >= 12 ? (s / c > 4 ? s / c : 4) : 0);
-            l = gr_lf[y][x] ? gr_lf[y][x] : 64;
-            gr_alb[y][x].r = k.r * 128 / l; gr_alb[y][x].g = k.g * 128 / l; gr_alb[y][x].b = k.b * 128 / l;
+            light = gr_lf[y][x] ? gr_lf[y][x] : 64;
+            gr_alb[y][x].r = k.r * 128 / light;
+            gr_alb[y][x].g = k.g * 128 / light;
+            gr_alb[y][x].b = k.b * 128 / light;
         }
     for (int y = 0; y < PH; y++)
         for (int x = 0; x < PW; x++) {
-            int mn = 999, mx = 0;
-            for (int j = -6; j <= 6; j += 6) for (int i = -6; i <= 6; i += 6) {
-                int xx = clampi(x + i, 0, PW - 1), yy = clampi(y + j, 0, PH - 1), l = gr_lf[yy][xx];
-                if (!l) continue;
-                if (l < mn) mn = l;
-                if (l > mx) mx = l;
-            }
+            int mn = 999,
+                mx = 0;
+            for (int j = -6; j <= 6; j += 6)
+                for (int i = -6; i <= 6; i += 6) {
+                    int xx = clampi(x + i, 0, PW - 1),
+                        yy = clampi(y + j, 0, PH - 1),
+                        light = gr_lf[yy][xx];
+                    if (!light) continue;
+                    if (light < mn) mn = light;
+                    if (light > mx) mx = light;
+                }
             gr_flat[y][x] = mx * 4 <= mn * 5;
         }
 }
-static void gr_edge(int side)                            /* gr_le: the light of the row's first 12 wall texels from the
-                                                            edge (within 48 columns: the wall seen through the wheel),
-                                                            rows without any between their neighbours' */
+/* gr_le: the light of the row's first 12 wall texels from the edge (within 48 columns: the wall seen through the
+   wheel), rows without any between their neighbours' */
+static void gr_edge(int side)
 {
     int last = -1;
     for (int y = 0; y < PH; y++) {
-        int s = 0, c = 0;
-        for (int i = 0; i < 48 && c < 12; i++) { int x = side ? PW - 1 - i : i; if (gr_okw(x, y)) { s += gr_lf[y][x]; c++; } }
+        int s = 0,
+            c = 0;
+        for (int i = 0; i < 48 && c < 12; i++) {
+            int x = side ? PW - 1 - i : i;
+            if (gr_okw(x, y)) {
+                s += gr_lf[y][x];
+                c++;
+            }
+        }
         gr_le[y] = c >= 2 ? s / c : -1;
     }
     for (int y = 0; y < PH; y++) {
         if (gr_le[y] < 0) continue;
-        if (last < 0) for (int i = 0; i < y; i++) gr_le[i] = gr_le[y];
-        else for (int i = last + 1; i < y; i++) gr_le[i] = gr_le[last] + (gr_le[y] - gr_le[last]) * (i - last) / (y - last);
+        if (last < 0)
+            for (int i = 0; i < y; i++) gr_le[i] = gr_le[y];
+        else
+            for (int i = last + 1; i < y; i++)
+                gr_le[i] = gr_le[last] + (gr_le[y] - gr_le[last]) * (i - last) / (y - last);
         last = y;
     }
     if (last < 0) last = 0, gr_le[0] = 64;
     for (int i = last + 1; i < PH; i++) gr_le[i] = gr_le[last];
-    {   int t[PH];                                       /* smoothed over 5 rows */
-        for (int y = 0; y < PH; y++) { int s = 0, n = 0; for (int d = -2; d <= 2; d++) if (y + d >= 0 && y + d < PH) { s += gr_le[y + d]; n++; } t[y] = s / n; }
-        memcpy(gr_le, t, sizeof t);
+    {
+        int smoothed[PH]; /* smoothed over 5 rows */
+        for (int y = 0; y < PH; y++) {
+            int s = 0,
+                n = 0;
+            for (int d = -2; d <= 2; d++)
+                if (y + d >= 0 && y + d < PH) {
+                    s += gr_le[y + d];
+                    n++;
+                }
+            smoothed[y] = s / n;
+        }
+        memcpy(gr_le, smoothed, sizeof smoothed);
     }
 }
 /* --- the side walls.  The room is a box seen straight on: both side walls' feet and courses meet at (162, 155); the
@@ -504,90 +756,163 @@ static void gr_edge(int side)                            /* gr_le: the light of 
 static const int GR_XC[2] = { 115, 111 };
 #define GR_NC 32
 #define GR_NB 96
-static short gr_mr[GR_NC + 1], gr_bm[GR_NC][256]; static u8 gr_bd[GR_NC][256]; static int gr_nc; static u8 gr_cr[PH];
-static short gr_bk[GR_NB][3]; static int gr_nb;         /* the bricks: course, first column (its joint), columns */
+static short gr_mr[GR_NC + 1], (*gr_bm)[256];
+static u8 (*gr_bd)[256];
+static int gr_nc;
+static u8 gr_cr[PH];
+/* the bricks: course, first column (its joint), columns */
+static short gr_bk[GR_NB][3];
+static int gr_nb;
 static void gr_bricks(int even)
 {
     gr_nb = 0;
     for (int c = 0; c < gr_nc; c++) {
-        int p[PW], h = gr_mr[c + 1] - gr_mr[c], lastj = -1; u8 ok[PW];
-        if (h < 5 || h > 9) continue;
+        int prof[PW],
+            height = gr_mr[c + 1] - gr_mr[c],
+            last_joint = -1;
+        u8 ok[PW];
+        if (height < 5 || height > 9) continue;
         for (int x = 0; x < PW; x++) {
             int s = 0;
             ok[x] = x >= 52 && x < 267;
             for (int y = gr_mr[c]; ok[x] && y < gr_mr[c + 1]; y++) ok[x] = even ? gr_srcw(x, y) : gr_okw(x, y);
             for (int y = gr_mr[c] + 2; ok[x] && y < gr_mr[c + 1] - 1; y++) s += lum(gr_alb[y][x]);
-            p[x] = ok[x] ? s * 16 / (h - 3) : 0;
+            prof[x] = ok[x] ? s * 16 / (height - 3) : 0;
         }
         for (int x = 56; x < 263; x++) {
-            int m = 0;
-            if (!ok[x]) { lastj = -1; continue; }
-            for (int d = -4; d <= 4 && m >= 0; d++) m = ok[x + d] ? m + p[x + d] : -1;
-            if (m < 0) continue;                         /* (a stretch's first and last 4 columns: no joint looked for) */
-            if (p[x] * 9 - m > 9 * 9 * 16 && p[x] >= p[x - 1] && p[x] > p[x + 1]) {      /* an upright joint */
-                if (lastj >= 0 && x - lastj >= 7 && x - lastj <= 30 && gr_nb < GR_NB) {
+            int around = 0;
+            if (!ok[x]) {
+                last_joint = -1;
+                continue;
+            }
+            for (int d = -4; d <= 4 && around >= 0; d++) around = ok[x + d] ? around + prof[x + d] : -1;
+            /* (a stretch's first and last 4 columns: no joint looked for) */
+            if (around < 0) continue;
+            /* an upright joint */
+            if (prof[x] * 9 - around > 9 * 9 * 16 && prof[x] >= prof[x - 1] && prof[x] > prof[x + 1]) {
+                if (last_joint >= 0 && x - last_joint >= 7 && x - last_joint <= 30 && gr_nb < GR_NB) {
                     int clean = 1;
-                    for (int i = lastj; i < x; i++) if (!ok[i]) clean = 0;
-                    if (clean) { gr_bk[gr_nb][0] = (short)c; gr_bk[gr_nb][1] = (short)lastj; gr_bk[gr_nb][2] = (short)(x - lastj); gr_nb++; }
+                    for (int i = last_joint; i < x; i++)
+                        if (!ok[i]) clean = 0;
+                    if (clean) {
+                        gr_bk[gr_nb][0] = (short)c;
+                        gr_bk[gr_nb][1] = (short)last_joint;
+                        gr_bk[gr_nb][2] = (short)(x - last_joint);
+                        gr_nb++;
+                    }
                 }
-                lastj = x;
+                last_joint = x;
             }
         }
     }
 }
 static void gr_courses(void)
 {
-    int bw[PH], hp[PH], n = 0, first = -1, last = 0, m[GR_NC];
+    int row_l[PH], high[PH],
+        n = 0,
+        first = -1,
+        last = 0,
+        mortar[GR_NC];
     for (int y = 0; y < PH; y++) {
-        int s = 0, c = 0;
-        for (int x = 60; x < 265; x++) if (gr_okw(x, y)) { s += lum(gr_raw[y][x]); c++; }
-        bw[y] = c >= 20 ? s * 16 / c : -1;
-        if (bw[y] >= 0) { if (first < 0) first = y; last = y; }
-    }
-    if (first < 0) { first = 40; last = 177; }
-    for (int y = 0; y < PH; y++) if (bw[y] < 0) bw[y] = bw[clampi(y, first, last)] >= 0 ? bw[clampi(y, first, last)] : 1600;
-    for (int y = 0; y < PH; y++) { int s = 0; for (int d = -4; d <= 4; d++) s += bw[clampi(y + d, 0, PH - 1)]; hp[y] = bw[y] - s / 9; }
-    for (int y = first + 1; y < last && n < GR_NC - 8; y++)     /* the mortar lines: the row profile's maxima */
-        if (hp[y] > 32 && hp[y] > hp[y - 1] && hp[y] >= hp[y + 1] && (!n || y - m[n - 1] >= 5)) {
-            while (n && y - m[n - 1] > 10 && n < GR_NC - 8) { m[n] = m[n - 1] + 7; n++; }     /* (one missed) */
-            m[n++] = y;
+        int s = 0,
+            c = 0;
+        for (int x = 60; x < 265; x++)
+            if (gr_okw(x, y)) {
+                s += lum(gr_raw[y][x]);
+                c++;
+            }
+        row_l[y] = c >= 20 ? s * 16 / c : -1;
+        if (row_l[y] >= 0) {
+            if (first < 0) first = y;
+            last = y;
         }
-    if (n < 2) { n = 0; for (int y = 49; y < 178 && n < GR_NC - 8; y += 7) m[n++] = y; }
+    }
+    if (first < 0) {
+        first = 40;
+        last = 177;
+    }
+    for (int y = 0; y < PH; y++)
+        if (row_l[y] < 0) row_l[y] = row_l[clampi(y, first, last)] >= 0 ? row_l[clampi(y, first, last)] : 1600;
+    for (int y = 0; y < PH; y++) {
+        int s = 0;
+        for (int d = -4; d <= 4; d++) s += row_l[clampi(y + d, 0, PH - 1)];
+        high[y] = row_l[y] - s / 9;
+    }
+    for (int y = first + 1; y < last && n < GR_NC - 8; y++) /* the mortar lines: the row profile's maxima */
+        if (high[y] > 32 && high[y] > high[y - 1] && high[y] >= high[y + 1] && (!n || y - mortar[n - 1] >= 5)) {
+            /* (one missed) */
+            while (n && y - mortar[n - 1] > 10 && n < GR_NC - 8) {
+                mortar[n] = mortar[n - 1] + 7;
+                n++;
+            }
+            mortar[n++] = y;
+        }
+    if (n < 2) {
+        n = 0;
+        for (int y = 49; y < 178 && n < GR_NC - 8; y += 7) mortar[n++] = y;
+    }
     gr_nc = 0;
-    {   int k = 0, y0 = m[0]; while (y0 > 7) { y0 -= 7; k++; }           /* (and above the first, below the last) */
+    {
+        int k = 0,
+            y0 = mortar[0];
+        while (y0 > 7) {
+            y0 -= 7;
+            k++;
+        } /* (and above the first, below the last) */
         for (int i = 0; i < k && gr_nc < GR_NC; i++) gr_mr[gr_nc++] = (short)(y0 + 7 * i);
     }
-    for (int i = 0; i < n && gr_nc < GR_NC; i++) gr_mr[gr_nc++] = (short)m[i];
-    while (gr_nc < GR_NC && gr_mr[gr_nc - 1] + 7 < 178) { gr_mr[gr_nc] = (short)(gr_mr[gr_nc - 1] + 7); gr_nc++; }
+    for (int i = 0; i < n && gr_nc < GR_NC; i++) gr_mr[gr_nc++] = (short)mortar[i];
+    while (gr_nc < GR_NC && gr_mr[gr_nc - 1] + 7 < 178) {
+        gr_mr[gr_nc] = (short)(gr_mr[gr_nc - 1] + 7);
+        gr_nc++;
+    }
     gr_mr[gr_nc] = 178;
-    for (int y = 0, c = 0; y < PH; y++) { while (c + 1 < gr_nc && y >= gr_mr[c + 1]) c++; gr_cr[y] = (u8)c; }
+    for (int y = 0, c = 0; y < PH; y++) {
+        while (c + 1 < gr_nc && y >= gr_mr[c + 1]) c++;
+        gr_cr[y] = (u8)c;
+    }
     gr_bricks(1);
-    if (gr_nb < 24) gr_bricks(0);                        /* (too few in even light: any wall texel) */
-    for (int c = 0; c < gr_nc; c++) {                    /* the courses' bricks, end to end */
-        int u = -(int)(hash3(c, 7, 3) % 12u), last1 = -1, last2 = -1;
+    if (gr_nb < 24) gr_bricks(0);     /* (too few in even light: any wall texel) */
+    for (int c = 0; c < gr_nc; c++) { /* the courses' bricks, end to end */
+        int u = -(int)(hash3(c, 7, 3) % 12u),
+            last1 = -1,
+            last2 = -1;
         for (int i = 0; u < 256 && gr_nb; i++) {
-            int b = (int)(hash3(c, i, 911) % (u32)gr_nb), up = c ? gr_bd[c - 1][clampi(u + 4, 0, 255)] : 255, upx = c ? gr_bm[c - 1][clampi(u + 4, 0, 255)] : -1;
+            int brick = (int)(hash3(c, i, 911) % (u32)gr_nb),
+                above = c ? gr_bd[c - 1][clampi(u + 4, 0, 255)] : 255,
+                above_x = c ? gr_bm[c - 1][clampi(u + 4, 0, 255)] : -1;
             for (int t = 0; t < 8; t++) {
-                int same = b == last1 || b == last2 || (gr_bk[b][0] == up && upx >= gr_bk[b][1] && upx < gr_bk[b][1] + gr_bk[b][2]);
+                int same = brick == last1 || brick == last2 ||
+                           (gr_bk[brick][0] == above && above_x >= gr_bk[brick][1] &&
+                            above_x < gr_bk[brick][1] + gr_bk[brick][2]);
                 if (!same) break;
-                b = (b + 1 + (int)(hash3(c, i, 77 + t) % 5u)) % gr_nb;
+                brick = (brick + 1 + (int)(hash3(c, i, 77 + t) % 5u)) % gr_nb;
             }
-            for (int j = 0; j < gr_bk[b][2]; j++, u++) if (u >= 0 && u < 256) { gr_bm[c][u] = (short)(gr_bk[b][1] + j); gr_bd[c][u] = (u8)gr_bk[b][0]; }
-            last2 = last1; last1 = b;
+            for (int j = 0; j < gr_bk[brick][2]; j++, u++)
+                if (u >= 0 && u < 256) {
+                    gr_bm[c][u] = (short)(gr_bk[brick][1] + j);
+                    gr_bd[c][u] = (u8)gr_bk[brick][0];
+                }
+            last2 = last1;
+            last1 = brick;
         }
     }
 #ifdef WS_BACKDROP_MAIN
     if (getenv("WSB_INFO")) fprintf(stderr, "gears: %d courses, %d bricks\n", gr_nc, gr_nb);
 #endif
 }
-static int gr_brow(int c, int d, int y)                  /* the row of course d for row y of course c */
+static int gr_brow(int c, int d, int y) /* the row of course d for row y of course c */
 {
-    int hc = gr_mr[c + 1] - gr_mr[c], hd = gr_mr[d + 1] - gr_mr[d];
+    int hc = gr_mr[c + 1] - gr_mr[c],
+        hd = gr_mr[d + 1] - gr_mr[d];
     return gr_mr[d] + clampi(((y - gr_mr[c]) * hd + hd / 2) / hc, 0, hd - 1);
 }
-static Rgb gr_brick1(int u, int y)                       /* the wall's brick over its light: column u along the wall, row y */
+/* the wall's brick over its light: column u along the wall, row y */
+static Rgb gr_brick1(int u, int y)
 {
-    int c = gr_cr[y], d; Rgb o = { 128, 100, 80 };
+    int c = gr_cr[y],
+        d;
+    Rgb o = { 128, 100, 80 };
     if (!gr_nb) return o;
     d = gr_bd[c][u & 255];
     return gr_alb[gr_brow(c, d, y)][gr_bm[c][u & 255]];
@@ -597,39 +922,64 @@ static Rgb gr_brick1(int u, int y)                       /* the wall's brick ove
 #define GR_GRAIN 150
 static void gr_grain(int X, int y, int v, int *d)
 {
-    int c = gr_cr[clampi(v, 0, 177)], g, dd, gx, gy, h; Rgb m = { 0, 0, 0 }, k;
+    int c = gr_cr[clampi(v, 0, 177)],
+        col, course_d, gx, gy, height;
+    Rgb mean = { 0, 0, 0 },
+        k;
     d[0] = d[1] = d[2] = 0;
     if (!gr_nb) return;
-    dd = gr_bd[c][(X + 37 * c) & 255]; h = gr_mr[dd + 1] - gr_mr[dd] - 1;
-    g = (X + 37 * c + 53 * fdiv(y + 5 * c, h)) & 255;
-    dd = gr_bd[c][g]; gx = gr_bm[c][g]; h = gr_mr[dd + 1] - gr_mr[dd] - 1;
-    gy = gr_mr[dd] + 1 + fmodi(y + 5 * c, h);
+    course_d = gr_bd[c][(X + 37 * c) & 255];
+    height = gr_mr[course_d + 1] - gr_mr[course_d] - 1;
+    col = (X + 37 * c + 53 * fdiv(y + 5 * c, height)) & 255;
+    course_d = gr_bd[c][col];
+    gx = gr_bm[c][col];
+    height = gr_mr[course_d + 1] - gr_mr[course_d] - 1;
+    gy = gr_mr[course_d] + 1 + fmodi(y + 5 * c, height);
     for (int i = -2; i <= 2; i++) {
         if (!gr_okw(gx + i, gy)) return;
-        m.r += gr_alb[gy][gx + i].r; m.g += gr_alb[gy][gx + i].g; m.b += gr_alb[gy][gx + i].b;
+        mean.r += gr_alb[gy][gx + i].r;
+        mean.g += gr_alb[gy][gx + i].g;
+        mean.b += gr_alb[gy][gx + i].b;
     }
     k = gr_alb[gy][gx];
-    d[0] = (k.r * 5 - m.r) * GR_GRAIN / (5 * 256); d[1] = (k.g * 5 - m.g) * GR_GRAIN / (5 * 256); d[2] = (k.b * 5 - m.b) * GR_GRAIN / (5 * 256);
+    d[0] = (k.r * 5 - mean.r) * GR_GRAIN / (5 * 256);
+    d[1] = (k.g * 5 - mean.g) * GR_GRAIN / (5 * 256);
+    d[2] = (k.b * 5 - mean.b) * GR_GRAIN / (5 * 256);
 }
-static Rgb gr_side(int side, int X, int y)               /* the side wall at strip column X, row y: over its light (x 128) */
+/* the side wall at strip column X, row y: over its light (x 128) */
+static Rgb gr_side(int side, int X, int y)
 {
-    int dx = side ? 157 * 256 + 128 + X * 256 : 162 * 256 - 128 + X * 256, k = GR_XC[side] * 256 * 256 / (dx >> 4) * 16;     /* xc / dx, x 65536 */
-    int v = GR_VY + (int)(((long long)(y * 256 + 128 - GR_VY) * k) >> 16) - 128, u = (GR_F * (65536 - k)) >> 8;
-    int y0 = clampi(v >> 8, 0, 176), fy = v < 0 ? 0 : v & 255, u0 = u >> 8, fu = u & 255, d[3];
+    /* xc / dx, x 65536 */
+    int dx = side ? 157 * 256 + 128 + X * 256 : 162 * 256 - 128 + X * 256,
+        depth_k = GR_XC[side] * 256 * 256 / (dx >> 4) * 16;
+    int back_v = GR_VY + (int)(((long long)(y * 256 + 128 - GR_VY) * depth_k) >> 16) - 128,
+        along = (GR_F * (65536 - depth_k)) >> 8;
+    int y0 = clampi(back_v >> 8, 0, 176),
+        fy = back_v < 0 ? 0 : back_v & 255,
+        u0 = along >> 8,
+        fu = along & 255,
+        d[3];
     Rgb a, b;
-    fy = clampi(fy * 2 - 128, 0, 256); fu = clampi(fu * 2 - 128, 0, 256);     /* (half as soft as bilinear: the picture's own side walls keep their mortar lines a texel wide) */
-    a = mix(gr_brick1(u0, y0), gr_brick1(u0 + 1, y0), fu); b = mix(gr_brick1(u0, y0 + 1), gr_brick1(u0 + 1, y0 + 1), fu);
+    /* (half as soft as bilinear: the picture's own side walls keep their mortar lines a texel wide) */
+    fy = clampi(fy * 2 - 128, 0, 256);
+    fu = clampi(fu * 2 - 128, 0, 256);
+    a = mix(gr_brick1(u0, y0), gr_brick1(u0 + 1, y0), fu);
+    b = mix(gr_brick1(u0, y0 + 1), gr_brick1(u0 + 1, y0 + 1), fu);
     a = mix(a, b, fy);
-    gr_grain(X, y, (v + 128) >> 8, d);
-    a.r += d[0]; a.g += d[1]; a.b += d[2];
+    gr_grain(X, y, (back_v + 128) >> 8, d);
+    a.r += d[0];
+    a.g += d[1];
+    a.b += d[2];
     return a;
 }
 /* the side wall's light at strip column X, row y: the picture's wall at the edge (gr_le), followed along the wall's
    level lines (the rays), so a tone the edge cuts goes on in the wall's perspective and not across the screen */
 static int gr_wlight(int side, int X, int y)
 {
-    int d0 = side ? 158 : 162, r = 155 * 256 + 128 + (y * 256 + 128 - (155 * 256 + 128)) * d0 / (d0 + X) - 128;
-    int y0 = clampi(r >> 8, 0, PH - 2), f = r < 0 ? 0 : r & 255;
+    int d0 = side ? 158 : 162,
+        ray_r = 155 * 256 + 128 + (y * 256 + 128 - (155 * 256 + 128)) * d0 / (d0 + X) - 128;
+    int y0 = clampi(ray_r >> 8, 0, PH - 2),
+        f = ray_r < 0 ? 0 : ray_r & 255;
     return gr_le[y0] * 16 + (gr_le[y0 + 1] - gr_le[y0]) * f / 16;
 }
 /* --- the floor: sandstone slabs running away from the viewer, their joints straight lines of the picture that meet
@@ -644,49 +994,93 @@ static int gr_wlight(int side, int X, int y)
    floor next to that edge over the source slab's (9 rows' means). */
 #define GR_FVX 2554
 #define GR_FVY 2541
-#define GR_FJ0 (-502)                                    /* the whole slab's left joint: slope x 1024 */
-#define GR_FJP 1428                                      /* the joints' pitch */
-static int gr_fg[PH]; static Rgb gr_fm;                  /* the row's tone (x 256) for the side being made; the floor's mean colour */
-static int gr_fslab(int x, int y, int *sx)               /* the slab of (x, y); *sx: the column of the same point of the whole slab */
+#define GR_FJ0 (-502) /* the whole slab's left joint: slope x 1024 */
+#define GR_FJP 1428   /* the joints' pitch */
+/* the row's tone (x 256) for the side being made; the floor's mean colour */
+static int gr_fg[PH];
+static Rgb gr_fm;
+/* the slab of (x, y); *sx: the column of the same point of the whole slab */
+static int gr_fslab(int x, int y, int *sx)
 {
-    int dy = y * 16 + 8 - GR_FVY, n;
+    int dy = y * 16 + 8 - GR_FVY,
+        n;
     if (dy < 16) dy = 16;
-    n = fdiv(fdiv((x * 16 + 8 - GR_FVX) * 1024, dy) - GR_FJ0 + 51, GR_FJP);      /* (51: the joint's own texels stay with the slab on its right) */
+    /* (51: the joint's own texels stay with the slab on its right) */
+    n = fdiv(fdiv((x * 16 + 8 - GR_FVX) * 1024, dy) - GR_FJ0 + 51, GR_FJP);
     *sx = x - fdiv(n * GR_FJP * dy + 8192, 16384);
     return n;
 }
 static void gr_ftone(int side)
 {
-    int le[PH], ls[PH], ne[PH], ns[PH], r = 0, g = 0, b = 0, n = 0;
+    int edge_l[PH], slab_l[PH], edge_n[PH], slab_n[PH],
+        r = 0,
+        g = 0,
+        b = 0,
+        n = 0;
     for (int y = 0; y < PH; y++) {
-        le[y] = ls[y] = ne[y] = ns[y] = 0;
+        edge_l[y] = slab_l[y] = edge_n[y] = slab_n[y] = 0;
         for (int x = 0; x < PW; x++) {
             int sx, l;
             if (!gr_floorc(x, y)) continue;
             l = lum(gr_raw[y][x]);
-            if (side ? x >= 200 : x < 72) { le[y] += l; ne[y]++; }
-            if (!gr_fslab(x, y, &sx)) { ls[y] += l; ns[y]++; r += gr_raw[y][x].r; g += gr_raw[y][x].g; b += gr_raw[y][x].b; n++; }
+            if (side ? x >= 200 : x < 72) {
+                edge_l[y] += l;
+                edge_n[y]++;
+            }
+            if (!gr_fslab(x, y, &sx)) {
+                slab_l[y] += l;
+                slab_n[y]++;
+                r += gr_raw[y][x].r;
+                g += gr_raw[y][x].g;
+                b += gr_raw[y][x].b;
+                n++;
+            }
         }
     }
-    gr_fm.r = n ? r / n : 200; gr_fm.g = n ? g / n : 150; gr_fm.b = n ? b / n : 100;
+    gr_fm.r = n ? r / n : 200;
+    gr_fm.g = n ? g / n : 150;
+    gr_fm.b = n ? b / n : 100;
     for (int y = 0; y < PH; y++) {
-        int a = 0, na = 0, s = 0, nsum = 0;
-        for (int d = -4; d <= 4; d++) if (y + d >= 0 && y + d < PH) { a += le[y + d]; na += ne[y + d]; s += ls[y + d]; nsum += ns[y + d]; }
-        gr_fg[y] = na >= 40 && nsum >= 40 ? clampi((a * 256 / na) / (s / nsum + 1), 216, 296) : 256;
+        int edge_sum = 0,
+            edge_cnt = 0,
+            slab_sum = 0,
+            slab_cnt = 0;
+        for (int d = -4; d <= 4; d++)
+            if (y + d >= 0 && y + d < PH) {
+                edge_sum += edge_l[y + d];
+                edge_cnt += edge_n[y + d];
+                slab_sum += slab_l[y + d];
+                slab_cnt += slab_n[y + d];
+            }
+        gr_fg[y] = edge_cnt >= 40 && slab_cnt >= 40
+                       ? clampi((edge_sum * 256 / edge_cnt) / (slab_sum / slab_cnt + 1), 216, 296)
+                       : 256;
     }
 }
 static Rgb gr_floor(int x, int y)
 {
-    int sx; Rgb o;
+    int sx;
+    Rgb o;
     if (y < 188) y = 188;
     gr_fslab(x, y, &sx);
-    if (!gr_floorc(sx, y)) {                             /* (something lies on the slab there: the nearest floor texel of the row) */
-        int f = 0;
-        for (int d = 1; d <= 24 && !f; d++) { if (gr_floorc(sx + d, y)) { sx += d; f = 1; } else if (gr_floorc(sx - d, y)) { sx -= d; f = 1; } }
-        if (!f) return scale(gr_fm, gr_fg[y]);
+    /* (something lies on the slab there: the nearest floor texel of the row) */
+    if (!gr_floorc(sx, y)) {
+        int got_floor = 0;
+        for (int d = 1; d <= 24 && !got_floor; d++) {
+            if (gr_floorc(sx + d, y)) {
+                sx += d;
+                got_floor = 1;
+            } else if (gr_floorc(sx - d, y)) {
+                sx -= d;
+                got_floor = 1;
+            }
+        }
+        if (!got_floor) return scale(gr_fm, gr_fg[y]);
     }
     o = scale(gr_raw[y][sx], gr_fg[y]);
-    o.r = clampi(o.r, 0, 255); o.g = clampi(o.g, 0, 255); o.b = clampi(o.b, 0, 255);
+    o.r = clampi(o.r, 0, 255);
+    o.g = clampi(o.g, 0, 255);
+    o.b = clampi(o.b, 0, 255);
     return o;
 }
 /* --- the corbels.  Their tips are at columns 62 and 256, mirror places about the room's axis (159.6, the floor
@@ -695,24 +1089,34 @@ static Rgb gr_floor(int x, int y)
    73 columns long and ends on the side wall there.  The left one's edges are straight to the picture's edge; the same
    length (the same plane across the room) puts its end 9.3 columns past the left edge, on the side wall at the
    depth of the right one's: both are closed 9 columns out and the walls go on past them. */
-#define GR_ROOTL 9                                       /* the left corbel's root: strip columns */
-#define GR_ROOTR 9                                       /* the right one's */
+#define GR_ROOTL 9 /* the left corbel's root: strip columns */
+#define GR_ROOTR 9 /* the right one's */
 /* the corbels at strip column X (1 ..), row y: how much of the texel is the lit face / the underside (0 .. 256; their
    edges are drawn anti-aliased) */
 static void gr_corbel(int side, int X, int y, int *af, int *au)
 {
-    int y16 = y * 16 + 8, top, bot, ub, a, b;
+    int y16 = y * 16 + 8,
+        top, bot, under_b, a, b;
     *af = *au = 0;
     if (!side) {
-        top = 760 - X * 23 / 16; bot = 1349 + X * 67 / 16; ub = bot + 56;     /* 47.5 + 0.09 x, 84.3 - 0.26 x, x = -X + 0.5 */
+        /* 47.5 + 0.09 x, 84.3 - 0.26 x, x = -X + 0.5 */
+        top = 760 - X * 23 / 16;
+        bot = 1349 + X * 67 / 16;
+        under_b = bot + 56;
         if (X > GR_ROOTL) return;
     } else {
-        top = 55 * 16 + 8; ub = 105 * 16 + 8; bot = 96 * 16 + 8 + X * 16;
+        top = 55 * 16 + 8;
+        under_b = 105 * 16 + 8;
+        bot = 96 * 16 + 8 + X * 16;
         if (X > GR_ROOTR) return;
-        if (bot > ub) bot = ub;
+        if (bot > under_b) bot = under_b;
     }
-    a = clampi(y16 - top + 8, 0, 16); b = clampi(bot - y16 + 8, 0, 16); *af = (a < b ? a : b) * 16;
-    a = clampi(y16 - bot + 8, 0, 16); b = clampi(ub - y16 + 8, 0, 16); *au = (a < b ? a : b) * 16;
+    a = clampi(y16 - top + 8, 0, 16);
+    b = clampi(bot - y16 + 8, 0, 16);
+    *af = (a < b ? a : b) * 16;
+    a = clampi(y16 - bot + 8, 0, 16);
+    b = clampi(under_b - y16 + 8, 0, 16);
+    *au = (a < b ? a : b) * 16;
 }
 /* the left corbel's face in the strip.  In the picture its first 5 columns are darker than the rest (mean luminance
    128 against 165, a sharp upright step at column 5 on every row: the part next to the wall is in shade), so the 9
@@ -723,17 +1127,26 @@ static int gr_lsh[3];
 static void gr_lshade(void)
 {
     GrSum a = { 0 }, b = { 0 };
-    for (int y = 52; y < 80; y++) for (int x = 0; x < 14; x++) if (!pic_ov[y][x] && lum(gr_raw[y][x]) >= 96) gr_add(x < 5 ? &a : &b, gr_raw[y][x]);
-    if (a.n < 40 || b.n < 80) { gr_lsh[0] = gr_lsh[1] = gr_lsh[2] = 256; return; }
+    for (int y = 52; y < 80; y++)
+        for (int x = 0; x < 14; x++)
+            if (!pic_ov[y][x] && lum(gr_raw[y][x]) >= 96) gr_add(x < 5 ? &a : &b, gr_raw[y][x]);
+    if (a.n < 40 || b.n < 80) {
+        gr_lsh[0] = gr_lsh[1] = gr_lsh[2] = 256;
+        return;
+    }
     gr_lsh[0] = clampi((a.r * 256 / a.n) / (b.r / b.n + 1), 160, 256);
     gr_lsh[1] = clampi((a.g * 256 / a.n) / (b.g / b.n + 1), 160, 256);
     gr_lsh[2] = clampi((a.b * 256 / a.n) / (b.b / b.n + 1), 160, 256);
 }
 static Rgb gr_lface(int X, int y)
 {
-    int sx = 14 - X, td = 760 - X * 23 / 16, bd = 1349 + X * 67 / 16, ts = 760 + (sx * 16 + 8) * 9 / 100 + 24, bs = 1349 - (sx * 16 + 8) * 26 / 100 - 24;
-    int ys = ts + (clampi(y * 16 + 8, td, bd) - td) * (bs - ts) / (bd - td);
-    return gr_gain(gr_raw[clampi(ys >> 4, 0, PH - 1)][sx], gr_lsh);
+    int sx = 14 - X,
+        top_d = 760 - X * 23 / 16,
+        bot_d = 1349 + X * 67 / 16,
+        top_s = 760 + (sx * 16 + 8) * 9 / 100 + 24,
+        bot_s = 1349 - (sx * 16 + 8) * 26 / 100 - 24;
+    int src_y = top_s + (clampi(y * 16 + 8, top_d, bot_d) - top_d) * (bot_s - top_s) / (bot_d - top_d);
+    return gr_gain(gr_raw[clampi(src_y >> 4, 0, PH - 1)][sx], gr_lsh);
 }
 /* the right corbel's lit face: sandstone in soft upright bands.  The face has a few clean 16 x 15 pieces (found at
    run time: windows of lit sandstone, apart from one another, of both faces).  The strip's face is laid from them
@@ -741,74 +1154,123 @@ static Rgb gr_lface(int X, int y)
    to the edge (columns 3-14 from it); a piece and its neighbours are never the same one, and every other use is the
    piece turned half round (a rotation), so twice as many different pieces come before one repeats */
 #define GR_NF 8
-static short gr_fp[GR_NF][2], gr_fd[GR_NF][15][16][3]; static int gr_nf; static Rgb gr_fb[2];
-static int gr_fpok(int x0, int y0)                       /* a clean piece: lit sandstone (a few darker grains may be in it) */
+static short gr_fp[GR_NF][2], (*gr_fd)[15][16][3];
+static int gr_nf;
+static Rgb gr_fb[2];
+/* a clean piece: lit sandstone (a few darker grains may be in it) */
+static int gr_fpok(int x0, int y0)
 {
     int bad = 0;
-    for (int j = 0; j < 15; j++) for (int i = 0; i < 16; i++) {
-        Rgb c;
-        if (x0 + i < 0 || x0 + i >= PW || pic_ov[y0 + j][x0 + i] || !gr_cbox(x0 + i, y0 + j)) return 0;
-        c = gr_raw[y0 + j][x0 + i];
-        if (lum(c) < 96 || c.r < c.b + 32) return 0;
-        if (!gr_sandc(x0 + i, y0 + j) && ++bad > 24) return 0;
-    }
+    for (int j = 0; j < 15; j++)
+        for (int i = 0; i < 16; i++) {
+            Rgb c;
+            if (x0 + i < 0 || x0 + i >= PW || pic_ov[y0 + j][x0 + i] || !gr_cbox(x0 + i, y0 + j)) return 0;
+            c = gr_raw[y0 + j][x0 + i];
+            if (lum(c) < 96 || c.r < c.b + 32) return 0;
+            if (!gr_sandc(x0 + i, y0 + j) && ++bad > 24) return 0;
+        }
     return 1;
 }
 static void gr_faces(void)
 {
     gr_nf = 0;
-    for (int pass = 0; pass < 2; pass++)                 /* the pieces: by turns from the right face and the left one,
-                                                            none within 11 columns and 10 rows of another */
+    /* the pieces: by turns from the right face and the left one, none within 11 columns and 10 rows of another */
+    for (int pass = 0; pass < 2; pass++)
         for (int t = 0; t < 2 * 24 && gr_nf < GR_NF; t++) {
-            int right = !(t & 1), found = 0;
+            int right = !(t & 1),
+                found = 0;
             for (int y0 = 44; y0 <= 100 && !found; y0 += 2)
                 for (int x0 = right ? 256 : 0; x0 <= (right ? PW - 16 : 48) && !found; x0 += 2) {
-                    int far = 1;
-                    for (int k = 0; k < gr_nf; k++) if (abs(gr_fp[k][0] - x0) < (pass ? 7 : 11) && abs(gr_fp[k][1] - y0) < (pass ? 6 : 10)) far = 0;
-                    if (far && gr_fpok(x0, y0)) { gr_fp[gr_nf][0] = (short)x0; gr_fp[gr_nf][1] = (short)y0; gr_nf++; found = 1; }
+                    int apart = 1;
+                    for (int k = 0; k < gr_nf; k++)
+                        if (abs(gr_fp[k][0] - x0) < (pass ? 7 : 11) && abs(gr_fp[k][1] - y0) < (pass ? 6 : 10))
+                            apart = 0;
+                    if (apart && gr_fpok(x0, y0)) {
+                        gr_fp[gr_nf][0] = (short)x0;
+                        gr_fp[gr_nf][1] = (short)y0;
+                        gr_nf++;
+                        found = 1;
+                    }
                 }
         }
     for (int k = 0; k < gr_nf; k++) {
-        int m[3] = { 0, 0, 0 }, x0 = gr_fp[k][0], y0 = gr_fp[k][1];
-        for (int j = 0; j < 15; j++) for (int i = 0; i < 16; i++) { m[0] += gr_raw[y0 + j][x0 + i].r; m[1] += gr_raw[y0 + j][x0 + i].g; m[2] += gr_raw[y0 + j][x0 + i].b; }
-        for (int j = 0; j < 15; j++) for (int i = 0; i < 16; i++) {
-            Rgb c = gr_raw[y0 + j][x0 + i];
-            gr_fd[k][j][i][0] = (short)(c.r - m[0] / 240); gr_fd[k][j][i][1] = (short)(c.g - m[1] / 240); gr_fd[k][j][i][2] = (short)(c.b - m[2] / 240);
-        }
+        int m[3] = { 0, 0, 0 },
+            x0 = gr_fp[k][0],
+            y0 = gr_fp[k][1];
+        for (int j = 0; j < 15; j++)
+            for (int i = 0; i < 16; i++) {
+                m[0] += gr_raw[y0 + j][x0 + i].r;
+                m[1] += gr_raw[y0 + j][x0 + i].g;
+                m[2] += gr_raw[y0 + j][x0 + i].b;
+            }
+        for (int j = 0; j < 15; j++)
+            for (int i = 0; i < 16; i++) {
+                Rgb c = gr_raw[y0 + j][x0 + i];
+                gr_fd[k][j][i][0] = (short)(c.r - m[0] / 240);
+                gr_fd[k][j][i][1] = (short)(c.g - m[1] / 240);
+                gr_fd[k][j][i][2] = (short)(c.b - m[2] / 240);
+            }
     }
 #ifdef WS_BACKDROP_MAIN
-    if (getenv("WSB_INFO")) { fprintf(stderr, "gears: %d face pieces:", gr_nf); for (int k = 0; k < gr_nf; k++) fprintf(stderr, " (%d, %d)", gr_fp[k][0], gr_fp[k][1]); fprintf(stderr, "\n"); }
+    if (getenv("WSB_INFO")) {
+        fprintf(stderr, "gears: %d face pieces:", gr_nf);
+        for (int k = 0; k < gr_nf; k++) fprintf(stderr, " (%d, %d)", gr_fp[k][0], gr_fp[k][1]);
+        fprintf(stderr, "\n");
+    }
 #endif
     for (int s = 0; s < 2; s++) {
-        int m[3] = { 0, 0, 0 }, n = 0;
-        for (int y = 44; y < 100; y++) for (int i = 3; i < 15; i++) {
-            int x = s ? PW - 1 - i : i;
-            if (gr_sandc(x, y)) { m[0] += gr_raw[y][x].r; m[1] += gr_raw[y][x].g; m[2] += gr_raw[y][x].b; n++; }
-        }
-        gr_fb[s].r = n ? m[0] / n : 200; gr_fb[s].g = n ? m[1] / n : 150; gr_fb[s].b = n ? m[2] / n : 100;
+        int m[3] = { 0, 0, 0 },
+            n = 0;
+        for (int y = 44; y < 100; y++)
+            for (int i = 3; i < 15; i++) {
+                int x = s ? PW - 1 - i : i;
+                if (gr_sandc(x, y)) {
+                    m[0] += gr_raw[y][x].r;
+                    m[1] += gr_raw[y][x].g;
+                    m[2] += gr_raw[y][x].b;
+                    n++;
+                }
+            }
+        gr_fb[s].r = n ? m[0] / n : 200;
+        gr_fb[s].g = n ? m[1] / n : 150;
+        gr_fb[s].b = n ? m[2] / n : 100;
     }
 }
 static void gr_face1(int cx, int cy, int i, int j, int w, int *d)
 {
     int v, k;
     if (!gr_nf) return;
-    v = fmodi(cx * 2 + cy * 5 + (cy >> 1), 2 * gr_nf); k = v >> 1;
-    if (v & 1) { i = 15 - i; j = 14 - j; }
+    v = fmodi(cx * 2 + cy * 5 + (cy >> 1), 2 * gr_nf);
+    k = v >> 1;
+    if (v & 1) {
+        i = 15 - i;
+        j = 14 - j;
+    }
     for (int c = 0; c < 3; c++) d[c] += gr_fd[k][j][i][c] * w;
 }
-static void gr_facecol(int cx, int i, int y, int w, int *d)     /* (each column of pieces starts at its own row, so
-                                                                   no line runs along the face) */
+/* (each column of pieces starts at its own row, so no line runs along the face) */
+static void gr_facecol(int cx, int i, int y, int w, int *d)
 {
-    int yy = y + fmodi(cx * 5, 13), cy = fdiv(yy, 13), j = fmodi(yy, 13), wy = j < 2 ? j + 1 : 3;
+    int yy = y + fmodi(cx * 5, 13),
+        cy = fdiv(yy, 13),
+        j = fmodi(yy, 13),
+        wy = j < 2 ? j + 1 : 3;
     gr_face1(cx, cy, i, j, w * wy, d);
     if (wy < 3) gr_face1(cx, cy - 1, i, j + 13, w * (3 - wy), d);
 }
 static Rgb gr_face(int side, int x, int y)
 {
-    int cx = fdiv(x, 14), i = fmodi(x, 14), d[3] = { 0, 0, 0 }, wx = i < 2 ? i + 1 : 3; Rgb o;   /* (thirds: this piece's share in the overlap) */
+    /* (thirds: this piece's share in the overlap) */
+    int cx = fdiv(x, 14),
+        i = fmodi(x, 14),
+        d[3] = { 0, 0, 0 },
+        wx = i < 2 ? i + 1 : 3;
+    Rgb o;
     gr_facecol(cx, i, y, wx, d);
     if (wx < 3) gr_facecol(cx - 1, i + 14, y, 3 - wx, d);
-    o.r = clampi(gr_fb[side].r + d[0] / 9, 0, 255); o.g = clampi(gr_fb[side].g + d[1] / 9, 0, 255); o.b = clampi(gr_fb[side].b + d[2] / 9, 0, 255);
+    o.r = clampi(gr_fb[side].r + d[0] / 9, 0, 255);
+    o.g = clampi(gr_fb[side].g + d[1] / 9, 0, 255);
+    o.b = clampi(gr_fb[side].b + d[2] / 9, 0, 255);
     return o;
 }
 /* what a texel is made of: 1 a wheel's lit face, 2 brick, 3 sandstone (corbel or floor), 0 anything else */
@@ -820,52 +1282,87 @@ static int gr_kind(Rgb k)
 }
 static int gr_foot16(int side, int X) { return side ? 187 * 16 + 13 + X * 16 / 5 : 187 * 16 + 10 + X * 16 / 5; }
 
+/* both strips, per texel back to front: the floor, the side wall, the corbels, the wheels, then the join */
 static void gen_gr(int pad)
 {
+    if (!ws_need_gen_gr()) return;
     pal_make();
-    gr_light(); gr_tones(); gr_courses(); gr_faces(); gr_lshade();
+    gr_light();
+    gr_tones();
+    gr_courses();
+    gr_faces();
+    gr_lshade();
     for (int side = 0; side < 2; side++) {
-        Rgb us[16];
-        for (int d = 0; d < 16; d++) {                   /* the right corbel's underside by depth */
-            int r = 0, g = 0, b = 0, n = 0;
+        Rgb under[16];
+        for (int d = 0; d < 16; d++) { /* the right corbel's underside by depth */
+            int r = 0,
+                g = 0,
+                b = 0,
+                n = 0;
             for (int x = PW - 10; x < PW; x++) {
-                int y = 95 - (PW - 1 - x) + 1 + d; Rgb k;
+                int y = 95 - (PW - 1 - x) + 1 + d;
+                Rgb k;
                 if (y >= PH || pic_ov[y][x]) continue;
-                k = rgb15(pic[y][x]); r += k.r; g += k.g; b += k.b; n++;
+                k = rgb15(pic[y][x]);
+                r += k.r;
+                g += k.g;
+                b += k.b;
+                n++;
             }
-            us[d].r = n ? r / n : 0; us[d].g = n ? g / n : 0; us[d].b = n ? b / n : 0;
+            under[d].r = n ? r / n : 0;
+            under[d].g = n ? g / n : 0;
+            under[d].b = n ? b / n : 0;
         }
-        cur_side = side; gr_edge(side); gr_ftone(side);
+        cur_side = side;
+        gr_edge(side);
+        gr_ftone(side);
         for (int y = 0; y < PH; y++)
             for (int X = 1; X <= pad; X++) {
-                int x = side ? PW - 1 + X : -X, af, au, got; Rgb c = { 0, 0, 0 }, w = { 0, 0, 0 };
-                gr_corbel(side, X, y, &af, &au);
-                got = clampi(gr_foot16(side, X) - y * 16, 0, 16);       /* (the wall's foot: anti-aliased) */
-                if (got < 16) c = gr_floor(x, y);
-                if (got) {
-                    int l = gr_wlight(side, X, y); Rgb k = gr_side(side, X, y);
-                    k.r = clampi(k.r * l / (128 * 16), 0, 255); k.g = clampi(k.g * l / (128 * 16), 0, 255); k.b = clampi(k.b * l / (128 * 16), 0, 255);
-                    c = got >= 16 ? k : mix(c, k, got * 16);
+                int x = side ? PW - 1 + X : -X,
+                    face_a, under_a, cover;
+                Rgb c = { 0, 0, 0 },
+                    wheel = { 0, 0, 0 };
+                gr_corbel(side, X, y, &face_a, &under_a);
+                cover = clampi(gr_foot16(side, X) - y * 16, 0, 16); /* (the wall's foot: anti-aliased) */
+                if (cover < 16) c = gr_floor(x, y);
+                if (cover) {
+                    int l = gr_wlight(side, X, y);
+                    Rgb k = gr_side(side, X, y);
+                    k.r = clampi(k.r * l / (128 * 16), 0, 255);
+                    k.g = clampi(k.g * l / (128 * 16), 0, 255);
+                    k.b = clampi(k.b * l / (128 * 16), 0, 255);
+                    c = cover >= 16 ? k : mix(c, k, cover * 16);
                 }
                 /* (the wall next to a corbel's root: in its shade) */
-                if (!side && X > GR_ROOTL && X <= GR_ROOTL + 4 && y >= 46 && y < 90) c = scale(c, 176 + (X - GR_ROOTL) * 16);
-                if (side && X > GR_ROOTR && X <= GR_ROOTR + 4 && y >= 54 && y < 107) c = scale(c, 176 + (X - GR_ROOTR) * 16);
-                if (au && side) {                        /* the right underside: the picture's tone at that depth under
-                                                            the lower edge (its last 10 columns), a low noise over it */
+                if (!side && X > GR_ROOTL && X <= GR_ROOTL + 4 && y >= 46 && y < 90)
+                    c = scale(c, 176 + (X - GR_ROOTL) * 16);
+                if (side && X > GR_ROOTR && X <= GR_ROOTR + 4 && y >= 54 && y < 107)
+                    c = scale(c, 176 + (X - GR_ROOTR) * 16);
+                /* the right underside: the picture's tone at that depth under the lower edge (its last 10 columns),
+                   a low noise over it */
+                if (under_a && side) {
                     int d = clampi(y - (96 + X), 0, 15);
-                    if (us[d].r + us[d].g + us[d].b) c = mix(c, scale(us[d], 232 + noise(x, y, 5, 4, 91) * 48 / 255), au);
-                } else if (au) {                         /* the left one: the picture's, slid along the lower edge */
-                    int sx = x + 12, sy = y - 3;
-                    if (sx >= 0 && sx < PW && sy >= 0 && sy < PH && !pic_ov[sy][sx]) c = mix(c, rgb15(pic[sy][sx]), au);
+                    if (under[d].r + under[d].g + under[d].b)
+                        c = mix(c, scale(under[d], 232 + noise(x, y, 5, 4, 91) * 48 / 255), under_a);
+                    /* the left one: the picture's, slid along the lower edge */
+                } else if (under_a) {
+                    int sx = x + 12,
+                        sy = y - 3;
+                    if (sx >= 0 && sx < PW && sy >= 0 && sy < PH && !pic_ov[sy][sx])
+                        c = mix(c, rgb15(pic[sy][sx]), under_a);
                 }
-                if (af) c = mix(c, side ? gr_face(side, x, y) : gr_lface(X, y), af);
-                got = gr_cover(side, x, y, &w);          /* the wheels */
-                if (got) c = mix(c, w, got * 16);
-                if (X <= 3) {                            /* the join: the first three columns lean on the picture's edge
-                                                            texel of their row where both are the same material */
-                    Rgb e = gr_raw[y][side ? PW - 1 : 0]; int k = gr_kind(e);
-                    c.r = clampi(c.r, 0, 255); c.g = clampi(c.g, 0, 255); c.b = clampi(c.b, 0, 255);
-                    if (k && k == gr_kind(c)) c = mix(e, c, X == 1 ? 110 : X == 2 ? 180 : 230);
+                if (face_a) c = mix(c, side ? gr_face(side, x, y) : gr_lface(X, y), face_a);
+                cover = gr_cover(side, x, y, &wheel); /* the wheels */
+                if (cover) c = mix(c, wheel, cover * 16);
+                /* the join: the first three columns lean on the picture's edge texel of their row where both are the
+                   same material */
+                if (X <= 3) {
+                    Rgb edge_px = gr_raw[y][side ? PW - 1 : 0];
+                    int k = gr_kind(edge_px);
+                    c.r = clampi(c.r, 0, 255);
+                    c.g = clampi(c.g, 0, 255);
+                    c.b = clampi(c.b, 0, 255);
+                    if (k && k == gr_kind(c)) c = mix(edge_px, c, X == 1 ? 110 : X == 2 ? 180 : 230);
                 }
                 strip[(size_t)y * 2 * pad + (side ? pad + (X - 1) : pad - X)] = quant(c);
             }

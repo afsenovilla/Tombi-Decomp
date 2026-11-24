@@ -26,7 +26,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32; typedef short s16; typedef int s32;
+typedef unsigned char u8;
+typedef unsigned short u16;
+typedef unsigned int u32;
+typedef short s16;
+typedef int s32;
 
 extern int port_ws_cull, port_verbose;
 extern int port_printf(const char *, ...);
@@ -35,10 +39,12 @@ int port_ws_edge = 1;
 
 typedef struct { s16 x, y, z; u8 u, v; } Vx;
 typedef struct {
-    u16 clut, tpage; u8 cmd, nv, gour, pad;
+    u16 clut, tpage;
+    u8 cmd, nv, gour, pad;
     u32 col[4];
     Vx v[4];                              /* file order; x in end space (x' = s * x: the end is at min x') */
-    s16 x0, x1, y0, y1, z0, z1; u8 u0, u1, v0, v1;
+    s16 x0, x1, y0, y1, z0, z1;           /* the bounding box and the UV box */
+    u8 u0, u1, v0, v1;
 } Poly;
 
 #define MAXP 12000
@@ -48,6 +54,8 @@ typedef struct {
 
 static const u8 RING3[3] = {0, 1, 2}, RING4[4] = {0, 1, 3, 2};
 
+/* every block of the model -> ps[] (x mirrored by s), with the boxes; the count, 0 for a prop, -1 when the model is
+   not what this file expects */
 static int parse(const u8 *tbl, Poly *ps, int s)
 {
     int n = tbl[0], np = 0;
@@ -55,28 +63,50 @@ static int parse(const u8 *tbl, Poly *ps, int s)
     if (n < 2) return 0;                                   /* a prop, not a room */
     for (int i = 0; i < n; i++) {
         const u8 *p = tbl + off[i];
-        for (int g = 0; g < 4; g++) {
-            u32 c; memcpy(&c, p, 4); p += 4;
-            int nv = (g & 1) ? 4 : 3, gour = g >= 2;
-            if (c > 4000) return -1;
-            for (u32 k = 0; k < c; k++) {
+        for (int group = 0; group < 4; group++) {   /* flat triangles, flat quads, gouraud triangles, gouraud quads */
+            u32 count;
+            memcpy(&count, p, 4);
+            p += 4;
+            int nv = (group & 1) ? 4 : 3, gour = group >= 2;
+            if (count > 4000) return -1;
+            for (u32 k = 0; k < count; k++) {
                 if (np >= MAXP) return -1;
                 Poly *q = &ps[np];
-                memcpy(&q->clut, p, 2); memcpy(&q->tpage, p + 2, 2); memcpy(&q->col[0], p + 4, 4);
-                q->cmd = p[7]; q->nv = nv; q->gour = gour;
-                if (((q->cmd & 8) != 0) != (nv == 4) || ((q->cmd & 0x10) != 0) != gour || (q->cmd & 0xE0) != 0x20) return -1;
+                memcpy(&q->clut, p, 2);
+                memcpy(&q->tpage, p + 2, 2);
+                memcpy(&q->col[0], p + 4, 4);
+                q->cmd = p[7];
+                q->nv = nv;
+                q->gour = gour;
+                if (((q->cmd & 8) != 0) != (nv == 4) || ((q->cmd & 0x10) != 0) != gour || (q->cmd & 0xE0) != 0x20)
+                    return -1;
                 p += 8;
-                for (int j = 1; j < nv; j++) { if (gour) { memcpy(&q->col[j], p, 4); p += 4; } else q->col[j] = q->col[0]; }
-                q->x0 = q->y0 = q->z0 = 32767; q->x1 = q->y1 = q->z1 = -32768; q->u0 = q->v0 = 255; q->u1 = q->v1 = 0;
+                for (int j = 1; j < nv; j++) {
+                    if (gour) {
+                        memcpy(&q->col[j], p, 4);
+                        p += 4;
+                    } else q->col[j] = q->col[0];
+                }
+                q->x0 = q->y0 = q->z0 = 32767;
+                q->x1 = q->y1 = q->z1 = -32768;
+                q->u0 = q->v0 = 255;
+                q->u1 = q->v1 = 0;
                 for (int j = 0; j < nv; j++) {
-                    Vx *v = &q->v[j]; memcpy(v, p, 8); p += 8;
+                    Vx *v = &q->v[j];
+                    memcpy(v, p, 8);
+                    p += 8;
                     if (v->x < -16000 || v->x > 16000) return -1;
                     v->x = (s16)(s * v->x);
-                    if (v->x < q->x0) q->x0 = v->x; if (v->x > q->x1) q->x1 = v->x;
-                    if (v->y < q->y0) q->y0 = v->y; if (v->y > q->y1) q->y1 = v->y;
-                    if (v->z < q->z0) q->z0 = v->z; if (v->z > q->z1) q->z1 = v->z;
-                    if (v->u < q->u0) q->u0 = v->u; if (v->u > q->u1) q->u1 = v->u;
-                    if (v->v < q->v0) q->v0 = v->v; if (v->v > q->v1) q->v1 = v->v;
+                    if (v->x < q->x0) q->x0 = v->x;
+                    if (v->x > q->x1) q->x1 = v->x;
+                    if (v->y < q->y0) q->y0 = v->y;
+                    if (v->y > q->y1) q->y1 = v->y;
+                    if (v->z < q->z0) q->z0 = v->z;
+                    if (v->z > q->z1) q->z1 = v->z;
+                    if (v->u < q->u0) q->u0 = v->u;
+                    if (v->u > q->u1) q->u1 = v->u;
+                    if (v->v < q->v0) q->v0 = v->v;
+                    if (v->v > q->v1) q->v1 = v->v;
                 }
                 np++;
             }
@@ -86,7 +116,12 @@ static int parse(const u8 *tbl, Poly *ps, int s)
 }
 
 static int same_pos(const Vx *a, const Vx *b) { return a->x == b->x && a->y == b->y && a->z == b->z; }
-static int has_vertex(const Poly *q, const Vx *a) { for (int j = 0; j < q->nv; j++) if (same_pos(&q->v[j], a)) return 1; return 0; }
+static int has_vertex(const Poly *q, const Vx *a)
+{
+    for (int j = 0; j < q->nv; j++)
+        if (same_pos(&q->v[j], a)) return 1;
+    return 0;
+}
 
 /* another polygon uses (at least half of) this one's texture rectangle: a tile of the room */
 static int tex_reused(const Poly *ps, int np, const Poly *p)
@@ -107,16 +142,22 @@ static int chain(const Poly *ps, int np, const Poly *p)
 {
     int len = 1;
     while (len < 3) {
-        const Vx *r[2]; int nr = 0;
-        for (int j = 0; j < p->nv; j++) if (p->v[j].x >= p->x1 - 1) { if (nr < 2) r[nr] = &p->v[j]; nr++; }
-        if (nr != 2) break;
-        const Poly *nx = 0;
-        for (int i = 0; i < np && !nx; i++) {
+        const Vx *inner[2];
+        int inner_n = 0;
+        for (int j = 0; j < p->nv; j++)
+            if (p->v[j].x >= p->x1 - 1) {
+                if (inner_n < 2) inner[inner_n] = &p->v[j];
+                inner_n++;
+            }
+        if (inner_n != 2) break;
+        const Poly *next = 0;
+        for (int i = 0; i < np && !next; i++) {
             const Poly *q = &ps[i];
-            if (q != p && q->x1 > p->x1 && has_vertex(q, r[0]) && has_vertex(q, r[1])) nx = q;
+            if (q != p && q->x1 > p->x1 && has_vertex(q, inner[0]) && has_vertex(q, inner[1])) next = q;
         }
-        if (!nx) break;
-        p = nx; len++;
+        if (!next) break;
+        p = next;
+        len++;
     }
     return len;
 }
@@ -124,19 +165,27 @@ static int chain(const Poly *ps, int np, const Poly *p)
 /* the U range of the tile p's texture belongs to: the ranges of the polygons of its page, palette and rows, joined */
 static void tile(const Poly *ps, int np, const Poly *p, int *t0, int *t1)
 {
-    int a = p->u0, b = p->u1, more = 1, vh = p->v1 - p->v0 + 1;
+    int lo = p->u0, hi = p->u1, more = 1, vh = p->v1 - p->v0 + 1;
     while (more) {
         more = 0;
         for (int i = 0; i < np; i++) {
             const Poly *q = &ps[i];
             if (q->tpage != p->tpage || q->clut != p->clut) continue;
             int h = (q->v1 < p->v1 ? q->v1 : p->v1) - (q->v0 > p->v0 ? q->v0 : p->v0) + 1;
-            if (2 * h < vh || q->u1 < a || q->u0 > b) continue;        /* (shares a texel column: 195..224 + 224..253) */
-            if (q->u0 < a) { a = q->u0; more = 1; }
-            if (q->u1 > b) { b = q->u1; more = 1; }
+            /* (shares a texel column: 195..224 + 224..253) */
+            if (2 * h < vh || q->u1 < lo || q->u0 > hi) continue;
+            if (q->u0 < lo) {
+                lo = q->u0;
+                more = 1;
+            }
+            if (q->u1 > hi) {
+                hi = q->u1;
+                more = 1;
+            }
         }
     }
-    *t0 = a; *t1 = b;
+    *t0 = lo;
+    *t1 = hi;
 }
 
 typedef struct { u8 flat[40]; } FQ;
@@ -147,7 +196,13 @@ typedef struct { u8 t[40]; } TR;          /* a triangle packet: flat 32 bytes, s
 /* A prop of the room stood again past its end: the polygons of the model inside a box (and on the given texture
    pages: its leaves and wood, not the ground or the fence under it) are copied, moved by (dx, dy, dz).  The first
    room: its big apple tree planted where the path ends on the left, so the way is visibly closed. */
-static const struct { u8 area, section, end; s16 x0, x1, y1, z0, z1; u16 tp[2], clut; s16 dx, dy, dz, pad0, pad1; s16 tx, tz, slope; } PROPS[] = {
+static const struct {
+    u8 area, section, end;
+    s16 x0, x1, y1, z0, z1;
+    u16 tp[2], clut;
+    s16 dx, dy, dz, pad0, pad1;
+    s16 tx, tz, slope;
+} PROPS[] = {
     /* (clut: 0 = any; pad0..pad1: the strip widths, in px, it is used for)
        32:9: the whole tree, far enough out that its round crown stops at the pig house.
        (the stand of foreground trunks, the apple tree's 7eca and the hut tree's 7f0a, was dropped 2026-11-17: seen from
@@ -201,11 +256,14 @@ static int cur_area, cur_section, cur_props_only;
 typedef struct { u8 *blk; int size, nq; } Block;
 
 /* the ground carried on rises and falls gently like the rest of the room instead of running flat: a height offset
-   (negative = up) of the distance d an extruded vertex lies past the edge vertex it comes from.  A vertex shared by two
-   edges gets the same offset from both, so neighbouring strips still meet; d = 0 starts flat (no crease at the edge). */
+   (negative = up) of the distance d an extruded vertex lies past the edge vertex it comes from.  A vertex shared by
+   two edges gets the same offset from both, so neighbouring strips still meet; d = 0 starts flat (no crease at the
+   edge). */
 static float hump(float d, float period)                            /* 0 at d = 0, 1 at period / 2, smooth */
 {
-    float t = d / period; t -= (int)t; t = t < 0.5f ? 2 * t : 2 - 2 * t;
+    float t = d / period;
+    t -= (int)t;
+    t = t < 0.5f ? 2 * t : 2 - 2 * t;
     return t * t * (3 - 2 * t);
 }
 static float wave(float d, float z)
@@ -216,12 +274,18 @@ static float wave(float d, float z)
     return -(14.0f * hump(d, 300.0f) + 5.0f * hump(d, 170.0f)) * k;
 }
 static int wave_ex(const void *cs, int nc, int z);
+/* one vertex of an extruded quad: the edge vertex e moved to x (end space) with texel u, raised by wave() for its
+   distance past the edge's x (ex) */
 static void put_v(u8 *d, int s, float x, const Vx *e, float u, float ex)
 {
     Vx v = *e;
-    { float w = wave(ex - x, v.z); v.y = (s16)(v.y + (int)(w < 0 ? w - 0.5f : w + 0.5f)); }
+    {
+        float w = wave(ex - x, v.z);
+        v.y = (s16)(v.y + (int)(w < 0 ? w - 0.5f : w + 0.5f));
+    }
     int xi = (int)(x < 0 ? x - 0.5f : x + 0.5f), ui = (int)(u + 0.5f);
-    v.x = (s16)(s * xi); v.u = (u8)(ui < 0 ? 0 : ui > 255 ? 255 : ui);
+    v.x = (s16)(s * xi);
+    v.u = (u8)(ui < 0 ? 0 : ui > 255 ? 255 : ui);
     memcpy(d, &v, 8);
 }
 
@@ -231,34 +295,49 @@ typedef struct { int poly, e, x0, x1, z0, z1, ground; } Cand;
 /* the end line at depth z: the x of the ground edge there (0 if none) */
 static int wave_ex(const void *v, int nc, int z)
 {
-    const Cand *cs = v; int best = 1 << 30, ex = 0;
+    const Cand *cs = v;
+    int best = 1 << 30, ex = 0;
     for (int i = 0; i < nc; i++) {
         if (cs[i].ground != 1) continue;
         int d = z < cs[i].z0 ? cs[i].z0 - z : z > cs[i].z1 ? z - cs[i].z1 : 0;
-        if (d < best) { best = d; ex = cs[i].x0; }
+        if (d < best) {
+            best = d;
+            ex = cs[i].x0;
+        }
     }
     return ex;
 }
+/* the end sector of one end (s 1: left, -1: right), carried on reach units past the end, into out */
 static void build(const u8 *tbl, int s, Block *out, int reach)
 {
-    Cand *cs = malloc(sizeof(Cand) * MAXC); int nc = 0;
-    TR *ft = malloc(sizeof(TR) * MAXT), *gt = malloc(sizeof(TR) * MAXT); int nt3[2] = {0, 0}, nprop = 0;
+    Cand *cs = malloc(sizeof(Cand) * MAXC);
+    int nc = 0;
+    TR *ft = malloc(sizeof(TR) * MAXT), *gt = malloc(sizeof(TR) * MAXT);
+    int nt3[2] = {0, 0}, nprop = 0;
     Poly *ps = malloc(sizeof(Poly) * MAXP);
-    FQ *fq = malloc(sizeof(FQ) * MAXQ); GQ *gq = malloc(sizeof(GQ) * MAXQ);
+    FQ *fq = malloc(sizeof(FQ) * MAXQ);
+    GQ *gq = malloc(sizeof(GQ) * MAXQ);
     int nf = 0, ng = 0, np, nedge = 0;
-    static struct { Vx a, b; } done[400]; int ndone = 0;
-    out->nq = 0; out->size = 0;
+    static struct { Vx a, b; } done[400];
+    int ndone = 0;
+    out->nq = 0;
+    out->size = 0;
     if (!ps || !fq || !gq || !cs || !ft || !gt || (np = parse(tbl, ps, s)) <= 0) goto end;
-    int M = 32767;
-    for (int i = 0; i < np; i++) if (ps[i].x0 < M) M = ps[i].x0;
+    int end_x = 32767;
+    for (int i = 0; i < np; i++)
+        if (ps[i].x0 < end_x) end_x = ps[i].x0;
+    /* 1. the candidate edges: free, facing outwards, of a surface that goes on */
     for (int i = 0; i < np; i++) {
         const Poly *p = &ps[i];
-        if (p->x0 > M + REACH) continue;
+        if (p->x0 > end_x + REACH) continue;
         const u8 *ring = p->nv == 4 ? RING4 : RING3;
         const Vx *r0 = &p->v[ring[0]], *r1 = &p->v[ring[1]], *r2 = &p->v[ring[2]];
-        long long ax = r1->x - r0->x, ay = r1->y - r0->y, az = r1->z - r0->z, bx = r2->x - r0->x, by = r2->y - r0->y, bz = r2->z - r0->z;
+        long long ax = r1->x - r0->x, ay = r1->y - r0->y, az = r1->z - r0->z,
+                  bx = r2->x - r0->x, by = r2->y - r0->y, bz = r2->z - r0->z;
         long long nx = ay * bz - az * by, ny = az * bx - ax * bz, nz = ax * by - ay * bx;
-        if (nx < 0) nx = -nx; if (ny < 0) ny = -ny; if (nz < 0) nz = -nz;
+        if (nx < 0) nx = -nx;
+        if (ny < 0) ny = -ny;
+        if (nz < 0) nz = -nz;
         if (nx > ny && nx > nz) continue;                              /* faces sideways */
         int ground = 4.0 * (double)ny * (double)ny >= (double)nx * nx + (double)ny * ny + (double)nz * nz;
         int checked = 0, ok = 0;
@@ -272,22 +351,39 @@ static void build(const u8 *tbl, int s, Block *out, int reach)
                 const Vx *c = &p->v[k];
                 if (c == a || c == b) continue;
                 double t = ((double)(c->y - a->y) * dy + (double)(c->z - a->z) * dz) / (double)l2;
-                if (t < 0) t = 0; if (t > 1) t = 1;
+                if (t < 0) t = 0;
+                if (t > 1) t = 1;
                 if (c->x <= a->x + t * dx + 0.5) out_facing = 0;
             }
             if (!out_facing) continue;
             int ex0 = a->x < b->x ? a->x : b->x, ey0 = a->y < b->y ? a->y : b->y, ey1 = a->y > b->y ? a->y : b->y;
             int ez0 = a->z < b->z ? a->z : b->z, ez1 = a->z > b->z ? a->z : b->z, blocked = 0;
-            for (int k = 0; k < np && !blocked; k++) {                 /* something further out at this depth and height */
+            /* something further out at this depth and height */
+            for (int k = 0; k < np && !blocked; k++) {
                 const Poly *q = &ps[k];
                 if (q == p || q->x0 >= ex0 - 1 || q->y1 < ey0 - 4 || q->y0 > ey1 + 4) continue;
-                if (ez0 == ez1) blocked = q->z0 == q->z1 ? (q->z0 >= ez0 - 1 && q->z0 <= ez0 + 1) : (q->z0 <= ez0 && q->z1 >= ez0);
-                else blocked = q->z0 == q->z1 ? (q->z0 > ez0 && q->z0 < ez1) : ((q->z0 > ez0 ? q->z0 : ez0) < (q->z1 < ez1 ? q->z1 : ez1));
+                if (ez0 == ez1)
+                    blocked = q->z0 == q->z1 ? (q->z0 >= ez0 - 1 && q->z0 <= ez0 + 1) : (q->z0 <= ez0 && q->z1 >= ez0);
+                else
+                    blocked = q->z0 == q->z1 ? (q->z0 > ez0 && q->z0 < ez1)
+                                             : ((q->z0 > ez0 ? q->z0 : ez0) < (q->z1 < ez1 ? q->z1 : ez1));
             }
             if (blocked) continue;
-            if (!checked) { checked = 1; ok = tex_reused(ps, np, p) || (ground && chain(ps, np, p) >= 3); }
+            if (!checked) {
+                checked = 1;
+                ok = tex_reused(ps, np, p) || (ground && chain(ps, np, p) >= 3);
+            }
             if (!ok) break;
-            if (nc < MAXC) { Cand *c = &cs[nc++]; c->poly = i; c->e = e; c->x0 = ex0; c->x1 = a->x > b->x ? a->x : b->x; c->z0 = ez0; c->z1 = ez1; c->ground = ground && ez1 > ez0; }
+            if (nc < MAXC) {
+                Cand *c = &cs[nc++];
+                c->poly = i;
+                c->e = e;
+                c->x0 = ex0;
+                c->x1 = a->x > b->x ? a->x : b->x;
+                c->z0 = ez0;
+                c->z1 = ez1;
+                c->ground = ground && ez1 > ez0;
+            }
         }
     }
     if (cur_props_only) nc = 0;
@@ -297,18 +393,30 @@ static void build(const u8 *tbl, int s, Block *out, int reach)
     for (int i = 0; i < nc; i++) {
         if (!cs[i].ground) continue;
         for (int k = 0; k < nc; k++)
-            if (k != i && cs[k].ground && cs[k].x0 < cs[i].x0 - 8 && (cs[k].z0 > cs[i].z0 ? cs[k].z0 : cs[i].z0) < (cs[k].z1 < cs[i].z1 ? cs[k].z1 : cs[i].z1)) { cs[i].ground = -1; break; }
+            if (k != i && cs[k].ground && cs[k].x0 < cs[i].x0 - 8
+                && (cs[k].z0 > cs[i].z0 ? cs[k].z0 : cs[i].z0) < (cs[k].z1 < cs[i].z1 ? cs[k].z1 : cs[i].z1)) {
+                cs[i].ground = -1;
+                break;
+            }
     }
     for (int i = 0; i < nc; i++) {
         Cand *c = &cs[i];
         if (c->ground == 1) continue;
-        if (c->ground == -1) { c->poly = -1; continue; }
+        if (c->ground == -1) {
+            c->poly = -1;
+            continue;
+        }
         int lim = -32768, best = 1 << 30, near = -32768;
         for (int k = 0; k < nc; k++) {
             if (cs[k].ground != 1) continue;
-            if (cs[k].z0 - 64 <= c->z1 && cs[k].z1 + 64 >= c->z0) { if (cs[k].x1 > lim) lim = cs[k].x1; }
+            if (cs[k].z0 - 64 <= c->z1 && cs[k].z1 + 64 >= c->z0) {
+                if (cs[k].x1 > lim) lim = cs[k].x1;
+            }
             int d = c->z0 > cs[k].z1 ? c->z0 - cs[k].z1 : cs[k].z0 > c->z1 ? cs[k].z0 - c->z1 : 0;
-            if (d < best) { best = d; near = cs[k].x1; }
+            if (d < best) {
+                best = d;
+                near = cs[k].x1;
+            }
         }
         if (lim == -32768) lim = near;
         if (lim == -32768 || c->x0 > lim + 16) c->poly = -1;
@@ -324,52 +432,94 @@ static void build(const u8 *tbl, int s, Block *out, int reach)
             const Vx *a = &p->v[ring[e]], *b = &p->v[ring[(e + 1) % p->nv]];
             int dup = 0;
             for (int k = 0; k < ndone && !dup; k++)
-                dup = (same_pos(&done[k].a, a) && same_pos(&done[k].b, b)) || (same_pos(&done[k].a, b) && same_pos(&done[k].b, a));
+                dup = (same_pos(&done[k].a, a) && same_pos(&done[k].b, b))
+                      || (same_pos(&done[k].a, b) && same_pos(&done[k].b, a));
             if (dup) continue;
-            if (ndone < 400) { done[ndone].a = *a; done[ndone].b = *b; ndone++; }
+            if (ndone < 400) {
+                done[ndone].a = *a;
+                done[ndone].b = *b;
+                ndone++;
+            }
             /* texel density along X (texels per unit, signed) from the edge's neighbours in the ring */
             const Vx *na = &p->v[ring[(e + p->nv - 1) % p->nv]], *nb = &p->v[ring[(e + 2) % p->nv]];
-            float rho = 0; int nr = 0;
-            if (na->x - a->x >= 1) { rho += (float)(na->u - a->u) / (na->x - a->x); nr++; }
-            if (nb->x - b->x >= 1) { rho += (float)(nb->u - b->u) / (nb->x - b->x); nr++; }
+            float rho = 0;
+            int nr = 0;
+            if (na->x - a->x >= 1) {
+                rho += (float)(na->u - a->u) / (na->x - a->x);
+                nr++;
+            }
+            if (nb->x - b->x >= 1) {
+                rho += (float)(nb->u - b->u) / (nb->x - b->x);
+                nr++;
+            }
             if (nr) rho /= nr;
-            int t0, t1; tile(ps, np, p, &t0, &t1);
-            float ar = rho < 0 ? -rho : rho;
-            if (ar < 0.01f || (t1 - t0) < 4 || (t1 - t0) / ar < 8) rho = ar = 0;   /* no usable tile: the edge's texel column */
+            int t0, t1;
+            tile(ps, np, p, &t0, &t1);
+            float abs_rho = rho < 0 ? -rho : rho;
+            /* no usable tile: the edge's texel column */
+            if (abs_rho < 0.01f || (t1 - t0) < 4 || (t1 - t0) / abs_rho < 8) rho = abs_rho = 0;
             float xa = a->x, xb = b->x, ua = a->u, ub = b->u, xend = (xa < xb ? xa : xb) - reach;
             int ia = ring[e], ib = ring[(e + 1) % p->nv];
             u32 ca = p->col[p->gour ? ia : 0] & 0xFFFFFF, cb = p->col[p->gour ? ib : 0] & 0xFFFFFF;
             nedge++;
-            if (port_verbose > 1) port_printf("[port] ws edge: %s cmd %02x tp %04x cl %04x a (%d,%d,%d u%d v%d) b (%d,%d,%d u%d v%d) poly x %d..%d u %d..%d v %d..%d tile %d..%d rho %.3f ground %d\n", s > 0 ? "L" : "R",
-                p->cmd, p->tpage, p->clut, a->x, a->y, a->z, a->u, a->v, b->x, b->y, b->z, b->u, b->v, p->x0, p->x1, p->u0, p->u1, p->v0, p->v1, t0, t1, rho, ground);
+            if (port_verbose > 1)
+                port_printf("[port] ws edge: %s cmd %02x tp %04x cl %04x a (%d,%d,%d u%d v%d) b (%d,%d,%d u%d v%d) "
+                            "poly x %d..%d u %d..%d v %d..%d tile %d..%d rho %.3f ground %d\n", s > 0 ? "L" : "R",
+                            p->cmd, p->tpage, p->clut, a->x, a->y, a->z, a->u, a->v, b->x, b->y, b->z, b->u, b->v,
+                            p->x0, p->x1, p->u0, p->u1, p->v0, p->v1, t0, t1, rho, ground);
+            /* pieces of at most PIECE units, each ending where the tile wraps */
             for (int guard = 0; guard < 64; guard++) {
-                float xl = xa < xb ? xa : xb, nxt = xl - PIECE, wrap = -1e9f;
+                float xl = xa < xb ? xa : xb, next_x = xl - PIECE, wrap = -1e9f;
                 if (xl <= xend + 0.5f) break;
                 if (rho != 0) {
                     float wa = rho > 0 ? xa - (ua - t0) / rho : xa - (t1 - ua) / -rho;
                     float wb = rho > 0 ? xb - (ub - t0) / rho : xb - (t1 - ub) / -rho;
                     wrap = wa < wb ? wa : wb;
-                    if (wrap > xl - 0.5f) { ua = ub = rho > 0 ? t1 : t0; continue; }   /* at the tile's end already */
-                    if (wrap > nxt) nxt = wrap;
+                    if (wrap > xl - 0.5f) {                     /* at the tile's end already */
+                        ua = ub = rho > 0 ? t1 : t0;
+                        continue;
+                    }
+                    if (wrap > next_x) next_x = wrap;
                 }
-                if (nxt < xend) nxt = xend;
-                float ua2 = ua - rho * (xa - nxt), ub2 = ub - rho * (xb - nxt);
-                if (ua2 < t0) ua2 = t0; if (ua2 > t1) ua2 = t1; if (ub2 < t0) ub2 = t0; if (ub2 > t1) ub2 = t1;
-                if (rho == 0) { ua2 = ua; ub2 = ub; }
+                if (next_x < xend) next_x = xend;
+                float ua2 = ua - rho * (xa - next_x), ub2 = ub - rho * (xb - next_x);
+                if (ua2 < t0) ua2 = t0;
+                if (ua2 > t1) ua2 = t1;
+                if (ub2 < t0) ub2 = t0;
+                if (ub2 > t1) ub2 = t1;
+                if (rho == 0) {
+                    ua2 = ua;
+                    ub2 = ub;
+                }
                 if (nf + ng >= MAXQ) goto pack;
-                /* the quad on the other side of the edge, same facing: ring (b, a, a', b') = strip order b, a, b', a' */
+                /* the quad on the other side of the edge, same facing: ring (b, a, a', b') = strip order b, a, b',
+                   a' */
                 u8 *d = p->gour ? gq[ng].g : fq[nf].flat, *vp;
                 u32 w0 = cb | ((u32)(p->cmd | 8) << 24);
-                memcpy(d, &p->clut, 2); memcpy(d + 2, &p->tpage, 2); memcpy(d + 4, &w0, 4);
+                memcpy(d, &p->clut, 2);
+                memcpy(d + 2, &p->tpage, 2);
+                memcpy(d + 4, &w0, 4);
                 vp = d + 8;
-                if (p->gour) { memcpy(d + 8, &ca, 4); memcpy(d + 12, &cb, 4); memcpy(d + 16, &ca, 4); vp = d + 20; ng++; } else nf++;
-                put_v(vp, s, xb, b, ub, b->x); put_v(vp + 8, s, xa, a, ua, a->x); put_v(vp + 16, s, nxt, b, ub2, b->x); put_v(vp + 24, s, nxt, a, ua2, a->x);
-                xa = xb = nxt; ua = ua2; ub = ub2;
-                if (rho != 0 && nxt <= wrap + 0.01f) ua = ub = rho > 0 ? t1 : t0;
+                if (p->gour) {
+                    memcpy(d + 8, &ca, 4);
+                    memcpy(d + 12, &cb, 4);
+                    memcpy(d + 16, &ca, 4);
+                    vp = d + 20;
+                    ng++;
+                } else nf++;
+                put_v(vp, s, xb, b, ub, b->x);
+                put_v(vp + 8, s, xa, a, ua, a->x);
+                put_v(vp + 16, s, next_x, b, ub2, b->x);
+                put_v(vp + 24, s, next_x, a, ua2, a->x);
+                xa = xb = next_x;
+                ua = ua2;
+                ub = ub2;
+                if (rho != 0 && next_x <= wrap + 0.01f) ua = ub = rho > 0 ? t1 : t0;
             }
         }
     }
 pack:
+    /* the PROPS of this room and end, copied */
     for (unsigned pi = 0; pi < sizeof PROPS / sizeof PROPS[0]; pi++) {
         if (PROPS[pi].area != cur_area || PROPS[pi].section != cur_section || PROPS[pi].end != (s < 0)) continue;
         if (port_ws_cull < PROPS[pi].pad0 || port_ws_cull > PROPS[pi].pad1) continue;
@@ -378,16 +528,31 @@ pack:
             int rx0 = s > 0 ? p->x0 : -p->x1, rx1 = s > 0 ? p->x1 : -p->x0;
             if (p->tpage != PROPS[pi].tp[0] && p->tpage != PROPS[pi].tp[1]) continue;
             if (PROPS[pi].clut && p->clut != PROPS[pi].clut) continue;
-            if (rx0 < PROPS[pi].x0 || rx1 > PROPS[pi].x1 || p->y0 > PROPS[pi].y1 || p->z0 < PROPS[pi].z0 || p->z1 > PROPS[pi].z1) continue;
+            if (rx0 < PROPS[pi].x0 || rx1 > PROPS[pi].x1 || p->y0 > PROPS[pi].y1 || p->z0 < PROPS[pi].z0
+                || p->z1 > PROPS[pi].z1) continue;
             u8 *d;
-            if (p->nv == 4) { if (nf + ng >= MAXQ) break; d = p->gour ? gq[ng++].g : fq[nf++].flat; }
-            else { if (nt3[0] + nt3[1] >= MAXT) break; d = p->gour ? gt[nt3[1]++].t : ft[nt3[0]++].t; }
+            if (p->nv == 4) {
+                if (nf + ng >= MAXQ) break;
+                d = p->gour ? gq[ng++].g : fq[nf++].flat;
+            }
+            else {
+                if (nt3[0] + nt3[1] >= MAXT) break;
+                d = p->gour ? gt[nt3[1]++].t : ft[nt3[0]++].t;
+            }
             /* a turned copy faces the other way: swap the vertex pairs so that it is not culled (the command byte
                stays with the first colour word) */
             static const u8 fwd[4] = {0, 1, 2, 3}, rev4[4] = {1, 0, 3, 2}, rev3[4] = {1, 0, 2, 3};
             const u8 *ord = !PROPS[pi].tz ? fwd : p->nv == 4 ? rev4 : rev3;
-            memcpy(d, &p->clut, 2); memcpy(d + 2, &p->tpage, 2); memcpy(d + 4, &p->col[ord[0]], 3); memcpy(d + 7, (const u8 *)&p->col[0] + 3, 1); d += 8;
-            if (p->gour) for (int j = 1; j < p->nv; j++) { memcpy(d, &p->col[ord[j]], 4); d += 4; }
+            memcpy(d, &p->clut, 2);
+            memcpy(d + 2, &p->tpage, 2);
+            memcpy(d + 4, &p->col[ord[0]], 3);
+            memcpy(d + 7, (const u8 *)&p->col[0] + 3, 1);
+            d += 8;
+            if (p->gour)
+                for (int j = 1; j < p->nv; j++) {
+                    memcpy(d, &p->col[ord[j]], 4);
+                    d += 4;
+                }
             for (int j = 0; j < p->nv; j++) {
                 Vx v = p->v[ord[j]];
                 float px = PROPS[pi].tz ? PROPS[pi].dx : PROPS[pi].dx + (PROPS[pi].x0 + PROPS[pi].x1) / 2;
@@ -395,33 +560,65 @@ pack:
                 float lift = wave(wave_ex(cs, nc, pz) - px, pz);
                 if (PROPS[pi].tz) {
                     int along = s * v.x - PROPS[pi].x0;
-                    v.x = (s16)(PROPS[pi].dx + along * PROPS[pi].tx / 256); v.z = (s16)(PROPS[pi].dz + along * PROPS[pi].tz / 256);
+                    v.x = (s16)(PROPS[pi].dx + along * PROPS[pi].tx / 256);
+                    v.z = (s16)(PROPS[pi].dz + along * PROPS[pi].tz / 256);
                     v.y = (s16)(v.y + (int)lift + PROPS[pi].dy + along * PROPS[pi].slope / 256);
                 } else {
-                    v.x = (s16)(s * v.x + PROPS[pi].dx); v.y = (s16)(v.y + (int)lift + PROPS[pi].dy); v.z = (s16)(v.z + PROPS[pi].dz);
+                    v.x = (s16)(s * v.x + PROPS[pi].dx);
+                    v.y = (s16)(v.y + (int)lift + PROPS[pi].dy);
+                    v.z = (s16)(v.z + PROPS[pi].dz);
                 }
-                memcpy(d, &v, 8); d += 8;
+                memcpy(d, &v, 8);
+                d += 8;
             }
             nprop++;
         }
     }
+    /* the block: flat triangles, flat quads, gouraud triangles, gouraud quads (each a count and its packets), then
+       16 zero bytes */
     if (nf + ng + nt3[0] + nt3[1]) {
         int size = 4 + nt3[0] * 32 + 4 + nf * 40 + 4 + nt3[1] * 40 + 4 + ng * 52 + 16;
         u8 *b = out->blk = realloc(out->blk, size), *d = b;
         if (b) {
             u32 c;
-            c = nt3[0]; memcpy(d, &c, 4); d += 4; for (int i = 0; i < nt3[0]; i++) { memcpy(d, ft[i].t, 32); d += 32; }
-            c = nf; memcpy(d, &c, 4); d += 4; memcpy(d, fq, nf * 40); d += nf * 40;
-            c = nt3[1]; memcpy(d, &c, 4); d += 4; memcpy(d, gt, nt3[1] * 40); d += nt3[1] * 40;
-            c = ng; memcpy(d, &c, 4); d += 4; memcpy(d, gq, ng * 52); d += ng * 52;
+            c = nt3[0];
+            memcpy(d, &c, 4);
+            d += 4;
+            for (int i = 0; i < nt3[0]; i++) {
+                memcpy(d, ft[i].t, 32);
+                d += 32;
+            }
+            c = nf;
+            memcpy(d, &c, 4);
+            d += 4;
+            memcpy(d, fq, nf * 40);
+            d += nf * 40;
+            c = nt3[1];
+            memcpy(d, &c, 4);
+            d += 4;
+            memcpy(d, gt, nt3[1] * 40);
+            d += nt3[1] * 40;
+            c = ng;
+            memcpy(d, &c, 4);
+            d += 4;
+            memcpy(d, gq, ng * 52);
+            d += ng * 52;
             memset(d, 0, 16);
-            out->size = size; out->nq = nf + ng + nt3[0] + nt3[1];
+            out->size = size;
+            out->nq = nf + ng + nt3[0] + nt3[1];
         }
     }
-    if (port_verbose) port_printf("[port] ws edge: %s end, %d polygons read, %d edges carried on, %d polygons of a prop copied: %d quads, %d triangles\n",
-                                  s > 0 ? "left" : "right", np, nedge, nprop, nf + ng, nt3[0] + nt3[1]);
+    if (port_verbose)
+        port_printf("[port] ws edge: %s end, %d polygons read, %d edges carried on, %d polygons of a prop copied: "
+                    "%d quads, %d triangles\n",
+                    s > 0 ? "left" : "right", np, nedge, nprop, nf + ng, nt3[0] + nt3[1]);
 end:
-    free(ps); free(fq); free(gq); free(cs); free(ft); free(gt);
+    free(ps);
+    free(fq);
+    free(gq);
+    free(cs);
+    free(ft);
+    free(gt);
 }
 
 /* the rooms looked at (area, section, ends: 1 = left, 2 = right) */
@@ -434,17 +631,22 @@ static const struct { u8 area, section, ends, props_only; } ROOMS[] = {
 static int room_ends(int area, int section)
 {
     if (port_ws_edge >= 2) return 3;
-    for (unsigned i = 0; i < sizeof ROOMS / sizeof ROOMS[0]; i++) if (ROOMS[i].area == area && ROOMS[i].section == section) return ROOMS[i].ends;
+    for (unsigned i = 0; i < sizeof ROOMS / sizeof ROOMS[0]; i++)
+        if (ROOMS[i].area == area && ROOMS[i].section == section) return ROOMS[i].ends;
     return 0;
 }
 static int room_props_only(int area, int section)
 {
-    for (unsigned i = 0; i < sizeof ROOMS / sizeof ROOMS[0]; i++) if (ROOMS[i].area == area && ROOMS[i].section == section) return ROOMS[i].props_only;
+    for (unsigned i = 0; i < sizeof ROOMS / sizeof ROOMS[0]; i++)
+        if (ROOMS[i].area == area && ROOMS[i].section == section) return ROOMS[i].props_only;
     return 0;
 }
 
 static Block blocks[2];
-static u32 cur_key; static const u8 *cur_tbl; static int cur_reach;
+/* what blocks[] were built for */
+static u32 cur_key;
+static const u8 *cur_tbl;
+static int cur_reach;
 
 /* called from port_ws_area_model_link with the game's (merged) block list of this frame: adds the end sectors while
    the first / last sector of the model is listed.  list: [3] = count, u32 pointers from +4, room for 88. */
@@ -454,11 +656,17 @@ void port_ws_edge_blocks(char *list, const u8 *tbl, int area, int section)
     int ends = room_ends(area, section), n = tbl[0];
     if (!ends || n < 2) return;
     const s32 *off = (const s32 *)(tbl + 4);
-    u32 key = (u32)n * 2654435761u; int reach = 3 * port_ws_cull + 96;
+    u32 key = (u32)n * 2654435761u;
+    int reach = 3 * port_ws_cull + 96;
     for (int i = 0; i < n; i++) key = (key ^ (u32)off[i]) * 16777619u;
     for (int i = 0; i < 64; i++) key = (key ^ tbl[off[0] + i]) * 16777619u;
     if (key != cur_key || tbl != cur_tbl || reach != cur_reach || area != cur_area || section != cur_section) {
-        cur_key = key; cur_tbl = tbl; cur_reach = reach; cur_area = area; cur_section = section; cur_props_only = room_props_only(area, section);
+        cur_key = key;
+        cur_tbl = tbl;
+        cur_reach = reach;
+        cur_area = area;
+        cur_section = section;
+        cur_props_only = room_props_only(area, section);
         build(tbl, 1, &blocks[0], reach);
         build(tbl, -1, &blocks[1], reach);
     }
@@ -475,15 +683,17 @@ void port_ws_edge_blocks(char *list, const u8 *tbl, int area, int section)
     for (int e = 0; e < 2; e++) {
         if (!(ends & (1 << e)) || !blocks[e].nq || !near[e]) continue;
         for (int j = 0; j <= 4 && j <= n; j++) {
-            u32 w = j == 4 ? (u32)(unsigned long)blocks[e].blk : (u32)(unsigned long)tbl + off[e ? n - 1 - j : j];
+            u32 sector = j == 4 ? (u32)(unsigned long)blocks[e].blk : (u32)(unsigned long)tbl + off[e ? n - 1 - j : j];
             int k;
             if (j == 4 && n < 4) { /* (short models: every sector is an end sector) */ }
             if (j < 4 && j >= n) continue;
             cnt = (u8)list[3];
-            for (k = 0; k < cnt; k++) if (((u32 *)list)[1 + k] == w) break;
+            for (k = 0; k < cnt; k++)
+                if (((u32 *)list)[1 + k] == sector) break;
             if (k < cnt) continue;
             if (cnt >= 88) return;
-            ((u32 *)list)[1 + cnt] = w; list[3] = cnt + 1;
+            ((u32 *)list)[1 + cnt] = sector;
+            list[3] = cnt + 1;
         }
     }
 }

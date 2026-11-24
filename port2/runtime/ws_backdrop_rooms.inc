@@ -11,7 +11,14 @@
 /* --- the canvas of a frontal room: cv / cw as AREA02 s5's (X = 1..cw outwards), plus the region of every pixel */
 static u8 *rg;                                            /* region id per strip pixel (0 = none) */
 static int wx_of(int side, int X) { return pcol(side, X); }   /* the picture column a strip column continues */
-static void putr(int X, int y, Rgb c, int r) { Rgb *p = px_at(X, y); if (p) { *p = c; rg[(size_t)y * cw + X - 1] = (u8)r; } }
+static void putr(int X, int y, Rgb c, int r)
+{
+    Rgb *p = px_at(X, y);
+    if (p) {
+        *p = c;
+        rg[(size_t)y * cw + X - 1] = (u8)r;
+    }
+}
 static int reg_at(int X, int y) { return (X >= 1 && X <= cw && y >= 0 && y < PH) ? rg[(size_t)y * cw + X - 1] : 0; }
 
 /* samples of the texels in picture box [x0, x1) x [y0, y1) that pass pred (0: all) */
@@ -23,56 +30,105 @@ static void samp_box(int x0, int x1, int y0, int y1, Pred pred)
             if (!pred || pred(pic[y][x])) samp_add(pic[y][x]);
 }
 /* both edges' boxes: columns [x0, x1) from the left edge and the mirror from the right one */
-static void samp_edges(int x0, int x1, int y0, int y1, Pred pred) { samp_box(x0, x1, y0, y1, pred); samp_box(PW - x1, PW - x0, y0, y1, pred); }
+static void samp_edges(int x0, int x1, int y0, int y1, Pred pred)
+{
+    samp_box(x0, x1, y0, y1, pred);
+    samp_box(PW - x1, PW - x0, y0, y1, pred);
+}
 static void samp_side(int side, int x0, int x1, int y0, int y1, Pred pred)
 {
-    if (side) samp_box(PW - x1, PW - x0, y0, y1, pred); else samp_box(x0, x1, y0, y1, pred);
+    if (side) samp_box(PW - x1, PW - x0, y0, y1, pred);
+    else samp_box(x0, x1, y0, y1, pred);
 }
-static Rgb ramp_mean(const Ramp *rp) { Rgb s = { 0, 0, 0 }; for (int i = 0; i < NRAMP; i++) { s.r += rp->bin[i].r; s.g += rp->bin[i].g; s.b += rp->bin[i].b; } s.r /= NRAMP; s.g /= NRAMP; s.b /= NRAMP; return s; }
+static Rgb ramp_mean(const Ramp *rp)
+{
+    Rgb s = { 0, 0, 0 };
+    for (int i = 0; i < NRAMP; i++) {
+        s.r += rp->bin[i].r;
+        s.g += rp->bin[i].g;
+        s.b += rp->bin[i].b;
+    }
+    s.r /= NRAMP;
+    s.g /= NRAMP;
+    s.b /= NRAMP;
+    return s;
+}
 
 /* luminance statistics: trimmed mean and deviation (x 16) of a histogram (the lightest and darkest 10 % left out, so a
    barrel or a sign by the edge does not set the level) */
 typedef struct { int h[256], n; } Hist;
-static void hist_add(Hist *h, int l) { h->h[clampi(l, 0, 255)]++; h->n++; }
+static void hist_add(Hist *h, int l)
+{
+    h->h[clampi(l, 0, 255)]++;
+    h->n++;
+}
 static void hist_stat(const Hist *h, int *mean16, int *dev16)
 {
-    int lo = h->n / 10, hi = h->n - h->n / 10, k = 0, n = 0; long long s = 0, sq = 0;
+    int lo = h->n / 10,
+        hi = h->n - h->n / 10,
+        k = 0,
+        n = 0;
+    long long s = 0,
+              sq = 0;
     for (int l = 0; l < 256; l++)
-        for (int i = 0; i < h->h[l]; i++, k++) if (k >= lo && k < hi) { s += l; sq += l * l; n++; }
-    if (!n) { *mean16 = *dev16 = 0; return; }
+        for (int i = 0; i < h->h[l]; i++, k++)
+            if (k >= lo && k < hi) {
+                s += l;
+                sq += l * l;
+                n++;
+            }
+    if (!n) {
+        *mean16 = *dev16 = 0;
+        return;
+    }
     *mean16 = (int)(s * 16 / n);
     *dev16 = isqrt_i((int)((sq * 256 - s * s * 256 / n) / n));
 }
 
-/* match each region of the strip to the picture next to the edge: the picture's texels of region r (pic_reg(side, x, y))
-   in the 32 columns next to the edge (regions in the mask both: next to both edges, where one edge is mostly covered by an object) against the strip's region r in columns 4-15; L' = m + (L - ms) k, contrast k
+/* match each region of the strip to the picture next to the edge: the picture's texels of region r
+   (pic_reg(side, x, y)) in the 32 columns next to the edge (regions in the mask both: next to both edges, where one
+   edge is mostly covered by an object) against the strip's region r in columns 4-15; L' = m + (L - ms) k, contrast k
    0.75..1.5.  pic_reg returns 0 for texels to leave out (objects by the edge). */
 typedef int (*PicReg)(int side, int x, int y);
 #define NREG 12
+static Hist (*balance_regions__hp);
+static Hist (*balance_regions__hs);
 static void balance_regions(int side, PicReg pic_reg, int both)
 {
-    static Hist hp[NREG], hs[NREG]; int mp[NREG], dp[NREG], ms[NREG], ds[NREG], k[NREG];
-    memset(hp, 0, sizeof hp); memset(hs, 0, sizeof hs);
+    Hist (*const hp) = balance_regions__hp,
+         (*const hs) = balance_regions__hs;
+    int mp[NREG], dp[NREG], ms[NREG], ds[NREG], k[NREG];
+    memset(hp, 0, (sizeof *hp * (NREG)));
+    memset(hs, 0, (sizeof *hs * (NREG)));
     for (int sd = 0; sd < 2; sd++)
         for (int X = -31; X <= 0; X++)
             for (int y = 0; y < PH; y++) {
-                int x = pcol(sd, X), r = pic_reg(sd, x, y);
+                int x = pcol(sd, X),
+                    r = pic_reg(sd, x, y);
                 if (r > 0 && r < NREG && (sd == side || (both >> r & 1))) hist_add(&hp[r], lum(rgb15(pic[y][x])));
             }
     for (int X = 4; X <= 15 && X <= cw; X++)
-        for (int y = 0; y < PH; y++) { int r = reg_at(X, y); if (r > 0 && r < NREG) hist_add(&hs[r], lum(cv[(size_t)y * cw + X - 1])); }
+        for (int y = 0; y < PH; y++) {
+            int r = reg_at(X, y);
+            if (r > 0 && r < NREG) hist_add(&hs[r], lum(cv[(size_t)y * cw + X - 1]));
+        }
     for (int r = 1; r < NREG; r++) {
-        hist_stat(&hp[r], &mp[r], &dp[r]); hist_stat(&hs[r], &ms[r], &ds[r]);
+        hist_stat(&hp[r], &mp[r], &dp[r]);
+        hist_stat(&hs[r], &ms[r], &ds[r]);
         k[r] = ds[r] && dp[r] ? clampi(dp[r] * 256 / ds[r], 192, 384) : 256;
         if (hp[r].n < 40 || hs[r].n < 20) ms[r] = 0;
 #ifdef WS_BACKDROP_MAIN
-        if (getenv("WSB_INFO") && hp[r].n) fprintf(stderr, "side %d region %d: picture %d (dev %d, n %d), strip %d (dev %d) -> k %d\n",
-                                                   side, r, mp[r] / 16, dp[r] / 16, hp[r].n, ms[r] / 16, ds[r] / 16, k[r]);
+        if (getenv("WSB_INFO") && hp[r].n)
+            fprintf(stderr, "side %d region %d: picture %d (dev %d, n %d), strip %d (dev %d) -> k %d\n",
+                    side, r, mp[r] / 16, dp[r] / 16, hp[r].n, ms[r] / 16, ds[r] / 16, k[r]);
 #endif
     }
     for (int y = 0; y < PH; y++)
         for (int X = 1; X <= cw; X++) {
-            Rgb *p = &cv[(size_t)y * cw + X - 1]; int r = reg_at(X, y), l = lum(*p), l2;
+            Rgb *p = &cv[(size_t)y * cw + X - 1];
+            int r = reg_at(X, y),
+                l = lum(*p),
+                l2;
             if (r <= 0 || r >= NREG || !ms[r]) continue;
             l2 = clampi((mp[r] + (l * 16 - ms[r]) * k[r] / 256) / 16, 2, 255);
             *p = l ? scale(*p, clampi(l2 * 256 / l, 0, 1024)) : (Rgb){ l2, l2, l2 };
@@ -93,24 +149,50 @@ static void emit(int side)
 static int canvas_open(int pad)
 {
     pal_make();
-    cw = pad; cv = calloc((size_t)pad * PH, sizeof *cv); rg = calloc((size_t)pad * PH, 1); occ = calloc((size_t)pad * PH, 1);
-    if (!cv || !rg || !occ) { free(cv); free(rg); free(occ); cv = 0; rg = occ = 0; return 0; }
+    cw = pad;
+    cv = calloc((size_t)pad * PH, sizeof *cv);
+    rg = calloc((size_t)pad * PH, 1);
+    occ = calloc((size_t)pad * PH, 1);
+    if (!cv || !rg || !occ) {
+        free(cv);
+        free(rg);
+        free(occ);
+        cv = 0;
+        rg = occ = 0;
+        return 0;
+    }
     return 1;
 }
-static void canvas_close(void) { free(cv); free(rg); free(occ); cv = 0; rg = occ = 0; }
-static void canvas_clear(void) { memset(cv, 0, (size_t)cw * PH * sizeof *cv); memset(rg, 0, (size_t)cw * PH); }
+static void canvas_close(void)
+{
+    free(cv);
+    free(rg);
+    free(occ);
+    cv = 0;
+    rg = occ = 0;
+}
+static void canvas_clear(void)
+{
+    memset(cv, 0, (size_t)cw * PH * sizeof *cv);
+    memset(rg, 0, (size_t)cw * PH);
+}
 
 /* a soft round blob of foliage (leaves / blossom / needles): centre (x16, y16) 1/16 px, radii, tone on rp; lit from
    the top left (the light of these rooms), darker rim at the bottom right; per-pixel grain from a position hash */
 static void blob(int x16, int y16, int rx, int ry, const Ramp *rp, int tone, int r, int seed)
 {
-    int R = (rx > ry ? rx : ry) / 16 + 2, X0 = x16 / 16, Y0 = y16 / 16;
+    int R = (rx > ry ? rx : ry) / 16 + 2,
+        X0 = x16 / 16,
+        Y0 = y16 / 16;
     for (int py = Y0 - R; py <= Y0 + R; py++)
         for (int X = X0 - R; X <= X0 + R; X++) {
-            int dx = X * 16 + 8 - x16, dy = py * 16 + 8 - y16;
+            int dx = X * 16 + 8 - x16,
+                dy = py * 16 + 8 - y16;
             long long q = (long long)dx * dx * 256 / (rx * rx) + (long long)dy * dy * 256 / (ry * ry);
             if (q > 256 || X < 1 || X > cw || py < 0 || py >= PH) continue;
-            {   int t = tone - (dx * 64 / rx + dy * 96 / ry) / 2;              /* lit from the top left */
+            /* lit from the top left */
+            {
+                int t = tone - (dx * 64 / rx + dy * 96 / ry) / 2;
                 if (q > 170 && dx / 2 + dy > 0) t -= 40;                        /* the rim away from the light */
                 t += (int)(hash3(X * 7 + seed, py, seed) & 31) - 16;
                 putr(X, py, ramp(rp, t), r);
@@ -160,8 +242,8 @@ static void blob(int x16, int y16, int rx, int ry, const Ramp *rp, int tone, int
  *     hole), the first mound's top starting at the picture's bush top at the edge;
  *   - each band softened to the picture's own sharpness next to the edge (the mean fine detail |L - box3(L)| matched by
  *     a 3x3 blur of the right strength: the distant trees and the path are soft, the wall crisp).
- * Not continued: the stepping stones jutting out of the wall, the ferns in it, the barrels, the bench, the notice board,
- * the pipe, the low two-board object by each edge. */
+ * Not continued: the stepping stones jutting out of the wall, the ferns in it, the barrels, the bench, the notice
+ * board, the pipe, the low two-board object by each edge. */
 enum { A5_SKY = 1, A5_TREE, A5_FENCE, A5_STONE, A5_PATH, A5_BUSH, A5_TREEN };
 #define A5_WALL0 103
 #define A5_WALL1 186
@@ -186,12 +268,16 @@ static const A5Fence A5_FEN[2] = { { -12, 80, 102 }, { 296, 80, 103 } };   /* (l
 typedef struct { short kind, cx, ty, wk; } A5ETree;      /* kind 0 far, 1 hazy, 2 near; centre column, top row, w x16 */
 static const A5ETree A5_ETREE[2] = { { 2, 12, 3, 9 }, { 1, 309, 1, 9 } };
 
-static Ramp A5_rrow[2][PH];                              /* per-row ramps (fence, wall top / foot, path) */
+static Ramp (*A5_rrow)[PH];                              /* per-row ramps (fence, wall top / foot, path) */
 static Ramp A5_rsky[2], A5_rnear, A5_rhaze, A5_rpost, A5_rmortar, A5_rbush;
-static Rgb A5_stc[256]; static int A5_nst, A5_sta[257]; /* the picture's stone colours, their areas (cumulative) */
+/* the picture's stone colours, their areas (cumulative) */
+static Rgb (*A5_stc);
+static int A5_nst, (*A5_sta);
 static int A5_thr;                                       /* stone / mortar threshold (luminance) */
-static int A5_lk[2];
-static Rgb A5_cblue, A5_cwarm; static int A5_pblue, A5_pwarm;   /* the pale blue / warm stones: colour, share (/1000) */                                     /* the stones' length per side (x 256) */
+static int A5_lk[2];                                     /* the stones' length per side (x 256) */
+/* the pale blue / warm stones: colour, share (/1000) */
+static Rgb A5_cblue, A5_cwarm;
+static int A5_pblue, A5_pwarm;
 static int A5_foot[PH];                                  /* the wall's light per row (x 256) */
 static int A5_tb[2][24], A5_ntb[2];                      /* tier lines (dark rows) of the edge tree at the edge */
 static int A5_btop[2];                                   /* the bush top at the edge */
@@ -200,8 +286,12 @@ static Rgb A5_skyc;
 static int a5x(int side, int i) { return side ? PW - 1 - i : i; }      /* picture column i in from the edge */
 static Rgb a5p(int side, int i, int y) { return rgb15(pic[clampi(y, 0, PH - 1)][clampi(a5x(side, i), 0, PW - 1)]); }
 static int a5_green(Rgb k) { return k.g >= k.r + 6 && k.g >= k.b + 16; }
-static int a5_obj(Rgb k) { int l = lum(k); return k.r > k.g + 30 || k.g > k.r + 8 || l < 110 || k.r > k.b + 60; }  /* stepping
-   stones, plants, shadows, barrels (in the wall) */
+/* stepping stones, plants, shadows, barrels (in the wall) */
+static int a5_obj(Rgb k)
+{
+    int l = lum(k);
+    return k.r > k.g + 30 || k.g > k.r + 8 || l < 110 || k.r > k.b + 60;
+}
 static int a5_sky(Rgb k) { return lum(k) > 170 && k.b + 24 >= k.g && k.g < k.r + 24 && !(k.g > k.r + 8); }
 static int a5_plank(Rgb k) { return lum(k) > 120 && k.r >= k.b + 30 && k.g >= k.b + 20 && k.r < k.g + 40; }
 static int a5_orange(Rgb k) { return k.r >= k.g + 30 && k.g >= k.b + 20; }
@@ -214,13 +304,26 @@ static void ramp_any(Ramp *rp)
     if (n < 1) return;
     qsort(samp, (size_t)n, sizeof samp[0], samp_cmp);
     for (int i = 0; i < NRAMP; i++) {
-        int a = n * i / NRAMP, b = n * (i + 1) / NRAMP; Rgb s = { 0, 0, 0 };
+        int a = n * i / NRAMP,
+            b = n * (i + 1) / NRAMP;
+        Rgb s = { 0, 0, 0 };
         if (b <= a) b = a + 1;
-        if (b > n) { a = n - 1; b = n; }
-        for (int j = a; j < b; j++) { Rgb c = rgb15((u16)samp[j]); s.r += c.r; s.g += c.g; s.b += c.b; }
-        rp->bin[i].r = s.r / (b - a); rp->bin[i].g = s.g / (b - a); rp->bin[i].b = s.b / (b - a);
+        if (b > n) {
+            a = n - 1;
+            b = n;
+        }
+        for (int j = a; j < b; j++) {
+            Rgb c = rgb15((u16)samp[j]);
+            s.r += c.r;
+            s.g += c.g;
+            s.b += c.b;
+        }
+        rp->bin[i].r = s.r / (b - a);
+        rp->bin[i].g = s.g / (b - a);
+        rp->bin[i].b = s.b / (b - a);
     }
-    rp->ok = 1; nsamp = 0;
+    rp->ok = 1;
+    nsamp = 0;
 }
 /* the ramp of row y: the texels of columns [i0, i1) from the edge that pass pred (widened to +-3 rows if too few) */
 typedef int (*A5Pred)(int side, int i, int y);
@@ -233,69 +336,149 @@ static void a5_row_ramp(Ramp *rp, int side, int y, int i0, int i1, A5Pred pred)
                 for (int i = i0; i < i1; i++) if (pred(side, i, yy)) samp_add(pic[yy][a5x(side, i)]);
         if (nsamp >= 10 || d == 3) break;
     }
-    if (nsamp) ramp_any(rp); else memset(rp, 0, sizeof *rp);
+    if (nsamp) ramp_any(rp);
+    else memset(rp, 0, sizeof *rp);
 }
 /* the picture's sunlit fence stretch (x 250-260 and 269-291: no post, trunk, pipe or object) */
 static int a5_fence_col(int x) { return (x >= 250 && x < 261) || (x >= 269 && x < 292); }
 static int pu_rail(u16 c) { return a5_plank(rgb15(c)) || lum(rgb15(c)) >= 150; }
-static int pu_gap(u16 c) { Rgb k = rgb15(c); return !a5_plank(k) && !(k.b > k.r + 8) && lum(k) < 150; }
-static int pu_post(u16 c) { Rgb k = rgb15(c); return k.r > k.g + 8 && k.r > k.b + 24 && lum(k) < 175; }
-static int pu_lit(u16 c) { Rgb k = rgb15(c); return lum(k) >= 150 && !a5_green(k); }
-static int pr_path(int side, int i, int y) { Rgb k = a5p(side, i, y); return a5_orange(k) || (y < 190 && !a5_green(k) && lum(k) > 120); }
+static int pu_gap(u16 c)
+{
+    Rgb k = rgb15(c);
+    return !a5_plank(k) && !(k.b > k.r + 8) && lum(k) < 150;
+}
+static int pu_post(u16 c)
+{
+    Rgb k = rgb15(c);
+    return k.r > k.g + 8 && k.r > k.b + 24 && lum(k) < 175;
+}
+static int pu_lit(u16 c)
+{
+    Rgb k = rgb15(c);
+    return lum(k) >= 150 && !a5_green(k);
+}
+static int pr_path(int side, int i, int y)
+{
+    Rgb k = a5p(side, i, y);
+    return a5_orange(k) || (y < 190 && !a5_green(k) && lum(k) > 120);
+}
 static int pr_lit(int side, int i, int y) { return pu_lit(pic[y][a5x(side, i)]); }
 static int pr_wall(int side, int i, int y) { return !a5_obj(a5p(side, i, y)); }
-static int pr_orange(int side, int i, int y) { Rgb k = a5p(side, i, y); return a5_orange(k) && lum(k) >= 128; }   /* (lit: no shadows of objects) */
+/* (lit: no shadows of objects) */
+static int pr_orange(int side, int i, int y)
+{
+    Rgb k = a5p(side, i, y);
+    return a5_orange(k) && lum(k) >= 128;
+}
 static int pr_sky(int side, int i, int y) { return a5_sky(a5p(side, i, y)); }
 
 /* Otsu's threshold of a luminance histogram */
 static int otsu(const int *h)
 {
-    long long n = 0, s = 0, w0 = 0, s0 = 0, best = -1; int bt = 128;
-    for (int l = 0; l < 256; l++) { n += h[l]; s += (long long)h[l] * l; }
-    for (int t = 1; t < 256; t++) {
-        w0 += h[t - 1]; s0 += (long long)h[t - 1] * (t - 1);
-        if (!w0 || w0 == n) continue;
-        {   long long m0 = s0 * 16 / w0, m1 = (s - s0) * 16 / (n - w0), d = m0 - m1, v = (w0 * (n - w0) / 64) * (d * d / 16);
-            if (v > best) { best = v; bt = t; } }
+    long long n = 0,
+              s = 0,
+              w0 = 0,
+              s0 = 0,
+              best = -1;
+    int best_t = 128;
+    for (int l = 0; l < 256; l++) {
+        n += h[l];
+        s += (long long)h[l] * l;
     }
-    return bt;
+    for (int t = 1; t < 256; t++) {
+        w0 += h[t - 1];
+        s0 += (long long)h[t - 1] * (t - 1);
+        if (!w0 || w0 == n) continue;
+        {
+            long long m0 = s0 * 16 / w0,
+                      m1 = (s - s0) * 16 / (n - w0),
+                      d = m0 - m1,
+                      v = (w0 * (n - w0) / 64) * (d * d / 16);
+            if (v > best) {
+                best = v;
+                best_t = t;
+            }
+        }
+    }
+    return best_t;
 }
 
 /* the picture's stones next to both edges: 4-connected bright cores in rows 104-180, columns 0-69 from each edge */
 #define A5_SW 70
+static u8 (*a5_stones__m)[77][A5_SW];
+static short (*a5_stones__stk);
 static void a5_stones(void)
 {
-    static u8 m[2][77][A5_SW]; static short stk[77 * A5_SW * 2]; int hist[256];
-    memset(hist, 0, sizeof hist); A5_nst = 0; A5_sta[0] = 0;
-    for (int s = 0; s < 2; s++) for (int y = 104; y < 181; y++) for (int i = 0; i < A5_SW; i++) {
-        Rgb k = a5p(s, i, y); int ob = 0;
-        for (int dy = -1; dy <= 1; dy++) for (int di = -1; di <= 1; di++) if (a5_obj(a5p(s, i + di, y + dy))) ob = 1;
-        m[s][y - 104][i] = ob ? 0 : 1;
-        if (!ob) hist[lum(k)]++;
-    }
+    u8 (*const m)[77][A5_SW] = a5_stones__m;
+    short (*const stk) = a5_stones__stk;
+    int hist[256];
+    memset(hist, 0, sizeof hist);
+    A5_nst = 0;
+    A5_sta[0] = 0;
+    /* m: 1 where no object is near; the threshold between stones and mortar from the rest */
+    for (int s = 0; s < 2; s++)
+        for (int y = 104; y < 181; y++)
+            for (int i = 0; i < A5_SW; i++) {
+                Rgb k = a5p(s, i, y);
+                int ob = 0;
+                for (int dy = -1; dy <= 1; dy++)
+                    for (int di = -1; di <= 1; di++)
+                        if (a5_obj(a5p(s, i + di, y + dy))) ob = 1;
+                m[s][y - 104][i] = ob ? 0 : 1;
+                if (!ob) hist[lum(k)]++;
+            }
     A5_thr = otsu(hist);
     nsamp = 0;
-    for (int s = 0; s < 2; s++) for (int y = 104; y < 181; y++) for (int i = 0; i < A5_SW; i++)
-        if (m[s][y - 104][i] && lum(a5p(s, i, y)) < A5_thr - 20) samp_add(pic[y][a5x(s, i)]);
+    for (int s = 0; s < 2; s++)
+        for (int y = 104; y < 181; y++)
+            for (int i = 0; i < A5_SW; i++)
+                if (m[s][y - 104][i] && lum(a5p(s, i, y)) < A5_thr - 20) samp_add(pic[y][a5x(s, i)]);
     ramp_any(&A5_rmortar);
     for (int s = 0; s < 2; s++) {
-        for (int y = 0; y < 77; y++) for (int i = 0; i < A5_SW; i++) m[s][y][i] = m[s][y][i] && lum(a5p(s, i, y + 104)) >= A5_thr ? 1 : 0;
-        for (int y0 = 0; y0 < 77; y0++) for (int i0 = 0; i0 < A5_SW; i0++) {
-            int sp = 0, n = 0, border = 0; Rgb t = { 0, 0, 0 };
-            if (m[s][y0][i0] != 1) continue;
-            m[s][y0][i0] = 2; stk[sp++] = (short)y0; stk[sp++] = (short)i0;
-            while (sp) {
-                int i = stk[--sp], y = stk[--sp]; Rgb k = a5p(s, i, y + 104);
-                t.r += k.r; t.g += k.g; t.b += k.b; n++;
-                if (i == 0 || i == A5_SW - 1 || y == 0 || y == 76) border = 1;
-                {   static const int D[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
-                    for (int d = 0; d < 4; d++) {
-                        int yy = y + D[d][0], ii = i + D[d][1];
-                        if (yy >= 0 && yy < 77 && ii >= 0 && ii < A5_SW && m[s][yy][ii] == 1) { m[s][yy][ii] = 2; stk[sp++] = (short)yy; stk[sp++] = (short)ii; }
-                    } }
+        for (int y = 0; y < 77; y++)
+            for (int i = 0; i < A5_SW; i++)
+                m[s][y][i] = m[s][y][i] && lum(a5p(s, i, y + 104)) >= A5_thr ? 1 : 0;
+        /* flood fill of each bright core (a stack of row / column pairs); the ones that touch the box's border are
+           left out */
+        for (int y0 = 0; y0 < 77; y0++)
+            for (int i0 = 0; i0 < A5_SW; i0++) {
+                int sp = 0,
+                    n = 0,
+                    border = 0;
+                Rgb t = { 0, 0, 0 };
+                if (m[s][y0][i0] != 1) continue;
+                m[s][y0][i0] = 2;
+                stk[sp++] = (short)y0;
+                stk[sp++] = (short)i0;
+                while (sp) {
+                    int i = stk[--sp],
+                        y = stk[--sp];
+                    Rgb k = a5p(s, i, y + 104);
+                    t.r += k.r;
+                    t.g += k.g;
+                    t.b += k.b;
+                    n++;
+                    if (i == 0 || i == A5_SW - 1 || y == 0 || y == 76) border = 1;
+                    {
+                        static const int D[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+                        for (int d = 0; d < 4; d++) {
+                            int yy = y + D[d][0],
+                                ii = i + D[d][1];
+                            if (yy >= 0 && yy < 77 && ii >= 0 && ii < A5_SW && m[s][yy][ii] == 1) {
+                                m[s][yy][ii] = 2;
+                                stk[sp++] = (short)yy;
+                                stk[sp++] = (short)ii;
+                            }
+                        }
+                    }
+                }
+                if (!border && n >= 8 && n <= 160 && A5_nst < 256) {
+                    Rgb c = { t.r / n, t.g / n, t.b / n };
+                    A5_stc[A5_nst] = c;
+                    A5_sta[A5_nst + 1] = A5_sta[A5_nst] + n;
+                    A5_nst++;
+                }
             }
-            if (!border && n >= 8 && n <= 160 && A5_nst < 256) { Rgb c = { t.r / n, t.g / n, t.b / n }; A5_stc[A5_nst] = c; A5_sta[A5_nst + 1] = A5_sta[A5_nst] + n; A5_nst++; }
-        }
     }
 }
 
@@ -304,85 +487,165 @@ static void a5_analyse(void)
     for (int s = 0; s < 2; s++) {
         for (int y = 0; y < 28; y++) ;
         nsamp = 0;
-        for (int y = 0; y < 24; y++) for (int i = 0; i < 64; i++) for (int s2 = 0; s2 < 2; s2++) if (pr_sky(s2, i, y)) samp_add(pic[y][a5x(s2, i)]);   /* (both edges: the clouds too) */
+        /* (both edges: the clouds too) */
+        for (int y = 0; y < 24; y++)
+            for (int i = 0; i < 64; i++)
+                for (int s2 = 0; s2 < 2; s2++)
+                    if (pr_sky(s2, i, y))
+                        samp_add(pic[y][a5x(s2, i)]);
         ramp_any(&A5_rsky[s]);
         /* the fence's rows: the rails and the gaps from the sunlit stretch; the left's rails in the shade, as its top
            rail at the edge (x 0-15: the lower rail's rows from the same rows of it); the path per side from its lit
            orange texels next to the edge */
         for (int y = A5_FEN0; y < A5_PATH0; y++) {
-            int rail = (y < A5_FEN0 + A5_RAILH) || (y >= A5_RAIL1 && y < A5_RAIL1 + A5_RAILH), yt = y < A5_RAIL1 ? y : y - (A5_RAIL1 - A5_FEN0);
+            int rail = (y < A5_FEN0 + A5_RAILH) || (y >= A5_RAIL1 && y < A5_RAIL1 + A5_RAILH),
+                yt = y < A5_RAIL1 ? y : y - (A5_RAIL1 - A5_FEN0);
             nsamp = 0;
             if (rail && !s) for (int x = 0; x < 16; x++) { if (pu_rail(pic[yt][x])) samp_add(pic[yt][x]); }
-            else for (int x = 250; x < 292; x++) if (a5_fence_col(x) && (rail ? pu_rail(pic[y][x]) : pu_gap(pic[y][x]))) samp_add(pic[y][x]);
-            if (nsamp < 6) { nsamp = 0; for (int x = 250; x < 292; x++) if (a5_fence_col(x)) samp_add(pic[y][x]); }   /* (a picture without the
-                                                                                                             fence's tones there) */
+            else
+                for (int x = 250; x < 292; x++)
+                    if (a5_fence_col(x) && (rail ? pu_rail(pic[y][x]) : pu_gap(pic[y][x])))
+                        samp_add(pic[y][x]);
+            /* (a picture without the fence's tones there) */
+            if (nsamp < 6) {
+                nsamp = 0;
+                for (int x = 250; x < 292; x++) if (a5_fence_col(x)) samp_add(pic[y][x]);
+            }
             ramp_any(&A5_rrow[s][y]);
         }
         for (int y = A5_PATH0; y < A5_WALL0; y++) a5_row_ramp(&A5_rrow[s][y], s, y, 0, 70, pr_orange);
         for (int y = A5_PATH0; y < A5_WALL0; y++) if (!A5_rrow[s][y].ok) A5_rrow[s][y] = A5_rrow[s][y - 1];
         /* the wall's coping (rows 103-104, lit: the right edge lies in the object's shadow) and the joint under it */
-        for (int y = A5_WALL0; y < A5_STONE0; y++) a5_row_ramp(&A5_rrow[s][y], s, y, 0, 70, y < A5_STONE0 - 1 ? pr_lit : pr_wall);
+        for (int y = A5_WALL0; y < A5_STONE0; y++)
+            a5_row_ramp(&A5_rrow[s][y], s, y, 0, 70, y < A5_STONE0 - 1 ? pr_lit : pr_wall);
         for (int y = A5_STONE1; y < PH; y++) a5_row_ramp(&A5_rrow[s][y], s, y, 0, 40, pr_path);
-        for (int y = A5_STONE1; y < PH; y++) if (!A5_rrow[s][y].ok) A5_rrow[s][y] = A5_rrow[s][y - 1];   /* rows hidden by bushes */
+        /* rows hidden by bushes */
+        for (int y = A5_STONE1; y < PH; y++) if (!A5_rrow[s][y].ok) A5_rrow[s][y] = A5_rrow[s][y - 1];
     }
     nsamp = 0;                                               /* the posts: the picture's at x 262-268 */
     for (int y = 72; y < 92; y++) for (int x = 262; x < 269; x++) if (pu_post(pic[y][x])) samp_add(pic[y][x]);
     ramp_any(&A5_rpost);
-    {   int vj[2], n[2];                                     /* the stones' length per side: the density of vertical
-                                                                joints in the 40 columns next to each edge */
+    /* the stones' length per side: the density of vertical joints in the 40 columns next to each edge */
+    {
+        int vj[2], n[2];
         for (int s = 0; s < 2; s++) {
             vj[s] = n[s] = 0;
-            for (int y = A5_STONE0; y < A5_STONE1; y++) for (int i = 1; i < 40; i++) {
-                int l = lum(a5p(s, i, y));
-                if (a5_obj(a5p(s, i - 1, y)) || a5_obj(a5p(s, i, y)) || a5_obj(a5p(s, i + 1, y))) continue;
-                n[s]++; vj[s] += l <= lum(a5p(s, i - 1, y)) - 10 && l <= lum(a5p(s, i + 1, y)) - 10;
-            }
+            for (int y = A5_STONE0; y < A5_STONE1; y++)
+                for (int i = 1; i < 40; i++) {
+                    int l = lum(a5p(s, i, y));
+                    if (a5_obj(a5p(s, i - 1, y)) || a5_obj(a5p(s, i, y)) || a5_obj(a5p(s, i + 1, y))) continue;
+                    n[s]++;
+                    vj[s] += l <= lum(a5p(s, i - 1, y)) - 10 && l <= lum(a5p(s, i + 1, y)) - 10;
+                }
         }
         for (int s = 0; s < 2; s++)
-            A5_lk[s] = vj[s] && n[0] && n[1] ? clampi((int)((long long)(vj[0] + vj[1]) * n[s] * 256 / ((long long)vj[s] * (n[0] + n[1]))), 232, 320) : 256;
+            A5_lk[s] = vj[s] && n[0] && n[1]
+                ? clampi((int)((long long)(vj[0] + vj[1]) * n[s] * 256 / ((long long)vj[s] * (n[0] + n[1]))), 232, 320)
+                : 256;
 #ifdef WS_BACKDROP_MAIN
-        if (getenv("WSB_INFO")) fprintf(stderr, "stone length k %d %d (vertical joints %d / %d, %d / %d))\n", A5_lk[0], A5_lk[1], vj[0], n[0], vj[1], n[1]);
+        if (getenv("WSB_INFO"))
+            fprintf(stderr, "stone length k %d %d (vertical joints %d / %d, %d / %d))\n", A5_lk[0], A5_lk[1], vj[0],
+                    n[0], vj[1], n[1]);
 #endif
     }
     nsamp = 0;
-    for (int y = 8; y < 66; y++) { for (int x = 250; x < 292; x++) if (a5_green(rgb15(pic[y][x]))) samp_add(pic[y][x]);
-                                   for (int x = 0; x < 34; x++) if (a5_green(rgb15(pic[y][x]))) samp_add(pic[y][x]); }
+    for (int y = 8; y < 66; y++) {
+        for (int x = 250; x < 292; x++) if (a5_green(rgb15(pic[y][x]))) samp_add(pic[y][x]);
+        for (int x = 0; x < 34; x++) if (a5_green(rgb15(pic[y][x]))) samp_add(pic[y][x]);
+    }
     ramp_any(&A5_rnear);
     nsamp = 0;
-    for (int y = 8; y < 66; y++) for (int x = 300; x < 320; x++) { Rgb k = rgb15(pic[y][x]); if (k.g > k.r && !(k.b > k.r + 8 && y > 48)) samp_add(pic[y][x]); }
-    for (int y = 10; y < 44; y++) for (int x = 44; x < 80; x++) { Rgb k = rgb15(pic[y][x]); if (k.g > k.r) samp_add(pic[y][x]); }
+    for (int y = 8; y < 66; y++)
+        for (int x = 300; x < 320; x++) {
+            Rgb k = rgb15(pic[y][x]);
+            if (k.g > k.r && !(k.b > k.r + 8 && y > 48)) samp_add(pic[y][x]);
+        }
+    for (int y = 10; y < 44; y++)
+        for (int x = 44; x < 80; x++) {
+            Rgb k = rgb15(pic[y][x]);
+            if (k.g > k.r) samp_add(pic[y][x]);
+        }
     ramp_any(&A5_rhaze);
     nsamp = 0;
-    for (int y = 204; y < PH; y++) for (int i = 0; i < 48; i++) for (int s = 0; s < 2; s++) if (a5_green(a5p(s, i, y))) samp_add(pic[y][a5x(s, i)]);
+    for (int y = 204; y < PH; y++)
+        for (int i = 0; i < 48; i++)
+            for (int s = 0; s < 2; s++)
+                if (a5_green(a5p(s, i, y)))
+                    samp_add(pic[y][a5x(s, i)]);
     ramp_any(&A5_rbush);
     A5_skyc = ramp_mean(&A5_rsky[1]);
     a5_stones();
-    {   /* the pale blue stones and the warm (sandy) ones of the wall next to both edges: their colour and their share of
-           the wall (the warm ones halved: the stepping stones' lit tops pass for them too) */
-        int nb = 0, nw = 0, n = 0; Rgb cb = { 0, 0, 0 }, cwm = { 0, 0, 0 };
-        for (int s = 0; s < 2; s++) for (int y = A5_STONE0; y < A5_STONE1; y++) for (int i = 0; i < 70; i++) {
-            Rgb k = a5p(s, i, y); int l = lum(k), near = 0;
-            for (int dy = -3; dy <= 3 && !near; dy += 3) for (int di = -3; di <= 3; di += 3) if (lum(a5p(s, i + di, y + dy)) < 110) near = 1;
-            if (near || l < 120 || k.g > k.r + 8) continue;
-            n++;
-            if (k.b > k.r + 6 && l > 150) { nb++; cb.r += k.r; cb.g += k.g; cb.b += k.b; }
-            else if (k.r - k.b > 40 && k.r - k.b <= 80 && l > 150 && k.g < k.r) { nw++; cwm.r += k.r; cwm.g += k.g; cwm.b += k.b; }
-        }
-        A5_pblue = n ? nb * 1000 / n : 0; A5_pwarm = n ? nw * 500 / n : 0;
-        if (nb) { A5_cblue.r = cb.r / nb; A5_cblue.g = cb.g / nb; A5_cblue.b = cb.b / nb; } else A5_pblue = 0;
-        if (nw) { A5_cwarm.r = cwm.r / nw; A5_cwarm.g = cwm.g / nw; A5_cwarm.b = cwm.b / nw; } else A5_pwarm = 0;
+    {
+        /* the pale blue stones and the warm (sandy) ones of the wall next to both edges: their colour and their share
+           of the wall (the warm ones halved: the stepping stones' lit tops pass for them too) */
+        int nb = 0,
+            nw = 0,
+            n = 0;
+        Rgb cb = { 0, 0, 0 },
+            cwm = { 0, 0, 0 };
+        for (int s = 0; s < 2; s++)
+            for (int y = A5_STONE0; y < A5_STONE1; y++)
+                for (int i = 0; i < 70; i++) {
+                    Rgb k = a5p(s, i, y);
+                    int l = lum(k),
+                        near = 0;
+                    for (int dy = -3; dy <= 3 && !near; dy += 3)
+                        for (int di = -3; di <= 3; di += 3)
+                            if (lum(a5p(s, i + di, y + dy)) < 110) near = 1;
+                    if (near || l < 120 || k.g > k.r + 8) continue;
+                    n++;
+                    if (k.b > k.r + 6 && l > 150) {
+                        nb++;
+                        cb.r += k.r;
+                        cb.g += k.g;
+                        cb.b += k.b;
+                    } else if (k.r - k.b > 40 && k.r - k.b <= 80 && l > 150 && k.g < k.r) {
+                        nw++;
+                        cwm.r += k.r;
+                        cwm.g += k.g;
+                        cwm.b += k.b;
+                    }
+                }
+        A5_pblue = n ? nb * 1000 / n : 0;
+        A5_pwarm = n ? nw * 500 / n : 0;
+        if (nb) {
+            A5_cblue.r = cb.r / nb;
+            A5_cblue.g = cb.g / nb;
+            A5_cblue.b = cb.b / nb;
+        } else A5_pblue = 0;
+        if (nw) {
+            A5_cwarm.r = cwm.r / nw;
+            A5_cwarm.g = cwm.g / nw;
+            A5_cwarm.b = cwm.b / nw;
+        } else A5_pwarm = 0;
 #ifdef WS_BACKDROP_MAIN
-        if (getenv("WSB_INFO")) fprintf(stderr, "blue %d/1000 (%d %d %d), warm %d/1000 (%d %d %d)\n", A5_pblue, A5_cblue.r, A5_cblue.g, A5_cblue.b, A5_pwarm, A5_cwarm.r, A5_cwarm.g, A5_cwarm.b);
+        if (getenv("WSB_INFO"))
+            fprintf(stderr, "blue %d/1000 (%d %d %d), warm %d/1000 (%d %d %d)\n", A5_pblue, A5_cblue.r, A5_cblue.g,
+                    A5_cblue.b, A5_pwarm, A5_cwarm.r, A5_cwarm.g, A5_cwarm.b);
 #endif
     }
     /* the wall's light per row: the mean of its stones and mortar (objects left out) next to both edges over the mean
        of rows 110-170 */
-    {   int mean = 0, nm = 0, rowm[PH];
+    {
+        int mean = 0,
+            nm = 0,
+            rowm[PH];
         for (int y = 104; y < A5_WALL1 - 1; y++) {
-            int s = 0, n = 0;
-            for (int sd = 0; sd < 2; sd++) for (int i = 0; i < 40; i++) { Rgb k = a5p(sd, i, y); if (!a5_obj(k)) { s += lum(k); n++; } }
+            int s = 0,
+                n = 0;
+            for (int sd = 0; sd < 2; sd++)
+                for (int i = 0; i < 40; i++) {
+                    Rgb k = a5p(sd, i, y);
+                    if (!a5_obj(k)) {
+                        s += lum(k);
+                        n++;
+                    }
+                }
             rowm[y] = n ? s / n : 0;
-            if (y >= 110 && y < 170 && n) { mean += rowm[y]; nm++; }
+            if (y >= 110 && y < 170 && n) {
+                mean += rowm[y];
+                nm++;
+            }
         }
         mean = nm ? mean / nm : 1;
         for (int y = 0; y < PH; y++) A5_foot[y] = 256;
@@ -390,23 +653,37 @@ static void a5_analyse(void)
     }
     /* the edge tree's tier lines: the dark rows of the edge columns (local minima of their luminance) */
     for (int s = 0; s < 2; s++) {
-        int P[PH]; A5_ntb[s] = 0;
-        for (int y = 0; y < 76; y++) { int t = 0; for (int i = 0; i < 3; i++) t += lum(a5p(s, i, y - 1)) + 2 * lum(a5p(s, i, y)) + lum(a5p(s, i, y + 1)); P[y] = t / 12; }
+        int P[PH];
+        A5_ntb[s] = 0;
+        for (int y = 0; y < 76; y++) {
+            int t = 0;
+            for (int i = 0; i < 3; i++) t += lum(a5p(s, i, y - 1)) + 2 * lum(a5p(s, i, y)) + lum(a5p(s, i, y + 1));
+            P[y] = t / 12;
+        }
         for (int y = A5_ETREE[s].ty + 5; y < 70; y++) {
             int loc = (P[y - 3] + P[y + 3] + P[y - 2] + P[y + 2]) / 4;
             if (P[y] <= P[y - 1] && P[y] <= P[y + 1] && P[y] <= P[y - 2] && P[y] <= P[y + 2] && P[y] < loc - 3
-                && (!A5_ntb[s] || y - A5_tb[s][A5_ntb[s] - 1] >= 4) && A5_ntb[s] < 24) A5_tb[s][A5_ntb[s]++] = y;
+                && (!A5_ntb[s] || y - A5_tb[s][A5_ntb[s] - 1] >= 4) && A5_ntb[s] < 24)
+                A5_tb[s][A5_ntb[s]++] = y;
         }
         /* the bush top at the edge */
         A5_btop[s] = PH;
-        for (int y = 194; y < PH; y++) { int g = 0; for (int i = 0; i < 3; i++) g += a5_green(a5p(s, i, y)); if (g >= 2) { A5_btop[s] = y; break; } }
+        for (int y = 194; y < PH; y++) {
+            int g = 0;
+            for (int i = 0; i < 3; i++) g += a5_green(a5p(s, i, y));
+            if (g >= 2) {
+                A5_btop[s] = y;
+                break;
+            }
+        }
     }
 }
 
 /* value noise stretched to an even spread of 0..255 (a rank in a ramp) plus a share of per-texel grain */
 static int a5_rank(int wx, int y, int sx, int sy, int seed, int grain)
 {
-    int n = noise(wx, y, sx, sy, seed), h = (int)(hash3(wx, y, seed + 7) & 255);
+    int n = noise(wx, y, sx, sy, seed),
+        h = (int)(hash3(wx, y, seed + 7) & 255);
     int t = 128 + (n - 128) * 7 / 4;
     return clampi((t * (256 - grain) + h * grain) / 256, 0, 255);
 }
@@ -415,7 +692,8 @@ static int a5_rank(int wx, int y, int sx, int sy, int seed, int grain)
    tier's dark underside lies on the lit top of the one below: the chevrons), over the dark shade inside the crown */
 typedef struct { int cx, ty, h, wmax, sp, kind, seed, nb, adx0; const int *B; } A5Tree;
 #define A5_DROOP 10                                      /* the branches' droop: rows per column x 16 */
-static int a5_tw(const A5Tree *t, int rel)               /* the crown's half-width (columns x 16) rel rows below the top */
+/* the crown's half-width (columns x 16) rel rows below the top */
+static int a5_tw(const A5Tree *t, int rel)
 {
     if (rel < 0) return 0;
     if (rel >= t->h) return t->wmax * 16;
@@ -425,25 +703,38 @@ static Rgb a5_tcol(const A5Tree *t, int v)
 {
     if (t->kind == 2) return ramp(&A5_rnear, v);
     v = 128 + (v - 128) * 3 / 5;
-    {   Rgb c = ramp(&A5_rhaze, v); return t->kind == 0 ? mix(c, A5_skyc, 40) : c; }
+    {
+        Rgb c = ramp(&A5_rhaze, v);
+        return t->kind == 0 ? mix(c, A5_skyc, 40) : c;
+    }
 }
 static void a5_clump(const A5Tree *t, int side, int x16, int y16, int rx, int ry, int base, int seed, int dir)
 {
-    int R = (rx > ry ? rx : ry) / 16 + 2, xc = x16 / 16, yc = y16 / 16;
-    for (int y = yc - R; y <= yc + R; y++) for (int wx = xc - R; wx <= xc + R; wx++) {
-        int X = side ? wx - (PW - 1) : -wx, dx = wx * 16 + 8 - x16, dy = y * 16 + 8 - y16;
-        int u = (dx * dir * 217 + dy * 136) / 256, v = (dy * 217 - dx * dir * 136) / 256;   /* along / across the branch */
-        long long q;
-        if (X < 1 || X > cw || y < 0 || y >= A5_WALL0) continue;
-        q = (long long)u * u * 256 / (rx * rx) + (long long)v * v * 256 / (ry * ry);
-        if (q > 256 + (int)(hash3(wx, y, seed) & 127) - 80) continue;                      /* a ragged rim */
-        {   int c = base - v * (t->kind == 2 ? 28 : 16) / ry + dx * 10 / rx + (int)(hash3(wx, y, seed + 1) & 15) - 8 + (noise(wx, y, 2, 2, seed + 3) - 128) / 4;
-            if (q > 150 && v > 0) c -= 34;                                                 /* the underside */
-            if ((hash3(wx, y, seed + 5) & 7) == 0) c -= 24;                                /* gaps between the needles */
-            if (t->kind == 2 && v < 0 && noise(wx, y, 7, 6, 821) > 160) c += 56;             /* sunlit patches */
-            putr(X, y, a5_tcol(t, c), t->kind == 2 ? A5_TREEN : A5_TREE);
+    int R = (rx > ry ? rx : ry) / 16 + 2,
+        xc = x16 / 16,
+        yc = y16 / 16;
+    for (int y = yc - R; y <= yc + R; y++)
+        for (int wx = xc - R; wx <= xc + R; wx++) {
+            int X = side ? wx - (PW - 1) : -wx,
+                dx = wx * 16 + 8 - x16,
+                dy = y * 16 + 8 - y16;
+            /* along / across the branch */
+            int u = (dx * dir * 217 + dy * 136) / 256,
+                v = (dy * 217 - dx * dir * 136) / 256;
+            long long q;
+            if (X < 1 || X > cw || y < 0 || y >= A5_WALL0) continue;
+            q = (long long)u * u * 256 / (rx * rx) + (long long)v * v * 256 / (ry * ry);
+            if (q > 256 + (int)(hash3(wx, y, seed) & 127) - 80) continue;                      /* a ragged rim */
+            {
+                int c = base - v * (t->kind == 2 ? 28 : 16) / ry + dx * 10 / rx + (int)(hash3(wx, y, seed + 1) & 15)
+                        - 8 + (noise(wx, y, 2, 2, seed + 3) - 128) / 4;
+                if (q > 150 && v > 0) c -= 34;                                                 /* the underside */
+                /* gaps between the needles */
+                if ((hash3(wx, y, seed + 5) & 7) == 0) c -= 24;
+                if (t->kind == 2 && v < 0 && noise(wx, y, 7, 6, 821) > 160) c += 56;             /* sunlit patches */
+                putr(X, y, a5_tcol(t, c), t->kind == 2 ? A5_TREEN : A5_TREE);
+            }
         }
-    }
 }
 static void a5_tree(const A5Tree *t, int side)
 {
@@ -452,36 +743,57 @@ static void a5_tree(const A5Tree *t, int side)
     for (int y = t->ty + 2; y < A5_WALL0; y++) {
         int W = a5_tw(t, y - t->ty) * 13 / 16;
         for (int wx = (xs - W) / 16 - 2; wx <= (xs + W) / 16 + 2; wx++) {
-            int X = side ? wx - (PW - 1) : -wx, dx = wx * 16 + 8 - xs;
+            int X = side ? wx - (PW - 1) : -wx,
+                dx = wx * 16 + 8 - xs;
             if (X < 1 || X > cw || (dx < 0 ? -dx : dx) > W + (noise(wx, y, 3, 2, 811 + t->seed) - 128) / 4) continue;
-            putr(X, y, a5_tcol(t, (noise(wx, y, 5, 4, 823 + t->seed) < 80 ? -20 : 24) + noise(wx, y, 3, 3, 801 + t->seed) / 4 + dx * 16 / (W + 16)), t->kind == 2 ? A5_TREEN : A5_TREE);
+            putr(X, y, a5_tcol(t, (noise(wx, y, 5, 4, 823 + t->seed) < 80 ? -20 : 24)
+                                  + noise(wx, y, 3, 3, 801 + t->seed) / 4 + dx * 16 / (W + 16)),
+                 t->kind == 2 ? A5_TREEN : A5_TREE);
         }
     }
     /* the tiers, bottom first: tier rows from the edge's measured tier lines (the edge tree) or every sp rows */
-    {   int rows[40], nr = 0;
+    {
+        int rows[40],
+            nr = 0;
         if (t->nb) {
-            int off = t->adx0 * A5_DROOP / 256 + 2, y;
+            int off = t->adx0 * A5_DROOP / 256 + 2,
+                y;
             for (int k = 0; k < t->nb && nr < 40; k++) rows[nr++] = t->B[k] - off;
-            for (y = rows[0] - t->sp; y > t->ty && nr < 40; y -= t->sp) { for (int k = nr; k > 0; k--) rows[k] = rows[k - 1]; rows[0] = y; nr++; }
+            for (y = rows[0] - t->sp; y > t->ty && nr < 40; y -= t->sp) {
+                for (int k = nr; k > 0; k--) rows[k] = rows[k - 1];
+                rows[0] = y;
+                nr++;
+            }
             for (y = rows[nr - 1] + t->sp; y < A5_WALL0 && nr < 40; y += t->sp) rows[nr++] = y;
         } else
-            for (int y = t->ty + 1 + (int)(hash3(t->seed, 0, 803) % 3); y < A5_WALL0 && nr < 40; y += t->sp + (int)(hash3(t->seed, y, 805) % 4) - 1) rows[nr++] = y;
+            for (int y = t->ty + 1 + (int)(hash3(t->seed, 0, 803) % 3); y < A5_WALL0 && nr < 40;
+                 y += t->sp + (int)(hash3(t->seed, y, 805) % 4) - 1)
+                rows[nr++] = y;
         for (int k = nr - 1; k >= 0; k--) {
-            int yk = rows[k], rel = yk - t->ty, W0 = a5_tw(t, rel + t->sp) * (200 + (int)(hash3(t->seed, k, 813) % 90)) / 256, base = 128 + 14 - rel / 6;
+            int yk = rows[k],
+                rel = yk - t->ty,
+                W0 = a5_tw(t, rel + t->sp) * (200 + (int)(hash3(t->seed, k, 813) % 90)) / 256,
+                base = 128 + 14 - rel / 6;
             if (rel < 0) continue;
             for (int s = -1; s <= 1; s += 2) {
                 Rng r = rng_at(t->seed * 64 + k, s + 1, 807);
-                int W = W0 * (s > 0 ? 224 + (int)(hash3(t->seed, k, 815) % 64) : 224 + (int)(hash3(t->seed, k, 817) % 64)) / 256;   /* uneven sides */
+                /* uneven sides */
+                int W = W0 * (s > 0 ? 224 + (int)(hash3(t->seed, k, 815) % 64)
+                                    : 224 + (int)(hash3(t->seed, k, 817) % 64)) / 256;
                 int step = 20 + rndi(&r, 12);
                 for (int i = rndi(&r, 16); i <= W + 6; i += step) {
-                    int x16 = xs + s * i, y16 = yk * 16 + i * A5_DROOP / 16 + rndi(&r, 48) - 24;
-                    int rx = 28 + rndi(&r, 26), ry = 16 + rndi(&r, 10), v = base + rndi(&r, 70) - 35;
+                    int x16 = xs + s * i,
+                        y16 = yk * 16 + i * A5_DROOP / 16 + rndi(&r, 48) - 24;
+                    int rx = 28 + rndi(&r, 26),
+                        ry = 16 + rndi(&r, 10),
+                        v = base + rndi(&r, 70) - 35;
                     int wx = x16 / 16;
                     v += (noise(wx, yk, 9, 11, 809 + t->seed) - 128) * 3 / 5;          /* patches of sun and shade */
                     v += s > 0 ? 18 + i * 40 / (W + 16) : -18 - i * 22 / (W + 16);   /* the right flank in the light */
                     if (s > 0 && i > W / 2 && rndi(&r, 2)) v += 34;                  /* its bright tips */
                     if (i > W - 8 && rndi(&r, 2)) ry += 8;                           /* drooping tips */
-                    if (rndi(&r, 6)) a5_clump(t, side, x16, y16, rx, ry, v, t->seed * 16 + k, s);   /* (the odd one missing: a deep hole) */
+                    /* (the odd one missing: a deep hole) */
+                    if (rndi(&r, 6)) a5_clump(t, side, x16, y16, rx, ry, v, t->seed * 16 + k, s);
                     step = 16 + rndi(&r, 18);
                 }
             }
@@ -490,7 +802,11 @@ static void a5_tree(const A5Tree *t, int side)
 }
 static void a5_wood(int side)
 {
-    A5Tree tr[96]; int n = 0, dir = side ? 1 : -1, x0 = side ? PW - 8 : -cw - 40, x1 = side ? PW + cw + 40 : 8;
+    A5Tree tr[96];
+    int n = 0,
+        dir = side ? 1 : -1,
+        x0 = side ? PW - 8 : -cw - 40,
+        x1 = side ? PW + cw + 40 : 8;
     for (int X = 1; X <= cw; X++)                                            /* the sky */
         for (int y = 0; y < A5_FEN0; y++) {
             int wx = wx_of(side, X);
@@ -498,28 +814,62 @@ static void a5_wood(int side)
         }
     /* the hazy back row: far trees every ~13 columns */
     for (int k = fdiv(x0, 13) - 3; k * 13 < x1 + 30 && n < 96; k++) {
-        u32 h = hash3(k, 0, 631); A5Tree *t = &tr[n];
-        t->cx = k * 13 + (int)(h % 7) - 3; t->ty = 2 + (int)(h >> 8) % 14; t->h = 30 + (int)(h >> 16) % 16; t->wmax = 16 + (int)(h >> 20) % 9;
-        t->sp = 6; t->kind = 0; t->seed = k * 7 + 3; t->nb = 0; t->B = 0; t->adx0 = 0;
+        u32 h = hash3(k, 0, 631);
+        A5Tree *t = &tr[n];
+        t->cx = k * 13 + (int)(h % 7) - 3;
+        t->ty = 2 + (int)(h >> 8) % 14;
+        t->h = 30 + (int)(h >> 16) % 16;
+        t->wmax = 16 + (int)(h >> 20) % 9;
+        t->sp = 6;
+        t->kind = 0;
+        t->seed = k * 7 + 3;
+        t->nb = 0;
+        t->B = 0;
+        t->adx0 = 0;
         if ((side && t->cx > PW - 4) || (!side && t->cx < 4)) n++;
     }
-    {   int c = A5_ETREE[side].cx, i = 0, ne;
-        A5Tree *t = &tr[n]; ne = n++;                                        /* the tree cut by the edge */
-        t->cx = c; t->ty = A5_ETREE[side].ty; t->h = 70; t->wmax = A5_ETREE[side].wk * 70 / 16; t->sp = 7;
-        t->kind = A5_ETREE[side].kind; t->seed = 900 + side; t->nb = A5_ntb[side]; t->B = A5_tb[side];
-        t->adx0 = (side ? PW - 1 : 0) - c; if (t->adx0 < 0) t->adx0 = -t->adx0; t->adx0 *= 16;
+    {
+        int c = A5_ETREE[side].cx,
+            i = 0,
+            ne;
+        /* the tree cut by the edge */
+        A5Tree *t = &tr[n];
+        ne = n++;
+        t->cx = c;
+        t->ty = A5_ETREE[side].ty;
+        t->h = 70;
+        t->wmax = A5_ETREE[side].wk * 70 / 16;
+        t->sp = 7;
+        t->kind = A5_ETREE[side].kind;
+        t->seed = 900 + side;
+        t->nb = A5_ntb[side];
+        t->B = A5_tb[side];
+        t->adx0 = (side ? PW - 1 : 0) - c;
+        if (t->adx0 < 0) t->adx0 = -t->adx0;
+        t->adx0 *= 16;
         /* new conifers outwards, each its own: near (bright) or hazy, top -5..15, crown 26-60 wide, spaced by their
            widths (overlapping by a third or so), a gap now and then where the back row and the sky show */
-        {   int pw = t->wmax;
+        {
+            int pw = t->wmax;
             while (n < 96) {
-                u32 h = hash3(side, i, 641), h2 = hash3(side, i, 643); A5Tree *q = &tr[n];
-                q->kind = h % 9 < 5 ? 2 : 1; q->wmax = 20 + (int)(h >> 4) % 18;
+                u32 h = hash3(side, i, 641),
+                    h2 = hash3(side, i, 643);
+                A5Tree *q = &tr[n];
+                q->kind = h % 9 < 5 ? 2 : 1;
+                q->wmax = 20 + (int)(h >> 4) % 18;
                 c += dir * ((pw + q->wmax) * 2 / 3 + (int)(h2 % 9) - 4 + ((h2 >> 4) % 4 == 0 ? 10 : 0));
                 if ((side && c > x1) || (!side && c < x0)) break;
-                q->cx = c; q->ty = (int)(h >> 10) % 17 - 6 + (q->kind == 1 ? 3 : 0);
-                q->h = 36 + (int)(h >> 16) % 26; q->sp = 6 + (int)(h >> 22) % 3;
-                q->seed = 700 + i * 5 + side; q->nb = 0; q->B = 0; q->adx0 = 0;
-                pw = q->wmax; n++; i++;
+                q->cx = c;
+                q->ty = (int)(h >> 10) % 17 - 6 + (q->kind == 1 ? 3 : 0);
+                q->h = 36 + (int)(h >> 16) % 26;
+                q->sp = 6 + (int)(h >> 22) % 3;
+                q->seed = 700 + i * 5 + side;
+                q->nb = 0;
+                q->B = 0;
+                q->adx0 = 0;
+                pw = q->wmax;
+                n++;
+                i++;
             }
         }
         /* draw: the back row, the hazy trees, the near ones; the edge tree last within its kind */
@@ -532,10 +882,12 @@ static void a5_wood(int side)
 
 /* the fence: two rails (per-row ramps of the picture's sunlit rails, grain along them), the wood between and under
    them, the path; posts every 31-35 columns continuing the picture's (A5_FEN), 5 columns wide, lit on their right and
-   casting a shadow to their left on the rails and the path; the object by each edge ended in the strip's first columns */
+   casting a shadow to their left on the rails and the path; the object by each edge ended in the strip's first
+   columns */
 static int a5_post_at(int side, int wx)                  /* the column (0..4, screen left to right) of a post, or -1 */
 {
-    int p = A5_FEN[side].post0, dir = side ? 1 : -1;
+    int p = A5_FEN[side].post0,
+        dir = side ? 1 : -1;
     for (int k = side ? 1 : 0; k < 64; k++) {
         int q = p + dir * A5_POSTD * k + (k ? (int)(hash3(side, k, 651) % 5) - 2 : 0);
         if (wx >= q && wx < q + A5_POSTW) return wx - q;
@@ -546,15 +898,21 @@ static int a5_post_at(int side, int wx)                  /* the column (0..4, sc
 static void a5_fence(int side)
 {
     static const int lit[A5_POSTW] = { 18, 90, 205, 225, 120 };   /* across a post, as the picture's (x 263-267) */
-    int lr = lum(ramp_mean(&A5_rrow[1][A5_FEN0 + 2])), pk = lr ? clampi(lum(ramp_mean(&A5_rrow[side][A5_FEN0 + 2])) * 256 / lr, 160, 256) : 256;   /* (the posts in the
-                                                                    shade with the rails: the left's) */
+    /* (the posts in the shade with the rails: the left's) */
+    int lr = lum(ramp_mean(&A5_rrow[1][A5_FEN0 + 2])),
+        pk = lr ? clampi(lum(ramp_mean(&A5_rrow[side][A5_FEN0 + 2])) * 256 / lr, 160, 256) : 256;
     for (int X = 1; X <= cw; X++) {
-        int wx = wx_of(side, X), pc = a5_post_at(side, wx), sh = a5_post_at(side, wx + 1) == 0 ? 1 : a5_post_at(side, wx + 2) == 0 ? 2 : 0;
+        int wx = wx_of(side, X),
+            pc = a5_post_at(side, wx),
+            sh = a5_post_at(side, wx + 1) == 0 ? 1 : a5_post_at(side, wx + 2) == 0 ? 2 : 0;
         for (int y = A5_FEN0; y < A5_WALL0; y++) {
-            Rgb c; int rail = y < A5_FEN0 + A5_RAILH ? 0 : y >= A5_RAIL1 && y < A5_RAIL1 + A5_RAILH ? 1 : -1;
+            Rgb c;
+            int rail = y < A5_FEN0 + A5_RAILH ? 0 : y >= A5_RAIL1 && y < A5_RAIL1 + A5_RAILH ? 1 : -1;
             if (X <= 2 && y >= A5_FEN[side].obj0 && y < A5_FEN[side].obj1) {      /* the object's end */
-                c = a5p(side, 0, y); if (X == 2) c = scale(c, 216);
-                putr(X, y, c, A5_FENCE); continue;
+                c = a5p(side, 0, y);
+                if (X == 2) c = scale(c, 216);
+                putr(X, y, c, A5_FENCE);
+                continue;
             }
             if (pc >= 0 && y < A5_PATH0 + 2) {                                    /* a post */
                 int t = lit[pc] + (noise(wx * 4, y, 1, 7, 653) - 128) / 4 + (int)(hash3(wx, y, 655) & 15) - 8;
@@ -569,7 +927,8 @@ static void a5_fence(int side)
                 c = ramp(&A5_rrow[side][y], a5_rank(wx, y, 3, 2, 681, 90));
                 if (sh) c = scale(c, 220);
             } else {                                                             /* the path */
-                c = ramp(&A5_rrow[side][y], 40 + a5_rank(wx, y * 3, 6, 3, 691, 50) * 11 / 16);   /* (the extremes left out: no specks) */
+                /* (the extremes left out: no specks) */
+                c = ramp(&A5_rrow[side][y], 40 + a5_rank(wx, y * 3, 6, 3, 691, 50) * 11 / 16);
                 if (y < A5_PATH0 + 3 && (sh || a5_post_at(side, wx + 3) == 0)) c = scale(c, 200);
             }
             putr(X, y, c, A5_FENCE);
@@ -579,17 +938,30 @@ static void a5_fence(int side)
 
 /* --- the wall: a skyline of stones (see the comment at the top of this generator) */
 typedef struct { short y0, hs, jh, x0, x1, slant; Rgb c; } A5Slot;
-static A5Slot *a5s; static int a5ns, a5cap;
+static A5Slot *a5s;
+static int a5ns, a5cap;
 static int a5_new(int y0, int hs, int jh, int x0, int len, Rgb c, int slant)
 {
-    if (a5ns >= a5cap) { int nc = a5cap ? a5cap * 2 : 1024; A5Slot *p = realloc(a5s, (size_t)nc * sizeof *p); if (!p) return -1; a5s = p; a5cap = nc; }
-    a5s[a5ns].y0 = (short)y0; a5s[a5ns].hs = (short)hs; a5s[a5ns].jh = (short)jh; a5s[a5ns].x0 = (short)x0; a5s[a5ns].x1 = (short)(x0 + len);
-    a5s[a5ns].slant = (short)slant; a5s[a5ns].c = c;
+    if (a5ns >= a5cap) {
+        int nc = a5cap ? a5cap * 2 : 1024;
+        A5Slot *p = realloc(a5s, (size_t)nc * sizeof *p);
+        if (!p) return -1;
+        a5s = p;
+        a5cap = nc;
+    }
+    a5s[a5ns].y0 = (short)y0;
+    a5s[a5ns].hs = (short)hs;
+    a5s[a5ns].jh = (short)jh;
+    a5s[a5ns].x0 = (short)x0;
+    a5s[a5ns].x1 = (short)(x0 + len);
+    a5s[a5ns].slant = (short)slant;
+    a5s[a5ns].c = c;
     return a5ns++;
 }
 static Rgb a5_stone_col(u32 h)                          /* a stone colour of the picture's, as often as its area */
 {
-    int a, i = 0;
+    int a,
+        i = 0;
     if (!A5_nst) return ramp(&A5_rmortar, 255);
     a = (int)(h % (u32)A5_sta[A5_nst]);
     while (i < A5_nst - 1 && A5_sta[i + 1] <= a) i++;
@@ -601,32 +973,83 @@ static Rgb a5_stone_col(u32 h)                          /* a stone colour of the
 static void a5_wall(int side)
 {
     enum { Y0 = A5_STONE0, Y1 = A5_STONE1 };            /* stone rows 106..184 */
-    int act[PH]; size_t N = (size_t)cw * PH;
-    short *own = calloc(N, sizeof *own), *o2 = calloc(N, sizeof *o2); u8 *jt = calloc(N, 1);
-    if (!own || !o2 || !jt) { free(own); free(o2); free(jt); return; }
+    int act[PH];
+    size_t N = (size_t)cw * PH;
+    short *own = calloc(N, sizeof *own),
+          *o2 = calloc(N, sizeof *o2);
+    u8 *jt = calloc(N, 1);
+    if (!own || !o2 || !jt) {
+        free(own);
+        free(o2);
+        free(jt);
+        return;
+    }
     a5ns = 0;
     for (int y = 0; y < PH; y++) act[y] = -1;
     for (size_t i = 0; i < N; i++) own[i] = -1;
     /* the picture's stones cut by the edge: runs of rows between the horizontal joints of its last columns */
-    {   int y = Y0;
+    {
+        int y = Y0;
         while (y < Y1) {
             int j0 = 0;
             for (int i = 0; i < 3; i++) j0 += lum(a5p(side, i, y)) < A5_thr - 12;
-            if (j0 >= 2) { y++; continue; }
-            {   int a = y, b = y, jh = 0, v = 0, n = 0, vj; Rgb t = { 0, 0, 0 };
-                while (b < Y1) { int j = 0; for (int i = 0; i < 3; i++) j += lum(a5p(side, i, b)) < A5_thr - 12; if (j >= 2) break; b++; }
-                while (b + jh < Y1 && jh < 2) { int j = 0; for (int i = 0; i < 3; i++) j += lum(a5p(side, i, b + jh)) < A5_thr - 12; if (j < 2) break; jh++; }
+            if (j0 >= 2) {
+                y++;
+                continue;
+            }
+            {
+                int a = y,
+                    b = y,
+                    jh = 0,
+                    v = 0,
+                    n = 0,
+                    vj;
+                Rgb t = { 0, 0, 0 };
+                while (b < Y1) {
+                    int j = 0;
+                    for (int i = 0; i < 3; i++) j += lum(a5p(side, i, b)) < A5_thr - 12;
+                    if (j >= 2) break;
+                    b++;
+                }
+                while (b + jh < Y1 && jh < 2) {
+                    int j = 0;
+                    for (int i = 0; i < 3; i++) j += lum(a5p(side, i, b + jh)) < A5_thr - 12;
+                    if (j < 2) break;
+                    jh++;
+                }
                 if (!jh && b < Y1) jh = 1;
-                {   int ym = (a + b - 1) / 2;
-                    while (v < 30 && lum(a5p(side, v, ym)) >= A5_thr - 12) v++; }
-                vj = 0; for (int yy = a; yy < b; yy++) vj += lum(a5p(side, 0, yy)) < A5_thr - 12;   /* a joint right at the edge */
-                for (int yy = a; yy < b; yy++) for (int i = 0; i < 6 && i < v + 1; i++) { Rgb k = a5p(side, i, yy); if (lum(k) >= A5_thr && !a5_obj(k)) { t.r += k.r; t.g += k.g; t.b += k.b; n++; } }
-                if (b - a > 5) { b = a + 3 + (int)(hash3(side, a, 703) % 2); jh = 1; }   /* a joint too faint to see: split */
+                {
+                    int ym = (a + b - 1) / 2;
+                    while (v < 30 && lum(a5p(side, v, ym)) >= A5_thr - 12) v++;
+                }
+                vj = 0;
+                /* a joint right at the edge */
+                for (int yy = a; yy < b; yy++) vj += lum(a5p(side, 0, yy)) < A5_thr - 12;
+                for (int yy = a; yy < b; yy++)
+                    for (int i = 0; i < 6 && i < v + 1; i++) {
+                        Rgb k = a5p(side, i, yy);
+                        if (lum(k) >= A5_thr && !a5_obj(k)) {
+                            t.r += k.r;
+                            t.g += k.g;
+                            t.b += k.b;
+                            n++;
+                        }
+                    }
+                /* a joint too faint to see: split */
+                if (b - a > 5) {
+                    b = a + 3 + (int)(hash3(side, a, 703) % 2);
+                    jh = 1;
+                }
                 if (n && vj * 2 < b - a) {
-                    u32 h = hash3(side, a, 701); int T = 6 + (int)(h % 5) + (int)(h >> 8) % 6, rem = T - v;
+                    u32 h = hash3(side, a, 701);
+                    int T = 6 + (int)(h % 5) + (int)(h >> 8) % 6,
+                        rem = T - v;
                     Rgb c = { t.r / n, t.g / n, t.b / n };
                     if (rem < 2) rem = 2 + (int)(h >> 16) % 2;
-                    {   int s = a5_new(a, b - a, jh, 1, rem, c, 0); if (s >= 0) for (int yy = a; yy < b + jh && yy < Y1; yy++) act[yy] = s; }
+                    {
+                        int s = a5_new(a, b - a, jh, 1, rem, c, 0);
+                        if (s >= 0) for (int yy = a; yy < b + jh && yy < Y1; yy++) act[yy] = s;
+                    }
                 }
                 y = b + jh;
             }
@@ -638,45 +1061,79 @@ static void a5_wall(int side)
         int y = Y0;
         while (y < Y1) {
             int a, len;
-            if (act[y] >= 0 && a5s[act[y]].x1 > X) { y++; continue; }
-            a = y; while (y < Y1 && !(act[y] >= 0 && a5s[act[y]].x1 > X)) y++;
+            if (act[y] >= 0 && a5s[act[y]].x1 > X) {
+                y++;
+                continue;
+            }
+            a = y;
+            while (y < Y1 && !(act[y] >= 0 && a5s[act[y]].x1 > X)) y++;
             for (int m = 0; m < 2; m++) {                /* no course runs on: a stone over / under the free rows that
                                                             would end within 4 columns ends here, its rows join them */
                 int t = m ? (y < Y1 ? act[y] : -1) : (a > Y0 ? act[a - 1] : -1);
-                if (t < 0 || a5s[t].x1 - X > 6 || X - a5s[t].x0 < 4 || hash3(wx_of(side, X), m ? y : a, 719 + side) % 4 == 0) continue;
+                if (t < 0 || a5s[t].x1 - X > 6 || X - a5s[t].x0 < 4
+                    || hash3(wx_of(side, X), m ? y : a, 719 + side) % 4 == 0)
+                    continue;
                 a5s[t].x1 = (short)X;
                 if (m) while (y < Y1 && (act[y] == t || !(act[y] >= 0 && a5s[act[y]].x1 > X))) y++;
                 else while (a > Y0 && act[a - 1] == t) a--;
             }
             len = y - a;
             if (len <= 2) {                              /* a sliver: the stone above (or under) grows into it */
-                int sa = a > Y0 && act[a - 1] >= 0 && a5s[act[a - 1]].x1 > X ? act[a - 1] : y < Y1 && act[y] >= 0 && a5s[act[y]].x1 > X ? act[y] : -1;
-                if (sa >= 0) { for (int q = a; q < y; q++) act[q] = sa; continue; }
+                int sa = a > Y0 && act[a - 1] >= 0 && a5s[act[a - 1]].x1 > X ? act[a - 1]
+                         : y < Y1 && act[y] >= 0 && a5s[act[y]].x1 > X ? act[y]
+                         : -1;
+                if (sa >= 0) {
+                    for (int q = a; q < y; q++) act[q] = sa;
+                    continue;
+                }
             }
-            {   int yy = a;
+            {
+                int yy = a;
                 while (len > 0) {
                     u32 h = hash3(wx_of(side, X), yy, 711 + side);
-                    int H = len <= 6 ? len : (int)(h % 20) < 5 ? 4 : (int)(h % 20) < 12 ? 5 : (int)(h % 20) < 17 ? 6 : 7;
-                    int L = 5 + (int)(h >> 8) % 5 + (int)(h >> 12) % 6 + ((h >> 24) % 4 == 0 ? 4 + (int)(h >> 27) % 7 : 0);
+                    int H = len <= 6 ? len
+                            : (int)(h % 20) < 5 ? 4
+                            : (int)(h % 20) < 12 ? 5
+                            : (int)(h % 20) < 17 ? 6
+                            : 7;
+                    int L = 5 + (int)(h >> 8) % 5 + (int)(h >> 12) % 6
+                            + ((h >> 24) % 4 == 0 ? 4 + (int)(h >> 27) % 7 : 0);
                     Rgb sc;
                     if (len > 6 && len - H < 3) H = len - 3 >= 3 ? len - 3 : len;
-                    if (X > 1 && len > H + 2) for (int tr = 0; tr < 2; tr++) {   /* no joint in line with one just before */
-                        int jr = yy + H - 1; size_t o = (size_t)jr * cw + X - 2;
-                        if (!(jr + 1 < Y1 && own[o] != own[o + cw])) break;
-                        H += (len - H - 1 >= 3 && H < 7) ? 1 : -1;
-                        if (H < 3) { H = 3; break; }
-                    }
+                    /* no joint in line with one just before */
+                    if (X > 1 && len > H + 2)
+                        for (int tr = 0; tr < 2; tr++) {
+                            int jr = yy + H - 1;
+                            size_t o = (size_t)jr * cw + X - 2;
+                            if (!(jr + 1 < Y1 && own[o] != own[o + cw])) break;
+                            H += (len - H - 1 >= 3 && H < 7) ? 1 : -1;
+                            if (H < 3) {
+                                H = 3;
+                                break;
+                            }
+                        }
                     L = L * A5_lk[side] / 256;
-                    {   int h2 = (int)(hash3(wx_of(side, X), yy, 713) % 1000);   /* the pale blue and the warm stones as
-                                                                                     often as the picture's, the others from
-                                                                                     its list of stone colours */
-                        if (h2 < A5_pblue) { sc = A5_cblue; L = 8 + (int)(h >> 26) % 6; if (H > 5 && len - 5 >= 3) H = 5; }
-                        else if (h2 < A5_pblue + A5_pwarm) sc = A5_cwarm;
-                        else { sc = a5_stone_col(h >> 4); for (int r = 0; r < 6 && sc.b >= sc.r - 2; r++) sc = a5_stone_col(hash3(wx_of(side, X), yy, 715 + r)); }
+                    /* the pale blue and the warm stones as often as the picture's, the others from its list of stone
+                       colours */
+                    {
+                        int h2 = (int)(hash3(wx_of(side, X), yy, 713) % 1000);
+                        if (h2 < A5_pblue) {
+                            sc = A5_cblue;
+                            L = 8 + (int)(h >> 26) % 6;
+                            if (H > 5 && len - 5 >= 3) H = 5;
+                        } else if (h2 < A5_pblue + A5_pwarm) sc = A5_cwarm;
+                        else {
+                            sc = a5_stone_col(h >> 4);
+                            for (int r = 0; r < 6 && sc.b >= sc.r - 2; r++)
+                                sc = a5_stone_col(hash3(wx_of(side, X), yy, 715 + r));
+                        }
                     }
-                    {   int s = a5_new(yy, H > 1 ? H - 1 : H, H > 1 ? 1 : 0, X, L, sc, 0);
-                        if (s >= 0) for (int q = yy; q < yy + H; q++) act[q] = s; }
-                    yy += H; len -= H;
+                    {
+                        int s = a5_new(yy, H > 1 ? H - 1 : H, H > 1 ? 1 : 0, X, L, sc, 0);
+                        if (s >= 0) for (int q = yy; q < yy + H; q++) act[q] = s;
+                    }
+                    yy += H;
+                    len -= H;
                 }
             }
         }
@@ -686,24 +1143,41 @@ static void a5_wall(int side)
        horizontal ones stepping by a row along some stones, as the picture's; none at the join */
     memcpy(o2, own, N * sizeof *o2);
     for (int s = 0; s < a5ns; s++) {
-        const A5Slot *k = &a5s[s]; int x0 = k->x0, x1 = k->x1, H = k->hs + k->jh, e = x1 - 1, len = x1 - x0;
+        const A5Slot *k = &a5s[s];
+        int x0 = k->x0,
+            x1 = k->x1,
+            H = k->hs + k->jh,
+            e = x1 - 1,
+            len = x1 - x0;
         u32 h = hash3(wx_of(side, x0), k->y0, 761 + side);
-        int vs = (int)(h % 2) ? 1 : -1, D = 1 + (int)(h >> 4) % 2, hd = (int)(h >> 6) % 3, xs = x0 + len * (1 + (int)(h >> 9) % 3) / 4, hside = (int)(h >> 12) & 1;
-        if (x0 < 4 || k->y0 < Y0 || k->y0 + H > Y1 || A5_BLUE(k->c)) continue;   /* (the blue-grey ones stay neat slabs) */
+        int vs = (int)(h % 2) ? 1 : -1,
+            D = 1 + (int)(h >> 4) % 2,
+            hd = (int)(h >> 6) % 3,
+            xs = x0 + len * (1 + (int)(h >> 9) % 3) / 4,
+            hside = (int)(h >> 12) & 1;
+        /* (the blue-grey ones stay neat slabs) */
+        if (x0 < 4 || k->y0 < Y0 || k->y0 + H > Y1 || A5_BLUE(k->c)) continue;
         /* the outer joint slanted: shifted by -D/2..D/2 columns from the top row to the bottom one */
         for (int y = k->y0; y < k->y0 + H && vs && e + 1 <= cw; y++) {
-            int sh = vs * (fdiv((2 * (y - k->y0) + 1) * (D + 1), 2 * H) - (D + 1) / 2), t = own[(size_t)y * cw + e];   /* (X e + 1 is column index e) */
+            /* (X e + 1 is column index e) */
+            int sh = vs * (fdiv((2 * (y - k->y0) + 1) * (D + 1), 2 * H) - (D + 1) / 2),
+                t = own[(size_t)y * cw + e];
             if (!sh || t < 0 || t == s || a5s[t].x0 != e + 1 || A5_BLUE(a5s[t].c)) continue;
-            if (sh > 0 && a5s[t].x1 - a5s[t].x0 >= sh + 4 && e + sh <= cw) for (int q = 1; q <= sh; q++) o2[(size_t)y * cw + e + q - 1] = (short)s;
+            if (sh > 0 && a5s[t].x1 - a5s[t].x0 >= sh + 4 && e + sh <= cw)
+                for (int q = 1; q <= sh; q++)
+                    o2[(size_t)y * cw + e + q - 1] = (short)s;
             if (sh < 0 && len >= 4 - sh) for (int q = 0; q < -sh; q++) o2[(size_t)y * cw + e - 1 - q] = (short)t;
         }
         if (hd < 2 && H >= 4) {
             int yb = k->y0 + H - 1;
             for (int X = x0; X < x1 - 1 && X <= cw; X++) {
-                int t; if ((X >= xs) != hside || yb + 1 >= Y1) continue;   /* (one side of xs) */
+                /* (one side of xs) */
+                int t;
+                if ((X >= xs) != hside || yb + 1 >= Y1) continue;
                 t = own[(size_t)(yb + 1) * cw + X - 1];
                 if (t < 0 || t == s || A5_BLUE(a5s[t].c)) continue;
-                if (hd == 0 && a5s[t].hs + a5s[t].jh >= 5 && a5s[t].y0 == yb + 1) o2[(size_t)(yb + 1) * cw + X - 1] = (short)s;
+                if (hd == 0 && a5s[t].hs + a5s[t].jh >= 5 && a5s[t].y0 == yb + 1)
+                    o2[(size_t)(yb + 1) * cw + X - 1] = (short)s;
                 if (hd == 1 && H >= 5) o2[(size_t)yb * cw + X - 1] = (short)t;
             }
         }
@@ -711,59 +1185,108 @@ static void a5_wall(int side)
     /* the courses drift: the layout shifted up / down by a slow vertical offset (up to +-2 rows over ~20 columns, none
        at the join), so the horizontal joints run as the picture's: slanted pixel lines stepping a row every few columns
        instead of ruled ones */
-    for (int X = 1; X <= cw; X++) for (int y = Y0; y < Y1; y++) {
-        int wx = wx_of(side, X), A = X <= 3 ? 0 : X >= 10 ? 256 : (X - 3) * 36;
-        int oy = fdiv((noise(wx, y, A5_WSX, 47, 737) - 128) * 4 * A + 32768, 65536);
-        {   int a = o2[(size_t)y * cw + X - 1], b = o2[(size_t)clampi(y + oy, Y0, Y1 - 1) * cw + X - 1];   /* (the blue-grey slabs stay put) */
-            own[(size_t)y * cw + X - 1] = (short)((a >= 0 && A5_BLUE(a5s[a].c)) || (b >= 0 && A5_BLUE(a5s[b].c)) ? a : b); }
-    }
+    for (int X = 1; X <= cw; X++)
+        for (int y = Y0; y < Y1; y++) {
+            int wx = wx_of(side, X),
+                A = X <= 3 ? 0 : X >= 10 ? 256 : (X - 3) * 36;
+            int oy = fdiv((noise(wx, y, A5_WSX, 47, 737) - 128) * 4 * A + 32768, 65536);
+            /* (the blue-grey slabs stay put) */
+            {
+                int a = o2[(size_t)y * cw + X - 1],
+                    b = o2[(size_t)clampi(y + oy, Y0, Y1 - 1) * cw + X - 1];
+                own[(size_t)y * cw + X - 1] =
+                    (short)((a >= 0 && A5_BLUE(a5s[a].c)) || (b >= 0 && A5_BLUE(a5s[b].c)) ? a : b);
+            }
+        }
     memcpy(o2, own, N * sizeof *o2);
     /* the mortar: the one-texel boundary of each stone (its lower row and outer column) */
-    for (int X = 1; X <= cw; X++) for (int y = Y0; y < Y1; y++) {
-        size_t o = (size_t)y * cw + X - 1; int s0 = o2[o];
-        jt[o] = s0 >= 0 && ((y + 1 < Y1 && o2[o + cw] != s0) || (X < cw && o2[o + 1] != s0) || (X == cw && a5s[s0].x1 - 1 == X)) ? 1 : 0;
-    }
+    for (int X = 1; X <= cw; X++)
+        for (int y = Y0; y < Y1; y++) {
+            size_t o = (size_t)y * cw + X - 1;
+            int s0 = o2[o];
+            jt[o] = s0 >= 0 && ((y + 1 < Y1 && o2[o + cw] != s0) || (X < cw && o2[o + 1] != s0)
+                                || (X == cw && a5s[s0].x1 - 1 == X)) ? 1 : 0;
+        }
     /* draw: each stone lit from the top left as the picture's: a near-white top row, the body a little darker downwards
        with soft streaks along it, a grey lower row and right column falling into the mortar, rounded corners */
     for (int X = 1; X <= cw; X++) {
-        int wx = wx_of(side, X), dxr = side ? 1 : -1;                              /* screen right in X */
+        /* screen right in X */
+        int wx = wx_of(side, X),
+            dxr = side ? 1 : -1;
         for (int y = A5_WALL0; y < A5_WALL1; y++) {
             Rgb c;
             if (y < Y0 || y >= Y1) {                                               /* the coping, the foot */
                 c = ramp(&A5_rrow[side][y], a5_rank(wx, y, 5, 2, 721, 80));
                 if (y == Y0 - 1 && (hash3(fdiv(wx, 1), 0, 719) % 9) == 0) c = scale(c, 236);
-                if (y < Y0 - 1 && fmodi(wx + (int)(hash3(fdiv(wx, 23), 1, 717) % 23), 23) == 0) c = ramp(&A5_rrow[side][Y0 - 1], 128);   /* the coping's joints */
-                putr(X, y, c, A5_STONE); continue;
+                /* the coping's joints */
+                if (y < Y0 - 1 && fmodi(wx + (int)(hash3(fdiv(wx, 23), 1, 717) % 23), 23) == 0)
+                    c = ramp(&A5_rrow[side][Y0 - 1], 128);
+                putr(X, y, c, A5_STONE);
+                continue;
             }
-            {   size_t o = (size_t)y * cw + X - 1; int s = o2[o];
+            {
+                size_t o = (size_t)y * cw + X - 1;
+                int s = o2[o];
                 if (s < 0) continue;
                 if (jt[o]) {                                     /* mortar; darker in the shadow under a stone */
-                    int vert = y + 1 < Y1 && o2[o + cw] == s && !jt[o + cw];      /* a vertical joint (else under the stone) */
-                    c = ramp(&A5_rmortar, (vert ? 0 : 40) + (int)(hash3(s, 1, 747) % 50) + a5_rank(wx, y, 3, 3, 723, 120) / 2);
-                    if (vert) c = scale(c, 244);                                  /* (the vertical joints the darker, as the picture's) */
+                    /* a vertical joint (else under the stone) */
+                    int vert = y + 1 < Y1 && o2[o + cw] == s && !jt[o + cw];
+                    c = ramp(&A5_rmortar,
+                             (vert ? 0 : 40) + (int)(hash3(s, 1, 747) % 50) + a5_rank(wx, y, 3, 3, 723, 120) / 2);
+                    /* (the vertical joints the darker, as the picture's) */
+                    if (vert) c = scale(c, 244);
                     else if (hash3(wx, y, 751) % 10 == 0) c = scale(c, 216);    /* deeper spots */
                     if (!vert && (hash3(s, 1, 743) % 10) < 3) c = mix(c, a5s[s].c, 110);   /* a faint joint */
                 } else {
                     Rgb m = ramp(&A5_rmortar, 110);
-                    int du = 1, dd = 1, dl = 1, dr = 1, d;
+                    int du = 1,
+                        dd = 1,
+                        dl = 1,
+                        dr = 1,
+                        d;
                     while (y - du >= Y0 && o2[o - (size_t)du * cw] == s && !jt[o - (size_t)du * cw]) du++;
                     while (y + dd < Y1 && o2[o + (size_t)dd * cw] == s && !jt[o + (size_t)dd * cw]) dd++;
-                    for (;;) { int Xn = X + dr * dxr; size_t on; if (Xn < 1 || Xn > cw) break; on = (size_t)y * cw + Xn - 1; if (o2[on] != s || jt[on]) break; dr++; }
-                    for (;;) { int Xn = X - dl * dxr; size_t on; if (Xn < 1 || Xn > cw) break; on = (size_t)y * cw + Xn - 1; if (o2[on] != s || jt[on]) break; dl++; }
+                    for (;;) {
+                        int Xn = X + dr * dxr;
+                        size_t on;
+                        if (Xn < 1 || Xn > cw) break;
+                        on = (size_t)y * cw + Xn - 1;
+                        if (o2[on] != s || jt[on]) break;
+                        dr++;
+                    }
+                    for (;;) {
+                        int Xn = X - dl * dxr;
+                        size_t on;
+                        if (Xn < 1 || Xn > cw) break;
+                        on = (size_t)y * cw + Xn - 1;
+                        if (o2[on] != s || jt[on]) break;
+                        dl++;
+                    }
                     d = (int)(hash3(s, 0, 741) % 21) - 15;                         /* each stone its own tone */
-                    if (a5s[s].hs >= 3 && (hash3(s, 2, 745) % 10) < 2 && y == a5s[s].y0 + 1 + (int)(hash3(s, 3, 745) % (u32)(a5s[s].hs - 2))
-                        && X >= a5s[s].x0 + (int)(hash3(s, 4, 745) % 3) && X < a5s[s].x1 - 1 - (int)(hash3(s, 5, 745) % 4)) d -= 11;   /* a layer line */
+                    /* a layer line */
+                    if (a5s[s].hs >= 3 && (hash3(s, 2, 745) % 10) < 2
+                        && y == a5s[s].y0 + 1 + (int)(hash3(s, 3, 745) % (u32)(a5s[s].hs - 2))
+                        && X >= a5s[s].x0 + (int)(hash3(s, 4, 745) % 3)
+                        && X < a5s[s].x1 - 1 - (int)(hash3(s, 5, 745) % 4))
+                        d -= 11;
                     d += (noise(wx, y, 6, 2, 727 + s % 7) - 128) / 7 + (int)(hash3(wx, y, 725) % 9) - 4;
                     /* rounded like a pillow (the picture's profiles across its stones): the middle rows lightest, the
                        first row a little and the last one more below them, both end columns ~15 darker */
-                    if (A5_BLUE(a5s[s].c)) d = (du == 1 ? 18 : du == 2 ? 10 : 2 - 6 * (du - 3)) - (dd == 1 ? 12 : 0);   /* the blue-grey slabs: lightest on top */
+                    /* the blue-grey slabs: lightest on top */
+                    if (A5_BLUE(a5s[s].c)) d = (du == 1 ? 18 : du == 2 ? 10 : 2 - 6 * (du - 3)) - (dd == 1 ? 12 : 0);
                     else if (du == 1 && dd == 1) d += 2;
                     else if (du + dd == 3) d += du == 1 ? 6 : 3;
                     else d += du == 1 ? 0 : dd == 1 ? -6 : du == 2 ? 18 : 12;
-                    if (du <= 2 && dd >= 2 && dl >= 2 && dr >= 3 && dl <= 2 + (int)(hash3(s, 7, 749) % 8) && (hash3(s, 6, 749) % 2) == 0) d += du == 1 ? 18 : 12;   /* a white highlight on the top left */
+                    /* a white highlight on the top left */
+                    if (du <= 2 && dd >= 2 && dl >= 2 && dr >= 3 && dl <= 2 + (int)(hash3(s, 7, 749) % 8)
+                        && (hash3(s, 6, 749) % 2) == 0)
+                        d += du == 1 ? 18 : 12;
                     d -= dl == 1 ? 15 : 0;
                     d += dr == 1 ? -17 : dr == 2 ? 4 : 0;
-                    c = a5s[s].c; c.r += d; c.g += d; c.b += d;
+                    c = a5s[s].c;
+                    c.r += d;
+                    c.g += d;
+                    c.b += d;
                     (void)m;
                 }
             }
@@ -771,7 +1294,9 @@ static void a5_wall(int side)
             putr(X, y, c, A5_STONE);
         }
     }
-    free(own); free(o2); free(jt);
+    free(own);
+    free(o2);
+    free(jt);
 }
 
 /* the path (per-row ramps, streaks along it) and the bushes */
@@ -779,38 +1304,71 @@ static void a5_ground(int side)
 {
     for (int X = 1; X <= cw; X++) {
         int wx = wx_of(side, X);
-        for (int y = A5_WALL1; y < PH; y++) putr(X, y, ramp(&A5_rrow[side][y], a5_rank(wx, y * 3, 4, 4, 731, 60)), A5_PATH);
+        for (int y = A5_WALL1; y < PH; y++)
+            putr(X, y, ramp(&A5_rrow[side][y], a5_rank(wx, y * 3, 4, 4, 731, 60)), A5_PATH);
     }
 }
 static int a5_bush_top(int side, int wx, int X)
 {
-    int best = PH + 20, dir = side ? 1 : -1, p = side ? PW - 30 : 30;
-    for (int k = 0; k < 64; k++) {                       /* mounds: 22-50 columns apart, half-width 12-27, top 198-211 */
-        u32 h = hash3(side, k, 741); int hw = 12 + (int)(h % 16), top = 198 + (int)(h >> 8) % 14, d = wx - p, t;
+    int best = PH + 20,
+        dir = side ? 1 : -1,
+        p = side ? PW - 30 : 30;
+    /* mounds: 22-50 columns apart, half-width 12-27, top 198-211 */
+    for (int k = 0; k < 64; k++) {
+        u32 h = hash3(side, k, 741);
+        int hw = 12 + (int)(h % 16),
+            top = 198 + (int)(h >> 8) % 14,
+            d = wx - p,
+            t;
         t = top + d * d * 13 / (hw * hw);
         if (t < best) best = t;
         p += dir * (22 + (int)(h >> 12) % 29);
         if ((side && p - 40 > wx) || (!side && p + 40 < wx)) break;
     }
     best += (noise(wx, 0, 4, 1, 743) - 128) / 36;                                  /* leaf clusters on the outline */
-    if (X <= 14 && A5_btop[side] < PH) best += (A5_btop[side] - best) * (15 - X) / 14;   /* from the picture's top at the edge */
+    /* from the picture's top at the edge */
+    if (X <= 14 && A5_btop[side] < PH) best += (A5_btop[side] - best) * (15 - X) / 14;
     return best;
 }
 static void a5_bushes(int side)
 {
     for (int X = 1; X <= cw; X++) {
-        int wx = wx_of(side, X), top = a5_bush_top(side, wx, X);
+        int wx = wx_of(side, X),
+            top = a5_bush_top(side, wx, X);
         for (int y = top; y < PH; y++) {
-            int d = y - top, best = 1 << 30, sec = 1 << 30, bh = 0, cy = 0, cx = 0;
-            int gx = fdiv(wx, 6), gy = fdiv(y, 5);
-            for (int j = gy - 1; j <= gy + 1; j++) for (int i = gx - 1; i <= gx + 1; i++) {   /* leaf clusters on a jittered grid */
-                u32 h = hash3(i, j, 751); int px = i * 6 + (int)(h % 6), py = j * 5 + (int)(h >> 8) % 5;
-                int dx = (wx - px) * 16, dy = (y - py) * 19, dd = dx * dx + dy * dy;
-                if (dd < best) { sec = best; best = dd; bh = (int)(h >> 16); cy = (y - py) * 16; cx = (wx - px) * 16; } else if (dd < sec) sec = dd;
-            }
-            {   int r1 = isqrt_i(best), r2 = isqrt_i(sec), tone = 150 - d * 3;
-                tone += -cy - cx / 3;                                                 /* each cluster lit from the top left */
-                tone += (int)(bh & 127) - 64 + (noise(wx, y, 13, 9, 755) - 128) / 2;  /* cluster by cluster, patches of sun */
+            int d = y - top,
+                best = 1 << 30,
+                sec = 1 << 30,
+                bh = 0,
+                cy = 0,
+                cx = 0;
+            int gx = fdiv(wx, 6),
+                gy = fdiv(y, 5);
+            /* leaf clusters on a jittered grid */
+            for (int j = gy - 1; j <= gy + 1; j++)
+                for (int i = gx - 1; i <= gx + 1; i++) {
+                    u32 h = hash3(i, j, 751);
+                    int px = i * 6 + (int)(h % 6),
+                        py = j * 5 + (int)(h >> 8) % 5;
+                    int dx = (wx - px) * 16,
+                        dy = (y - py) * 19,
+                        dd = dx * dx + dy * dy;
+                    if (dd < best) {
+                        sec = best;
+                        best = dd;
+                        bh = (int)(h >> 16);
+                        cy = (y - py) * 16;
+                        cx = (wx - px) * 16;
+                    } else if (dd < sec) sec = dd;
+                }
+            {
+                int r1 = isqrt_i(best),
+                    r2 = isqrt_i(sec),
+                    tone = 150 - d * 3;
+                /* each cluster lit from the top left */
+                tone += -cy - cx / 3;
+                /* cluster by cluster, patches of sun */
+                tone += (int)(bh & 127) - 64 + (noise(wx, y, 13, 9, 755) - 128) / 2;
                 if (r2 - r1 < 12) tone -= 40;                                         /* the crevices between them */
                 if ((bh >> 6 & 7) == 0 && d > 4) tone = 56 + d / 2;                   /* a hole into the bush */
                 if (d < 9 && (bh >> 9 & 1)) tone += 44;                          /* bright leaves on top */
@@ -824,27 +1382,47 @@ static void a5_bushes(int side)
 /* the picture's trees and bushes next to the edge (for balance_regions: the strip's as light and as contrasted) */
 static int a5_picreg(int side, int x, int y)
 {
-    Rgb k = rgb15(pic[y][x]); (void)side;
-    if (y < 70 && (side ? x >= 296 : x < 24)) return a5_green(k) || k.g > k.r ? (A5_ETREE[side].kind == 2 ? A5_TREEN : A5_TREE) : 0;
+    Rgb k = rgb15(pic[y][x]);
+    (void)side;
+    if (y < 70 && (side ? x >= 296 : x < 24))
+        return a5_green(k) || k.g > k.r ? (A5_ETREE[side].kind == 2 ? A5_TREEN : A5_TREE) : 0;
     if (y >= 206) return a5_green(k) ? A5_BUSH : 0;
     return 0;
 }
-/* the strip's region reg as light and as contrasted as the picture's texels in box [x0, x1) x [y0, y1) that pass pred */
+/* the strip's region reg as light and as contrasted as the picture's texels in box [x0, x1) x [y0, y1) that pass
+   pred */
 static void a5_match(int reg, int x0, int x1, int y0, int y1, int (*pred)(Rgb))
 {
-    static Hist hp, hs; int mp, dp, ms, ds, k;
-    memset(&hp, 0, sizeof hp); memset(&hs, 0, sizeof hs);
-    for (int y = y0; y < y1; y++) for (int x = x0; x < x1; x++) { Rgb c = rgb15(pic[y][x]); if (pred(c)) hist_add(&hp, lum(c)); }
-    for (int y = 0; y < PH; y++) for (int X = 1; X <= cw && X <= 53; X++) if (reg_at(X, y) == reg) hist_add(&hs, lum(cv[(size_t)y * cw + X - 1]));   /* (the 16:9 strip's columns: a wider one starts the same) */
+    static Hist hp, hs;
+    int mp, dp, ms, ds, k;
+    memset(&hp, 0, sizeof hp);
+    memset(&hs, 0, sizeof hs);
+    for (int y = y0; y < y1; y++)
+        for (int x = x0; x < x1; x++) {
+            Rgb c = rgb15(pic[y][x]);
+            if (pred(c)) hist_add(&hp, lum(c));
+        }
+    /* (the 16:9 strip's columns: a wider one starts the same) */
+    for (int y = 0; y < PH; y++)
+        for (int X = 1; X <= cw && X <= 53; X++)
+            if (reg_at(X, y) == reg)
+                hist_add(&hs, lum(cv[(size_t)y * cw + X - 1]));
     if (hp.n < 40 || hs.n < 40) return;
-    hist_stat(&hp, &mp, &dp); hist_stat(&hs, &ms, &ds);
+    hist_stat(&hp, &mp, &dp);
+    hist_stat(&hs, &ms, &ds);
     k = ds ? clampi(dp * 256 / ds, 160, 512) : 256;
-    for (int y = 0; y < PH; y++) for (int X = 1; X <= cw; X++) if (reg_at(X, y) == reg) {
-        Rgb *p = &cv[(size_t)y * cw + X - 1]; int l = lum(*p), l2 = clampi((mp + (l * 16 - ms) * k / 256) / 16, 2, 255);
-        *p = l ? scale(*p, clampi(l2 * 256 / l, 0, 1024)) : (Rgb){ l2, l2, l2 };
-    }
+    for (int y = 0; y < PH; y++)
+        for (int X = 1; X <= cw; X++)
+            if (reg_at(X, y) == reg) {
+                Rgb *p = &cv[(size_t)y * cw + X - 1];
+                int l = lum(*p),
+                    l2 = clampi((mp + (l * 16 - ms) * k / 256) / 16, 2, 255);
+                *p = l ? scale(*p, clampi(l2 * 256 / l, 0, 1024)) : (Rgb){ l2, l2, l2 };
+            }
 #ifdef WS_BACKDROP_MAIN
-    if (getenv("WSB_INFO")) fprintf(stderr, "match region %d: picture %d dev %d, strip %d dev %d\n", reg, mp / 16, dp / 16, ms / 16, ds / 16);
+    if (getenv("WSB_INFO"))
+        fprintf(stderr, "match region %d: picture %d dev %d, strip %d dev %d\n", reg, mp / 16, dp / 16, ms / 16,
+                ds / 16);
 #endif
 }
 static int a5_greenish(Rgb k) { return k.g > k.r && k.g > k.b + 8; }
@@ -853,17 +1431,28 @@ static void a5_seam(int side, int y0, int y1, int n)
 {
     int lp[PH], ls[PH];
     for (int y = y0; y < y1; y++) {
-        int a = 0, b = 0;
+        int a = 0,
+            b = 0;
         for (int i = 0; i < 3; i++) a += lum(a5p(side, i, y));
         for (int X = 1; X <= 3 && X <= cw; X++) b += lum(cv[(size_t)y * cw + X - 1]);
-        lp[y] = a; ls[y] = b;
+        lp[y] = a;
+        ls[y] = b;
     }
     for (int y = y0; y < y1; y++) {
-        int a = 0, b = 0;
-        for (int d = -2; d <= 2; d++) { int yy = clampi(y + d, y0, y1 - 1); a += lp[yy]; b += ls[yy]; }
+        int a = 0,
+            b = 0;
+        for (int d = -2; d <= 2; d++) {
+            int yy = clampi(y + d, y0, y1 - 1);
+            a += lp[yy];
+            b += ls[yy];
+        }
         if (b <= 0) continue;
-        {   int k = clampi(a * 256 / b, 160, 400);
-            for (int X = 1; X <= n && X <= cw; X++) { Rgb *p = px_at(X, y); *p = scale(*p, 256 + (k - 256) * (n + 1 - X) / (n + 1)); }
+        {
+            int k = clampi(a * 256 / b, 160, 400);
+            for (int X = 1; X <= n && X <= cw; X++) {
+                Rgb *p = px_at(X, y);
+                *p = scale(*p, 256 + (k - 256) * (n + 1 - X) / (n + 1));
+            }
         }
     }
 }
@@ -871,89 +1460,185 @@ static void a5_seam(int side, int y0, int y1, int n)
    the strip's 2-28 after a 3x3 blur of strength w (0: none, 256: one box, 512: two) */
 static int a5_fine(const Rgb *b, int w, int h, int x0, int x1)
 {
-    long long s = 0; int n = 0;
-    for (int y = 1; y < h - 1; y++) for (int x = x0; x < x1 && x < w - 1; x++) {
-        int t = 0;
-        for (int dy = -1; dy <= 1; dy++) for (int dx = -1; dx <= 1; dx++) t += lum(b[(size_t)(y + dy) * w + x + dx]);
-        t = lum(b[(size_t)y * w + x]) * 9 - t; s += t < 0 ? -t : t; n++;
-    }
+    long long s = 0;
+    int n = 0;
+    for (int y = 1; y < h - 1; y++)
+        for (int x = x0; x < x1 && x < w - 1; x++) {
+            int t = 0;
+            for (int dy = -1; dy <= 1; dy++)
+                for (int dx = -1; dx <= 1; dx++) t += lum(b[(size_t)(y + dy) * w + x + dx]);
+            t = lum(b[(size_t)y * w + x]) * 9 - t;
+            s += t < 0 ? -t : t;
+            n++;
+        }
     return n ? (int)(s * 16 / 9 / n) : 0;
 }
 static void a5_box(const Rgb *in, Rgb *out, int w, int h)
 {
-    for (int y = 0; y < h; y++) for (int x = 0; x < w; x++) {
-        int r = 0, g = 0, b = 0, n = 0;
-        for (int dy = -1; dy <= 1; dy++) for (int dx = -1; dx <= 1; dx++) {
-            int yy = y + dy, xx = x + dx;
-            if (yy < 0 || yy >= h || xx < 0 || xx >= w) continue;
-            r += in[(size_t)yy * w + xx].r; g += in[(size_t)yy * w + xx].g; b += in[(size_t)yy * w + xx].b; n++;
+    for (int y = 0; y < h; y++)
+        for (int x = 0; x < w; x++) {
+            int r = 0,
+                g = 0,
+                b = 0,
+                n = 0;
+            for (int dy = -1; dy <= 1; dy++)
+                for (int dx = -1; dx <= 1; dx++) {
+                    int yy = y + dy,
+                        xx = x + dx;
+                    if (yy < 0 || yy >= h || xx < 0 || xx >= w) continue;
+                    r += in[(size_t)yy * w + xx].r;
+                    g += in[(size_t)yy * w + xx].g;
+                    b += in[(size_t)yy * w + xx].b;
+                    n++;
+                }
+            out[(size_t)y * w + x].r = r / n;
+            out[(size_t)y * w + x].g = g / n;
+            out[(size_t)y * w + x].b = b / n;
         }
-        out[(size_t)y * w + x].r = r / n; out[(size_t)y * w + x].g = g / n; out[(size_t)y * w + x].b = b / n;
-    }
 }
 /* the same for the strip's texels of region reg only, against the picture's box [px0, px1) x [y0, y1) (columns from the
    left), measured on the strip's texels of that region whose 3x3 is all that region */
 static void a5_soften_reg(int side, int y0, int y1, int reg, int px0, int px1, int py0, int py1, int wmin)
 {
-    int h = y1 - y0, ep, best = 0, bd = 1 << 30, pw = px1 - px0, ph = py1 - py0;
-    Rgb *p = malloc((size_t)pw * ph * sizeof *p), *b1 = malloc((size_t)cw * h * sizeof *b1), *b2 = malloc((size_t)cw * h * sizeof *b2);
-    if (!p || !b1 || !b2) { free(p); free(b1); free(b2); return; }
+    int h = y1 - y0,
+        ep,
+        best = 0,
+        best_d = 1 << 30,
+        pw = px1 - px0,
+        ph = py1 - py0;
+    Rgb *p = malloc((size_t)pw * ph * sizeof *p),
+        *b1 = malloc((size_t)cw * h * sizeof *b1),
+        *b2 = malloc((size_t)cw * h * sizeof *b2);
+    if (!p || !b1 || !b2) {
+        free(p);
+        free(b1);
+        free(b2);
+        return;
+    }
     (void)side;
     for (int y = 0; y < ph; y++) for (int i = 0; i < pw; i++) p[(size_t)y * pw + i] = rgb15(pic[py0 + y][px0 + i]);
     ep = a5_fine(p, pw, ph, 1, pw - 1);
-    a5_box(&cv[(size_t)y0 * cw], b1, cw, h); a5_box(b1, b2, cw, h);
+    a5_box(&cv[(size_t)y0 * cw], b1, cw, h);
+    a5_box(b1, b2, cw, h);
     for (int w = 0; w <= 512; w += 32) {
-        long long sum = 0; int n = 0;
-        for (int y = 1; y < h - 1; y++) for (int X = 2; X < cw && X <= 53; X++) {
-            int t = 0, ok = 1, c = 0;
-            for (int dy = -1; dy <= 1 && ok; dy++) for (int dx = -1; dx <= 1; dx++) {
-                size_t i = (size_t)(y + dy) * cw + X - 1 + dx; Rgb q;
-                if (rg[(size_t)y0 * cw + i] != reg) { ok = 0; break; }
-                q = w <= 256 ? mix(cv[(size_t)y0 * cw + i], b1[i], w) : mix(b1[i], b2[i], w - 256);
-                t += lum(q); if (!dx && !dy) c = lum(q);
+        long long sum = 0;
+        int n = 0;
+        for (int y = 1; y < h - 1; y++)
+            for (int X = 2; X < cw && X <= 53; X++) {
+                int t = 0,
+                    ok = 1,
+                    c = 0;
+                for (int dy = -1; dy <= 1 && ok; dy++)
+                    for (int dx = -1; dx <= 1; dx++) {
+                        size_t i = (size_t)(y + dy) * cw + X - 1 + dx;
+                        Rgb q;
+                        if (rg[(size_t)y0 * cw + i] != reg) {
+                            ok = 0;
+                            break;
+                        }
+                        q = w <= 256 ? mix(cv[(size_t)y0 * cw + i], b1[i], w) : mix(b1[i], b2[i], w - 256);
+                        t += lum(q);
+                        if (!dx && !dy) c = lum(q);
+                    }
+                if (ok) {
+                    t = c * 9 - t;
+                    sum += t < 0 ? -t : t;
+                    n++;
+                }
             }
-            if (ok) { t = c * 9 - t; sum += t < 0 ? -t : t; n++; }
+        if (n < 30) {
+            free(p);
+            free(b1);
+            free(b2);
+            return;
         }
-        if (n < 30) { free(p); free(b1); free(b2); return; }
-        {   int e = (int)(sum * 16 / 9 / n), d = e - ep; d = d < 0 ? -d : d; if (d < bd && w >= wmin) { bd = d; best = w; } }
+        {
+            int e = (int)(sum * 16 / 9 / n),
+                d = e - ep;
+            d = d < 0 ? -d : d;
+            if (d < best_d && w >= wmin) {
+                best_d = d;
+                best = w;
+            }
+        }
     }
-    for (int y = 0; y < h; y++) for (int X = 1; X <= cw; X++) {
-        size_t i = (size_t)y * cw + X - 1;
-        if (rg[(size_t)y0 * cw + i] == reg || (reg == A5_TREE && rg[(size_t)y0 * cw + i] == A5_SKY)) cv[(size_t)y0 * cw + i] = best <= 256 ? mix(cv[(size_t)y0 * cw + i], b1[i], best) : mix(b1[i], b2[i], best - 256);
-    }
+    for (int y = 0; y < h; y++)
+        for (int X = 1; X <= cw; X++) {
+            size_t i = (size_t)y * cw + X - 1;
+            if (rg[(size_t)y0 * cw + i] == reg || (reg == A5_TREE && rg[(size_t)y0 * cw + i] == A5_SKY))
+                cv[(size_t)y0 * cw + i] = best <= 256 ? mix(cv[(size_t)y0 * cw + i], b1[i], best)
+                                                      : mix(b1[i], b2[i], best - 256);
+        }
 #ifdef WS_BACKDROP_MAIN
-    if (getenv("WSB_INFO")) fprintf(stderr, "side %d region %d: picture fine %d, blur %d (left %d)\n", side, reg, ep, best, bd);
+    if (getenv("WSB_INFO"))
+        fprintf(stderr, "side %d region %d: picture fine %d, blur %d (left %d)\n", side, reg, ep, best, best_d);
 #endif
-    free(p); free(b1); free(b2);
+    free(p);
+    free(b1);
+    free(b2);
 }
 static void a5_soften(int side, int y0, int y1)
 {
-    int h = y1 - y0, pw = 26, ep, best = 0, bd = 1 << 30;
-    Rgb *p = malloc((size_t)pw * h * sizeof *p), *b1 = malloc((size_t)cw * h * sizeof *b1), *b2 = malloc((size_t)cw * h * sizeof *b2), *t = malloc((size_t)cw * h * sizeof *t);
-    if (!p || !b1 || !b2 || !t || cw < 30) { free(p); free(b1); free(b2); free(t); return; }
+    int h = y1 - y0,
+        pw = 26,
+        ep,
+        best = 0,
+        best_d = 1 << 30;
+    Rgb *p = malloc((size_t)pw * h * sizeof *p),
+        *b1 = malloc((size_t)cw * h * sizeof *b1),
+        *b2 = malloc((size_t)cw * h * sizeof *b2),
+        *t = malloc((size_t)cw * h * sizeof *t);
+    if (!p || !b1 || !b2 || !t || cw < 30) {
+        free(p);
+        free(b1);
+        free(b2);
+        free(t);
+        return;
+    }
     for (int y = 0; y < h; y++) for (int i = 0; i < pw; i++) p[(size_t)y * pw + i] = a5p(side, i, y0 + y);
     ep = a5_fine(p, pw, h, 1, 25);
-    a5_box(&cv[(size_t)y0 * cw], b1, cw, h); a5_box(b1, b2, cw, h);
+    a5_box(&cv[(size_t)y0 * cw], b1, cw, h);
+    a5_box(b1, b2, cw, h);
     for (int w = 0; w <= 512; w += 32) {
-        for (size_t i = 0; i < (size_t)cw * h; i++) t[i] = w <= 256 ? mix(cv[(size_t)y0 * cw + i], b1[i], w) : mix(b1[i], b2[i], w - 256);
-        {   int e = a5_fine(t, cw, h, 2, 28), d = e - ep; d = d < 0 ? -d : d;
-            if (d < bd) { bd = d; best = w; } }
+        for (size_t i = 0; i < (size_t)cw * h; i++)
+            t[i] = w <= 256 ? mix(cv[(size_t)y0 * cw + i], b1[i], w) : mix(b1[i], b2[i], w - 256);
+        {
+            int e = a5_fine(t, cw, h, 2, 28),
+                d = e - ep;
+            d = d < 0 ? -d : d;
+            if (d < best_d) {
+                best_d = d;
+                best = w;
+            }
+        }
     }
-    for (size_t i = 0; i < (size_t)cw * h; i++) cv[(size_t)y0 * cw + i] = best <= 256 ? mix(cv[(size_t)y0 * cw + i], b1[i], best) : mix(b1[i], b2[i], best - 256);
+    for (size_t i = 0; i < (size_t)cw * h; i++)
+        cv[(size_t)y0 * cw + i] = best <= 256 ? mix(cv[(size_t)y0 * cw + i], b1[i], best)
+                                              : mix(b1[i], b2[i], best - 256);
 #ifdef WS_BACKDROP_MAIN
-    if (getenv("WSB_INFO")) fprintf(stderr, "side %d rows %d-%d: picture fine %d, blur %d (left %d)\n", side, y0, y1, ep, best, bd);
+    if (getenv("WSB_INFO"))
+        fprintf(stderr, "side %d rows %d-%d: picture fine %d, blur %d (left %d)\n", side, y0, y1, ep, best, best_d);
 #endif
-    free(p); free(b1); free(b2); free(t);
+    free(p);
+    free(b1);
+    free(b2);
+    free(t);
 }
 
 static void gen_a5(int pad)
 {
-    pal_make(); a5_analyse();
-    if (!A5_rsky[0].ok || !A5_rsky[1].ok || !A5_rnear.ok || !A5_rhaze.ok || !A5_rpost.ok || !A5_rmortar.ok || !A5_rbush.ok
-        || !canvas_open(pad)) return;
+    if (!ws_need_gen_a5()) return;
+    pal_make();
+    a5_analyse();
+    if (!A5_rsky[0].ok || !A5_rsky[1].ok || !A5_rnear.ok || !A5_rhaze.ok || !A5_rpost.ok || !A5_rmortar.ok
+        || !A5_rbush.ok || !canvas_open(pad)) return;
     for (int side = 0; side < 2; side++) {
         canvas_clear();
-        a5_wood(side); a5_fence(side); a5_wall(side); a5_ground(side); a5_bushes(side);
+        a5_wood(side);
+        a5_fence(side);
+        a5_wall(side);
+        a5_ground(side);
+        a5_bushes(side);
         a5_match(A5_TREEN, 252, 288, 8, 64, a5_greenish);
         a5_match(A5_TREE, 298, 320, 8, 64, a5_greenish);
         a5_match(A5_BUSH, 0, 48, 208, PH, a5_green);
@@ -969,7 +1654,9 @@ static void gen_a5(int pad)
         a5_soften(side, 200, PH);
         emit(side);
     }
-    free(a5s); a5s = 0; a5ns = a5cap = 0;
+    free(a5s);
+    a5s = 0;
+    a5ns = a5cap = 0;
     canvas_close();
 }
 
@@ -977,15 +1664,21 @@ static void gen_a5(int pad)
  * Two pictures with one layout (the same pieces, huts, fence, ledge, bank, ladder and jukebox): AREA02 s1 with the
  * balloon trees (gen_vb below) and AREA19 s1 in cherry blossom (gen_cb, after gen_vb's machinery).  AREA19 s1 runs as
  * area 2 s1, so the table tells them apart by the picture: */
-static int v_cherry(void)                                /* the canopy mostly pink: the blossom (AREA19), else balloons */
+/* the canopy mostly pink: the blossom (AREA19), else balloons */
+static int v_cherry(void)
 {
     int n = 0;
-    for (int y = 0; y < 88; y += 2) for (int x = 0; x < PW; x += 2) { Rgb k = rgb15(pic[y][x]); n += k.r > k.g + 20 && k.b > k.g + 4; }
+    for (int y = 0; y < 88; y += 2)
+        for (int x = 0; x < PW; x += 2) {
+            Rgb k = rgb15(pic[y][x]);
+            n += k.r > k.g + 20 && k.b > k.g + 4;
+        }
     return n * 10 > 44 * 160 * 6;
 }
 static int v_not_cherry(void) { return !v_cherry(); }
 
-/* ================================================================== AREA02 s1: the Dwarf Village with the balloon trees
+/* ================================================================== AREA02 s1: the Dwarf Village with the balloon
+ * trees
  * Third version (2026-11-16), after the user's review of the second: the strips are now made from the user's own
  * picture at run time instead of being drawn by hand-made procedures ("you invented the fence instead of looking at
  * the fences literally next to it"; the palisade "practically a repeating texture"; the spheres cut by the edges not
@@ -1030,17 +1723,17 @@ static int v_not_cherry(void) { return !v_cherry(); }
  * jukebox, the ladder and the front sphere), the front spheres from ~190.  Not continued: the huts, the dwarves, the
  * jukebox, the ladder, the log, the barrel, the stones. */
 enum { VB_SPH = 1, VB_FRONTR = 5, VB_BACK = 9, VB_FENCE, VB_LEDGE, VB_BANK, VB_GROUND };
-typedef struct { short x2, y2, r2, cls, dep, side, fl; } VbS;   /* centre / radius in half texels, colour class (cream 0,
-                                                                   pink 1, blue 2), depth (more: in front), the edge that
-                                                                   cuts it (-1: none) */
+/* centre / radius in half texels, colour class (cream 0, pink 1, blue 2), depth (more: in front), the edge that cuts it
+   (-1: none) */
+typedef struct { short x2, y2, r2, cls, dep, side, fl; } VbS;
 #define VBS_DONOR 1
 #define VBS_FRONT 2
 #define VBS_KEEP 16                                      /* completed: no new sphere in front of it in the strip (its
                                                             outline beyond the join stays its own, round) */
 #define VBS_CAP 8                                        /* completed: its model's tone eased below the lightest of
                                                             its visible texels (a sphere fitted on a short dim rim) */
-#define VBS_EDGE 32                                      /* completed front sphere: not drawn whole in the strip; the new
-                                                            cream spheres behind it reach the join, then only its
+#define VBS_EDGE 32                                      /* completed front sphere: not drawn whole in the strip; the
+                                                            new cream spheres behind it reach the join, then only its
                                                             outline zone goes on over them (vb_edge) */
 #define VBS_SOFTJ 4                                      /* its contact shade fades out over the strip's first 8
                                                             columns (the picture shows none there) */
@@ -1080,13 +1773,12 @@ static const VbBox VB_EXCL[] = {
     { 226, 118, 254, 142 }, { 216, 133, 262, 188 }, { 252, 120, 268, 190 }, { 262, 108, 316, 196 }, { 0, 0, 0, 0 } };
 typedef struct { short y0, y1, ry0, ry1, sx0, sx1, B, OV, OT, OB, dy, reg, per, up, mr, st; } VbBand;
 /* rows [y0, y1) of the strip from the picture's rows [ry0, ry1) (others reflected into them), columns [sx0, sx1);
-   blocks of B columns, OV of overlap, OT / OB rows of overlap with the band above / below, windows shifted up to dy rows, per: look
-   for a horizontal period, up: rows above ry0 reflected into the first up rows only (the trunks: straight on up; -1:
-   the row ry0 repeated), mr:
-   the first mr columns the picture's last columns repeated with their own period (the quilt's first block then cut
-   into them), st: VBB_STRICT, a window whose rows (shifted) leave [ry0, ry1) is not taken (no rows reflected);
-   VBB_TIGHT, the first block is the best match of the picture's columns at the edge (not one within 1/8 of it);
-   VBB_SOFT below */
+   blocks of B columns, OV of overlap, OT / OB rows of overlap with the band above / below, windows shifted up to dy
+   rows, per: look for a horizontal period, up: rows above ry0 reflected into the first up rows only (the trunks:
+   straight on up; -1: the row ry0 repeated), mr: the first mr columns the picture's last columns repeated with their
+   own period (the quilt's first block then cut into them), st: VBB_STRICT, a window whose rows (shifted) leave
+   [ry0, ry1) is not taken (no rows reflected); VBB_TIGHT, the first block is the best match of the picture's columns
+   at the edge (not one within 1/8 of it); VBB_SOFT below */
 #define VBB_STRICT 1
 #define VBB_TIGHT 2
 #define VBB_FEATHER 8                                    /* the cuts blended (below) */
@@ -1116,17 +1808,18 @@ static const VbBand VB_BANDS[2][5] = {          /* (in the order they are made: 
       { 137, 156, 143, 156, 150, 216, 16, 5, 4, 0, 0, VB_LEDGE, 0, 0 },
       { 156, 181, 156, 181, 150, 216, 16, 5, 4, 0, 0, VB_BANK, 1, 0 },
       { 181, PH, 181, 198, 0, 262, 16, 5, 4, 0, 1, VB_GROUND, 0, 0 } } };
-static Ramp VB_rc[3], VB_rf[3];
+static Ramp (*VB_rc), (*VB_rf);
 static int VB_share[4];                                  /* the classes' shares of the canopy (cumulative, /256) */
 static int VB_L[3];                                      /* the light (x 256) */
-static int VB_a[VB_NPS], VB_b[VB_NPS], VB_n[VB_NPS], VB_m[VB_NPS], VB_hi[VB_NPS];   /* each sphere's shading: L = a + b (n . light) / 256;
-                                                                       m: its visible texels' mean luminance */
+/* each sphere's shading: L = a + b (n . light) / 256; m: its visible texels' mean luminance */
+static int VB_a[VB_NPS], VB_b[VB_NPS], VB_n[VB_NPS], VB_m[VB_NPS], VB_hi[VB_NPS];
 static int vb_ow;                                        /* the working canvas' width (the strip + a margin, so a block
                                                             or sphere at the strip's end is the same at any width) */
 
 static int vb_class(Rgb k)                               /* cream 0, pink / lilac 1, blue 2, else -1 */
 {
-    int mx = k.r > k.g ? (k.r > k.b ? k.r : k.b) : (k.g > k.b ? k.g : k.b), mn = k.r < k.g ? (k.r < k.b ? k.r : k.b) : (k.g < k.b ? k.g : k.b);
+    int mx = k.r > k.g ? (k.r > k.b ? k.r : k.b) : (k.g > k.b ? k.g : k.b),
+        mn = k.r < k.g ? (k.r < k.b ? k.r : k.b) : (k.g < k.b ? k.g : k.b);
     if (k.b > k.r + 16 && k.b > k.g + 24) return 2;
     if (k.r > k.g + 20 && k.b > k.g + 8) return 1;
     if (mx - mn < 40 && lum(k) > 70 && k.r >= k.b) return 0;
@@ -1140,9 +1833,12 @@ static int (*vb_otgt)(int side, int X, int *tol);
 static int (*vb_exf)(int x, int y);                     /* objects that are not boxes (gen_st's stair), or none */
 static int *vb_srcmap;                                   /* where each canvas texel was copied from (y * PW + x), or
                                                             none: gen_st relights the copies */
+static u8 *vb_exmap;                                     /* vb_excl of every picture texel while vb_quilt runs (vb_ex
+                                                            and vb_exf do not change during a quilt), or none */
 static int vb_excl(int x, int y)
 {
     if (x < 0 || x >= PW || y < 0 || y >= PH) return 1;
+    if (vb_exmap) return vb_exmap[y * PW + x];
     if (vb_exf && vb_exf(x, y)) return 1;
     for (int i = 0; vb_ex[i].x1; i++)
         if (x >= vb_ex[i].x0 && x < vb_ex[i].x1 && y >= vb_ex[i].y0 && y < vb_ex[i].y1) return 1;
@@ -1151,83 +1847,147 @@ static int vb_excl(int x, int y)
 
 /* --- the canvas in picture columns: wx < 0 (left strip) or >= PW (right strip); X = 1.. outwards, up to vb_ow */
 static int vb_X(int side, int wx) { return side ? wx - (PW - 1) : -wx; }
-static int vb_in(int side, int wx, int y) { int X = vb_X(side, wx); return X >= 1 && X <= vb_ow && y >= 0 && y < PH; }
-static Rgb *vb_px(int side, int wx, int y) { return vb_in(side, wx, y) ? &cv[(size_t)y * vb_ow + vb_X(side, wx) - 1] : 0; }
-static int vb_reg(int side, int wx, int y) { return vb_in(side, wx, y) ? rg[(size_t)y * vb_ow + vb_X(side, wx) - 1] : 0; }
+static int vb_in(int side, int wx, int y)
+{
+    int X = vb_X(side, wx);
+    return X >= 1 && X <= vb_ow && y >= 0 && y < PH;
+}
+static Rgb *vb_px(int side, int wx, int y)
+{
+    return vb_in(side, wx, y) ? &cv[(size_t)y * vb_ow + vb_X(side, wx) - 1] : 0;
+}
+static int vb_reg(int side, int wx, int y)
+{
+    return vb_in(side, wx, y) ? rg[(size_t)y * vb_ow + vb_X(side, wx) - 1] : 0;
+}
 static void vb_put(int side, int wx, int y, Rgb c, int r)
 {
-    if (vb_in(side, wx, y)) { size_t i = (size_t)y * vb_ow + vb_X(side, wx) - 1; cv[i] = c; rg[i] = (u8)r; }
+    if (vb_in(side, wx, y)) {
+        size_t i = (size_t)y * vb_ow + vb_X(side, wx) - 1;
+        cv[i] = c;
+        rg[i] = (u8)r;
+    }
 }
 static int vb_lo(int side) { return side ? PW : -vb_ow; }            /* the canvas' columns [lo, hi) */
 static int vb_hi(int side) { return side ? PW + vb_ow : 0; }
 /* what is at picture column wx: the picture (when not an object), or the canvas where already filled */
 static int vb_get(int side, int wx, int y, Rgb *c)
 {
-    if (wx >= 0 && wx < PW) { if (y < 0 || y >= PH || vb_excl(wx, y)) return 0; *c = rgb15(pic[y][wx]); return 1; }
+    if (wx >= 0 && wx < PW) {
+        if (y < 0 || y >= PH || vb_excl(wx, y)) return 0;
+        *c = rgb15(pic[y][wx]);
+        return 1;
+    }
     if (!vb_reg(side, wx, y)) return 0;
-    *c = *vb_px(side, wx, y); return 1;
+    *c = *vb_px(side, wx, y);
+    return 1;
 }
-static int vb_d2(Rgb a, Rgb b) { int r = a.r - b.r, g = a.g - b.g, bb = a.b - b.b; return 3 * r * r + 4 * g * g + 2 * bb * bb; }
+static int vb_d2(Rgb a, Rgb b)
+{
+    int r = a.r - b.r,
+        g = a.g - b.g,
+        bb = a.b - b.b;
+    return 3 * r * r + 4 * g * g + 2 * bb * bb;
+}
 
 /* ================================================================== quilting */
 static int vb_srow(const VbBand *b, int y)               /* a row of the band's clean rows: reflected into [ry0, ry1) */
 {
-    int n = b->ry1 - b->ry0, k;
+    int n = b->ry1 - b->ry0,
+        k;
     if (y >= b->ry0 && y < b->ry1) return y;
     if (b->up < 0) {                                     /* (the trunks straight on up: the first -up rows reflected,
                                                             few, so no haze repeats as bands) */
         if (y >= b->ry1) return b->ry1 - 1;
-        k = fmodi(y - b->ry0, -2 * b->up); return b->ry0 + (k < -b->up ? k : -2 * b->up - 1 - k);
+        k = fmodi(y - b->ry0, -2 * b->up);
+        return b->ry0 + (k < -b->up ? k : -2 * b->up - 1 - k);
     }
-    if (b->up && y >= b->ry1) { k = fmodi(b->ry1 - 1 - y, 2 * b->up); return b->ry1 - 1 - (k < b->up ? k : 2 * b->up - 1 - k); }
+    if (b->up && y >= b->ry1) {
+        k = fmodi(b->ry1 - 1 - y, 2 * b->up);
+        return b->ry1 - 1 - (k < b->up ? k : 2 * b->up - 1 - k);
+    }
     if (b->up) n = b->up;
     k = fmodi(y - b->ry0, 2 * n);
     return b->ry0 + (k < n ? k : 2 * n - 1 - k);
 }
 /* the band's horizontal period next to the edge (autocorrelation of each row's luminance minus its mean over the
    window's columns), 0 if none is clear */
+static int (*vb_period__L)[40];
 static int vb_period(int side, const VbBand *b)
 {
-    int x0 = b->sx0, w = b->sx1 - b->sx0 < 40 ? b->sx1 - b->sx0 : 40, best = 0, bc = 0, ok[PH]; long long den = 0;
-    static int L[PH][40];
+    int x0 = b->sx0,
+        w = b->sx1 - b->sx0 < 40 ? b->sx1 - b->sx0 : 40,
+        best = 0,
+        best_c = 0,
+        ok[PH];
+    long long den = 0;
+    int (*const L)[40] = vb_period__L;
     for (int y = b->ry0; y < b->ry1; y++) {
-        int s = 0; ok[y] = 1;
-        for (int i = 0; i < w; i++) { if (vb_excl(x0 + i, y)) ok[y] = 0; L[y][i] = lum(rgb15(pic[y][x0 + i])); s += L[y][i]; }
-        for (int i = 0; i < w; i++) { L[y][i] -= s / w; if (ok[y]) den += (long long)L[y][i] * L[y][i]; }
+        int s = 0;
+        ok[y] = 1;
+        for (int i = 0; i < w; i++) {
+            if (vb_excl(x0 + i, y)) ok[y] = 0;
+            L[y][i] = lum(rgb15(pic[y][x0 + i]));
+            s += L[y][i];
+        }
+        for (int i = 0; i < w; i++) {
+            L[y][i] -= s / w;
+            if (ok[y]) den += (long long)L[y][i] * L[y][i];
+        }
     }
     if (den <= 0) return 0;
     for (int lag = 4; lag <= 16; lag++) {
-        long long s = 0; int c;
-        for (int y = b->ry0; y < b->ry1; y++) if (ok[y]) for (int i = 0; i + lag < w; i++) s += (long long)L[y][i] * L[y][i + lag];
+        long long s = 0;
+        int c;
+        for (int y = b->ry0; y < b->ry1; y++)
+            if (ok[y])
+                for (int i = 0; i + lag < w; i++)
+                    s += (long long)L[y][i] * L[y][i + lag];
         c = (int)(s * 256 * w / (w - lag) / den);
-        if (c > bc) { bc = c; best = lag; }
+        if (c > best_c) {
+            best_c = c;
+            best = lag;
+        }
     }
 #ifdef WS_BACKDROP_MAIN
-    if (getenv("WSB_INFO")) fprintf(stderr, "side %d band %d-%d: period %d (corr %d/256)\n", side, b->y0, b->y1, best, bc);
+    if (getenv("WSB_INFO"))
+        fprintf(stderr, "side %d band %d-%d: period %d (corr %d/256)\n", side, b->y0, b->y1, best, best_c);
 #endif
     (void)side;
-    return bc >= 64 ? best : 0;
+    return best_c >= 64 ? best : 0;
 }
 /* the minimum-error path through rows [ya, yb) x columns [0, w) of the error map e (indexed e[y - ya][j]): vertical
    (one column per row, path[y - ya]) when vert, else horizontal (one row per column, path[j]) */
 #define VB_MAXH 128
 #define VB_MAXW 40
-static int vb_E[VB_MAXH][VB_MAXW];
+static int (*vb_E)[VB_MAXW];
 static void vb_cutpath(int e[VB_MAXH][VB_MAXW], int rows, int w, int vert, int *path)
 {
-    int (*E)[VB_MAXW] = vb_E, n = vert ? rows : w, m = vert ? w : rows;   /* n steps, m positions each */
+    /* n steps, m positions each */
+    int (*E)[VB_MAXW] = vb_E,
+        n = vert ? rows : w,
+        m = vert ? w : rows;
     for (int i = 0; i < n; i++)
         for (int p = 0; p < m; p++) {
-            int c = vert ? e[i][p] : e[p][i], best = 1 << 30;
+            int c = vert ? e[i][p] : e[p][i],
+                best = 1 << 30;
             if (i == 0) best = 0;
-            else for (int d = -1; d <= 1; d++) if (p + d >= 0 && p + d < m && E[i - 1][p + d] < best) best = E[i - 1][p + d];
+            else
+                for (int d = -1; d <= 1; d++)
+                    if (p + d >= 0 && p + d < m && E[i - 1][p + d] < best)
+                        best = E[i - 1][p + d];
             E[i][p] = c + best;
         }
-    {   int p = 0;
+    {
+        int p = 0;
         for (int q = 1; q < m; q++) if (E[n - 1][q] < E[n - 1][p]) p = q;
         for (int i = n - 1; i >= 0; i--) {
             path[i] = p;
-            if (i > 0) { int bp = p; for (int d = -1; d <= 1; d++) if (p + d >= 0 && p + d < m && E[i - 1][p + d] < E[i - 1][bp]) bp = p + d; p = bp; }
+            if (i > 0) {
+                int bp = p;
+                for (int d = -1; d <= 1; d++) if (p + d >= 0 && p + d < m && E[i - 1][p + d] < E[i - 1][bp]) bp = p + d;
+                p = bp;
+            }
         }
     }
 }
@@ -1238,9 +1998,16 @@ static short vb_hs[PW];                                  /* the picture's outlin
 static int vb_grass(Rgb k) { return (k.g > k.r + 8 && k.g > k.b + 8) || lum(k) < 60; }
 static int vb_hcol(int side, int wx)
 {
-    int run = 0, ex = -9; Rgb c;
+    int run = 0,
+        ex = -9;
+    Rgb c;
     for (int y = 184; y < PH; y++) {
-        if (wx >= 0 && wx < PW && vb_excl(wx, y)) { run = 0; ex = y; continue; }   /* (an object in the grass above) */
+        /* (an object in the grass above) */
+        if (wx >= 0 && wx < PW && vb_excl(wx, y)) {
+            run = 0;
+            ex = y;
+            continue;
+        }
         if (!vb_get(side, wx, y, &c)) return -1;
         run = vb_grass(c) ? 0 : run + 1;
         if (run == 3) return ex >= y - 4 ? -1 : y - 2;   /* (-1: the top hidden by the object) */
@@ -1253,105 +2020,253 @@ static int vb_hole(const VbBand *b, int x, int y)
 {
     return (b->st & VBB_OUTL) && vb_excl(x, y) && x >= 0 && x < PW && vb_hs[x] >= 0 && y < vb_hs[x];
 }
+static int (*vb_quilt__err);
+static int (*vb_quilt__em)[VB_MAXW];
+static Rgb (*vb_quilt__win)[VB_MAXW];
+static u8 (*vb_quilt__pm)[VB_MAXW];
+static int (*vb_quilt__ev)[VB_MAXW];
+/* (speed, the same strips: vb_quilt_run's inner loops read these instead of calling vb_excl / vb_srow / vb_get for
+   every candidate window; a candidate's error is a sum of integers, so the order it is added in does not matter) */
+typedef struct { short y, j, wv; Rgb o; } VbTgt;          /* a target texel the window's error compares */
+static VbTgt *vb_tg;
+static short vb_sr[3 * PH];                              /* vb_srow(b, y) for y in [-PH, 2 PH) */
+static u16 *vb_bad;                                      /* per picture row, a running count of the texels a window may
+                                                            not hold (vb_excl and not vb_hole): row y, columns [0, x) at
+                                                            y * (PW + 1) + x */
+static void vb_quilt_run(int side, const VbBand *b, int seed);
 static void vb_quilt(int side, const VbBand *b, int seed)
 {
-    int W = b->B + b->OV, ytop = b->y0 - b->OT, ybot = b->y1 + b->OB, H = ybot - ytop, per = b->per ? vb_period(side, b) : 0;
-    int pos = side ? PW : -1, nb = 0, used[3] = { -999, -999, -999 }, nd = 2 * b->dy + 1, ncand = (b->sx1 - b->sx0 - W + 1) * nd;
-    static int err[320 * 128], em[VB_MAXH][VB_MAXW], vcut[VB_MAXH], tcut[VB_MAXW], bcut[VB_MAXW];
-    static Rgb win[VB_MAXH][VB_MAXW]; static u8 pm[VB_MAXH][VB_MAXW];
+    u8 *m = (u8 *)malloc((size_t)PW * PH);
+    VbTgt *tg = (VbTgt *)malloc(sizeof *tg * VB_MAXH * VB_MAXW);
+    if (m) for (int y = 0; y < PH; y++) for (int x = 0; x < PW; x++) m[y * PW + x] = (u8)vb_excl(x, y);
+    vb_exmap = m;
+    vb_tg = tg;
+    for (int y = -PH; y < 2 * PH; y++) vb_sr[y + PH] = (short)vb_srow(b, y);
+    vb_quilt_run(side, b, seed);
+    vb_exmap = 0;
+    vb_tg = 0;
+    free(m);
+    free(tg);
+    free(vb_bad);
+    vb_bad = 0;
+}
+#define VB_SR(y) ((y) >= -PH && (y) < 2 * PH ? vb_sr[(y) + PH] : vb_srow(b, y))
+#define VB_EX(x, y) (vb_exmap && (unsigned)(x) < PW && (unsigned)(y) < PH ? vb_exmap[(y) * PW + (x)] : vb_excl(x, y))
+static void vb_quilt_run(int side, const VbBand *b, int seed)
+{
+    int W = b->B + b->OV,
+        ytop = b->y0 - b->OT,
+        ybot = b->y1 + b->OB,
+        H = ybot - ytop,
+        per = b->per ? vb_period(side, b) : 0;
+    int pos = side ? PW : -1,
+        nb = 0,
+        used[3] = { -999, -999, -999 },
+        nd = 2 * b->dy + 1,
+        ncand = (b->sx1 - b->sx0 - W + 1) * nd;
+    static int vcut[VB_MAXH], tcut[VB_MAXW], bcut[VB_MAXW];
+    int (*const err) = vb_quilt__err,
+        (*const em)[VB_MAXW] = vb_quilt__em;
+    Rgb (*const win)[VB_MAXW] = vb_quilt__win;
+    u8 (*const pm)[VB_MAXW] = vb_quilt__pm;
     if (H > VB_MAXH || W > VB_MAXW || ncand <= 0 || ncand > 320 * 128) return;
     if (b->st & VBB_OUTL) for (int x = 0; x < PW; x++) vb_hs[x] = (short)vb_hcol(side, x);
+    /* (after vb_hs: vb_hole reads it) */
+    if (vb_exmap && (vb_bad = (u16 *)malloc(sizeof *vb_bad * PH * (PW + 1))) != 0)
+        for (int y = 0; y < PH; y++) {
+            u16 *r = vb_bad + (size_t)y * (PW + 1);
+            r[0] = 0;
+            for (int x = 0; x < PW; x++) r[x + 1] = (u16)(r[x] + (vb_exmap[y * PW + x] && !vb_hole(b, x, y)));
+        }
     if (b->mr > 0) {                                     /* the trunk cut by the edge goes on: the picture's last k
                                                             columns repeated, k (mr/2+1 .. 2 mr) the shift at which
                                                             its last 3 columns best match 3 earlier ones (the stripes'
                                                             period; the first block is then cut into them) */
-        long long be = -1; int kp = b->mr;
+        long long be = -1;
+        int kp = b->mr;
         for (int k = b->mr / 2 + 1; k <= 2 * b->mr; k++) {
             long long e = 0;
             for (int y = b->ry0; y < b->ry1; y++)
                 for (int i = 0; i < 3; i++) {
-                    int xa = side ? PW - 1 - i : i, xb = side ? xa - k : xa + k;
+                    int xa = side ? PW - 1 - i : i,
+                        xb = side ? xa - k : xa + k;
                     if (!vb_excl(xa, y) && !vb_excl(xb, y)) e += vb_d2(rgb15(pic[y][xa]), rgb15(pic[y][xb]));
                 }
-            if (be < 0 || e < be) { be = e; kp = k; }
+            if (be < 0 || e < be) {
+                be = e;
+                kp = k;
+            }
         }
         for (int X = 1; X <= b->mr; X++)
             for (int y = b->y0; y < b->y1; y++)
-                vb_put(side, side ? PW - 1 + X : -X, y, rgb15(pic[vb_srow(b, y)][side ? PW - kp + (X - 1) % kp : kp - 1 - (X - 1) % kp]), b->reg);
+                vb_put(side, side ? PW - 1 + X : -X, y,
+                       rgb15(pic[vb_srow(b, y)][side ? PW - kp + (X - 1) % kp : kp - 1 - (X - 1) % kp]), b->reg);
         pos += side ? b->mr : -b->mr;
     }
     while (side ? pos < vb_hi(side) : pos >= vb_lo(side)) {
         int t0 = side ? pos - b->OV : pos - b->B + 1;             /* the window's first picture column (target) */
-        int first = nb == 0 && !b->mr, mn = 1 << 30, pick = -1, nc = 0, k, tol;
-        int oc0 = side ? t0 + b->OV - VB_OCTX : t0 + b->B, oht[VB_OCTX];   /* the outline context's first column */
-        int oref = -1, oslope = 0;                       /* the outline next to the new columns (its 2 nearest) and
-                                                            its slope outwards there (x 4, at most 2 rows a column:
-                                                            a valley's flat bottom goes on flat, not down its flank) */
+        int first = nb == 0 && !b->mr,
+            mn = 1 << 30,
+            pick = -1,
+            nc = 0,
+            k, tol;
+        /* the outline context's first column */
+        int oc0 = side ? t0 + b->OV - VB_OCTX : t0 + b->B,
+            oht[VB_OCTX];
+        /* the outline next to the new columns (its 2 nearest) and its slope outwards there (x 4, at most 2 rows a
+           column: a valley's flat bottom goes on flat, not down its flank) */
+        int oref = -1,
+            oslope = 0;
         if (b->st & VBB_OUTL) {
-            int a = 0, na = 0, c = 0, nc2 = 0;
+            int a = 0,
+                na = 0,
+                c = 0,
+                nc2 = 0;
             for (int j = 0; j < VB_OCTX; j++) oht[j] = vb_hcol(side, oc0 + j);
             for (int k = 0; k < 4; k++) {
                 int h = oht[side ? VB_OCTX - 1 - k : k];
                 if (h < 0 || (vb_otgt && h >= PH)) continue;   /* (with a target: a block's feathered outer
                                                                   column, grass-tinted, is no outline) */
-                if (k < 2) { a += h; na++; } else { c += h; nc2++; }
+                if (k < 2) {
+                    a += h;
+                    na++;
+                } else {
+                    c += h;
+                    nc2++;
+                }
             }
             if (na) oref = a / na;
-            if (na && nc2) { oslope = (a * 4 / na - c * 4 / nc2) / 2; oslope = oslope > 8 ? 8 : oslope < -8 ? -8 : oslope; }
-        }
-        for (int c = 0; c < ncand; c++) {
-            int sx = b->sx0 + c / nd, dy = c % nd - b->dy, ok = 1, n = 0; long long e = 0;
-            if ((b->st & VBB_STRICT) && (ytop + dy < b->ry0 || ybot + dy > b->ry1)) ok = 0;
-            for (int y = ytop; y < ybot && ok; y++) {
-                if ((b->st & VBB_SOFT) && (y < b->y0 || y >= b->y1)) continue;
-                for (int j = 0; j < W; j++) if (vb_excl(sx + j, vb_srow(b, y + dy)) && !vb_hole(b, sx + j, vb_srow(b, y + dy))) { ok = 0; break; }
+            if (na && nc2) {
+                oslope = (a * 4 / na - c * 4 / nc2) / 2;
+                oslope = oslope > 8 ? 8 : oslope < -8 ? -8 : oslope;
             }
-            if (!ok) { err[c] = -1; continue; }
+        }
+        int nt = 0;                                      /* the target texels (the same for every candidate) */
+        if (vb_tg)
             for (int y = ytop; y < ybot; y++)
                 for (int j = 0; j < W; j++) {
-                    int ov = side ? j < b->OV : j >= b->B; Rgb o;
+                    int ov = side ? j < b->OV : j >= b->B;
+                    Rgb o;
                     if (!ov && y >= b->y0 && y < b->y1) continue;
-                    if (first && ov && (y < b->ry0 || y >= b->ry1)) continue;   /* (the picture's canopy above the back) */
+                    /* (the picture's canopy above the back) */
+                    if (first && ov && (y < b->ry0 || y >= b->ry1)) continue;
+                    if (!vb_get(side, t0 + j, y, &o)) continue;
+                    /* (VBB_EDGEW: the overlap columns next to the new ones weigh 4, the 2 after them 2) */
+                    {
+                        int wv = 1;
+                        if ((b->st & VBB_EDGEW) && ov && y >= b->y0 && y < b->y1) {
+                            int dj = side ? b->OV - 1 - j : j - b->B;
+                            wv = dj < 2 ? 4 : dj < 4 ? 2 : 1;
+                        }
+                        vb_tg[nt].y = (short)y;
+                        vb_tg[nt].j = (short)j;
+                        vb_tg[nt].wv = (short)wv;
+                        vb_tg[nt].o = o;
+                        nt++;
+                    }
+                }
+        for (int c = 0; c < ncand; c++) {
+            int sx = b->sx0 + c / nd,
+                dy = c % nd - b->dy,
+                ok = 1,
+                n = 0;
+            long long e = 0;
+            if ((b->st & VBB_STRICT) && (ytop + dy < b->ry0 || ybot + dy > b->ry1)) ok = 0;
+            for (int y = ytop; y < ybot && ok; y++) {
+                int ys;
+                if ((b->st & VBB_SOFT) && (y < b->y0 || y >= b->y1)) continue;
+                ys = VB_SR(y + dy);
+                if (vb_bad && ys >= 0 && ys < PH && sx >= 0 && sx + W <= PW) {   /* (any such texel in [sx, sx + W)) */
+                    const u16 *r = vb_bad + (size_t)ys * (PW + 1);
+                    if (r[sx + W] != r[sx]) ok = 0;
+                    continue;
+                }
+                for (int j = 0; j < W; j++)
+                    if (vb_excl(sx + j, ys) && !vb_hole(b, sx + j, ys)) {
+                        ok = 0;
+                        break;
+                    }
+            }
+            if (!ok) {
+                err[c] = -1;
+                continue;
+            }
+            if (vb_tg)
+                for (int i = 0; i < nt; i++) {
+                    const VbTgt *q = &vb_tg[i];
+                    int ys = VB_SR(q->y + dy),
+                        xs = sx + q->j;
+                    if ((b->st & (VBB_SOFT | VBB_OUTL)) && VB_EX(xs, ys)) continue;
+                    e += (long long)vb_d2(q->o, rgb15(pic[ys][xs])) * q->wv;
+                    n += q->wv;
+                }
+            else
+            for (int y = ytop; y < ybot; y++)
+                for (int j = 0; j < W; j++) {
+                    int ov = side ? j < b->OV : j >= b->B;
+                    Rgb o;
+                    if (!ov && y >= b->y0 && y < b->y1) continue;
+                    /* (the picture's canopy above the back) */
+                    if (first && ov && (y < b->ry0 || y >= b->ry1)) continue;
                     if (!vb_get(side, t0 + j, y, &o)) continue;
                     if ((b->st & (VBB_SOFT | VBB_OUTL)) && vb_excl(sx + j, vb_srow(b, y + dy))) continue;
-                    {   int wv = 1;                      /* (VBB_EDGEW: the overlap columns next to the new ones
-                                                            weigh 4, the 2 after them 2) */
-                        if ((b->st & VBB_EDGEW) && ov && y >= b->y0 && y < b->y1) { int dj = side ? b->OV - 1 - j : j - b->B; wv = dj < 2 ? 4 : dj < 4 ? 2 : 1; }
-                        e += (long long)vb_d2(o, rgb15(pic[vb_srow(b, y + dy)][sx + j])) * wv; n += wv;
+                    /* (VBB_EDGEW: the overlap columns next to the new ones weigh 4, the 2 after them 2) */
+                    {
+                        int wv = 1;
+                        if ((b->st & VBB_EDGEW) && ov && y >= b->y0 && y < b->y1) {
+                            int dj = side ? b->OV - 1 - j : j - b->B;
+                            wv = dj < 2 ? 4 : dj < 4 ? 2 : 1;
+                        }
+                        e += (long long)vb_d2(o, rgb15(pic[vb_srow(b, y + dy)][sx + j])) * wv;
+                        n += wv;
                     }
                 }
             e = n ? e * 64 / n : 0;
             if (b->st & VBB_OUTL) {                      /* (the outline: squared row offsets, the 8 columns next to
                                                             the window counted twice; unknown: as 6 rows off) */
-                long long so = 0; int no = 0;
+                long long so = 0;
+                int no = 0;
                 for (int j = 0; j < VB_OCTX; j++) {
-                    int sc = sx + oc0 + j - t0, hs = sc >= 0 && sc < PW ? vb_hs[sc] : -1, d, wj;
+                    int sc = sx + oc0 + j - t0,
+                        hs = sc >= 0 && sc < PW ? vb_hs[sc] : -1,
+                        d, wj;
                     if (oht[j] < 0 || hs < 0) continue;
-                    d = oht[j] - (hs - dy); if (d < 0) d = -d;
+                    d = oht[j] - (hs - dy);
+                    if (d < 0) d = -d;
                     if (d > 12) d = 12;
                     wj = (side ? j >= VB_OCTX - 8 - b->OV : j < b->OV + 8) ? 2 : 1;
-                    so += (long long)d * d * wj; no += wj;
+                    so += (long long)d * d * wj;
+                    no += wj;
                 }
                 e += (no ? so / no : 36) * VB_OUTW;
-                so = 0; no = 0;
+                so = 0;
+                no = 0;
                 if (oref > 0) for (int k = 1; k <= 6; k++) {   /* (the next 6 columns: on along the slope there,
                                                                   more and more freely, no notch or step) */
-                    int sc = side ? sx + b->OV - 1 + k : sx + b->B - k, hs = sc >= 0 && sc < PW ? vb_hs[sc] : -1, d;
+                    int sc = side ? sx + b->OV - 1 + k : sx + b->B - k,
+                        hs = sc >= 0 && sc < PW ? vb_hs[sc] : -1,
+                        d;
                     if (hs < 0) continue;
-                    d = (hs - dy) - (oref + oslope * k / 4); if (d < 0) d = -d;
+                    d = (hs - dy) - (oref + oslope * k / 4);
+                    if (d < 0) d = -d;
                     d -= 1 + k / 2;
                     if (d > 12) d = 12;
                     if (d > 0) so += (long long)d * d;
                     no++;
                 }
                 if (no) e += so / no * VB_OUTW;
-                so = 0; no = 0;
+                so = 0;
+                no = 0;
                 if (vb_otgt) for (int j = 0; j < W; j++) {     /* (the target outline over the window's strip
                                                                   columns: squared rows beyond its tolerance) */
-                    int X = vb_X(side, t0 + j), hs = vb_hs[sx + j], tl, tg, d;
+                    int X = vb_X(side, t0 + j),
+                        hs = vb_hs[sx + j],
+                        tl, tg, d;
                     if (X < 1 || hs < 0 || (tg = vb_otgt(side, X, &tl)) < 0) continue;
-                    d = hs - dy - tg; if (d < 0) d = -d;
-                    d -= tl; if (d > 12) d = 12;
+                    d = hs - dy - tg;
+                    if (d < 0) d = -d;
+                    d -= tl;
+                    if (d > 12) d = 12;
                     if (d > 0) so += (long long)d * d;
                     no++;
                 }
@@ -1360,25 +2275,44 @@ static void vb_quilt(int side, const VbBand *b, int seed)
             if (b->up < 0) {                              /* (its top row repeated upwards: windows whose columns go
                                                              straight on up, not a trunk's top or a haze's edge) */
                 long long v = 0;
-                for (int j = 0; j < W; j++) v += vb_d2(rgb15(pic[vb_srow(b, b->ry0 + dy)][sx + j]), rgb15(pic[vb_srow(b, b->ry0 + dy + 8)][sx + j]));
+                for (int j = 0; j < W; j++)
+                    v += vb_d2(rgb15(pic[vb_srow(b, b->ry0 + dy)][sx + j]),
+                               rgb15(pic[vb_srow(b, b->ry0 + dy + 8)][sx + j]));
                 e += v * 512 / W;                          /* (weighed 8: no haze slab or trunk top) */
             }
-            for (int u = 0; u < 3; u++) { int d = sx - used[u]; if (d < 0) d = -d; if (d < b->B) e += e / 2 + 2000; }
+            for (int u = 0; u < 3; u++) {
+                int d = sx - used[u];
+                if (d < 0) d = -d;
+                if (d < b->B) e += e / 2 + 2000;
+            }
             if (b->st & VBB_FAR) {                       /* (no copy of the picture next to itself, no run of it) */
-                int d = sx - t0, f = nb ? sx - (used[(nb - 1) % 3] + (side ? b->B : -b->B)) : 99;
+                int d = sx - t0,
+                    f = nb ? sx - (used[(nb - 1) % 3] + (side ? b->B : -b->B)) : 99;
                 if (d < 0) d = -d;
                 if (f < 0) f = -f;
                 if (d < 96) e += e / 2 + 2000;
                 if (f < b->B) e += 1 << 24;              /* (only when nothing else fits) */
-                for (int u = 0; u < 3; u++) { int g = sx - used[u]; if (g < 0) g = -g; if (g < W) { e += 1 << 24; break; } }
+                for (int u = 0; u < 3; u++) {
+                    int g = sx - used[u];
+                    if (g < 0) g = -g;
+                    if (g < W) {
+                        e += 1 << 24;
+                        break;
+                    }
+                }
             }
-            if (per) { int ph = fmodi(t0 - sx, per); if (ph > per / 2) ph = per - ph; e += e * ph / per; }
+            if (per) {
+                int ph = fmodi(t0 - sx, per);
+                if (ph > per / 2) ph = per - ph;
+                e += e * ph / per;
+            }
             err[c] = (int)(e > (1 << 29) ? (1 << 29) : e);
             if (err[c] < mn) mn = err[c];
         }
         if (mn == 1 << 30) {
 #ifdef WS_BACKDROP_MAIN
-            if (getenv("WSB_INFO")) fprintf(stderr, "side %d band %d-%d: no window for block %d\n", side, b->y0, b->y1, nb);
+            if (getenv("WSB_INFO"))
+                fprintf(stderr, "side %d band %d-%d: no window for block %d\n", side, b->y0, b->y1, nb);
 #endif
             return;
         }
@@ -1386,30 +2320,47 @@ static void vb_quilt(int side, const VbBand *b, int seed)
         for (int c = 0; c < ncand; c++) if (err[c] >= 0 && err[c] <= mn + tol) nc++;
         k = (int)(hash3(side * 64 + b->reg, nb, seed) % (u32)nc);
         for (int c = 0; c < ncand && pick < 0; c++) if (err[c] >= 0 && err[c] <= mn + tol && k-- == 0) pick = c;
-        {   int sx = b->sx0 + pick / nd, dy = pick % nd - b->dy, j0 = side ? 0 : b->B;
+        {
+            int sx = b->sx0 + pick / nd,
+                dy = pick % nd - b->dy,
+                j0 = side ? 0 : b->B;
 #ifdef WS_BACKDROP_MAIN
             if (getenv("WSB_PICK") && (b->st & VBB_OUTL)) {
-                fprintf(stderr, "side %d band %d block %d t0 %d: sx %d dy %d err %d (min %d, %d cands) oref %d slope %d | ctx", side, b->y0, nb, t0, sx, dy, err[pick], mn, nc, oref, oslope);
+                fprintf(stderr,
+                        "side %d band %d block %d t0 %d: sx %d dy %d err %d (min %d, %d cands) oref %d slope %d | ctx",
+                        side, b->y0, nb, t0, sx, dy, err[pick], mn, nc, oref, oslope);
                 for (int j = 0; j < VB_OCTX; j++) fprintf(stderr, " %d", oht[j]);
                 fprintf(stderr, " | src");
                 for (int j = 0; j < W; j++) fprintf(stderr, " %d", vb_hs[sx + j] < 0 ? -1 : vb_hs[sx + j] - dy);
                 fprintf(stderr, "\n");
             }
 #endif
-            for (int y = 0; y < H; y++) for (int j = 0; j < W; j++) win[y][j] = rgb15(pic[vb_srow(b, ytop + y + dy)][sx + j]);
+            for (int y = 0; y < H; y++)
+                for (int j = 0; j < W; j++)
+                    win[y][j] = rgb15(pic[vb_srow(b, ytop + y + dy)][sx + j]);
             used[nb % 3] = sx;
-            for (int y = 0; y < H; y++) for (int j = 0; j < W; j++) { Rgb o; em[y][j] = vb_get(side, t0 + j, ytop + y, &o) ? vb_d2(o, win[y][j]) : 0; }
+            for (int y = 0; y < H; y++)
+                for (int j = 0; j < W; j++) {
+                    Rgb o;
+                    em[y][j] = vb_get(side, t0 + j, ytop + y, &o) ? vb_d2(o, win[y][j]) : 0;
+                }
             /* the vertical cut through the overlap columns (rows y0..y1): the new block on the outer side */
             for (int y = 0; y < H; y++) vcut[y] = side ? -1 : W;
             if (!first) {
-                static int ev[VB_MAXH][VB_MAXW]; int path[VB_MAXH];
-                for (int y = b->y0; y < b->y1; y++) for (int j = 0; j < b->OV; j++) ev[y - b->y0][j] = em[y - ytop][j0 + j];
+                int (*const ev)[VB_MAXW] = vb_quilt__ev;
+                int path[VB_MAXH];
+                for (int y = b->y0; y < b->y1; y++)
+                    for (int j = 0; j < b->OV; j++)
+                        ev[y - b->y0][j] = em[y - ytop][j0 + j];
                 vb_cutpath(ev, b->y1 - b->y0, b->OV, 1, path);
                 for (int y = b->y0; y < b->y1; y++) vcut[y - ytop] = j0 + path[y - b->y0];
             }
             /* the horizontal cuts through the overlap rows with the band above (the new block below the cut) and below
                (the new block above it) */
-            for (int j = 0; j < W; j++) { tcut[j] = ytop; bcut[j] = ybot; }
+            for (int j = 0; j < W; j++) {
+                tcut[j] = ytop;
+                bcut[j] = ybot;
+            }
             if (b->OT > 0) {
                 vb_cutpath(em, b->OT, W, 0, tcut);
                 for (int j = 0; j < W; j++) tcut[j] += ytop;
@@ -1420,56 +2371,76 @@ static void vb_quilt(int side, const VbBand *b, int seed)
             }
             for (int y = ytop; y < ybot; y++)
                 for (int j = 0; j < W; j++) {
-                    int tx = t0 + j, vc = vcut[y - ytop];
+                    int tx = t0 + j,
+                        vc = vcut[y - ytop];
                     pm[y - ytop][j] = 0;
                     if (tx >= 0 && tx < PW) continue;                     /* never the picture */
-                    if (y >= b->y0 && y < b->y1 && (side ? j <= vc : j >= vc)) continue;   /* the old block's side of the cut */
+                    /* the old block's side of the cut */
+                    if (y >= b->y0 && y < b->y1 && (side ? j <= vc : j >= vc)) continue;
                     if (y < tcut[j] || y >= bcut[j]) continue;
                     if ((b->st & (VBB_SOFT | VBB_OUTL)) && vb_excl(sx + j, vb_srow(b, y + dy))) continue;
                     pm[y - ytop][j] = 1;
                     if (!(b->st & VBB_FEATHER)) vb_put(side, tx, y, win[y - ytop][j], b->reg);
-                    if (vb_srcmap && vb_in(side, tx, y)) vb_srcmap[(size_t)y * vb_ow + vb_X(side, tx) - 1] = vb_srow(b, y + dy) * PW + sx + j;
+                    if (vb_srcmap && vb_in(side, tx, y))
+                        vb_srcmap[(size_t)y * vb_ow + vb_X(side, tx) - 1] = vb_srow(b, y + dy) * PW + sx + j;
                 }
-            if (b->st & VBB_FEATHER)                             /* the cuts blended over 5 x 5 texels (blurred bands:
-                                                                    a cut between two smooth textures shows as an edge) */
+            /* the cuts blended over 5 x 5 texels (blurred bands: a cut between two smooth textures shows as an edge) */
+            if (b->st & VBB_FEATHER)
                 for (int y = ytop; y < ybot; y++)
                     for (int j = 0; j < W; j++) {
-                        int tx = t0 + j, a = 0; Rgb o;
+                        int tx = t0 + j,
+                            a = 0;
+                        Rgb o;
                         if (tx >= 0 && tx < PW) continue;
                         if (vb_hole(b, sx + j, vb_srow(b, y + dy))) continue;
-                        for (int v = -2; v <= 2; v++) for (int u = -2; u <= 2; u++) {
-                            int yy = y - ytop + v, jj = j + u;
-                            if (yy >= 0 && yy < H && jj >= 0 && jj < W)   /* (VBB_OUTL: the picture's columns count as
-                                                                              the new block's, so its edge columns are
-                                                                              its own, not blended into the grass under) */
-                                a += pm[yy][jj] || ((b->st & VBB_OUTL) && t0 + jj >= 0 && t0 + jj < PW);
-                        }
+                        for (int v = -2; v <= 2; v++)
+                            for (int u = -2; u <= 2; u++) {
+                                int yy = y - ytop + v,
+                                    jj = j + u;
+                                /* (VBB_OUTL: the picture's columns count as the new block's, so its edge columns
+                                   are its own, not blended into the grass under) */
+                                if (yy >= 0 && yy < H && jj >= 0 && jj < W)
+                                    a += pm[yy][jj] || ((b->st & VBB_OUTL) && t0 + jj >= 0 && t0 + jj < PW);
+                            }
                         if (!a) continue;
-                        if (!vb_get(side, tx, y, &o)) { if (pm[y - ytop][j]) vb_put(side, tx, y, win[y - ytop][j], b->reg); continue; }
+                        if (!vb_get(side, tx, y, &o)) {
+                            if (pm[y - ytop][j]) vb_put(side, tx, y, win[y - ytop][j], b->reg);
+                            continue;
+                        }
                         vb_put(side, tx, y, mix(o, win[y - ytop][j], a * 256 / 25), b->reg);
-                        if (vb_srcmap && a * 2 > 25 && vb_in(side, tx, y)) vb_srcmap[(size_t)y * vb_ow + vb_X(side, tx) - 1] = vb_srow(b, y + dy) * PW + sx + j;
+                        if (vb_srcmap && a * 2 > 25 && vb_in(side, tx, y))
+                            vb_srcmap[(size_t)y * vb_ow + vb_X(side, tx) - 1] = vb_srow(b, y + dy) * PW + sx + j;
                     }
         }
-        nb++; pos += side ? b->B : -b->B;
+        nb++;
+        pos += side ? b->B : -b->B;
     }
 }
 
 /* ================================================================== the spheres */
-static const short VB_COS[8] = { 256, 181, 0, -181, -256, -181, 0, 181 }, VB_SIN[8] = { 0, 181, 256, 181, 0, -181, -256, -181 };
+static const short VB_COS[8] = { 256, 181, 0, -181, -256, -181, 0, 181 },
+                   VB_SIN[8] = { 0, 181, 256, 181, 0, -181, -256, -181 };
 /* n . light (-256..256) at texel (x, y) of the circle centre (x2, y2) radius r2 (half texels), or -9999 outside */
 static int vb_dot(int x2, int y2, int r2, int x, int y, const int *L)
 {
-    int dx = (x * 2 + 1 - x2) * 8, dy = (y * 2 + 1 - y2) * 8, R = r2 * 8, q = R * R - dx * dx - dy * dy;
+    int dx = (x * 2 + 1 - x2) * 8,
+        dy = (y * 2 + 1 - y2) * 8,
+        R = r2 * 8,
+        q = R * R - dx * dx - dy * dy;
     if (q <= 0) return -9999;
     return (dx * L[0] + dy * L[1] + isqrt_i(q) * L[2]) / R;
 }
 /* is the picture's texel (x, y) a visible texel of sphere i: inside 0.9 r, under no sphere in front, of its class */
 static int vb_vis(int i, int x, int y)
 {
-    const VbS *s = &VB_PS[i]; int dx = x * 2 + 1 - s->x2, dy = y * 2 + 1 - s->y2;
+    const VbS *s = &VB_PS[i];
+    int dx = x * 2 + 1 - s->x2,
+        dy = y * 2 + 1 - s->y2;
     if (x < 0 || x >= PW || y < 0 || y >= PH || (dx * dx + dy * dy) * 100 >= s->r2 * s->r2 * 81) return 0;
     for (int j = 0; j < VB_NPS; j++) {
-        const VbS *t = &VB_PS[j]; int ex = x * 2 + 1 - t->x2, ey = y * 2 + 1 - t->y2;
+        const VbS *t = &VB_PS[j];
+        int ex = x * 2 + 1 - t->x2,
+            ey = y * 2 + 1 - t->y2;
         if (j == i || (t->fl & VBS_FRONT) != (s->fl & VBS_FRONT) || t->dep <= s->dep) continue;
         if (ex * ex + ey * ey < (t->r2 + 2) * (t->r2 + 2)) return 0;
     }
@@ -1479,10 +2450,14 @@ static int vb_vis(int i, int x, int y)
 /* the same by geometry only (any colour): inside 0.95 r, under no sphere in front, not an object */
 static int vb_vis_geo(int i, int x, int y)
 {
-    const VbS *s = &VB_PS[i]; int dx = x * 2 + 1 - s->x2, dy = y * 2 + 1 - s->y2;
+    const VbS *s = &VB_PS[i];
+    int dx = x * 2 + 1 - s->x2,
+        dy = y * 2 + 1 - s->y2;
     if (vb_excl(x, y) || (dx * dx + dy * dy) * 400 >= s->r2 * s->r2 * 361) return 0;
     for (int j = 0; j < VB_NPS; j++) {
-        const VbS *t = &VB_PS[j]; int ex = x * 2 + 1 - t->x2, ey = y * 2 + 1 - t->y2;
+        const VbS *t = &VB_PS[j];
+        int ex = x * 2 + 1 - t->x2,
+            ey = y * 2 + 1 - t->y2;
         if (j == i || (t->fl & VBS_FRONT) != (s->fl & VBS_FRONT) || t->dep <= s->dep) continue;
         if (ex * ex + ey * ey < (t->r2 + 2) * (t->r2 + 2)) return 0;
     }
@@ -1493,28 +2468,51 @@ static long long vb_fit(const int *L, int apply)
 {
     long long tot = 0;
     for (int i = 0; i < VB_NPS; i++) {
-        const VbS *s = &VB_PS[i]; long long n = 0, sd = 0, sdd = 0, sl = 0, sdl = 0, sll = 0, den; int a, b, hl[256];
+        const VbS *s = &VB_PS[i];
+        long long n = 0,
+                  sd = 0,
+                  sdd = 0,
+                  sl = 0,
+                  sdl = 0,
+                  sll = 0,
+                  den;
+        int a, b, hl[256];
         if (apply) memset(hl, 0, sizeof hl);
         for (int y = (s->y2 - s->r2) / 2 - 1; y <= (s->y2 + s->r2) / 2 + 1; y++)
             for (int x = (s->x2 - s->r2) / 2 - 1; x <= (s->x2 + s->r2) / 2 + 1; x++) {
                 int d, l;
                 if (!vb_vis(i, x, y)) continue;
-                d = vb_dot(s->x2, s->y2, s->r2, x, y, L); l = lum(rgb15(pic[y][x]));
-                n++; sd += d; sdd += (long long)d * d; sl += l; sdl += (long long)d * l; sll += (long long)l * l;
+                d = vb_dot(s->x2, s->y2, s->r2, x, y, L);
+                l = lum(rgb15(pic[y][x]));
+                n++;
+                sd += d;
+                sdd += (long long)d * d;
+                sl += l;
+                sdl += (long long)d * l;
+                sll += (long long)l * l;
                 if (apply) hl[clampi(l, 0, 255)]++;
             }
         den = n * sdd - sd * sd;
-        if (n < 12) { a = n ? (int)(sl / n) : 120; b = 0; }
+        if (n < 12) {
+            a = n ? (int)(sl / n) : 120;
+            b = 0;
+        }
         else {
             b = den > 0 ? (int)((n * sdl - sd * sl) * 256 / den) : 0;   /* (x 256) */
             b = clampi(b, 40, 150);
             a = (int)((sl * 256 - (long long)b * sd) / (n * 256));
         }
         /* the error: sum (l - a - b d / 256)^2 */
-        tot += sll - 2 * a * sl - 2 * (long long)b * sdl / 256 + n * a * a + 2 * (long long)a * b * sd / 256 + (long long)b * b / 256 * sdd / 256;
+        tot += sll - 2 * a * sl - 2 * (long long)b * sdl / 256 + n * a * a + 2 * (long long)a * b * sd / 256
+            + (long long)b * b / 256 * sdd / 256;
         if (apply) {
-            int k = 0, l = 255;                          /* (the 90th percentile of its visible texels) */
-            VB_a[i] = a; VB_b[i] = b; VB_n[i] = (int)n; VB_m[i] = n ? (int)(sl / n) : a;
+            /* (the 90th percentile of its visible texels) */
+            int k = 0,
+                l = 255;
+            VB_a[i] = a;
+            VB_b[i] = b;
+            VB_n[i] = (int)n;
+            VB_m[i] = n ? (int)(sl / n) : a;
             while (l > 0 && (k += hl[l]) * 10 < n) l--;
             VB_hi[i] = n ? l : 255;
         }
@@ -1523,20 +2521,35 @@ static long long vb_fit(const int *L, int apply)
 }
 static void vb_light(void)
 {
-    static const short LX[6] = { -32, 0, 32, 64, 96, 128 }, LY[5] = { -128, -96, -64, -32, 0 };
-    long long be = -1; int L[3], bl[3] = { 64, -80, 230 };
-    for (int i = 0; i < 6; i++) for (int j = 0; j < 5; j++) {
-        long long e;
-        L[0] = LX[i]; L[1] = LY[j]; L[2] = isqrt_i(65536 - LX[i] * LX[i] - LY[j] * LY[j]);
-        e = vb_fit(L, 0);
-        if (be < 0 || e < be) { be = e; bl[0] = L[0]; bl[1] = L[1]; bl[2] = L[2]; }
-    }
-    VB_L[0] = bl[0]; VB_L[1] = bl[1]; VB_L[2] = bl[2];
+    static const short LX[6] = { -32, 0, 32, 64, 96, 128 },
+                       LY[5] = { -128, -96, -64, -32, 0 };
+    long long be = -1;
+    int L[3],
+        bl[3] = { 64, -80, 230 };
+    for (int i = 0; i < 6; i++)
+        for (int j = 0; j < 5; j++) {
+            long long e;
+            L[0] = LX[i];
+            L[1] = LY[j];
+            L[2] = isqrt_i(65536 - LX[i] * LX[i] - LY[j] * LY[j]);
+            e = vb_fit(L, 0);
+            if (be < 0 || e < be) {
+                be = e;
+                bl[0] = L[0];
+                bl[1] = L[1];
+                bl[2] = L[2];
+            }
+        }
+    VB_L[0] = bl[0];
+    VB_L[1] = bl[1];
+    VB_L[2] = bl[2];
     vb_fit(VB_L, 1);
 #ifdef WS_BACKDROP_MAIN
     if (getenv("WSB_INFO")) {
         fprintf(stderr, "light %d %d %d\n", VB_L[0], VB_L[1], VB_L[2]);
-        for (int i = 0; i < VB_NPS; i++) fprintf(stderr, "sphere %d: a %d b %d (n %d, mean %d, p90 %d)\n", i, VB_a[i], VB_b[i], VB_n[i], VB_m[i], VB_hi[i]);
+        for (int i = 0; i < VB_NPS; i++)
+            fprintf(stderr, "sphere %d: a %d b %d (n %d, mean %d, p90 %d)\n", i, VB_a[i], VB_b[i], VB_n[i], VB_m[i],
+                    VB_hi[i]);
     }
 #endif
 }
@@ -1546,30 +2559,50 @@ static Rgb vb_at_lum(const Ramp *rp, int l)
     int i = 0;
     while (i < NRAMP - 1 && lum(rp->bin[i + 1]) <= l) i++;
     if (i >= NRAMP - 1 || l <= lum(rp->bin[0])) return rp->bin[l <= lum(rp->bin[0]) ? 0 : NRAMP - 1];
-    {   int a = lum(rp->bin[i]), b = lum(rp->bin[i + 1]); return b > a ? mix(rp->bin[i], rp->bin[i + 1], (l - a) * 256 / (b - a)) : rp->bin[i]; }
+    {
+        int a = lum(rp->bin[i]),
+            b = lum(rp->bin[i + 1]);
+        return b > a ? mix(rp->bin[i], rp->bin[i + 1], (l - a) * 256 / (b - a)) : rp->bin[i];
+    }
 }
 static Rgb vb_shift(const Ramp *rp, Rgb c, int dl)
 {
-    int l = lum(c); Rgb a = vb_at_lum(rp, l), b = vb_at_lum(rp, clampi(l + dl, 4, 250));
+    int l = lum(c);
+    Rgb a = vb_at_lum(rp, l),
+        b = vb_at_lum(rp, clampi(l + dl, 4, 250));
     Rgb o = { clampi(c.r + b.r - a.r, 0, 255), clampi(c.g + b.g - a.g, 0, 255), clampi(c.b + b.b - a.b, 0, 255) };
     return o;
 }
 typedef struct { int x2, y2, r2, cls, dep, don, rot, mir, da, self, reg; } VbN;
-static u16 *vb_id; static int vb_cur;                    /* which sphere is on top at each strip texel (1 + index) */   /* a sphere to draw in the strip */
+static u16 *vb_id;
+/* a sphere to draw in the strip */
+static int vb_cur;                    /* which sphere is on top at each strip texel (1 + index) */
 /* source texel try t for sphere n (donor D) at offset (sdx, sdy) (1/16 texel): 0 the same place, 1 across the edge (a
    completed sphere: any texel of it there), 2-4 the same direction nearer the centre, 5 mirrored, 6-12 rotated */
 static int vb_try(const VbN *n, const VbS *D, int side, int sdx, int sdy, int t, int *qx, int *qy)
 {
-    int rot = n->rot, mir = n->mir, ux, uy, q16x, q16y, k = 256;
+    int rot = n->rot,
+        mir = n->mir,
+        ux, uy, q16x, q16y,
+        k = 256;
     if (t == 1 && !n->self) return 0;
     if (t >= 2 && t <= 4) k = 256 - 51 * (t - 1);
     if (t == 5) mir ^= 1;
     if (t >= 6) rot = (rot + t - 5) & 7;
-    ux = (mir ? -sdx : sdx) * k / 256; uy = sdy * k / 256;
-    {   int rx = (ux * VB_COS[rot] - uy * VB_SIN[rot]) / 256, ry = (ux * VB_SIN[rot] + uy * VB_COS[rot]) / 256;
-        q16x = D->x2 * 8 + rx * D->r2 / n->r2; q16y = D->y2 * 8 + ry * D->r2 / n->r2; }
-    *qx = fdiv(q16x, 16); *qy = fdiv(q16y, 16);
-    if (t == 1) { *qx = side ? 2 * PW - 1 - *qx : -1 - *qx; return vb_vis_geo(n->don, *qx, *qy); }
+    ux = (mir ? -sdx : sdx) * k / 256;
+    uy = sdy * k / 256;
+    {
+        int rx = (ux * VB_COS[rot] - uy * VB_SIN[rot]) / 256,
+            ry = (ux * VB_SIN[rot] + uy * VB_COS[rot]) / 256;
+        q16x = D->x2 * 8 + rx * D->r2 / n->r2;
+        q16y = D->y2 * 8 + ry * D->r2 / n->r2;
+    }
+    *qx = fdiv(q16x, 16);
+    *qy = fdiv(q16y, 16);
+    if (t == 1) {
+        *qx = side ? 2 * PW - 1 - *qx : -1 - *qx;
+        return vb_vis_geo(n->don, *qx, *qy);
+    }
     return vb_vis(n->don, *qx, *qy);
 }
 /* the colour of source texel (qx, qy) of donor D moved to model tone lt at its new place: along the donor's ramp, or,
@@ -1578,9 +2611,9 @@ static Rgb vb_col(const VbN *n, const VbS *D, const Ramp *rp, const Ramp *rpt, i
 {
     int ls = VB_a[n->don] + VB_b[n->don] * vb_dot(D->x2, D->y2, D->r2, qx, qy, VB_L) / 256;
     Rgb c = rgb15(pic[qy][qx]);
-    if (front) {                                          /* the front: the model's tone (a completed one never below its
-                                                             mean by more than 28: its flank is not the brown of the
-                                                             picture's rim), the texture's grain only (+-20) */
+    /* the front: the model's tone (a completed one never below its mean by more than 28: its flank is not the brown of
+       the picture's rim), the texture's grain only (+-20) */
+    if (front) {
         int l = (!n->self || lt > VB_m[n->don] - 28 ? lt : VB_m[n->don] - 28) + clampi(lum(c) - ls, -20, 20);
         return vb_at_lum(rpt, clampi(l, 4, 250));
     }
@@ -1592,36 +2625,70 @@ static Rgb vb_col(const VbN *n, const VbS *D, const Ramp *rp, const Ramp *rpt, i
    its residual on n's model tone at that place */
 static void vb_sphere(int side, const VbN *n)
 {
-    const VbS *D = &VB_PS[n->don]; const Ramp *rp = D->fl & VBS_FRONT ? &VB_rf[D->cls] : &VB_rc[D->cls];
+    const VbS *D = &VB_PS[n->don];
+    const Ramp *rp = D->fl & VBS_FRONT ? &VB_rf[D->cls] : &VB_rc[D->cls];
     const Ramp *rpt = D->fl & VBS_FRONT ? &VB_rf[n->cls] : &VB_rc[n->cls];      /* the target class's */
-    int R16 = n->r2 * 8, lo = vb_lo(side), hi = vb_hi(side), xa = (n->x2 - n->r2) / 2 - 7, xb = (n->x2 + n->r2) / 2 + 7;
-    int ya = (n->y2 - n->r2) / 2 - 7, yb = (n->y2 + n->r2) / 2 + 7;
+    int R16 = n->r2 * 8,
+        lo = vb_lo(side),
+        hi = vb_hi(side),
+        xa = (n->x2 - n->r2) / 2 - 7,
+        xb = (n->x2 + n->r2) / 2 + 7;
+    int ya = (n->y2 - n->r2) / 2 - 7,
+        yb = (n->y2 + n->r2) / 2 + 7;
     /* the contact shade on the spheres behind it: a soft ring outside its outline, deeper at the lower left */
     for (int y = ya; y <= yb; y++)
         for (int wx = xa; wx <= xb; wx++) {
-            int dx = (wx * 2 + 1 - n->x2) * 8, dy = (y * 2 + 1 - n->y2) * 8, o = isqrt_i(dx * dx + dy * dy) - R16, rr; Rgb *p;
+            int dx = (wx * 2 + 1 - n->x2) * 8,
+                dy = (y * 2 + 1 - n->y2) * 8,
+                o = isqrt_i(dx * dx + dy * dy) - R16,
+                rr;
+            Rgb *p;
             if (wx < lo || wx >= hi || y < 0 || y >= PH || o < 0 || o >= 72 || !(p = vb_px(side, wx, y))) continue;
             rr = vb_reg(side, wx, y);
-            if (rr < VB_SPH || rr >= VB_BACK || occ[(size_t)y * vb_ow + vb_X(side, wx) - 1]) continue;   /* (once: not deeper
-                                                                       where several spheres in front meet) */
-            {   int sh = clampi(200 + o * 56 / 72 + (dx - dy) * 12 / (R16 + 1), 200, 256);
-                if (n->self && (VB_PS[n->don].fl & VBS_SOFTJ)) sh = 256 - (256 - sh) * clampi((vb_X(side, wx) - 2) * 256 / 6, 0, 256) / 256;
-                *p = scale(*p, sh); }
+            /* (once: not deeper where several spheres in front meet) */
+            if (rr < VB_SPH || rr >= VB_BACK || occ[(size_t)y * vb_ow + vb_X(side, wx) - 1]) continue;
+            {
+                int sh = clampi(200 + o * 56 / 72 + (dx - dy) * 12 / (R16 + 1), 200, 256);
+                if (n->self && (VB_PS[n->don].fl & VBS_SOFTJ))
+                    sh = 256 - (256 - sh) * clampi((vb_X(side, wx) - 2) * 256 / 6, 0, 256) / 256;
+                *p = scale(*p, sh);
+            }
             occ[(size_t)y * vb_ow + vb_X(side, wx) - 1] = 1;
         }
     for (int y = ya; y <= yb; y++)
         for (int wx = xa; wx <= xb; wx++) {
-            int dx = (wx * 2 + 1 - n->x2) * 8, dy = (y * 2 + 1 - n->y2) * 8, d = isqrt_i(dx * dx + dy * dy), dt, src = 0, qx = 0, qy = 0, sdx, sdy;
+            int dx = (wx * 2 + 1 - n->x2) * 8,
+                dy = (y * 2 + 1 - n->y2) * 8,
+                d = isqrt_i(dx * dx + dy * dy),
+                dt,
+                src = 0,
+                qx = 0,
+                qy = 0,
+                sdx, sdy;
             Rgb c;
             if (wx < lo || wx >= hi || y < 0 || y >= PH || d >= R16 || (wx >= 0 && wx < PW)) continue;
             dt = vb_dot(n->x2, n->y2, n->r2, wx, y, VB_L);
-            {   int rin = R16 * 86 / 100; if (d > rin) { sdx = dx * rin / d; sdy = dy * rin / d; } else { sdx = dx; sdy = dy; } }   /* (the rim: texture
-                                                                       from just inside it, the tone of its own place) */
-            {   int front = (D->fl & VBS_FRONT) != 0, li = n->don, lt;
+            /* (the rim: texture from just inside it, the tone of its own place) */
+            {
+                int rin = R16 * 86 / 100;
+                if (d > rin) {
+                    sdx = dx * rin / d;
+                    sdy = dy * rin / d;
+                } else {
+                    sdx = dx;
+                    sdy = dy;
+                }
+            }
+            {
+                int front = (D->fl & VBS_FRONT) != 0,
+                    li = n->don,
+                    lt;
                 if (front && !n->self)                    /* a new front sphere: lit as the picture's front sphere of
                                                              its class (the cream one: lilac grey in the shade, warm
                                                              on the lit right), its grain from the donor */
-                    for (int i = 0; i < VB_NPS; i++) if ((VB_PS[i].fl & VBS_FRONT) && VB_PS[i].cls == n->cls && VB_n[i] >= 60) li = i;
+                    for (int i = 0; i < VB_NPS; i++)
+                        if ((VB_PS[i].fl & VBS_FRONT) && VB_PS[i].cls == n->cls && VB_n[i] >= 60)
+                            li = i;
                 lt = VB_a[li] + n->da + VB_b[li] * dt / 256;
                 if (n->self && !front && (VB_PS[n->don].fl & VBS_CAP)) {   /* (eased above its visible texels' 90th
                                                                              percentile - 8: no flat white dome) */
@@ -1631,7 +2698,8 @@ static void vb_sphere(int side, const VbN *n)
                 if (n->self && front) {
                     /* a completed front sphere: the texture reflected across the edge (else its other flank), on the
                        model's light; the first 12 columns blended from the exact continuation of the picture's texel */
-                    int X = side ? wx - (PW - 1) : -wx, ok = vb_try(n, D, side, sdx, sdy, 1, &qx, &qy);
+                    int X = side ? wx - (PW - 1) : -wx,
+                        ok = vb_try(n, D, side, sdx, sdy, 1, &qx, &qy);
                     static const signed char ord[4] = { 5, 2, 3, 4 };
                     for (int i = 0; i < 4 && !ok; i++) ok = vb_try(n, D, side, sdx, sdy, ord[i], &qx, &qy);
                     if (!ok) c = vb_at_lum(rpt, clampi(lt > VB_m[n->don] - 28 ? lt : VB_m[n->don] - 28, 4, 250));
@@ -1648,15 +2716,29 @@ static void vb_sphere(int side, const VbN *n)
                     else c = vb_at_lum(rpt, clampi(lt + (int)(hash3(wx, y, 977) & 15) - 8, 4, 250));
                 }
             }
-            if (d >= R16 - 24) { Rgb *p = vb_px(side, wx, y); if (p && vb_reg(side, wx, y)) c = mix(*p, c, 256 - (d - (R16 - 24)) * 150 / 24); }   /* (a soft outline) */
+            /* (a soft outline) */
+            if (d >= R16 - 24) {
+                Rgb *p = vb_px(side, wx, y);
+                if (p && vb_reg(side, wx, y)) c = mix(*p, c, 256 - (d - (R16 - 24)) * 150 / 24);
+            }
             vb_put(side, wx, y, c, n->reg);
-            if (vb_in(side, wx, y)) { occ[(size_t)y * vb_ow + vb_X(side, wx) - 1] = 0; if (vb_id) vb_id[(size_t)y * vb_ow + vb_X(side, wx) - 1] = (u16)vb_cur; }
+            if (vb_in(side, wx, y)) {
+                occ[(size_t)y * vb_ow + vb_X(side, wx) - 1] = 0;
+                if (vb_id) vb_id[(size_t)y * vb_ow + vb_X(side, wx) - 1] = (u16)vb_cur;
+            }
         }
 }
-static int vb_cls(u32 h) { int a = (int)(h & 255), c = 0; while (c < 2 && VB_share[c + 1] <= a) c++; return c; }
+static int vb_cls(u32 h)
+{
+    int a = (int)(h & 255),
+        c = 0;
+    while (c < 2 && VB_share[c + 1] <= a) c++;
+    return c;
+}
 static int vb_ncmp(const void *a, const void *b)
 {
-    const VbN *p = a, *q = b;
+    const VbN *p = a,
+              *q = b;
     if (p->dep != q->dep) return p->dep - q->dep;       /* (a total order: any qsort gives the same) */
     if (p->x2 != q->x2) return p->x2 - q->x2;
     if (p->y2 != q->y2) return p->y2 - q->y2;
@@ -1668,9 +2750,11 @@ static int vb_ncmp(const void *a, const void *b)
 }
 static int vb_donor(int cls, int front, u32 h)            /* a donor of the class (by hash among them) */
 {
-    int c[VB_NPS], n = 0;
+    int c[VB_NPS],
+        n = 0;
     for (int i = 0; i < VB_NPS; i++)
-        if ((VB_PS[i].fl & VBS_DONOR) && VB_PS[i].cls == cls && !(VB_PS[i].fl & VBS_FRONT) == !front && VB_n[i] >= 60) c[n++] = i;
+        if ((VB_PS[i].fl & VBS_DONOR) && VB_PS[i].cls == cls && !(VB_PS[i].fl & VBS_FRONT) == !front && VB_n[i] >= 60)
+            c[n++] = i;
     return n ? c[h % (u32)n] : -1;
 }
 /* the deepest edge sphere in front at the strip texel (wx, y) next to the join, or -1000 */
@@ -1678,7 +2762,9 @@ static int vb_edge_dep(int side, int front, int wx, int y)
 {
     int m = -1000;
     for (int i = 0; i < VB_NPS; i++) {
-        const VbS *s = &VB_PS[i]; int dx = wx * 2 + 1 - s->x2, dy = y * 2 + 1 - s->y2;
+        const VbS *s = &VB_PS[i];
+        int dx = wx * 2 + 1 - s->x2,
+            dy = y * 2 + 1 - s->y2;
         if (s->side != side || !(s->fl & VBS_FRONT) != !front) continue;
         if (dx * dx + dy * dy < s->r2 * s->r2 && s->dep > m) m = s->dep;
     }
@@ -1689,92 +2775,165 @@ static int vb_edge_dep(int side, int front, int wx, int y)
 static int vb_fits(int side, const VbN *n, int front)
 {
     for (int i = 0; i < VB_NPS; i++) {
-        const VbS *s = &VB_PS[i]; int dx = n->x2 - s->x2, dy = n->y2 - s->y2, rr = n->r2 + s->r2;
+        const VbS *s = &VB_PS[i];
+        int dx = n->x2 - s->x2,
+            dy = n->y2 - s->y2,
+            rr = n->r2 + s->r2;
         if (!(s->fl & VBS_KEEP) || s->side != side || !(s->fl & VBS_FRONT) != !front || n->dep <= s->dep) continue;
         if (dx * dx + dy * dy < rr * rr) return 0;
     }
     for (int k = 0; k < 3; k++) {
         int wx = side ? PW + k : -1 - k;
         for (int y = (n->y2 - n->r2) / 2 - 1; y <= (n->y2 + n->r2) / 2 + 1; y++) {
-            int dx = wx * 2 + 1 - n->x2, dy = y * 2 + 1 - n->y2;
+            int dx = wx * 2 + 1 - n->x2,
+                dy = y * 2 + 1 - n->y2;
             if (y < 0 || y >= PH || dx * dx + dy * dy >= n->r2 * n->r2) continue;
             if (vb_edge_dep(side, front, wx, y) <= n->dep) return 0;
         }
     }
     return 1;
 }
-static VbN vb_s[700];
+static VbN (*vb_s);
 static int vb_add(int side, int n, VbN t, int front, int filler)
 {
     int dir = side ? 2 : -2;
     if (n >= 700 || t.don < 0) return n;
     if (!filler) {
         int k = 0;
-        while (k < 120 && !vb_fits(side, &t, front)) { t.x2 += dir; k++; }
+        while (k < 120 && !vb_fits(side, &t, front)) {
+            t.x2 += dir;
+            k++;
+        }
         if (k == 120) return n;
     }
 #ifdef WS_BACKDROP_MAIN
     if (getenv("WSB_NONEW") && !filler) return n;
 #endif
     if (side ? (t.x2 + t.r2) / 2 < PW : (t.x2 - t.r2) / 2 >= 0) return n;   /* (all inside the picture) */
-    vb_s[n] = t; return n + 1;
+    vb_s[n] = t;
+    return n + 1;
 }
 /* draw the n spheres of vb_s in order; then leave out every new one of which less than a fifth shows (a sliver
    between the ones in front reads as a cut sphere) and draw them again */
 static void vb_draw_all(int side, int n)
 {
-    size_t np = (size_t)vb_ow * PH; Rgb *c0 = malloc(np * sizeof *c0); u8 *r0 = malloc(np); int *cnt = calloc((size_t)n + 1, sizeof *cnt);
+    size_t np = (size_t)vb_ow * PH;
+    Rgb *c0 = malloc(np * sizeof *c0);
+    u8 *r0 = malloc(np);
+    int *cnt = calloc((size_t)n + 1, sizeof *cnt);
     vb_id = calloc(np, sizeof *vb_id);
-    if (!c0 || !r0 || !cnt || !vb_id) { free(c0); free(r0); free(cnt); free(vb_id); vb_id = 0; for (int i = 0; i < n; i++) vb_sphere(side, &vb_s[i]); return; }
-    memcpy(c0, cv, np * sizeof *c0); memcpy(r0, rg, np); memset(occ, 0, np);
-    for (int i = 0; i < n; i++) { vb_cur = i + 1; vb_sphere(side, &vb_s[i]); }
+    if (!c0 || !r0 || !cnt || !vb_id) {
+        free(c0);
+        free(r0);
+        free(cnt);
+        free(vb_id);
+        vb_id = 0;
+        for (int i = 0; i < n; i++) vb_sphere(side, &vb_s[i]);
+        return;
+    }
+    memcpy(c0, cv, np * sizeof *c0);
+    memcpy(r0, rg, np);
+    memset(occ, 0, np);
+    for (int i = 0; i < n; i++) {
+        vb_cur = i + 1;
+        vb_sphere(side, &vb_s[i]);
+    }
     for (size_t k = 0; k < np; k++) if (vb_id[k]) cnt[vb_id[k]]++;
-    {   int m = 0;
+    {
+        int m = 0;
         for (int i = 0; i < n; i++) {
-            int area = 0, X0 = vb_X(side, (vb_s[i].x2 - vb_s[i].r2) / 2), X1 = vb_X(side, (vb_s[i].x2 + vb_s[i].r2) / 2);
+            int area = 0,
+                X0 = vb_X(side, (vb_s[i].x2 - vb_s[i].r2) / 2),
+                X1 = vb_X(side, (vb_s[i].x2 + vb_s[i].r2) / 2);
             for (int y = (vb_s[i].y2 - vb_s[i].r2) / 2; y <= (vb_s[i].y2 + vb_s[i].r2) / 2; y++)
                 for (int wx = (vb_s[i].x2 - vb_s[i].r2) / 2; wx <= (vb_s[i].x2 + vb_s[i].r2) / 2; wx++) {
-                    int dx = wx * 2 + 1 - vb_s[i].x2, dy = y * 2 + 1 - vb_s[i].y2;
+                    int dx = wx * 2 + 1 - vb_s[i].x2,
+                        dy = y * 2 + 1 - vb_s[i].y2;
                     if (vb_in(side, wx, y) && dx * dx + dy * dy < vb_s[i].r2 * vb_s[i].r2) area++;
                 }
-            (void)X0; (void)X1;
-            if (vb_s[i].self || vb_s[i].dep < -40 || vb_s[i].y2 < 40 || cnt[i + 1] * 5 >= area) vb_s[m++] = vb_s[i];   /* (not the far ones
-                                                                       nor the top row: nothing behind them) */
+            (void)X0;
+            (void)X1;
+            /* (not the far ones nor the top row: nothing behind them) */
+            if (vb_s[i].self || vb_s[i].dep < -40 || vb_s[i].y2 < 40 || cnt[i + 1] * 5 >= area) vb_s[m++] = vb_s[i];
         }
-        memcpy(cv, c0, np * sizeof *c0); memcpy(rg, r0, np); memset(occ, 0, np);
-        for (int i = 0; i < m; i++) { vb_cur = i + 1; vb_sphere(side, &vb_s[i]); }
+        memcpy(cv, c0, np * sizeof *c0);
+        memcpy(rg, r0, np);
+        memset(occ, 0, np);
+        for (int i = 0; i < m; i++) {
+            vb_cur = i + 1;
+            vb_sphere(side, &vb_s[i]);
+        }
     }
-    free(c0); free(r0); free(cnt); free(vb_id); vb_id = 0;
+    free(c0);
+    free(r0);
+    free(cnt);
+    free(vb_id);
+    vb_id = 0;
 }
 static void vb_canopy(int side)
 {
-    int n = 0, lo = vb_lo(side), hi = vb_hi(side);
+    int n = 0,
+        lo = vb_lo(side),
+        hi = vb_hi(side);
     for (int i = 0; i < VB_NPS; i++) {
-        const VbS *s = &VB_PS[i]; VbN t;
+        const VbS *s = &VB_PS[i];
+        VbN t;
         if (s->side != side || (s->fl & VBS_FRONT)) continue;
-        t.x2 = s->x2; t.y2 = s->y2; t.r2 = s->r2; t.cls = s->cls; t.dep = s->dep; t.don = i; t.rot = 0; t.mir = 0; t.da = 0; t.self = 1;
-        t.reg = VB_SPH + s->cls; vb_s[n++] = t;
+        t.x2 = s->x2;
+        t.y2 = s->y2;
+        t.r2 = s->r2;
+        t.cls = s->cls;
+        t.dep = s->dep;
+        t.don = i;
+        t.rot = 0;
+        t.mir = 0;
+        t.da = 0;
+        t.self = 1;
+        t.reg = VB_SPH + s->cls;
+        vb_s[n++] = t;
     }
     /* far balloons behind everything (no gaps between the spheres): darker */
     for (int k = fdiv(lo, 13) - 2; k * 13 < hi + 30; k++)
         for (int row = 0; row < 6; row++) {
-            u32 h = hash3(k, row, 841); VbN t;
-            t.x2 = 2 * (k * 13 + (int)(h % 13) + (row & 1) * 6); t.y2 = 2 * (row * 11 - 4 + (int)(h >> 4) % 6);
-            t.r2 = 2 * (11 + (int)(h >> 8) % 5); t.cls = vb_cls(h >> 12); t.dep = -60 + row; t.don = vb_donor(t.cls, 0, h >> 20);
-            t.rot = (int)(h >> 24) & 7; t.mir = (int)(h >> 27) & 1; t.da = -46 - (int)(h >> 28) % 8; t.self = 0; t.reg = VB_SPH + t.cls;
+            u32 h = hash3(k, row, 841);
+            VbN t;
+            t.x2 = 2 * (k * 13 + (int)(h % 13) + (row & 1) * 6);
+            t.y2 = 2 * (row * 11 - 4 + (int)(h >> 4) % 6);
+            t.r2 = 2 * (11 + (int)(h >> 8) % 5);
+            t.cls = vb_cls(h >> 12);
+            t.dep = -60 + row;
+            t.don = vb_donor(t.cls, 0, h >> 20);
+            t.rot = (int)(h >> 24) & 7;
+            t.mir = (int)(h >> 27) & 1;
+            t.da = -46 - (int)(h >> 28) % 8;
+            t.self = 0;
+            t.reg = VB_SPH + t.cls;
             n = vb_add(side, n, t, 0, 1);
         }
     /* three layers of new spheres, 26-column cells, the lower ones in front; the odd one lower still (ragged ends) */
     for (int k = fdiv(lo, 26) - 2; k * 26 < hi + 56; k++)
         for (int row = 0; row < 4; row++) {
-            u32 h = hash3(k, row, 851), h2 = hash3(k, row, 853); VbN t;
+            u32 h = hash3(k, row, 851),
+                h2 = hash3(k, row, 853);
+            VbN t;
             if (row == 3 && (h2 & 3) != 0) continue;
             t.x2 = 2 * (k * 26 + (int)(h % 26) + row * 9);
-            t.y2 = 2 * (row == 0 ? -2 + (int)(h >> 5) % 12 : row == 1 ? 26 + (int)(h >> 5) % 14 : row == 2 ? 52 + (int)(h >> 5) % 14 : 72 + (int)(h >> 5) % 8);
-            t.r2 = 2 * (row == 0 ? 16 + (int)(h >> 9) % 8 : row == 1 ? 15 + (int)(h >> 9) % 8 : row == 2 ? 14 + (int)(h >> 9) % 7 : 11 + (int)(h >> 9) % 4);
+            t.y2 = 2 * (row == 0 ? -2 + (int)(h >> 5) % 12
+                        : row == 1 ? 26 + (int)(h >> 5) % 14
+                        : row == 2 ? 52 + (int)(h >> 5) % 14
+                        : 72 + (int)(h >> 5) % 8);
+            t.r2 = 2 * (row == 0 ? 16 + (int)(h >> 9) % 8
+                        : row == 1 ? 15 + (int)(h >> 9) % 8
+                        : row == 2 ? 14 + (int)(h >> 9) % 7
+                        : 11 + (int)(h >> 9) % 4);
             t.r2 += (int)(h2 >> 4) & 1;
-            t.cls = vb_cls(h >> 16); t.dep = t.y2 / 2 + (int)(h >> 24) % 12 - 30; t.don = vb_donor(t.cls, 0, h2 >> 8);
-            t.rot = (int)(h2 >> 12) & 7; t.mir = (int)(h2 >> 15) & 1; t.da = (int)(h2 >> 16) % 17 - 8 - (row == 0 ? 6 : 0); t.self = 0;
+            t.cls = vb_cls(h >> 16);
+            t.dep = t.y2 / 2 + (int)(h >> 24) % 12 - 30;
+            t.don = vb_donor(t.cls, 0, h2 >> 8);
+            t.rot = (int)(h2 >> 12) & 7;
+            t.mir = (int)(h2 >> 15) & 1;
+            t.da = (int)(h2 >> 16) % 17 - 8 - (row == 0 ? 6 : 0);
+            t.self = 0;
             t.reg = VB_SPH + t.cls;
             n = vb_add(side, n, t, 0, 0);
         }
@@ -1783,25 +2942,46 @@ static void vb_canopy(int side)
 }
 static void vb_front(int side)
 {
-    int n = 0, lo = vb_lo(side), hi = vb_hi(side), fdon = -1;
+    int n = 0,
+        lo = vb_lo(side),
+        hi = vb_hi(side),
+        fdon = -1;
     for (int i = 0; i < VB_NPS; i++)
         if ((VB_PS[i].fl & VBS_FRONT) && (VB_PS[i].fl & VBS_DONOR) && (fdon < 0 || VB_n[i] > VB_n[fdon])) fdon = i;
     for (int i = 0; i < VB_NPS; i++) {
-        const VbS *s = &VB_PS[i]; VbN t;
+        const VbS *s = &VB_PS[i];
+        VbN t;
         if (s->side != side || !(s->fl & VBS_FRONT) || (s->fl & VBS_EDGE)) continue;
-        t.x2 = s->x2; t.y2 = s->y2; t.r2 = s->r2; t.cls = s->cls; t.dep = s->dep; t.don = i; t.rot = 0; t.mir = 0; t.da = 0; t.self = 1;
-        t.reg = VB_FRONTR + s->cls; vb_s[n++] = t;
+        t.x2 = s->x2;
+        t.y2 = s->y2;
+        t.r2 = s->r2;
+        t.cls = s->cls;
+        t.dep = s->dep;
+        t.don = i;
+        t.rot = 0;
+        t.mir = 0;
+        t.da = 0;
+        t.self = 1;
+        t.reg = VB_FRONTR + s->cls;
+        vb_s[n++] = t;
     }
     for (int k = fdiv(lo, 46) - 2; k * 46 < hi + 100; k++)
         for (int row = 0; row < 2; row++) {
-            u32 h = hash3(k, side * 4 + row, 871), h2 = hash3(k, row, 873); VbN t;
-            t.x2 = 2 * (k * 46 + (int)(h % 30) + row * 23); t.y2 = 2 * (row ? 252 + (int)(h >> 5) % 14 : 238 + (int)(h >> 5) % 12);
+            u32 h = hash3(k, side * 4 + row, 871),
+                h2 = hash3(k, row, 873);
+            VbN t;
+            t.x2 = 2 * (k * 46 + (int)(h % 30) + row * 23);
+            t.y2 = 2 * (row ? 252 + (int)(h >> 5) % 14 : 238 + (int)(h >> 5) % 12);
             t.r2 = 2 * (row ? 40 + (int)(h >> 10) % 12 : 42 + (int)(h >> 10) % 12);
-            t.cls = vb_cls(h >> 16); t.dep = row ? 5 + (int)(h >> 24) % 4 : 1 + (int)(h >> 24) % 4;
+            t.cls = vb_cls(h >> 16);
+            t.dep = row ? 5 + (int)(h >> 24) % 4 : 1 + (int)(h >> 24) % 4;
             t.don = fdon;                                 /* (the front sphere best seen in the picture lends its
                                                                      texture to every class: the pink and cream ones are
                                                                      too hidden, their rims brown) */
-            t.rot = 0; t.mir = (int)(h2 >> 11) & 1; t.self = 0;  /* (only the donors' tops are in the picture: not rotated) */
+            /* (only the donors' tops are in the picture: not rotated) */
+            t.rot = 0;
+            t.mir = (int)(h2 >> 11) & 1;
+            t.self = 0;
             t.da = (int)(h2 >> 12) % 21 - 10 - (row ? 0 : 8);
             t.reg = VB_FRONTR + t.cls;
             n = vb_add(side, n, t, 1, 0);
@@ -1825,17 +3005,32 @@ static void vb_front(int side)
 #define VB_EDGE_R2 100
 static void vb_edge(int side)
 {
-    int R16 = VB_EDGE_R2 * 8, lo = vb_lo(side);
+    int R16 = VB_EDGE_R2 * 8,
+        lo = vb_lo(side);
     if (side) return;
     for (int i = 0; i < VB_NPS; i++) {
-        long long n = 0, sd = 0, sdd = 0, sl = 0, sdl = 0, den; int hl[256], fa, fb, l5 = 0, lmed = 0, lband, k;
+        long long n = 0,
+                  sd = 0,
+                  sdd = 0,
+                  sl = 0,
+                  sdl = 0,
+                  den;
+        int hl[256], fa, fb,
+            l5 = 0,
+            lmed = 0,
+            lband, k;
         if (VB_PS[i].side != side || !(VB_PS[i].fl & VBS_EDGE)) continue;
         memset(hl, 0, sizeof hl);
         for (int y = 0; y < PH; y++) for (int x = 16; x < PW; x++) {        /* the fit on its pink texels */
             int d, l;
             if (!vb_vis(i, x, y) || (d = vb_dot(VB_EDGE_X2, VB_EDGE_Y2, VB_EDGE_R2, x, y, VB_L)) == -9999) continue;
             l = lum(rgb15(pic[y][x]));
-            n++; sd += d; sdd += (long long)d * d; sl += l; sdl += (long long)d * l; hl[clampi(l, 0, 255)]++;
+            n++;
+            sd += d;
+            sdd += (long long)d * d;
+            sl += l;
+            sdl += (long long)d * l;
+            hl[clampi(l, 0, 255)]++;
         }
         if (n < 40) continue;
         den = n * sdd - sd * sd;
@@ -1843,15 +3038,30 @@ static void vb_edge(int side)
         fa = (int)((sl * 256 - (long long)fb * sd) / (n * 256));
         for (k = 0, l5 = 0; l5 < 255 && (k += hl[l5]) * 20 < n; l5++) continue;
         for (k = 0, lmed = 0; lmed < 255 && (k += hl[lmed]) * 2 < n; lmed++) continue;
-        {   long long s0 = 0, c0 = 0; for (int l = 0; l < lmed; l++) { s0 += (long long)hl[l] * l; c0 += hl[l]; } lband = c0 ? (int)(s0 / c0) : l5; }
+        {
+            long long s0 = 0,
+                      c0 = 0;
+            for (int l = 0; l < lmed; l++) {
+                s0 += (long long)hl[l] * l;
+                c0 += hl[l];
+            }
+            lband = c0 ? (int)(s0 / c0) : l5;
+        }
 #ifdef WS_BACKDROP_MAIN
-        if (getenv("WSB_INFO")) fprintf(stderr, "edge sphere %d: n %lld a %d b %d l5 %d band %d\n", i, n, fa, fb, l5, lband);
+        if (getenv("WSB_INFO"))
+            fprintf(stderr, "edge sphere %d: n %lld a %d b %d l5 %d band %d\n", i, n, fa, fb, l5, lband);
 #endif
         for (int y = (VB_EDGE_Y2 - VB_EDGE_R2) / 2; y < PH; y++)
             for (int wx = -1; wx >= lo; wx--) {
-                int dx = (wx * 2 + 1 - VB_EDGE_X2) * 8, dy = (y * 2 + 1 - VB_EDGE_Y2) * 8, d = isqrt_i(dx * dx + dy * dy) - R16;
-                int X = -wx, rr = vb_reg(side, wx, y), sphere = rr >= VB_SPH && rr < VB_BACK, a;
-                Rgb *p = vb_px(side, wx, y), bg;
+                int dx = (wx * 2 + 1 - VB_EDGE_X2) * 8,
+                    dy = (y * 2 + 1 - VB_EDGE_Y2) * 8,
+                    d = isqrt_i(dx * dx + dy * dy) - R16;
+                int X = -wx,
+                    rr = vb_reg(side, wx, y),
+                    sphere = rr >= VB_SPH && rr < VB_BACK,
+                    a;
+                Rgb *p = vb_px(side, wx, y),
+                    bg;
                 if (!p || d >= 80) continue;
                 bg = *p;
                 if (sphere) bg = scale(bg, 256 - 72 * (80 - (d > 0 ? d : 0)) / 80);   /* (the contact shade) */
@@ -1867,21 +3077,30 @@ static void vb_edge(int side)
 
 static void vb_analyse(void)
 {
-    int cnt[3] = { 0, 0, 0 }, n = 0;
+    int cnt[3] = { 0, 0, 0 },
+        n = 0;
     for (int c = 0; c < 3; c++) {                        /* the classes' ramps (the hut's chimney and roof left out) */
         nsamp = 0;
-        for (int y = 0; y < 90; y++) for (int x = 0; x < PW; x++) {
-            Rgb k = rgb15(pic[y][x]);
-            if (y >= 14 && x >= 60 && x < 200) continue;
-            if (vb_class(k) == c && !(c == 0 && y > 62)) { samp_add(pic[y][x]); cnt[c]++; }
-        }
+        for (int y = 0; y < 90; y++)
+            for (int x = 0; x < PW; x++) {
+                Rgb k = rgb15(pic[y][x]);
+                if (y >= 14 && x >= 60 && x < 200) continue;
+                if (vb_class(k) == c && !(c == 0 && y > 62)) {
+                    samp_add(pic[y][x]);
+                    cnt[c]++;
+                }
+            }
         ramp_any(&VB_rc[c]);
         nsamp = 0;
         for (int i = 0; i < VB_NPS; i++)                   /* the front: the visible texels of its spheres of the class
                                                               (not the stones' greys nor the rims' browns) */
             if ((VB_PS[i].fl & VBS_FRONT) && VB_PS[i].cls == c)
                 for (int y = 186; y < PH; y++) for (int x = 0; x < PW; x++) if (vb_vis(i, x, y)) samp_add(pic[y][x]);
-        if (nsamp >= 200) ramp_any(&VB_rf[c]); else { nsamp = 0; VB_rf[c] = VB_rc[c]; }
+        if (nsamp >= 200) ramp_any(&VB_rf[c]);
+        else {
+            nsamp = 0;
+            VB_rf[c] = VB_rc[c];
+        }
         n += cnt[c];
     }
     VB_share[0] = 0;
@@ -1890,12 +3109,15 @@ static void vb_analyse(void)
 }
 static void gen_vb(int pad)
 {
-    pal_make(); vb_analyse();
+    if (!ws_need_gen_vb()) return;
+    pal_make();
+    vb_analyse();
     for (int c = 0; c < 3; c++) if (!VB_rc[c].ok || !VB_rf[c].ok) return;
     vb_ow = pad + 64;
     if (!canvas_open(vb_ow)) return;
     for (int side = 0; side < 2; side++) {
-        canvas_clear(); cur_side = side;
+        canvas_clear();
+        cur_side = side;
         for (int i = 0; i < 5; i++) vb_quilt(side, &VB_BANDS[side][i], 701 + 13 * i);
         vb_canopy(side);
         vb_front(side);
@@ -1925,8 +3147,9 @@ static void gen_vb(int pad)
  *     the windows keep their rows (up to 3 rows of shift), so the blossom's vertical structure (light flower clusters
  *     above, darker and greyer low, the fringe's brown rim on the rocks) goes on as the picture has it by each edge;
  *   - the green ledge: its lower rows (145-155, the grass and its dark lip) from x 0-215, its top (rows 136/137-144,
- *     where the left edge has the log, x 2-52) from the clean stretch between the hut's pole and the ladder (x 192-213),
- *     so its top edge under the fence is the picture's own; the straw bank (156-180), the ground (181-189);
+ *     where the left edge has the log, x 2-52) from the clean stretch between the hut's pole and the ladder
+ *     (x 192-213), so its top edge under the fence is the picture's own; the straw bank (156-180), the ground
+ *     (181-189);
  *   - the front blossom: one band, rows 186-223 (windows of the picture's front, any column, up to 6 rows of shift,
  *     the bottom rows reflected), on a grass underlay (rows 191-223 from the central valley's clean grass), scored
  *     on the bushes' outline too (VBB_OUTL: a window's scalloped top, shifted, against the one already there over 20
@@ -1936,13 +3159,13 @@ static void gen_vb(int pad)
  *     189; the left edge's valley flat at ~213 and then up its other flank; on the left over 8 columns only), the
  *     left front keeps to a target outline (vb_otgt / cb_otgt: the edge's valley for a few columns, up to row ~203 by
  *     column 14, then the picture's left bushes' height, ~196-206; windows there shifted up to 10 rows), cb_clean
- *     drops loose blossom bits on its grass and fills grass enclosed by its bushes, and cb_ftone matches the tone per row
- *     and per kind (grass, blossom; R, G, B, so the pink, not only the lightness) over 20 columns, fading by 72,
+ *     drops loose blossom bits on its grass and fills grass enclosed by its bushes, and cb_ftone matches the tone per
+ *     row and per kind (grass, blossom; R, G, B, so the pink, not only the lightness) over 20 columns, fading by 72,
  *     then the strip's first 2 columns onto the picture's last 2, fading over 12;
- *   - the blurred bands (canopy, front) have their cuts blended over 5 x 5 texels (VBB_FEATHER), and the canopy's tone
- *     is matched at the join per row (cb_tone: the strip's first 8 columns onto the picture's columns 2-9, fading out by
- *     column 64; its first column onto the picture's last one, fading out over 8: the picture's edge columns are a
- *     little darker, about 6 levels, and the strip goes on from them).
+ *   - the blurred bands (canopy, front) have their cuts blended over 5 x 5 texels (VBB_FEATHER), and the canopy's
+ *     tone is matched at the join per row (cb_tone: the strip's first 8 columns onto the picture's columns 2-9, fading
+ *     out by column 64; its first column onto the picture's last one, fading out over 8: the picture's edge columns
+ *     are a little darker, about 6 levels, and the strip goes on from them).
  * Objects never copied (CB_EXCL): the hut and its chimney and pole, the log, the bucket, the barrel, the stones and
  * their track, the stone pile, the ladder, the jukebox and its lever (and the front blossom under the jukebox, rows
  * 182-201, whose top the jukebox hides: a flat top). */
@@ -1975,21 +3198,35 @@ static const VbBand CB_BANDS[2][9] = {
    the picture's columns 2-9 from the edge (full for 16 columns, gone at 64), and its first column onto the picture's
    last one (easing out over 8 columns), so the join is neither a tone step nor a line (the picture's last columns are
    often a little darker: the strip goes on from them and lightens as the picture does inwards) */
+static int (*cb_tone__d)[2][3];
 static void cb_tone(int side, int y0, int y1)
 {
-    static int d[PH][2][3];
+    int (*const d)[2][3] = cb_tone__d;
     for (int y = y0; y < y1; y++) {
-        int s[4][3] = { { 0 } }, n[4] = { 0, 0, 0, 0 };     /* picture col 0, cols 2-9, strip col 1, cols 1-8 */
+        /* picture col 0, cols 2-9, strip col 1, cols 1-8 */
+        int s[4][3] = { { 0 } },
+            n[4] = { 0, 0, 0, 0 };
         for (int yy = y - 4; yy <= y + 4; yy++) {
             if (yy < y0 || yy >= y1) continue;
             for (int i = 0; i < 10; i++) {
-                int x = side ? PW - 1 - i : i, g = i == 0 ? 0 : i == 1 ? -1 : 1; Rgb k;
+                int x = side ? PW - 1 - i : i,
+                    g = i == 0 ? 0 : i == 1 ? -1 : 1;
+                Rgb k;
                 if (g < 0 || vb_excl(x, yy)) continue;
-                k = rgb15(pic[yy][x]); s[g][0] += k.r; s[g][1] += k.g; s[g][2] += k.b; n[g]++;
+                k = rgb15(pic[yy][x]);
+                s[g][0] += k.r;
+                s[g][1] += k.g;
+                s[g][2] += k.b;
+                n[g]++;
             }
             for (int X = 1; X <= 8; X++) {
                 Rgb k = cv[(size_t)yy * vb_ow + X - 1];
-                for (int g = X == 1 ? 2 : 3; g <= 3; g++) { s[g][0] += k.r; s[g][1] += k.g; s[g][2] += k.b; n[g]++; }
+                for (int g = X == 1 ? 2 : 3; g <= 3; g++) {
+                    s[g][0] += k.r;
+                    s[g][1] += k.g;
+                    s[g][2] += k.b;
+                    n[g]++;
+                }
             }
         }
         for (int c = 0; c < 3; c++) {
@@ -2000,7 +3237,8 @@ static void cb_tone(int side, int y0, int y1)
     for (int y = y0; y < y1; y++)
         for (int X = 1; X <= vb_ow; X++) {
             Rgb *p = &cv[(size_t)y * vb_ow + X - 1];
-            int w2 = X <= 16 ? 256 : X >= 64 ? 0 : (64 - X) * 256 / 48, w1 = X <= 8 ? (9 - X) * 256 / 8 : 0;
+            int w2 = X <= 16 ? 256 : X >= 64 ? 0 : (64 - X) * 256 / 48,
+                w1 = X <= 8 ? (9 - X) * 256 / 8 : 0;
             p->r = clampi(p->r + (d[y][0][0] * w2 + d[y][1][0] * w1) / 256, 0, 255);
             p->g = clampi(p->g + (d[y][0][1] * w2 + d[y][1][1] * w1) / 256, 0, 255);
             p->b = clampi(p->b + (d[y][0][2] * w2 + d[y][1][2] * w1) / 256, 0, 255);
@@ -2014,20 +3252,38 @@ static void cb_tone(int side, int y0, int y1)
 #define CB_WNL 8
 static void cb_warp(int side)
 {
-    int h[4], n = 0, hs[CB_WN + 1], col[PH], wn = side ? CB_WN : CB_WNL;
-    for (int i = 0; i < 24 && n < 4; i++) { int v = vb_hcol(side, side ? PW - 1 - i : i); if (v >= 0) h[n++] = v; }
+    int h[4],
+        n = 0,
+        hs[CB_WN + 1], col[PH],
+        wn = side ? CB_WN : CB_WNL;
+    for (int i = 0; i < 24 && n < 4; i++) {
+        int v = vb_hcol(side, side ? PW - 1 - i : i);
+        if (v >= 0) h[n++] = v;
+    }
     if (n < 2) return;
     for (int X = 1; X <= CB_WN; X++) hs[X] = vb_hcol(side, side ? PW - 1 + X : -X);
-    {   int e4 = (h[0] + h[1]) * 2, sl = n == 4 ? e4 - (h[2] + h[3]) * 2 : 0;   /* (x 4) */
+    /* (x 4) */
+    {
+        int e4 = (h[0] + h[1]) * 2,
+            sl = n == 4 ? e4 - (h[2] + h[3]) * 2 : 0;
         sl = sl > 8 ? 8 : sl < -8 ? -8 : sl;                                   /* (2 columns apart: 1 row a column) */
         for (int X = 1; X <= wn; X++) {
-            int t, sft, k = X * 256 / wn, sm = k * k / 256 * (768 - 2 * k) / 256;   /* (smoothstep) */
+            /* (smoothstep) */
+            int t, sft,
+                k = X * 256 / wn,
+                sm = k * k / 256 * (768 - 2 * k) / 256;
             if (hs[X] < 0 || hs[X] >= PH) continue;
-            t = (e4 + sl * X / 2) / 4; t += (hs[X] - t) * sm / 256;
-            sft = t - hs[X]; sft = sft > 6 ? 6 : sft < -6 ? -6 : sft;
+            t = (e4 + sl * X / 2) / 4;
+            t += (hs[X] - t) * sm / 256;
+            sft = t - hs[X];
+            sft = sft > 6 ? 6 : sft < -6 ? -6 : sft;
             if (!sft) continue;
-            for (int y = 184; y < PH; y++) { int sy = y - sft; col[y] = sy < 184 ? 184 : sy >= PH ? PH - 1 : sy; }
-            {   Rgb tmp[PH];
+            for (int y = 184; y < PH; y++) {
+                int sy = y - sft;
+                col[y] = sy < 184 ? 184 : sy >= PH ? PH - 1 : sy;
+            }
+            {
+                Rgb tmp[PH];
                 for (int y = 184; y < PH; y++) tmp[y] = cv[(size_t)col[y] * vb_ow + X - 1];
                 for (int y = 184; y < PH; y++) cv[(size_t)y * vb_ow + X - 1] = tmp[y];
             }
@@ -2039,22 +3295,34 @@ static void cb_warp(int side)
    only its lightness), fully up to column CB_FN, gone at column 72 */
 #define CB_FN 20
 #define CB_FH 12
+static int (*cb_ftone__d)[2][3];
 static void cb_ftone(int side, int y0, int y1)
 {
-    static int d[PH][2][3];
+    int (*const d)[2][3] = cb_ftone__d;
     for (int y = y0; y < y1; y++) {
-        int s[2][2][3] = { { { 0 } } }, n[2][2] = { { 0 } };     /* [picture, strip][grass, blossom] */
+        /* [picture, strip][grass, blossom] */
+        int s[2][2][3] = { { { 0 } } },
+            n[2][2] = { { 0 } };
         for (int yy = y - 2; yy <= y + 2; yy++) {
             if (yy < y0 || yy >= y1) continue;
             for (int i = 0; i < CB_FN; i++) {
-                int x = side ? PW - 1 - i : i; Rgb k;
+                int x = side ? PW - 1 - i : i;
+                Rgb k;
                 if (vb_excl(x, yy)) continue;
-                k = rgb15(pic[yy][x]); int g = !vb_grass(k);
-                s[0][g][0] += k.r; s[0][g][1] += k.g; s[0][g][2] += k.b; n[0][g]++;
+                k = rgb15(pic[yy][x]);
+                int g = !vb_grass(k);
+                s[0][g][0] += k.r;
+                s[0][g][1] += k.g;
+                s[0][g][2] += k.b;
+                n[0][g]++;
             }
             for (int X = 1; X <= CB_FN; X++) {
-                Rgb k = cv[(size_t)yy * vb_ow + X - 1]; int g = !vb_grass(k);
-                s[1][g][0] += k.r; s[1][g][1] += k.g; s[1][g][2] += k.b; n[1][g]++;
+                Rgb k = cv[(size_t)yy * vb_ow + X - 1];
+                int g = !vb_grass(k);
+                s[1][g][0] += k.r;
+                s[1][g][1] += k.g;
+                s[1][g][2] += k.b;
+                n[1][g]++;
             }
         }
         for (int g = 0; g < 2; g++)
@@ -2064,7 +3332,8 @@ static void cb_ftone(int side, int y0, int y1)
     for (int y = y0; y < y1; y++)
         for (int X = 1; X <= vb_ow; X++) {
             Rgb *p = &cv[(size_t)y * vb_ow + X - 1];
-            int g = !vb_grass(*p), w = X <= CB_FN ? 256 : X >= 72 ? 0 : (72 - X) * 256 / (72 - CB_FN);
+            int g = !vb_grass(*p),
+                w = X <= CB_FN ? 256 : X >= 72 ? 0 : (72 - X) * 256 / (72 - CB_FN);
             p->r = clampi(p->r + d[y][g][0] * w / 256, 0, 255);
             p->g = clampi(p->g + d[y][g][1] * w / 256, 0, 255);
             p->b = clampi(p->b + d[y][g][2] * w / 256, 0, 255);
@@ -2073,20 +3342,27 @@ static void cb_ftone(int side, int y0, int y1)
        only), easing out over CB_FH columns (the picture's last columns are often a little darker or lighter than
        the ones before: the strip goes on from them) */
     for (int y = y0; y < y1; y++) {
-        int s[3] = { 0, 0, 0 }, n = 0;
+        int s[3] = { 0, 0, 0 },
+            n = 0;
         for (int yy = y - 1; yy <= y + 1; yy++) {
             if (yy < y0 || yy >= y1) continue;
             for (int i = 0; i < 2; i++) {
-                int x = side ? PW - 1 - i : i; Rgb k = rgb15(pic[yy][x]), q = cv[(size_t)yy * vb_ow + i];
+                int x = side ? PW - 1 - i : i;
+                Rgb k = rgb15(pic[yy][x]),
+                    q = cv[(size_t)yy * vb_ow + i];
                 if (vb_excl(x, yy) || vb_grass(k) != vb_grass(q)) continue;
-                s[0] += k.r - q.r; s[1] += k.g - q.g; s[2] += k.b - q.b; n++;
+                s[0] += k.r - q.r;
+                s[1] += k.g - q.g;
+                s[2] += k.b - q.b;
+                n++;
             }
         }
         for (int c = 0; c < 3; c++) d[y][0][c] = n >= 3 ? s[c] / n : 0;
     }
     for (int y = y0; y < y1; y++)
         for (int X = 1; X < CB_FH; X++) {
-            Rgb *p = &cv[(size_t)y * vb_ow + X - 1]; int w = (CB_FH - X) * 256 / (CB_FH - 1);
+            Rgb *p = &cv[(size_t)y * vb_ow + X - 1];
+            int w = (CB_FH - X) * 256 / (CB_FH - 1);
             p->r = clampi(p->r + d[y][0][0] * w / 256, 0, 255);
             p->g = clampi(p->g + d[y][0][1] * w / 256, 0, 255);
             p->b = clampi(p->b + d[y][0][2] * w / 256, 0, 255);
@@ -2098,9 +3374,16 @@ static int cb_h0 = 213;
 static int cb_otgt(int side, int X, int *tol)
 {
     if (side) return -1;
-    if (X <= 4) { *tol = 2; return cb_h0; }
-    if (X < 14) { *tol = 3; return cb_h0 + (203 - cb_h0) * (X - 4) / 10; }
-    *tol = 5; return 201;
+    if (X <= 4) {
+        *tol = 2;
+        return cb_h0;
+    }
+    if (X < 14) {
+        *tol = 3;
+        return cb_h0 + (203 - cb_h0) * (X - 4) / 10;
+    }
+    *tol = 5;
+    return 201;
 }
 /* the left front cleaned (rows CB_CY on, the canvas' whole width): blossom bits loose on the grass (8-connected
    non-grass pieces under CB_BLOB texels that do not reach the bottom row) go back to the grass underlay (und, the
@@ -2112,55 +3395,86 @@ static int cb_otgt(int side, int X, int *tol)
 #define CB_RIM 8
 static void cb_clean(const Rgb *und)
 {
-    int w = vb_ow, h = PH - CB_CY, n = w * h, *st = (int *)malloc(sizeof(int) * (size_t)n), *cm = (int *)malloc(sizeof(int) * (size_t)n);
+    int w = vb_ow,
+        h = PH - CB_CY,
+        n = w * h,
+        *st = (int *)malloc(sizeof(int) * (size_t)n),
+        *cm = (int *)malloc(sizeof(int) * (size_t)n);
     u8 *gr = (u8 *)malloc((size_t)n);
-    if (!st || !cm || !gr) { free(st); free(cm); free(gr); return; }
+    if (!st || !cm || !gr) {
+        free(st);
+        free(cm);
+        free(gr);
+        return;
+    }
 #define CBP(i) cv[(size_t)((i) / w + CB_CY) * w + (i) % w]
-    for (int i = 0; i < n; i++) { gr[i] = (u8)vb_grass(CBP(i)); cm[i] = -1; }
+    for (int i = 0; i < n; i++) {
+        gr[i] = (u8)vb_grass(CBP(i));
+        cm[i] = -1;
+    }
     for (int pass = 0; pass < 2; pass++)                 /* (0: blossom bits, 1: grass holes) */
         for (int i0 = 0; i0 < n; i0++) {
-            int sp = 0, cnt = 0, edge = 0, kind = pass ? 1 : 0;
+            int sp = 0,
+                cnt = 0,
+                edge = 0,
+                kind = pass ? 1 : 0;
             if (cm[i0] >= 0 || gr[i0] != kind) continue;
-            st[sp++] = i0; cm[i0] = i0;
+            st[sp++] = i0;
+            cm[i0] = i0;
             while (sp) {                                 /* (flood fill; cm: the piece's first texel) */
-                int i = st[--sp], y = i / w, x = i % w;
+                int i = st[--sp],
+                    y = i / w,
+                    x = i % w;
                 cnt++;
                 if (pass ? y == 0 : y == h - 1) edge = 1;
                 for (int dy = -1; dy <= 1; dy++)
                     for (int dx = -1; dx <= 1; dx++) {
-                        int yy = y + dy, xx = x + dx, j;
+                        int yy = y + dy,
+                            xx = x + dx,
+                            j;
                         if ((!dx && !dy) || (pass && dx && dy) || yy < 0 || yy >= h || xx < 0 || xx >= w) continue;
                         j = yy * w + xx;
-                        if (cm[j] < 0 && gr[j] == kind) { cm[j] = i0; st[sp++] = j; }
+                        if (cm[j] < 0 && gr[j] == kind) {
+                            cm[j] = i0;
+                            st[sp++] = j;
+                        }
                     }
             }
             if (edge || (!pass && cnt >= CB_BLOB)) continue;
             for (int i = 0; i < n; i++) {
                 if (cm[i] != i0) continue;
                 if (!pass) {                             /* (the bit and its rim: the underlay) */
-                    int y = i / w, x = i % w;
+                    int y = i / w,
+                        x = i % w;
                     for (int dy = -1; dy <= 1; dy++)
                         for (int dx = -1; dx <= 1; dx++) {
-                            int yy = y + dy, xx = x + dx, j;
+                            int yy = y + dy,
+                                xx = x + dx,
+                                j;
                             if (yy < 0 || yy >= h || xx < 0 || xx >= w) continue;
                             j = yy * w + xx;
                             if (j == i || gr[j]) CBP(j) = und[(size_t)(yy + CB_CY) * w + xx];
                         }
-                    gr[i] = 1; cm[i] = -1;
+                    gr[i] = 1;
+                    cm[i] = -1;
                 } else cm[i] = -2;                       /* (filled below) */
             }
             if (pass) {                                  /* the hole with its rim (2 texels of the bushes' grey
                                                             edge round it, holes of CB_RIM texels on): the blossom
                                                             its height above it, moved down whole (no per-column
                                                             streaks) */
-                int y0 = h, y1 = -1;
+                int y0 = h,
+                    y1 = -1;
                 for (int r = 0; r < 2 && cnt >= CB_RIM; r++) {
                     for (int i = 0; i < n; i++) {
-                        int y = i / w, x = i % w;
+                        int y = i / w,
+                            x = i % w;
                         if (cm[i] != -2) continue;
                         for (int dy = -1; dy <= 1; dy++)
                             for (int dx = -1; dx <= 1; dx++) {
-                                int yy = y + dy, xx = x + dx, j;
+                                int yy = y + dy,
+                                    xx = x + dx,
+                                    j;
                                 if (yy < 0 || yy >= h || xx < 0 || xx >= w) continue;
                                 j = yy * w + xx;
                                 if (!gr[j] && cm[j] > -2) cm[j] = -6;
@@ -2168,7 +3482,8 @@ static void cb_clean(const Rgb *und)
                     }
                     for (int i = 0; i < n; i++) if (cm[i] == -6) cm[i] = -2;
                 }
-                int x0 = w, x1 = -1;
+                int x0 = w,
+                    x1 = -1;
                 for (int i = 0; i < n; i++)
                     if (cm[i] == -2) {
                         if (i / w < y0) y0 = i / w;
@@ -2180,7 +3495,8 @@ static void cb_clean(const Rgb *und)
                     int sh = x0 - (x1 - x0 + 1) >= 0 ? -(x1 - x0 + 1) : x1 + (x1 - x0 + 1) < w ? x1 - x0 + 1 : 0;
                     int j = sh ? i + sh : i - (y1 - y0 + 1) * w;
                     if (cm[i] != -2 || j < 0 || gr[j] || cm[j] <= -2) continue;
-                    CBP(i) = CBP(j); cm[i] = -3;
+                    CBP(i) = CBP(j);
+                    cm[i] = -3;
                 }
                 for (int i = 0; i < n; i++) if (cm[i] == -2) cm[i] = -5;   /* (left for the mean) */
             }
@@ -2189,60 +3505,97 @@ static void cb_clean(const Rgb *und)
     for (int it = 0, left = 1; it < 16 && left; it++) {  /* (what is left: its blossom neighbours' mean, peeled) */
         left = 0;
         for (int i = 0; i < n; i++) {
-            int y = i / w, x = i % w, s[3] = { 0, 0, 0 }, c = 0;
+            int y = i / w,
+                x = i % w,
+                s[3] = { 0, 0, 0 },
+                c = 0;
             if (cm[i] != -2) continue;
             for (int d = 0; d < 4; d++) {
-                int yy = y + (d == 0) - (d == 1), xx = x + (d == 2) - (d == 3), j;
+                int yy = y + (d == 0) - (d == 1),
+                    xx = x + (d == 2) - (d == 3),
+                    j;
                 if (yy < 0 || yy >= h || xx < 0 || xx >= w) continue;
                 j = yy * w + xx;
                 if (cm[j] == -2 || (gr[j] && cm[j] != -3)) continue;
-                s[0] += CBP(j).r; s[1] += CBP(j).g; s[2] += CBP(j).b; c++;
+                s[0] += CBP(j).r;
+                s[1] += CBP(j).g;
+                s[2] += CBP(j).b;
+                c++;
             }
-            if (!c) { left = 1; continue; }
-            CBP(i).r = s[0] / c; CBP(i).g = s[1] / c; CBP(i).b = s[2] / c; cm[i] = -3;
+            if (!c) {
+                left = 1;
+                continue;
+            }
+            CBP(i).r = s[0] / c;
+            CBP(i).g = s[1] / c;
+            CBP(i).b = s[2] / c;
+            cm[i] = -3;
         }
     }
-    {   Rgb *t = (Rgb *)malloc(sizeof(Rgb) * (size_t)n);    /* the fill and its edge softened (3 x 3, twice): a
-                                                               copied patch has hard edges in the blurred bushes */
+    /* the fill and its edge softened (3 x 3, twice): a copied patch has hard edges in the blurred bushes */
+    {
+        Rgb *t = (Rgb *)malloc(sizeof(Rgb) * (size_t)n);
         for (int pass = 0; t && pass < 2; pass++) {
             for (int i = 0; i < n; i++) t[i] = CBP(i);
             for (int i = 0; i < n; i++) {
-                int y = i / w, x = i % w, s[3] = { 0, 0, 0 }, c = 0, near = cm[i] == -3;
+                int y = i / w,
+                    x = i % w,
+                    s[3] = { 0, 0, 0 },
+                    c = 0,
+                    near = cm[i] == -3;
                 if (gr[i] && cm[i] != -3) continue;
                 for (int dy = -1; dy <= 1 && !near; dy++)
                     for (int dx = -1; dx <= 1; dx++) {
-                        int yy = y + dy, xx = x + dx;
+                        int yy = y + dy,
+                            xx = x + dx;
                         if (yy >= 0 && yy < h && xx >= 0 && xx < w && cm[yy * w + xx] == -3) near = 1;
                     }
                 if (!near) continue;
                 for (int dy = -1; dy <= 1; dy++)
                     for (int dx = -1; dx <= 1; dx++) {
-                        int yy = y + dy, xx = x + dx, j;
+                        int yy = y + dy,
+                            xx = x + dx,
+                            j;
                         if (yy < 0 || yy >= h || xx < 0 || xx >= w) continue;
                         j = yy * w + xx;
                         if (gr[j] && cm[j] != -3) continue;
-                        s[0] += t[j].r; s[1] += t[j].g; s[2] += t[j].b; c++;
+                        s[0] += t[j].r;
+                        s[1] += t[j].g;
+                        s[2] += t[j].b;
+                        c++;
                     }
-                CBP(i).r = s[0] / c; CBP(i).g = s[1] / c; CBP(i).b = s[2] / c;
+                CBP(i).r = s[0] / c;
+                CBP(i).g = s[1] / c;
+                CBP(i).b = s[2] / c;
             }
         }
         free(t);
     }
 #undef CBP
-    free(st); free(cm); free(gr);
+    free(st);
+    free(cm);
+    free(gr);
 }
 static void gen_cb(int pad)
 {
+    if (!ws_need_gen_cb()) return;
     pal_make();
     vb_ow = pad + 64;
     if (!canvas_open(vb_ow)) return;
     vb_ex = CB_EXCL;
     for (int side = 0; side < 2; side++) {
         Rgb *und = 0;
-        canvas_clear(); cur_side = side;
+        canvas_clear();
+        cur_side = side;
         for (int i = 0; i < 9; i++) {
             if (i == 8 && !side) {                       /* (the edge's height: the picture's first known column) */
-                for (int x = 0; x < 8; x++) { int v = vb_hcol(0, x); if (v >= 0 && v < PH) { cb_h0 = v; break; } }
+                for (int x = 0; x < 8; x++) {
+                    int v = vb_hcol(0, x);
+                    if (v >= 0 && v < PH) {
+                        cb_h0 = v;
+                        break;
+                    }
+                }
                 vb_otgt = cb_otgt;
             }
             vb_quilt(side, &CB_BANDS[side][i], 901 + 13 * i);
@@ -2250,8 +3603,14 @@ static void gen_cb(int pad)
             if (i == 7 && !side && (und = (Rgb *)malloc(sizeof(Rgb) * (size_t)vb_ow * PH)) != 0)
                 memcpy(und, cv, sizeof(Rgb) * (size_t)vb_ow * PH);
         }
-        if (und) { cb_clean(und); free(und); und = 0; }
-        cb_tone(side, 0, 108); cb_warp(side); cb_ftone(side, 181, PH);
+        if (und) {
+            cb_clean(und);
+            free(und);
+            und = 0;
+        }
+        cb_tone(side, 0, 108);
+        cb_warp(side);
+        cb_ftone(side, 181, PH);
         for (int y = 0; y < PH; y++)
             for (int X = 1; X <= pad; X++)
                 strip[(size_t)y * 2 * pad + (side ? pad + (X - 1) : pad - X)] = quant(cv[(size_t)y * vb_ow + X - 1]);
@@ -2295,64 +3654,101 @@ static const VbBand CV_BANDS[2][8] = {
    (R 1, three quarters of the step, easing out over 6 columns) */
 #define CV_TN 40
 #define CV_TR 16
+static int (*cv_tone__jd)[2][3];
 static void cv_tone(int side, int y0, int y1)
 {
-    static int mp[PH], dp[PH], ms[PH], ds[PH], jd[PH][2][3];
+    static int mp[PH], dp[PH], ms[PH], ds[PH];
+    int (*const jd)[2][3] = cv_tone__jd;
     for (int y = y0; y < y1; y++) {
-        long long s[2] = { 0, 0 }, q[2] = { 0, 0 }; int n[2] = { 0, 0 };
+        long long s[2] = { 0, 0 },
+                  q[2] = { 0, 0 };
+        int n[2] = { 0, 0 };
         for (int yy = y - CV_TR; yy <= y + CV_TR; yy++) {
             if (yy < y0 || yy >= y1) continue;
             for (int i = 0; i < CV_TN; i++) {
-                int x = side ? PW - 1 - i : i, l;
+                int x = side ? PW - 1 - i : i,
+                    l;
                 if (vb_excl(x, yy)) continue;
-                l = lum(rgb15(pic[yy][x])); s[0] += l; q[0] += l * l; n[0]++;
+                l = lum(rgb15(pic[yy][x]));
+                s[0] += l;
+                q[0] += l * l;
+                n[0]++;
             }
-            for (int X = 1; X <= vb_ow; X++) { int l = lum(cv[(size_t)yy * vb_ow + X - 1]); s[1] += l; q[1] += l * l; n[1]++; }
+            for (int X = 1; X <= vb_ow; X++) {
+                int l = lum(cv[(size_t)yy * vb_ow + X - 1]);
+                s[1] += l;
+                q[1] += l * l;
+                n[1]++;
+            }
         }
         for (int k = 0; k < 2; k++) {
-            int m = n[k] ? (int)(s[k] * 16 / n[k]) : 0, d = n[k] ? isqrt_i((int)((q[k] * 256 - s[k] * s[k] * 256 / n[k]) / n[k])) : 0;
-            if (k) { ms[y] = m; ds[y] = d; } else { mp[y] = m; dp[y] = d; }
+            int m = n[k] ? (int)(s[k] * 16 / n[k]) : 0,
+                d = n[k] ? isqrt_i((int)((q[k] * 256 - s[k] * s[k] * 256 / n[k]) / n[k])) : 0;
+            if (k) {
+                ms[y] = m;
+                ds[y] = d;
+            } else {
+                mp[y] = m;
+                dp[y] = d;
+            }
         }
     }
     for (int y = y0; y < y1; y++) {
         int k = ds[y] && dp[y] ? clampi(dp[y] * 256 / ds[y], 154, 358) : 256;
         if (!ms[y] || !mp[y]) continue;
         for (int X = 1; X <= vb_ow; X++) {
-            Rgb *p = &cv[(size_t)y * vb_ow + X - 1]; int l = lum(*p), l2 = clampi((mp[y] + (l * 16 - ms[y]) * k / 256) / 16, 1, 255);
+            Rgb *p = &cv[(size_t)y * vb_ow + X - 1];
+            int l = lum(*p),
+                l2 = clampi((mp[y] + (l * 16 - ms[y]) * k / 256) / 16, 1, 255);
             *p = l ? scale(*p, clampi(l2 * 256 / l, 0, 1024)) : (Rgb){ l2, l2, l2 };
         }
     }
     for (int st = 0; st < 2; st++) {
-        int R = st ? 1 : 4, N = st ? 1 : 8;
+        int R = st ? 1 : 4,
+            N = st ? 1 : 8;
         for (int y = y0; y < y1; y++) {
-            int s[2][3] = { { 0 } }, n[2] = { 0, 0 };
+            int s[2][3] = { { 0 } },
+                n[2] = { 0, 0 };
             for (int yy = y - R; yy <= y + R; yy++) {
                 if (yy < y0 || yy >= y1) continue;
                 for (int i = 0; i < N; i++) {
-                    int x = side ? PW - 1 - i : i; Rgb a = cv[(size_t)yy * vb_ow + i];
-                    s[1][0] += a.r; s[1][1] += a.g; s[1][2] += a.b; n[1]++;
+                    int x = side ? PW - 1 - i : i;
+                    Rgb a = cv[(size_t)yy * vb_ow + i];
+                    s[1][0] += a.r;
+                    s[1][1] += a.g;
+                    s[1][2] += a.b;
+                    n[1]++;
                     if (vb_excl(x, yy)) continue;
-                    a = rgb15(pic[yy][x]); s[0][0] += a.r; s[0][1] += a.g; s[0][2] += a.b; n[0]++;
+                    a = rgb15(pic[yy][x]);
+                    s[0][0] += a.r;
+                    s[0][1] += a.g;
+                    s[0][2] += a.b;
+                    n[0]++;
                 }
             }
-            for (int c = 0; c < 3; c++) jd[y][st][c] = n[0] && n[1] ? (s[0][c] / n[0] - s[1][c] / n[1]) * (st ? 3 : 4) / 4 : 0;
+            for (int c = 0; c < 3; c++)
+                jd[y][st][c] = n[0] && n[1] ? (s[0][c] / n[0] - s[1][c] / n[1]) * (st ? 3 : 4) / 4 : 0;
         }
         for (int y = y0; y < y1; y++)
             for (int X = 1; X <= (st ? 6 : 40); X++) {
-                Rgb *p = &cv[(size_t)y * vb_ow + X - 1]; int w = st ? (7 - X) * 256 / 6 : X <= 8 ? 256 : (40 - X) * 256 / 32;
-                p->r = clampi(p->r + jd[y][st][0] * w / 256, 0, 255); p->g = clampi(p->g + jd[y][st][1] * w / 256, 0, 255);
+                Rgb *p = &cv[(size_t)y * vb_ow + X - 1];
+                int w = st ? (7 - X) * 256 / 6 : X <= 8 ? 256 : (40 - X) * 256 / 32;
+                p->r = clampi(p->r + jd[y][st][0] * w / 256, 0, 255);
+                p->g = clampi(p->g + jd[y][st][1] * w / 256, 0, 255);
                 p->b = clampi(p->b + jd[y][st][2] * w / 256, 0, 255);
             }
     }
 }
 static void gen_cv(int pad)
 {
+    if (!ws_need_gen_cv()) return;
     pal_make();
     vb_ow = pad + 64;
     if (!canvas_open(vb_ow)) return;
     vb_ex = CV_EXCL;
     for (int side = 0; side < 2; side++) {
-        canvas_clear(); cur_side = side;
+        canvas_clear();
+        cur_side = side;
         for (int i = 0; i < CV_NB; i++) vb_quilt(side, &CV_BANDS[side][i], 1101 + 13 * i);
         cv_tone(side, 0, PH);
         for (int y = 0; y < PH; y++)
@@ -2381,8 +3777,8 @@ static void gen_cv(int pad)
  *     right; eight steps where that leaves the clean stretch), so rail, balusters, steps and stringer go on exactly on
  *     their lines; the rows below the rail scaled by the band's width at both places (the stringer's lower edge is
  *     73.3 - 0.013 x rows below the rail: the band widens a little towards the bottom left), so that edge goes on
- *     along its own line; its light per row of the stair's cross-section matched at the edge (the stair 90 columns in against
- *     the stair at the edge);
+ *     along its own line; its light per row of the stair's cross-section matched at the edge (the stair 90 columns in
+ *     against the stair at the edge);
  *   - the join: per row, the wall's first 8 columns' mean onto the picture's last 8 (fading by 40) and its first column
  *     onto the picture's last one (fading over 6). */
 enum { ST_WALL = 1 };
@@ -2390,10 +3786,18 @@ enum { ST_WALL = 1 };
 #define ST_PY 55
 static int st_y16(int x) { return 3258 - fdiv(880 * x, ST_PX); }     /* the rail's top row (x 16) at column x */
 static int st_t16(int x, int y) { return y * 16 + 8 - st_y16(x); }   /* rows (x 16) below it */
-static int st_h16(int x) { return 1173 + fdiv(-215 * x, 1024); }   /* the stringer's lower edge (x 16) below it:
-                                                            73.3 - 0.013 x rows (the band widens towards the bottom left) */
-static int st_band(int x, int y) { int t = st_t16(x, y); return t >= -16 && t < st_h16(x) + 16; }
-static int st_exf(int x, int y) { int t = st_t16(x, y); return t >= -48 && t < st_h16(x) + 48; }
+/* the stringer's lower edge (x 16) below it: 73.3 - 0.013 x rows (the band widens towards the bottom left) */
+static int st_h16(int x) { return 1173 + fdiv(-215 * x, 1024); }
+static int st_band(int x, int y)
+{
+    int t = st_t16(x, y);
+    return t >= -16 && t < st_h16(x) + 16;
+}
+static int st_exf(int x, int y)
+{
+    int t = st_t16(x, y);
+    return t >= -48 && t < st_h16(x) + 48;
+}
 /* the stair's texel for (x, y) from k * four steps further in: its row below the rail scaled by the band's widths
    there and here, so the stringer's lower edge goes on along its own line */
 static int st_src(int side, int x, int y, int k, int *xs, int *ys)
@@ -2420,11 +3824,15 @@ static const VbBand ST_BANDS[8] = {
 #define ST_LX 26                                         /* the edge sconce's flame */
 #define ST_LY 120
 #define ST_S2 900                                        /* its glow's radius, squared */
-static short st_lf[PH][PW];                              /* the wall's light (0: no wall texel near) */
-static int st_le[PH], st_amb;                            /* the light at the edge per row (side being made), far light */
+static short (*st_lf)[PW];                              /* the wall's light (0: no wall texel near) */
+/* the light at the edge per row (side being made), far light */
+static int st_le[PH], st_amb;
+static int (*st_light__S)[PW + 1];
+static int (*st_light__C)[PW + 1];
 static void st_light(void)
 {
-    static int S[PH + 1][PW + 1], C[PH + 1][PW + 1];
+    int (*const S)[PW + 1] = st_light__S,
+        (*const C)[PW + 1] = st_light__C;
     for (int y = 0; y < PH; y++)
         for (int x = 0; x < PW; x++) {
             int m = !vb_excl(x, y);
@@ -2433,24 +3841,42 @@ static void st_light(void)
         }
     for (int y = 0; y < PH; y++)
         for (int x = 0; x < PW; x++) {
-            int x0 = x - 8 < 0 ? 0 : x - 8, x1 = x + 9 > PW ? PW : x + 9, y0 = y - 8 < 0 ? 0 : y - 8, y1 = y + 9 > PH ? PH : y + 9;
-            int s = S[y1][x1] - S[y0][x1] - S[y1][x0] + S[y0][x0], c = C[y1][x1] - C[y0][x1] - C[y1][x0] + C[y0][x0];
+            int x0 = x - 8 < 0 ? 0 : x - 8,
+                x1 = x + 9 > PW ? PW : x + 9,
+                y0 = y - 8 < 0 ? 0 : y - 8,
+                y1 = y + 9 > PH ? PH : y + 9;
+            int s = S[y1][x1] - S[y0][x1] - S[y1][x0] + S[y0][x0],
+                c = C[y1][x1] - C[y0][x1] - C[y1][x0] + C[y0][x0];
             st_lf[y][x] = (short)(c >= 16 ? (s / c > 4 ? s / c : 4) : 0);
         }
 }
-static void st_edge(int side)                             /* st_le: the light of the 4 edge columns per row, gaps filled */
+/* st_le: the light of the 4 edge columns per row, gaps filled */
+static void st_edge(int side)
 {
-    int h[PH], n = 0;
+    int h[PH],
+        n = 0;
     for (int y = 0; y < PH; y++) {
-        int s = 0, c = 0;
-        for (int i = 0; i < 4; i++) { int x = side ? PW - 1 - i : i; if (!vb_excl(x, y) && st_lf[y][x]) { s += st_lf[y][x]; c++; } }
+        int s = 0,
+            c = 0;
+        for (int i = 0; i < 4; i++) {
+            int x = side ? PW - 1 - i : i;
+            if (!vb_excl(x, y) && st_lf[y][x]) {
+                s += st_lf[y][x];
+                c++;
+            }
+        }
         st_le[y] = c ? s / c : -1;
         if (c) h[n++] = st_le[y];
     }
     for (int y = PH - 2; y >= 0; y--) if (st_le[y] < 0) st_le[y] = st_le[y + 1];   /* (the stair's rows: the light
                                                             under it, as the strip's texels there take it) */
     for (int y = 1; y < PH; y++) if (st_le[y] < 0) st_le[y] = st_le[y - 1];
-    for (int i = 1; i < n; i++) for (int j = i; j > 0 && h[j - 1] > h[j]; j--) { int t = h[j]; h[j] = h[j - 1]; h[j - 1] = t; }
+    for (int i = 1; i < n; i++)
+        for (int j = i; j > 0 && h[j - 1] > h[j]; j--) {
+            int t = h[j];
+            h[j] = h[j - 1];
+            h[j - 1] = t;
+        }
     st_amb = n ? h[n / 5] : 32;
 }
 static int st_want(int side, int X, int y)               /* the light wanted at strip column X, row y */
@@ -2459,7 +3885,10 @@ static int st_want(int side, int X, int y)               /* the light wanted at 
         int ye = y + fdiv(X * ST_PY, ST_PX);
         return st_le[clampi(ye, 0, PH - 1)];
     } else {                                             /* (the edge's light, its sconce's glow falling off) */
-        int dx = -X - ST_LX, dy = y - ST_LY, ex = -ST_LX, g = st_le[y] - st_amb;
+        int dx = -X - ST_LX,
+            dy = y - ST_LY,
+            ex = -ST_LX,
+            g = st_le[y] - st_amb;
         if (g <= 0) return st_le[y];
         return st_amb + (int)((long long)g * (ST_S2 + ex * ex + dy * dy) / (ST_S2 + dx * dx + dy * dy));
     }
@@ -2471,77 +3900,122 @@ static void st_stair(int side)
     for (int i = 0; i < 16; i++)                         /* the light per row of the cross-section: the edge's stair
                                                             against the stair 90 columns in */
         for (int y = 0; y < PH; y++) {
-            int x = side ? PW - 1 - i : i, xs, ys, t = st_t16(x, y);
+            int x = side ? PW - 1 - i : i,
+                xs, ys,
+                t = st_t16(x, y);
             Rgb a, b;
             if (!st_band(x, y) || t < 0 || !st_src(side, x, y, 1, &xs, &ys)) continue;
-            a = rgb15(pic[y][x]); b = rgb15(pic[ys][xs]); t /= 16;
-            sm[t][0][0] += a.r; sm[t][1][0] += a.g; sm[t][2][0] += a.b; sm[t][0][1] += b.r; sm[t][1][1] += b.g; sm[t][2][1] += b.b;
+            a = rgb15(pic[y][x]);
+            b = rgb15(pic[ys][xs]);
+            t /= 16;
+            sm[t][0][0] += a.r;
+            sm[t][1][0] += a.g;
+            sm[t][2][0] += a.b;
+            sm[t][0][1] += b.r;
+            sm[t][1][1] += b.g;
+            sm[t][2][1] += b.b;
         }
     for (int t = 0; t < 72; t++)
         for (int c = 0; c < 3; c++) {
-            int a = 0, b = 0;
-            for (int u = t - 3; u <= t + 3; u++) if (u >= 0 && u < 72) { a += sm[u][c][0]; b += sm[u][c][1]; }
+            int a = 0,
+                b = 0;
+            for (int u = t - 3; u <= t + 3; u++)
+                if (u >= 0 && u < 72) {
+                    a += sm[u][c][0];
+                    b += sm[u][c][1];
+                }
             g[t][c] = a > 0 && b > 0 ? clampi((int)((long long)a * 256 / b), 160, 400) : 256;
         }
     for (int X = 1; X <= vb_ow; X++)
         for (int y = 0; y < PH; y++) {
-            int x = side ? PW - 1 + X : -X, k = 1, xs, ys, t;
+            int x = side ? PW - 1 + X : -X,
+                k = 1,
+                xs, ys, t;
             Rgb c;
             if (!st_band(x, y)) continue;
             while ((side ? x - ST_PX * k > 300 : x + ST_PX * k < 8) && k < 8) k++;
             if (!st_src(side, x, y, k, &xs, &ys)) continue;
-            c = rgb15(pic[ys][xs]); t = clampi(st_t16(x, y) / 16, 0, 71);
-            c.r = clampi(c.r * g[t][0] / 256, 0, 255); c.g = clampi(c.g * g[t][1] / 256, 0, 255); c.b = clampi(c.b * g[t][2] / 256, 0, 255);
+            c = rgb15(pic[ys][xs]);
+            t = clampi(st_t16(x, y) / 16, 0, 71);
+            c.r = clampi(c.r * g[t][0] / 256, 0, 255);
+            c.g = clampi(c.g * g[t][1] / 256, 0, 255);
+            c.b = clampi(c.b * g[t][2] / 256, 0, 255);
             cv[(size_t)y * vb_ow + X - 1] = c;
         }
 }
+static int (*st_join__jd)[2][3];
 static void st_join(int side)                            /* the wall at the join (stair texels left alone) */
 {
-    static int jd[PH][2][3];
+    int (*const jd)[2][3] = st_join__jd;
     for (int st = 0; st < 2; st++) {
-        int R = st ? 1 : 4, N = st ? 1 : 8;
+        int R = st ? 1 : 4,
+            N = st ? 1 : 8;
         for (int y = 0; y < PH; y++) {
-            int s[2][3] = { { 0 } }, n[2] = { 0, 0 };
+            int s[2][3] = { { 0 } },
+                n[2] = { 0, 0 };
             for (int yy = y - R; yy <= y + R; yy++) {
                 if (yy < 0 || yy >= PH) continue;
                 for (int i = 0; i < N; i++) {
-                    int x = side ? PW - 1 - i : i, xo = side ? PW + i : -1 - i; Rgb a;
+                    int x = side ? PW - 1 - i : i,
+                        xo = side ? PW + i : -1 - i;
+                    Rgb a;
                     if (vb_excl(x, yy) || st_exf(xo, yy)) continue;
-                    a = cv[(size_t)yy * vb_ow + i]; s[1][0] += a.r; s[1][1] += a.g; s[1][2] += a.b; n[1]++;
-                    a = rgb15(pic[yy][x]); s[0][0] += a.r; s[0][1] += a.g; s[0][2] += a.b; n[0]++;
+                    a = cv[(size_t)yy * vb_ow + i];
+                    s[1][0] += a.r;
+                    s[1][1] += a.g;
+                    s[1][2] += a.b;
+                    n[1]++;
+                    a = rgb15(pic[yy][x]);
+                    s[0][0] += a.r;
+                    s[0][1] += a.g;
+                    s[0][2] += a.b;
+                    n[0]++;
                 }
             }
-            for (int c = 0; c < 3; c++) jd[y][st][c] = n[0] && n[1] ? (s[0][c] / n[0] - s[1][c] / n[1]) * (st ? 3 : 4) / 4 : 0;
+            for (int c = 0; c < 3; c++)
+                jd[y][st][c] = n[0] && n[1] ? (s[0][c] / n[0] - s[1][c] / n[1]) * (st ? 3 : 4) / 4 : 0;
         }
         for (int y = 0; y < PH; y++)
             for (int X = 1; X <= (st ? 6 : 40); X++) {
-                Rgb *p = &cv[(size_t)y * vb_ow + X - 1]; int w = st ? (7 - X) * 256 / 6 : X <= 8 ? 256 : (40 - X) * 256 / 32;
+                Rgb *p = &cv[(size_t)y * vb_ow + X - 1];
+                int w = st ? (7 - X) * 256 / 6 : X <= 8 ? 256 : (40 - X) * 256 / 32;
                 if (st_band(side ? PW - 1 + X : -X, y)) continue;
-                p->r = clampi(p->r + jd[y][st][0] * w / 256, 0, 255); p->g = clampi(p->g + jd[y][st][1] * w / 256, 0, 255);
+                p->r = clampi(p->r + jd[y][st][0] * w / 256, 0, 255);
+                p->g = clampi(p->g + jd[y][st][1] * w / 256, 0, 255);
                 p->b = clampi(p->b + jd[y][st][2] * w / 256, 0, 255);
             }
     }
 }
 static void gen_st(int pad)
 {
+    if (!ws_need_gen_st()) return;
     pal_make();
     vb_ow = pad + 64;
     if (!canvas_open(vb_ow)) return;
     vb_srcmap = (int *)malloc(sizeof(int) * (size_t)vb_ow * PH);
-    if (!vb_srcmap) { canvas_close(); return; }
-    vb_ex = ST_EXCL; vb_exf = st_exf;
+    if (!vb_srcmap) {
+        canvas_close();
+        return;
+    }
+    vb_ex = ST_EXCL;
+    vb_exf = st_exf;
     st_light();
     for (int side = 0; side < 2; side++) {
-        canvas_clear(); cur_side = side;
+        canvas_clear();
+        cur_side = side;
         for (int i = 0; i < vb_ow * PH; i++) vb_srcmap[i] = -1;
         for (int i = 0; i < ST_NB; i++) vb_quilt(side, &ST_BANDS[i], 1301 + 13 * i);
         st_edge(side);
         for (int y = 0; y < PH; y++)                     /* relight */
             for (int X = 1; X <= vb_ow; X++) {
-                int s = vb_srcmap[(size_t)y * vb_ow + X - 1], ls, lt;
+                int s = vb_srcmap[(size_t)y * vb_ow + X - 1],
+                    ls, lt;
                 if (s < 0) continue;
-                ls = st_lf[s / PW][s % PW]; lt = st_want(side, X, y);
-                if (ls > 0) cv[(size_t)y * vb_ow + X - 1] = scale(cv[(size_t)y * vb_ow + X - 1], clampi(lt * 256 / ls, 128, 512));
+                ls = st_lf[s / PW][s % PW];
+                lt = st_want(side, X, y);
+                if (ls > 0)
+                    cv[(size_t)y * vb_ow + X - 1] = scale(cv[(size_t)y * vb_ow + X - 1],
+                                                          clampi(lt * 256 / ls, 128, 512));
             }
         st_stair(side);
         st_join(side);
@@ -2549,8 +4023,10 @@ static void gen_st(int pad)
             for (int X = 1; X <= pad; X++)
                 strip[(size_t)y * 2 * pad + (side ? pad + (X - 1) : pad - X)] = quant(cv[(size_t)y * vb_ow + X - 1]);
     }
-    free(vb_srcmap); vb_srcmap = 0;
-    vb_ex = VB_EXCL; vb_exf = 0;
+    free(vb_srcmap);
+    vb_srcmap = 0;
+    vb_ex = VB_EXCL;
+    vb_exf = 0;
     canvas_close();
 }
 
@@ -2584,11 +4060,11 @@ static void gen_st(int pad)
 #define TH_PL1 132
 static int th_plaster(int j) { return j >= TH_PL0 && j < TH_PL1; }
 #define TH_NO 400                                         /* rectified columns outwards (tables) */
-static u16 th_p0[PH][PW];                                 /* the picture as shown (th_shown; pic holds the rectified
+static u16 (*th_p0)[PW];                                 /* the picture as shown (th_shown; pic holds the rectified
                                                             one meanwhile) */
-static u8 th_m[PH][PW];                                   /* rectified texel not to copy */
-static long long th_D[2][TH_NO + TH_NK + 1];              /* per wall, D(k), k = -TH_NO..TH_NK, in 2^-20 px */
-static int th_dj[2][PH];                                  /* side's rectified picture: the other wall's texels read
+static u8 (*th_m)[PW];                                   /* rectified texel not to copy */
+static long long (*th_D)[TH_NO + TH_NK + 1];              /* per wall, D(k), k = -TH_NO..TH_NK, in 2^-20 px */
+static int (*th_dj)[PH];                                  /* side's rectified picture: the other wall's texels read
                                                             this much lower (1/256 row; th_register) */
 static const VbBox TH_EXCL[] = { { 15, 66, 58, 203 }, { 262, 66, 305, 203 }, { 0, 0, 0, 0 } };   /* the arches */
 static const VbBox TH_NONE[] = { { 0, 0, 0, 0 } };
@@ -2596,7 +4072,8 @@ static int th_exf(int x, int y) { return th_m[y][x]; }
 static int th_de16(int side) { return side ? (PW - 1) * 16 - TH_VX16 : TH_VX16; }
 static void th_table(int side)
 {
-    long long de = (long long)th_de16(side), *D = th_D[side] + TH_NO;
+    long long de = (long long)th_de16(side),
+              *D = th_D[side] + TH_NO;
     D[0] = de << 16;
     for (int k = 1; k <= TH_NK; k++) D[k] = D[k - 1] - D[k - 1] * 16 / de;
     for (int k = 1; k <= TH_NO; k++) D[-k] = D[-k + 1] + D[-k + 1] * 16 / (de - 16);
@@ -2611,13 +4088,24 @@ static int th_bad(int x, int y)
 /* bilinear: the texel at (xf, yf) (2^-20 px) of the picture, 0 when one of the four is out or excluded */
 static int th_bil(const u16 (*src)[PW], long long xf, long long yf, Rgb *o)
 {
-    int x0 = (int)(xf >> 20), y0 = (int)(yf >> 20), fx = (int)((xf >> 12) & 255), fy = (int)((yf >> 12) & 255);
+    int x0 = (int)(xf >> 20),
+        y0 = (int)(yf >> 20),
+        fx = (int)((xf >> 12) & 255),
+        fy = (int)((yf >> 12) & 255);
     Rgb a, b;
-    if (th_bad(x0, y0) || th_bad(x0 + (fx > 0), y0) || th_bad(x0, y0 + (fy > 0)) || th_bad(x0 + (fx > 0), y0 + (fy > 0))) return 0;
-    a = mix(rgb15(src[y0][x0]), rgb15(src[y0][x0 + (fx > 0)]), fx); b = mix(rgb15(src[y0 + (fy > 0)][x0]), rgb15(src[y0 + (fy > 0)][x0 + (fx > 0)]), fx);
-    *o = mix(a, b, fy); return 1;
+    if (th_bad(x0, y0) || th_bad(x0 + (fx > 0), y0) || th_bad(x0, y0 + (fy > 0))
+        || th_bad(x0 + (fx > 0), y0 + (fy > 0)))
+        return 0;
+    a = mix(rgb15(src[y0][x0]), rgb15(src[y0][x0 + (fx > 0)]), fx);
+    b = mix(rgb15(src[y0 + (fy > 0)][x0]), rgb15(src[y0 + (fy > 0)][x0 + (fx > 0)]), fx);
+    *o = mix(a, b, fy);
+    return 1;
 }
-static u16 th_15(Rgb c) { return (u16)(clampi((c.r + 4) >> 3, 0, 31) | clampi((c.g + 4) >> 3, 0, 31) << 5 | clampi((c.b + 4) >> 3, 0, 31) << 10); }
+static u16 th_15(Rgb c)
+{
+    return (u16)(clampi((c.r + 4) >> 3, 0, 31) | clampi((c.g + 4) >> 3, 0, 31) << 5 | clampi((c.b + 4) >> 3, 0,
+            31) << 10);
+}
 /* the rectified picture for the strip on side `side`: its own wall at columns k (left) / 319 - k (right), k < TH_NK,
    and the other wall's rectified columns beside them in the screen's order (more windows for the narrow plaster /
    dado / floor stretches between the edge and the arch; never mirrored: a texel keeps its left / right neighbours) */
@@ -2626,18 +4114,30 @@ static u16 th_15(Rgb c) { return (u16)(clampi((c.r + 4) >> 3, 0, 31) | clampi((c
 static void th_rectify(int side)
 {
     for (int c = 0; c < PW; c++) {
-        int w = side, k = side ? PW - 1 - c : c;
-        if (!side && c >= TH_OTH && c < TH_OTH + TH_NK) { w = 1; k = TH_OTH + TH_NK - 1 - c; }
-        if (side && c >= PW - TH_OTH - TH_NK && c < PW - TH_OTH) { w = 0; k = c - (PW - TH_OTH - TH_NK); }
+        int w = side,
+            k = side ? PW - 1 - c : c;
+        if (!side && c >= TH_OTH && c < TH_OTH + TH_NK) {
+            w = 1;
+            k = TH_OTH + TH_NK - 1 - c;
+        }
+        if (side && c >= PW - TH_OTH - TH_NK && c < PW - TH_OTH) {
+            w = 0;
+            k = c - (PW - TH_OTH - TH_NK);
+        }
         for (int j = 0; j < PH; j++) {
-            Rgb o; int ok = 0; long long *D = th_D[w] + TH_NO, de = th_de16(w);
+            Rgb o;
+            int ok = 0;
+            long long *D = th_D[w] + TH_NO,
+                      de = th_de16(w);
             if (k < (th_plaster(j) ? TH_NKP : TH_NK)) {
                 long long xf = ((long long)TH_VX16 << 16) + (w ? D[k] : -D[k]);
                 long long yf = ((long long)TH_VY16 << 16) + (long long)(j * 16 - TH_VY16) * D[k] / de;
                 if (w != side && th_dj[side][j])          /* (the other wall: its row with the same line) */
-                    yf = ((long long)TH_VY16 << 16) + ((((long long)j * 256 + th_dj[side][j]) * 16 - ((long long)TH_VY16 << 8)) * D[k] / de >> 8);
+                    yf = ((long long)TH_VY16 << 16)
+                         + ((((long long)j * 256 + th_dj[side][j]) * 16 - ((long long)TH_VY16 << 8)) * D[k] / de >> 8);
                 if (th_plaster(j)) {                      /* (the plaster: nearest texels, its grain kept) */
-                    int xs = (int)((xf + (1 << 19)) >> 20), ys = (int)((yf + (1 << 19)) >> 20);
+                    int xs = (int)((xf + (1 << 19)) >> 20),
+                        ys = (int)((yf + (1 << 19)) >> 20);
                     ok = !th_bad(xs, ys);
                     if (ok) o = rgb15(th_p0[ys][xs]);
                 } else ok = th_bil(th_p0, xf, yf, &o);
@@ -2651,12 +4151,21 @@ static void th_rectify(int side)
    in 2^-20 px and de x 16); 0 when it holds no rectified column of a wall */
 static int th_col(int side, int c, long long *x, long long *Dk, long long *de, int *wo)
 {
-    int w = side, k = side ? PW - 1 - c : c;
+    int w = side,
+        k = side ? PW - 1 - c : c;
     if (c < 0 || c >= PW) return 0;
-    if (!side && c >= TH_OTH && c < TH_OTH + TH_NK) { w = 1; k = TH_OTH + TH_NK - 1 - c; }
-    if (side && c >= PW - TH_OTH - TH_NK && c < PW - TH_OTH) { w = 0; k = c - (PW - TH_OTH - TH_NK); }
+    if (!side && c >= TH_OTH && c < TH_OTH + TH_NK) {
+        w = 1;
+        k = TH_OTH + TH_NK - 1 - c;
+    }
+    if (side && c >= PW - TH_OTH - TH_NK && c < PW - TH_OTH) {
+        w = 0;
+        k = c - (PW - TH_OTH - TH_NK);
+    }
     if (k < 0 || k >= TH_NK) return 0;
-    *Dk = th_D[w][TH_NO + k]; *de = th_de16(w); *wo = w;
+    *Dk = th_D[w][TH_NO + k];
+    *de = th_de16(w);
+    *wo = w;
     *x = ((long long)TH_VX16 << 16) + (w ? *Dk : -*Dk);
     return 1;
 }
@@ -2666,7 +4175,9 @@ static int th_col(int side, int c, long long *x, long long *Dk, long long *de, i
    every column); 0 when the column holds no wall or a texel is out */
 static int th_back(int side, int cf, int rf, Rgb *o)
 {
-    long long x, Dk, de, yf; int c = (cf + 128) >> 8, w;
+    long long x, Dk, de, yf;
+    int c = (cf + 128) >> 8,
+        w;
     if (!th_col(side, c, &x, &Dk, &de, &w)) return 0;
     if (w != side) rf += th_dj[side][clampi((rf + 128) >> 8, 0, PH - 1)];
     yf = ((long long)TH_VY16 << 16) + (((long long)rf * 16 - ((long long)TH_VY16 << 8)) * Dk / de >> 8);
@@ -2683,28 +4194,43 @@ static const VbBand TH_BANDS[TH_NB] = {                   /* the left side (the 
     { 132, 166, 128, 166, 0, 214, 6, 3, 4, 0, 0, 3, 0, 0, 0, TH_Q },    /* the dado: the ledge, the rail, the panel */
     { 166, 203, 162, 203, 0, 214, 6, 3, 4, 0, 0, 3, 0, 0, 0, TH_Q },
     { 203, PH, 200, PH, 0, 214, 6, 3, 3, 0, 0, 4, 0, 0, 0, TH_Q } };    /* the floor */
+static int (*th_join__jd)[2][3];
 static void th_join(int side)
 {
-    static int jd[PH][2][3];
+    int (*const jd)[2][3] = th_join__jd;
     for (int st = 0; st < 2; st++) {
-        int R = st ? 1 : 2, N = st ? 1 : 8;
+        int R = st ? 1 : 2,
+            N = st ? 1 : 8;
         for (int y = 0; y < PH; y++) {
-            int s[2][3] = { { 0 } }, n[2] = { 0, 0 };
+            int s[2][3] = { { 0 } },
+                n[2] = { 0, 0 };
             for (int yy = y - R; yy <= y + R; yy++) {
                 if (yy < 0 || yy >= PH) continue;
                 for (int i = 0; i < N; i++) {
-                    int x = side ? PW - 1 - i : i; Rgb a;
+                    int x = side ? PW - 1 - i : i;
+                    Rgb a;
                     if (th_m[yy][x]) continue;
-                    a = cv[(size_t)yy * vb_ow + i]; s[1][0] += a.r; s[1][1] += a.g; s[1][2] += a.b; n[1]++;
-                    a = rgb15(pic[yy][x]); s[0][0] += a.r; s[0][1] += a.g; s[0][2] += a.b; n[0]++;
+                    a = cv[(size_t)yy * vb_ow + i];
+                    s[1][0] += a.r;
+                    s[1][1] += a.g;
+                    s[1][2] += a.b;
+                    n[1]++;
+                    a = rgb15(pic[yy][x]);
+                    s[0][0] += a.r;
+                    s[0][1] += a.g;
+                    s[0][2] += a.b;
+                    n[0]++;
                 }
             }
-            for (int c = 0; c < 3; c++) jd[y][st][c] = n[0] && n[1] ? (s[0][c] / n[0] - s[1][c] / n[1]) * (st ? 3 : 4) / 4 : 0;
+            for (int c = 0; c < 3; c++)
+                jd[y][st][c] = n[0] && n[1] ? (s[0][c] / n[0] - s[1][c] / n[1]) * (st ? 3 : 4) / 4 : 0;
         }
         for (int y = 0; y < PH; y++)
             for (int X = 1; X <= (st ? 6 : 40) && X <= vb_ow; X++) {
-                Rgb *p = &cv[(size_t)y * vb_ow + X - 1]; int w = st ? (7 - X) * 256 / 6 : X <= 8 ? 256 : (40 - X) * 256 / 32;
-                p->r = clampi(p->r + jd[y][st][0] * w / 256, 0, 255); p->g = clampi(p->g + jd[y][st][1] * w / 256, 0, 255);
+                Rgb *p = &cv[(size_t)y * vb_ow + X - 1];
+                int w = st ? (7 - X) * 256 / 6 : X <= 8 ? 256 : (40 - X) * 256 / 32;
+                p->r = clampi(p->r + jd[y][st][0] * w / 256, 0, 255);
+                p->g = clampi(p->g + jd[y][st][1] * w / 256, 0, 255);
                 p->b = clampi(p->b + jd[y][st][2] * w / 256, 0, 255);
             }
     }
@@ -2712,28 +4238,43 @@ static void th_join(int side)
 /* the plaster's light: its windows come from all over the recess, whose mottling is larger and stronger there than
    next to the edge; the strip's local light (luminance over 7 x 7) is pulled towards the edge's light of its row (the
    picture's 13 columns at the edge, rows +- 6), keeping 1/5 of its own variation; the grain stays */
+static int (*th_plaster_light__M)[TH_NO + 2];
 static void th_plaster_light(int side)
 {
-    static int M[PH][TH_NO + 2], T[PH];
+    static int T[PH];
+    int (*const M)[TH_NO + 2] = th_plaster_light__M;
     for (int y = TH_PL0; y < TH_PL1; y++) {
-        int s = 0, n = 0;
+        int s = 0,
+            n = 0;
         for (int yy = y - 6; yy <= y + 6; yy++) {
             if (!th_plaster(yy)) continue;
-            for (int i = 0; i < 13; i++) { int x = side ? PW - 1 - i : i; if (!th_m[yy][x]) { s += lum(rgb15(pic[yy][x])); n++; } }
+            for (int i = 0; i < 13; i++) {
+                int x = side ? PW - 1 - i : i;
+                if (!th_m[yy][x]) {
+                    s += lum(rgb15(pic[yy][x]));
+                    n++;
+                }
+            }
         }
         T[y] = n ? s * 16 / n : 0;
         for (int X = 1; X <= vb_ow; X++) {
-            int s2 = 0, n2 = 0;
+            int s2 = 0,
+                n2 = 0;
             for (int yy = y - 3; yy <= y + 3; yy++) {
                 if (!th_plaster(yy)) continue;
-                for (int XX = X - 3; XX <= X + 3; XX++) if (XX >= 1 && XX <= vb_ow) { s2 += lum(cv[(size_t)yy * vb_ow + XX - 1]); n2++; }
+                for (int XX = X - 3; XX <= X + 3; XX++)
+                    if (XX >= 1 && XX <= vb_ow) {
+                        s2 += lum(cv[(size_t)yy * vb_ow + XX - 1]);
+                        n2++;
+                    }
             }
             M[y][X] = n2 ? s2 * 16 / n2 : 0;
         }
     }
     for (int y = TH_PL0; y < TH_PL1; y++)
         for (int X = 1; X <= vb_ow; X++) {
-            int m = M[y][X], t;
+            int m = M[y][X],
+                t;
             if (!m || !T[y]) continue;
             t = T[y] + (m - T[y]) / 5;
             cv[(size_t)y * vb_ow + X - 1] = scale(cv[(size_t)y * vb_ow + X - 1], clampi(t * 256 / m, 160, 400));
@@ -2755,8 +4296,10 @@ static void th_shown(void)
         const Piece *p = &room->over[i];
         for (int r = 0; r < p->h; r++)
             for (int x = 0; x < p->w; x++) {
-                int sx = p->x + (shown_gl ? (64 * x * (p->w - 1) + 2 * p->w - 1) / (64 * p->w) : (2 * x * (p->w - 1) + p->w) / (2 * p->w));
-                int sy = p->y + (shown_gl ? (64 * r * (p->h - 1) + 2 * p->h - 1) / (64 * p->h) : (2 * r * (p->h - 1) + p->h) / (2 * p->h));
+                int sx = p->x + (shown_gl ? (64 * x * (p->w - 1) + 2 * p->w - 1) / (64 * p->w)
+                                          : (2 * x * (p->w - 1) + p->w) / (2 * p->w));
+                int sy = p->y + (shown_gl ? (64 * r * (p->h - 1) + 2 * p->h - 1) / (64 * p->h)
+                                          : (2 * r * (p->h - 1) + p->h) / (2 * p->h));
                 if (p->y + r < PH && p->x + x < PW && pic_ov[sy][sx]) th_p0[p->y + r][p->x + x] = pic[sy][sx];
             }
     }
@@ -2778,35 +4321,51 @@ static void th_shown(void)
 static int th_prof(int w, int j16)                        /* the sum over the edge's 13 rectified columns of wall w of
                                                             the luminance at row j16 / 16; -1 when a texel is missing */
 {
-    long long *D = th_D[w] + TH_NO, de = th_de16(w); int s = 0; Rgb o;
+    long long *D = th_D[w] + TH_NO,
+              de = th_de16(w);
+    int s = 0;
+    Rgb o;
     for (int k = 0; k < 13; k++) {
         long long xf = ((long long)TH_VX16 << 16) + (w ? D[k] : -D[k]);
-        long long yf = ((long long)TH_VY16 << 16) + (((long long)j16 * 256 - ((long long)TH_VY16 << 8)) * D[k] / de >> 8);
+        long long yf = ((long long)TH_VY16 << 16)
+                       + (((long long)j16 * 256 - ((long long)TH_VY16 << 8)) * D[k] / de >> 8);
         if (!th_bil(th_p0, xf, yf, &o)) return -1;
         s += lum(o);
     }
     return s;
 }
+static int (*th_register__P)[TH_RGN * 16];
 static void th_register(void)
 {
-    static int P[2][TH_RGN * 16], d[PH], ok[PH];
+    static int d[PH], ok[PH];
+    int (*const P)[TH_RGN * 16] = th_register__P;
     for (int w = 0; w < 2; w++)
         for (int i = 0; i < TH_RGN * 16; i++) P[w][i] = th_prof(w, TH_RGB * 16 + i);
     for (int j = TH_RG0; j < TH_RG1; j++) {
-        long long best = -1; int bt = 0, g = 0;
+        long long best = -1;
+        int bt = 0,
+            g = 0;
         for (int jj = j - 4; jj < j + 4; jj++) g += abs(P[0][(jj + 1 - TH_RGB) * 16] - P[0][(jj - TH_RGB) * 16]);
         for (int t = -24; t <= 24; t++) {
-            long long e = 0; int bad = 0;
+            long long e = 0;
+            int bad = 0;
             for (int jj = j - 4; jj <= j + 4 && !bad; jj++) {
-                int a = P[0][(jj - TH_RGB) * 16], b = P[1][(jj - TH_RGB) * 16 + t];
-                if (a < 0 || b < 0) bad = 1; else e += (long long)(a - b) * (a - b);
+                int a = P[0][(jj - TH_RGB) * 16],
+                    b = P[1][(jj - TH_RGB) * 16 + t];
+                if (a < 0 || b < 0) bad = 1;
+                else e += (long long)(a - b) * (a - b);
             }
-            if (!bad && (best < 0 || e < best)) { best = e; bt = t; }
+            if (!bad && (best < 0 || e < best)) {
+                best = e;
+                bt = t;
+            }
         }
-        ok[j] = best >= 0 && g >= 25 * 13; d[j] = bt * 16;
+        ok[j] = best >= 0 && g >= 25 * 13;
+        d[j] = bt * 16;
     }
     for (int j = TH_RG0; j < TH_RG1; j++) {                /* rows without an edge: between the nearest ones */
-        int a = j, b = j;
+        int a = j,
+            b = j;
         if (ok[j]) continue;
         while (a >= TH_RG0 && !ok[a]) a--;
         while (b < TH_RG1 && !ok[b]) b++;
@@ -2815,61 +4374,98 @@ static void th_register(void)
     }
     for (int j = 0; j < PH; j++) {
         int s = 0;
-        if (j < TH_RG0) { th_dj[0][j] = th_dj[1][j] = 0; continue; }
+        if (j < TH_RG0) {
+            th_dj[0][j] = th_dj[1][j] = 0;
+            continue;
+        }
         for (int jj = j - 2; jj <= j + 2; jj++) s += d[clampi(jj, TH_RG0, TH_RG1 - 1)];
-        th_dj[0][j] = s / 5; th_dj[1][j] = -(s / 5);
+        th_dj[0][j] = s / 5;
+        th_dj[1][j] = -(s / 5);
     }
 }
-static u16 th_raw[PH][PW];                                /* the picture, given back to pic at the end */
+static u16 (*th_raw)[PW];                                /* the picture, given back to pic at the end */
 static void gen_th(int pad)
 {
-    long long *D; int nk; Rgb *cv0;
+    if (!ws_need_gen_th()) return;
+    long long *D;
+    int nk;
+    Rgb *cv0;
     pal_make();
-    th_table(0); th_table(1); D = th_D[0] + TH_NO;
+    th_table(0);
+    th_table(1);
+    D = th_D[0] + TH_NO;
     for (nk = 1; nk < TH_NO && D[-nk] < ((long long)th_de16(0) + 16 * (pad + 64)) << 16; nk++) ;
     vb_ow = nk + 2;
     if (!canvas_open(vb_ow)) return;
-    vb_srcmap = (int *)malloc(sizeof(int) * (size_t)vb_ow * PH); cv0 = (Rgb *)malloc(sizeof(Rgb) * (size_t)vb_ow * PH);
-    if (!vb_srcmap || !cv0) { free(vb_srcmap); free(cv0); vb_srcmap = 0; canvas_close(); return; }
-    memcpy(th_raw, pic, sizeof pic); memcpy(th_p0, pic, sizeof pic); th_shown(); th_register();
-    vb_ex = TH_NONE; vb_exf = th_exf;
+    vb_srcmap = (int *)malloc(sizeof(int) * (size_t)vb_ow * PH);
+    cv0 = (Rgb *)malloc(sizeof(Rgb) * (size_t)vb_ow * PH);
+    if (!vb_srcmap || !cv0) {
+        free(vb_srcmap);
+        free(cv0);
+        vb_srcmap = 0;
+        canvas_close();
+        return;
+    }
+    memcpy(th_raw, pic, (sizeof *pic * (PH)));
+    memcpy(th_p0, pic, (sizeof *pic * (PH)));
+    th_shown();
+    th_register();
+    vb_ex = TH_NONE;
+    vb_exf = th_exf;
     for (int side = 0; side < 2; side++) {
         long long de = th_de16(side);
-        D = th_D[side] + TH_NO; th_rectify(side);
-        canvas_clear(); cur_side = side;
+        D = th_D[side] + TH_NO;
+        th_rectify(side);
+        canvas_clear();
+        cur_side = side;
         for (int i = 0; i < vb_ow * PH; i++) vb_srcmap[i] = -1;
         for (int i = 0; i < TH_NB; i++) {
             VbBand b = TH_BANDS[i];
-            if (side) { short a = b.sx0; b.sx0 = (short)(PW - b.sx1); b.sx1 = (short)(PW - a); }
+            if (side) {
+                short a = b.sx0;
+                b.sx0 = (short)(PW - b.sx1);
+                b.sx1 = (short)(PW - a);
+            }
             vb_quilt(side, &b, 1401 + 13 * i);
         }
         th_plaster_light(side);
         for (size_t i = 0; i < (size_t)vb_ow * PH; i++) cv0[i] = cv[i];
         th_join(side);
         for (int X = 1; X <= pad; X++) {
-            long long d = (de + 16 * X) << 16; int k = 0, fk;
+            long long d = (de + 16 * X) << 16;
+            int k = 0,
+                fk;
             while (k < TH_NO - 1 && D[-k - 1] <= d) k++;
             fk = (int)((d - D[-k]) * 256 / (D[-k - 1] - D[-k]));      /* rectified column k + fk / 256 */
             for (int y = 0; y < PH; y++) {
                 long long jf = ((long long)TH_VY16 << 16) + (long long)(y * 16 - TH_VY16) * (de << 16) / (de + 16 * X);
-                int j = clampi((int)(jf >> 20), 0, PH - 2), fj = (int)((jf >> 12) & 255);
+                int j = clampi((int)(jf >> 20), 0, PH - 2),
+                    fj = (int)((jf >> 12) & 255);
                 Rgb c[2];
                 if (th_plaster(j) && th_plaster(j + 1)) {      /* (nearest) */
-                    int kk = clampi(k + (fk >= 128), 0, vb_ow), jj = j + (fj >= 128);
+                    int kk = clampi(k + (fk >= 128), 0, vb_ow),
+                        jj = j + (fj >= 128);
                     strip[(size_t)y * 2 * pad + (side ? pad + (X - 1) : pad - X)] =
                         quant(kk ? cv[(size_t)jj * vb_ow + kk - 1] : rgb15(pic[jj][side ? PW - 1 : 0]));
                     continue;
                 }
                 {   /* the dado and the floor: the quilt's source texel in one step from the picture (bilinear
                        once: the slats, rails and the inlay as crisp as the picture's), plus the join's correction */
-                    int kr = k + (fk >= 128), jr = j + (fj >= 128), ox = k * 256 + fk - kr * 256, oy = j * 256 + fj - jr * 256, s;
+                    int kr = k + (fk >= 128),
+                        jr = j + (fj >= 128),
+                        ox = k * 256 + fk - kr * 256,
+                        oy = j * 256 + fj - jr * 256,
+                        s;
                     Rgb o;
                     if (kr <= vb_ow && jr < PH) {
                         s = kr ? vb_srcmap[(size_t)jr * vb_ow + kr - 1] : jr * PW + (side ? PW - 1 : 0);
                         if (s >= 0 && th_back(side, (s % PW) * 256 + (side ? ox : -ox), (s / PW) * 256 + oy, &o)) {
                             if (kr) {
-                                Rgb a = cv[(size_t)jr * vb_ow + kr - 1], b = cv0[(size_t)jr * vb_ow + kr - 1];
-                                o.r += a.r - b.r; o.g += a.g - b.g; o.b += a.b - b.b;
+                                Rgb a = cv[(size_t)jr * vb_ow + kr - 1],
+                                    b = cv0[(size_t)jr * vb_ow + kr - 1];
+                                o.r += a.r - b.r;
+                                o.g += a.g - b.g;
+                                o.b += a.b - b.b;
                             }
                             strip[(size_t)y * 2 * pad + (side ? pad + (X - 1) : pad - X)] = quant(o);
                             continue;
@@ -2886,9 +4482,12 @@ static void gen_th(int pad)
             }
         }
     }
-    memcpy(pic, th_raw, sizeof pic);
-    free(vb_srcmap); vb_srcmap = 0; free(cv0);
-    vb_ex = VB_EXCL; vb_exf = 0;
+    memcpy(pic, th_raw, (sizeof *pic * (PH)));
+    free(vb_srcmap);
+    vb_srcmap = 0;
+    free(cv0);
+    vb_ex = VB_EXCL;
+    vb_exf = 0;
     canvas_close();
 }
 
@@ -2943,47 +4542,73 @@ static const VbBand HL_VB[HL_NB] = {                      /* (left side; the rig
     { 184, 197, 184, 197, 0, 56, 10, 4, 0, 0, 0, 1, 0, 0, 0, HL_QF },
     { 197, PH, 197, PH, 0, 56, 10, 4, 0, 0, 0, 1, 0, 0, 0, HL_QF } };
 static const VbBox HL_VASE[] = { { 26, 146, 56, 204 }, { 264, 146, 294, 204 }, { 0, 0, 0, 0 } };   /* (screen) */
-static u16 hl_p0[PH][PW];                                 /* the picture (pic holds the rectified one meanwhile) */
-static u8 hl_m[PH][PW];                                   /* rectified texel not to copy */
-static int hl_gsrc[PH][PW];                               /* a rectified texel's source texel (itself, or for a gap
+static u16 (*hl_p0)[PW];                                 /* the picture (pic holds the rectified one meanwhile) */
+static u8 (*hl_m)[PW];                                   /* rectified texel not to copy */
+static int (*hl_gsrc)[PW];                               /* a rectified texel's source texel (itself, or for a gap
                                                             texel the one further in), j * PW + c; -1: none */
 static int hl_vx(int s) { return s ? 319 * 256 - HL_VX : HL_VX; }
 /* the picture point (side-local, 1/256) of the wall's point at geometric column k, rectified row j (1/256) */
 static void hl_pt(int s, long long k, long long j, long long *xo, long long *yo)
 {
-    long long hx = HL_HX[s], hy = HL_HY, vx = hl_vx(s), vy = HL_VY;
-    long long xr = k * hx / (hx + k), yr = hy + (HL_JR - hy) * (hx - xr) / hx;   /* on the reference line */
-    long long cn = vx - xr, cd = vy - yr, mn = j - hy;
+    long long hx = HL_HX[s],
+              hy = HL_HY,
+              vx = hl_vx(s),
+              vy = HL_VY;
+    /* on the reference line */
+    long long xr = k * hx / (hx + k),
+              yr = hy + (HL_JR - hy) * (hx - xr) / hx;
+    long long cn = vx - xr,
+              cd = vy - yr,
+              mn = j - hy;
     long long y = (hy * hx * cd + mn * ((hx - xr) * cd + yr * cn)) / (hx * cd + mn * cn);
-    *yo = y; *xo = xr + (y - yr) * cn / cd;
+    *yo = y;
+    *xo = xr + (y - yr) * cn / cd;
 }
 /* the inverse: geometric column k and rectified row j (1/256) of the side-local point (x, y) (1/256) */
 static void hl_kj(int s, long long x, long long y, long long *ko, long long *jo)
 {
-    long long hx = HL_HX[s], hy = HL_HY, vx = hl_vx(s), vy = HL_VY, xr;
+    long long hx = HL_HX[s],
+              hy = HL_HY,
+              vx = hl_vx(s),
+              vy = HL_VY,
+              xr;
     *jo = hy + (y - hy) * hx / (hx - x);
     xr = hx * (x * (vy - y) + (vx - x) * (HL_JR - y)) / (hx * (vy - y) + (vx - x) * (HL_JR - hy));
     *ko = hx * xr / (hx - xr);
 }
-static int hl_band(int j) { for (int i = 0; i < HL_NB; i++) if (j >= HL_BANDS[i].j0 && j < HL_BANDS[i].j1) return i; return -1; }
+static int hl_band(int j)
+{
+    for (int i = 0; i < HL_NB; i++) if (j >= HL_BANDS[i].j0 && j < HL_BANDS[i].j1) return i;
+    return -1;
+}
 /* rectified column of side s's rectified picture column c and back (oriented like vb_quilt's picture: the right side
    mirrored) */
 static int hl_k(int s, int c) { return (s ? PW - 1 - c : c) + HL_KMIN; }
 static int hl_c(int s, int k) { return s ? PW - 1 - (k - HL_KMIN) : k - HL_KMIN; }
+static int hl_mode;                     /* the read: 2 = bilinear with the fractions sharpened (x2 about the middle) */
 /* bilinear: the picture (screen) at (x, y) (1/256), 0 when a tap is out or on a vase */
-static int hl_mode;                                      /* the read: 2 = bilinear with the fractions sharpened (x2 about the middle) */
 static int hl_bil(long long x, long long y, Rgb *o)
 {
-    int x0 = (int)(x >> 8), y0 = (int)(y >> 8), fx = (int)(x & 255), fy = (int)(y & 255), x1 = x0 + (fx > 0), y1 = y0 + (fy > 0);
+    int x0 = (int)(x >> 8),
+        y0 = (int)(y >> 8),
+        fx = (int)(x & 255),
+        fy = (int)(y & 255),
+        x1 = x0 + (fx > 0),
+        y1 = y0 + (fy > 0);
     Rgb a, b;
     if (x < 0 || y < 0 || x1 >= PW || y1 >= PH) return 0;
     for (int i = 0; HL_VASE[i].x1; i++)
         if (x1 >= HL_VASE[i].x0 && x0 < HL_VASE[i].x1 && y1 >= HL_VASE[i].y0 && y0 < HL_VASE[i].y1) return 0;
     if (hl_mode == 1) fx = fx >= 128 ? 256 : 0;
-    if (hl_mode == 2) { fx = clampi((fx - 64) * 2, 0, 256); fy = clampi((fy - 64) * 2, 0, 256); }
+    if (hl_mode == 2) {
+        fx = clampi((fx - 64) * 2, 0, 256);
+        fy = clampi((fy - 64) * 2, 0, 256);
+    }
     if (hl_mode == 3) fx = clampi((fx - 64) * 2, 0, 256);
-    a = mix(rgb15(hl_p0[y0][x0]), rgb15(hl_p0[y0][x1]), fx); b = mix(rgb15(hl_p0[y1][x0]), rgb15(hl_p0[y1][x1]), fx);
-    *o = mix(a, b, fy); return 1;
+    a = mix(rgb15(hl_p0[y0][x0]), rgb15(hl_p0[y0][x1]), fx);
+    b = mix(rgb15(hl_p0[y1][x0]), rgb15(hl_p0[y1][x1]), fx);
+    *o = mix(a, b, fy);
+    return 1;
 }
 /* the picture at side s's rectified (k, j) (rectified column and row, 1/256) */
 static int hl_at(int s, long long k, long long j, Rgb *o)
@@ -2996,26 +4621,38 @@ static void hl_rectify(int s)
 {
     for (int j = 0; j < PH; j++)
         for (int c = 0; c < PW; c++) {
-            int k = hl_k(s, c), b = hl_band(j), ok; Rgb o;
+            int k = hl_k(s, c),
+                b = hl_band(j),
+                ok;
+            Rgb o;
             const HlBand *hb = &HL_BANDS[b];
-            pic[j][c] = 0; hl_m[j][c] = 1; hl_gsrc[j][c] = -1;
+            pic[j][c] = 0;
+            hl_m[j][c] = 1;
+            hl_gsrc[j][c] = -1;
             if (k < HL_KMIN || k >= HL_KMIN + HL_NK) continue;
             ok = hl_at(s, (long long)k * 256, (long long)j * 256, &o);
-            if (ok) { pic[j][c] = th_15(o); hl_gsrc[j][c] = j * PW + c; }
+            if (ok) {
+                pic[j][c] = th_15(o);
+                hl_gsrc[j][c] = j * PW + c;
+            }
             if (ok && ((k >= hb->ka && k < hb->kb) || (k >= hb->kc && k < hb->kd))) hl_m[j][c] = 0;
         }
     /* the gap: the rectified texels left of the picture's edge (lower rows), from `gap` columns further in */
     for (int j = 0; j < PH; j++) {
         int b = hl_band(j);
         for (int k = HL_KMIN + HL_NK - 1; k >= HL_KMIN; k--) {
-            int c = hl_c(s, k), k2 = k + HL_BANDS[b].gap, c2;
+            int c = hl_c(s, k),
+                k2 = k + HL_BANDS[b].gap,
+                c2;
             long long x, y;
             if (hl_gsrc[j][c] >= 0 || k2 >= HL_KMIN + HL_NK) continue;
             hl_pt(s, (long long)k * 256 * 256 / HL_KS, (long long)j * 256, &x, &y);
             if (x >= 0) continue;                         /* (only outside the picture) */
             c2 = hl_c(s, k2);
             if (hl_gsrc[j][c2] < 0) continue;
-            pic[j][c] = pic[j][c2]; hl_gsrc[j][c] = hl_gsrc[j][c2]; hl_m[j][c] = hl_m[j][c2];
+            pic[j][c] = pic[j][c2];
+            hl_gsrc[j][c] = hl_gsrc[j][c2];
+            hl_m[j][c] = hl_m[j][c2];
         }
     }
 }
@@ -3030,11 +4667,14 @@ static int hl_exf(int x, int y) { return hl_m[y][x]; }
 #define HL_RB0 138
 #define HL_RB1 146
 #define HL_RB2 166                                        /* (back to the wall's rows on the slats) */
-static const int HL_RBY[2] = { 37448, 37466 }, HL_RBM[2] = { 130, 117 };   /* the edge's row at the edge column (1/256), and
-                                                            its slope (1/4096 row a column) */
+/* the edge's row at the edge column (1/256), and its slope (1/4096 row a column) */
+static const int HL_RBY[2] = { 37448, 37466 },
+                 HL_RBM[2] = { 130, 117 };
 static long long hl_rbot(int s, long long kg)             /* its rectified row (1/256) at geometric column kg (1/256) */
 {
-    long long x, y, hx = HL_HX[s], yl;
+    long long x, y,
+              hx = HL_HX[s],
+              yl;
     hl_pt(s, kg, (long long)HL_RBY[s], &x, &y);
     yl = HL_RBY[s] + x * HL_RBM[s] / 4096;
     return HL_HY + (yl - HL_HY) * hx / (hx - x);
@@ -3042,12 +4682,21 @@ static long long hl_rbot(int s, long long kg)             /* its rectified row (
 /* the strip texel of side s at strip column X, row y: the quilt's source, read from the picture in one step */
 static int hl_src(int s, long long kg, long long jq, Rgb *o)
 {
-    long long kq = kg * HL_KS / 256; int kr, jr, ox, oy, src;
-    {   int b = hl_band(clampi((int)(jq >> 8), 0, PH - 1));   /* (the nearest row of the band) */
-        jr = clampi((int)((jq + 128) >> 8), HL_BANDS[b].j0, HL_BANDS[b].j1 - 1); }
+    long long kq = kg * HL_KS / 256;
+    int kr, jr, ox, oy, src;
+    /* (the nearest row of the band) */
+    {
+        int b = hl_band(clampi((int)(jq >> 8), 0, PH - 1));
+        jr = clampi((int)((jq + 128) >> 8), HL_BANDS[b].j0, HL_BANDS[b].j1 - 1);
+    }
     kr = fdiv((int)kq + 128, 256);
-    ox = (int)(kq - (long long)kr * 256); oy = (int)(jq - (long long)jr * 256);
-    if (kr >= HL_KMIN) { int c = hl_c(s, kr); if (c < 0 || c >= PW) return 0; src = hl_gsrc[jr][c]; }
+    ox = (int)(kq - (long long)kr * 256);
+    oy = (int)(jq - (long long)jr * 256);
+    if (kr >= HL_KMIN) {
+        int c = hl_c(s, kr);
+        if (c < 0 || c >= PW) return 0;
+        src = hl_gsrc[jr][c];
+    }
     else {
         int Xc = HL_KMIN - kr;
         if (Xc > vb_ow) return 0;
@@ -3057,8 +4706,10 @@ static int hl_src(int s, long long kg, long long jq, Rgb *o)
     if (src < 0) return 0;
     if (jq > HL_RB0 * 256 && jq < HL_RB2 * 256) {        /* the handrail's lower edge: the source rows moved so it
                                                             lies on its own line (hl_rbot) at the source and here */
-        int w = jq < HL_RB1 * 256 ? (int)((jq - HL_RB0 * 256) / (HL_RB1 - HL_RB0)) : (int)((HL_RB2 * 256 - jq) / (HL_RB2 - HL_RB1));
-        long long et = hl_rbot(s, kg), es = hl_rbot(s, (long long)hl_k(s, src % PW) * 65536 / HL_KS);
+        int w = jq < HL_RB1 * 256 ? (int)((jq - HL_RB0 * 256) / (HL_RB1 - HL_RB0))
+                                  : (int)((HL_RB2 * 256 - jq) / (HL_RB2 - HL_RB1));
+        long long et = hl_rbot(s, kg),
+                  es = hl_rbot(s, (long long)hl_k(s, src % PW) * 65536 / HL_KS);
         if (et > 150 * 256) et = 150 * 256;
         oy += (int)((es - et) * w / 256);
     }
@@ -3102,17 +4753,24 @@ static const int HL_URIM[2] = { 10365, 10220 };           /* the rim's start */
 #define HL_SHW 768                                        /* the bevel's first 3 columns: its inner shadow (B's lit
                                                             pane reaches about 2 columns further than A's there) */
 static int hl_ke[PH];                                     /* the edge's rectified column on rectified row j (1/256) */
-static int hl_eb[PH][3], hl_ea[PH][3];                    /* B's and A's texel at the edge */
-static int hl_ta[HL_NJ][HL_NU][3], hl_tb[HL_NJ][HL_NU][3], hl_la[HL_NJ][HL_NU][3];
-static unsigned char hl_vb[HL_NJ][HL_NU], hl_ms[HL_NJ][HL_NU], hl_md[HL_NJ][HL_NU];   /* B shows; measured; measured
+static int (*hl_eb)[3], (*hl_ea)[3];                    /* B's and A's texel at the edge */
+static int (*hl_ta)[HL_NU][3], (*hl_tb)[HL_NU][3], (*hl_la)[HL_NU][3];
+static unsigned char (*hl_vb)[HL_NU], (*hl_ms)[HL_NU], (*hl_md)[HL_NU];   /* B shows; measured; measured
                                                             directly (not held) */
-static short hl_rho[3][HL_NJ][HL_NU][3];                  /* the light ratio (x 256): B, C, the panels after C */
-static int hl_lvl[HL_NJ][3];                              /* B's pane's level (its rows) */
+static short (*hl_rho)[HL_NJ][HL_NU][3];                  /* the light ratio (x 256): B, C, the panels after C */
+static int (*hl_lvl)[3];                              /* B's pane's level (its rows) */
 static int hl_avg(int s, long long k0, long long j, int n, int step, int *rgb)   /* mean of n texels along the row */
 {
-    int got = 0; Rgb o; rgb[0] = rgb[1] = rgb[2] = 0;
+    int got = 0;
+    Rgb o;
+    rgb[0] = rgb[1] = rgb[2] = 0;
     for (int i = 0; i < n; i++)
-        if (hl_at(s, k0 + (long long)i * step, j, &o)) { rgb[0] += o.r; rgb[1] += o.g; rgb[2] += o.b; got++; }
+        if (hl_at(s, k0 + (long long)i * step, j, &o)) {
+            rgb[0] += o.r;
+            rgb[1] += o.g;
+            rgb[2] += o.b;
+            got++;
+        }
     if (!got) return 0;
     for (int c = 0; c < 3; c++) rgb[c] = rgb[c] / got;
     return 1;
@@ -3129,82 +4787,153 @@ static int hl_seg(int s, int u)                           /* the part at unit of
 {
     return u < HL_UBAR[s] ? 0 : u < HL_UPE[s] ? 1 : u < HL_UPE[s] + HL_SHW ? 2 : u < HL_URIM[s] ? 3 : 4;
 }
-static int hl_rcls(int j) { return j < HL_PN0 ? 0 : j < HL_PN1 ? 1 : 2; }   /* the frame above, the pane's rows, below */
+/* the frame above, the pane's rows, below */
+static int hl_rcls(int j) { return j < HL_PN0 ? 0 : j < HL_PN1 ? 1 : 2; }
+static int (*hl_light__q)[3];
+static int (*hl_light__qs)[3];
+static int (*hl_light__fa)[3];
+static int (*hl_light__fb)[3];
+static short (*hl_light__tmp)[HL_NU][3];
 static void hl_light(int s)
 {
-    int P = HL_UPER[s], u0 = HL_UE[s] - P, nu = P / HL_US + 2, lo[5], hi[5], mg[5];
-    static int q[HL_NJ][3], qs[HL_NJ][3], qv[HL_NJ], fa[HL_NJ][3], fb[HL_NJ][3];
+    int P = HL_UPER[s],
+        u0 = HL_UE[s] - P,
+        nu = P / HL_US + 2,
+        lo[5], hi[5], mg[5];
+    static int qv[HL_NJ];
+    int (*const q)[3] = hl_light__q,
+        (*const qs)[3] = hl_light__qs,
+        (*const fa)[3] = hl_light__fa,
+        (*const fb)[3] = hl_light__fb;
     static unsigned char rowok[HL_NJ];
-    static short tmp[6][HL_NU][3];
+    short (*const tmp)[HL_NU][3] = hl_light__tmp;
     if (nu > HL_NU) nu = HL_NU;
     for (int j = HL_PA0; j < HL_PA1; j++) {
-        int lo2 = -40 * 256, hi2 = 40 * 256;
+        int lo2 = -40 * 256,
+            hi2 = 40 * 256;
         while (hi2 - lo2 > 1) {                           /* the edge: hl_pt's column crosses 0 */
-            int m = (lo2 + hi2) / 2; long long x, y;
+            int m = (lo2 + hi2) / 2;
+            long long x, y;
             hl_pt(s, (long long)m * 256 / HL_KS, (long long)j * 256, &x, &y);
-            if (x < 0) lo2 = m; else hi2 = m;
+            if (x < 0) lo2 = m;
+            else hi2 = m;
         }
         hl_ke[j] = hi2;
-        if (!hl_avg(s, hi2 + 26, (long long)j * 256, 3, 64, hl_eb[j]) || !hl_avg(s, hi2 + 26 + P, (long long)j * 256, 3, 64, hl_ea[j]))
+        if (!hl_avg(s, hi2 + 26, (long long)j * 256, 3, 64, hl_eb[j])
+            || !hl_avg(s, hi2 + 26 + P, (long long)j * 256, 3, 64, hl_ea[j]))
             for (int c = 0; c < 3; c++) hl_eb[j][c] = hl_ea[j][c] = 0;
         for (int i = 0; i < nu; i++) {                    /* A's and B's texels on the grid */
-            int u = u0 + i * HL_US, r = j - HL_PA0; Rgb o;
+            int u = u0 + i * HL_US,
+                r = j - HL_PA0;
+            Rgb o;
             if (!hl_uv(s, u, (long long)j * 256, &o)) o.r = o.g = o.b = 0;
-            hl_ta[r][i][0] = o.r; hl_ta[r][i][1] = o.g; hl_ta[r][i][2] = o.b;
+            hl_ta[r][i][0] = o.r;
+            hl_ta[r][i][1] = o.g;
+            hl_ta[r][i][2] = o.b;
             hl_vb[r][i] = (unsigned char)(u - P >= hl_ke[j] + 32 && hl_at(s, u - P, (long long)j * 256, &o));
-            hl_tb[r][i][0] = hl_vb[r][i] ? o.r : 0; hl_tb[r][i][1] = hl_vb[r][i] ? o.g : 0; hl_tb[r][i][2] = hl_vb[r][i] ? o.b : 0;
+            hl_tb[r][i][0] = hl_vb[r][i] ? o.r : 0;
+            hl_tb[r][i][1] = hl_vb[r][i] ? o.g : 0;
+            hl_tb[r][i][2] = hl_vb[r][i] ? o.b : 0;
         }
     }
-    for (int g = 0; g < 5; g++) { lo[g] = nu; hi[g] = -1; }   /* each part's samples [lo, hi] and margin */
-    for (int i = 0; i < nu; i++) { int g = hl_seg(s, u0 + i * HL_US); if (i < lo[g]) lo[g] = i; hi[g] = i; }
+    /* each part's samples [lo, hi] and margin */
+    for (int g = 0; g < 5; g++) {
+        lo[g] = nu;
+        hi[g] = -1;
+    }
+    for (int i = 0; i < nu; i++) {
+        int g = hl_seg(s, u0 + i * HL_US);
+        if (i < lo[g]) lo[g] = i;
+        hi[g] = i;
+    }
     for (int g = 0; g < 5; g++) mg[g] = g == 2 ? 1 : clampi((hi[g] - lo[g]) / 2, 0, 5);
     /* the smoothed lights (+-4 samples within the part, +-2 rows within the row's class): A's everywhere, B's where it
        shows (half the window at least, off the part's ends), and their ratio there */
     for (int r = 0; r < HL_NJ; r++)
         for (int i = 0; i < nu; i++) {
-            int g = hl_seg(s, u0 + i * HL_US), sa[3] = { 0, 0, 0 }, sb[3] = { 0, 0, 0 }, na = 0, nb = 0;
+            int g = hl_seg(s, u0 + i * HL_US),
+                sa[3] = { 0, 0, 0 },
+                sb[3] = { 0, 0, 0 },
+                na = 0,
+                nb = 0;
             for (int r2 = r - 2; r2 <= r + 2; r2++) {
                 if (r2 < 0 || r2 >= HL_NJ || hl_rcls(r2 + HL_PA0) != hl_rcls(r + HL_PA0)) continue;
                 for (int i2 = i - 4; i2 <= i + 4; i2++) {
                     if (i2 < lo[g] || i2 > hi[g]) continue;
                     for (int c = 0; c < 3; c++) sa[c] += hl_ta[r2][i2][c];
                     na++;
-                    if (hl_vb[r2][i2]) { for (int c = 0; c < 3; c++) sb[c] += hl_tb[r2][i2][c]; nb++; }
+                    if (hl_vb[r2][i2]) {
+                        for (int c = 0; c < 3; c++) sb[c] += hl_tb[r2][i2][c];
+                        nb++;
+                    }
                 }
             }
             hl_ms[r][i] = (unsigned char)(nb * 2 >= na && nb > 0 && i - lo[g] >= mg[g] && hi[g] - i >= mg[g]);
             for (int c = 0; c < 3; c++) {
                 hl_la[r][i][c] = na ? sa[c] / na : 0;
-                hl_rho[0][r][i][c] = (short)(hl_ms[r][i] ? clampi((sb[c] / nb + 8) * 256 / (hl_la[r][i][c] + 8), 8, 1024) : 256);
+                hl_rho[0][r][i][c] =
+                    (short)(hl_ms[r][i] ? clampi((sb[c] / nb + 8) * 256 / (hl_la[r][i][c] + 8), 8, 1024) : 256);
             }
         }
     /* the pane (its rows): B's level by the edge (the mean of its two brightest texels there, where the edge is on
        the pane) over A's linear light (fitted on the pane's flat part), held flat across the pane; on the rows where
        the edge is past the pane, B's level over A's held from the nearest row; smoothed over 9 rows */
     {
-        int f0 = (HL_UBAR[s] + 320 - u0 + HL_US - 1) / HL_US, f1 = (HL_UPE[s] - 640 - u0) / HL_US, mid = (f0 + f1) / 2;
+        int f0 = (HL_UBAR[s] + 320 - u0 + HL_US - 1) / HL_US,
+            f1 = (HL_UPE[s] - 640 - u0) / HL_US,
+            mid = (f0 + f1) / 2;
         for (int r = HL_PN0 - HL_PA0; r < HL_PN1 - HL_PA0; r++) {
-            int ue = hl_ke[r + HL_PA0] + P, b1 = -1, b2 = -1, l1 = -1, l2 = -1;
+            int ue = hl_ke[r + HL_PA0] + P,
+                b1 = -1,
+                b2 = -1,
+                l1 = -1,
+                l2 = -1;
             for (int c = 0; c < 3; c++) {                 /* (least squares over the row and the 2 above and below) */
-                long long sx = 0, sy = 0, sxx = 0, sxy = 0, n = 0, den, b;
+                long long sx = 0,
+                          sy = 0,
+                          sxx = 0,
+                          sxy = 0,
+                          n = 0,
+                          den, b;
                 for (int r2 = r - 2; r2 <= r + 2; r2++) {
                     if (r2 < HL_PN0 - HL_PA0 || r2 >= HL_PN1 - HL_PA0) continue;
-                    for (int i = f0; i <= f1; i++) { long long x = i - f0, y = hl_ta[r2][i][c]; sx += x; sy += y; sxx += x * x; sxy += x * y; n++; }
+                    for (int i = f0; i <= f1; i++) {
+                        long long x = i - f0,
+                                  y = hl_ta[r2][i][c];
+                        sx += x;
+                        sy += y;
+                        sxx += x * x;
+                        sxy += x * y;
+                        n++;
+                    }
                 }
-                den = n * sxx - sx * sx; b = den ? (n * sxy - sx * sy) * 256 / den : 0;
-                fb[r][c] = (int)b; fa[r][c] = (int)((sy * 256 - b * sx) / n / 256);
+                den = n * sxx - sx * sx;
+                b = den ? (n * sxy - sx * sy) * 256 / den : 0;
+                fb[r][c] = (int)b;
+                fa[r][c] = (int)((sy * 256 - b * sx) / n / 256);
             }
             for (int i = 0; i < nu; i++) {                /* B's two brightest texels on the pane by the edge */
-                int u = u0 + i * HL_US, l;
+                int u = u0 + i * HL_US,
+                    l;
                 if (!hl_vb[r][i] || u < ue + 64 || u > HL_UPE[s] + 256) continue;
                 l = hl_tb[r][i][0] * 2 + hl_tb[r][i][1] * 5 + hl_tb[r][i][2];
-                if (l > l1) { b2 = b1; l2 = l1; b1 = i; l1 = l; } else if (l > l2) { b2 = i; l2 = l; }
+                if (l > l1) {
+                    b2 = b1;
+                    l2 = l1;
+                    b1 = i;
+                    l1 = l;
+                } else if (l > l2) {
+                    b2 = i;
+                    l2 = l;
+                }
             }
             qv[r] = ue <= HL_UPE[s] && b2 >= 0;
-            if (qv[r]) for (int c = 0; c < 3; c++) {
-                int lb = (hl_tb[r][b1][c] + hl_tb[r][b2][c]) / 2, la = fa[r][c] + fb[r][c] * (mid - f0) / 256;
-                q[r][c] = clampi((lb + 8) * 256 / (la + 8), 8, 1024);
-            }
+            if (qv[r])
+                for (int c = 0; c < 3; c++) {
+                    int lb = (hl_tb[r][b1][c] + hl_tb[r][b2][c]) / 2,
+                        la = fa[r][c] + fb[r][c] * (mid - f0) / 256;
+                    q[r][c] = clampi((lb + 8) * 256 / (la + 8), 8, 1024);
+                }
         }
         for (int r = HL_PN0 - HL_PA0; r < HL_PN1 - HL_PA0; r++) {
             int best = -1;
@@ -3217,12 +4946,17 @@ static void hl_light(int s)
         }
         for (int r = HL_PN0 - HL_PA0; r < HL_PN1 - HL_PA0; r++)
             for (int c = 0; c < 3; c++) {
-                int sum = 0, n = 0;
-                for (int r2 = r - 4; r2 <= r + 4; r2++) if (r2 >= HL_PN0 - HL_PA0 && r2 < HL_PN1 - HL_PA0) { sum += q[r2][c]; n++; }
+                int sum = 0,
+                    n = 0;
+                for (int r2 = r - 4; r2 <= r + 4; r2++)
+                    if (r2 >= HL_PN0 - HL_PA0 && r2 < HL_PN1 - HL_PA0) {
+                        sum += q[r2][c];
+                        n++;
+                    }
                 qs[r][c] = sum / n;
             }
     }
-    memcpy(hl_md, hl_ms, sizeof hl_md);
+    memcpy(hl_md, hl_ms, (sizeof *hl_md * (HL_NJ)));
     /* held over each part from where it was measured: from the nearest row of the same class measured there (the
        light of a part varies little down the wall), else along the row (the nearest measured sample), else from the
        nearest row of the same class that has one */
@@ -3232,15 +4966,23 @@ static void hl_light(int s)
             if (hl_ms[r][i]) continue;
             for (int d = 1; d < HL_NJ && best < 0; d++) {
                 if (r - d >= 0 && hl_ms[r - d][i] && hl_rcls(r - d + HL_PA0) == hl_rcls(r + HL_PA0)) best = r - d;
-                else if (r + d < HL_NJ && hl_ms[r + d][i] && hl_rcls(r + d + HL_PA0) == hl_rcls(r + HL_PA0)) best = r + d;
+                else if (r + d < HL_NJ && hl_ms[r + d][i] && hl_rcls(r + d + HL_PA0) == hl_rcls(r + HL_PA0))
+                    best = r + d;
             }
             if (best < 0) continue;
             for (int c = 0; c < 3; c++)                   /* (the inner shadow's: as B's pane's level goes) */
-                hl_rho[0][r][i][c] = (short)(i >= lo[2] && i <= hi[2] && hl_rcls(r + HL_PA0) == 1 ?
-                    clampi(hl_rho[0][best][i][c] * qs[r][c] / (qs[best][c] > 8 ? qs[best][c] : 8), 8, 1024) : hl_rho[0][best][i][c]);
+                hl_rho[0][r][i][c] =
+                    (short)(i >= lo[2] && i <= hi[2] && hl_rcls(r + HL_PA0) == 1
+                            ? clampi(hl_rho[0][best][i][c] * qs[r][c] / (qs[best][c] > 8 ? qs[best][c] : 8), 8, 1024)
+                            : hl_rho[0][best][i][c]);
             hl_vb[r][i] |= 2;
         }
-    for (int r = 0; r < HL_NJ; r++) for (int i = 0; i < nu; i++) if (hl_vb[r][i] & 2) { hl_ms[r][i] = 1; hl_vb[r][i] &= 1; }
+    for (int r = 0; r < HL_NJ; r++)
+        for (int i = 0; i < nu; i++)
+            if (hl_vb[r][i] & 2) {
+                hl_ms[r][i] = 1;
+                hl_vb[r][i] &= 1;
+            }
     for (int g = 1; g < 5; g++) {
         for (int r = 0; r < HL_NJ; r++) {
             int any = 0;
@@ -3264,17 +5006,22 @@ static void hl_light(int s)
                 if (r + d < HL_NJ && rowok[r + d] && hl_rcls(r + d + HL_PA0) == hl_rcls(r + HL_PA0)) best = r + d;
                 else if (r - d >= 0 && rowok[r - d] && hl_rcls(r - d + HL_PA0) == hl_rcls(r + HL_PA0)) best = r - d;
             }
-            if (best >= 0) for (int i = lo[g]; i <= hi[g]; i++) memcpy(hl_rho[0][r][i], hl_rho[0][best][i], sizeof hl_rho[0][r][i]);
+            if (best >= 0)
+                for (int i = lo[g]; i <= hi[g]; i++)
+                    memcpy(hl_rho[0][r][i], hl_rho[0][best][i], sizeof hl_rho[0][r][i]);
         }
     }
     {   /* the pane's ratio: B's level (qs over A's light at the middle) over A's light, flat */
-        int f0 = (HL_UBAR[s] + 320 - u0 + HL_US - 1) / HL_US, f1 = (HL_UPE[s] - 640 - u0) / HL_US, mid = (f0 + f1) / 2;
+        int f0 = (HL_UBAR[s] + 320 - u0 + HL_US - 1) / HL_US,
+            f1 = (HL_UPE[s] - 640 - u0) / HL_US,
+            mid = (f0 + f1) / 2;
         for (int r = HL_PN0 - HL_PA0; r < HL_PN1 - HL_PA0; r++)
             for (int c = 0; c < 3; c++) {
                 int la = fa[r][c] + fb[r][c] * (mid - f0) / 256;
                 hl_lvl[r][c] = qs[r][c] * la / 256;
                 for (int i = lo[1]; i <= hi[1]; i++) {
-                    int x = clampi(i, f0, f1) - f0, l = fa[r][c] + fb[r][c] * x / 256;
+                    int x = clampi(i, f0, f1) - f0,
+                        l = fa[r][c] + fb[r][c] * x / 256;
                     hl_rho[0][r][i][c] = (short)clampi(qs[r][c] * (la + 8) / (l > 8 ? l + 8 : 16), 8, 1024);
                 }
             }
@@ -3284,31 +5031,62 @@ static void hl_light(int s)
             for (int t = 0; t < 6; t++)
                 for (int i = lo[1]; i <= hi[1]; i++)
                     for (int c = 0; c < 3; c++) {
-                        int a = hl_rho[0][jb - 1][i][c], b = hl_rho[0][jb][i][c];
+                        int a = hl_rho[0][jb - 1][i][c],
+                            b = hl_rho[0][jb][i][c];
                         tmp[t][i][c] = (short)(a + (b - a) * (2 * t + 1) / 12);
                     }
             for (int t = 0; t < 6; t++)
-                if (jb - 3 + t >= 0 && jb - 3 + t < HL_NJ) memcpy(hl_rho[0][jb - 3 + t][lo[1]], tmp[t][lo[1]], sizeof(short) * 3 * (size_t)(hi[1] - lo[1] + 1));
+                if (jb - 3 + t >= 0 && jb - 3 + t < HL_NJ)
+                    memcpy(hl_rho[0][jb - 3 + t][lo[1]], tmp[t][lo[1]],
+                           sizeof(short) * 3 * (size_t)(hi[1] - lo[1] + 1));
         }
     }
     /* the rim (a thin bright line, B's narrower): B's two brightest texels on it over A's, smoothed over 5 rows and
        held flat across it; B's bar never shows: the rim's ratio too (front faces both), at most A's light */
     for (int r = 0; r < HL_NJ; r++) {
-        int ba[2] = { -1, -1 }, bb[2] = { -1, -1 }, la[2] = { -1, -1 }, lb[2] = { -1, -1 };
+        int ba[2] = { -1, -1 },
+            bb[2] = { -1, -1 },
+            la[2] = { -1, -1 },
+            lb[2] = { -1, -1 };
         for (int i = lo[4] - 4; i <= hi[4]; i++) {
             int l = hl_ta[r][i][0] * 2 + hl_ta[r][i][1] * 5 + hl_ta[r][i][2];
-            if (i >= lo[4]) { if (l > la[0]) { ba[1] = ba[0]; la[1] = la[0]; ba[0] = i; la[0] = l; } else if (l > la[1]) { ba[1] = i; la[1] = l; } }
+            if (i >= lo[4]) {
+                if (l > la[0]) {
+                    ba[1] = ba[0];
+                    la[1] = la[0];
+                    ba[0] = i;
+                    la[0] = l;
+                } else if (l > la[1]) {
+                    ba[1] = i;
+                    la[1] = l;
+                }
+            }
             if (!hl_vb[r][i]) continue;
             l = hl_tb[r][i][0] * 2 + hl_tb[r][i][1] * 5 + hl_tb[r][i][2];
-            if (l > lb[0]) { bb[1] = bb[0]; lb[1] = lb[0]; bb[0] = i; lb[0] = l; } else if (l > lb[1]) { bb[1] = i; lb[1] = l; }
+            if (l > lb[0]) {
+                bb[1] = bb[0];
+                lb[1] = lb[0];
+                bb[0] = i;
+                lb[0] = l;
+            } else if (l > lb[1]) {
+                bb[1] = i;
+                lb[1] = l;
+            }
         }
         for (int c = 0; c < 3; c++)
-            q[r][c] = bb[1] < 0 ? 256 : clampi((hl_tb[r][bb[0]][c] + hl_tb[r][bb[1]][c] + 16) * 256 / (hl_ta[r][ba[0]][c] + hl_ta[r][ba[1]][c] + 16), 8, 1024);
+            q[r][c] = bb[1] < 0 ? 256
+                      : clampi((hl_tb[r][bb[0]][c] + hl_tb[r][bb[1]][c] + 16) * 256
+                               / (hl_ta[r][ba[0]][c] + hl_ta[r][ba[1]][c] + 16), 8, 1024);
     }
     for (int r = 0; r < HL_NJ; r++)
         for (int c = 0; c < 3; c++) {
-            int sum = 0, n = 0;
-            for (int r2 = r - 2; r2 <= r + 2; r2++) if (r2 >= 0 && r2 < HL_NJ) { sum += q[r2][c]; n++; }
+            int sum = 0,
+                n = 0;
+            for (int r2 = r - 2; r2 <= r + 2; r2++)
+                if (r2 >= 0 && r2 < HL_NJ) {
+                    sum += q[r2][c];
+                    n++;
+                }
             for (int i = lo[4]; i <= hi[4]; i++) hl_rho[0][r][i][c] = (short)(sum / n);
             for (int i = lo[0]; i <= hi[0]; i++) hl_rho[0][r][i][c] = (short)(sum / n < 256 ? sum / n : 256);
         }
@@ -3317,19 +5095,22 @@ static void hl_light(int s)
        bevel), not the pane's, by how gold A's light is (red over blue) */
     for (int r = HL_PN0 - HL_PA0; r < HL_PN1 - HL_PA0; r++) {
         short fbar[3], fbev[3];
-        memcpy(fbar, hl_rho[0][r][lo[0]], sizeof fbar); memcpy(fbev, hl_rho[0][r][lo[3] + mg[3]], sizeof fbev);
+        memcpy(fbar, hl_rho[0][r][lo[0]], sizeof fbar);
+        memcpy(fbev, hl_rho[0][r][lo[3] + mg[3]], sizeof fbev);
         for (int i = lo[1]; i <= hi[2]; i++) {
             int w = clampi((hl_la[r][i][0] - hl_la[r][i][2] - 25) * 256 / 50, 0, 256);
             const short *f = i < (lo[1] + hi[1]) / 2 ? fbar : fbev;
             if (hl_md[r][i] || !w) continue;
-            for (int c = 0; c < 3; c++) hl_rho[0][r][i][c] = (short)(hl_rho[0][r][i][c] + (f[c] - hl_rho[0][r][i][c]) * w / 256);
+            for (int c = 0; c < 3; c++)
+                hl_rho[0][r][i][c] = (short)(hl_rho[0][r][i][c] + (f[c] - hl_rho[0][r][i][c]) * w / 256);
         }
     }
     /* the pane's end and the inner shadow are measured two ways (B's level, B over A): their ratios meet smoothly
        (+-1 column about the pane's end; a step there would draw a line down B's pane by the join) */
     for (int r = 0; r < HL_NJ; r++) {
         short sm[16][3];
-        int a0 = lo[2] - 6, a1 = lo[2] + 5;
+        int a0 = lo[2] - 6,
+            a1 = lo[2] + 5;
         for (int i = a0; i <= a1; i++)
             for (int c = 0; c < 3; c++) {
                 int sum = 0;
@@ -3351,47 +5132,71 @@ static void hl_light(int s)
     for (int r = 0; r < HL_NJ; r++)
         for (int i = 0; i < nu; i++)
             for (int c = 0; c < 3; c++) {
-                int p = i >= lo[2] && i <= hi[2] && hl_rho[0][r][i][c] > 256 ? 256 : hl_rho[0][r][i][c], p4 = isqrt_i(isqrt_i(p * 256) * 256), p8 = isqrt_i(p4 * 256);
-                int pc = p >= 256 ? p : p * p4 / 256, pd = p >= 256 ? p : p * p4 / 256 * p8 / 256;
+                int p = i >= lo[2] && i <= hi[2] && hl_rho[0][r][i][c] > 256 ? 256 : hl_rho[0][r][i][c],
+                    p4 = isqrt_i(isqrt_i(p * 256) * 256),
+                    p8 = isqrt_i(p4 * 256);
+                int pc = p >= 256 ? p : p * p4 / 256,
+                    pd = p >= 256 ? p : p * p4 / 256 * p8 / 256;
                 hl_rho[1][r][i][c] = (short)clampi(pc, HL_FLO, 1024);
                 hl_rho[2][r][i][c] = (short)clampi(pd, HL_FLO, 1024);
             }
 #ifdef WS_BACKDROP_MAIN
-    if (getenv("WSB_HLDBG")) for (int r = 0; r < HL_NJ; r += 2) {
-        fprintf(stderr, "s%d j%3d:", s, r + HL_PA0);
-        for (int i = 0; i < nu; i += 2) fprintf(stderr, "%c%3d", hl_md[r][i] ? '*' : ' ', (hl_rho[0][r][i][0] * 2 + hl_rho[0][r][i][1] * 5 + hl_rho[0][r][i][2]) * 100 / 8 / 256);
-        fprintf(stderr, "\n");
-    }
+    if (getenv("WSB_HLDBG"))
+        for (int r = 0; r < HL_NJ; r += 2) {
+            fprintf(stderr, "s%d j%3d:", s, r + HL_PA0);
+            for (int i = 0; i < nu; i += 2)
+                fprintf(stderr, "%c%3d", hl_md[r][i] ? '*' : ' ',
+                        (hl_rho[0][r][i][0] * 2 + hl_rho[0][r][i][1] * 5 + hl_rho[0][r][i][2]) * 100 / 8 / 256);
+            fprintf(stderr, "\n");
+        }
 #endif
 }
 /* the light ratio of panel n (1: B) at unit offset u, rectified row jq (1/256), channel c */
 static int hl_rh(int s, int n, long long u, long long jq, int c)
 {
-    int t = n >= 3 ? 2 : n - 1, x = (int)(u - (HL_UE[s] - HL_UPER[s])), i = clampi(x / HL_US, 0, HL_NU - 2);
+    int t = n >= 3 ? 2 : n - 1,
+        x = (int)(u - (HL_UE[s] - HL_UPER[s])),
+        i = clampi(x / HL_US, 0, HL_NU - 2);
     int fx = clampi(x - i * HL_US, 0, HL_US) * 256 / HL_US;
-    int y = (int)jq - HL_PA0 * 256, r = clampi(y >> 8, 0, HL_NJ - 1), r1 = r + 1 < HL_NJ ? r + 1 : r, fy = clampi(y - r * 256, 0, 256);
+    int y = (int)jq - HL_PA0 * 256,
+        r = clampi(y >> 8, 0, HL_NJ - 1),
+        r1 = r + 1 < HL_NJ ? r + 1 : r,
+        fy = clampi(y - r * 256, 0, 256);
     int a = hl_rho[t][r][i][c] + (hl_rho[t][r][i + 1][c] - hl_rho[t][r][i][c]) * fx / 256;
     int b = hl_rho[t][r1][i][c] + (hl_rho[t][r1][i + 1][c] - hl_rho[t][r1][i][c]) * fx / 256;
     return a + (b - a) * fy / 256;
 }
 static int hl_unit(int s, long long kg, long long jq, Rgb *o)
 {
-    long long kq = kg * HL_KS / 256, P = HL_UPER[s], kend = HL_UE[s], kk;
-    int n = 0, v[3];
+    long long kq = kg * HL_KS / 256,
+              P = HL_UPER[s],
+              kend = HL_UE[s],
+              kk;
+    int n = 0,
+        v[3];
     if (jq < HL_PA0 * 256) jq = HL_PA0 * 256;
     if (jq > HL_PA1 * 256 - 1) jq = HL_PA1 * 256 - 1;
     kk = kq;
-    while (kk < kend - P) { kk += P; n++; }
+    while (kk < kend - P) {
+        kk += P;
+        n++;
+    }
     if (kk > kend - 128) {                                /* (a rim meets the next bar: blended over half a column) */
-        Rgb a, b; int f = (int)((kk - (kend - 128)) * 2);
+        Rgb a, b;
+        int f = (int)((kk - (kend - 128)) * 2);
         if (!hl_uv(s, kk, jq, &a)) return hl_uv(s, kk - P, jq, o);
-        if (!hl_uv(s, kk - P, jq, &b)) *o = a; else *o = mix(a, b, f);
+        if (!hl_uv(s, kk - P, jq, &b)) *o = a;
+        else *o = mix(a, b, f);
     } else if (!hl_uv(s, kk, jq, o)) return 0;
     if (n < 1) return 1;
-    v[0] = o->r; v[1] = o->g; v[2] = o->b;
+    v[0] = o->r;
+    v[1] = o->g;
+    v[2] = o->b;
     for (int c = 0; c < 3; c++) v[c] = v[c] * hl_rh(s, n, kk, jq, c) / 256;
     if (n == 1) {                                         /* B: the rest to its edge texel, fading out */
-        int j0 = (int)(jq >> 8), fj = (int)(jq & 255), j1 = j0 + 1 < HL_PA1 ? j0 + 1 : j0;
+        int j0 = (int)(jq >> 8),
+            fj = (int)(jq & 255),
+            j1 = j0 + 1 < HL_PA1 ? j0 + 1 : j0;
         int ke = hl_ke[j0] + (hl_ke[j1] - hl_ke[j0]) * fj / 256;
         int w = clampi((int)((kk - (ke + P) + HL_FADE) * 256 / HL_FADE), 0, 256);
         for (int c = 0; c < 3; c++) {
@@ -3407,29 +5212,42 @@ static int hl_unit(int s, long long kg, long long jq, Rgb *o)
             }
         }
     }
-    o->r = clampi(v[0], 0, 255); o->g = clampi(v[1], 0, 255); o->b = clampi(v[2], 0, 255);
+    o->r = clampi(v[0], 0, 255);
+    o->g = clampi(v[1], 0, 255);
+    o->b = clampi(v[2], 0, 255);
     return 1;
 }
-static u16 hl_raw[PH][PW];
+static u16 (*hl_raw)[PW];
 static void gen_hl(int pad)
 {
+    if (!ws_need_gen_hl()) return;
     long long kg, jq;
     pal_make();
     hl_kj(0, (long long)-(pad + 32) * 256, (long long)HL_HY, &kg, &jq);
     vb_ow = clampi((int)(-kg * HL_KS / 256 / 256) + HL_KMIN + 4, 8, HL_NO);
     if (!canvas_open(vb_ow)) return;
     vb_srcmap = (int *)malloc(sizeof(int) * (size_t)vb_ow * PH);
-    if (!vb_srcmap) { canvas_close(); return; }
-    memcpy(hl_raw, pic, sizeof pic); memcpy(hl_p0, pic, sizeof pic);
-    vb_ex = TH_NONE; vb_exf = hl_exf;
+    if (!vb_srcmap) {
+        canvas_close();
+        return;
+    }
+    memcpy(hl_raw, pic, (sizeof *pic * (PH)));
+    memcpy(hl_p0, pic, (sizeof *pic * (PH)));
+    vb_ex = TH_NONE;
+    vb_exf = hl_exf;
     for (int side = 0; side < 2; side++) {
         hl_rectify(side);
-        canvas_clear(); cur_side = side;
+        canvas_clear();
+        cur_side = side;
         for (int i = 0; i < vb_ow * PH; i++) vb_srcmap[i] = -1;
         for (int i = 0; i < HL_NB; i++) {
             VbBand b = HL_VB[i];
             if (b.y1 <= b.y0) continue;
-            if (side) { short a = b.sx0; b.sx0 = (short)(PW - b.sx1); b.sx1 = (short)(PW - a); }
+            if (side) {
+                short a = b.sx0;
+                b.sx0 = (short)(PW - b.sx1);
+                b.sx1 = (short)(PW - a);
+            }
             vb_quilt(side, &b, 1701 + 13 * i);
         }
         hl_mode = 2;                                      /* (crisper: the slats' and rails' edges as in the picture) */
@@ -3446,15 +5264,19 @@ static void gen_hl(int pad)
                 } else if (!hl_src(side, kg, jq, &o)) {
                     o = rgb15(hl_p0[y][side ? PW - 1 : 0]);
 #ifdef WS_BACKDROP_MAIN
-                    if (getenv("WSB_INFO")) fprintf(stderr, "side %d X %d y %d: no source (k %lld j %lld)\n", side, X, y, kg * HL_KS / 65536, jq >> 8);
+                    if (getenv("WSB_INFO"))
+                        fprintf(stderr, "side %d X %d y %d: no source (k %lld j %lld)\n", side, X, y,
+                                kg * HL_KS / 65536, jq >> 8);
 #endif
                 }
                 strip[(size_t)y * 2 * pad + (side ? pad + (X - 1) : pad - X)] = quant(o);
             }
         hl_mode = 0;
     }
-    memcpy(pic, hl_raw, sizeof pic);
-    free(vb_srcmap); vb_srcmap = 0;
-    vb_ex = VB_EXCL; vb_exf = 0;
+    memcpy(pic, hl_raw, (sizeof *pic * (PH)));
+    free(vb_srcmap);
+    vb_srcmap = 0;
+    vb_ex = VB_EXCL;
+    vb_exf = 0;
     canvas_close();
 }

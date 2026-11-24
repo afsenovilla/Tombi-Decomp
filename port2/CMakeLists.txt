@@ -230,46 +230,6 @@ add_library(port2chd OBJECT ${CHDR_DIR}/unity.c ${CHDR_DIR}/src/libchdr_codec_av
 target_include_directories(port2chd PRIVATE ${CHDR_DIR}/include)
 target_compile_definitions(port2chd PRIVATE ZSTD_DISABLE_ASM)
 target_compile_options(port2chd PRIVATE ${PORT2_ARCH_FLAGS} -O2 -w)
-# The 3DS: the widescreen generators' (and the GL renderer's) big static tables out of the program image
-# (port2/tools/lazy_bss.py, runtime/lazy_bss.h): a 3DS title's code + data + bss must fit below 0x04000000 and, on an
-# Old 3DS, its 64 MB with the heaps; the units get them from the heap when the memory is there (n3ds/main_3ds.c).
-# -DPORT_LAZY_BSS=ON on another build makes the same copies (to check them against the plain build).
-if(NINTENDO_3DS)
-  set(PORT_LAZY_BSS_DEFAULT ON)
-else()
-  set(PORT_LAZY_BSS_DEFAULT OFF)
-endif()
-option(PORT_LAZY_BSS "big static tables of some units from the heap (port2/tools/lazy_bss.py)" ${PORT_LAZY_BSS_DEFAULT})
-if(PORT_LAZY_BSS)
-  set(RT ${CMAKE_CURRENT_SOURCE_DIR}/runtime)
-  # lazy_unit(MAIN.c FILES_WHOSE_ARRAYS_MOVE...): the unit's copy (with its own .inc files) in gen/lazy/<name>
-  function(lazy_unit umain)
-    get_filename_component(ubase ${umain} NAME_WE)
-    get_filename_component(uname ${umain} NAME)
-    get_filename_component(usrc ${umain} DIRECTORY)
-    set(udir ${GEN}/lazy/${ubase})
-    file(GLOB uinc ${usrc}/${ubase}*.inc)
-    add_custom_command(OUTPUT ${udir}/${uname}
-                       COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/lazy_bss.py ${udir} ${umain}
-                               --transform ${ARGN} --copy ${uinc}
-                       DEPENDS ${umain} ${ARGN} ${uinc} ${CMAKE_CURRENT_SOURCE_DIR}/tools/lazy_bss.py
-                       COMMENT "lazy_bss: ${uname}" VERBATIM)
-    # (-Wshadow: a name the macros of lazy_bss.py would catch; .github/workflows/3ds.yml fails on one)
-    set_source_files_properties(${udir}/${uname} PROPERTIES COMPILE_OPTIONS -Wshadow)
-    set(rt ${PORT2_RT})
-    list(REMOVE_ITEM rt ${umain})
-    list(APPEND rt ${udir}/${uname})
-    set(PORT2_RT ${rt} PARENT_SCOPE)
-  endfunction()
-  file(GLOB WSBD_INC ${RT}/ws_backdrop_*.inc)
-  lazy_unit(${RT}/ws_backdrop.c ${RT}/ws_backdrop.c ${WSBD_INC})
-  lazy_unit(${RT}/ws_topdown.c ${RT}/ws_topdown_gen.inc)
-  lazy_unit(${RT}/ws_pigs.c ${RT}/ws_pigs.c)
-  lazy_unit(${RT}/ws_room3d.c ${RT}/ws_room3d.c)
-  lazy_unit(${RT}/ws_trick.c ${RT}/ws_trick.c)
-  lazy_unit(${RT}/ws_floor3d.c ${RT}/ws_floor3d.c)
-  lazy_unit(${CMAKE_CURRENT_SOURCE_DIR}/shims/gpu_gl.c ${CMAKE_CURRENT_SOURCE_DIR}/shims/gpu_gl.c)
-endif()
 add_library(port2rt OBJECT ${PORT2_RT} ${GEN}/funcmap.c ${GEN}/build_id.c)
 # PORT_FN_PROFILE (the 3DS, a diagnostic build): the game with -finstrument-functions, sampled on the
 # console every millisecond (n3ds/fnprof.c); the log gets the functions the main thread is most often in
@@ -283,9 +243,6 @@ if(PORT_FN_PROFILE AND NINTENDO_3DS)
   # table's time is split by function too
   set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/shims/gpu.c ${CMAKE_CURRENT_SOURCE_DIR}/shims/gpu_pica.c
                               ${CMAKE_CURRENT_SOURCE_DIR}/n3ds/pica_c3d.c PROPERTIES COMPILE_OPTIONS -finstrument-functions)
-endif()
-if(PORT_LAZY_BSS)
-  target_compile_definitions(port2rt PRIVATE PORT_LAZY_BSS)
 endif()
 add_dependencies(port2rt port2_build_id)
 if(NINTENDO_3DS)

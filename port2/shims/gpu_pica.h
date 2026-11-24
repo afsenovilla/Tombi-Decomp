@@ -4,8 +4,10 @@
 #ifndef PORT2_GPU_PICA_H
 #define PORT2_GPU_PICA_H
 
-#define PICA_A_OPAQUE 0x80                 /* texel alpha classes: drawn, bit 15 clear */
-#define PICA_A_SEMI 0xFF                   /*                      drawn, bit 15 set (semi-transparent when the primitive is) */
+/* texel alpha classes: PICA_A_OPAQUE drawn, bit 15 clear; PICA_A_SEMI drawn, bit 15 set (semi-transparent when the
+   primitive is) */
+#define PICA_A_OPAQUE 0x80
+#define PICA_A_SEMI 0xFF
 /* texture cache slots: square blocks of a texture page + CLUT, in three sizes (a sprite's primitives rarely need more
    than a 64 x 64 block of their page, and an area uses many more page + CLUT pairs than whole pages fit in memory),
    in two atlases, so a change of texture seldom ends a batch of triangles:
@@ -24,21 +26,41 @@
 #define PICA_X128 (PICA_N256 + PICA_N128 + PICA_N64)   /* the first of them */
 #define PICA_SLOTS (PICA_X128 + PICA_N128X)
 extern int pica_n128x;
-static inline int pica_slot_size(int slot) { return slot < PICA_N256 ? 256 : slot < PICA_N256 + PICA_N128 || slot >= PICA_X128 ? 128 : 64; }
-static inline int pica_slot_atlas(int slot) { return slot >= PICA_X128 ? 2 : slot < PICA_N256 || slot >= PICA_N256 + PICA_N128 + 128; }
+static inline int pica_slot_size(int slot) {
+    return slot < PICA_N256 ? 256 : slot < PICA_N256 + PICA_N128 || slot >= PICA_X128 ? 128 : 64;
+}
+static inline int pica_slot_atlas(int slot) {
+    return slot >= PICA_X128 ? 2 : slot < PICA_N256 || slot >= PICA_N256 + PICA_N128 + 128;
+}
 static inline void pica_slot_pos(int slot, int *x, int *y) {   /* its corner in its atlas */
-    if (slot >= PICA_X128) { slot -= PICA_X128; *x = (slot & 7) * 128; *y = (slot >> 3) * 128; return; }
-    if (slot < PICA_N256) { *x = (slot & 3) * 256; *y = (slot >> 2) * 256; return; }
+    if (slot >= PICA_X128) {
+        slot -= PICA_X128;
+        *x = (slot & 7) * 128;
+        *y = (slot >> 3) * 128;
+        return;
+    }
+    if (slot < PICA_N256) {
+        *x = (slot & 3) * 256;
+        *y = (slot >> 2) * 256;
+        return;
+    }
     slot -= PICA_N256;
-    if (slot < PICA_N128) { *x = (slot & 7) * 128; *y = (slot >> 3) * 128; return; }
+    if (slot < PICA_N128) {
+        *x = (slot & 7) * 128;
+        *y = (slot >> 3) * 128;
+        return;
+    }
     slot -= PICA_N128;
-    *x = (slot & 15) * 64; *y = 512 + ((slot >> 4) & 7) * 64;
+    *x = (slot & 15) * 64;
+    *y = 512 + ((slot >> 4) & 7) * 64;
 }
 enum { AT_OFF, AT_NOTZERO, AT_OPAQUE, AT_SEMI };   /* alpha test: off, alpha != 0, == PICA_A_OPAQUE, == PICA_A_SEMI */
-typedef struct { float x, y, u, v; unsigned char r, g, b, a; float sh; } PV;   /* u, v: texels of the atlas; sh: --stereo, the right eye's x is x + sh */
+/* u, v: texels of the atlas; sh: --stereo, the right eye's x is x + sh */
+typedef struct { float x, y, u, v; unsigned char r, g, b, a; float sh; } PV;
 /* tex: the atlas (0, 1, 2) or -1; mod: texture x colour x 2 (else the texture, raw); blend: -1 or the PS1 mode 0..3;
-   x1..y2: the drawing area (inclusive) */
-typedef struct { int tex, mod, atest, blend, x1, y1, x2, y2, wide; } PState;   /* wide: the target, 0 VRAM's, 1 the wide plane (--widescreen), 2 the right eye's (--stereo) */
+   x1..y2: the drawing area (inclusive); wide: the target, 0 VRAM's, 1 the wide plane (--widescreen), 2 the right
+   eye's (--stereo) */
+typedef struct { int tex, mod, atest, blend, x1, y1, x2, y2, wide; } PState;
 typedef struct {
     int (*start)(void);                                                    /* 0 = ready */
     /* a slot's texels (pica_slot_size(slot) squared); busy: triangles since the last present sample this slot */
@@ -74,8 +96,9 @@ typedef struct {
     void (*cell_copy)(int dslot, int dcell, int sslot, int scell, int busy);
     void (*cell_upload)(int slot, const unsigned *rgba, unsigned long long mask, int busy);
 } PicaDev;
-/* --widescreen, a top-down room's side strips (runtime/ws_topdown.c): pieces of the map picture (8 bpp, in RAM) that the
-   SPRT copies beside the game's window read from texels (u, v) .. (u + w - 1, v + h - 1) of page (tx, ty), CLUT (cx, cy) */
+/* --widescreen, a top-down room's side strips (runtime/ws_topdown.c): pieces of the map picture (8 bpp, in RAM)
+   that the SPRT copies beside the game's window read from texels (u, v) .. (u + w - 1, v + h - 1) of page (tx, ty),
+   CLUT (cx, cy) */
 typedef struct { const unsigned char *pic; int stride, col, row, w, h, tx, ty, u, v, cx, cy; } PicaStrip;
 void pica_ws_strips(int side, int n, const PicaStrip *e);   /* side 0 left, 1 right: those pieces, until ... */
 void pica_ws_strips_end(void);                               /* ... the game's own map packets */

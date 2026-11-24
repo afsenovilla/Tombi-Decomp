@@ -315,20 +315,6 @@ static size_t heap_free(void) {
     return (size_t)mi.fordblks + (brk && brk < fake_heap_end ? (size_t)(fake_heap_end - brk) : 0);
 }
 unsigned port_n3ds_heap_free(void) { return (unsigned)heap_free(); }   /* (n3ds/pica_c3d.c's lines a few seconds apart) */
-/* runtime/lazy_bss.h: a unit's big tables (the widescreen generators: the picture strips, the top-down margins, the
-   Evil Pig / 3D room / Trick Village / 3D floor ends; port2/tools/lazy_bss.py), zeroed, from the heap.  Only on a New
-   3DS (124 MB: the heap is about 66 MB) and with 16 MB left over; an Old 3DS's heap (about 20 MB) is the game's, so
-   there those parts stay off, as in the builds that run there. */
-void *port_lazy_alloc(const char *what, size_t n) {
-    extern void port_printf(const char *fmt, ...);
-    bool n3 = false; APT_CheckNew3DS(&n3);
-    size_t fr = heap_free();
-    void *p = n3 && fr >= n + (16u << 20) ? calloc(1, n) : 0;
-    port_printf("[3ds] %s: %u KB of tables %s (%u KB of heap free before)\n", what, (unsigned)(n >> 10),
-                p ? "from the heap" : n3 ? "not given (too little heap): off" : "not given (an Old 3DS): off", (unsigned)(fr >> 10));
-    return p;
-}
-
 int main(int argc, char **argv) {
     (void)argc; (void)argv;
     osSetSpeedupEnable(true);                  /* New 3DS: 804 MHz and the L2 cache */

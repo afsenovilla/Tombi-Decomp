@@ -23,8 +23,9 @@
  *     rows that share a texel column), and at the tile's end it does what the model does there: the polygons that
  *     follow the edge's polygon inwards in its plane show whether the tile starts again (the water: 192..255 every
  *     109 units; most rows of the grass blocks) or is laid flipped (the other grass rows and the stone at the
- *     bottom: there the model lays every other tile flipped); a polygon alone in its plane (the pink wall) shows nothing: its tile starts again, never flipped, from
- *     the column of the tile's far half that goes best with its first column;
+ *     bottom: there the model lays every other tile flipped); a polygon alone in its plane (the pink wall) shows
+ *     nothing: its tile starts again, never flipped, from the column of the tile's far half that goes best with its
+ *     first column;
  *   - a cut-out (a texture rectangle with see-through texels: the tree crown card) is left as it ends;
  *   - a piece ends where a vertex reaches the tile's end, so the pieces are the same whatever the strip's width (a
  *     wider strip only has more of them) and rows that share a vertex meet without a crack;
@@ -50,39 +51,47 @@
 #include <stdlib.h>
 #include <string.h>
 #include "port_runtime.h"
-#include "lazy_bss.h"
+#include "ws_heap.h"
 
-typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32; typedef short s16; typedef int s32;
+typedef unsigned char u8;
+typedef unsigned short u16;
+typedef unsigned int u32;
+typedef short s16;
+typedef int s32;
 
 extern int port_ws_cull, port_verbose;
 extern unsigned long port_gte_cfc2(int);
 
-int port_ws_trick_on = 1;                /* 1: the approved rooms (default), 0: off, 3: every room of the table (main.c) */
+/* 1: the approved rooms (default), 0: off, 3: every room of the table (main.c) */
+int port_ws_trick_on = 1;
 const char *port_ws_trick_rooms;         /* --ws-trick-rooms A:S,A:S,... (decimal; "all" = every room of the table) */
 
-/* the rooms (the debug select's numbers); approved: on by default once the user has seen the room */
-static const struct { u8 area, sec, end, approved, relief, wall; } ROOMS[] = {   /* end: 0 = the left one, 1 = the right one */
+/* the rooms (the debug select's numbers); approved: on by default once the user has seen the room;
+   end: 0 = the left one, 1 = the right one */
+static const struct { u8 area, sec, end, approved, relief, wall; } ROOMS[] = {
     {10, 3, 0, 1, 0, 0},  /* Trick Village, cursed (night, flooded) */
     {10, 7, 0, 1, 0, 0},  /* Trick Village, purified */
     {3, 1, 1, 1, 1, 2},   /* Stormy Mountain 2: the cliff's rock face past the cave door */
     {3, 5, 1, 1, 1, 2},   /* Phoenix Mountain 2 (the same mountain, purified) */
 };
 static int room_relief;                  /* the end is a relief (the cliff's columns of facets): relief() below */
-static int room_wall;                    /* the wall that ends inside the 4:3 picture goes on too (wall() below); ROOMS `wall`: 1 = a preview
-                                            (only with --ws-trick-rooms / --ws-trick on), 2 = approved (whenever the room is extended) */
+/* the wall that ends inside the 4:3 picture goes on too (wall() below); ROOMS `wall`: 1 = a preview (only with
+   --ws-trick-rooms / --ws-trick on), 2 = approved (whenever the room is extended) */
+static int room_wall;
 static int room_enabled(int area, int sec, int end)
 {
     for (unsigned i = 0; i < sizeof ROOMS / sizeof ROOMS[0]; i++) {
         if (ROOMS[i].area != area || ROOMS[i].sec != sec || ROOMS[i].end != end) continue;
-        room_relief = ROOMS[i].relief; room_wall = ROOMS[i].wall;
-        const char *l = port_ws_trick_rooms;
-        if (l) {
-            if (!strcmp(l, "all")) return 1;
-            while (*l) {
+        room_relief = ROOMS[i].relief;
+        room_wall = ROOMS[i].wall;
+        const char *names = port_ws_trick_rooms;
+        if (names) {
+            if (!strcmp(names, "all")) return 1;
+            while (*names) {
                 int a, s, n = 0;
-                if (sscanf(l, "%d:%d%n", &a, &s, &n) == 2 && a == area && s == sec) return 1;
-                while (*l && *l != ',') l++;
-                if (*l == ',') l++;
+                if (sscanf(names, "%d:%d%n", &a, &s, &n) == 2 && a == area && s == sec) return 1;
+                while (*names && *names != ',') names++;
+                if (*names == ',') names++;
             }
             return 0;
         }
@@ -93,20 +102,41 @@ static int room_enabled(int area, int sec, int end)
 }
 
 typedef struct { s16 x, y, z; u8 u, v; } Vx;
-typedef struct { u16 clut, tpage; u8 cmd, nv, gour, pad; u32 col[4]; Vx v[4]; s16 x0, x1, y0, y1, z0, z1; u8 u0, u1, v0, v1; } Poly;
+typedef struct {
+    u16 clut, tpage;
+    u8 cmd, nv, gour, pad;
+    u32 col[4];
+    Vx v[4];
+    s16 x0, x1, y0, y1, z0, z1;           /* the bounding box and the UV box */
+    u8 u0, u1, v0, v1;
+} Poly;
 
 #define MAXP 1200                         /* polygons of the end looked at */
 #define MAXQ 600                          /* packets per kind */
 #define H 544
-#define NEAR 400                          /* how far right of the 4:3 frame's left edge (camera at its limit) a polygon is still read */
+/* how far right of the 4:3 frame's left edge (camera at its limit) a polygon is still read */
+#define NEAR 400
 
-static Poly ps[MAXP]; static int np;
-static u8 ft4[MAXQ][40], gt4[MAXQ][52]; static int n4, g4;
+static Poly (*model_polys);               /* the model's polygons near the end (parse) */
+static int poly_count;
+static u8 (*ft4)[40], (*gt4)[52];         /* the new flat / gouraud quads */
+static int n4, g4;
 /* One end at a time: the right end is the left end of the mirrored model (sgn = -1: every x read is negated, and
    negated again when written, so `lo`, x43() and the sweep "to the left" below are the same code for both). */
-static struct { u8 blk[16 + MAXQ * (40 + 52) + 16]; u32 key; int have_key, polys, lo; } ends[2];
-static const u8 *seen_tbl; static int seen_sec = -1, lo, sgn = 1, blk_polys;
+#define BLK (16 + MAXQ * (40 + 52) + 16)
+static struct { u8 *blk; u32 key; int have_key, polys, lo; } ends[2];
+static const u8 *seen_tbl;
+static int seen_sec = -1, lo, sgn = 1, blk_polys;
 static u8 *blk;
+/* the tables on the heap (ws_heap.h): both ends' blocks while the room is shown (the game draws them), the model's
+   polygons and the packets while an end is made */
+static const WsTab ROOM_TABS[] = { WS_T(ends[0].blk, BLK), WS_T(ends[1].blk, BLK) };
+static const WsTab GEN_TABS[] = { WS_T(model_polys, MAXP), WS_T(ft4, MAXQ), WS_T(gt4, MAXQ) };
+static void trick_reset(void)            /* (the room changed: the blocks go) */
+{
+    ends[0].have_key = ends[1].have_key = 0;
+    blk = 0;
+}
 
 static const u8 RING3[3] = {0, 1, 2}, RING4[4] = {0, 1, 3, 2};
 static int iabs(int a) { return a < 0 ? -a : a; }
@@ -115,48 +145,76 @@ static int iabs(int a) { return a < 0 ? -a : a; }
 static int x43(int z) { return lo - (160 * (z + H) + H - 1) / H; }
 static int xwide(int z) { return lo - ((160 + port_ws_cull + 8) * (z + H) + H - 1) / H; }
 
-/* the model's polygons near the left end -> ps[]; 0 if the model is not what this file expects */
+/* the model's polygons near the left end -> model_polys[]; 0 if the model is not what this file expects */
 static int parse(const u8 *tbl)
 {
     int n = tbl[0];
     const s32 *off = (const s32 *)(tbl + 4);
-    np = 0;
+    poly_count = 0;
     for (int i = 0; i < n; i++) {
         const u8 *p = tbl + off[i];
-        for (int g = 0; g < 4; g++) {
-            u32 c; memcpy(&c, p, 4); p += 4;
-            int nv = (g & 1) ? 4 : 3, gour = g >= 2;
-            if (c > 4000) return 0;
-            for (u32 k = 0; k < c; k++) {
+        for (int group = 0; group < 4; group++) {   /* flat triangles, flat quads, gouraud triangles, gouraud quads */
+            u32 count;
+            memcpy(&count, p, 4);
+            p += 4;
+            int nv = (group & 1) ? 4 : 3, gour = group >= 2;
+            if (count > 4000) return 0;
+            for (u32 k = 0; k < count; k++) {
                 Poly q;
-                memcpy(&q.clut, p, 2); memcpy(&q.tpage, p + 2, 2); memcpy(&q.col[0], p + 4, 4);
-                q.cmd = p[7]; q.nv = (u8)nv; q.gour = (u8)gour; q.pad = 0;
-                if (((q.cmd & 8) != 0) != (nv == 4) || ((q.cmd & 0x10) != 0) != gour || (q.cmd & 0xE0) != 0x20) return 0;
+                memcpy(&q.clut, p, 2);
+                memcpy(&q.tpage, p + 2, 2);
+                memcpy(&q.col[0], p + 4, 4);
+                q.cmd = p[7];
+                q.nv = (u8)nv;
+                q.gour = (u8)gour;
+                q.pad = 0;
+                if (((q.cmd & 8) != 0) != (nv == 4) || ((q.cmd & 0x10) != 0) != gour || (q.cmd & 0xE0) != 0x20)
+                    return 0;
                 p += 8;
-                for (int j = 1; j < nv; j++) { if (gour) { memcpy(&q.col[j], p, 4); p += 4; } else q.col[j] = q.col[0]; }
-                q.x0 = q.y0 = q.z0 = 32767; q.x1 = q.y1 = q.z1 = -32768; q.u0 = q.v0 = 255; q.u1 = q.v1 = 0;
+                for (int j = 1; j < nv; j++) {
+                    if (gour) {
+                        memcpy(&q.col[j], p, 4);
+                        p += 4;
+                    } else q.col[j] = q.col[0];
+                }
+                q.x0 = q.y0 = q.z0 = 32767;
+                q.x1 = q.y1 = q.z1 = -32768;
+                q.u0 = q.v0 = 255;
+                q.u1 = q.v1 = 0;
                 int near = 0;
                 for (int j = 0; j < nv; j++) {
-                    Vx *v = &q.v[j]; memcpy(v, p, 8); p += 8;
+                    Vx *v = &q.v[j];
+                    memcpy(v, p, 8);
+                    p += 8;
                     v->x = (s16)(sgn * v->x);
-                    if (v->x < q.x0) q.x0 = v->x; if (v->x > q.x1) q.x1 = v->x;
-                    if (v->y < q.y0) q.y0 = v->y; if (v->y > q.y1) q.y1 = v->y;
-                    if (v->z < q.z0) q.z0 = v->z; if (v->z > q.z1) q.z1 = v->z;
-                    if (v->u < q.u0) q.u0 = v->u; if (v->u > q.u1) q.u1 = v->u;
-                    if (v->v < q.v0) q.v0 = v->v; if (v->v > q.v1) q.v1 = v->v;
+                    if (v->x < q.x0) q.x0 = v->x;
+                    if (v->x > q.x1) q.x1 = v->x;
+                    if (v->y < q.y0) q.y0 = v->y;
+                    if (v->y > q.y1) q.y1 = v->y;
+                    if (v->z < q.z0) q.z0 = v->z;
+                    if (v->z > q.z1) q.z1 = v->z;
+                    if (v->u < q.u0) q.u0 = v->u;
+                    if (v->u > q.u1) q.u1 = v->u;
+                    if (v->v < q.v0) q.v0 = v->v;
+                    if (v->v > q.v1) q.v1 = v->v;
                     if (v->z > -H + 64 && v->x <= x43(v->z) + NEAR) near = 1;
                 }
                 if (!near) continue;
-                if (np >= MAXP) return 0;
-                ps[np++] = q;
+                if (poly_count >= MAXP) return 0;
+                model_polys[poly_count++] = q;
             }
         }
     }
-    return np;
+    return poly_count;
 }
 
 static int same_pos(const Vx *a, const Vx *b) { return a->x == b->x && a->y == b->y && a->z == b->z; }
-static int has_vertex(const Poly *q, const Vx *a) { for (int j = 0; j < q->nv; j++) if (same_pos(&q->v[j], a)) return 1; return 0; }
+static int has_vertex(const Poly *q, const Vx *a)
+{
+    for (int j = 0; j < q->nv; j++)
+        if (same_pos(&q->v[j], a)) return 1;
+    return 0;
+}
 static int same_stuff(const Poly *p, const Poly *q)          /* same page and palette, at least half of p's rows */
 {
     if (q->tpage != p->tpage || q->clut != p->clut) return 0;
@@ -169,17 +227,24 @@ static int same_stuff(const Poly *p, const Poly *q)          /* same page and pa
    184..219, 219..253: 184..253) */
 static void tile(const Poly *p, int *t0, int *t1)
 {
-    int a = p->u0, b = p->u1, more = 1;
+    int u_lo = p->u0, u_hi = p->u1, more = 1;
     while (more) {
         more = 0;
-        for (int i = 0; i < np; i++) {
-            const Poly *q = &ps[i];
-            if (!same_stuff(p, q) || q->u1 < a || q->u0 > b) continue;
-            if (q->u0 < a) { a = q->u0; more = 1; }
-            if (q->u1 > b) { b = q->u1; more = 1; }
+        for (int i = 0; i < poly_count; i++) {
+            const Poly *q = &model_polys[i];
+            if (!same_stuff(p, q) || q->u1 < u_lo || q->u0 > u_hi) continue;
+            if (q->u0 < u_lo) {
+                u_lo = q->u0;
+                more = 1;
+            }
+            if (q->u1 > u_hi) {
+                u_hi = q->u1;
+                more = 1;
+            }
         }
     }
-    *t0 = a; *t1 = b;
+    *t0 = u_lo;
+    *t1 = u_hi;
 }
 
 /* U at the left / right side of a polygon whose U runs along x (the mean of its vertices in the outer quarter) */
@@ -188,15 +253,22 @@ static int side_u(const Poly *q, int right)
     int s = 0, n = 0, w = q->x1 - q->x0;
     for (int j = 0; j < q->nv; j++) {
         int d = right ? q->x1 - q->v[j].x : q->v[j].x - q->x0;
-        if (4 * d <= w) { s += q->v[j].u; n++; }
+        if (4 * d <= w) {
+            s += q->v[j].u;
+            n++;
+        }
     }
     return n ? s / n : 0;
 }
+/* q lies in p's plane (p's plane holds the x direction) */
 static int in_plane(const Poly *p, const Poly *q)
 {
     const Vx *o = &p->v[0], *a = &p->v[1], *b = &p->v[2];
     int ay = a->y - o->y, az = a->z - o->z, by = b->y - o->y, bz = b->z - o->z;
-    if (ay == 0 && az == 0) { ay = by; az = bz; }             /* (the plane holds x: its trace in y / z is a line) */
+    if (ay == 0 && az == 0) {                 /* (the plane holds x: its trace in y / z is a line) */
+        ay = by;
+        az = bz;
+    }
     for (int j = 0; j < q->nv; j++) {
         int cy = q->v[j].y - o->y, cz = q->v[j].z - o->z;
         if (iabs(ay * cz - az * cy) > 4 * (iabs(ay) + iabs(az))) return 0;
@@ -212,11 +284,12 @@ static int join_kind(const Poly *p, int t0, int t1)
     const Poly *c = p;
     for (int step = 0; step < 4; step++) {
         const Poly *nx = 0;
-        for (int i = 0; i < np; i++) {
-            const Poly *q = &ps[i];
+        for (int i = 0; i < poly_count; i++) {
+            const Poly *q = &model_polys[i];
             if (q == c || !same_stuff(p, q) || q->x1 - q->x0 < 8 || q->u1 - q->u0 < 8 || !in_plane(p, q)) continue;
             if (q->x0 < c->x1 - 8 || q->x0 > c->x1 + 8) continue;
-            int oy = (q->y1 < c->y1 ? q->y1 : c->y1) - (q->y0 > c->y0 ? q->y0 : c->y0), oz = (q->z1 < c->z1 ? q->z1 : c->z1) - (q->z0 > c->z0 ? q->z0 : c->z0);
+            int oy = (q->y1 < c->y1 ? q->y1 : c->y1) - (q->y0 > c->y0 ? q->y0 : c->y0),
+                oz = (q->z1 < c->z1 ? q->z1 : c->z1) - (q->z0 > c->z0 ? q->z0 : c->z0);
             if (2 * oy < c->y1 - c->y0 || 2 * oz < c->z1 - c->z0) continue;
             if (!nx || q->x1 - q->x0 > nx->x1 - nx->x0) nx = q;
         }
@@ -236,8 +309,10 @@ static int texel(const unsigned short *vr, const Poly *p, int u, int v)
 {
     int tx = (p->tpage & 15) * 64, ty = (p->tpage & 16) ? 256 : 0, depth = (p->tpage >> 7) & 3;
     int cx = (p->clut & 63) * 16, cy = (p->clut >> 6) & 511;
-    if (depth == 0) return vr[cy * 1024 + ((cx + ((vr[(ty + v) * 1024 + ((tx + u / 4) & 1023)] >> ((u & 3) * 4)) & 15)) & 1023)];
-    if (depth == 1) return vr[cy * 1024 + ((cx + ((vr[(ty + v) * 1024 + ((tx + u / 2) & 1023)] >> ((u & 1) * 8)) & 255)) & 1023)];
+    if (depth == 0)
+        return vr[cy * 1024 + ((cx + ((vr[(ty + v) * 1024 + ((tx + u / 4) & 1023)] >> ((u & 3) * 4)) & 15)) & 1023)];
+    if (depth == 1)
+        return vr[cy * 1024 + ((cx + ((vr[(ty + v) * 1024 + ((tx + u / 2) & 1023)] >> ((u & 1) * 8)) & 255)) & 1023)];
     return vr[(ty + v) * 1024 + ((tx + u) & 1023)];
 }
 /* a cut-out (leaves, a fringe): its texture rectangle holds see-through texels */
@@ -245,7 +320,11 @@ static int has_holes(const Poly *p)
 {
     const unsigned short *vr = port_gpu_vram(0, 0, 1024, 512);
     int bad = 0, n = 0;
-    for (int v = p->v0; v <= p->v1; v++) for (int u = p->u0; u <= p->u1; u++) { bad += texel(vr, p, u, v) == 0; n++; }
+    for (int v = p->v0; v <= p->v1; v++)
+        for (int u = p->u0; u <= p->u1; u++) {
+            bad += texel(vr, p, u, v) == 0;
+            n++;
+        }
     return bad * 64 > n;
 }
 /* where the model shows nothing about the tile's end (a face alone in its plane), the tile starts again, and from
@@ -255,11 +334,13 @@ static int has_holes(const Poly *p)
 static int wrap_column(const Poly *p, int t0, int t1)
 {
     const unsigned short *vr = port_gpu_vram(0, 0, 1024, 512);
-    int v0 = 255, v1 = 0, best = t1; long bc = -1;
-    for (int i = 0; i < np; i++) {
-        const Poly *q = &ps[i];
+    int v0 = 255, v1 = 0, best = t1;
+    long bc = -1;
+    for (int i = 0; i < poly_count; i++) {
+        const Poly *q = &model_polys[i];
         if (q->tpage != p->tpage || q->clut != p->clut || q->u0 < t0 || q->u1 > t1) continue;
-        if (q->v0 < v0) v0 = q->v0; if (q->v1 > v1) v1 = q->v1;
+        if (q->v0 < v0) v0 = q->v0;
+        if (q->v1 > v1) v1 = q->v1;
     }
     if (v1 < v0 || t1 - t0 < 16) return t1;
     for (int c = t1; c >= t0 + (t1 - t0) / 2; c--) {
@@ -268,21 +349,29 @@ static int wrap_column(const Poly *p, int t0, int t1)
             int d[3] = {0, 0, 0};                                            /* 3 x 3 texels each side of the join */
             for (int k = 0; k < 9; k++) {
                 int a = texel(vr, p, t0 + k % 3, v - 1 + k / 3), b = texel(vr, p, c - k % 3, v - 1 + k / 3);
-                d[0] += (a & 31) - (b & 31); d[1] += ((a >> 5) & 31) - ((b >> 5) & 31); d[2] += ((a >> 10) & 31) - ((b >> 10) & 31);
+                d[0] += (a & 31) - (b & 31);
+                d[1] += ((a >> 5) & 31) - ((b >> 5) & 31);
+                d[2] += ((a >> 10) & 31) - ((b >> 10) & 31);
             }
-            cost += d[0] * d[0] + d[1] * d[1] + d[2] * d[2];                 /* squared: a mark cut through counts more than grain */
+            /* squared: a mark cut through counts more than grain */
+            cost += d[0] * d[0] + d[1] * d[1] + d[2] * d[2];
         }
         if (port_verbose > 2) port_printf("[port] ws trick: wrap column %d cost %ld\n", c, cost);
-        if (bc < 0 || cost < bc) { bc = cost; best = c; }
+        if (bc < 0 || cost < bc) {
+            bc = cost;
+            best = c;
+        }
     }
     return best;
 }
 
+/* one vertex of a swept quad: the edge vertex e moved to x (mirrored back by sgn) with U u256 (8.8) */
 static void put_v(u8 *d, const Vx *e, int x, int u256)
 {
     Vx v = *e;
     int u = (u256 + 128) >> 8;
-    v.x = (s16)(sgn * x); v.u = (u8)(u < 0 ? 0 : u > 255 ? 255 : u);
+    v.x = (s16)(sgn * x);
+    v.u = (u8)(u < 0 ? 0 : u > 255 ? 255 : u);
     memcpy(d, &v, 8);
 }
 
@@ -297,6 +386,7 @@ static void put_v(u8 *d, const Vx *e, int x, int u256)
        starts it, the row lines go on with their own zigzag and the light changes column by column as before;
      - again every PX units until the wide frame is covered.
    The two columns are the model's polygons, read each time; nothing is mirrored and no value is random. */
+/* (ring_next: the ring neighbour of quad q's vertex v that is not `not`) */
 static const Vx *ring_next(const Poly *q, const Vx *v, const Vx *not)
 {
     for (int j = 0; j < 4; j++) {
@@ -306,27 +396,44 @@ static const Vx *ring_next(const Poly *q, const Vx *v, const Vx *not)
     }
     return 0;
 }
-static const Vx *find_vertex(const Poly *q, const Vx *a) { for (int j = 0; j < q->nv; j++) if (same_pos(&q->v[j], a)) return &q->v[j]; return 0; }
+static const Vx *find_vertex(const Poly *q, const Vx *a)
+{
+    for (int j = 0; j < q->nv; j++)
+        if (same_pos(&q->v[j], a)) return &q->v[j];
+    return 0;
+}
 /* quad q moved dx outwards; with `from`, those two vertices are laid on `to` (moved dx - period) */
 static void put_poly(const Poly *q, const Vx *const *from, const Vx *const *to, int dx, int period)
 {
     if (n4 >= MAXQ || g4 >= MAXQ) return;
-    u8 *d = q->gour ? gt4[g4++] : ft4[n4++];
-    memcpy(d, &q->clut, 2); memcpy(d + 2, &q->tpage, 2); memcpy(d + 4, &q->col[0], 4); d += 8;
-    if (q->gour) { memcpy(d, &q->col[1], 12); d += 12; }
+    u8 *pkt = q->gour ? gt4[g4++] : ft4[n4++];
+    memcpy(pkt, &q->clut, 2);
+    memcpy(pkt + 2, &q->tpage, 2);
+    memcpy(pkt + 4, &q->col[0], 4);
+    pkt += 8;
+    if (q->gour) {
+        memcpy(pkt, &q->col[1], 12);
+        pkt += 12;
+    }
     for (int j = 0; j < 4; j++) {
         Vx v = q->v[j];
-        for (int k = 0; k < 2; k++) if (from && &q->v[j] == from[k]) { v.x = (s16)(to[k]->x + period); v.y = to[k]->y; v.z = to[k]->z; }
+        for (int k = 0; k < 2; k++)
+            if (from && &q->v[j] == from[k]) {
+                v.x = (s16)(to[k]->x + period);
+                v.y = to[k]->y;
+                v.z = to[k]->z;
+            }
         v.x = (s16)(sgn * (v.x - dx));
-        memcpy(d, &v, 8); d += 8;
+        memcpy(pkt, &v, 8);
+        pkt += 8;
     }
 }
 static int relief(void)
 {
     static struct { const Poly *b, *a; const Vx *o[2], *j[2]; } row[160];
     int nrow = 0, px[160];
-    for (int i = 0; i < np && nrow < 160; i++) {
-        const Poly *p = &ps[i];
+    for (int i = 0; i < poly_count && nrow < 160; i++) {
+        const Poly *p = &model_polys[i];
         if (p->nv != 4) continue;
         {   /* the planes that hold the x direction are swept (build) */
             const Vx *r0 = &p->v[RING4[0]], *r1 = &p->v[RING4[1]], *r2 = &p->v[RING4[2]], *r3 = &p->v[RING4[3]];
@@ -342,26 +449,45 @@ static int relief(void)
             if (a->x > x43(a->z) || b->x > x43(b->z)) continue;              /* (part of) it is in the 4:3 picture */
             if (a->x <= xwide(a->z) && b->x <= xwide(b->z)) continue;        /* out of the wide frame too */
             int shared = 0;
-            for (int k = 0; k < np && !shared; k++)                          /* (a layer over the same quad, the straw's fringe on the rock, is not a neighbour) */
-                shared = k != i && has_vertex(&ps[k], a) && has_vertex(&ps[k], b) && !(has_vertex(&ps[k], na) && has_vertex(&ps[k], nb));
+            /* (a layer over the same quad, the straw's fringe on the rock, is not a neighbour) */
+            for (int k = 0; k < poly_count && !shared; k++)
+                shared = k != i && has_vertex(&model_polys[k], a) && has_vertex(&model_polys[k], b)
+                         && !(has_vertex(&model_polys[k], na) && has_vertex(&model_polys[k], nb));
             if (shared) continue;
             const Poly *A = 0;                                               /* the quad across the opposite edge */
-            for (int k = 0; k < np && !A; k++)
-                if (k != i && ps[k].nv == 4 && ps[k].tpage == p->tpage && ps[k].clut == p->clut && has_vertex(&ps[k], na) && has_vertex(&ps[k], nb)) A = &ps[k];
+            for (int k = 0; k < poly_count && !A; k++)
+                if (k != i && model_polys[k].nv == 4 && model_polys[k].tpage == p->tpage
+                    && model_polys[k].clut == p->clut && has_vertex(&model_polys[k], na)
+                    && has_vertex(&model_polys[k], nb)) A = &model_polys[k];
             if (!A) continue;
             const Vx *ia = find_vertex(A, na), *ib = find_vertex(A, nb);
             const Vx *ja = ring_next(A, ia, ib), *jb = ring_next(A, ib, ia);
             if (!ja || !jb || ja->x <= na->x || jb->x <= nb->x) continue;
-            row[nrow].b = p; row[nrow].a = A; row[nrow].o[0] = a; row[nrow].o[1] = b; row[nrow].j[0] = ja; row[nrow].j[1] = jb;
+            row[nrow].b = p;
+            row[nrow].a = A;
+            row[nrow].o[0] = a;
+            row[nrow].o[1] = b;
+            row[nrow].j[0] = ja;
+            row[nrow].j[1] = jb;
             px[nrow] = (ja->x + jb->x - a->x - b->x) / 2;
-            if (port_verbose > 1) port_printf("[port] ws trick: relief edge (%d,%d,%d) (%d,%d,%d) tp %04x cl %04x, across (%d,%d,%d) (%d,%d,%d): %d\n",
-                a->x, a->y, a->z, b->x, b->y, b->z, p->tpage, p->clut, ja->x, ja->y, ja->z, jb->x, jb->y, jb->z, px[nrow]);
+            if (port_verbose > 1)
+                port_printf("[port] ws trick: relief edge (%d,%d,%d) (%d,%d,%d) tp %04x cl %04x, across (%d,%d,%d) "
+                            "(%d,%d,%d): %d\n",
+                            a->x, a->y, a->z, b->x, b->y, b->z, p->tpage, p->clut, ja->x, ja->y, ja->z, jb->x, jb->y,
+                            jb->z, px[nrow]);
             nrow++;
             break;
         }
     }
     if (!nrow) return 0;
-    for (int i = 1; i < nrow; i++) { int v = px[i], k = i; while (k > 0 && px[k - 1] > v) { px[k] = px[k - 1]; k--; } px[k] = v; }
+    for (int i = 1; i < nrow; i++) {                                         /* sorted, for the median */
+        int v = px[i], k = i;
+        while (k > 0 && px[k - 1] > v) {
+            px[k] = px[k - 1];
+            k--;
+        }
+        px[k] = v;
+    }
     int PX = px[nrow / 2];
     if (PX < 16) return 0;
     for (int r = 0; r < nrow; r++) {
@@ -369,7 +495,7 @@ static int relief(void)
         for (int m = 1; m <= 24; m++) {
             int dxm = (m - 1) * PX;
             if (a->x - dxm <= xwide(a->z) && b->x - dxm <= xwide(b->z)) break;
-            put_poly(row[r].a, row[r].j, row[r].o, m * PX, PX);              /* A with its far edge on O, one period out */
+            put_poly(row[r].a, row[r].j, row[r].o, m * PX, PX);   /* A with its far edge on O, one period out */
             put_poly(row[r].b, 0, 0, m * PX, 0);                             /* B one period out */
         }
     }
@@ -388,31 +514,54 @@ static int carry(const Poly *p, int ia, int ib, int rho, int t0, int t1, int fli
     const Vx *ev[2] = {a, b};
     for (int k = 0; k < 2 && clamp; k++) {                                   /* start outside the 4:3 frustum */
         int lim = x43(ev[k]->z);
-        if (x[k] > lim) { u[k] -= r[k] * (x[k] - lim); x[k] = lim; }
+        if (x[k] > lim) {
+            u[k] -= r[k] * (x[k] - lim);
+            x[k] = lim;
+        }
     }
     for (int guard = 0; guard < 48 && (x[0] > end[0] || x[1] > end[1]); guard++) {
         int nx[2], nu[2];
         for (int k = 0; k < 2; k++) {
-            if (!r[k]) { nx[k] = x[k] - 64; nu[k] = u[k]; continue; }
+            if (!r[k]) {
+                nx[k] = x[k] - 64;
+                nu[k] = u[k];
+                continue;
+            }
             for (int twice = 0; twice < 2; twice++) {                        /* at the tile's end: flipped, or again */
                 int bound = (r[k] > 0 ? t0 : t1) * 256;
                 if (iabs(u[k] - bound) >= 128) break;
-                if (flip) r[k] = -r[k]; else u[k] = (r[k] > 0 ? t1 : t0) * 256;
+                if (flip) r[k] = -r[k];
+                else u[k] = (r[k] > 0 ? t1 : t0) * 256;
             }
             int bound = (r[k] > 0 ? t0 : t1) * 256;
             int d = (iabs(u[k] - bound) + iabs(r[k]) / 2) / iabs(r[k]);
             if (d < 1) d = 1;
-            nx[k] = x[k] - d; nu[k] = bound;
+            nx[k] = x[k] - d;
+            nu[k] = bound;
         }
         if (n4 >= MAXQ || g4 >= MAXQ) return 0;
         /* the quad on the other side of the edge, same facing: ring (b, a, a', b') = strip order b, a, b', a' */
         u8 *d = p->gour ? gt4[g4] : ft4[n4], *vp;
         u32 w0 = cb | ((u32)(p->cmd | 8) << 24);
-        memcpy(d, &p->clut, 2); memcpy(d + 2, &p->tpage, 2); memcpy(d + 4, &w0, 4);
+        memcpy(d, &p->clut, 2);
+        memcpy(d + 2, &p->tpage, 2);
+        memcpy(d + 4, &w0, 4);
         vp = d + 8;
-        if (p->gour) { memcpy(d + 8, &ca, 4); memcpy(d + 12, &cb, 4); memcpy(d + 16, &ca, 4); vp = d + 20; g4++; } else n4++;
-        put_v(vp, b, x[1], u[1]); put_v(vp + 8, a, x[0], u[0]); put_v(vp + 16, b, nx[1], nu[1]); put_v(vp + 24, a, nx[0], nu[0]);
-        for (int k = 0; k < 2; k++) { x[k] = nx[k]; u[k] = nu[k]; }
+        if (p->gour) {
+            memcpy(d + 8, &ca, 4);
+            memcpy(d + 12, &cb, 4);
+            memcpy(d + 16, &ca, 4);
+            vp = d + 20;
+            g4++;
+        } else n4++;
+        put_v(vp, b, x[1], u[1]);
+        put_v(vp + 8, a, x[0], u[0]);
+        put_v(vp + 16, b, nx[1], nu[1]);
+        put_v(vp + 24, a, nx[0], nu[0]);
+        for (int k = 0; k < 2; k++) {
+            x[k] = nx[k];
+            u[k] = nu[k];
+        }
     }
     return 1;
 }
@@ -439,32 +588,49 @@ static int carry(const Poly *p, int ia, int ib, int rho, int t0, int t1, int fli
    Nothing mirrored, integers only. */
 #define GAP 96
 #define TUCK 2
+/* (grid_rho: the median texels per unit (8.8) of the polygons at depth wz that hold a whole tile of p's page) */
 static int grid_rho(const Poly *p, int t0, int t1, int wz)
 {
     int w[64], n = 0;
-    for (int i = 0; i < np && n < 64; i++) {
-        const Poly *q = &ps[i];
-        if (q->z0 != wz || q->z1 != wz || q->tpage != p->tpage || q->u1 - q->u0 < t1 - t0 - 2 || q->u1 - q->u0 > t1 - t0 || q->x1 - q->x0 < 8) continue;
-        if (iabs(side_u(q, 1) - side_u(q, 0)) < t1 - t0 - 4) continue;       /* (a whole tile, U along x; every palette of the page) */
+    for (int i = 0; i < poly_count && n < 64; i++) {
+        const Poly *q = &model_polys[i];
+        if (q->z0 != wz || q->z1 != wz || q->tpage != p->tpage || q->u1 - q->u0 < t1 - t0 - 2
+            || q->u1 - q->u0 > t1 - t0 || q->x1 - q->x0 < 8) continue;
+        /* (a whole tile, U along x; every palette of the page) */
+        if (iabs(side_u(q, 1) - side_u(q, 0)) < t1 - t0 - 4) continue;
         w[n++] = (q->u1 - q->u0) * 256 / (q->x1 - q->x0);
     }
     if (!n) return 0;
-    for (int i = 1; i < n; i++) { int v = w[i], k = i; while (k > 0 && w[k - 1] > v) { w[k] = w[k - 1]; k--; } w[k] = v; }
+    for (int i = 1; i < n; i++) {
+        int v = w[i], k = i;
+        while (k > 0 && w[k - 1] > v) {
+            w[k] = w[k - 1];
+            k--;
+        }
+        w[k] = v;
+    }
     return w[n / 2];
 }
 static int wall(void)
 {
-    static struct { const Poly *p; u8 ia, ib; } we[64];
-    int nw = 0, wz = 0, done = 0, foot = -32768, drop = 0;
+    static struct { const Poly *p; u8 ia, ib; } wall_edges[64];
+    int wall_edge_count = 0, wz = 0, done = 0, foot = -32768, drop = 0;
     for (int pass = 0; pass < 2; pass++) {                                   /* 0: the wall's depth; 1: its end */
         if (pass) {
             int best = 0;
-            for (int i = 0; i < nw; i++) { int c = 0; for (int k = 0; k < nw; k++) c += we[k].p->z0 == we[i].p->z0; if (c > best) { best = c; wz = we[i].p->z0; } }
-            if (!nw) return 0;
-            nw = 0;
+            for (int i = 0; i < wall_edge_count; i++) {
+                int c = 0;
+                for (int k = 0; k < wall_edge_count; k++) c += wall_edges[k].p->z0 == wall_edges[i].p->z0;
+                if (c > best) {
+                    best = c;
+                    wz = wall_edges[i].p->z0;
+                }
+            }
+            if (!wall_edge_count) return 0;
+            wall_edge_count = 0;
         }
-        for (int i = 0; i < np && nw < 64; i++) {
-            const Poly *p = &ps[i];
+        for (int i = 0; i < poly_count && wall_edge_count < 64; i++) {
+            const Poly *p = &model_polys[i];
             const u8 *ring = p->nv == 4 ? RING4 : RING3;
             if (p->z0 != p->z1 || (pass && p->z0 != wz)) continue;
             for (int e = 0; e < p->nv; e++) {
@@ -473,68 +639,99 @@ static int wall(void)
                 const Vx *na = &p->v[ring[(e + p->nv - 1) % p->nv]], *nb = &p->v[ring[(e + 2) % p->nv]];
                 int dx = b->x - a->x, dy = b->y - a->y;
                 if (dx * dx > dy * dy) continue;                             /* runs along x */
-                if (na->x < a->x || nb->x < b->x || (na->x == a->x && nb->x == b->x)) continue;    /* the polygon lies inwards */
-                if (a->x <= x43(a->z) + 1 && b->x <= x43(b->z) + 1) continue;       /* outside the 4:3 picture: build()'s */
+                /* the polygon lies inwards */
+                if (na->x < a->x || nb->x < b->x || (na->x == a->x && nb->x == b->x)) continue;
+                /* outside the 4:3 picture: build()'s */
+                if (a->x <= x43(a->z) + 1 && b->x <= x43(b->z) + 1) continue;
                 if (a->x > x43(a->z) + GAP || b->x > x43(b->z) + GAP) continue;     /* not at the end */
                 int shared = 0;
-                for (int k = 0; k < np && !shared; k++)                      /* (a layer over the same quad, the straw's fringe on the wall's foot, is not a neighbour) */
-                    shared = k != i && has_vertex(&ps[k], a) && has_vertex(&ps[k], b) && !(has_vertex(&ps[k], na) && has_vertex(&ps[k], nb));
+                /* (a layer over the same quad, the straw's fringe on the wall's foot, is not a neighbour) */
+                for (int k = 0; k < poly_count && !shared; k++)
+                    shared = k != i && has_vertex(&model_polys[k], a) && has_vertex(&model_polys[k], b)
+                             && !(has_vertex(&model_polys[k], na) && has_vertex(&model_polys[k], nb));
                 if (shared) continue;
-                if (has_holes(p)) { int t0, t1; tile(p, &t0, &t1); if (join_kind(p, t0, t1) < 0) break; }      /* a cut-out alone (a ladder) ends where it ends */
-                we[nw].p = p; we[nw].ia = (u8)ia; we[nw].ib = (u8)ib; nw++;
-                if (port_verbose > 1) port_printf("[port] ws trick: wall %s (%d,%d,%d u%d) (%d,%d,%d u%d) tp %04x cl %04x\n", pass ? "end" : "candidate",
-                    sgn * a->x, a->y, a->z, a->u, sgn * b->x, b->y, b->z, b->u, p->tpage, p->clut);
+                if (has_holes(p)) {                    /* a cut-out alone (a ladder) ends where it ends */
+                    int t0, t1;
+                    tile(p, &t0, &t1);
+                    if (join_kind(p, t0, t1) < 0) break;
+                }
+                wall_edges[wall_edge_count].p = p;
+                wall_edges[wall_edge_count].ia = (u8)ia;
+                wall_edges[wall_edge_count].ib = (u8)ib;
+                wall_edge_count++;
+                if (port_verbose > 1)
+                    port_printf("[port] ws trick: wall %s (%d,%d,%d u%d) (%d,%d,%d u%d) tp %04x cl %04x\n",
+                                pass ? "end" : "candidate",
+                                sgn * a->x, a->y, a->z, a->u, sgn * b->x, b->y, b->z, b->u, p->tpage, p->clut);
                 break;
             }
         }
     }
-    for (int i = 0; i < nw; i++) for (int k = 0; k < 2; k++) { int y = we[i].p->v[k ? we[i].ib : we[i].ia].y; if (y > foot) foot = y; }
-    for (int i = 0; i < np; i++) {                                           /* the floor the wall stands on: how much its edge at the wall's
-                                                                                depth still drops outwards of the wall's end */
-        const Poly *f = &ps[i];
-        if (f->z0 == f->z1) continue;
-        for (int j = 0; j < f->nv; j++) for (int k = 0; k < f->nv; k++) {
-            const Vx *v = &f->v[j], *w = &f->v[k];
-            if (v->z != wz || w->z != wz || w->x >= v->x || v->y < foot - 2 || v->y > foot || w->y - v->y <= drop || w->y - v->y > 8) continue;
-            for (int m = 0; m < nw; m++) if (same_pos(&we[m].p->v[we[m].ia], v) || same_pos(&we[m].p->v[we[m].ib], v)) { drop = w->y - v->y; break; }
+    for (int i = 0; i < wall_edge_count; i++)
+        for (int k = 0; k < 2; k++) {
+            int y = wall_edges[i].p->v[k ? wall_edges[i].ib : wall_edges[i].ia].y;
+            if (y > foot) foot = y;
         }
+    /* the floor the wall stands on: how much its edge at the wall's depth still drops outwards of the wall's end */
+    for (int i = 0; i < poly_count; i++) {
+        const Poly *f = &model_polys[i];
+        if (f->z0 == f->z1) continue;
+        for (int j = 0; j < f->nv; j++)
+            for (int k = 0; k < f->nv; k++) {
+                const Vx *v = &f->v[j], *w = &f->v[k];
+                if (v->z != wz || w->z != wz || w->x >= v->x || v->y < foot - 2 || v->y > foot || w->y - v->y <= drop
+                    || w->y - v->y > 8) continue;
+                for (int m = 0; m < wall_edge_count; m++)
+                    if (same_pos(&wall_edges[m].p->v[wall_edges[m].ia], v)
+                        || same_pos(&wall_edges[m].p->v[wall_edges[m].ib], v)) {
+                        drop = w->y - v->y;
+                        break;
+                    }
+            }
     }
-    for (int i = 0; i < nw; i++) {
-        Poly q = *we[i].p;                                                   /* (a copy: the foot's vertices are moved) */
-        const Poly *p = we[i].p;
-        Vx *a = &q.v[we[i].ia], *b = &q.v[we[i].ib];
+    for (int i = 0; i < wall_edge_count; i++) {
+        Poly q = *wall_edges[i].p;                       /* (a copy: the foot's vertices are moved) */
+        const Poly *p = wall_edges[i].p;
+        Vx *a = &q.v[wall_edges[i].ia], *b = &q.v[wall_edges[i].ib];
         int t0, t1, flip, rho, own = side_u(p, 1) - side_u(p, 0), cut = has_holes(p);
-        tile(p, &t0, &t1); flip = join_kind(p, t0, t1);
-        if (flip < 0) flip = 0;                                              /* (a facet with none beside it: as the wall's other rows) */
+        tile(p, &t0, &t1);
+        flip = join_kind(p, t0, t1);
+        if (flip < 0) flip = 0;                          /* (a facet with none beside it: as the wall's other rows) */
         rho = grid_rho(p, t0, t1, wz);
         if (!rho && p->x1 > p->x0) rho = iabs(own) * 256 / (p->x1 - p->x0);
         if (own < 0) rho = -rho;
         if (iabs(rho) < 8 || t1 - t0 < 4) rho = 0;
-        for (int k = 0; k < 2; k++) {                                        /* the foot: down to the floor's level there, the wall's own
-                                                                                stone TUCK units behind it */
+        /* the foot: down to the floor's level there, the wall's own stone TUCK units behind it */
+        for (int k = 0; k < 2; k++) {
             Vx *v = k ? b : a, *o = k ? a : b;
             if (v->y >= foot - 2 && o->y < v->y) v->y = (s16)(v->y + drop + (cut ? 0 : TUCK));
         }
-        if (port_verbose > 1) port_printf("[port] ws trick: wall sweep (%d,%d u%d) (%d,%d u%d) tile %d..%d rho %d %s\n", sgn * a->x, a->y, a->u, sgn * b->x, b->y, b->u, t0, t1, rho, flip ? "flipped" : "again");
-        if (!carry(&q, we[i].ia, we[i].ib, rho, t0, t1, flip, 0)) break;
+        if (port_verbose > 1)
+            port_printf("[port] ws trick: wall sweep (%d,%d u%d) (%d,%d u%d) tile %d..%d rho %d %s\n", sgn * a->x,
+                        a->y, a->u, sgn * b->x, b->y, b->u, t0, t1, rho, flip ? "flipped" : "again");
+        if (!carry(&q, wall_edges[i].ia, wall_edges[i].ib, rho, t0, t1, flip, 0)) break;
         done++;
     }
     if (port_verbose) port_printf("[port] ws trick: wall at depth %d, %d edges carried on\n", wz, done);
     return done;
 }
 
+/* the block of the current end (sgn, lo): the relief, the free edges swept, the wall, into blk */
 static void build(void)
 {
     int nedge = 0;
     n4 = g4 = 0;
     if (room_relief) nedge += relief();
-    for (int i = 0; i < np; i++) {
-        const Poly *p = &ps[i];
+    for (int i = 0; i < poly_count; i++) {
+        const Poly *p = &model_polys[i];
         const u8 *ring = p->nv == 4 ? RING4 : RING3;
         {   /* the plane holds the x direction */
             const Vx *r0 = &p->v[ring[0]], *r1 = &p->v[ring[1]], *r2 = &p->v[ring[2]];
             if ((r1->y - r0->y) * (r2->z - r0->z) - (r1->z - r0->z) * (r2->y - r0->y) != 0) continue;
-            if (p->nv == 4) { const Vx *r3 = &p->v[ring[3]]; if ((r1->y - r0->y) * (r3->z - r0->z) - (r1->z - r0->z) * (r3->y - r0->y) != 0) continue; }
+            if (p->nv == 4) {
+                const Vx *r3 = &p->v[ring[3]];
+                if ((r1->y - r0->y) * (r3->z - r0->z) - (r1->z - r0->z) * (r3->y - r0->y) != 0) continue;
+            }
         }
         int have_tile = 0, t0 = 0, t1 = 0, t1e = 0, flip = 0, holes = 0;
         for (int e = 0; e < p->nv; e++) {
@@ -543,89 +740,155 @@ static void build(void)
             const Vx *na = &p->v[ring[(e + p->nv - 1) % p->nv]], *nb = &p->v[ring[(e + 2) % p->nv]];
             int dx = b->x - a->x, dy = b->y - a->y, dz = b->z - a->z;
             if (dx * dx > dy * dy + dz * dz) continue;                       /* runs along x: nothing to sweep */
-            if (na->x < a->x || nb->x < b->x || (na->x == a->x && nb->x == b->x)) continue;    /* the polygon lies to its right */
+            /* the polygon lies to its right */
+            if (na->x < a->x || nb->x < b->x || (na->x == a->x && nb->x == b->x)) continue;
             if (a->x > x43(a->z) + 1 || b->x > x43(b->z) + 1) continue;     /* (part of) it is in the 4:3 picture */
             if (a->x <= xwide(a->z) && b->x <= xwide(b->z)) continue;       /* out of the wide frame too */
             int shared = 0;
-            for (int k = 0; k < np && !shared; k++) shared = k != i && has_vertex(&ps[k], a) && has_vertex(&ps[k], b);
+            for (int k = 0; k < poly_count && !shared; k++)
+                shared = k != i && has_vertex(&model_polys[k], a) && has_vertex(&model_polys[k], b);
             if (shared) continue;
             /* texels per unit along x (8.8), from the polygon's edges that run along x */
             int rho = 0, nr = 0;
-            if (na->x - a->x >= 4 && 4 * (iabs(na->y - a->y) + iabs(na->z - a->z)) <= na->x - a->x) { rho += (na->u - a->u) * 256 / (na->x - a->x); nr++; }
-            if (nb->x - b->x >= 4 && 4 * (iabs(nb->y - b->y) + iabs(nb->z - b->z)) <= nb->x - b->x) { rho += (nb->u - b->u) * 256 / (nb->x - b->x); nr++; }
+            if (na->x - a->x >= 4 && 4 * (iabs(na->y - a->y) + iabs(na->z - a->z)) <= na->x - a->x) {
+                rho += (na->u - a->u) * 256 / (na->x - a->x);
+                nr++;
+            }
+            if (nb->x - b->x >= 4 && 4 * (iabs(nb->y - b->y) + iabs(nb->z - b->z)) <= nb->x - b->x) {
+                rho += (nb->u - b->u) * 256 / (nb->x - b->x);
+                nr++;
+            }
             if (!nr) continue;
             rho /= nr;
             if (!have_tile) {
-                have_tile = 1; holes = has_holes(p); tile(p, &t0, &t1); flip = join_kind(p, t0, t1);
-                if (holes && room_relief && flip >= 0) holes = 0;       /* (a fringe the model itself lays tile after tile: the straw on a ledge) */
-                if (flip < 0) { flip = 0; t1e = wrap_column(p, t0, t1); if (t1e < a->u || t1e < b->u) t1e = t1; t1 = t1e; }
+                have_tile = 1;
+                holes = has_holes(p);
+                tile(p, &t0, &t1);
+                flip = join_kind(p, t0, t1);
+                /* (a fringe the model itself lays tile after tile: the straw on a ledge) */
+                if (holes && room_relief && flip >= 0) holes = 0;
+                if (flip < 0) {
+                    flip = 0;
+                    t1e = wrap_column(p, t0, t1);
+                    if (t1e < a->u || t1e < b->u) t1e = t1;
+                    t1 = t1e;
+                }
             }
             if (holes) continue;                                             /* a tree's crown ends where it ends */
             if (iabs(rho) < 8 || t1 - t0 < 4) rho = 0;                       /* one texel column */
             nedge++;
-            if (port_verbose > 1) port_printf("[port] ws trick: edge (%d,%d,%d u%d) (%d,%d,%d u%d) cmd %02x tp %04x cl %04x tile %d..%d rho %d %s\n",
-                a->x, a->y, a->z, a->u, b->x, b->y, b->z, b->u, p->cmd, p->tpage, p->clut, t0, t1, rho, flip ? "flipped" : "again");
+            if (port_verbose > 1)
+                port_printf("[port] ws trick: edge (%d,%d,%d u%d) (%d,%d,%d u%d) cmd %02x tp %04x cl %04x tile %d..%d "
+                            "rho %d %s\n",
+                            a->x, a->y, a->z, a->u, b->x, b->y, b->z, b->u, p->cmd, p->tpage, p->clut, t0, t1, rho,
+                            flip ? "flipped" : "again");
             if (!carry(p, ia, ib, rho, t0, t1, flip, 1)) goto pack;
         }
     }
 pack:
     if (room_wall) nedge += wall();
-    {
-        u8 *d = blk; u32 n = 0;
-        memcpy(d, &n, 4); d += 4;
-        n = (u32)n4; memcpy(d, &n, 4); d += 4; memcpy(d, ft4, (size_t)n4 * 40); d += n4 * 40;
-        n = 0; memcpy(d, &n, 4); d += 4;
-        n = (u32)g4; memcpy(d, &n, 4); d += 4; memcpy(d, gt4, (size_t)g4 * 52); d += g4 * 52;
-        memset(d, 0, 16);
+    {   /* the block: no triangles, the flat quads, no triangles, the gouraud quads, then 16 zero bytes */
+        u8 *dst = blk;
+        u32 n = 0;
+        memcpy(dst, &n, 4);
+        dst += 4;
+        n = (u32)n4;
+        memcpy(dst, &n, 4);
+        dst += 4;
+        memcpy(dst, ft4, (size_t)n4 * 40);
+        dst += n4 * 40;
+        n = 0;
+        memcpy(dst, &n, 4);
+        dst += 4;
+        n = (u32)g4;
+        memcpy(dst, &n, 4);
+        dst += 4;
+        memcpy(dst, gt4, (size_t)g4 * 52);
+        dst += g4 * 52;
+        memset(dst, 0, 16);
         blk_polys = n4 + g4;
     }
-    if (port_verbose) port_printf("[port] ws trick: %s end, camera limit %d, %d polygons read, %d edges carried on, %d quads\n", sgn > 0 ? "left" : "right", sgn * lo, np, nedge, blk_polys);
+    if (port_verbose)
+        port_printf("[port] ws trick: %s end, camera limit %d, %d polygons read, %d edges carried on, %d quads\n",
+                    sgn > 0 ? "left" : "right", sgn * lo, poly_count, nedge, blk_polys);
 }
 
 /* called from port_ws_area_model_link with the game's (merged) block list of this frame (list[3] = count, u32
    pointers from +4, room for 88) and the area model's table */
+static void blocks(char *list, const u8 *tbl, int area, int section);
 void port_ws_trick_blocks(char *list, const u8 *tbl, int area, int section)
 {
-    if (!PORT_LAZY_OK()) return;            /* (the 3DS: its tables are not in the program, runtime/lazy_bss.h) */
+    if (ws_heap_failed) return;
+    ws_on_room(trick_reset);
+    blocks(list, tbl, area, section);
+    ws_free(WS_GEN);
+}
+static void blocks(char *list, const u8 *tbl, int area, int section)
+{
     if (!port_ws_cull || !tbl) return;
-    int on[2], rel[2], wal[2];
-    for (int e = 0; e < 2; e++) { room_relief = room_wall = 0; on[e] = room_enabled(area, section, e); rel[e] = room_relief; wal[e] = on[e] ? room_wall : 0; }
+    int on[2], rel[2], wal[2];                                               /* per end: extended, relief, wall */
+    for (int e = 0; e < 2; e++) {
+        room_relief = room_wall = 0;
+        on[e] = room_enabled(area, section, e);
+        rel[e] = room_relief;
+        wal[e] = on[e] ? room_wall : 0;
+    }
     if (!on[0] && !on[1]) return;
     int n = tbl[0];
     if (n < 2) return;
     /* the camera: VIEW_CAMERA (scratchpad 0xC0, MATRIX: m[3][3] s16, t[3] s32 at +0x14) must be unrotated */
-    const u8 *c = (const u8 *)PORT_SPAD(0xC0);
-    s16 m[9]; s32 t[3]; memcpy(m, c, 18); memcpy(t, c + 0x14, 12);
-    for (int i = 0; i < 9; i++) if (m[i] != ((i % 4) ? 0 : 4096)) return;
+    const u8 *view_cam = (const u8 *)PORT_SPAD(0xC0);
+    s16 m[9];
+    s32 t[3];
+    memcpy(m, view_cam, 18);
+    memcpy(t, view_cam + 0x14, 12);
+    for (int i = 0; i < 9; i++)
+        if (m[i] != ((i % 4) ? 0 : 4096)) return;
     if ((int)(u16)port_gte_cfc2(26) != H || (int)((s32)port_gte_cfc2(24) >> 16) != 160 || t[2] != H) return;
+    if (!ws_need(WS_ROOM, ROOM_TABS, WS_NT(ROOM_TABS))) return;
     /* the camera's limit at each end: CAMERA_SCROLL minX / maxX, and wherever the camera has been in this room */
     const u8 *cs = (const u8 *)port_ram_ptr(0x800A4550u);
-    s16 minx, maxx; memcpy(&minx, cs + 0x2C, 2); memcpy(&maxx, cs + 0x2E, 2);
+    s16 minx, maxx;
+    memcpy(&minx, cs + 0x2C, 2);
+    memcpy(&maxx, cs + 0x2E, 2);
     if (seen_tbl != tbl || seen_sec != section) {
-        seen_tbl = tbl; seen_sec = section;
-        ends[0].lo = -(int)t[0]; ends[1].lo = (int)t[0]; ends[0].have_key = ends[1].have_key = 0;
+        seen_tbl = tbl;
+        seen_sec = section;
+        ends[0].lo = -(int)t[0];
+        ends[1].lo = (int)t[0];
+        ends[0].have_key = ends[1].have_key = 0;
     }
     const s32 *off = (const s32 *)(tbl + 4);
     for (int e = 0; e < 2; e++) {
-        sgn = e ? -1 : 1; lo = ends[e].lo; blk = ends[e].blk;
+        sgn = e ? -1 : 1;
+        lo = ends[e].lo;
+        blk = ends[e].blk;
         int cx = -sgn * (int)t[0], lim = e ? -maxx : minx;                  /* (mirrored for the right end) */
         if (minx <= maxx && maxx - minx < 8000 && lim < lo) lo = lim;
         if (cx < lo) lo = cx;
         ends[e].lo = lo;
         if (!on[e] || cx > lo + 2 * (160 + port_ws_cull) + 64) continue;    /* the end is out of sight */
+        /* the key: the model's block offsets and first bytes, the strip width and the camera limit */
         u32 key = (u32)n * 2654435761u;
         for (int i = 0; i < n; i++) key = (key ^ (u32)off[i]) * 16777619u;
-        for (int i = 0; i < 4 && i < n; i++) for (int k = 0; k < 256; k++) key = (key ^ tbl[off[i] + k]) * 16777619u;
-        key = (key ^ (u32)port_ws_cull) * 16777619u; key = (key ^ (u32)(lo + 16384)) * 16777619u;
+        for (int i = 0; i < 4 && i < n; i++)
+            for (int k = 0; k < 256; k++) key = (key ^ tbl[off[i] + k]) * 16777619u;
+        key = (key ^ (u32)port_ws_cull) * 16777619u;
+        key = (key ^ (u32)(lo + 16384)) * 16777619u;
         if (!ends[e].have_key || key != ends[e].key) {
-            ends[e].have_key = 1; ends[e].key = key; blk_polys = 0;
-            room_relief = rel[e]; room_wall = wal[e];
+            if (!ws_need(WS_GEN, GEN_TABS, WS_NT(GEN_TABS))) return;
+            ends[e].have_key = 1;
+            ends[e].key = key;
+            blk_polys = 0;
+            room_relief = rel[e];
+            room_wall = wal[e];
             if (parse(tbl)) build();
             ends[e].polys = blk_polys;
         }
         if (!ends[e].polys) continue;
         int cnt = (u8)list[3];
         if (cnt >= 88) return;
-        ((u32 *)list)[1 + cnt] = (u32)(unsigned long)blk; list[3] = (char)(cnt + 1);
+        ((u32 *)list)[1 + cnt] = (u32)(unsigned long)blk;
+        list[3] = (char)(cnt + 1);
     }
 }

@@ -4,23 +4,92 @@ Update this file whenever something lands or a task is decided. Newest first.
 
 ## Since v0.7.2 (not released)
 
-- **3DS memory (the user: the New 3DS in its 124 MB mode, and optimise everything).** tombi.rsf already asked for
-  124 MB (SystemModeExt) on a New 3DS; v0.7.0 failed on both models because a title's image must end below
-  0x04000000. Now the widescreen generators' and the GL renderer's big static tables are not in the 3DS image
-  (port2/tools/lazy_bss.py, PORT_LAZY_BSS, docs/PORT.md "Nintendo 3DS: memory, lazy tables"): a New 3DS gets them from
-  the heap (every widescreen part again: picture strips, top-down margins, Evil Pig / 3D room / Trick Village / 3D
-  floor ends), an Old 3DS leaves them off and has more heap / linear memory. The start screen's two frame buffers are
-  on the heap. PC check: the lazy build's frames of 44 widescreen rooms byte-identical. The log's first lines show the
-  console's memory and each unit's tables; `[wsbd] strips ... made in N ms` the strips' time. Not yet run on a console.
+- **3DS (branch claude/wizardly-heisenberg-5fllxj, merged 2026-11-24).**  Old 3DS at 5:3 / 60 Hz: the GTE's
+  perspective division in single precision with one correction step (exact over every pair; 2-3 ms a frame less on an
+  Old 3DS), the screen products in one SMULL, RTPT straight into the FIFOs (`tools/gte_arm_test.c` in qemu: identical
+  registers).  The start screen's buffers on the heap (a CPU write to VRAM crashed a console).  Two null-pointer
+  sites that faulted every frame now read / write the page-0 image directly (`port/fixes.txt`: chainedPartPlaceChild
+  in Forest: hut entrance, playerCheckPerchLanding): at 60-120 faults a second each kernel exception dispatch
+  eventually stopped an Old 3DS in a kernel crash (three times in the hut entrance; fixed and checked on the console).
+  An Old 3DS gets no widescreen extensions (ws_heap.c).  The fps line names the room; a function-profile build
+  (`PERFIL-tombi-3ds-lenta`) and `3ds-old.yml` (Azahar as an Old 3DS) for diagnosis; docs/AGENT_GUIDE.md section 6.
 - Panel: the vitality fruit's 1 showed as "01" (its texture cell took the 0's right half); fixed on every platform.
+
+- **The second-screen panel in French, German, Italian, Dutch, Portuguese, Swedish and Danish (2026-11-23).**  Its
+  own words (tabs, labels, planks, messages: 103 pairs) were English for every language but Spanish; now
+  `tools/panel_lang.py` holds them in the seven other languages of the PAL disc and writes
+  `port2/runtime/panel_lang.inc`, which `T()` reads by the pair's text (English and Spanish unchanged at the call
+  sites).  Plank labels that do not fit (long words on the 3DS's 320 x 240 panel) drop to the 8 px font instead of
+  overflowing, a back plank whose word is too long no longer breaks it mid-word, and the 3DS's shared Sort / Equip
+  row is split by the words' widths.  "Who" (the character that gives an event) has names only in English and
+  Spanish, so the other languages show the hint.  Checked on PC headless (i386): every tab and the event / item
+  pages in the nine languages at 1240 x 1080 and 320 x 240; English and Spanish panels identical to before.  Not
+  checked: the devices.  Known, older and in English too: on the 320 x 240 panel the room line of an event's
+  "Where" box can run over the box's lower edge.
+
+- **Readability pass over the port's C code (2026-11-22).**  port2/runtime and port2/shims (80 files): one
+  statement per line, lines within 120 columns, cryptic local names renamed (locals, parameters, statics only), short comments above unclear functions; data tables and
+  generated files untouched.  Form only: `tools/same_code.py` proves it (C tokens equal apart from layout, comments
+  and safe renames; i386 objects equal), and the whole i386 binary is byte-identical to the base apart from the build
+  stamp; the wasm2c build and a mingw syntax check pass; 3DS-only code is format-only (token check + the 3DS CI
+  build).
+
+- **No more hitch when entering a room with widescreen picture strips (2026-11-22, docs/PORT.md "Widescreen strips
+  cache").**  Since f5451af every visit made the strips again (up to 2 s on a PC in the Dwarf Village in blossom, a
+  visible freeze on the Thor).  Now (1) the slowest generators are 3-10 times faster with the same output bytes (the
+  quilters `vb_quilt` / `rq_quilt` / `tw_quilt`: exclusion map, reflected rows, a running count of excluded texels
+  per row, target texels listed once per block instead of per candidate); (2) `runtime/ws_cache.c` keeps every
+  finished result (build()'s strips with AREA17 s5's `en_ov` and AREA11 s1's `lf_fix`, tw / mm / im / ic / ck /
+  lake / island takes) in memory (8 results, 8 MB, LRU) and on disk (`ws_cache/` next to the memory cards, one file
+  per path, room, width and renderer flag; head + checksum, written to a temporary file and moved over), keyed by
+  the picture's hash, the width, the renderer flag, the mirror mode, `WS_GEN_VERSION` and ws_backdrop.c's build
+  stamp.  `--ws-cache off|mem|on`, `--no-ws-cache`.  PC (i386, one core, time of the strips at the room's entry,
+  before -> made now -> from the cache, 16:9 / 21:9): Dwarf Village in blossom AREA19 s1 1993 -> 166 -> 0 ms / 3063
+  -> 269 -> 0, the brick wall with the staircase AREA09 s5 1756 -> 202 / 2678 -> 319, the cave with the brick tower
+  AREA11 s2 621 -> 100 / 1039 -> 146, Dwarf Village AREA02 s1 408 -> 163 / 577 -> 216, the rock wall with the stair
+  AREA09 s4 367 -> 138 / 525 -> 196, the green tower AREA16 s4 363 -> 335 / 531 -> 475, the Underground Prison
+  AREA02 s2 188 -> 135, the treasure hall AREA09 s3 135 -> 39, the mermaid AREA06 s2 117 (unchanged), the clock
+  room AREA09 s2 99 (unchanged); from the cache 0-3 ms everywhere.  Cache files: 47 KB per 16:9 strip (108 KB at
+  21:9), the green tower 143 / 323 KB, the mermaid's four phases 190 / 430 KB.  The 3DS: five of the six `N3DS_OFF` rooms are on again
+  (expected first visit ever on an Old 3DS some 3-13 s, then from the SD card); the green tower stays off for its
+  10.8 MB.  Checked on the PC: frames byte-identical to the build before in all 27 strip rooms at 16:9 and 21:9 with
+  the cache cold, warm from disk (a new process), off, and A -> AREA02 s5 -> A through the debug menu (memory, and
+  `--ws-cache mem`), walking both ways (which also reaches the island, AREA11 s1 and the lake); a truncated, flipped,
+  random or empty cache file is ignored and replaced; 21:9 after 16:9 in the same folder makes its own file; the GL
+  renderer (xvfb) gets its own files (AREA09 s3, AREA06 s2, AREA19 s1: GL and software frames each identical to the
+  build before); the wasm2c build (9 rooms at 16:9 walking, 3 at 21:9 A -> B -> A: frames identical to the wasm2c build before, the cache files written through WASI).  Not run on the Thor or a 3DS.
+
+- **Smaller program image (all platforms, for the 3DS's 26 MB limit).** Three tables the 3DS never uses are no longer
+  in the image: the OpenGL renderer's vertex / op buffers (`shims/gpu_gl.c`, 3.5 MB, allocated by `gl_start`), the
+  RGB frame buffer of window presents and dumps (`shims/gpu.c` `frame_rgb`, 1.5 MB, allocated on first use) and the
+  top-down strips' VRAM save rows (`runtime/ws_topdown.c` `Slot.save`, 1.3 MB, allocated the first time the VRAM path
+  needs them; the pica path never does). About 6.3 MB less bss than after f5451af (estimated 3dsx ~25.8 MB -> ~19.5
+  MB; not measured: no devkitARM here, Docker Hub refused the pull with 429). Checked on the PC: frames identical
+  before / after on the software renderer (village 16:9, AREA05 s0 16:9, AREA19 s2 21:9) and on GL under xvfb (16:9),
+  and the wasm2c build matches i386 in AREA05 s0.
+
+- **The widescreen generators' tables on the heap, only while a room uses them; the 3DS gets them back (2026-11-22,
+  docs/PORT.md "Widescreen tables on the heap").** `runtime/ws_heap.c`: the picture strips (ws_backdrop*.c/.inc, 239
+  tables), the Evil Pig rooms, room3d, trick, floor3d and the Hidden Village's top-down margins keep their work
+  tables as heap pointers, asked for by each entry point (`ws_need_*` lists, checked by `tools/ws_heap_check.py`) and
+  freed when the call that made them returns (work) or when GAME area / section changes (what later frames read),
+  with every cache key reset so a room builds again on the way back.  bss: ws_backdrop.c 39.0 MB -> 48 KB, pigs 409 ->
+  1.4 KB, room3d 272 -> 4 KB, trick 257 -> 4.5 KB, floor3d 155 -> 3.6 KB, ws_topdown 4.1 -> 1.66 MB (its 1.35 MB
+  slot cache stays).  Largest room: the green tower (AREA16 s4) 10.8 MB while its strips are made.  The 3DS stubs
+  are gone; on the 3DS six rooms whose strips take 0.4-2 s on a PC stay off (`N3DS_OFF`, ws_backdrop.c: an Old 3DS
+  would freeze 10 s to a minute there), and out of memory turns the room's extensions off (a log line).  Expected
+  3DS image ~25.8 MB (+0.56 MB of code from clang armv6k objects; limit 26 MB, last build 25.26 MB): not built
+  (no devkitPro here) and not run on the console.  PC: frames byte-identical to before (i386 and wasm2c) in every
+  room with strips / pigs / room3d / trick / floor3d / margins at 4:3, 16:9, 21:9, with sweeps to both ends, room
+  A -> B -> A through the debug menu's warp, and with the new tables filled with garbage (PORT_WS_HEAP_POISON=1).
 
 ## In v0.7.2 (released 2026-11-18, after v0.7.2-fix)
 
 - **v0.7.1's code with a 3DS that fits (image 25.3 MB; not yet run on the device).** The 3DS image of v0.7.1 was 28.7 MB, 2.9 MB over the
   build that runs (run 43647748843, 26.0 MB): the new widescreen modules from master. On the 3DS these are now inert:
   ws_topdown_gen.inc's margins (Hidden Village; 2.4 MB of tables; the Dwarf Village trim stays), ws_pigs.c,
-  ws_room3d.c, ws_trick.c, ws_floor3d.c (1.1 MB). check_3dsx.py's limit is now 26 MB. To do later: those tables on
-  the heap only while used, so the 3DS can have them.
+  ws_room3d.c, ws_trick.c, ws_floor3d.c (1.1 MB). check_3dsx.py's limit is now 26 MB.
+  (Done since v0.7.2: the tables on the heap, the 3DS has them again.)
 
 ## In v0.7.2-fix (released 2026-11-18)
 
@@ -501,8 +570,8 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    is byte-identical to SCES-01331 Rev.1 except SYSTEM.CNF and the boot file name, so every PAL disc carries all
    nine MAINn.EXE and `--lang 1..4` already ran (lang.c). Now exposed: port usage, PC launcher (list, flags,
    launcher-language default), Android launcher (`LANG_N` appended). Checked on PC headless: in-game text in the
-   four languages, panel names from `D<n>SPSUB`. Not checked: the device, the Android build. Open: the panel's own
-   chrome is English for 1..4 (only en/es exist, `T()` in panel.c). Rev.0 (July 1998 build of either serial, MAIN0
+   four languages, panel names from `D<n>SPSUB`. Not checked: the device, the Android build. The panel's own chrome
+   is translated since 2026-11-23 (see "Since v0.7.2"). Rev.0 (July 1998 build of either serial, MAIN0
    md5 3edd55b0) is not supported: 793 files differ from Rev.1 and the port reads overlay tables at Rev.1 addresses.
    Since 2026-11-04 the PC launcher, extract_data.py and the Android app name a Rev.0 disc as such (sha1 118459ce),
    and the messages say Rev 1 of SCES-01331 or SCES-01330 is needed. The SCES-01330 zip in R2 is Rev.1 again

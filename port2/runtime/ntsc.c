@@ -12,7 +12,12 @@ extern unsigned short GAME[];           /* GAME.selectedArea */
 extern int port_printf(const char *, ...);
 extern int port_verbose;
 
-static const struct { unsigned char area, slot; unsigned short rec; short pal[8]; short us_y; } ntsc_apd[] = {
+static const struct {
+    unsigned char area, slot;
+    unsigned short rec;
+    short pal[8];
+    short us_y;
+} ntsc_apd[] = {
 #include "ntsc_apd.inc"
 };
 
@@ -36,8 +41,9 @@ void port_ntsc_apd_rec(void *rec) {
         for (i = 0; i < sizeof pal_apd_fix / sizeof pal_apd_fix[0]; i++)
             if (pal_apd_fix[i].area == GAME[0] && !memcmp(r, pal_apd_fix[i].pal, 16)) {
                 r[4] = pal_apd_fix[i].y;
-                if (port_verbose > 1) port_printf("[port] area %d placement record (%d %d %d x %d) y %d -> %d (PAL slip)\n",
-                                                  GAME[0], r[0], r[1], r[2], r[3], pal_apd_fix[i].pal[4], r[4]);
+                if (port_verbose > 1)
+                    port_printf("[port] area %d placement record (%d %d %d x %d) y %d -> %d (PAL slip)\n", GAME[0],
+                                r[0], r[1], r[2], r[3], pal_apd_fix[i].pal[4], r[4]);
                 return;
             }
         return;
@@ -45,8 +51,9 @@ void port_ntsc_apd_rec(void *rec) {
     for (i = 0; i < sizeof ntsc_apd / sizeof ntsc_apd[0]; i++)
         if (ntsc_apd[i].area == GAME[0] && r[4] == ntsc_apd[i].pal[4] && !memcmp(r, ntsc_apd[i].pal, 16)) {
             r[4] = ntsc_apd[i].us_y;
-            if (port_verbose > 1) port_printf("[port] NTSC picture: area %d placement record (%d %d %d x %d) y %d -> %d (USA)\n",
-                                              GAME[0], r[0], r[1], r[2], r[3], ntsc_apd[i].pal[4], r[4]);
+            if (port_verbose > 1)
+                port_printf("[port] NTSC picture: area %d placement record (%d %d %d x %d) y %d -> %d (USA)\n", GAME[0],
+                            r[0], r[1], r[2], r[3], ntsc_apd[i].pal[4], r[4]);
             return;
         }
 }
@@ -59,12 +66,16 @@ void port_ntsc_apd_rec(void *rec) {
    subScreenUpdate (port/fixes.txt) as the menu opens; each change only applies to the PAL value, so a
    second call (or another overlay's data) changes nothing.  Slots are { x, y, dw, idx }, ended by x == -1. */
 void port_ntsc_subscreen(short *item, short *event, short *arrows, short *footer, short *bg) {
-    short *t[2] = { item, event }, *f[2] = { arrows, footer };
+    short *lists[2] = { item, event },
+          *footers[2] = { arrows, footer };
     int k, i;
     if (!port_ntsc) return;
     for (k = 0; k < 2; k++)                     /* 8 rows: the 9th slot (idx 8) becomes the end marker */
-        if (t[k] && t[k][8 * 4 + 3] == 8 && t[k][8 * 4] != -1 && t[k][9 * 4 + 3] == 9 && t[k][10 * 4] == -1) t[k][8 * 4] = -1;
+        if (lists[k] && lists[k][8 * 4 + 3] == 8 && lists[k][8 * 4] != -1 && lists[k][9 * 4 + 3] == 9 &&
+            lists[k][10 * 4] == -1)
+            lists[k][8 * 4] = -1;
     for (k = 0; k < 2; k++)                     /* footer line 248 -> 216 */
-        for (i = 0; f[k] && i < 8 && f[k][i * 4] != -1; i++) if (f[k][i * 4 + 1] == 248) f[k][i * 4 + 1] = 216;
+        for (i = 0; footers[k] && i < 8 && footers[k][i * 4] != -1; i++)
+            if (footers[k][i * 4 + 1] == 248) footers[k][i * 4 + 1] = 216;
     if (bg && bg[0] == 80 && bg[1] == 128 && bg[3] == 0) bg[1] = 112;   /* the pink backdrop's centre */
 }
