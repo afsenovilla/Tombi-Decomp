@@ -271,12 +271,11 @@ if(PORT_LAZY_BSS)
   lazy_unit(${CMAKE_CURRENT_SOURCE_DIR}/shims/gpu_gl.c ${CMAKE_CURRENT_SOURCE_DIR}/shims/gpu_gl.c)
 endif()
 add_library(port2rt OBJECT ${PORT2_RT} ${GEN}/funcmap.c ${GEN}/build_id.c)
-# PORT_FN_PROFILE (the 3DS, a diagnostic build): the game and the runtime with -finstrument-functions, sampled on the
+# PORT_FN_PROFILE (the 3DS, a diagnostic build): the game with -finstrument-functions, sampled on the
 # console every millisecond (n3ds/fnprof.c); the log gets the functions the main thread is most often in
 option(PORT_FN_PROFILE "3DS: a function profile of the main thread in the log (n3ds/fnprof.c)" OFF)
 if(PORT_FN_PROFILE AND NINTENDO_3DS)
   target_compile_definitions(port2rt PRIVATE PORT_FN_PROFILE)
-  target_compile_options(port2rt PRIVATE -finstrument-functions)
   foreach(t ${PORT2_GAME_TARGETS})
     target_compile_options(${t} PRIVATE -finstrument-functions)
   endforeach()

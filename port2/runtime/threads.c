@@ -80,6 +80,9 @@ static void switch_to(int n) {
     if (from >= 1 && from <= MAX_TH) note_yield(from);
     port_thread_switches++;
     cur = n;
+#ifdef PORT_FN_PROFILE
+    { extern void port_fnprof_switch(int); port_fnprof_switch(n); }   /* (n3ds/fnprof.c: each task's stack of calls) */
+#endif
     tib_set(from, n);
     port_ctx_switch(&th[from].sp, th[n].sp);
 }

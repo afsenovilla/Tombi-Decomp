@@ -11,16 +11,24 @@
 #include <string.h>
 #include "port_runtime.h"
 
-#define DEPTH 64
-static __thread void *fp_stack[DEPTH];
-static __thread int fp_sp;
-static void *volatile *main_stack;   /* the main thread's own */
-static volatile int *main_sp;
+#define DEPTH 64   /* (a ring: an unbalanced enter / exit cannot run off it) */
+/* the game's tasks are coroutines on the main thread (runtime/threads.c), each with its own stack of calls: one
+   stack of names each (port_fnprof_switch), [9] for every other thread's calls (not sampled) */
+#define NCO 10
+static void *co_stack[NCO][DEPTH];
+static int co_sp[NCO];
+static volatile int co_cur;           /* the coroutine the main thread runs */
+static __thread int fp_main;          /* 1 on the main thread */
 
 void __cyg_profile_func_enter(void *fn, void *cs) __attribute__((no_instrument_function));
 void __cyg_profile_func_exit(void *fn, void *cs) __attribute__((no_instrument_function));
-void __cyg_profile_func_enter(void *fn, void *cs) { (void)cs; int s = fp_sp; if (s < DEPTH) fp_stack[s] = fn; fp_sp = s + 1; }
-void __cyg_profile_func_exit(void *fn, void *cs) { (void)fn; (void)cs; fp_sp--; }
+void __cyg_profile_func_enter(void *fn, void *cs) {
+    (void)cs; int c = fp_main ? co_cur : NCO - 1; int s = co_sp[c];
+    co_stack[c][s & (DEPTH - 1)] = fn; co_sp[c] = s + 1;
+}
+void __cyg_profile_func_exit(void *fn, void *cs) { (void)fn; (void)cs; int c = fp_main ? co_cur : NCO - 1; co_sp[c]--; }
+void port_fnprof_switch(int to) __attribute__((no_instrument_function));
+void port_fnprof_switch(int to) { co_cur = to >= 0 && to < NCO - 1 ? to : NCO - 2; }   /* (runtime/threads.c switch_to) */
 
 #define NH 2048
 static struct { void *fn; unsigned n; } hist[NH];
@@ -51,15 +59,15 @@ static void sampler(void *arg) {
     (void)arg;
     for (;;) {
         svcSleepThread(1000000);
-        int s = *main_sp;
-        if (s > 0 && s <= DEPTH) note((void *)main_stack[s - 1]); else outside++;
+        int c = co_cur, s = co_sp[c];
+        if (s > 0) note(co_stack[c][(s - 1) & (DEPTH - 1)]); else outside++;
         if (++total >= 10000) report();
     }
 }
 /* (called by the main thread once, before the game: n3ds/main_3ds.c) */
 void port_fnprof_start(void) __attribute__((no_instrument_function));
 void port_fnprof_start(void) {
-    main_stack = (void *volatile *)fp_stack; main_sp = &fp_sp;
+    fp_main = 1;
     s32 prio = 0x30; svcGetThreadPriority(&prio, CUR_THREAD_HANDLE);
     Thread t = threadCreate(sampler, 0, 16 * 1024, prio > 0x19 ? prio - 8 : 0x18, 0, true);
     port_printf("[prof] function profile: %s (sampler priority %d, the main thread's %d)\n", t ? "on" : "no thread", (int)(prio > 0x19 ? prio - 8 : 0x18), (int)prio);
