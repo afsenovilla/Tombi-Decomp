@@ -489,6 +489,10 @@ void port_vblank(void) {
                 }
                 /* (the present's part of the panel, --second-screen, and the sound mixer, inside game, are also given on their own) */
                 game = game > port_prof_sound_us ? game - port_prof_sound_us : 0;
+                {   /* (the room: AREA / section, which a log of a slow stretch needs to say where it was) */
+                    const unsigned char *g = port_ram_ptr(PORT_A_GAME); size_t n = strlen(low);
+                    snprintf(low + n, sizeof low - n, " room %u:%u", *(const unsigned short *)g, *(const unsigned short *)(g + 2));
+                }
                 port_printf("[port] fps: %d.%02d vblank/s (frame %d, %d audio samples/s) ms/frame: game %llu.%llu draw %llu.%llu present %llu.%llu (panel %llu.%llu) sound %llu.%llu wait %llu.%llu;%s\n",
                             (int)(nf * 100000000ull / tot / 100), (int)(nf * 100000000ull / tot % 100), port_frame, smp,
                             game / nf / 1000, game / nf / 100 % 10, port_prof_draw_us / nf / 1000, port_prof_draw_us / nf / 100 % 10,
