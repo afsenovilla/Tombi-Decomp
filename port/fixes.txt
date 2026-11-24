@@ -1104,3 +1104,10 @@ src/cameraClampAroundTarget.c | t = x - 0x90; | t = x - 0x90 - PORT_WSL;
 src/cameraClampAroundTarget.c | t = x + 0x90; | t = x + 0x90 + PORT_WSR;
 src/getCollisionPlaneAt.c | if (x < CAMERA_SCROLL.minX - 0xaa || | x = port_ws_whm_x(x, y, CAMERA_SCROLL.minX, CAMERA_SCROLL.maxX); if (x < CAMERA_SCROLL.minX - 0xaa ||
 src/getCollisionPlaneAt.c | return b + *(unsigned short *)(b + (c << 1)); | return port_ws_whm_col(b + *(unsigned short *)(b + (c << 1)), x);
+#
+# The tail part of a subtype-2 updateA00L4Type06 chain (AREA00 section 2, Forest: hut entrance) has d94 = 0 by
+# construction and the retail code stores its place through it into the BIOS words 0x10 / 0x14 and reads them back
+# (docs/PORT.md "the two null-pointer bursts"): twice a frame there.  The same words of the port's page-0 image,
+# without a fault each time (on a 3DS each one went through the kernel's exception dispatch, 120 a second, and an
+# Old 3DS stopped in a kernel exception in that room three times)
+src/chainedPartPlaceChild.c | q = o->d94; | q = o->d94; if (!q) { extern void *port_page0(void); q = (P *)port_page0(); }

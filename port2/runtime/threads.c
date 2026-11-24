@@ -168,6 +168,9 @@ void port_thread_close(int h) {
 /* The game writes the status register field of the BIOS TCBs (kernel table pointer at 0x110): the zeroed BIOS
    area of the data image serves as the table; the coroutines above do not need it. */
 void *port_bios_tcb_table(void) { return port_bios; }
+/* the BIOS kernel area (page 0) of the game's RAM: where a store / load through a null object pointer lands on
+   the PS1 (port/fixes.txt points such a pointer here instead of faulting on page 0) */
+void *port_page0(void) { return port_ram; }
 
 /* --test-null, second half: the fault handlers from a coroutine stack.  A null read, a null write and a
    division by zero where the game's tasks do them: ESP inside one of the stacks above, not the main thread's

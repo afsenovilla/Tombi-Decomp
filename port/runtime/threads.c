@@ -71,3 +71,6 @@ void port_thread_close(int h) {
    table; the coroutines above do not need it. */
 static unsigned char bios_tcbs[0xC0 * 8];
 void *port_bios_tcb_table(void) { return bios_tcbs; }
+/* the BIOS kernel area (page 0) of the game's RAM: where a store / load through a null object pointer lands on
+   the PS1 (port/fixes.txt points such a pointer here instead of faulting on page 0) */
+void *port_page0(void) { return (void *)0x80000000ul; }
