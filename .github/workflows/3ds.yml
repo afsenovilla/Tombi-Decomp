@@ -173,6 +173,8 @@ jobs:
             if [ "$PROF" = 1 ]; then
               cmake -S port2 -B build/n3ds-prof -G Ninja -DCMAKE_TOOLCHAIN_FILE=$DEVKITPRO/cmake/3DS.cmake -DCMAKE_BUILD_TYPE=Release -DPORT_FN_PROFILE=ON > /dev/null
               cmake --build build/n3ds-prof -j "$(nproc)" > build/n3ds-prof.log 2>&1 || { tail -30 build/n3ds-prof.log; exit 1; }
+              # (a name of its own, so it is never taken for the normal build: same build id, but slower)
+              mv build/n3ds-prof/tombi.3dsx build/n3ds-prof/tombi-PERFIL.3dsx
               ls -l build/n3ds-prof/*.3dsx
             fi
           '
@@ -224,9 +226,9 @@ jobs:
         if: github.ref != 'refs/heads/master'
         uses: actions/upload-artifact@v4
         with:
-          name: tombi-3ds-prof
+          name: PERFIL-tombi-3ds-lenta
           path: |
-            build/n3ds-prof/*.3dsx
+            build/n3ds-prof/tombi-PERFIL.3dsx
             build/n3ds-prof/tombi.elf
           if-no-files-found: warn
 
