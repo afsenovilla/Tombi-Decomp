@@ -1111,3 +1111,39 @@ src/getCollisionPlaneAt.c | return b + *(unsigned short *)(b + (c << 1)); | retu
 # without a fault each time (on a 3DS each one went through the kernel's exception dispatch, 120 a second, and an
 # Old 3DS stopped in a kernel exception in that room three times)
 src/chainedPartPlaceChild.c | q = o->d94; | q = o->d94; if (!q) { extern void *port_page0(void); q = (P *)port_page0(); }
+#
+# playerCheckPerchLanding (MAIN0 and the area overlays but X008, fixed above): GRABBED_OBJECT holds 3 at times (a flag
+# value) and the type test reads byte 3 of the BIOS kernel area; the same byte of the port's page-0 image, without a
+# fault (up to 60 a second in the Village: each one a kernel exception dispatch on the 3DS, as in Forest: hut entrance)
+src/playerCheckPerchLanding.c | extern TObj *GRABBED_OBJECT; | extern TObj *GRABBED_OBJECT; extern void *port_page0(void);
+src/playerCheckPerchLanding.c | if (GRABBED_OBJECT && GRABBED_OBJECT->type == 0x14 | if (GRABBED_OBJECT && ((unsigned long)GRABBED_OBJECT >= 0x10000 ? GRABBED_OBJECT : (TObj *)((char *)port_page0() + (unsigned long)GRABBED_OBJECT))->type == 0x14
+src/x001/playerCheckPerchLanding.c | extern TObj *GRABBED_OBJECT; | extern TObj *GRABBED_OBJECT; extern void *port_page0(void);
+src/x001/playerCheckPerchLanding.c | if (GRABBED_OBJECT && GRABBED_OBJECT->type == 0x14 | if (GRABBED_OBJECT && ((unsigned long)GRABBED_OBJECT >= 0x10000 ? GRABBED_OBJECT : (TObj *)((char *)port_page0() + (unsigned long)GRABBED_OBJECT))->type == 0x14
+src/x002/playerCheckPerchLanding.c | extern TObj *GRABBED_OBJECT; | extern TObj *GRABBED_OBJECT; extern void *port_page0(void);
+src/x002/playerCheckPerchLanding.c | if (GRABBED_OBJECT && GRABBED_OBJECT->type == 0x14 | if (GRABBED_OBJECT && ((unsigned long)GRABBED_OBJECT >= 0x10000 ? GRABBED_OBJECT : (TObj *)((char *)port_page0() + (unsigned long)GRABBED_OBJECT))->type == 0x14
+src/x003/playerCheckPerchLanding.c | extern TObj *GRABBED_OBJECT; | extern TObj *GRABBED_OBJECT; extern void *port_page0(void);
+src/x003/playerCheckPerchLanding.c | if (GRABBED_OBJECT && GRABBED_OBJECT->type == 0x14 | if (GRABBED_OBJECT && ((unsigned long)GRABBED_OBJECT >= 0x10000 ? GRABBED_OBJECT : (TObj *)((char *)port_page0() + (unsigned long)GRABBED_OBJECT))->type == 0x14
+src/x004/playerCheckPerchLanding.c | extern TObj *GRABBED_OBJECT; | extern TObj *GRABBED_OBJECT; extern void *port_page0(void);
+src/x004/playerCheckPerchLanding.c | if (GRABBED_OBJECT && GRABBED_OBJECT->type == 0x14 | if (GRABBED_OBJECT && ((unsigned long)GRABBED_OBJECT >= 0x10000 ? GRABBED_OBJECT : (TObj *)((char *)port_page0() + (unsigned long)GRABBED_OBJECT))->type == 0x14
+src/x005/playerCheckPerchLanding.c | extern TObj *GRABBED_OBJECT; | extern TObj *GRABBED_OBJECT; extern void *port_page0(void);
+src/x005/playerCheckPerchLanding.c | if (GRABBED_OBJECT && GRABBED_OBJECT->type == 0x14 | if (GRABBED_OBJECT && ((unsigned long)GRABBED_OBJECT >= 0x10000 ? GRABBED_OBJECT : (TObj *)((char *)port_page0() + (unsigned long)GRABBED_OBJECT))->type == 0x14
+src/x006/playerCheckPerchLanding.c | extern TObj *GRABBED_OBJECT; | extern TObj *GRABBED_OBJECT; extern void *port_page0(void);
+src/x006/playerCheckPerchLanding.c | if (GRABBED_OBJECT && GRABBED_OBJECT->type == 0x14 | if (GRABBED_OBJECT && ((unsigned long)GRABBED_OBJECT >= 0x10000 ? GRABBED_OBJECT : (TObj *)((char *)port_page0() + (unsigned long)GRABBED_OBJECT))->type == 0x14
+src/x009/playerCheckPerchLanding.c | extern TObj *GRABBED_OBJECT; | extern TObj *GRABBED_OBJECT; extern void *port_page0(void);
+src/x009/playerCheckPerchLanding.c | if (GRABBED_OBJECT && GRABBED_OBJECT->type == 0x14 | if (GRABBED_OBJECT && ((unsigned long)GRABBED_OBJECT >= 0x10000 ? GRABBED_OBJECT : (TObj *)((char *)port_page0() + (unsigned long)GRABBED_OBJECT))->type == 0x14
+src/x010/playerCheckPerchLanding.c | extern TObj *GRABBED_OBJECT; | extern TObj *GRABBED_OBJECT; extern void *port_page0(void);
+src/x010/playerCheckPerchLanding.c | if (GRABBED_OBJECT && GRABBED_OBJECT->type == 0x14 | if (GRABBED_OBJECT && ((unsigned long)GRABBED_OBJECT >= 0x10000 ? GRABBED_OBJECT : (TObj *)((char *)port_page0() + (unsigned long)GRABBED_OBJECT))->type == 0x14
+src/x011/playerCheckPerchLanding.c | extern TObj *GRABBED_OBJECT; | extern TObj *GRABBED_OBJECT; extern void *port_page0(void);
+src/x011/playerCheckPerchLanding.c | if (GRABBED_OBJECT && GRABBED_OBJECT->type == 0x14 | if (GRABBED_OBJECT && ((unsigned long)GRABBED_OBJECT >= 0x10000 ? GRABBED_OBJECT : (TObj *)((char *)port_page0() + (unsigned long)GRABBED_OBJECT))->type == 0x14
+src/x013/playerCheckPerchLanding.c | extern TObj *GRABBED_OBJECT; | extern TObj *GRABBED_OBJECT; extern void *port_page0(void);
+src/x013/playerCheckPerchLanding.c | if (GRABBED_OBJECT && GRABBED_OBJECT->type == 0x14 | if (GRABBED_OBJECT && ((unsigned long)GRABBED_OBJECT >= 0x10000 ? GRABBED_OBJECT : (TObj *)((char *)port_page0() + (unsigned long)GRABBED_OBJECT))->type == 0x14
+src/x014/playerCheckPerchLanding.c | extern TObj *GRABBED_OBJECT; | extern TObj *GRABBED_OBJECT; extern void *port_page0(void);
+src/x014/playerCheckPerchLanding.c | if (GRABBED_OBJECT && GRABBED_OBJECT->type == 0x14 | if (GRABBED_OBJECT && ((unsigned long)GRABBED_OBJECT >= 0x10000 ? GRABBED_OBJECT : (TObj *)((char *)port_page0() + (unsigned long)GRABBED_OBJECT))->type == 0x14
+src/x016/playerCheckPerchLanding.c | extern TObj *GRABBED_OBJECT; | extern TObj *GRABBED_OBJECT; extern void *port_page0(void);
+src/x016/playerCheckPerchLanding.c | if (GRABBED_OBJECT && GRABBED_OBJECT->type == 0x14 | if (GRABBED_OBJECT && ((unsigned long)GRABBED_OBJECT >= 0x10000 ? GRABBED_OBJECT : (TObj *)((char *)port_page0() + (unsigned long)GRABBED_OBJECT))->type == 0x14
+src/x017/playerCheckPerchLanding.c | extern TObj *GRABBED_OBJECT; | extern TObj *GRABBED_OBJECT; extern void *port_page0(void);
+src/x017/playerCheckPerchLanding.c | if (GRABBED_OBJECT && GRABBED_OBJECT->type == 0x14 | if (GRABBED_OBJECT && ((unsigned long)GRABBED_OBJECT >= 0x10000 ? GRABBED_OBJECT : (TObj *)((char *)port_page0() + (unsigned long)GRABBED_OBJECT))->type == 0x14
+src/x018/playerCheckPerchLanding.c | extern TObj *GRABBED_OBJECT; | extern TObj *GRABBED_OBJECT; extern void *port_page0(void);
+src/x018/playerCheckPerchLanding.c | if (GRABBED_OBJECT && GRABBED_OBJECT->type == 0x14 | if (GRABBED_OBJECT && ((unsigned long)GRABBED_OBJECT >= 0x10000 ? GRABBED_OBJECT : (TObj *)((char *)port_page0() + (unsigned long)GRABBED_OBJECT))->type == 0x14
+src/x019/playerCheckPerchLanding.c | extern TObj *GRABBED_OBJECT; | extern TObj *GRABBED_OBJECT; extern void *port_page0(void);
+src/x019/playerCheckPerchLanding.c | if (GRABBED_OBJECT && GRABBED_OBJECT->type == 0x14 | if (GRABBED_OBJECT && ((unsigned long)GRABBED_OBJECT >= 0x10000 ? GRABBED_OBJECT : (TObj *)((char *)port_page0() + (unsigned long)GRABBED_OBJECT))->type == 0x14
