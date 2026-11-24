@@ -100,3 +100,63 @@ the floor), make the numbered picture sheet, let the user decide. Details and th
   2026-11-16 (their `#line 1 "src/..."` was resolved from the build directory and failed; `port2/CMakeLists.txt` now
   links `src` into the build directory). The APK job saves its ccache even when cancelled; later runs should be
   much faster once the cache is warm.
+
+## 6. Nintendo 3DS version only (2026-11-24)
+
+Everything in this section is about the 3DS build (`port2/n3ds/`, `.github/workflows/3ds.yml`); none of it applies to
+the PC or Android builds.
+
+**How the user tests.** An Old 3DS (sometimes a New 3DS), the `.3dsx` from the Homebrew Launcher, widescreen 5:3,
+60 Hz, improved Spanish, no movies. Never suggest 50 Hz. Tell the user the moment the `n3ds` job of a push is green
+(do not wait for the `emulate` job): poll `actions/runs?head_sha=SHA` with a background script and report at once.
+A 3DS-only release goes to a `dev` branch as a pre-release, never to master's release flow.
+
+**Builds and artifacts.** Off master, `3ds.yml` also builds a function-profile build: artifact
+`PERFIL-tombi-3ds-lenta`, file `tombi-PERFIL.3dsx` (it has the same build id as the normal one and runs slower on
+purpose; say clearly which artifact to take). Its log has `[prof]` lines: name the addresses with
+`arm-none-eabi-addr2line -f -e tombi.elf ADDR` (the ELF is in the artifact). Artifacts can be fetched from the
+session with the GitHub MCP tool `actions_get` / `download_workflow_run_artifact` (a short-lived URL for curl).
+Instrumentation inflates small functions (each call gets enter/exit hooks): read shares, not absolute times.
+
+**Reading a device log.** The per-second `[port] fps:` line ends with `lowmem: N` and `room A:S`; aggregate it per
+room (fps, `game` ms, `draw` ms, seconds below 58 fps) and compare builds room by room. `[3ds] profile of N ordering
+tables` gives the cost of a drawn frame (decoder vs backend vs the GPU's own part).
+
+**Null-pointer accesses can crash an Old 3DS's kernel.** The port emulates the game's reads/writes of the PS1
+kernel area (page 0, through null object pointers) from libctru's user exception handler
+(`port2/runtime/lowmem_arm.inc`): every access is a kernel exception dispatch. A few a minute are harmless; tens to
+hundreds a second (a site that faults every frame) eventually stop the console in a kernel exception (Luma crash
+dump: ARM11, SVC mode, `pc=0xfffffffe`, `lr=0`; the game's log just ends). It is reproducible in the same room. Azahar
+does not reproduce it (its kernel is emulated). Fix such a site at its source in `port/fixes.txt`: point the null
+pointer at `port_page0()` (the page-0 image in the port's RAM: the same bytes the handler used, so identical
+behaviour), e.g. `chainedPartPlaceChild` (Forest: hut entrance) and `playerCheckPerchLanding`. Any `lowmem:` site in
+the tens per second on a device log needs the same treatment. Never tell the user a crash is "the system's" without
+proof: a crash in the same place twice is the port's.
+
+**Crash dumps** (`crash_dump_*.dmp`, Luma): 11 little-endian words of header (magic, magic, version, processor,
+exception type, ..., register size, code size, stack size, extra size), then r0-r12, sp, lr, pc, cpsr, dfsr, ifsr,
+far, fpexc, fpinst, fpinst2 from offset 40; the extra data names the process (`3dsx_app`). cpsr mode 0x13 with a
+kernel address in pc = a kernel crash, not a fault in the game's code.
+
+**Speed (Old 3DS, 268 MHz ARM11 + VFP11).**
+- Double-precision division on the VFP11 is far slower than it looks: replacing the GTE's perspective division
+  (`runtime/gte.c`) with a single-precision one plus one correction step on the remainder (exact over all 3.2 billion
+  h / sz pairs) took 2-3 ms off every frame. Look for `double` math and 64-bit divisions in per-vertex / per-primitive
+  code first.
+- The game's own code plus the GTE (RTPS / RTPT and the model loops) is ~45 % of the main thread; the renderer ~25 %,
+  spread over many small functions.
+- Check every GTE change against the plain C path in qemu (`port2/tools/gte_arm_test.c`): `arm-none-eabi-gcc` with
+  `--specs=rdimon.specs` works; do not install `gcc-arm-linux-gnueabi`, it removes `gcc-multilib` and breaks the i386
+  build.
+
+**Memory.** The code + data + bss image must end below 0x04000000 (`port2/n3ds/check_3dsx.py`); an Old 3DS has 64 MB
+of application memory and gets no widescreen tables (lazy_bss: `port_lazy_alloc` gives them on a New 3DS only). The
+CPU cannot write VRAM on a real console (emulators allow it): no CPU writes to VRAM frame buffers.
+
+**Emulator runs.** `.github/workflows/3ds-old.yml` runs builds in Azahar as an Old 3DS; the run ids (and an optional
+`cases:` line choosing the cases, e.g. `hut-wide`) are in `port2/n3ds/old3ds_runs.txt`. It checks start-up, memory
+and that rooms draw; it says nothing about the console's speed or its kernel.
+
+**PC memory checks of the runtime.** An AddressSanitizer build of the i386 port needs `--param asan-stack=0` (the
+game's tasks are coroutines on their own stacks: ASan reports false stack overflows in `switch_to`) and
+`ASAN_OPTIONS=handle_segv=0:allow_user_segv_handler=1`.

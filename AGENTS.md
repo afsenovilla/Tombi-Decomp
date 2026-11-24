@@ -92,3 +92,9 @@ inline asm. A score above 0 can still be instruction-identical (only relocation 
 Several agents can work at once (one function set each), on copies outside the repo. Only one process should
 edit and commit the repo; agents report a file path and what fixed it. Run background jobs with the tool's
 background option, not a subshell `&`; never `pkill -f` (kill by PID).
+
+## Nintendo 3DS version
+
+Work on the 3DS build (`port2/n3ds/`) has its own lessons in `docs/AGENT_GUIDE.md` section 6 (how the user tests,
+the profile build, reading device logs and crash dumps, null-pointer accesses that crash an Old 3DS's kernel, VFP
+speed). They apply to the 3DS version only.
