@@ -138,7 +138,7 @@ jobs:
       - name: Build tombi.3dsx (devkitARM container)
         if: steps.fetch.outputs.ok == 'true'
         run: |
-          docker run --rm -v "$PWD:/w" -w /w -e SDL2_VERSION=2.30.11 devkitpro/devkitarm:latest bash -ec '
+          docker run --rm -v "$PWD:/w" -w /w -e SDL2_VERSION=2.30.11 -e PROF=${{ github.ref == 'refs/heads/master' && '0' || '1' }} devkitpro/devkitarm:latest bash -ec '
             dkp-pacman -Q | grep -E "libctru|citro3d|devkitARM" || true
             apt-get update -qq && apt-get install -y -qq python3 cmake ninja-build binutils-mipsel-linux-gnu curl >/dev/null
             git config --global --add safe.directory /w || true
@@ -169,6 +169,12 @@ jobs:
             echo "== stubs"; sed -n "/## psyq\/bios stubs/,/## port-runtime/p" build/n3ds/gen/report.txt | awk "{print \$1}" | tr "\n" " "; echo
             ls -l build/n3ds/*.3dsx
             python3 port2/n3ds/check_3dsx.py build/n3ds/tombi.3dsx build/n3ds/tombi.elf $DEVKITARM/bin/arm-none-eabi-nm
+            # (not master: also the function-profile build, n3ds/fnprof.c, as its own artifact)
+            if [ "$PROF" = 1 ]; then
+              cmake -S port2 -B build/n3ds-prof -G Ninja -DCMAKE_TOOLCHAIN_FILE=$DEVKITPRO/cmake/3DS.cmake -DCMAKE_BUILD_TYPE=Release -DPORT_FN_PROFILE=ON > /dev/null
+              cmake --build build/n3ds-prof -j "$(nproc)" > build/n3ds-prof.log 2>&1 || { tail -30 build/n3ds-prof.log; exit 1; }
+              ls -l build/n3ds-prof/*.3dsx
+            fi
           '
           sudo chown -R "$(id -u):$(id -g)" build .sdl3ds
 
@@ -212,6 +218,16 @@ jobs:
             build/n3ds/*.cia
             build/n3ds/*.cci
             build/n3ds/tombi.elf
+          if-no-files-found: warn
+
+      - name: Upload the function-profile build
+        if: github.ref != 'refs/heads/master'
+        uses: actions/upload-artifact@v4
+        with:
+          name: tombi-3ds-prof
+          path: |
+            build/n3ds-prof/*.3dsx
+            build/n3ds-prof/tombi.elf
           if-no-files-found: warn
 
       - name: Upload build log

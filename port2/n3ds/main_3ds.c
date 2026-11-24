@@ -433,6 +433,9 @@ int main(int argc, char **argv) {
     }
     args[n] = 0;
     fprintf(stderr, "[3ds] %u KB of linear memory free before the game\n", (unsigned)(linearSpaceFree() >> 10));
+#ifdef PORT_FN_PROFILE
+    { extern void port_fnprof_start(void); port_fnprof_start(); }
+#endif
     fprintf(stderr, "[3ds] port_main:");
     for (int i = 1; i < n; i++) fprintf(stderr, " %s", args[i]);
     fprintf(stderr, "\n");

@@ -203,7 +203,8 @@ endif()
 file(GLOB PORT2_RT ${CMAKE_CURRENT_SOURCE_DIR}/runtime/*.c ${CMAKE_CURRENT_SOURCE_DIR}/shims/*.c)
 if(NINTENDO_3DS)   # the 3DS entry point (main: SD card paths, then the port's main as port_main); the citro3d renderer
   list(APPEND PORT2_RT ${CMAKE_CURRENT_SOURCE_DIR}/n3ds/main_3ds.c ${CMAKE_CURRENT_SOURCE_DIR}/n3ds/pica_c3d.c
-       ${CMAKE_CURRENT_SOURCE_DIR}/n3ds/launcher_ui.c ${CMAKE_CURRENT_SOURCE_DIR}/n3ds/launcher_font.c)
+       ${CMAKE_CURRENT_SOURCE_DIR}/n3ds/launcher_ui.c ${CMAKE_CURRENT_SOURCE_DIR}/n3ds/launcher_font.c
+       ${CMAKE_CURRENT_SOURCE_DIR}/n3ds/fnprof.c)
   # its vertex shader (picasso), embedded as pica_vsh_shbin[] (pica_vsh_shbin.h)
   ctr_add_shader_library(pica_vsh ${CMAKE_CURRENT_SOURCE_DIR}/n3ds/pica.v.pica)
   dkp_add_embedded_binary_library(pica_vsh_bin pica_vsh)
@@ -270,6 +271,16 @@ if(PORT_LAZY_BSS)
   lazy_unit(${CMAKE_CURRENT_SOURCE_DIR}/shims/gpu_gl.c ${CMAKE_CURRENT_SOURCE_DIR}/shims/gpu_gl.c)
 endif()
 add_library(port2rt OBJECT ${PORT2_RT} ${GEN}/funcmap.c ${GEN}/build_id.c)
+# PORT_FN_PROFILE (the 3DS, a diagnostic build): the game and the runtime with -finstrument-functions, sampled on the
+# console every millisecond (n3ds/fnprof.c); the log gets the functions the main thread is most often in
+option(PORT_FN_PROFILE "3DS: a function profile of the main thread in the log (n3ds/fnprof.c)" OFF)
+if(PORT_FN_PROFILE AND NINTENDO_3DS)
+  target_compile_definitions(port2rt PRIVATE PORT_FN_PROFILE)
+  target_compile_options(port2rt PRIVATE -finstrument-functions)
+  foreach(t ${PORT2_GAME_TARGETS})
+    target_compile_options(${t} PRIVATE -finstrument-functions)
+  endforeach()
+endif()
 if(PORT_LAZY_BSS)
   target_compile_definitions(port2rt PRIVATE PORT_LAZY_BSS)
 endif()
