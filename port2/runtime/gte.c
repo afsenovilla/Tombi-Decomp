@@ -62,11 +62,39 @@ static inline s32 sum3_12(s32 a, s32 b, s32 c) {
 }
 /* (the rotation's products are 16 x 16 bits: 32-bit multiplies, and the translation, a multiple of 4096 once shifted,
    is added after the sum's own shift: the same values as the 64-bit sums, a third of the game's time on an Old 3DS) */
+#if defined(__arm__) && !defined(__thumb__) && defined(__ARM_ARCH) && __ARM_ARCH >= 6 && !defined(GTE_PLAIN)
+/* ARMv6 (the 3DS's ARM11): the rotation's three rows as 64-bit sums of 16 x 16 products, two of them in one SMLALD
+   (the matrix and the vector are the registers' packed halves), the third in one SMLALxy; then the sum's floor / 4096,
+   which is what sum3_12 makes of the same three products (port2/tools/gte_arm_test.c checks them equal, in qemu) */
+#define GTE_ARM 1
+static inline __attribute__((always_inline)) s64 gte_smlald(s64 acc, u32 a, u32 b) {
+    u32 lo = (u32)acc, hi = (u32)((unsigned long long)acc >> 32);
+    __asm__("smlald %0, %1, %2, %3" : "+r"(lo), "+r"(hi) : "r"(a), "r"(b));
+    return (s64)(((unsigned long long)hi << 32) | lo);
+}
+static inline __attribute__((always_inline)) s64 gte_smlalbb(s64 acc, u32 a, u32 b) {   /* + a.lo16 * b.lo16 */
+    u32 lo = (u32)acc, hi = (u32)((unsigned long long)acc >> 32);
+    __asm__("smlalbb %0, %1, %2, %3" : "+r"(lo), "+r"(hi) : "r"(a), "r"(b));
+    return (s64)(((unsigned long long)hi << 32) | lo);
+}
+static inline __attribute__((always_inline)) s64 gte_smlaltb(s64 acc, u32 a, u32 b) {   /* + a.hi16 * b.lo16 */
+    u32 lo = (u32)acc, hi = (u32)((unsigned long long)acc >> 32);
+    __asm__("smlaltb %0, %1, %2, %3" : "+r"(lo), "+r"(hi) : "r"(a), "r"(b));
+    return (s64)(((unsigned long long)hi << 32) | lo);
+}
+#endif
 static inline __attribute__((always_inline)) void rtp(int n, int last) {   /* (in line: RTPT's three share the matrix and the screen registers they load) */
+#ifdef GTE_ARM
+    const u32 xy = (u32)D[n * 2], zz = (u32)D[n * 2 + 1];
+    s64 m1 = (s64)C[5] + (gte_smlalbb(gte_smlald(0, (u32)C[0], xy), (u32)C[1], zz) >> 12);
+    s64 m2 = (s64)C[6] + (gte_smlaltb(gte_smlald(0, ((u32)C[1] >> 16) | ((u32)C[2] << 16), xy), (u32)C[2], zz) >> 12);
+    s64 m3 = (s64)C[7] + (gte_smlalbb(gte_smlald(0, (u32)C[3], xy), (u32)C[4], zz) >> 12);
+#else
     s32 x = VX(n), y = VY(n), z = VZ(n);
     s64 m1 = (s64)C[5] + sum3_12(M16LO(0) * x, M16HI(0) * y, M16LO(1) * z);
     s64 m2 = (s64)C[6] + sum3_12(M16HI(1) * x, M16LO(2) * y, M16HI(2) * z);
     s64 m3 = (s64)C[7] + sum3_12(M16LO(3) * x, M16HI(3) * y, M16LO(4) * z);
+#endif
     MAC1 = (s32)m1; MAC2 = (s32)m2; MAC3 = (s32)m3;
     IR1 = clamp32(MAC1, -0x8000, 0x7FFF, 1u << 24);
     IR2 = clamp32(MAC2, -0x8000, 0x7FFF, 1u << 23);
@@ -105,7 +133,21 @@ static inline void set_ir0(void) {   /* set_ir(1) */
     IR2 = clamp32(MAC2, 0, 0x7FFF, 1u << 23);
     IR3 = clamp32(MAC3, 0, 0x7FFF, 1u << 22);
 }
+#ifdef GTE_ARM
+/* the 3 x 3 matrix at control register `b` (packed halves, as the light and colour matrices are) times the vector
+   (lo: x, hi: y) and z: each row's floor(sum / 4096), the same as sum3_12 */
+#define GTE_ROWS(b, xy, zz, r1, r2, r3) do { \
+    r1 = (s32)(gte_smlalbb(gte_smlald(0, (u32)C[b], xy), (u32)C[(b) + 1], zz) >> 12); \
+    r2 = (s32)(gte_smlaltb(gte_smlald(0, ((u32)C[(b) + 1] >> 16) | ((u32)C[(b) + 2] << 16), xy), (u32)C[(b) + 2], zz) >> 12); \
+    r3 = (s32)(gte_smlalbb(gte_smlald(0, (u32)C[(b) + 3], xy), (u32)C[(b) + 4], zz) >> 12); } while (0)
+#endif
 static void ncc(int n) {
+#ifdef GTE_ARM
+    { s32 r1, r2, r3; GTE_ROWS(8, (u32)D[n * 2], (u32)D[n * 2 + 1], r1, r2, r3); MAC1 = r1; MAC2 = r2; MAC3 = r3; }
+    set_ir0();
+    { s32 r1, r2, r3; GTE_ROWS(16, (u32)IR1 | ((u32)IR2 << 16), (u32)IR3, r1, r2, r3);   /* (IR 0 .. 0x7FFF) */
+      MAC1 = (s32)((u32)C[13] + (u32)r1); MAC2 = (s32)((u32)C[14] + (u32)r2); MAC3 = (s32)((u32)C[15] + (u32)r3); }
+#else
     s32 x = VX(n), y = VY(n), z = VZ(n);
     MAC1 = sum3_12(M16LO(8) * x, M16HI(8) * y, M16LO(9) * z);
     MAC2 = sum3_12(M16HI(9) * x, M16LO(10) * y, M16HI(10) * z);
@@ -115,6 +157,7 @@ static void ncc(int n) {
     MAC1 = (s32)((u32)C[13] + (u32)sum3_12(M16LO(16) * a, M16HI(16) * b, M16LO(17) * d));
     MAC2 = (s32)((u32)C[14] + (u32)sum3_12(M16HI(17) * a, M16LO(18) * b, M16HI(18) * d));
     MAC3 = (s32)((u32)C[15] + (u32)sum3_12(M16LO(19) * a, M16HI(19) * b, M16LO(20) * d));
+#endif
     set_ir0();
     u32 rgbc = (u32)D[6];
     MAC1 = (s32)((rgbc & 0xFF) * (u32)IR1) >> 8;            /* (colour x IR << 4 >> 12: under 2^23) */
