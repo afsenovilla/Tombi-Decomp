@@ -57,6 +57,8 @@ Main references: `README.md`, `docs/PORT.md` (long; search it), `docs/STATUS.md`
 - Git: commit explicit paths only (no `git add -A`), no amend, no force push, `git pull --no-rebase origin master`
   before pushing to `master`. Never `pkill -f`. Author stays `noreply@anthropic.com`. Every commit ends with the
   trailers the session gives (Co-Authored-By / Claude-Session). No model names anywhere in the repo.
+- The text patches are for the port only: ignore the console's title layout limits (check_text_patch's "the console's
+  layout shows only the first N" warnings) when choosing wording.
 - The translation JSON is edited textually (never `json.dump` the whole file); `itemNames`/`eventNames` keys are the
   original disc strings and are never edited. Validate with
   `python3 tools/check_text_patch.py game/disc/Tombi.bin patches/es_mejorada.tombipatch.json` and rebuild with

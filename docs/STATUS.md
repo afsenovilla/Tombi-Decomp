@@ -4,9 +4,12 @@ Update this file whenever something lands or a task is decided. Newest first.
 
 ## Since v0.7.2 (not released)
 
-- Spanish: the cold-medicine event's title (#116 of every CFNT999S) is "Al primer síntoma..." (was "Coge dos de
-  estos", a literal "Take two of these"); it follows the Japanese title's hint, a cut-off cold-medicine advert line.
-  The console's layout shows 14 of its 18 letters; the port shows it whole (freeTitles).
+- Spanish event titles reviewed against the Japanese ones (2026-11-24): event 132 "Al primer síntoma..." (was "Coge
+  dos de estos", a literal "Take two of these"; the JP hint cuts off a cold-medicine advert line), 104 "¿Qué come un
+  motor?" (was "¿Comida por gasoil?"; JP "what is feed-fuel?"), 167 "Un cerdito de bolsillo" (was "Gas de flor de
+  melocotón"; JP: the shrunken Koma pig).  Each in the 19 CFNT999S title copies and in the sub-screen event list
+  (eventNames of D5SPSUB / D5SPSUB3).  Left as they are by the user: event 3 "Llévame a casa" (JP frog pun), event 32
+  "Trompetasminiatura" (a cut event no player sees).
 - **3DS (branch claude/wizardly-heisenberg-5fllxj, merged 2026-11-24).**  Old 3DS at 5:3 / 60 Hz: the GTE's
   perspective division in single precision with one correction step (exact over every pair; 2-3 ms a frame less on an
   Old 3DS), the screen products in one SMULL, RTPT straight into the FIFOs (`tools/gte_arm_test.c` in qemu: identical
