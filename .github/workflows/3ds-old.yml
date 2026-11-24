@@ -24,12 +24,16 @@ jobs:
     runs-on: ubuntu-24.04
     outputs:
       runs: ${{ steps.p.outputs.runs }}
+      cases: ${{ steps.p.outputs.cases }}
     steps:
       - uses: actions/checkout@v4
       - id: p
         run: |
-          R="${{ inputs.runs }}"; [ -n "$R" ] || R=$(grep -v "^#" port2/n3ds/old3ds_runs.txt | awk '{print $1}')
+          R="${{ inputs.runs }}"; [ -n "$R" ] || R=$(grep -v -e "^#" -e "^cases:" port2/n3ds/old3ds_runs.txt | awk '{print $1}')
           echo "runs=$(echo $R | python3 -c "import sys,json; print(json.dumps(sys.stdin.read().split()))")" >> "$GITHUB_OUTPUT"
+          # the cases: the second line of port2/n3ds/old3ds_runs.txt that starts with "cases:", else all of them
+          C=$(grep "^cases:" port2/n3ds/old3ds_runs.txt | head -1 | cut -d: -f2-); [ -n "$C" ] || C="start start-wide start-stereo start-es play-wide rooms-wide hut-wide"
+          echo "cases=$(echo $C | python3 -c "import sys,json; print(json.dumps(sys.stdin.read().split()))")" >> "$GITHUB_OUTPUT"
 
   old3ds:
     needs: plan
@@ -38,7 +42,7 @@ jobs:
       fail-fast: false
       matrix:
         run: ${{ fromJSON(needs.plan.outputs.runs) }}
-        case: [start, start-wide, start-stereo, start-es, play-wide, rooms-wide]
+        case: ${{ fromJSON(needs.plan.outputs.cases) }}
     steps:
       - name: The build
         env:
@@ -86,6 +90,8 @@ jobs:
                           echo "--skip-movies --poke 900:1F8001B4:1 --poke 1250:8009C960:1:2 --poke 1250:8009C962:0:2 --pad-script 1000:start,1300:circle:3,2000:right:6000" > "$SD/3ds/tombi/args.txt" ;;
             rooms-wide)   echo "1 60 1" > "$SD/3ds/tombi/opts.txt"     # (Mushroom Forest, walked left)
                           echo "--skip-movies --poke 900:1F8001B4:1 --poke 1250:8009C960:5:2 --poke 1250:8009C962:1:2 --pad-script 1000:start,1300:circle:3,2000:left:6000" > "$SD/3ds/tombi/args.txt" ;;
+            hut-wide)     echo "1 60 1" > "$SD/3ds/tombi/opts.txt"; T=24  # (Forest: hut entrance, where the user's Old 3DS stopped twice)
+                          echo "--skip-movies --poke 900:1F8001B4:1 --poke 1250:8009C960:0:2 --poke 1250:8009C962:2:2 --pad-script 1000:start,1300:circle:3,1700:right:300,2100:left:300,2500:right:4000" > "$SD/3ds/tombi/args.txt" ;;
           esac
           F=$(ls app/*.cci | head -1)
           export LIBGL_ALWAYS_SOFTWARE=1 QT_QPA_PLATFORM=xcb

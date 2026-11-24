@@ -1,6 +1,6 @@
 # 3ds.yml runs .github/workflows/3ds-old.yml starts in Azahar as an Old 3DS (the first word of each line)
+# (a line "cases: ..." picks the cases; without it, all of them)
+cases: hut-wide play-wide
 43647748843  the build that runs on the user's Old and New 3DS (branch commit 2409c2b2, v0.7.2-fix's 3DS files)
-44371333060  v0.7.1 (28.7 MB image: out of memory at start on the user's Old 3DS)
-44380369699  v0.7.2 (25.3 MB)
-44430949427  the lazy tables build (23.4 MB: crashed on the user's Old 3DS)
-45243645947  the lazy tables build + the panel's 14.4 MB scaled frame only when used
+45392250967  4fc4e6a: the perspective division in single precision
+45399781860  dd5c0e8: RTPT straight into the FIFOs (stopped the user's Old 3DS twice in Forest: hut entrance)
