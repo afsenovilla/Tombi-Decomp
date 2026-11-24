@@ -18,6 +18,8 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <malloc.h>
+#define SDL_MAIN_HANDLED   /* (SDL2 would rename main() to SDL_main on the 3DS; this file is the entry point) */
+#include <SDL2/SDL.h>
 #include "launcher_ui.h"
 
 u32 __stacksize__ = 1024 * 1024;   /* the main thread runs the game's main loop (libctru's default is 32 KB) */
@@ -173,44 +175,25 @@ int port_launcher_music_start(void);
 void port_launcher_music_stop(void);
 void port_launcher_sfx_move(void);
 extern int port_sound_pull(short *dst, int frames);
-/* the OPTIONS screen's music under the start screen: the port's mixer (shims/sound.c) fed to the DSP by the start
-   screen's own loop, four wave buffers of its own (no SDL, no audio thread: the cursor sound needs no lock either), all
-   given back before the game starts (the linear memory the renderer's texture cache wants) */
-#define LA_NBUF 4
-static ndspWaveBuf la_wb[LA_NBUF];
-static short *la_mem;
-static int la_fr, la_on;
+/* the OPTIONS screen's music under the start screen: the port's mixer (shims/sound.c) pulled by an SDL audio device of
+   its own, closed again before the game opens its one.  (As in the build that runs on the consoles: the start screen's
+   own ndsp wave buffers of 2026-11-14 were never run on one.) */
+static void launcher_audio_cb(void *ud, Uint8 *stream, int len) { (void)ud; port_sound_pull((short *)stream, len / 4); }
+static SDL_AudioDeviceID la_dev;
 static int la_start(int rate, int fr) {
-    if (R_FAILED(ndspInit())) return 0;
-    la_mem = linearAlloc((size_t)LA_NBUF * fr * 4);
-    if (!la_mem) { ndspExit(); return 0; }
-    la_fr = fr;
-    ndspSetOutputMode(NDSP_OUTPUT_STEREO);
-    ndspChnReset(0);
-    ndspChnSetInterp(0, NDSP_INTERP_LINEAR);
-    ndspChnSetRate(0, (float)rate);
-    ndspChnSetFormat(0, NDSP_FORMAT_STEREO_PCM16);
-    { float mix[12] = { 0 }; mix[0] = mix[1] = 1.0f; ndspChnSetMix(0, mix); }
-    memset(la_wb, 0, sizeof la_wb);
-    for (int i = 0; i < LA_NBUF; i++) { la_wb[i].data_vaddr = la_mem + (size_t)i * fr * 2; la_wb[i].nsamples = (u32)fr; la_wb[i].status = NDSP_WBUF_DONE; }
-    la_on = 1;
-    return 1;
+    if (SDL_Init(SDL_INIT_AUDIO) != 0) return 0;
+    SDL_AudioSpec want, have;
+    SDL_zero(want);
+    want.freq = rate; want.format = AUDIO_S16SYS; want.channels = 2; want.samples = (Uint16)fr;
+    want.callback = launcher_audio_cb;
+    la_dev = SDL_OpenAudioDevice(NULL, 0, &want, &have, 0);
+    if (la_dev) SDL_PauseAudioDevice(la_dev, 0); else SDL_QuitSubSystem(SDL_INIT_AUDIO);
+    return la_dev != 0;
 }
-static void la_feed(void) {   /* every wave buffer the DSP has played: the next samples */
-    for (int i = 0; la_on && i < LA_NBUF; i++) {
-        if (la_wb[i].status != NDSP_WBUF_DONE && la_wb[i].status != NDSP_WBUF_FREE) continue;
-        short *d = (short *)la_wb[i].data_vaddr;
-        port_sound_pull(d, la_fr);
-        DSP_FlushDataCache(d, (u32)la_fr * 4);
-        ndspChnWaveBufAdd(0, &la_wb[i]);
-    }
-}
+static void la_feed(void) { }
+static void la_lock(int on) { if (la_dev) { if (on) SDL_LockAudioDevice(la_dev); else SDL_UnlockAudioDevice(la_dev); } }
 static void la_stop(void) {
-    if (!la_on) return;
-    ndspChnWaveBufClear(0);
-    ndspChnReset(0);
-    ndspExit();
-    linearFree(la_mem); la_mem = NULL; la_on = 0;
+    if (la_dev) { SDL_CloseAudioDevice(la_dev); SDL_QuitSubSystem(SDL_INIT_AUDIO); la_dev = 0; }
 }
 extern int port_cd_open_data(const char *dir);
 extern int port_cd_open(const char *path);
@@ -225,7 +208,11 @@ static int choose_lang(int code) {
     int redraw = 1, ok = 0, lang = 0, row = 0, touching = 0;
     for (int i = 0; i < NLANG; i++) if (codes[i] == code) lang = i;
     bool n3 = false; APT_CheckNew3DS(&n3);
-    gfxInit(GSP_BGR8_OES, GSP_BGR8_OES, true);   /* (the screens in VRAM, which nothing uses yet: the linear memory is the renderer's) */
+    /* (the screens in linear memory, as gfxInitDefault: the CPU draws them, and a console does not let a title's CPU
+       write VRAM (tombi.rsf maps it read-only; a .3dsx gets none): a data abort at the first blit on the user's Old 3DS
+       from the build of 2026-11-14 that put them in VRAM on (emulators allow it).  Given back by gfxExit before the
+       game: the renderer has that linear memory then) */
+    gfxInit(GSP_BGR8_OES, GSP_BGR8_OES, false);
     gfxSetDoubleBuffering(GFX_TOP, false); gfxSetDoubleBuffering(GFX_BOTTOM, false);
     /* (from the heap while the screen is up: 500 KB less in the program image) */
     unsigned char *top = malloc(400 * 240 * 3), *bot = malloc(320 * 240 * 3);
@@ -278,7 +265,7 @@ static int choose_lang(int code) {
             redraw = 1;
         }
         /* the language menu's cursor sound when the option or its value moves */
-        if (adev && (row != was_row || lang * 64 + opt_movies * 16 + (opt_hz == 50) * 8 + opt_wide != was_val)) port_launcher_sfx_move();
+        if (adev && (row != was_row || lang * 64 + opt_movies * 16 + (opt_hz == 50) * 8 + opt_wide != was_val)) { la_lock(1); port_launcher_sfx_move(); la_lock(0); }
         if (k & KEY_A) { ok = 1; break; }
         if (redraw) {
             LuiState st = { row, name[lang], codes[lang] == 9, es_ready, opt_movies, opt_hz, opt_wide, launch_disc, n3, touching == 1, touching };
