@@ -4,6 +4,10 @@ Update this file whenever something lands or a task is decided. Newest first.
 
 ## Since v0.7.2 (not released)
 
+- PrePre 8 event titles by area (2026-11-27, docs/PREPRE8_EVENTS.md): 169 titles (not 167), retail id = PrePre 8
+  index - 1 over the whole list, 85 in retail / 84 cut, cut areas (snow, Pig Town, island, sky), the proto
+  Civilization run, Tomba! 2 matches checked on the T2 USA disc, every candy (Blue / Green / Black have use effects
+  but are never given; Gold is Mizuno's). `tools/prepre8_text.py` reads 12 more kanji. Cross-checked with Folkin's list.
 - Spanish event titles reviewed against the Japanese ones (2026-11-24): event 132 "Al primer síntoma..." (was "Coge
   dos de estos", a literal "Take two of these"; the JP hint cuts off a cold-medicine advert line), 104 "¿Qué come un
   motor?" (was "¿Comida por gasoil?"; JP "what is feed-fuel?"), 167 "Un cerdito de bolsillo" (was "Gas de flor de

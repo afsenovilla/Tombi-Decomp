@@ -26,12 +26,13 @@ HANDAKU = dict(zip("はひふへほハヒフヘホ", "ぱぴぷぺぽパピプ�
 
 # Event-title font (table 0x9A1FC). Symbols row 0/1 are ASCII order from 0x20 with Japanese punctuation after '}'.
 EV_SYM = " !\"#$%&'()*+,-./012345678" + "9:;<=>?[¥]^_`{|}…「」、。・、〜ー" + "▼←→↑↓○×△□‼AP"
-# 196 kanji 0xAE..0x171 in on-reading order; '〓' = not identified (12x12 glyph unclear).
+# 196 kanji 0xAE..0x171 in on-reading order; '〓' = not identified (12x12 glyph unclear). 雲泳絵恵砦紙毒燃能勇裸 and the
+# 具/空 pair (2026-11-27) were read from their slot in the reading order and the retail JP event titles of the same ids.
 EV_KANJI = (
-    "ⅠⅡⅢ悪案飲〓影〓円王黄億下何家果歌花会解怪海〓割寒間岩願危気紀議救泣魚強橋郷玉金銀空窟形〓穴件見幻"
-    "固湖光口行黒〓材作山始姉子師思止死〓歯事字持時実車主取手樹集出助女勝少床晶消笑上城色食森神身進人吹水"
-    "数世性生青石赤雪先占戦側賊族村体大達脱誰探団知地中仲挑町長沈通停底鉄天電渡塔島盗当動道銅〓読届内入年"
-    "〓〓白箱発犯飛不風物文捕宝方法忘本魔妹万夢霧名明木門〓友溶〓落卵嵐里立旅料良力緑涙路老話〓迷")
+    "ⅠⅡⅢ悪案飲雲影泳円王黄億下何家果歌花会解怪海絵割寒間岩願危気紀議救泣魚強橋郷玉金銀具空形恵穴件見幻"
+    "固湖光口行黒砦材作山始姉子師思止死紙歯事字持時実車主取手樹集出助女勝少床晶消笑上城色食森神身進人吹水"
+    "数世性生青石赤雪先占戦側賊族村体大達脱誰探団知地中仲挑町長沈通停底鉄天電渡塔島盗当動道銅毒読届内入年"
+    "燃能白箱発犯飛不風物文捕宝方法忘本魔妹万夢霧名明木門勇友溶裸落卵嵐里立旅料良力緑涙路老話〓迷")
 # Dialogue font of table 0x9B930 (TIM001), 94 kanji 0x95..0xF2.
 DLG_SYM = "?!  ()0123456789…「」、。・、〜ー" + "▼←→↑↓○×△□‼AP" + "ンァィゥェォッャュョ"
 DLG_KANJI = ("哀悪一隠泳奥押屋下何可会解回楽気協強教撃見元言向攻考行高込散仕使始子枝事持自手集住出小信新森人水数先"

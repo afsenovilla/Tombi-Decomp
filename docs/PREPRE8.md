@@ -125,12 +125,14 @@ Decoder: `python3 -I tools/prepre8_text.py TOMBA.EXE [--raw]` (prints to stdout;
   are separate glyphs after the base kana. Dialogue adds controls: 0xFFFB + 3 halfwords (window/speaker header),
   0x4019 (wait), 0xFFFD/0xFFFC (end of page/box), 0xFFF8. This is why byte/u16/Shift-JIS searches failed: no fixed
   base, kanji are a per-table subset, and text is u16.
-- **Event titles**: table 0x800A99FC (file 0x9A1FC, 372 glyphs: 174 kana/symbols, 196 kanji), 167 titles at
-  0x800AA140..0x800AB12A (file 0x9A940). Kana: symbols are ASCII order from code 0 (space) to `}`, then `…「」、。・、〜ー`
+- **Event titles**: table 0x800A99FC (file 0x9A1FC, 372 glyphs: 174 kana/symbols, 196 kanji), 169 event titles at
+  0x800AA140..0x800AB0A4 (file 0x9A940), then the placeholder and six item names up to 0x800AB12A (corrected
+  2026-11-27: the old count was 167). Kana: symbols are ASCII order from code 0 (space) to `}`, then `…「」、。・、〜ー`
   and `▼←→↑↓○×△□‼AP`; hiragana 0x3E, katakana 0x75, dakuten 0xAC/0xAD, kanji 0xAE..0x171. The font page is not in
   any AREA00/SYSTEM GAM: it only exists in `SYSTEM/SYS008.000` (a 384x256 VRAM snapshot, font at x=768 in 4 bpp).
   The TIM000 16x16 strip is a cache of glyphs for the titles on screen, which is why it held only fragments.
-  About 15 kanji are still unread (12x12 glyphs; shown as 〓 by the decoder).
+  One kanji is still unread (in the item name 花の〓); the other unread ones and the 具/空 swap were fixed on
+  2026-11-27 (see [PREPRE8_EVENTS.md](PREPRE8_EVENTS.md), "How the list was read").
 - **Dialogue**: tables 0x800A2BCC, 0x800A4060, 0x800A5E74, 0x800AB130 (file 0x933CC, 0x94860, 0x96674, 0x9B930,
   0x9CDC4). Three of them (0x933CC, 0x96674, 0x9B930) use the TIM001 font (kanji from code 0x95, 94 kanji, decoded) and
   carry the same 104-line area-0 script; the other two (305-glyph tables, file 0x94860 and 0x9CDC4) carry the same
@@ -144,18 +146,24 @@ screen (0x80067EA0) builds index = page*16 + row, forces it to 0 if >= 0x18, and
 0x800216F4 (start), 0x800217A8 (sets 4), 0x800217F0 (complete; AP from table 0x800A2198), 0x80021914 (get). The AP
 table is a placeholder: 20 entries, all (500, 2000). Per-event 10-byte records at 0x800A1B0C are uniform (0, 180, 0, 0,
 n). Constant ids passed to start/set4 in the exe: 2, 3, 4, 6, 9, 10, 11, 13; others come from object/script data.
-Titles 25..163 (島のヒミツその1-5, 大停電, 人魚の王を救え, 「大団円1-3」, 光の落ちるところ, コロガルゾォ〜, ...) have
+Titles 25..168 (島のヒミツその1-5, 大停電, 人魚の王を救え, 「大団円1-3」, 光の落ちるところ, コロガルゾォ〜, ...) have
 **no pointer and no reference anywhere** in the exe: no area, map position, icon, AP or flag code exists for them in this
 build. 5つの箱の忘れもの (index 20) and 地下ロウの大ドロボウ (22) do have a list slot, but no area/icon data either.
 
-Event-title list (167 entries; the order is the in-game list order). Highlights not in retail: 少年の旅立ち (Young Boy
+**All 169 titles by area, with their retail ids, the Tomba! 2 links and the candies: [PREPRE8_EVENTS.md](PREPRE8_EVENTS.md).**
+The key result there: retail event id = PrePre 8 index - 1 over the whole list, so many titles below that are "not in
+retail" are only missing from the English retail: 霧を吹き飛ばせ, 100年老人との出会い / の話 / の仲間, まいごのドワーフ,
+地下ロウの大ドロボウ (= The Great Escape), バロンは友だち, のぞいてごらん?!, 嵐の山の怪 (= A Stormy Pig Bag), いよっ!穴ほり名人!,
+怪物?勝てるかな?, 死神の実をつぶせ, 花をさかせよう! and かくれ里のヤン are the JP retail titles of the same ids.
+
+Event-title list (169 entries; the order is the in-game list order). Highlights not in the English retail: 少年の旅立ち (Young Boy
 Sets Off), 大きな水たまり? (A Large Puddle?; the strip's あれま is not in the title), APゲート, ドワーフの助け, 5つの箱の
 忘れもの / 5つの箱のカギ, 地下ロウの大ドロボウ, コロガルゾォ〜 / またコロガルゾォ〜 (Tumbling Down / Again), 光の落ちる
 ところ, 嵐の山の怪, そこ、どいて, 怪物?勝てるかな?, 死神の実をつぶせ, 花をさかせよう!, 霧を吹き飛ばせ, 100年老人との出会い
 / の話 / の仲間, コトバをおぼえよう!Ⅰ/Ⅱ/Ⅲ, まいごのドワーフ, バロンは友だち, 消えた長老, のぞいてごらん?!, かくれ里の
-ヤン, カエル…にかえる, いよっ!穴ほり名人!, 大トリの山 - Folkin's list matches the first ~45 entries. The rest is
+ヤン, カエル…にかえる, いよっ!穴ほり名人!, 大トリの山 - Folkin's later annotated list covers all 169 titles. The rest is
 the full planned game: 島のヒミツその1-5, 大停電, 電気うなぎを捕まえろ!, 事件発生、犯人を探せ!, 黒い水の不思議, 文明の
-キカイ, 進め!きかんしゃ, 赤/緑/青/黒の占い師, 金/銀/銅色のメダルがほしい, からくり〓の3姉妹, 1000年老人, 万年老人の
+キカイ, 進め!きかんしゃ, 赤/緑/青/黒の占い師, 金/銀/銅色のメダルがほしい, からくり砦の3姉妹, 1000年老人, 万年老人の
 数字玉, 億年老人の願い, 人魚の王を救え, 歌を忘れた人魚, 海底通路の行き先, 本当の魔ブタ, 夢?幻?黄金郷を探せ, ミリオンの塔,
 「大団円1-3」, plus item names (ヒヨコ, カエル, ドワーフの迷子, バナナ, たつまき, 花の〓).
 
@@ -175,7 +183,7 @@ TIM000 strip glyphs (rows, left to right): ボンプ岩の謎 ？り里ヤオイ
 - **Glyph-only hints (not proof)**: 話 (Tale of the 100 Year Old Man), 仲間 (A Friend of...), 里 + ヤ (Yan of the Hidden Village), 泳 (swim, unmatched).
 - **Now decoded from the exe** (see Text above): all of Folkin's titles are in the title table.
 - **Not in strip**: no 宝箱 (chests), 盗/泥棒 (thief), 転 (tumbling), 光/落 (light falls). Those titles come from Folkin's list only (the strip is not the full list).
-- Proposed retail slots (unverified): Five Chests -> Lost and Found (area 0, 魔女の忘れもの), Great Thief -> before The Great Escape, Tumbling Down / Again -> Where did I come from? / Lava Caves, Where the Light Falls -> event 32 (trumpets) slot.
+- Retail slots (verified 2026-11-27 by the id rule, PREPRE8_EVENTS.md): Five Chests (20) -> 19 Lost and Found (JP 魔女の忘れもの), Key for the Five Chests (27) -> id 26, reused for To Phoenix Mountain..., Great Thief (22) -> 21 The Great Escape itself (JP retail keeps 地下ロウの大ドロボウ; PrePre 8's own 大脱出, 29, became id 28 Familiar Looking Mansion), Tumbling Down / Again (32 / 35) -> 31 Where did I come from? / 34 Lava Caves, Where the Light Falls (33) -> 32 (trumpets, never awarded).
 
 ### Event ids from data, and the rooms DATA003/DATA004 (checked 2026-10-30, static only, no emulator run)
 
