@@ -1230,3 +1230,35 @@ Broken Vase (live); retail gives max health. Charity Wings later come from other
   new event id: the event census of notes/secrets.md "Pre-release builds" stands). The pre-release X00/A00 sequence
   tables share no 3-step run with PAL (other op numbering); their event ops were already censused. Nothing new.
 - Not done: message-box control codes in the dialogue banks, I0NFO/I0NFO2 town-scene step tables across builds.
+
+## Lava Caves: what is behind the flames (community question, 2026-11-27)
+
+Question: in the cursed state the Lava Caves stop Tombi after the first screen. Did the game build a cursed version of
+the whole cave, or only the entrance? **Answer: there is no separate cursed version.** The Lava Caves are one room,
+AREA03 section 2 (debug select "Lava Caves"). It has one set of files, used before and after purification: load
+list 3 of `SYS/LD0AR03.BIN` = B200-B205, CLUT03, `D206.GAM`. `D206.GAM` holds the WMD (38 sectors, 2,814 polygons,
+x -84..2923, y 0..-1906, about nine screens by seven, textured throughout), the WHM, and 136 APD placement records.
+`resolveAreaVariant` has no Lava Caves case. Phoenix Mountain s0/s1, by contrast, become s4/s5 with their own files.
+The Lava Caves flag is `GAME.purifiedAreas` bit 2 (0x04; the same byte as `GV2.bc3`, 0x8009D2C3). The Lava Caves pig
+fight (AREA14 s3) sets it.
+
+- **How Tombi is stopped:** neither the camera nor a wall nor an exit. CAMERA_SCROLL is 160..2674 / -1718.. in both
+  states, and the collision is the same. `spawnSoakedPhoenixGuideNpcs` (X003) spawns the guide NPC at (104, -351)
+  with `wba` 4 unless bit 2 is set. Every frame, its `stepPhoenixSpiritHintTalk` case 4 does
+  `if (!(GV2.bc3 & 4) && PLAYER.h > 0xa0) PLAYER.h = 0xa0`, a clamp at x 160. `flameBlockedNpcTalk` shows "I can't go
+  any further because of the flames" and starts event 0xAC (The Fire Pig Bag). Port check: walking and jumping right
+  stops at x 160 exactly; with the bit set the same input goes on.
+- **What the curse adds:** three layer-3 type 0x39 objects (`updateL3Type39Object`, x 142 / 256 / 474), the flame
+  curtain over the first screens. They free themselves when bit 2 is set. The NPC and its clamp are also cursed-only.
+- **What purification adds:** 22 layer-3 type 0x3E objects (`updateL3Type3EObject`, x 100..2000), the steam clouds.
+  They free themselves when bit 2 is clear.
+- **Everything else is the same and live in the cursed state:** the model, collision, pages, palettes (the lava CLUT
+  animation `loadArea3ClutRows` runs in both states), 13 winged fork pigs, 12 chests, 19 items, knock-down and
+  wobble objects, a villager, and the three exits (left, right end, the ladder at x 1459..1650). None of their
+  handlers reads the bit (X003 is fully matched).
+- Seen in the port (PC i386, headless, 4:3; not on a device). Tombi was flown with `--sweep-x 2400:8:2740
+  --sweep-fly -100 / -600 / -1100` from the debug select. Cursed: the bit was poked at frame 2350, after the room
+  spawned, which lifts only the clamp. Purified: the bit was poked before the room loads. The camera matched in both
+  runs. The frames are the same apart from the flames (first screens), the steam (low path) and one enemy hit
+  timing. Enemies hit Tombi and AP was collected in the cursed flight. The retail flow (bag, AREA14 fight, HONOO2
+  movie) was not played.
