@@ -53,12 +53,12 @@ Tomba! 2 USA disc (`MAIN.EXE`, whose event and item names are plain ASCII).
 
 | Area | Titles | In retail | Cut | Tomba! 2 link |
 |---|---|---|---|---|
-| Village of All Beginnings | 13 | 11 | 2 | 1 |
+| Village of All Beginnings | 14 | 11 | 3 | 1 |
 | 100 Flowers / Dwarf Village | 27 | 24 | 3 | 2 |
 | Phoenix Mountain | 10 | 9 | 1 | 0 |
 | Haunted Mansion | 9 | 7 | 2 | 3 |
 | Baccus Village / Lake | 10 | 6 | 4 | 1 |
-| Masakari Jungle | 20 | 10 | 10 | 1 |
+| Masakari Jungle | 19 | 10 | 9 | 1 |
 | Sea / mermaids / water | 12 | 5 | 7 | 4 |
 | Village of Civilization | 23 | 7 | 16 | 3 |
 | Island secrets (cut area) | 7 | 0 | 7 | 0 |
@@ -78,7 +78,7 @@ secrets, SN snow / cold area, PT Pig Town, SK sky / towers / light, EG endgame, 
 
 | # | +0 | +1 | +2 | +3 | +4 | +5 | +6 | +7 | +8 | +9 |
 |---|---|---|---|---|---|---|---|---|---|---|
-| 0 | x V0 | R V0 | R V0 | R V0 | R V0 | R V0 | R V0 | x MJ | R² V0 | R V0 |
+| 0 | x V0 | R V0 | R V0 | R V0 | R V0 | R V0 | R V0 | x V0 | R² V0 | R V0 |
 | 10 | R V0 | R V0 | R V0 | R DW | R DW | R DW | R DW | R DW | R DW | x DW |
 | 20 | R DW | R DW | R DW | R DW | R²? DW | R DW | R DW | x DW | R² DW | x DW |
 | 30 | R PM | R PM | R PM | x PM | R PM | R PM | R PM | R PM | R DW | R DW |
@@ -161,7 +161,7 @@ brackets, the JP retail title where JP titles it.
 
 ### Village of All Beginnings (AREA00)
 
-13 titles: 11 in retail, 2 cut, 1 with a Tomba! 2 link.
+14 titles: 11 in retail, 3 cut, 1 with a Tomba! 2 link.
 
 | # | Japanese | English | Status | Retail id: title (JP retail) | Area basis | Tomba! 2 |
 |---|---|---|---|---|---|---|
@@ -172,6 +172,7 @@ brackets, the JP retail title where JP titles it.
 | 4 | カエル…にかえる | Return the Frog... | retail (same) | 3: Take Me Home (カエル水にかえる) | evidence: retail AREA00 s0 |  |
 | 5 | モトクロスコース | Motocross Course | retail (same) | 4: Motocross Course (モトクロスコース) | evidence: title in the area-0 JP list |  |
 | 6 | キミ、だあれ? | Who Are You? | retail (same) | 5: Who are you? (キミ、だあれ？) | evidence: retail AREA00 |  |
+| 7 | 大きな水たまり? | A Big Puddle? | cut | 6: untitled in PAL (JP 大きな水たまり？), never triggered | evidence, but conflicting. For area 0: PrePre 8's own dialogue has a kid asking 「キミ、泳げるのかい?」 (can you swim?) about the big puddle in the area-0 script, next to the place name ふるいけ (Ol' Pond), and Hyper 12's AREA00 title block lists 大きな水たまり？ at index 7 (= event 6 + 1). For the jungle: JP retail titles id 6 in the jungle (X10) list, and the 10,000 Year Old Man is 水たまりの万年老人 ("of the puddle"), id 118 = 119 大きな水たまりを渡れ. Area 0 is the better-supported reading for June 1997; the jungle list may only reflect where retail later moved the puddle idea |  |
 | 8 | かくれ里のヤン | Yan of the Hidden Village | retail (renamed / reworked) | 7: Hide and Go Seek (JP keeps かくれ里のヤン) | evidence: retail AREA00; Yan is in PrePre 8's area-0 dialogue | confirmed: Yan of the Hidden Village |
 | 9 | オイラ泳げない… | I Can't Swim... | retail (same) | 8: I Can't Swim... (オイラ泳げない…) | evidence: retail AREA00 / AREA10; PrePre 8 kid asks 「キミ、泳げるのかい?」 |  |
 | 10 | コッカ卵の中身 | Inside the Kokka Eggs | retail (same) | 9: Inside the Kokka Eggs (コッカタマゴの中身) | evidence: PrePre 8 100-year-old man asks for the eggs |  |
@@ -265,11 +266,10 @@ brackets, the JP retail title where JP titles it.
 
 ### Masakari Jungle (AREA10)
 
-20 titles: 10 in retail, 10 cut, 1 with a Tomba! 2 link.
+19 titles: 10 in retail, 9 cut, 1 with a Tomba! 2 link.
 
 | # | Japanese | English | Status | Retail id: title (JP retail) | Area basis | Tomba! 2 |
 |---|---|---|---|---|---|---|
-| 7 | 大きな水たまり? | A Big Puddle? | cut | 6: untitled in PAL (JP 大きな水たまり？), never triggered | evidence: JP retail titles event 6 only in the jungle list (X10), next to the 10,000 Year Old Man's puddle (see 119); JP hint: heard the story of a big puddle |  |
 | 60 | 長老のたのみごと? | The Elder's Request? | cut | 59: untitled in PAL (JP 族長のたのみごと？ "the chief's request"), never triggered | evidence: JP jungle list (X10) |  |
 | 61 | コトバをおぼえよう!Ⅱ | Let's Learn the Language! II | cut | 60: untitled in PAL (JP コトバを吸いとろう！Ⅱ), never triggered | evidence: JP jungle list; Masakari language |  |
 | 62 | マサカリ族のヒミツ | Secret of the Masakari Tribe | cut | 61: untitled in PAL (JP マサカリ族のヒミツ); read only by the cut Stonetown | evidence: JP jungle list |  |
@@ -510,7 +510,7 @@ spot as retail event X" notes match the id rule above in nearly every case. Wher
 |---|---|---|
 | 29 大脱出 | "The Great Escape", exactly the retail event | Retail "The Great Escape" is id 21, whose JP retail title is still 地下ロウの大ドロボウ (PrePre 8 22, the Great Thief). Index 29's id 28 is Familiar Looking Mansion. So the Great Thief event was renamed The Great Escape, and PrePre 8's own 大脱出 was dropped |
 | 30 嵐の山の怪 | maybe "To Phoenix Mountain..." | JP retail id 29 keeps 嵐の山の怪; in English it is "A Stormy Pig Bag". To Phoenix Mountain is id 26, the slot of 27 5つの箱のカギ |
-| 7 大きな水たまり? | maybe Ol' Pond | JP retail titles id 6 only in the jungle list (X10), and the 10,000 Year Old Man's JP title is 水たまりの万年老人 ("of the puddle"); 119 大きな水たまりを渡れ maps to his id 118. The puddle points to the jungle |
+| 7 大きな水たまり? | maybe Ol' Pond | Agreed, with a caveat: PrePre 8's own area-0 dialogue ("can you swim?", next to ふるいけ) and Hyper 12's AREA00 title block place it in area 0; JP retail later lists id 6 in the jungle (X10), where the 10,000 Year Old Man "of the puddle" lives |
 | 112 始まりの村 | (title only) | Id 111 became Baccus Village (バッカスの村): the slot kept "village", not area 0 |
 | 33 光の落ちるところ | the retail leftover is "Miniature Making Trumpets" | Agreed; the JP retail title is ラッパでミニミニ and the JP hint is about a coin blown in by the wind |
 | 129 青の占い師 / 147 黒の占い師 | 147 is a new, black fortune teller | Agreed that black is new; retail's Blue Fortune Teller is id 146, i.e. it took the black one's slot, and the blue one's old id 128 became Unbreakable Wire |
