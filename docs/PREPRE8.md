@@ -150,8 +150,10 @@ Titles 25..168 (島のヒミツその1-5, 大停電, 人魚の王を救え, 「�
 **no pointer and no reference anywhere** in the exe: no area, map position, icon, AP or flag code exists for them in this
 build. 5つの箱の忘れもの (index 20) and 地下ロウの大ドロボウ (22) do have a list slot, but no area/icon data either.
 
-**All 169 titles by area, with their retail ids, the Tomba! 2 links and the candies: [PREPRE8_EVENTS.md](PREPRE8_EVENTS.md).**
-The key result there: retail event id = PrePre 8 index - 1 over the whole list, so many titles below that are "not in
+**All 169 titles, with the area each one can be placed in and how strong that placement is (evidence / strong / weak /
+unknown), their retail ids, the Tomba! 2 resemblances and the candies: [PREPRE8_EVENTS.md](PREPRE8_EVENTS.md).**
+The key result there: retail event id = PrePre 8 index - 1 (69 titles are the JP retail title of that id; two match
+another id: 43 and 129), so many titles below that are "not in
 retail" are only missing from the English retail: 霧を吹き飛ばせ, 100年老人との出会い / の話 / の仲間, まいごのドワーフ,
 地下ロウの大ドロボウ (= The Great Escape), バロンは友だち, のぞいてごらん?!, 嵐の山の怪 (= A Stormy Pig Bag), いよっ!穴ほり名人!,
 怪物?勝てるかな?, 死神の実をつぶせ, 花をさかせよう! and かくれ里のヤン are the JP retail titles of the same ids.
@@ -161,8 +163,8 @@ Sets Off), 大きな水たまり? (A Large Puddle?; the strip's あれま is not
 忘れもの / 5つの箱のカギ, 地下ロウの大ドロボウ, コロガルゾォ〜 / またコロガルゾォ〜 (Tumbling Down / Again), 光の落ちる
 ところ, 嵐の山の怪, そこ、どいて, 怪物?勝てるかな?, 死神の実をつぶせ, 花をさかせよう!, 霧を吹き飛ばせ, 100年老人との出会い
 / の話 / の仲間, コトバをおぼえよう!Ⅰ/Ⅱ/Ⅲ, まいごのドワーフ, バロンは友だち, 消えた長老, のぞいてごらん?!, かくれ里の
-ヤン, カエル…にかえる, いよっ!穴ほり名人!, 大トリの山 - Folkin's later annotated list covers all 169 titles. The rest is
-the full planned game: 島のヒミツその1-5, 大停電, 電気うなぎを捕まえろ!, 事件発生、犯人を探せ!, 黒い水の不思議, 文明の
+ヤン, カエル…にかえる, いよっ!穴ほり名人!, 大トリの山 - Folkin's later annotated list covers all 169 titles. The rest are
+later events, most of them with no retail area (PREPRE8_EVENTS.md rates each placement): 島のヒミツその1-5, 大停電, 電気うなぎを捕まえろ!, 事件発生、犯人を探せ!, 黒い水の不思議, 文明の
 キカイ, 進め!きかんしゃ, 赤/緑/青/黒の占い師, 金/銀/銅色のメダルがほしい, からくり砦の3姉妹, 1000年老人, 万年老人の
 数字玉, 億年老人の願い, 人魚の王を救え, 歌を忘れた人魚, 海底通路の行き先, 本当の魔ブタ, 夢?幻?黄金郷を探せ, ミリオンの塔,
 「大団円1-3」, plus item names (ヒヨコ, カエル, ドワーフの迷子, バナナ, たつまき, 花の〓).
@@ -183,7 +185,7 @@ TIM000 strip glyphs (rows, left to right): ボンプ岩の謎 ？り里ヤオイ
 - **Glyph-only hints (not proof)**: 話 (Tale of the 100 Year Old Man), 仲間 (A Friend of...), 里 + ヤ (Yan of the Hidden Village), 泳 (swim, unmatched).
 - **Now decoded from the exe** (see Text above): all of Folkin's titles are in the title table.
 - **Not in strip**: no 宝箱 (chests), 盗/泥棒 (thief), 転 (tumbling), 光/落 (light falls). Those titles come from Folkin's list only (the strip is not the full list).
-- Retail slots (verified 2026-11-27 by the id rule, PREPRE8_EVENTS.md): Five Chests (20) -> 19 Lost and Found (JP 魔女の忘れもの), Key for the Five Chests (27) -> id 26, reused for To Phoenix Mountain..., Great Thief (22) -> 21 The Great Escape itself (JP retail keeps 地下ロウの大ドロボウ; PrePre 8's own 大脱出, 29, became id 28 Familiar Looking Mansion), Tumbling Down / Again (32 / 35) -> 31 Where did I come from? / 34 Lava Caves, Where the Light Falls (33) -> 32 (trumpets, never awarded).
+- Retail slots (verified 2026-11-27 by the id rule, PREPRE8_EVENTS.md): Five Chests (20) -> 19 Lost and Found (JP 魔女の忘れもの; the same goal, "forgotten things", is a reading), Key for the Five Chests (27) -> id 26, reused for To Phoenix Mountain..., Great Thief (22) -> 21 The Great Escape itself (JP retail keeps 地下ロウの大ドロボウ; PrePre 8's own 大脱出, 29, became id 28 Familiar Looking Mansion), Tumbling Down / Again (32 / 35) -> ids 31 / 34, which retail reused for other events (Where did I come from? / Lava Caves: the tumbling events themselves were cut), Where the Light Falls (33) -> 32 (retail titles it as the trumpets, never awarded).
 
 ### Event ids from data, and the rooms DATA003/DATA004 (checked 2026-10-30, static only, no emulator run)
 

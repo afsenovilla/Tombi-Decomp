@@ -4,8 +4,14 @@ Update this file whenever something lands or a task is decided. Newest first.
 
 ## Since v0.7.2 (not released)
 
+- PrePre 8 event areas audited (2026-11-27, docs/PREPRE8_EVENTS.md): every title's area now carries a level and a
+  one-line argument (87 evidence, 19 strong, 16 weak = list position, 47 unknown / title clusters); 78 in retail / 91
+  cut. Measured: the list is grouped by area but not sorted (51% of neighbouring matched titles share the area, 14%
+  shuffled; a title between two of one area is in it 16 times in 21); the JP per-area title tables are about 3/4 per
+  area (the Civilization ones copy the forest list). The snow area / sky group are now title clusters, not areas;
+  Tomba! 2 "likely" links are "theme only". Poster of all 169 events and chart: scratch only, not in the repo.
 - PrePre 8 event titles by area (2026-11-27, docs/PREPRE8_EVENTS.md): 169 titles (not 167), retail id = PrePre 8
-  index - 1 over the whole list, 85 in retail / 84 cut, cut areas (snow, Pig Town, island, sky), the proto
+  index - 1 over the whole list, 85 in retail / 84 cut (superseded by the audit above), the proto
   Civilization run, Tomba! 2 matches checked on the T2 USA disc, every candy (Blue / Green / Black have use effects
   but are never given; Gold is Mizuno's). `tools/prepre8_text.py` reads 12 more kanji. Cross-checked with Folkin's list.
 - Spanish event titles reviewed against the Japanese ones (2026-11-24): event 132 "Al primer síntoma..." (was "Coge
