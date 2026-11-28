@@ -215,6 +215,7 @@ Regenerated with `python3 tools/build_report.py --version slpm80165` then `pytho
 <summary><b>All versions and how they share code</b></summary>
 
 Every known retail, demo and prototype disc (serials, dates, executable hashes): [wiki: List of builds](docs/wiki/Builds.md).
+All 169 event titles of PrePre 8 ("Pure 8"), by area, with retail fate and descriptions: [wiki: PrePre 8 events](docs/wiki/PrePre8-Events.md).
 
 | Version | Serial | Status |
 |---------|--------|--------|

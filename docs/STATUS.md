@@ -4,6 +4,10 @@ Update this file whenever something lands or a task is decided. Newest first.
 
 ## Since v0.7.2 (not released)
 
+- PrePre 8 event descriptions and wiki (2026-11-28): docs/PREPRE8_EVENTS.md has a "Description (source)" column
+  (Pure 8 dialogue 18, Dengeki D5 14, JP demo 1, retail EN 83, JP hint translated 4, none 49; PrePre 8, PrePre 9 and
+  Hyper 12 have no hint bank). `python3 tools/prepre8_wiki.py --check` builds docs/wiki/PrePre8-*.md from it (index,
+  19 area pages with a section per event, Tomba! 2 / candies / Civilization pages) and checks the links.
 - PrePre 8 event areas audited (2026-11-27, docs/PREPRE8_EVENTS.md): every title's area now carries a level and a
   one-line argument (87 evidence, 19 strong, 16 weak = list position, 47 unknown / title clusters); 78 in retail / 91
   cut. Measured: the list is grouped by area but not sorted (51% of neighbouring matched titles share the area, 14%
